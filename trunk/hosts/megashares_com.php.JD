@@ -1,0 +1,89 @@
+<?php
+if (!defined('RAPIDLEECH'))
+{
+	require_once("index.html");
+	exit;
+}
+
+$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
+is_page($page);
+
+preg_match_all('/Set-Cookie: *(.+);/', $page, $cook);
+$cookies = implode(';', $cook[1]);
+
+$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "index.php?".$Url["query"] : ""), $Referer, $cookies, 0, 0, $_GET["proxy"],$pauth);
+is_page($page);
+is_present($page, "This link requires a password to continue:", "This file is password protected.");
+is_present($page, "This link's <u>filesize is larger</u> than what you have left on your Passport.");
+is_present($page, "Link was deleted", "File deleted.");
+is_present($page, "Invalid link.");
+is_present($page, "You can download again when your download completes", "Your IP is currently downloading a file.");
+is_present($page, "This link is currently offline for scheduled maintenance, please try again later.");
+is_present($page, "Link contents could not be located.");
+
+preg_match_all('/Set-Cookie: *(.+);/', $page, $cook);
+$cookies = implode(';', $cook[1]);
+
+preg_match('%id="dlink".*http://(.*?)"%', $page, $dllink);
+preg_match('%Filename:&nbsp;<strong>(.+?)</%', $page, $name);
+
+if (preg_match('/Your Passport needs to be reactivated/', $page))
+{
+	preg_match('/var request_uri *= *"(.*)";/', $page, $fquery);
+	preg_match('/src="index\.php\?secgfx=gfx&random_num=(.+?)"/', $page, $randnum);
+	preg_match('/name="passport_num".*value="(.*?)"/', $page, $pass);
+
+	$img = "http://".$Url["host"]."/index.php?secgfx=gfx&random_num=".$randnum[1];
+	$mhost = $Url["host"];
+
+	$Url = parse_url($img);
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookies, 0, 0, $_GET["proxy"],$pauth);
+	$headerend = strpos($page, "\r\n\r\n");
+	$pass_img = substr($page, $headerend + 4);
+	write_file($download_dir."megashares_captcha.png", $pass_img);
+
+	//$captcha = trim(shell_exec($path_to_java.' -jar "'.$path_to_jdownloader.'" --captcha "'.str_replace("/", "\\", dirname($_SERVER["SCRIPT_FILENAME"])."/".$download_dir).'megashares_captcha.png" megashares.com'));
+	$captcha = trim(shell_exec($path_to_java.' -jar "'.$path_to_jdownloader.'" --captcha "'.dirname($_SERVER["SCRIPT_FILENAME"])."/".$download_dir.'megashares_captcha.png" megashares.com'));
+	@unlink($download_dir."megashares_captcha.png");
+	if ($captcha == "null")
+	{
+		html_error("Unable to decrypt captcha. Try again.", 0);
+	}
+	if ($captcha == "File does not exist")
+	{
+		html_error("Unable to find captcha file", 0);
+	}
+
+	$randnum = $randnum[1];
+	$fquery = $fquery[1];
+	$pass = $pass[1];
+	$dllink = "http://".$dllink[1];
+	$rndtime = time();
+	$FileName = $name[1];
+	$final = "http://".$mhost.$fquery."&rs=check_passport_renewal&rsargs[]=".$captcha."&rsargs[]=".$randnum."&rsargs[]=".$pass."&rsargs[]=replace_sec_pprenewal&rsrnd=".$rndtime;
+
+	$Url = parse_url($final);
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookies, 0, 0, $_GET["proxy"],$pauth);
+	is_page($page);
+	is_present($page, "Invalid renewal code.");
+
+	if (preg_match('/Thank you for reactivating your passport/', $page))
+	{
+		$Url = parse_url($dllink);
+
+		insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&cookie=".urlencode($cookies)."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+	}
+	else
+	{
+		html_error("An error occured", 0);
+	}
+}
+else
+{
+	$dllink = "http://".$dllink[1];
+	$Url = parse_url($dllink);
+	$FileName = $name[1];
+
+	insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&cookie=".urlencode($cookies)."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+}
+?>
