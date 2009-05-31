@@ -1,0 +1,165 @@
+<?php
+if (!defined('RAPIDLEECH'))
+{
+	require_once("index.html");
+	exit;
+}
+
+if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["rs_de"]["user"] && $$premium_acc["rs_de"]["pass"]))
+{
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"],$pauth);
+	is_page($page);
+
+	is_present($page,"File not found");
+	is_present($page,"This file has been deleted");
+	is_present($page,"Inactivity-timeout exceeded");
+	is_present($page,"unavailable due to technical-maintenance", "Download-Server unavailable due to maintenance");
+	is_present($page,"unavailable due to hardware-problems", "Server unavailable due to hardware-problems");
+
+	$FileName = basename(trim(cut_str($page, 'name="uri" value="', '"')));
+	!$FileName ? $FileName = basename($Url["path"]) : "";
+	$auth = $_GET["premium_user"] ? base64_encode($_GET["premium_user"].":".$_GET["premium_pass"]) : base64_encode($premium_acc["rs_de"]["user"].":".$premium_acc["rs_de"]["pass"]);
+
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"],$pauth, $auth);
+	is_page($page);
+
+	if (stristr($page,"Location:"))
+	{
+		$Href = trim(cut_str($page,"Location:","\n"));
+		$Url = parse_url($Href);
+
+		insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET[split] ? $_GET[partSize] : "")."&method=".$_GET[method]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+	}
+	else
+	{
+		html_error("Cannot use premium account", 0);
+	}
+}
+else
+{
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"],$pauth);
+	is_page($page);
+
+	is_present($page,"File not found");
+	is_present($page,"This file has been deleted");
+	is_present($page,"Inactivity-timeout exceeded");
+	is_present($page,"unavailable due to technical-maintenance", "Download-Server unavailable due to maintenance");
+	is_present($page,"unavailable due to hardware-problems", "Server unavailable due to hardware-problems");
+
+	$post = array();
+	$post["uri"] = $Url["path"];
+	$post["dl.start"] = "Free";
+
+	$Href = trim(cut_str($page, '<form action="', '"'));
+	$Url = parse_url($Href);
+
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : "") ,$LINK , 0, $post, 0, $_GET["proxy"],$pauth);
+	is_page($page);
+
+	is_present($page, "is not allowed to use the free-service anymore today","No more free downloads from this IP today");
+	is_present($page, "This file exceeds your download-limit","Download limit exceeded");
+	is_present($page, "KB in one hour","Download limit exceeded");
+	is_present($page, "is already downloading a file","Your IP-address is already downloading a file");
+
+	if (stristr($page, "Want to download more?"))
+	{
+		$minutes = trim(cut_str($page, "Or wait", "minute"));
+		if ($minutes)
+		{
+			html_error("Download limit exceeded. You have to wait ".$minutes." minutes until the next download.");
+		}
+		else
+		{
+			html_error("Download limit exceeded.");
+		}
+	}
+
+	if(stristr($page, "Too many users downloading right now") || stristr($page, "Too many connections"))
+	{
+		html_error("Too many users are downloading right now");
+	}
+
+	$countDown = trim(cut_str($page, "var c =", ";"));				
+	$code = urldecode(cut_str($page, "unescape('", "'"));
+	if (!$code)
+	{
+		html_error('Error getting access code');
+	}
+
+	$FileAddr = trim(cut_str($code, '<form name="dl" action="', '"'));
+	if (!$FileAddr)
+	{
+		html_error("Error getting download link");
+	}
+
+	$access_image_url = trim(cut_str($code,'<img src="','">'));
+	if (!$access_image_url)
+	{
+		html_error('Error getting access image url');
+	}
+	$Url = parse_url($access_image_url);
+
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Href, 0, 0, 0, $_GET["proxy"],$pauth, 0, $Url["scheme"]);
+	$headerend = strpos($page, "\r\n\r\n");
+	$pass_img = substr($page, $headerend + 4);
+	write_file($download_dir."rapidshare_de_captcha.png", $pass_img);
+
+	//$captcha = trim(shell_exec($path_to_java.' -jar "'.$path_to_jdownloader.'" --captcha "'.str_replace("/", "\\", dirname($_SERVER["SCRIPT_FILENAME"])."/".$download_dir).'rapidshare_de_captcha.png" rapidshare.de'));
+	$captcha = trim(shell_exec($path_to_java.' -jar "'.$path_to_jdownloader.'" --captcha "'.dirname($_SERVER["SCRIPT_FILENAME"])."/".$download_dir.'rapidshare_de_captcha.png" rapidshare.de'));
+	@unlink($download_dir."rapidshare_de_captcha.png");
+	if ($captcha == "null")
+	{
+		html_error("Unable to decrypt captcha. Try again.", 0);
+	}
+	if ($captcha == "File does not exist")
+	{
+		html_error("Unable to find captcha file", 0);
+	}
+
+	$Url = parse_url($FileAddr);
+	$Referer = $Href;
+	$FileName = basename($Url["path"]);
+	$post = Array();
+	$post["captcha"] = $captcha;
+	$post["actionstring"] = "Download";
+
+	//### use default server ###
+	insert_timer($countDown, "Download-Ticket reserved.");
+	insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&cookie=&post=".urlencode(serialize($post))."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+
+	//### show server choices ###
+	// never happens!
+	/*$code = str_replace($FileAddr, $PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : ""), $code);				
+	$capthatag = cut_str($code,'here: <input','>');
+	$capthatag = cut_str($capthatag,'name="','"');
+
+	preg_match_all("/http:\/\/dl(.*).rapidshare.de\/(.*)".$FileName."/iU", $code, $matches);
+	if (!$matches)
+	{
+		html_error("Error getting available server's list");
+	}
+	for ($i = 0; $i < count($matches[0]); $i++)
+	{
+		$Href = parse_url($matches[0][$i]);
+		$code = str_replace("document.dl.action='".$matches[0][$i], "document.dl.host.value='".$Href["host"], $code);
+	}
+
+	$code = str_replace("</form>", $nn, $code);
+	$code.= "<input type=\"hidden\" name=\"filename\" value=\"".urlencode($FileName)."\">".$nn;
+	$code.= "<input type=\"hidden\" name=\"link\" value=\"".urlencode($LINK)."\">".$nn;
+	$code.= "<input type=\"hidden\" name=\"referer\" value=\"".urlencode($Referer)."\">".$nn;
+	$code.= "<input type=\"hidden\" name=\"saveto\" value=\"".$_GET["path"]."\">".$nn;
+	$code.= "<input type=\"hidden\" name=\"host\" value=\"".$Url["host"]."\">".$nn;
+	$code.= "<input type=\"hidden\" name=\"path\" value=\"".urlencode($Url["path"])."\">".$nn;
+	$code.= "<input type=\"hidden\" name=\"post\" value=\"".urlencode(serialize($post))."\">".$nn;
+	$code.= ($_GET["add_comment"] == "on" ? "<input type=\"hidden\" name=\"comment\" value=\"".urlencode($_GET["comment"])."\">".$nn : "");
+	$code.= "<input type=\"hidden\" name=\"email\" value=\"".($_GET["domail"] ? $_GET["email"] : "")."\">".$nn;
+	$code.= "<input type=\"hidden\" name=\"partSize\" value=\"".($_GET["split"] ? $_GET["partSize"] : "")."\">".$nn;
+	$code.= "<input type=\"hidden\" name=\"method\" value=\"".$_GET["method"]."\">".$nn;
+	$code.= "<input type=\"hidden\" name=\"proxy\" value=\"".($_GET["useproxy"] ? $_GET["proxy"] : "")."\">".$nn;
+	$code.= ($pauth ? "<input type=\"hidden\" name=\"pauth\" value=\"".$pauth."\">".$nn : "");
+	$code.= "</form>";
+
+	insert_new_timer($countDown, rawurlencode($code), "Download-Ticket reserved.");*/
+}
+?>

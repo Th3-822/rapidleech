@@ -1,0 +1,70 @@
+<?php
+if (!defined('RAPIDLEECH'))
+{
+	require_once("index.html");
+	exit;
+}
+
+$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
+is_page($page);
+
+if (preg_match_all('/Set-Cookie: *(.+);/', $page, $cook))
+{
+	$cookie = implode('; ', $cook[1]);
+}
+else
+{
+	html_error("Cookie not found", 0);
+}
+$Referer = $LINK;
+$Url = parse_url("http://www.gigasize.com/randomImage.php");
+
+$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
+$headerend = strpos($page, "\r\n\r\n");
+$pass_img = substr($page, $headerend + 4);
+write_file($download_dir."gigasize_captcha.png", $pass_img);
+
+//$captcha = trim(shell_exec($path_to_java.' -jar "'.$path_to_jdownloader.'" --captcha "'.str_replace("/", "\\", dirname($_SERVER["SCRIPT_FILENAME"])."/".$download_dir).'gigasize_captcha.png" gigasize.com'));
+$captcha = trim(shell_exec($path_to_java.' -jar "'.$path_to_jdownloader.'" --captcha "'.dirname($_SERVER["SCRIPT_FILENAME"])."/".$download_dir.'gigasize_captcha.png" gigasize.com'));
+@unlink($download_dir."gigasize_captcha.png");
+if ($captcha == "null")
+{
+	html_error("Unable to decrypt captcha. Try again.", 0);
+}
+if ($captcha == "File does not exist")
+{
+	html_error("Unable to find captcha file", 0);
+}
+$post = Array();
+$post["txtNumber"] = $captcha;
+
+$Href = "http://www.gigasize.com/formdownload.php";
+
+$Url = parse_url($Href);
+$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, $post, 0, $_GET["proxy"],$pauth);
+is_page($page);
+
+if (preg_match('%(/getcgi\.php\?.*?)"%', $page, $dllink))
+{
+	$final = "http://www.gigasize.com".$dllink[1];
+}
+else
+{
+	html_error("Download page not found", 0);
+}
+$Url = parse_url($final);
+$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
+is_page($page);
+
+if (preg_match('/ocation: *(.+)/', $page, $redir))
+{
+	$Url = parse_url(trim($redir[1]));
+}
+else
+{
+	html_error("Redirection not found", 0);
+}
+$FileName = basename($Url["path"]);
+
+insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&cookie=".urlencode($cookie)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+?>

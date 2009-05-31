@@ -1,0 +1,170 @@
+<?php
+if (!defined('RAPIDLEECH'))
+{
+	require_once("index.html");
+	exit;
+}
+
+if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["megaupload"]["user"] && $premium_acc["megaupload"]["pass"] || $_GET["mu_acc"] == "on" && $_GET["mu_cookie"]) || $_GET["mu_acc"] == "on" && $mu_cookie_user_value)
+{
+	$post = array();
+	$post["login"] = $_GET["premium_user"] ? $_GET["premium_user"] : $premium_acc["megaupload"]["user"];
+	$post["password"] = $_GET["premium_pass"] ? $_GET["premium_pass"] : $premium_acc["megaupload"]["pass"];
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, "/", 0, 0, $post, 0, $_GET["proxy"],$pauth);
+	is_page($page);
+
+	$premium_cookie = trim(cut_str($page, "Set-Cookie:", ";"));
+
+	if($mu_cookie_user_value)
+	{
+		$premium_cookie = 'user='.$mu_cookie_user_value;
+	}
+	elseif($_GET["mu_acc"] == "on" && $_GET["mu_cookie"])
+	{
+		$premium_cookie = 'user='.$_GET["mu_cookie"];
+	}
+	elseif (!stristr($premium_cookie, "user"))
+	{
+		html_error("Cannot use premium account", 0);
+	}
+
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $premium_cookie, 0, 0, $_GET["proxy"],$pauth);
+	is_page($page);
+
+	if (stristr($page, "Location:"))
+	{
+		preg_match('/Location: (.*)/i', $page, $loc);
+		$Href = trim($loc[1]);
+		$Url =  parse_url($Href);
+		$FileName = !$FileName ? basename($Url["path"]) : $FileName;
+
+		insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&cookie=".urlencode($premium_cookie)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+	}
+	elseif(preg_match('/href="(.*?)\' \+ \w \+ \w \+ \'(.*?)"/i', $page, $loc))
+	{
+		preg_match('/var \w.*abs\(\-([0-9]*)\)/i', $page, $h);
+		$h_val = chr($h[1]);
+
+		preg_match('/var \w.*\'(.*)\'.*sqrt\(([0-9]*)\)/i', $page, $k);
+		$k_val = $k[1].chr(sqrt($k[2]));
+
+		$finallink = $loc[1].$k_val.$h_val.$loc[2];
+		$Url =  parse_url($finallink);
+		$FileName = !$FileName ? basename($Url["path"]) : $FileName;
+
+		insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&cookie=".urlencode($premium_cookie)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+	}
+	else
+	{
+		html_error("Download link not found", 0);
+	}
+}
+else
+{
+	$cookie = array("user=f256de5761a351e4b7cd7b1c0d5c266f; megauploadtoolbar_id=D910E987B19B436EBF452B3C0D503909; megauploadtoolbar_visible=yes; toolbar=1; MUTBI=E%3D3%2CP%3D3; v=1");
+
+	list ($tmp,$fid) = explode('=',$Url["query"]);
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
+	is_page($page);
+
+	if (stristr($page, "Location:"))
+	{
+		$Referer = $LINK;
+		$Href = trim(cut_str($page, "ocation:", "\n"));
+		$Url = parse_url($Href);
+
+		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
+		is_page($page);
+
+		is_present($page, "All download slots assigned to your country", "All download slots assigned to your country are currently in use");
+
+		if (!stristr($page, "capgen.php?"))
+		{
+			//print "An error occured, see details below:<br>".$nn.str_replace("<HEAD>", "<HEAD>$nn<base href=\"http://www.megaupload.com\">", $page);
+			//exit;
+			html_error("An error occured", 0);
+		}
+	}
+
+	is_present($page, 'The file you are trying to access is temporarily unavailable');
+	is_present($page, 'the link you have clicked is not available', 'Invalid link');
+	is_present($page, 'This file has expired due to inactivity');
+
+	if (stristr($page, "capgen.php?"))
+	{
+		$Href = cut_str(cut_str($page, '<div id="downloadbutton"', '</div>'), '<form method="POST" action="', '"');
+		$Referer = $LINK;
+
+		$imagecode = cut_str($page,'<input type="hidden" name="imagecode" value="','"');
+		$capcode = cut_str($page,'capgen.php?','"');
+		$megavar = cut_str($page, '<input type="hidden" name="megavar" value="', '">');
+
+		$access_image_url = "http://www.megaupload.com/capgen.php?".$capcode;
+		$Url = parse_url($access_image_url);
+
+		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $Referer, 0, 0, $_GET["proxy"],$pauth);
+		$headerend = strpos($page, "\r\n\r\n");
+		$pass_img = substr($page, $headerend + 4);
+		write_file($download_dir."megaupload_captcha.png", $pass_img);
+
+		//$captcha = trim(shell_exec($path_to_java.' -jar "'.$path_to_jdownloader.'" --captcha "'.str_replace("/", "\\", dirname($_SERVER["SCRIPT_FILENAME"])."/".$download_dir).'megaupload_captcha.png" megaupload.com'));
+		$captcha = trim(shell_exec($path_to_java.' -jar "'.$path_to_jdownloader.'" --captcha "'.dirname($_SERVER["SCRIPT_FILENAME"])."/".$download_dir.'megaupload_captcha.png" megaupload.com'));
+		@unlink($download_dir."megaupload_captcha.png");
+		if ($captcha == "null")
+		{
+			html_error("Unable to decrypt captcha. Try again.", 0);
+		}
+		if ($captcha == "File does not exist")
+		{
+			html_error("Unable to find captcha file", 0);
+		}
+		$Url = parse_url($Href);
+
+		$post = Array();
+		$post["d"] = $fid;
+		$post["imagecode"] = $imagecode;
+		$post["imagestring"] = $captcha;
+		$post["megavar"] = $megavar;
+
+		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, $post, 0, $_GET["proxy"],$pauth);
+		is_page($page);
+		is_present($page, "The file you are trying to access is temporarily unavailable");
+
+		$findvar = trim(cut_str($page, "'Please wait", "seconds"));
+		$findvar = trim(cut_str($findvar, "+", "+"));
+		$countDown = trim(cut_str($page, $findvar."=", ";"));
+		$countDown = (!is_numeric($countDown) ? 26 : $countDown);
+
+		$tmp = trim(cut_str($page, 'if('.$findvar.' == 0)', 'if('.$findvar.' > 0)'));
+		$tmp_url = '"'.trim(cut_str($tmp, '("dlbutton").innerHTML = \'<a href="', '"')).'"';
+
+		if (!$tmp_url)
+		{
+			html_error("Download link not found", 0);
+		}
+
+		$a = chr(abs(trim(cut_str($tmp, "Math.abs(", "))"))));
+		$b = trim(cut_str($tmp, "var", "document"));
+		$b = trim(cut_str($b, "var", ";"));
+		$b = trim(cut_str($b, "'", "'")).chr(sqrt(trim(cut_str($b, "Math.sqrt(", "))"))));
+
+		$Href = trim(cut_str($tmp_url, '"', "' +")).$b.$a.trim(cut_str($tmp_url, "+ '", '"'));
+		$Url = parse_url($Href);
+
+		if (!is_array($Url))
+		{
+			html_error("Download link not found", 0);
+		}
+
+		insert_timer($countDown, "The file is being prepared.", "", true);
+
+		$FileName = ($FileName ? $FileName : basename($Url["path"]));
+
+		insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+	}
+	else
+	{
+		html_error("Image code not found", 0);
+	}
+}
+?>
