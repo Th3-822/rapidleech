@@ -1,4 +1,4 @@
-#Welcome to the Rapidleech Wiki for v38+ (plugmod by eqbal)
+=Welcome to the Rapidleech Wiki for v38+ (plugmod by eqbal)=
 
 = Introduction =
 
