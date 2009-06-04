@@ -18,13 +18,15 @@ Remember that *every* commit must have a comment, indicating what modify/add and
 
 Finally, we have a few tags to indicate what is the reason of the commit, that tags are used to create the changelog, so don't use it if you think that your change should not appear in that changelog: 
 
-  * [FIX] or [FIX #000000]: This tag is to mark that the commit is to fix a bug that are there since the previous version. If the bug are reported in the bugtrack (mantis) the bug id must be attached). 
-  * [FEATURE]: When we finish the implementation of the new feature, we need to indicate it with this tag (only in the final commit when the feature is considered stable and complete). 
-  * [CHANGE]: If we change a current feature, for example modifying the behaviour. 
-  * [SECURITY]: If the commit fix a security bug, it need to be tagged with a special tag.
+  * `[`FIX`]` or `[`FIX #000000`]`: This tag is to mark that the commit is to fix a bug that are there since the previous version. If the bug are reported in the bugtrack (mantis) the bug id must be attached). 
+  * `[`FEATURE`]`: When we finish the implementation of the new feature, we need to indicate it with this tag (only in the final commit when the feature is considered stable and complete). 
+  * `[`CHANGE`]`: If we change a current feature, for example modifying the behaviour. 
+  * `[`SECURITY`]`: If the commit fix a security bug, it need to be tagged with a special tag.
 
 = Fixing a bug =
 When a bug is fixed, you must indicate in the comment of the commit an identifying number, accompanied by a precise explanation of the problem and solution. For example: 
+{{{
 BUG: #189203
 Rapidleech Don't have a platform for help the developers feedback.
 Now, we use google code as developers platform. 
+}}}
