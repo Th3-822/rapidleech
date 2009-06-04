@@ -210,18 +210,18 @@ if ($saveToFile)
 	}
 
 #########################################################################
-							//echo "<br><br>| ".$request." |<br><br>";
 fputs($fp,$request);
 fflush($fp);
 $timeStart = getmicrotime();
 
-do
-  {
-  $header.= @fgets($fp, 128);
-} while (strpos($header, $nn.$nn) === false);
+// Rewrote the get header function according to the proxy script
+// Also made sure it goes faster and I think 8192 is the best value for retrieving headers
+$header .= fgets($fp,8192);
+while (strspn($header, "\r\n") !== strlen($header)) {
+	$header .= fgets($fp,8192);
+}
 
 #########################################################################
-							//echo "<br><br> |".$header." |<br><br>";
 
 if (!$header)
   {
@@ -539,48 +539,30 @@ else
 	  }
 }
 
-function formpostdata($post)
-  {
-  global $first,$postdata;
-  $first = "";
-  $postdata = "";
-  @array_walk($post, "fpd_f");
-  return $postdata;
-  }
-
-function fpd_f($value, $key)
-  {
-  global $postdata, $first;
-  $postdata .= $first.$key."=".urlencode($value);
-  $first = "&";
-  }
-
+// This new function requires less line and actually reduces filesize :P
+// Besides, using less globals means more variables available for us to use
+function formpostdata($post) {
+	$postdata = "";
+	foreach ($post as $k => $v) {
+		$postdata .= "$k=$v&";
+	}
+	// Remove the last '&'
+	$postdata = substr($postdata,0,-1);
+	return $postdata;
+}
 
 function GetCookies($content)
 {
-	preg_match_all('/Set-Cookie: (.*);/',$content,$temp);
+	// The U option will make sure that it matches the first character
+	// So that it won't grab other information about cookie such as expire, domain and etc
+	preg_match_all('/Set-Cookie: (.*);/U',$content,$temp);
 	$cookie = $temp[1];
 	$cook = implode('; ',$cookie);
 	return $cook;
 }
 
-/*
-function GetCookies($content)
-{
-	global $nn;
-	list($header,$info) = explode($nn.$nn,$content);
-
-	$i = preg_match_all("/Set-Cookie: (.*)\n/",$header,$matches);
-	for ($j=0; $j<$i; $j++)
-		{
-		$res[]=$matches[1][$j];
-		}
-	return $res;
-}
-*/
-
 function GetChunkSize($fsize)
-	{
+{
 	if ($fsize <= 1024*1024) { return 4096; }
 	if ($fsize <= 1024*1024*10) { return 4096*10; }
 	if ($fsize <= 1024*1024*40) { return 4096*30; }
@@ -594,7 +576,7 @@ function GetChunkSize($fsize)
 	if ($fsize <= 1024*1024*500) { return 4096*170; }
 	if ($fsize <= 1024*1024*1000) { return 4096*200; }
 	return 4096*210;
-	}
+}
 
 function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file, $filename, $fieldname, $field2name = "", $upagent="Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.1", $proxy = 0) {
 global $nn, $lastError, $sleep_time, $sleep_count;

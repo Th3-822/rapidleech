@@ -25,6 +25,8 @@ define('BUILD', '09052009');
 define('CREDITS', '<a href="http://www.rapidleech.com/" style="text-decoration:none"><b>RapidLeech</b></a>&nbsp;<b style="color:#F09D19">PlugMod rev. '.$rev_num.'</b> <span style="color:#F09D19">by '.$dev_name.'</span><br><small style="color:#239FD9">Credits to Pramode &amp; Checkmate &amp; Kloon</small>');
 
 require_once(CONFIG_DIR."config.php");
+// $download_dir should always end with a '/'
+if (substr($download_dir,-1) != '/') $download_dir .= '/';
 
 define('DOWNLOAD_DIR', (substr($download_dir, 0, 6) == "ftp://" ? '' : $download_dir));
 
@@ -46,6 +48,16 @@ define('FTP_OS_Mac','m');
 
 require_once(CLASS_DIR."other.php");
 
+// If configs/files.lst is not writable, give a warning
+if (!is__writable(CONFIG_DIR.'files.lst')) {
+	html_error("configs/files.lst is not writable, please make sure it is chmod to 777");
+}
+
+// If the download path is not writable, show error
+if (!is__writable(DOWNLOAD_DIR)) {
+	html_error(DOWNLOAD_DIR." is selected as your download path and it is not writable. Please chmod it to 777");
+}
+
 purge_files($delete_delay);
 
 register_shutdown_function("pause_download");
@@ -57,10 +69,9 @@ if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logg
 		exit("<html>$nn<head>$nn<title>RAPIDLEECH PLUGMOD</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1251\">$nn</head>$nn<body>$nn<h1>$nn<center>$nn<a href=http://www.rapidleech.com>RapidLeech</a>: Access Denied - Wrong Username or Password$nn</center>$nn</h1>$nn</body>$nn</html>");
 	}
 
-foreach($_POST as $key => $value)
-  {
-  $_GET[$key] = $value;
-  }
+foreach($_POST as $key => $value) {
+	$_GET[$key] = $value;
+}
 
 if(!$_COOKIE)
   {
