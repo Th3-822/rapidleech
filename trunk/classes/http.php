@@ -232,7 +232,15 @@ if (!$header)
 preg_match('/^HTTP\/1\.0|1 ([0-9]+) .*/',$header,$responsecode);
 if (($responsecode[1] == 404 || $responsecode[1] == 403) && $saveToFile)
 {
-	$lastError = 'The page was either forbidden or not found!';
+	// Do some checking, please, at least tell them what error it was
+	if ($responsecode[1] == 403) {
+		$lastError = 'The page was not found!';
+	} elseif ($responsecode[1] == 404) {
+		$lastError = 'You are forbidden to access the page!';
+	} else {
+		// Weird, it shouldn't come here...
+		$lastError = 'The page was either forbidden or not found!';
+	}
 	return false;
 }
 
@@ -417,7 +425,7 @@ function pr(percent, received, speed){
 	document.getElementById("percent").innerHTML = '<b>' + percent + '%</b>';
 	document.getElementById("progress").style.width = percent + '%';
 	document.getElementById("speed").innerHTML = '<b>' + speed + ' KB/s</b>';
-	document.title = 'Downloaded ' + percent + '%';
+	document.title = percent + '% Downloaded';
 	return true;
 	}
 
