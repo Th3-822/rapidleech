@@ -569,7 +569,7 @@
                         else
                           {
                             ?>
-                            <form method="post">
+                            <form method="post" action="<?php echo $PHP_SELF; ?>">
                               <input type="hidden" name="act" value="split_go">
                                <table align="center">
                                 <tr>
@@ -580,23 +580,39 @@
                                   {
                                     $file = $list[$_GET["files"][$i]];
                                     ?>
-                                      <input type="hidden" name="files[]" value="<?php echo $_GET["files"][$i]; ?>">
                                           <tr>
-                                            <td align="center"><b><?php echo basename($file["name"]); ?></b></td>
+                                            <td align="center">
+                                              <input type="hidden" name="files[]" value="<?php echo $_GET["files"][$i]; ?>">
+                                              <b><?php echo basename($file["name"]); ?></b>
+                                            </td>
                                           </tr>
                                           <tr>
                                             <td>
                                               Parts Size:&nbsp;<input type="text" name="partSize[]" size="2" value="<?php echo ($_COOKIE["partSize"] ? $_COOKIE["partSize"] : 10); ?>">&nbsp;MB
                                             </td>
                                           </tr>
+<?php
+                                    if ($download_dir_is_changeable) {
+?>
                                           <tr>
                                             <td>
                                               Save To:&nbsp;<input type="text" name="saveTo[]" size="40" value="<?php echo addslashes(dirname($file["name"])); ?>">
                                             </td>
                                           </tr>
+<?php
+                                    }
+?>
                                           <tr>
                                             <td>
-                                              <input type="checkbox" name="del_ok" <?php if(!$disable_deleting) echo "checked"; ?> <?php if($disable_deleting) echo "disabled"; ?>>&nbsp;Delete source file after successful split
+                                              <input type="checkbox" name="del_ok" <?php echo $disable_deleting ? 'disabled' : 'checked'; ?>>&nbsp;Delete source file after successful split
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td>
+                                              CRC32 generation mode:<br>
+                                              <?php if (function_exists('hash_file')) { ?><input type="radio" name="crc_mode[<?php echo $i; ?>]" value="hash_file" checked>&nbsp;Use hash_file (Recommended)<br><?php } ?>
+                                              <input type="radio" name="crc_mode[<?php echo $i; ?>]" value="file_read">&nbsp;Read file to memory<br>
+                                              <input type="radio" name="crc_mode[<?php echo $i; ?>]" value="fake" <?php if (!function_exists('hash_file')) { echo 'checked'; } ?>>&nbsp;Fake crc
                                             </td>
                                           </tr>
                                           <tr>
@@ -623,323 +639,249 @@
                       break;
 
                       case "split_go":
-                        for($i = 0; $i < count($_GET["files"]); $i++)
-                          {
-                            $split_ok = true;
-                            $file = $list[$_GET["files"][$i]];
-                            $partSize = urldecode($_GET["partSize"][$i]) * 1024 * 1024;
-                            $saveTo = urldecode($_GET["saveTo"][$i]);
-                            while(stristr($saveTo, "\\\\"))
-                              {
-                              $saveTo = str_replace("\\\\", "\\", $saveTo);				
+                        for($i = 0; $i < count($_GET["files"]); $i++) {
+                          $split_ok = true;
+                          $file = $list[$_GET["files"][$i]];
+                          $partSize = round(($_GET["partSize"][$i]) * 1024 * 1024);
+                          $saveTo = ($download_dir_is_changeable ? stripslashes($_GET["saveTo"][$i]) : realpath($download_dir)).'/';
+                          $dest_name = basename($file["name"]);
+                          $fileSize = filesize($file["name"]);
+                          $totalParts = ceil($fileSize / $partSize);
+                          $crc = ($_GET['crc_mode'][$i] == 'file_read') ? dechex(crc32(read_file($file["name"]))) : 
+                          (($_GET['crc_mode'][$i] == 'hash_file' && function_exists('hash_file')) ? hash_file('crc32b', $file["name"]) : '111111');
+                          $crc = str_repeat("0", 8 - strlen($crc)).strtoupper($crc);
+                          echo "Started to split file <b>".basename($file["name"])."</b> parts of ".bytesToKbOrMbOrGb($partSize).", Using Method - Total Commander...<br>";
+                          echo "Total Parts: <b>".$totalParts."</b><br><br>";
+                          for($j = 1; $j <= $totalParts; $j++) {
+                            if (file_exists($saveTo.$dest_name.'.'.sprintf("%03d", $j))) {
+                              echo "It is not possible to split the file. A piece already exists<b>".$dest_name.'.'.sprintf("%03d", $j)."</b> !<br><br>";
+                              continue 2;
+                            }
+                          }
+                          if (file_exists($saveTo.$dest_name.'.crc')) {
+                            echo "It is not possible to split the file. CRC file already exists<b>".$dest_name.'.crc'."</b> !<br><br>";
+                          }
+                          elseif (!is_file($file["name"])) {
+                            echo "It is not possible to split the file. Source file not found<b>".$file["name"]."</b> !<br><br>";                              
+                          }
+                          elseif (!is_dir($saveTo)) {
+                            echo "It is not possible to split the file. Directory doesn't exist<b>".$saveTo."</b> !<br><br>";
+                          }
+                          elseif(!@write_file($saveTo.$dest_name.".crc", "filename=".$dest_name."\r\n"."size=".$fileSize."\r\n"."crc32=".$crc."\r\n")) {
+                            echo "It is not possible to split the file. CRC Error<b>".$dest_name.".crc"."</b> !<br><br>";
+                          }
+                          else {
+                            $time = filectime($saveTo.$dest_name.'.crc'); while (isset($list[$time])) { $time++; }
+                            $list[$time] = array("name" => $saveTo.$dest_name.'.crc',
+                              "size" => bytesToKbOrMbOrGb(filesize($saveTo.$dest_name.'.crc')), "date" => $time);
+                            $split_buffer_size = 2 * 1024 * 1024;
+                            $split_source = @fopen($file["name"], "rb");
+                            if (!$split_source) {
+                              echo "It is not possible to open source file <b>".$file["name"]."</b> !<br><br>";
+                              continue;
+                            }
+                            for($j = 1; $j <= $totalParts; $j++) {
+                              $split_dest = @fopen($saveTo.$dest_name.'.'.sprintf("%03d", $j), "wb");
+                              if (!$split_dest) {
+                                echo "Error openning file <b>".$dest_name.'.'.sprintf("%03d", $j)."</b> !<br><br>";
+                                $split_ok = false;
+                                break;
                               }
-                            $partSize = round($partSize);
-							$fileSize = filesize($file["name"]);
-							$fp = fopen($file["name"], "rb");
-							//flock($fp, LOCK_SH);
-                            $buffer_size = 25000000; //adjust with server memory //15mb - 9mb worked
-                            //$crc = strtoupper(dechex(crc32($fileContents)));
-							$crc = "111111";
-                            $crc = str_repeat("0", 8 - strlen($crc)).$crc;
-                            if(file_exists($file["name"]))
-                            {
-                            echo "Started to split file <b>".basename($file["name"])."</b> of parts ".bytesToKbOrMbOrGb($partSize).", Using Method - Total Commander...<br>";
-                            $totalParts = ceil($fileSize / $partSize);
-                            echo "Total Parts: <b>".$totalParts."</b><br><br>";
-                            $fileName=basename($file["name"]);
-                            /*$fileTmp = $fileNamePerman = basename($file["name"]);
-                            while(strpos($fileTmp, "."))
-                              {
-                                $fileName .= substr($fileTmp, 0, strpos($fileTmp, ".") + 1);
-                                $fileTmp = substr($fileTmp, strpos($fileTmp, ".") + 1);
-                              }
-                            $fileName = substr($fileName, 0, -1);*/
-                            $path = $saveTo.(strstr(ROOT_DIR, "\\") ? "\\" : "/");
-                            for($j = 0; $j < $totalParts; $j++)
-                              {
-                                if($j == 0)
-                                  {
-
-                                    if(!@write_file($path.$fileName.".crc", "filename=".basename($file["name"])."\r\n"."size=".$fileSize."\r\n"."crc32=".$crc."\r\n"))
-                                      {
-                                        echo "It is not possible to split the file. CRC Error<b>".$fileName.".crc"."</b> !<br><br>";
-                                        $split_ok = false;
-                                      }
-                                    else
-                                      {
-                                        $time = explode(" ", microtime());
-                                        $time = str_replace("0.", $time[1], $time[0]);
-                                        $list[$time] = array("name"    => $path.$fileName.".crc",
-                                                             "size"    => bytesToKbOrMbOrGb(strlen(read_file($path.$fileName.".crc"))),
-                                                             "date"    => time(),
-                                                             "comment" => "CRC file of ".$fileNamePerman);
-                                      }
-
-                                      $total_reads=ceil($partSize / $buffer_size);
-                                      fseek($fp, 0, SEEK_SET);
-				    for ($p = 0; $p < $total_reads; $p++)
-				    {
-
-
-					if ($p!=$total_reads-1)
-					{
-						$fileChunk=fread($fp, $buffer_size);
-						}
-					else
-					{
-						$fileChunk=fread($fp, $partSize - ($total_reads-1)*$buffer_size);
-						}
-					
-                                    	if(!@write_file($path.$fileName.".001", $fileChunk, 0))
-                                      	{
-                                        	echo "It was not possible to split the file <b>".$fileName.".001"."</b> !<br><br>";
-                                        	$split_ok = false;
-                                      	}
-                                    	
-                                    }
-                                    $time = explode(" ", microtime());
-                                        	$time = str_replace("0.", $time[1], $time[0]);
-                                        	$list[$time] = array("name"    => $path.$fileName.".001",
-
-                                                             	"size"    => bytesToKbOrMbOrGb($partSize),
-                                                             	"date"    => time(),
-                                                             	"comment" => "Part ".($j + 1)."/".$totalParts." of ".$fileNamePerman);
-                                  }
-
-                                elseif($j == $totalParts - 1)
-                                  {
-
-                                  fseek($fp, $j * $partSize, SEEK_SET);
-                                    $total_reads =ceil(($fileSize - $j * $partSize) / $buffer_size);
-                                    for ($p = 0; $p < $total_reads; $p++)
-                                    {
-                                    if ($p!=$total_reads-1)
-                                    {
-						$fileChunk=fread($fp, $buffer_size);
-						}
-					else
-					{
-						$fileChunk=fread($fp, ($fileSize - $j * $partSize) - ($total_reads-1)*$buffer_size);
-						}
-					
-                                    $num = strlen($j + 1) == 2 ? "0".($j + 1) : (strlen($j + 1) == 1 ? "00".($j + 1) : ($j + 1));
-                                    if(!@write_file($path.$fileName.".".$num, $fileChunk, 0))
-                                      {
-                                        echo "It was not possible to split the file <b>".$fileName.".".$num."</b> !<br><br>";
-                                        $split_ok = false;
-                                      }
-
-
-                                    }
-                                    $time = explode(" ", microtime());
-                                        $time = str_replace("0.", $time[1], $time[0]);
-                                        $list[$time] = array("name"    => $path.$fileName.".".$num,
-
-                                                             "size"    => bytesToKbOrMbOrGb(($fileSize - $j * $partSize)),
-                                                             "date"    => time(),
-                                                             "comment" => "Part ".($j + 1)."/".$totalParts." of ".$fileNamePerman);
-                                  }
-                                else
-                                  {
-                                    fseek($fp, $j * $partSize, SEEK_SET);
-                                    $total_reads =ceil($partSize / $buffer_size);
-                                    for ($p = 0; $p < $total_reads; $p++)
-                                    {
-                                    if ($p!=$total_reads-1)
-                                    {
-						$fileChunk=fread($fp, $buffer_size);
-						}
-					else
-					{
-
-						$fileChunk=fread($fp, $partSize - ($total_reads-1)*$buffer_size);
-						}
-					
-                                    $num = strlen($j + 1) == 2 ? "0".($j + 1) : (strlen($j + 1) == 1 ? "00".($j + 1) : ($j + 1));
-                                    if(!@write_file($path.$fileName.".".$num, $fileChunk, 0))
-                                      {
-                                      echo "It was not possible to split the file <b>".$fileName.".".$num."</b> !<br><br>";
-                                      $split_ok = false;
-                                      }
-
-
-                                    }
-                                    $time = explode(" ", microtime());
-                                      $time = str_replace("0.", $time[1], $time[0]);
-                                      $list[$time] = array("name"    => $path.$fileName.".".$num,
-
-                                                           "size"    => bytesToKbOrMbOrGb($partSize),
-                                                           "date"    => time(),
-                                                           "comment" => "Part ".($j + 1)."/".$totalParts." of ".$fileNamePerman);
-                                  }
-                              }
-
-                              
-				  fclose($fp);
-                            unset($fileName);
-
-                            if ($_GET["del_ok"] && !$disable_deleting)
-                             {
-                               if (!$split_ok )
-                                {
-                                 echo "An error occured. Source file not deleted!<br><br>";
+                              $split_write_times = floor($partSize / $split_buffer_size);
+                              for($k = 0; $k < $split_write_times; $k++) {
+                                $split_buffer = fread($split_source, $split_buffer_size);
+                                if (fwrite($split_dest, $split_buffer) === false) {
+                                  echo "Error writing the file <b>".$dest_name.'.'.sprintf("%03d", $j)."</b> !<br><br>";
+                                  $split_ok = false;
+                                  break;
                                 }
-                           elseif(@unlink($file["name"]))
-                                {
+                              }
+                              $split_rest = $partSize - ($split_write_times * $split_buffer_size);
+                              if ($split_ok && $split_rest > 0) {
+                                $split_buffer = fread($split_source, $split_rest);
+                                if (fwrite($split_dest, $split_buffer) === false) {
+                                  echo "Error writing the file <b>".$dest_name.'.'.sprintf("%03d", $j)."</b> !<br><br>";
+                                  $split_ok = false;
+                                }
+                              }
+                              fclose($split_dest);
+                              if ($split_ok) {
+                                $time = filectime($saveTo.$dest_name.'.'.sprintf("%03d", $j)); while (isset($list[$time])) { $time++; }
+                                $list[$time] = array("name" => $saveTo.$dest_name.'.'.sprintf("%03d", $j),
+                                  "size" => bytesToKbOrMbOrGb(filesize($saveTo.$dest_name.'.'.sprintf("%03d", $j))), "date" => $time);
+                              }
+                            }
+                            fclose($split_source);
+                            if ($split_ok) {
+                              if ($_GET["del_ok"] && !$disable_deleting) {
+                                if(@unlink($file["name"])) {
                                   unset($list[$_GET["files"][$i]]);
                                   echo "Source file deleted.<br><br>";
                                 }
-                               else
-                                {
-                                 echo "Source file is<b>not deleted!</b><br><br>";
-                                };
-                             };
-                            if(!updateListInFile($list))
-                              {
-                                  echo "Couldn't update. File already exists!<br><br>";
+                                else { echo "Source file is<b>not deleted!</b><br><br>"; }
                               }
-                             } //if(file_exists($file["name"]))
+                            }
+                            if (!updateListInFile($list)) { echo "Couldn't update file list. Problem writing to file!<br><br>"; }
                           }
+                        }
                       break;
 
                       case "merge":
-						if (count($_GET["files"]) !== 1)
-							{
-							echo "Please select only the .crc file!<br><br>";
-							}
-						else
-							{
-							$file = $list[$_GET["files"][0]];
-							if (substr($file["name"], -4) !== ".crc")
-								{
-								echo "Please select the .crc file!<br><br>";
-								}
-							else
-								{
-								$fs = @fopen($file["name"], "rb");
-								if (!$fs)
-									{
-									echo "Can't read the .crc file!<br><br>";
-									}
-								else
-									{
-									flock($fs, LOCK_SH);
-									while(!feof($fs))
-										{
-										$data .= trim(fgets($fs, 1024));
-										if ($data === false) {break;}
-										}
-									flock($fs, LOCK_UN);
-									fclose($fs);
-									$tmp = explode("=", $data);
-									$crc = array($tmp[0] => substr($tmp[1],0,-4), substr($tmp[1],-4) => substr($tmp[2],0,-5), substr($tmp[2],-5) => $tmp[3]);
-									$dir = dir(DOWNLOAD_DIR);
-									$filename = substr($crc["filename"], 0, strrpos($crc["filename"], "."));
-									while(($f = $dir->read()) !== false)
-										{
-										if (ereg("$filename.([0-9]{3})", $f))
-											{
-											$files[]= $f;
-											}
-										}
-									$dir->close();
-									if (!is_array($files))
-										{
-										echo "The files needed to merge are not found!<br><br>";
-										}
-									else
-										{
-										$fs = @fopen(DOWNLOAD_DIR.$crc["filename"], "wb");
-										if (!$fs)
-											{
-											echo "The file can't be opened for writing!<br><br>";
-											}
-										else
-											{
-											flock($fs, LOCK_EX);
-											foreach ($files as $fn)
-												{
-												$fp = @fopen(DOWNLOAD_DIR.$fn, "rb");
-												flock($fp, LOCK_SH);
-												while (!feof($fp))
-													{
-													$data = fgets($fp, 1024);
-													if ($data === false) {break;}
-													else {fwrite($fs, $data);}
-													}
-												flock($fp, LOCK_UN);
-												fclose($fp);
-												}
-											flock($fs, LOCK_UN);
-											fclose($fs);
-											$fs = filesize(DOWNLOAD_DIR.$crc["filename"]);
-											if ($fs != $crc["size"])
-												{
-												echo "Filesize doesn't match!<br><br>";
-												}
-											else
-												{
-												?>
-<form method="post">
-<input type="hidden" name="act" value="merge_go">
-<input type="hidden" name="filename" value="<?php echo $crc["filename"]; ?>">
-<input type="hidden" name="path" value="<?php echo dirname($file["name"]); ?>">
-<input type="hidden" name="size" value="<?php echo $crc["size"]; ?>">
-<input type="hidden" name="crc32" value="<?php echo $crc["crc32"]; ?>">
-Do you want to perform a CRC check?<br>(recommended)<br>
-<table>
-<tr>
-<td>
-<input type="submit" name="yes" style="width:33px; height:23px" value="Yes">
-</td>
-<td>
-&nbsp;&nbsp;&nbsp;
-</td>
-<td>
-<input type="submit" name="no" style="width:33px; height:23px" value="No">
-</td>
-</tr>
-</table>
-</form>
-												<?php
-												}
-											}
-										}
-									}
-								}
-							}
+                        if (count($_GET["files"]) !== 1) {
+                          echo "Please select only the .crc or .001 file!<br><br>";
+                        }
+                        else {
+                          $file = $list[$_GET["files"][0]];
+                          if (substr($file["name"], -4) == '.001' && is_file(substr($file["name"], 0, -4).'.crc')) {
+                          	echo "Please select the .crc file!<br><br>";
+                          }
+                          elseif (substr($file["name"], -4) !== '.crc' && substr($file["name"], -4) !== '.001') {
+                          	echo "Please select the .crc or .001 file!<br><br>";
+                          }
+                          else {
+                            $usingcrcfile = (substr($file["name"], -4) === '.001') ? false : true;
+?>
+                            <form method="post" action="<?php echo $PHP_SELF; ?>">
+                              <input type="hidden" name="files[0]" value="<?php echo $_GET["files"][0]; ?>">
+                              <table>
+<?php
+                            if ($usingcrcfile) {
+?>
+                                <tr>
+                                  <td>
+                                    <input type="checkbox" name="crc_check" value="1" checked onClick="javascript:var displ=this.checked?'inline':'none';document.getElementById('crc_check_mode').style.display=displ;">&nbsp;Perform a CRC check? (recommended)<br>
+                                    <span id="crc_check_mode">CRC32 check mode:<br>
+                                    <?php if (function_exists('hash_file')) { ?><input type="radio" name="crc_mode" value="hash_file" checked>&nbsp;Use hash_file (Recommended)<br><?php } ?>
+                                    <input type="radio" name="crc_mode" value="file_read">&nbsp;Read file to memory<br>
+                                    <input type="radio" name="crc_mode" value="fake" <?php if (!function_exists('hash_file')) { echo 'checked'; } ?>>&nbsp;Fake crc
+                                  </span>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td>
+                                    <input type="checkbox" name="del_ok" <?php echo $disable_deleting ? 'disabled' : 'checked'; ?>>&nbsp;Delete source file after successful merge
+                                  </td>
+                                </tr>
+<?php
+                            }
+                            else {
+?>
+                                <tr>
+                                  <td align="center">Note: <b>The file size and crc32 won't be check</b></td>
+                                </tr>
+<?php
+                            }
+?>
+                                <tr>
+                                  <td align="center">
+                                    <input type="hidden" name="act" value="merge_go">
+                                    <input type="submit" value="Merge file">
+                                  </td>
+                                </tr>
+                              </table>
+                            </form>
+<?php
+                          }
+                        }
                       break;
-                      
+
                       case "merge_go":
-						if ($_POST["yes"])
-							{
-							$fileContents = read_file(DOWNLOAD_DIR.$_POST["filename"]);
-							$fc = strtoupper(dechex(crc32($fileContents)));
-							$fc = str_repeat("0", 8 - strlen($fc)).$fc;
-							if ($fc != $_POST["crc32"])
-								{
-								echo "CRC32 checksum doesn't match!<br><br>";
-								}
-							else
-								{
-								echo "File <b>".$_POST["filename"]."</b> successfully merged!<br><br>";
-								}
-							}
-						else
-							{
-							echo "File <b>".$_POST["filename"]."</b> successfully merged, but not tested!<br><br>";
-							}
-            $time = explode(" ", microtime());
-						$time = str_replace("0.", $time[1], $time[0]);
-						$list[$time] = array("name"    => $_POST["path"].PATH_SPLITTER.$_POST["filename"],
-                                 "size"    => bytesToKbOrMbOrGb($_POST["size"]),
-                                 "date"    => time());
-						if (!updateListInFile($list))
-							{
-							echo "Couldn't update the list. File already exists!<br><br>";
-							}
+                        if (count($_GET["files"]) !== 1) {
+                          echo "Please select only the .crc or .001 file!<br><br>";
+                        }
+                        else {
+                          $file = $list[$_GET["files"][0]];
+                          if (substr($file["name"], -4) == '.001' && is_file(substr($file["name"], 0, -4).'.crc')) {
+                          	echo "Please select the .crc file!<br><br>";
+                          }
+                          elseif (substr($file["name"], -4) !== '.crc' && substr($file["name"], -4) !== '.001') {
+                          	echo "Please select the .crc or .001 file!<br><br>";
+                          }
+                          else {
+                            $usingcrcfile = (substr($file["name"], -4) === '.001') ? false : true;
+                          	if (!$usingcrcfile) {
+                              $data = array('filename' => basename(substr($file["name"], 0, -4)), 'size' => -1, 'crc32' => '00111111');
+                            }
+                            else { $fs = @fopen($file["name"], "rb"); }
+                            if ($usingcrcfile && !$fs) { echo "Can't read the .crc file!<br><br>"; }
+                          	else {
+                              if ($usingcrcfile) {
+                                $data = array();
+                            		while(!feof($fs)) {
+                            			$data_ = explode('=', trim(fgets($fs)), 2);
+                                  $data[$data_[0]] = $data_[1];
+                            		}
+                            		fclose($fs);
+                              }
+                          		$path = realpath(DOWNLOAD_DIR).'/';
+                              $filename = $data['filename'];
+                              $partfiles = array();
+                              $partsSize = 0;
+                              for($j = 1; $j < 10000; $j++) {
+                                if (!is_file($path.$filename.'.'.sprintf("%03d", $j))) {
+                                  if ($j == 1) { $partsSize = -1; }
+                                  break;
+                                }
+                                $partfiles[] = $path.$filename.'.'.sprintf("%03d", $j);
+                                $partsSize += filesize($path.$filename.'.'.sprintf("%03d", $j));
+                              }
+                              if (file_exists($path.$filename)) { echo "Error, Output file already exists <b>".$path.$filename."</b><br><br>"; }
+                              elseif ($usingcrcfile && $partsSize != $data['size']) { echo "Error, missing or incomplete parts<br><br>"; }
+                              else {
+                                $merge_buffer_size = 2 * 1024 * 1024;
+                                $merge_dest = @fopen($path.$filename, "wb");
+                                if (!$merge_dest) { echo "It is not possible to open destination file <b>".$path.$filename."</b><br><br>"; }
+                                else {
+                                  $merge_ok = true;
+                                  foreach ($partfiles as $part) {
+                                    $merge_source = @fopen($part, "rb");
+                                    while (!feof($merge_source)) {
+                                      $merge_buffer = fread($merge_source, $merge_buffer_size);
+                                      if ($merge_buffer === false) {
+                                        echo "Error reading the file <b>".$part."</b> !<br><br>";
+                                        $merge_ok = false; break;
+                                      }
+                                      if (fwrite($merge_dest, $merge_buffer) === false) {
+                                        echo "Error writing the file <b>".$path.$filename."</b> !<br><br>";
+                                        $merge_ok = false; break;
+                                      }
+                                    }
+                                    fclose($merge_source);
+                                    if (!$merge_ok) { break; }
+                                  }
+                                  fclose($merge_dest);
+                                  if ($merge_ok) {
+                                    $fc = ($_GET['crc_mode'] == 'file_read') ? dechex(crc32(read_file($path.$filename))) : 
+                                    (($_GET['crc_mode'] == 'hash_file' && function_exists('hash_file')) ? hash_file('crc32b', $path.$filename) : '111111');
+                                    $fc = str_repeat("0", 8 - strlen($fc)).strtoupper($fc);
+                                    if ($fc != strtoupper($data["crc32"])) { echo "CRC32 checksum doesn't match!<br><br>"; }
+                                    else {
+                                      echo "File <b>".$filename."</b> successfully merged!<br><br>";
+                                      if ($usingcrcfile && $fc != '00111111' && $_GET["del_ok"] && !$disable_deleting) {
+                                        if ($usingcrcfile) { $partfiles[] = $file["name"]; }
+                                        foreach ($partfiles as $part) {
+                                          if(@unlink($part)) {
+                                            foreach ($list as $list_key => $list_file) {
+                                              if ($list_file["name"] === $part) { unset($list[$list_key]); } 
+                                            }
+                                            echo "<b>".basename($part)."</b> deleted.<br>";
+                                          }
+                                          else { echo "<b>".basename($part)."</b> not deleted.<br>"; }
+                                        }
+                                      echo "<br>";
+                                      }
+                                      $time = filectime($path.$filename); while (isset($list[$time])) { $time++; }
+                                      $list[$time] = array("name" => $path.$filename, "size" => bytesToKbOrMbOrGb($data['size']), "date" => $time);
+                                      if (!updateListInFile($list)) { echo "Couldn't update file list. Problem writing to file!<br><br>"; }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
                       break;
-                      
+
                       case "rename":
                         if(count($_GET["files"]) < 1)
                           {
