@@ -99,32 +99,6 @@ void(document.forms[0].submit());
 	flush();
 	}
 
-/*function insert_location($newlocation, $url="", $showurl=false ,$test=false)
-	{
-
-		if ($url && $showurl)
-			{
-				echo "<center><b>$url</b></center>\n";
-				return true;
-			}
-
-		if ($test === false)
-			{
-?>
-
-<script language=javascript>
-	location.href='<?php echo $newlocation ?>';
-</script>
-<?php
-			}
-				else
-			{
-				echo "<center><b>$newlocation</b></center>\n";
-			}
-	flush();
-	return true;
-	}
-*/
 
 function pause_download()
 	{
@@ -273,36 +247,20 @@ function sec2time($time)
   return $hour.$min.$sec;
   }
 
-function bytesToKbOrMbOrGb($bytes)
-  {
-  if (is_numeric($bytes))
-    {
-    if ($bytes >= (1024 * 1024 * 1024))
-      {
-      $size = round($bytes / (1024 * 1024 * 1024), 2)." GB";
-      }
-    elseif ($bytes >= (1024 * 1024))
-      {
-      $size = round($bytes / (1024 * 1024), 2)." MB";
-      }
-    elseif ($bytes >= (1024))
-      {
-      $size = round($bytes / 1024, 2)." KB";
-      }
-    else
-      {
-      $size = $bytes." B";
-      }
-    }
-  else
-    {
-    $size = "Unknown";
-    }
-  return $size;
-  }
+// Updated function to be able to format up to Yotabytes!
+function bytesToKbOrMbOrGb($bytes) {
+	if (is_numeric($bytes)) {
+		$s = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+		$e = floor(log($bytes)/log(1024));
+     
+        return sprintf('%.2f '.$s[$e], ($bytes/pow(1024, floor($e))));
+	} else {
+		$size = "Unknown";
+	}
+	return $size;
+}
   
-function updateListInFile($list)
-  {
+function updateListInFile($list) {
   if(count($list) > 0)
     {
     foreach($list as $key => $value)
@@ -322,7 +280,7 @@ function updateListInFile($list)
     {
     return unlink(CONFIG_DIR."files.lst");
     }
-  }
+}
 
 function _cmp_list_enums($a,$b)
   {
@@ -528,5 +486,27 @@ if (!function_exists("file_get_contents"))
 		fclose($fh);
 		return $data;
 	}
+}
+
+// Using this function instead due to some compatibility problems
+function is__writable($path) {
+//will work in despite of Windows ACLs bug
+//NOTE: use a trailing slash for folders!!!
+//see http://bugs.php.net/bug.php?id=27609
+//see http://bugs.php.net/bug.php?id=30931
+
+    if ($path{strlen($path)-1}=='/') // recursively return a temporary file path
+        return is__writable($path.uniqid(mt_rand()).'.tmp');
+    else if (is_dir($path))
+        return is__writable($path.'/'.uniqid(mt_rand()).'.tmp');
+    // check tmp file for read/write capabilities
+    $rm = file_exists($path);
+    $f = @fopen($path, 'a');
+    if ($f===false)
+        return false;
+    fclose($f);
+    if (!$rm)
+        unlink($path);
+    return true;
 }
 ?>
