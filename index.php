@@ -292,7 +292,9 @@ else
 					$_GET["link"] = $redirectto;
 					$purl = parse_url($redirectto);
 				    list($_GET["filename"],$tmp) = explode('?',basename($redirectto));
-					$_GET["host"] = $purl["host"];
+				    
+				    // In case the redirect didn't include the host
+					$_GET["host"] = ($purl["host"]) ? $purl["host"] : $_GET["host"];
     				$_GET["path"] = $purl["path"].($purl["query"] ? "?".$purl["query"] : "");
 					$_GET['port'] = $purl['port'] ? $purl['port'] : 80;
     				$lastError = "";
