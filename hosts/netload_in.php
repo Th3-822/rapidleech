@@ -15,12 +15,9 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, "/", 0, 0, $post, 0, $_GET["proxy"],$pauth);
 	is_page($page);
 	
-	preg_match_all('/Set-Cookie: (.*)/i', $page, $cook);
-	$cookies = implode(";", $cook[1]);
+	$cookies = GetCookies($page);
 	
-	preg_match('/(PHPSESSID=.*?;).*(cookie_user=.*?;)/si', $cookies, $finalcook);
-	$cookie = $finalcook[1].$finalcook[2];
-	
+	$cookie = str_replace('cookie_test=true;','',$cookies);
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
 	if(preg_match('/Location: *(.+)/i', $page, $redir))
 	  {
@@ -33,8 +30,8 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 		  {
 			$Href = 'http://netload.in'.trim($redir[1]);
 			$Url = parse_url($Href);
-			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
-			if(preg_match('/Location: *(.+)/i', $page, $redir))
+			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, 0, 0, $_GET["proxy"],$pauth);
+			if(preg_match('/<a class="Orange_Link" href="(.*)" >Click here for the download/Ui', $page, $redir))
 			  {
 				$redirect = $redir[1];
 				$Href = trim($redirect);
