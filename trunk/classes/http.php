@@ -1,72 +1,77 @@
 <?php
-if (!defined('RAPIDLEECH'))
-  {
-  require_once("index.html");
-  exit;
-  }
-function insert_timer($countd, $caption ="", $timeouttext = "", $hide = false)
-	{
-		global $disable_timer;
+if (!defined('RAPIDLEECH')) {
+	require_once("index.html");
+	exit;
+}
 
-		if ($disable_timer === true) {return true;}
-		if (!$countd || !is_numeric($countd)) {return false;}
+/**
+ * Pauses for countdown timer in file hosts
+ * @param int The number of seconds to count down
+ * @param string The text you want to display when counting down
+ * @param string The text you want to display when count down is complete
+ * @param bool
+ * @return bool
+ */
+function insert_timer($countd, $caption ="", $timeouttext = "", $hide = false) {
+	global $disable_timer;
 
-		$timerid=rand(1000,time());
+	if ($disable_timer === true) {return true;}
+	if (!$countd || !is_numeric($countd)) {return false;}
+
+	$timerid=rand(1000,time());
 ?>
-<center><span id=global<?php echo $timerid;?>><br><span style="FONT-FAMILY: Tahoma; FONT-SIZE: 11px;"><?php echo $caption ?></span>&nbsp;&nbsp;<span id='timerlabel<?php echo $timerid; ?>' style="FONT-FAMILY: Tahoma; FONT-SIZE: 11px;"></span></span></center>
-<script language=javascript>
+<center><span id="global<?php echo $timerid;?>"><br><span style="FONT-FAMILY: Tahoma; FONT-SIZE: 11px;"><?php echo $caption ?></span>&nbsp;&nbsp;<span id='timerlabel<?php echo $timerid; ?>' style="FONT-FAMILY: Tahoma; FONT-SIZE: 11px;"></span></span></center>
+<script type="text/javascript">
 var count<?php echo $timerid; ?>=<?php echo $countd; ?>;
-function timer<?php echo $timerid; ?>()
-	{
-		if(count<?php echo $timerid; ?> > 0)
-			{
-				document.getElementById('timerlabel<?php echo $timerid; ?>').innerHTML = "Please wait " + count<?php echo $timerid; ?> + ' sec...';
-				count<?php echo $timerid; ?>=count<?php echo $timerid; ?> - 1;
-				setTimeout("timer<?php echo $timerid; ?>()", 1000)
-			}
+function timer<?php echo $timerid; ?>() {
+	if(count<?php echo $timerid; ?> > 0) {
+		document.getElementById('timerlabel<?php echo $timerid; ?>').innerHTML = "Please wait " + count<?php echo $timerid; ?> + ' sec...';
+		count<?php echo $timerid; ?>=count<?php echo $timerid; ?> - 1;
+		setTimeout("timer<?php echo $timerid; ?>()", 1000)
 	}
+}
 timer<?php echo $timerid; ?>();
 </script>
 <!-- <?php
-		flush();
-		for ($nnn=0; $nnn<$countd; $nnn++)
-			{
-				echo "$nnn ";
-				flush();
-				sleep(1);
-			}
+	flush();
+	for ($nnn=0; $nnn<$countd; $nnn++) {
+		sleep(1);
+	}
 ?>
 -->
 <?php
-
-		if ($hide === true)
-			{
+	if ($hide === true) {
 ?>
 <script language=javascript>
 	document.getElementById('global<?php echo $timerid; ?>').style.display='none';
 </script>
 <?php
-				flush();
-				return true;
-			}
+		flush();
+		return true;
+	}
 
-		if ($timeouttext)
-			{
+	if ($timeouttext) {
 ?>
 <script language=javascript>
 	document.getElementById('global<?php echo $timerid; ?>').innerHTML = '<?php echo $timeouttext; ?>';
 </script>
 <?php
-				flush();
-				return true;
-			}
+		flush();
+		return true;
 	}
+	return true;
+}
 
-function insert_new_timer($countd, $displaytext, $caption = "", $text = "")
-	{
-	if (!is_numeric($countd))
-    {
-    html_error("Wrong Counter");
+/**
+ * Counter for those filehosts that displays mirror after countdown
+ * @param int The number of seconds to count down
+ * @param string Text you want to display above the counter
+ * @param string The text you want to display when counting down
+ * @param string The text you want to display when count down is complete
+ */
+function insert_new_timer($countd, $displaytext, $caption = "", $text = "") {
+	if (!is_numeric($countd)) {
+    	html_error("Text passed as counter is string!");
     }
 	?>
 <p><div id="code"></div></p>
@@ -79,32 +84,31 @@ function fc() {
 		document.getElementById("dl").innerHTML = "<?php echo $caption; ?> Please wait <b>" + c.toFixed(1) + "</b> seconds...";
 		c = c - .5;
 		setTimeout("fc()", 500);
-		}
-	else {
+	} else {
 		document.getElementById("dl").style.display="none";
 		document.getElementById("code").innerHTML = unescape("<?php echo $displaytext; ?>");
-		}
 	}
+}
 </script>
 <?php
-  if (!empty($text))
-    {
-    print $text;
-    }
-    ?>
+	if (!empty($text)) {
+		print $text;
+	}
+?>
 </body>
 </html>
-	<?php
-	}
+<?php
+}
 
-function is_page($lpage)
-  {
-  	global $lastError;
-  	if (!$lpage)
-  		{
-      html_error("Error retriving the link<br>$lastError", 0);
-  		}
-  }
+/**
+ * Function to check if geturl function has completed successfully
+ */
+function is_page($lpage) {
+	global $lastError;
+	if (!$lpage) {
+		html_error("Error retriving the link<br>$lastError", 0);
+	}
+}
 
 function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveToFile = 0, $proxy = 0, $pauth = 0, $auth = 0, $scheme = "http", $resume_from = 0) {
 global $nn, $lastError, $PHP_SELF, $AUTH, $IS_FTP, $FtpBytesTotal, $FtpBytesReceived, $FtpTimeStart, $FtpChunkSize, $Resume, $bytesReceived, $fs, $forbidden_filetypes, $rename_these_filetypes_to, $bw_save, $force_name, $rename_prefix, $rename_suffix;

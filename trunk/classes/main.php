@@ -15,7 +15,7 @@
 -->
 </style>
 
-<title>RAPIDLEECH PLUGMOD</title>
+<title>Rapidleech v2 rev. 39</title>
 <script type="text/javascript" src="classes/js.php"></script>
 <SCRIPT language="JavaScript">
 <!--

@@ -38,126 +38,114 @@ if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logg
 <?php
 if ($_REQUEST["GO"] == "GO")
 	{
-		$getlinks=explode("\r\n",trim($_REQUEST[links]));
+		$getlinks=explode("\r\n",trim($_REQUEST['links']));
 		
-		if (!count($getlinks) || (trim($_REQUEST[links]) == ""))
+		if (!count($getlinks) || (trim($_REQUEST['links']) == ""))
 			{
 				die('<span style="color:red; background-color:#fec; padding:3px; border:2px solid #FFaa00"><b>Not LINK</b></span><br>');
 			}
 			
 
-		$start_link='index.php?';
+		$start_link='index.php?audl=doum';
 
-		if(isset($_REQUEST[useproxy]) && $_REQUEST[useproxy] && (!$_REQUEST[proxy] || !strstr($_REQUEST[proxy], ":")))
+		if(isset($_REQUEST['useproxy']) && $_REQUEST['useproxy'] && (!$_REQUEST['proxy'] || !strstr($_REQUEST['proxy'], ":")))
 		    {
 	        	die('<span style="color:red; background-color:#fec; padding:3px; border:2px solid #FFaa00"><b>Not address of the proxy server is specified</b></span><br>');
 	    	}
 	    		else
 	    	{
-	    		if ($_REQUEST[useproxy] == "on")
+	    		if ($_REQUEST['useproxy'] == "on")
 	    			{
 						
-						$start_link.='&proxy='.$_REQUEST[proxy];
-						$start_link.='&proxyuser='.$_REQUEST[proxyuser];
-						$start_link.='&proxypass='.$_REQUEST[proxypass];
+						$start_link.='&proxy='.$_REQUEST['proxy'];
+						$start_link.='&proxyuser='.$_REQUEST['proxyuser'];
+						$start_link.='&proxypass='.$_REQUEST['proxypass'];
 					}
 	    	}
 
-		$pre_user = $_REQUEST[rrapidlogin_com] ? $_REQUEST[rrapidlogin_com] : $premium_acc["au_dl"]["user"];
-		$pre_pass = $_REQUEST[rrapidpass_com] ? $_REQUEST[rrapidpass_com] : $premium_acc["au_dl"]["pass"];
-		
-		$start_link.='&imageshack_tor='.$_REQUEST[imageshack_acc].'&premium_acc='.$_REQUEST[rapidpremium_com];
-		if ($_REQUEST[rapidpremium_com] == "on") 
-			{
-			$start_link.='&premium_user='.$pre_user;
-			$start_link.='&premium_pass='.$pre_pass;
-			}
+		$start_link.='&imageshack_tor='.$_REQUEST['imageshack_acc'].'&premium_acc='.$_REQUEST['premium_acc'];
 		
 ?>
-<script language="javascript">
+<script type="text/javascript">
 
-	var set_delay=0;
 	var current_dlink=-1;
-	var last_status = new Array();
 	var links = new Array();
-	var idwindow = new Array();
-	var dwindow = '<?php echo '_'.substr(md5(time()),0,7).'_'; ?>';
 	var start_link='<?php echo $start_link; ?>';
 
-	function download(id)
-		{
-			opennewwindow(id);
-		
-			document.getElementById('auto').style.display='none';
-			document.getElementById('dButton'+id).style.display='none';
-		}
-	
-	function startauto()
-		{
-			var delay_=document.getElementById('delay').value;
-			if (!((delay_>=1) && (delay_<=3600)))
-				{
-					alert('Errors in the interval of delay (from 1 to 3600 seconds)');
-					return;
-				}
-				
-			set_delay=delay_*1000;
-		
-			current_dlink=-1;
-			document.getElementById('auto').style.display='none';
-			
-			for(var i=0; i<links.length; i++)
-				{
-					document.getElementById('dButton'+i).style.display='none';
-					document.getElementById('status'+i).innerHTML='&nbsp;Wait';
-					
-				}
-				
-			nextlink();
-		}
-		
-	function nextlink()
-		{
-			current_dlink++;
-			
-			document.getElementById('status'+current_dlink).innerHTML='&nbsp;Started';
-			if (current_dlink < links.length)
-				{
-					opennewwindow(current_dlink);
-					setTimeout('nextlink()',set_delay);
-				}
-		}
+	function startauto() {
+		current_dlink=-1;
+		document.getElementById('auto').style.display='none';
+		nextlink();
+	}
 
-	function opennewwindow(id)
-		{
-			var options = "width=700,height=450,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,copyhistory=no";
-			idwindow[id] = window.open(start_link+'&link='+links[id], dwindow+id, options);
-			idwindow[id].opener=self;
-			idwindow[id].focus();
+	function nextlink() {
+		document.getElementById('status'+current_dlink).innerHTML='Finished';
+		current_dlink++;
+
+		if (current_dlink < links.length) {
+			document.getElementById('status'+current_dlink).innerHTML='Started';
+			opennewwindow(current_dlink);
 		}
-	
+	}
+
+	function opennewwindow(id) {
+		window.frames["idownload"].location = start_link+'&link='+links[id];
+	}
+	function addLinks() {
+		var tbody = document.getElementById("links").getElementsByTagName("tbody")[0];
+		var stringLinks = document.getElementById("addlinks").value;
+		var regexRN = new RegExp('\r\n',"g");
+		var regexN = new RegExp('\n',"g");
+		var stringLinksN = stringLinks.replace(regexRN, "\n");
+		var arrayLinks = stringLinksN.split(regexN);
+		for (var i = 0; i < arrayLinks.length; i++)
+		{
+			var row = document.createElement("tr");
+			var td1 = document.createElement("td");
+			td1.appendChild(document.createTextNode(arrayLinks[i]));
+			var td2 = document.createElement("td");
+			td2.appendChild(document.createTextNode("Waiting"));
+			td2.setAttribute("id", "status"+links.length);
+			row.appendChild(td1);
+			row.appendChild(td2);
+			tbody.appendChild(row);
+
+			links[links.length] = arrayLinks[i];
+		}
+		document.getElementById("addlinks").value = "";
+	}
 <?php
 		
 		for ($i=0; $i<count($getlinks); $i++)
 			{
-				echo "\tlast_status[$i]=''; links[".$i."]='".urlencode($getlinks[$i])."';\n";
+				echo "\tlinks[".$i."]='".urlencode($getlinks[$i])."';\n";
 			}
 ?>
 </script>
 
-<table width=90% style="border:1px solid #666" class="container" cellspacing="1">
-<tr><td width=80% align="center"><b>Link</b><td width=70 align="center">&nbsp;<b>Action</b>&nbsp;<td width=70 align="center">&nbsp;<b>Status</b>&nbsp;</tr>
+<table id="links" width=90% style="border:1px solid #666" class="container" cellspacing="1">
+<thead><tr><td width=80% align="left"><b>Link</b></td><td width=70 align="left"><b>Status</b></td></tr></thead>
+<tfoot><tr id=auto><td colspan=2 align=center><input type=button value='Start auto Transload' onClick=javascript:startauto();></td></tr></tfoot>
+<tbody>
 <?php
 		for ($i=0; $i<count($getlinks); $i++)
 			{
-				echo "<tr><td width=80% nowrap id=row".$i.">".$getlinks[$i]."</td>";
-				echo "<td width=70 id=action".$i."><input type=button onClick=javascript:download($i); value='Transload' id=dButton".$i."></td>";
-				echo "<td width=70 id=status".$i.">&nbsp;</td>";
-				echo "</tr>\n";
+				echo "<tr><td nowrap>".$getlinks[$i]."</td><td id=status".$i.">Waiting</td></tr>\r\n";
 			}
 ?>
-<tr id=auto><td colspan=3 align=center>Intervals (1 ... 3600)&nbsp;<input type=text id=delay name=delay size=5 value=20>&nbsp;seconds&nbsp;<input type=button value='Start auto Transload' onClick=javascript:startauto();></tr>
+</tbody>
 </table>
+<br />
+<iframe width="90%" height="300" src="" name="idownload" border="1">Frames not supported, update your browser</iframe>
+<br />
+<table style="border:1px solid #666" class="container" cellspacing="1">
+<tr>
+<td><textarea name="addlinks" id="addlinks" cols="100" rows="5"></textarea></td>
+<td><input type="button" value="Add links" onclick="javascript:addLinks();" /></td>
+</tr>
+</table>
+</body>
+</html>
 <?php
 		
 		
@@ -240,25 +228,16 @@ if ($_REQUEST["GO"] == "GO")
                     }
             ?>
 
-            <?php
-            if (!$rapidlogin_com || !$rapidpass_com)
-            	{
-            ?>
-            <tr>
-              <td>
-                <input type="checkbox" value="on" name=rapidpremium_com id=rapidpremium_com onClick="javascript:var displcom=this.checked?'':'none';document.getElementById('rapidblockcom').style.display=displcom;" <?php if (is_array($premium_acc["au_dl"])) print ' checked'; ?>>&nbsp;Use Premium Account
-              </td>
-              <td>&nbsp;</td>
-              <td id=rapidblockcom<?php echo $_COOKIE["rapidpremium_com"] ? "" : " style=\"display: none;\""; ?>>
-                <table width=150 border=0>
-                 <tr><td>Username</td><td><input type=text name=rrapidlogin_com size=15 value="<?php echo ($_COOKIE["rrapidlogin_com"] ? $_COOKIE["rrapidlogin_com"] : ""); ?>"></td></tr>
-                 <tr><td>password</td><td><input type=password name=rrapidpass_com size=15 value="<?php echo ($_COOKIE["rrapidpass_com"] ? $_COOKIE["rrapidpass_com"] : ""); ?>"></td></tr>
-                </table>
-              </td>
-            </tr>
-            <?php
-            	}
-            ?>
+			<tr>
+			<td><input type="checkbox" name="premium_acc" id="premium_acc" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;"<?php if (count($premium_acc) > 0) print ' checked'; ?>>&nbsp;Use Premium Account</td>
+			<td>&nbsp;</td>
+			<td id="premiumblock" style="display: none;">
+			<table width="150" border="0">
+			<tr><td>Username:&nbsp;</td><td><input type="text" name="premium_user" id="premium_user" size="15" value=""></td></tr>
+			<tr><td>Password:&nbsp;</td><td><input type="password" name="premium_pass" id="premium_pass" size="15" value=""></td></tr>
+			</table>
+			</td>
+			</tr>
           </table>
         </td>
       </tr>
