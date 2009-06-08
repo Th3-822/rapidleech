@@ -1,6 +1,29 @@
 Rapidleech PlugMod (by eqbal)
 /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 
+Rev. 39 - 06/08/2009
+[FIX] Added more information on error when page is not found or forbidden.
+[CHANGE] Editted javascript so that the download progress will be displayed in front on titlebar so that you can see it even if you open a lot of tabs.
+[FIX] Fixed the split/merge option. Thanks to DanielX_x!
+[CHANGE] Rewrote get header function
+[CHANGE] Rewrote formpostdata function
+[CHANGE] GetCookies function will only get cookie name and its value
+[CHANGE] Rewrote bytesToKbOrMbOrGb function so that it can actually format to Yotabytes, and it's shorter too
+[FEATURE] Will check configs/files.lst and download directory chmod now
+[CHANGE] Made some documentation in http.php
+[SECURITY] Fixed a security exploit with merge/split - thanks to DanielX_x
+[FEATURE] Implemented doum's auto download
+[FIX] Fixed auto download not starting due to javascript problem
+[FIX #0000027] Fixed a javascript problem which cause the clearsettings cookie not being set
+[FIX #0000028] fixed bug in .htaccess that allowed running maliciously named php files
+[CHANGE] edited hosts/rapidshare_com.php to allow usage of the premium details which can be set via the settings tab
+[CHANGE] Removed .JD files which existed for unknown reasons
+[BUG] Upload is now working ok and most of the <? short tags have been replaced with proper <?php tags
+[FIX] Fixed netload premium plugin.
++lots of latest plugins integrated
++old theme returned, as black background is too dark, some minor css changes needed
+
+
 Rev. 38 - 05/09/2009
 +lots of plugins updated, including premium features
 +new GetCookies() function (should be faster)
@@ -12,8 +35,6 @@ Rev. 38 - 05/09/2009
 +auul.php updated for ' in filenames (use base64 instead)
 +some minor .htaccess updates
 +some minor css updates
-+old theme returned, as black background is too dark
-
 
 Rev. 37 - (buggy test update)
 
