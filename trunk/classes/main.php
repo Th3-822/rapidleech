@@ -15,7 +15,7 @@
 -->
 </style>
 
-<title>Rapidleech v2 rev. 39</title>
+<title>Rapidleech v2 rev. <?php echo $rev_num; ?></title>
 <script type="text/javascript" src="classes/js.php"></script>
 <SCRIPT language="JavaScript">
 <!--
