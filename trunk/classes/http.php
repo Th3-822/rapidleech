@@ -220,10 +220,10 @@ $timeStart = getmicrotime();
 
 // Rewrote the get header function according to the proxy script
 // Also made sure it goes faster and I think 8192 is the best value for retrieving headers
-$header .= fgets($fp,8192);
-while (strspn($header, "\r\n") !== strlen($header)) {
+// Oops.. The previous function hooked up everything and now I'm returning it back to normal
+do {
 	$header .= fgets($fp,8192);
-}
+} while (strpos($header, $nn.$nn) === false);
 
 #########################################################################
 
