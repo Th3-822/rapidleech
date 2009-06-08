@@ -52,7 +52,7 @@ if (! $disable_action) {
 			win.focus();
 			return true;
 		}
-										
+</script>
 <table align="center">
 <?php
 					for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
@@ -63,8 +63,8 @@ if (! $disable_action) {
 		<form action='upload.php' method='get' target='<?php echo $tid?>' onSubmit="return openwinup('<?php echo $tid?>');">
 		
 		
-		<td><b><?php echo basename ( $file ["name"] ) . "</b>  , " . $file ["size"]?></td>
-		<td><select name=uploaded id=d_ <?php echo $tid;?>></select><script>fill_option('d_<?php echo $tid;?>');</script></td>
+		<td><b><?php echo basename ( $file ["name"] ) . "</b>  , " . $file ["size"]; ?></td>
+		<td><select name='uploaded' id='d_<?php echo $tid;?>'></select><script type='text/javascript'>fill_option('d_<?php echo $tid;?>');</script></td>
 		<td><input type='submit' value='Upload'></td>
 	</tr>
 	<tr>
