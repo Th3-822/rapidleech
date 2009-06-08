@@ -79,7 +79,8 @@ if ($_REQUEST["GO"] == "GO")
 	}
 
 	function nextlink() {
-		document.getElementById('status'+current_dlink).innerHTML='Finished';
+		if (document.getElementById('status'+current_dlink))
+			document.getElementById('status'+current_dlink).innerHTML='Finished';
 		current_dlink++;
 
 		if (current_dlink < links.length) {
