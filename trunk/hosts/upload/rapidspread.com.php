@@ -8,7 +8,7 @@
 			$Url=parse_url($ref);
 			$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"],$pauth);
 			is_page($page);
-			$cookies = GetCookies($page);
+			$cookies=implode("; ", GetCookies($page, true));
 
 ?>
 <script>document.getElementById('info').style.display='none';</script>
@@ -40,14 +40,17 @@
 <?php		
 			is_page($upfiles);
 			$locat=trim(cut_str($upfiles,'Location:',"\n"));
-			if (!$locat) html_error ('Error get location<br>'.$upfiles);
-			$Url=parse_url($locat);
-			$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $ref, $cookies, 0, 0, $_GET["proxy"],$pauth);
-			is_page($page);
-			$download_link=cut_str($page,'[url=',']');
+			$download_link=cut_str($upfiles,'<a target="top" href="','"><b>');
+			//if (!$locat) html_error ('Error get location<br>'.$upfiles);
+			//$download_link=cut_str($upfiles,'<a target="top" href="','"><b>');
+			//$Url=parse_url($locat);
+			//$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $ref, $cookies, 0, 0, $_GET["proxy"],$pauth);
+			//is_page($page);
+			//$download_link=cut_str($upfiles,'<a target="top" href="','"><b>');
 ?>
 <script>document.getElementById('final').style.display='none';</script>
 <?php
 
 // sert 04.08.2008
+//fixed by Baking 15/05/2009
 ?>
