@@ -286,13 +286,13 @@ else
 		    if ($ftp["scheme"] == "ftp" && !$_GET["proxy"])
 		    	{
 		    	require_once(CLASS_DIR."ftp.php");
-		    	$file = getftpurl($_GET["host"], $ftp["port"] ? $ftp["port"] : 21, $_GET["path"], &$pathWithName);
+		    	$file = getftpurl($_GET["host"], $ftp["port"] ? $ftp["port"] : 21, $_GET["path"], $pathWithName);
 		    	}
 		    else
 		    	{
 		    	require_once(CLASS_DIR."http.php");
 				$_GET["force_name"] ? $force_name = urldecode($_GET["force_name"]) : '';
-				$file = geturl($_GET["host"], $_GET["port"], $_GET["path"], $_GET["referer"], $_GET["cookie"], $_GET["post"], &$pathWithName, $_GET["proxy"], $pauth, $auth, $ftp["scheme"]);
+				$file = geturl($_GET["host"], $_GET["port"], $_GET["path"], $_GET["referer"], $_GET["cookie"], $_GET["post"], $pathWithName, $_GET["proxy"], $pauth, $auth, $ftp["scheme"]);
 		    	}
 			
 			if($redir && $lastError && stristr($lastError,"Error! it is redirected to ["))
