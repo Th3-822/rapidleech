@@ -26,8 +26,8 @@ exit;
 $continue_up=false;if ($_REQUEST['action'] == "OK"){$continue_up=true;}
 else{	?><form method=post>
 <div>Не используйте LetiT-Bit. Вот Вам <a href="http://rghost.ru/">альтернатива</a>.</div>
-<input type=hidden value=uploaded value='<?php $_REQUEST[uploaded]?>'>
-<input type=hidden name=filename value='<?php echo base64_encode($_REQUEST[filename]); ?>'>
+<input type=hidden value=uploaded value='<?php $_REQUEST['uploaded']?>'>
+<input type=hidden name=filename value='<?php echo base64_encode($_REQUEST['filename']); ?>'>
 TAGS:<input name=tags value='' type=input style="width:160px;"><br>
 COMMENTS:<textarea name=comments rows="3"style="width:160px;"></textarea><br>
 DELETE PASSWORD:<input name=dpass value='' type=input style="width:160px;"><br>
@@ -90,8 +90,8 @@ if($continue_up==true){
 					echo "<input name='filepage' type='hidden' value=".$filepage." />";
 					echo "<input name='cookies' type='text' value=".$cookies[0]." />";
 					echo "<input name='authenticity_token' type='hidden' value=".$authenticity_token." />";
-					echo "<input type='hidden' value='uploaded' value=".$_REQUEST[uploaded]." />";
-					echo "<input type='hidden' name='filename' value=".base64_encode($_REQUEST[filename])." />";
+					echo "<input type='hidden' value='uploaded' value=".$_REQUEST['uploaded']." />";
+					echo "<input type='hidden' name='filename' value=".base64_encode($_REQUEST['filename'])." />";
 					echo "<input type='hidden' name='action' value='delete'>";
 					echo "<input type='submit' value='Delete on rghost.ru' />";
 					echo "</form></div>";

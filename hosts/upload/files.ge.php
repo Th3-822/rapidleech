@@ -10,8 +10,8 @@ if ($_REQUEST['action'] == "FORM")
 ?>
 <table border=0 style="width:270px;" cellspacing=0 align=center>
 <form method=post>
-<input type=hidden name=action value='FORM'><input type=hidden value=uploaded value'<?php $_REQUEST[uploaded]?>'>
-<input type=hidden name=filename value='<?php echo base64_encode($_REQUEST[filename]); ?>'>
+<input type=hidden name=action value='FORM'><input type=hidden value=uploaded value'<?php $_REQUEST['uploaded']?>'>
+<input type=hidden name=filename value='<?php echo base64_encode($_REQUEST['filename']); ?>'>
 <tr><td nowrap>&nbsp;Login<td>&nbsp;<input name=bin_login value='' style="width:160px;">&nbsp;</tr>
 <tr><td nowrap>&nbsp;Password<td>&nbsp;<input type=password name=bin_pass value='' style="width:160px;">&nbsp;</tr>
 <tr><td colspan=2 align=center><input type=submit value='Upload'></tr>

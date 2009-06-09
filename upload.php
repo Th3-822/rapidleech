@@ -22,41 +22,41 @@ if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logg
 include("classes/http.php");
 
 if(!defined('CRLF')) define('CRLF',"\r\n");
-if (!$_REQUEST[uploaded])
+if (!$_REQUEST['uploaded'])
 	{
 		html_error("Not selected upload services", 0);
 	}
 
-if (!$_REQUEST[filename])
+if (!$_REQUEST['filename'])
 	{
 		html_error("Not select file to upload", 0);
 	}
 
-$_REQUEST[filename]=base64_decode($_REQUEST[filename]);
+$_REQUEST['filename']=base64_decode($_REQUEST['filename']);
 ?>
 <html>
 <head>
-<title>Uploading file <?php echo basename($_REQUEST[filename]); ?> to <?php echo $_REQUEST[uploaded]; ?></title>
+<title>Uploading file <?php echo basename($_REQUEST['filename']); ?> to <?php echo $_REQUEST['uploaded']; ?></title>
 <style type="text/css">
 <!--
 @import url("images/rl_style_pm.css");
 -->
 </style>
 <script>
-var orlink='<?php echo addslashes(basename($_REQUEST[filename])); ?> to <?php echo $_REQUEST[uploaded]; ?>';
+var orlink='<?php echo addslashes(basename($_REQUEST['filename'])); ?> to <?php echo $_REQUEST['uploaded']; ?>';
 </script>
 </head>
 <body>
 <center><img src="images/logo_pm.gif" alt="RapidLeech PlugMod" border="0"></center><br>
 <?php
-if (!file_exists($_REQUEST[filename]))
+if (!file_exists($_REQUEST['filename']))
 	{
 		html_error("ERROR: file not exist $filename", 0);
 	}
 				
-if (is_readable($_REQUEST[filename]))
+if (is_readable($_REQUEST['filename']))
 	{
-		$lfile=$_REQUEST[filename];
+		$lfile=$_REQUEST['filename'];
 		$lname=basename($lfile);
 	}
 		else
@@ -66,12 +66,12 @@ if (is_readable($_REQUEST[filename]))
 
 $fsize = getSize($lfile);
 
-if (file_exists("hosts/upload/".$_REQUEST[uploaded].".php")){    
-    include_once("hosts/upload/".$_REQUEST[uploaded].".index.php");
-    if ($max_file_size["$_REQUEST[uploaded]"]!=false)
-        if ($fsize > $max_file_size["$_REQUEST[uploaded]"]*1024*1024)       
+if (file_exists("hosts/upload/".$_REQUEST['uploaded'].".php")){    
+    include_once("hosts/upload/".$_REQUEST['uploaded'].".index.php");
+    if ($max_file_size[$_REQUEST['uploaded']]!=false)
+        if ($fsize > $max_file_size[$_REQUEST['uploaded']]*1024*1024)       
             html_error("Bigger than file-size", 0);
-    include_once("hosts/upload/".$page_upload["$_REQUEST[uploaded]"]);
+    include_once("hosts/upload/".$page_upload[$_REQUEST['uploaded']]);
 }else html_error('This service not allowed', 0); 
 
 ?>
@@ -227,7 +227,7 @@ hr {
 					if ($ftp_uplink) {fwrite($fr,"ftp upload: $ftp_uplink\r\n");}
 					//if ($protect) {fwrite($fr,"protect link: $protect\r\n");}
 					fwrite($fr,"\n");*/
-					fwrite($fr, "<div class=\"host\"><div class=\"title\"><strong>".$_REQUEST[uploaded]."</strong> - <span class=\"bluefont\">".date("Y-m-d H:i:s")."</span></div>");
+					fwrite($fr, "<div class=\"host\"><div class=\"title\"><strong>".$_REQUEST['uploaded']."</strong> - <span class=\"bluefont\">".date("Y-m-d H:i:s")."</span></div>");
 					fwrite($fr, "<div class=\"links\">");
 					if ($download_link) fwrite($fr, "<strong>Download link: <a href=\"".$download_link."\" target=\"_blank\">".$download_link." </a></strong>");
 					if ($delete_link) fwrite($fr, "<br />Delete link: <a href=\"".$delete_link."\" target=\"_blank\">".$delete_link." </a>");
