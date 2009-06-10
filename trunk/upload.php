@@ -1,6 +1,7 @@
 <?php
 define('RAPIDLEECH', 'yes');
 define('IMAGE_DIR', 'images/');
+define('HOST_DIR', 'hosts/');
 error_reporting(0);
 set_time_limit(0);
 @ini_alter("memory_limit", "1024M");
@@ -22,17 +23,35 @@ if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logg
 include("classes/http.php");
 
 if(!defined('CRLF')) define('CRLF',"\r\n");
-if (!$_REQUEST['uploaded'])
-	{
-		html_error("Not selected upload services", 0);
-	}
-
-if (!$_REQUEST['filename'])
-	{
-		html_error("Not select file to upload", 0);
-	}
-
 $_REQUEST['filename']=base64_decode($_REQUEST['filename']);
+
+// Check if requested upload file is within our $download_dir
+// We put basename() because we are quite sure that no one is able to upload things besides the download directory normally
+// htmlentities() prevents XSS attacks
+$_REQUEST['filename'] = htmlentities($download_dir.basename($_REQUEST['filename']));
+$_REQUEST['uploaded'] = htmlentities($_REQUEST['uploaded']);
+// We want to check if the selected upload service is a valid ones
+$d = opendir ( HOST_DIR . "upload/" );
+while ( false !== ($modules = readdir ( $d )) ) {
+	if ($modules != "." && $modules != "..") {
+		if (is_file ( HOST_DIR . "upload/" . $modules )) {
+			if (strpos ( $modules, ".index.php" ))
+				include_once (HOST_DIR . "upload/" . $modules);
+		}
+	}
+}
+if (!in_array($_REQUEST['uploaded'],$upload_services)) {
+	html_error("Not selected upload services");
+}
+
+if (!$_REQUEST['uploaded']) {
+	html_error("Not selected upload services", 0);
+}
+
+if (!$_REQUEST['filename']) {
+	html_error("Not select file to upload", 0);
+}
+
 ?>
 <html>
 <head>
@@ -248,7 +267,7 @@ echo $not_done ? "" : '<p><center><b><a href="javascript:window.close();">DONE</
 if (isset($_GET['auul'])) {
 ?><script language=javascript>parent.nextlink<?php echo $_GET['auul']; ?>();</script><?php
 	// Write links to a file
-	$file = "files/myuploads.txt";
+	$file = $download_dir."myuploads.txt";	// Obviously it was a mistake not making it a variable earlier
 	$fh = fopen($file, 'a');
 	$dash = "";
 	for ($i=0;$i<=80;$i++) $dash.="=";
