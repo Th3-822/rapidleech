@@ -1,0 +1,123 @@
+hr {
+	height: 1px;
+	border-top-width: 0px;
+	border-right-width: 0px;
+	border-left-width: 0px;
+	padding: 0px;
+	margin-top: 1px;
+	margin-right: 0px;
+	margin-bottom: 2px;
+	margin-left: 0px;
+	border-bottom-width: 0px;
+	background-color: #4A4A4A;
+	color: #4A4A4A;
+}
+img{
+	border:0
+}
+
+body {
+	font-family: "Segoe UI", Tahoma, sans-serif;
+	font-size: 11px;
+	color: #FFFFFF;
+	background-color: #010e17;
+	background-image: url(background_pm.gif);
+	background-attachment: fixed;
+	background-repeat: repeat-x;
+	background-position: left top;
+	margin: 0px;
+	padding: 0px;
+      }
+  tr        {font-family: "Segoe UI", Tahoma; font-size: 11px; line-height: 14.5px; color: #FFFFFF;}
+  input     {
+	font-family: "Segoe UI", Tahoma;
+	font-size: 11px;
+}
+  select    {font-family: "Segoe UI", Tahoma; font-size: 11px;}
+  textarea  {font-family: "Segoe UI", Tahoma; font-size: 11.5px;}
+  a         {color: #55aaff;}
+  color     {color: #FFFFFF;}
+
+.tab-on {
+	padding: 2px 0;
+	color: #000000;
+	background-color: #85cbeb;
+	width: 100px;
+}
+
+.tab-onr {
+	padding: 2px 0;
+	color: #000000;
+	background-color: #85cbeb;
+	width: 100px;
+}
+
+.tab-off
+{
+	padding: 2px 0;
+	color: #666666;
+	width: 100px;
+	background-color: #17668C;
+}
+
+.tab-offr
+{
+	padding: 2px 0;
+	color: #666666;
+	width: 100px;
+	background-color: #17668C;
+}
+
+.tab-none
+{
+border-top-width: 1px;
+border-right-width: 1px;
+border-bottom-width: 1px;
+border-left-width: 1px;
+border-top-style: none;
+border-right-style: none;
+border-bottom-style: solid;
+border-left-style: solid;
+border-top-color: #cccccc;
+border-right-color: #cccccc;
+border-bottom-color: #cccccc;
+border-left-color: #cccccc;
+}
+
+.show-table {display: block;}
+
+.hide-table {display: none;}
+.filelist a {
+	text-decoration:none;
+}
+.filelist a:hover {
+	text-decoration:underline;
+}
+.title {
+	font-size: 18px;
+	font-weight: bold;
+}
+.g {
+	text-align:center;
+	color:#00FF00;
+}
+.y {
+	text-align:center;
+	color:#FFFF00;
+}
+.r {
+	text-align:center;
+	color:#FF0000;
+}
+.n {
+	text-align:center;
+	color:blue;
+	}
+.style1 {
+	font-size: 12px;
+	font-weight: bold;
+}
+.style2 {font-weight: bold}
+
+
+.linkchecker-load{filter:alpha(opacity=20);-moz-opacity:0.2;opacity:0.2;}
