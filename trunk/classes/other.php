@@ -7,12 +7,12 @@ if (!defined('RAPIDLEECH'))
 
 function create_hosts_file($host_file = "hosts.php")
 	{
-	$fp = opendir(HOST_DIR);
+	$fp = opendir(HOST_DIR . 'download/');
 	while (($file = readdir($fp)) !== false)
 		{
 		if (substr($file, -4) == ".inc")
 			{
-			require_once(HOST_DIR.$file);
+			require_once(HOST_DIR . 'download/' . $file);
 			}
 		}
 	if (!is_array($host))
@@ -21,7 +21,7 @@ function create_hosts_file($host_file = "hosts.php")
 		}
 	else
 		{
-		$fs = fopen(HOST_DIR.$host_file, "wb");
+		$fs = fopen(HOST_DIR . 'download/' . $host_file, "wb");
 		if (!$fs)
 			{
 			print "Cannot create hosts file";
