@@ -1,5 +1,5 @@
 <?php
-$d = dir("hosts/");
+$d = dir("hosts/download/");
 while (false !== ($entry = $d->read())) {
    if (stristr($entry,'.php') && !stristr($entry,'.JD')) {
 		$hostname = substr($entry,0,-4);

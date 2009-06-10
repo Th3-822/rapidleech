@@ -20,9 +20,9 @@ clearstatcache();	// Clear caches created by PHP
 require_once("configs/config.php");	// Reads the configuration file, so we can pick up any accounts needed to use
 define('DOWNLOAD_DIR', (substr($download_dir, 0, 6) == "ftp://" ? '' : $download_dir));	// Set the download directory constant
 // Include other useful functions
-require_once("classes/other.php");
-require_once(HOST_DIR."hosts.php");
-require_once(CLASS_DIR."http.php");
+require_once('classes/other.php');
+require_once(HOST_DIR.'download/hosts.php');
+require_once(CLASS_DIR.'http.php');
 
 // If you set password for your rapidleech site, this asks for the password
 if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logged_user($users)) === false)) {

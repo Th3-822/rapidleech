@@ -92,9 +92,9 @@ if(!$_COOKIE)
 
 require_once(CLASS_DIR."cookie.php");
 
-if (!@file_exists(HOST_DIR."hosts.php"))
+if (!@file_exists(HOST_DIR."download/hosts.php"))
 	{
-	create_hosts_file("hosts.php");
+	create_hosts_file("download/hosts.php");
 	}
 
 if (!empty($_GET["image"]))
@@ -134,7 +134,7 @@ if (!$_GET["path"] || $download_dir_is_changeable == false)
   if(!$_GET["filename"] || !$_GET["host"] || !$_GET["path"])
   {
       //require "host.php";
-	require_once(HOST_DIR."hosts.php");
+	require_once(HOST_DIR."download/hosts.php");
   
     $LINK = trim(urldecode($_GET["link"]));
     if(!$LINK)
@@ -190,7 +190,7 @@ if (!$_GET["path"] || $download_dir_is_changeable == false)
 					print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1251\">$nn";
 					print "<style type=\"text/css\">$nn<!--$nn@import url(\"".IMAGE_DIR."rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"".IMAGE_DIR."logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\"></center><br><br>$nn";
 					require_once(CLASS_DIR."http.php");
-					require_once(HOST_DIR.$file);
+					require_once(HOST_DIR . 'download/' . $file);
 					exit;
 					}
 				}
