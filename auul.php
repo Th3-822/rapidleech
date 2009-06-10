@@ -64,7 +64,7 @@ function setCheckboxes(act)
   }
 </script>
 
-
+<script type="text/javascript" src="classes/js.php"></script>
 </head>
 <body>
 <center><img src="images/logo_pm.gif" alt="RAPIDLEECH PLUGMOD"></center><br><br>
@@ -185,9 +185,6 @@ $_COOKIE["showAll"] = 1;
 _create_list();
 require_once("classes/options.php");
 unset($Path);
-?>
-<?php
-require_once("classes/js.php");
 ?>
 <form name="flist" method="post" action="auul.php?action=upload">
 <p><b>Select Hosts to Upload</b></p>
