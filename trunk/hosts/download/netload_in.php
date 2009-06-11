@@ -31,11 +31,18 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 			$Href = 'http://netload.in'.trim($redir[1]);
 			$Url = parse_url($Href);
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, 0, 0, $_GET["proxy"],$pauth);
+
 			if(preg_match('/<a class="Orange_Link" href="(.*)" >Click here for the download/Ui', $page, $redir))
 			  {
 				$redirect = $redir[1];
 				$Href = trim($redirect);
-				
+			  }
+			  else
+			  {
+				  if (preg_match('%ocation: (.+)\r\n%U', $page, $flink))
+				  {
+					  $Href = trim($flink[1]);
+				  }
 			  }
 		  }
 		
