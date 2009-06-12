@@ -19,6 +19,8 @@ $premium_acc = array();
 //$premium_acc["filefactory"] = array('user' => 'myusername', 'pass' => 'mypass'); # Remove '//' from the beginning and enter your username and password for rapidshare.com premium account
 //$premium_acc["sendspace"] = array('user' => 'myusername', 'pass' => 'mypass'); # Remove '//' from the beginning and enter your username and password for rapidshare.com premium account
 //$premium_acc["uploaded_to"] = array('user' => 'myusername', 'pass' => 'mypass'); # Remove '//' from the beginning and enter your username and password for rapidshare.com premium account
+//$premium_acc["depositfiles"] = array('user' => 'myusername', 'pass' => 'mypass'); # Remove '//' from the beginning and enter your username and password for rapidshare.com premium account
+//$premium_acc["easyshare"] = array('user' => 'myusername', 'pass' => 'mypass'); # Remove '//' from the beginning and enter your username and password for rapidshare.com premium account
 
 $no_cache = true; # true - Prohibition by Browser; otherwise allowed (You should leave this intact unless you know what you are doing)
 //$images_via_php = false; # true - RapidShare images are downloaded through the script, but it requires ssl support; turn it off if you can't see the image.
