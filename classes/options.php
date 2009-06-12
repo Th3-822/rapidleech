@@ -57,7 +57,7 @@ if (! $disable_action) {
 		
 		case "split" :
 			require(CLASS_DIR . "options/split.php");
-			split();
+			rl_split();
 			break;
 		
 		case "split_go" :
