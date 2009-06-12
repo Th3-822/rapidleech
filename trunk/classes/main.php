@@ -217,7 +217,7 @@ foreach ($host as $site => $file)
 </tbody>
 </table>
 <table class="hide-table" id="tb3" name="tb" cellspacing="5" width="100%">
-<tbody><td align="center" width="100%">
+<tbody><tr><td align="center" width="100%"> 
 <?php
 _create_list();
 require_once(CLASS_DIR."options.php");
@@ -289,7 +289,6 @@ else
     {
     unset($Path);
     ?>
-<form name="flist" method="post">
 <a href="javascript:showAll();">Show
 <script language="JavaScript">
 if(getCookie("showAll") == 1)
@@ -344,11 +343,11 @@ if($list)
   ?>
 </tbody>
 </table>
+</div>
+</form>
 <?php
   }
-  ?>
-</form>
- </div>
+?>
 </td>
 </tr>
 </table>
