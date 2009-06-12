@@ -64,6 +64,9 @@ if ($_REQUEST["GO"] == "GO")
 	    	}
 
 		$start_link.='&imageshack_tor='.$_REQUEST['imageshack_acc'].'&premium_acc='.$_REQUEST['premium_acc'];
+		if (isset($_POST['premium_user'])) {
+			$start_link.='&premium_user='.urlencode($_POST['premium_user']).'&premium_pass='.urlencode($_POST['premium_pass']);
+		}
 		
 ?>
 <script type="text/javascript">
