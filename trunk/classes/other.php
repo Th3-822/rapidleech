@@ -253,7 +253,7 @@ function bytesToKbOrMbOrGb($bytes) {
 		$s = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
 		$e = floor(log($bytes)/log(1024));
      
-        return sprintf('%.2f '.$s[$e], ($bytes/pow(1024, floor($e))));
+        return sprintf('%.2f '.$s[$e], @($bytes/pow(1024, floor($e))));
 	} else {
 		$size = "Unknown";
 	}
