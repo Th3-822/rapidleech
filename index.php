@@ -12,7 +12,7 @@ error_reporting(6135);
 $nn = "\r\n";
 $fromaddr = "RapidLeech";
 $dev_name = 'eqbal, updated by szalinski';
-$rev_num = '39b';
+$rev_num = '40';
 $PHP_SELF = !$PHP_SELF ? $_SERVER["PHP_SELF"] : $PHP_SELF;
 define('RAPIDLEECH', 'yes');
 define('ROOT_DIR', realpath("./"));
