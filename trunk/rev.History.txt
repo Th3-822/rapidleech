@@ -1,13 +1,28 @@
 Rapidleech PlugMod (by eqbal)
 /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 
+Rev. 40 - 06/12/2009
+[FEATURE] Added server side auto download capability.
+[CHANGE] Removed the <form> tag when files aren't present and made some html corrections thanks to DanielX_x
+[FIX #0000031] Fixed bytesToKbOrMbOrGb gives warning when filesize is 0 (Reported by DanielX_x)
+[FIX] Fixed most of the plugin so that it will work with the new auto transload system.
+[CHANGE] The way depositfiles and easyshare premium plugin created was quite incorrect, it should be together with the free user plugin and be able to accept premium details from $_POST and in config.php
+[FIX] Added a missing configuration parameter
+
+[FIX] Fixed rapidshare plugin problem when auto transload
+[FIX] Fixed unable to use premium account in auto transload.
+[FIX] Fixed netload premium download plugin
+[BUG] Fixed a bug which was fixed previously actually but just replaced by the new version of auto upload.
+[CHANGE] Moved download plugin files into separate download/ folder in hosts/ directory
+[FEATURE] Updated to latest auto upload script.
+[SECURITY] Patched up a hole which was reported by BKiS long ago and should have been fixed but wasn't include in the previous release.
+
 
 Rev. 39b - 06/10/2009
 [CHANGE] Edited most $Array[String] to $Array["String"] which should improve speed a little
 [CHANGE] Separated options' actions to make it easier to manage.
 [FIX] Fixed 'call-time pass-by-reference has been deprecated' warnings.
 [CHANGE] Removed gigaup.fr upload plugin on request
-
 
 Rev. 39 - 06/08/2009
 [FIX] Added more information on error when page is not found or forbidden.
