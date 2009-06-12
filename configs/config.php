@@ -39,6 +39,8 @@ $download_dir_is_changeable = false; // Set it to true to allow users to change 
 
 ### CPU,  Memory & Time Info ###
 $server_info = false;
+### Ajax Auto Refresh Server Info ###
+$ajax_refresh = true;
 
 ### Megaupload cookie ###
 //$mu_cookie_user_value = '';  // like: b658b369856766f621ca292fac113a5c, that contains un&pass of premium account and can be shared to others, because it's an encrypted value.
