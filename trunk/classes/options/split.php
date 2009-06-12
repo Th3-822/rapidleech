@@ -1,5 +1,5 @@
 <?php
-function split() {
+function rl_split() {
 	global $PHP_SELF, $list, $download_dir_is_changeable, $disable_deleting;
 	if (count ( $_GET ["files"] ) < 1) {
 		echo "Select at least one file.<br><br>";
