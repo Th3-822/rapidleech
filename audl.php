@@ -8,7 +8,18 @@ ob_end_clean();
 ob_implicit_flush(TRUE);
 ignore_user_abort(1);
 clearstatcache();
+$PHP_SELF = !$PHP_SELF ? $_SERVER["PHP_SELF"] : $PHP_SELF;
+define('HOST_DIR', 'hosts/');
+define('IMAGE_DIR', 'images/');
+define('CLASS_DIR', 'classes/');
+define('CONFIG_DIR', 'configs/');
+define('RAPIDLEECH', 'yes');
+define('ROOT_DIR', realpath("./"));
+define('PATH_SPLITTER', (strstr(ROOT_DIR, "\\") ? "\\" : "/"));
 require_once("configs/config.php");
+if (substr($download_dir,-1) != '/') $download_dir .= '/';
+define('DOWNLOAD_DIR', (substr($download_dir, 0, 6) == "ftp://" ? '' : $download_dir));
+$nn = "\r\n";
 require_once("classes/other.php");
 
 if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logged_user($users)) === false))
@@ -36,33 +47,165 @@ if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logg
 <center><img src="images/logo_pm.gif" alt="RAPIDLEECH PLUGMOD"></center><br><br>
 <center>
 <?php
-if ($_REQUEST["GO"] == "GO")
-	{
-		$getlinks=explode("\r\n",trim($_REQUEST['links']));
-		
-		if (!count($getlinks) || (trim($_REQUEST['links']) == ""))
-			{
-				die('<span style="color:red; background-color:#fec; padding:3px; border:2px solid #FFaa00"><b>Not LINK</b></span><br>');
+if ($_REQUEST["GO"] == "GO") {
+	$getlinks=explode("\r\n",trim($_REQUEST['links']));
+	
+	if (!count($getlinks) || (trim($_REQUEST['links']) == "")) {
+		html_error("No link submited");
+	}
+	
+	if ($_REQUEST['server_side'] == 'on') {
+		// Get supported download plugins
+		require_once(HOST_DIR."download/hosts.php");
+		require_once(CLASS_DIR."ftp.php");
+		require_once(CLASS_DIR."http.php");
+		if (isset($_POST["useproxy"]) && $_POST["useproxy"] == true && (!$_POST["proxy"] || !strstr($_POST["proxy"], ":"))) {
+			html_error("Bad proxy server address", 0);
+		}
+?>
+<table width="90%" style="border:1px solid #666" class="container" cellspacing="1">
+<tr>
+<td width="80%" align="center"><b>Link</b></td>
+<td width="70" align="center"><b>Status</b></td>
+</tr>
+<?php 
+		for ($i = 0; $i < count($getlinks); $i++) {
+			echo "<tr><td width=\"80%\" nowrap>".$getlinks[$i]."</td><td width=\"70\" id=\"status".$i."\">Waiting</td></tr>".$nn;
+		}
+?>
+</table>
+<script type="text/javascript" language="javascript"><!--
+function updateStatus(id, status)
+{
+	document.getElementById("status"+id).innerHTML = status;
+}
+function resetProgress()
+{
+	document.getElementById("received").innerHTML = '0 KB';
+	document.getElementById("percent").innerHTML = '0%';
+	document.getElementById("progress").style.width = '0%';
+	document.getElementById("speed").innerHTML = '0 KB/s';
+	document.title = 'RAPIDLEECH PLUGMOD - Auto Download';
+}
+//--></script>
+<?php 
+		for ($i = 0; $i < count($getlinks); $i++) {
+			$isHost = false;
+			$hideDiv = false;
+			unset($FileName);
+			unset($force_name);
+			//$bytesReceived = 0; // fix for GLOBAL in geturl()
+			unset($bytesReceived);
+			$LINK = $getlinks[$i];
+			$Referer = $LINK;
+			$Url = parse_url($LINK);
+			$_GET = Array();
+			$_GET["GO"] = "GO"; // for insert_location()
+			$_GET["path"] = ((substr($download_dir, 0, 6) != "ftp://") ? realpath(DOWNLOAD_DIR) : $download_dir);
+	
+			if (isset($_POST["useproxy"]) && $_POST["useproxy"] == true) {
+				$_GET["useproxy"] = "on";
+				$_GET["proxy"] = $_POST["proxy"];
+				$pauth = ($_POST["proxyuser"] && $_POST["proxypass"]) ? base64_encode($_POST["proxyuser"].":".$_POST["proxypass"]) : "";
 			}
-			
+	
+			if ($Url['scheme'] != 'http' && $Url['scheme'] != 'https' && $Url['scheme'] != 'ftp') {
+				echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", 'Invalid URL');</script>".$nn;
+			} else {
+				echo "<div id=\"progress".$i."\" style=\"display:block;\">".$nn;
+				foreach ($host as $site => $file) {
+					if (preg_match("/^(.+\.)?".$site."$/i", $Url["host"])) {
+						require(HOST_DIR.'download/'.$file);
+						$isHost = true;
+					}
+				}
+				if (!$isHost) {
+					$FileName = basename($Url["path"]);
+					insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&port=".$Url["port"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=&partSize=&method=&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK));
+				}
+				echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", 'Preparing');</script>".$nn;
+				do {
+					list($_GET["filename"],$tmp) = explode('?',urldecode(trim($_GET["filename"])));
+					$_GET["saveto"] = urldecode(trim($_GET["saveto"]));
+					$_GET["host"] = urldecode(trim($_GET["host"]));
+					$_GET["path"] = urldecode(trim($_GET["path"]));
+					$_GET["port"] = $_GET["port"] ? urldecode(trim($_GET["port"])) : 80;
+					$_GET["referer"] = $_GET["referer"] ? urldecode(trim($_GET["referer"])) : 0;
+					$_GET["link"] = urldecode(trim($_GET["link"]));
+					$_GET["post"] = $_GET["post"] ? unserialize(stripslashes(urldecode(trim($_GET["post"])))) : 0;
+					$_GET["cookie"] = $_GET["cookie"] ? urldecode(trim($_GET["cookie"])) : 0;
+	
+					$redirectto = "";
+	
+					$pauth = urldecode(trim($_GET["pauth"]));
+					$auth = urldecode(trim($_GET["auth"]));
+	
+					if($_GET["auth"]) {
+						$AUTH["use"] = TRUE;
+						$AUTH["str"] = $_GET["auth"];
+					} else {
+						unset($AUTH);
+					}
+	
+					$ftp = parse_url($_GET["link"]);
+					$IS_FTP = $ftp["scheme"] == "ftp" ? TRUE : FALSE;
+					$AUTH["ftp"] = array("login" => ($ftp["user"] ? $ftp["user"] : "anonymous"), "password" => ($ftp["pass"] ? $ftp["pass"] : "anonymous@leechget.com"));
+	
+					$pathWithName = $_GET["saveto"].PATH_SPLITTER.$_GET["filename"];
+					while (stristr($pathWithName, "\\\\")) {
+						$pathWithName = str_replace("\\\\", "\\", $pathWithName);				
+					}
+					list($pathWithName,$tmp) = explode('?',$pathWithName);
+	
+					echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", 'Started');</script>".$nn;
+					if ($ftp["scheme"] == "ftp" && !$_GET["proxy"]) {
+						$file = getftpurl($_GET["host"], $ftp["port"] ? $ftp["port"] : 21, $_GET["path"], $pathWithName);
+					} else {
+						$_GET["force_name"] ? $force_name = urldecode($_GET["force_name"]) : '';
+						$file = geturl($_GET["host"], $_GET["port"], $_GET["path"], $_GET["referer"], $_GET["cookie"], $_GET["post"], $pathWithName, $_GET["proxy"], $pauth, $auth, $ftp["scheme"]);
+					}
+					if ($redir && $lastError && stristr($lastError,"Error! it is redirected to [")) {
+						$redirectto = trim(cut_str($lastError,"Error! it is redirected to [","]"));
+						$_GET["link"] = $redirectto;
+						$purl = parse_url($redirectto);
+						list($_GET["filename"],$tmp) = explode('?',basename($redirectto));
+						$_GET["host"] = $purl["host"];
+						$_GET["path"] = $purl["path"].($purl["query"] ? "?".$purl["query"] : "");
+						$lastError = "";
+					}
+					if ($lastError) {
+						echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", '".$lastError."');</script>".$nn;
+					} elseif ($file["bytesReceived"] == $file["bytesTotal"] || $file["size"] == "Unknown") {
+						echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", '100%');resetProgress();</script>".$nn;
+						write_file(CONFIG_DIR."files.lst", serialize(array("name" => $file["file"], "size" => $file["size"], "date" => time(), "link" => $_GET["link"], "comment" => str_replace("\n", "\\n", str_replace("\r", "\\r", $_GET["comment"]))))."\r\n", 0);
+						$hideDiv = true;
+					} else {
+						echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", 'Connection lost');</script>".$nn;
+					}
+				}
+				while ($redirectto && !$lastError);
+				echo "</div>".$nn;
+				if ($hideDiv) {
+					echo "<script type=\"text/javascript\" language=\"javascript\">document.getElementById('progress".$i."').style.display='none';</script>".$nn;
+				}
+			}
+		}
+		exit;
+	} else {
+		
 
 		$start_link='index.php?audl=doum';
-
-		if(isset($_REQUEST['useproxy']) && $_REQUEST['useproxy'] && (!$_REQUEST['proxy'] || !strstr($_REQUEST['proxy'], ":")))
-		    {
-	        	die('<span style="color:red; background-color:#fec; padding:3px; border:2px solid #FFaa00"><b>Not address of the proxy server is specified</b></span><br>');
-	    	}
-	    		else
-	    	{
-	    		if ($_REQUEST['useproxy'] == "on")
-	    			{
-						
-						$start_link.='&proxy='.$_REQUEST['proxy'];
-						$start_link.='&proxyuser='.$_REQUEST['proxyuser'];
-						$start_link.='&proxypass='.$_REQUEST['proxypass'];
-					}
-	    	}
-
+	
+		if(isset($_REQUEST['useproxy']) && $_REQUEST['useproxy'] && (!$_REQUEST['proxy'] || !strstr($_REQUEST['proxy'], ":"))) {
+	       	die('<span style="color:red; background-color:#fec; padding:3px; border:2px solid #FFaa00"><b>Not address of the proxy server is specified</b></span><br>');
+	   	} else {
+	   		if ($_REQUEST['useproxy'] == "on") {
+				$start_link.='&proxy='.$_REQUEST['proxy'];
+				$start_link.='&proxyuser='.$_REQUEST['proxyuser'];
+				$start_link.='&proxypass='.$_REQUEST['proxypass'];
+			}
+	   	}
+	
 		$start_link.='&imageshack_tor='.$_REQUEST['imageshack_acc'].'&premium_acc='.$_REQUEST['premium_acc'];
 		if (isset($_POST['premium_user'])) {
 			$start_link.='&premium_user='.urlencode($_POST['premium_user']).'&premium_pass='.urlencode($_POST['premium_pass']);
@@ -156,6 +299,7 @@ if ($_REQUEST["GO"] == "GO")
 		
 		exit;
 	}
+}
 ?>
 <script language=javascript>
 	function ViewPage(page)
@@ -242,6 +386,8 @@ if ($_REQUEST["GO"] == "GO")
 			</table>
 			</td>
 			</tr>
+			<tr>
+			<td><input type="checkbox" name="server_side" value="on" />Run Server Side</td></tr>
           </table>
         </td>
       </tr>

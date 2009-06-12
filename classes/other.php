@@ -77,6 +77,18 @@ function is_notpresent($lpage, $mystr, $strerror, $head = 0)
 	}
 
 function insert_location($newlocation)
+{
+	if (isset($_GET["GO"]) && $_GET["GO"] == "GO")
+	{
+		list($location, $list) = explode("?", $newlocation);
+		$list = explode("&", $list);
+		foreach ($list as $l)
+		{
+			list($name, $value) = explode("=", $l);
+			$_GET[$name] = $value;
+		}
+	}
+	else
 	{
 	global $nn;
 	list($location, $list) = explode("?", $newlocation);
@@ -98,6 +110,7 @@ void(document.forms[0].submit());
 	<?php
 	flush();
 	}
+}
 
 
 function pause_download()
