@@ -8,6 +8,8 @@ deny from all
 allow from all
 </files>
 
+#Uncomment the 3 lines below, ONLY when you want to run the checker.php!
+
 #<files checker.php>
 #allow from all
 #</files>
