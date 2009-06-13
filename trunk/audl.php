@@ -108,6 +108,12 @@ function resetProgress()
 				$_GET["proxy"] = $_POST["proxy"];
 				$pauth = ($_POST["proxyuser"] && $_POST["proxypass"]) ? base64_encode($_POST["proxyuser"].":".$_POST["proxypass"]) : "";
 			}
+			
+			if (isset($_POST['premium_acc'])) {
+				$_GET["premium_acc"] = "on";
+				$_GET["premium_user"] = $_POST["premium_user"];
+				$_GET["premium_pass"] = $_POST["premium_pass"];
+			}
 	
 			if ($Url['scheme'] != 'http' && $Url['scheme'] != 'https' && $Url['scheme'] != 'ftp') {
 				echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", 'Invalid URL');</script>".$nn;
@@ -124,6 +130,8 @@ function resetProgress()
 					insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&port=".$Url["port"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=&partSize=&method=&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK));
 				}
 				echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", 'Preparing');</script>".$nn;
+				$redir = "";
+				$lastError = "";
 				do {
 					list($_GET["filename"],$tmp) = explode('?',urldecode(trim($_GET["filename"])));
 					$_GET["saveto"] = urldecode(trim($_GET["saveto"]));
