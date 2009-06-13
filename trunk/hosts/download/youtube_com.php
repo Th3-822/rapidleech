@@ -7,6 +7,7 @@ if (!defined('RAPIDLEECH'))
 
 $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"], $pauth);
 is_page($page);
+
 if (preg_match("/\r\nLocation: [^\r\n]+/", $page))
 {
 	html_error("File not found", 0);
@@ -15,13 +16,14 @@ preg_match('/"t": "([^\"]+)/', $page, $video_t);
 preg_match('/"video_id": "([^\"]+)/', $page, $video_id);
 if (preg_match("/<title>YouTube - ([^<]+)/", $page, $title))
 {
-	$filename = str_replace(Array("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode($title[1]))."_".(isset($_POST["youtube_mp4"]) ? "HQ.mp4" : "LQ.flv");
+	$filename = str_replace(Array("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode($title[1]))."_".(isset($_POST["ytube_mp4"]) ? "HQ.mp4" : "LQ.flv");
 }
-if (preg_match_all("/Set-Cookie: ([^\r\n|^;)/i", $page, $cookies))
+if (preg_match_all("/Set-Cookie: ([^\r\n;]+)/i", $page, $cookies))
 {
 	$cookie = implode("; ", $cookies[1]);
 }
-$Url = parse_url("http://www.youtube.com/get_video?video_id=".$video_id[1]."&t=".$video_t[1].(isset($_POST["youtube_mp4"]) ? "&fmt=18" : ""));
+preg_match('%var swfUrl = canPlayV9Swf\(\) \? "(.+)\.swf" :%U', $page, $refmatch);
+$Url = parse_url("http://www.youtube.com/get_video?video_id=".$video_id[1]."&t=".$video_t[1].(isset($_POST["ytube_mp4"]) ? "&el=detailpage&ps=&fmt=34" : ""));
 
-insert_location("$PHP_SELF?filename=".urlencode($filename)."&force_name=".urlencode($filename)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($LINK)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+insert_location("$PHP_SELF?filename=".urlencode($filename)."&force_name=".urlencode($filename)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($refmatch[1])."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&cookie=".urlencode($refmatch[1])."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
 ?>
