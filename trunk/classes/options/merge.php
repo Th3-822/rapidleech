@@ -164,7 +164,7 @@ function merge_go() {
 								while ( isset ( $list [$time] ) ) {
 									$time ++;
 								}
-								$list [$time] = array ("name" => $path . $filename, "size" => bytesToKbOrMbOrGb ( $data ['size'] ), "date" => $time );
+								$list [$time] = array ("name" => $path . $filename, "size" => bytesToKbOrMbOrGb ( $partsSize ), "date" => $time );
 								if (! updateListInFile ( $list )) {
 									echo "Couldn't update file list. Problem writing to file!<br><br>";
 								}
