@@ -121,7 +121,7 @@ if (! $disable_action) {
 		
 		case "pack" :
 			require(CLASS_DIR . "options/pack.php");
-			pack();
+			rl_pack();
 			break;
 		
 		case "pack_go" :
