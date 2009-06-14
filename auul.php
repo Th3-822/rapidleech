@@ -89,7 +89,7 @@ function setCheckboxes(act)
 			foreach ($_POST['hosts'] as $host) {
 				$hostss[] = $host;
 				$uploads[] = array('host' => $host,
-					'file' => DOWNLOAD_DIR.$file);
+					'file' => DOWNLOAD_DIR.base64_decode($file));
 				$total++;
 			}
 		}
@@ -246,7 +246,7 @@ if (!$list) {
 		if(file_exists($file["name"])) {
 ?>
 	<tr>
-		<td><input type=checkbox name="files[]" value="<?php echo basename($file["name"]); ?>"></td>
+		<td><input type=checkbox name="files[]" value="<?php echo base64_encode(basename($file["name"])); ?>"></td>
 		<td><?php echo basename($file["name"]); ?></td>
 		<td><?php echo $file["size"]; ?></td>
 	</tr>
