@@ -7,3 +7,7 @@ deny from all
 <files ~ "^\.">
 deny from all
 </files>
+
+<files js.php>
+allow from all
+</files>
