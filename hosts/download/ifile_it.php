@@ -57,12 +57,20 @@ insert_location("$PHP_SELF?cookie=".urlencode($cook)."&filename=".urlencode($Fil
 $rnd=mt_rand(10000000,99999999);
 $rnd='0.'.$rnd.($rnd>>1);
 $access_image_url='http://ifile.it/download:captcha?'.$rnd;
-$capimg = $PHP_SELF."?image=".urlencode($access_image_url)."&cookie=".urlencode($cook);
-$link ="http://ifile.it/download:dl_request?it=".$file_key.",type=simple,esn=0,0d149=";
+$Url = parse_url($access_image_url);
+$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].'?'.$Url['query'], "http://ifile.it/dl", $cook, 0, 0, $_GET["proxy"],$pauth);
+        
+
+        $headerend = strpos($page,"JFIF");
+        $pass_img = substr($page,$headerend-6);
+        $imgfile=$download_dir."ifile_captcha.jpg"; 
+        if (file_exists($imgfile)){ unlink($imgfile);} 
+		write_file($imgfile, $pass_img);
+        $link ="http://ifile.it/download:dl_request?it=".$file_key.",type=simple,esn=0,0d149=";
 		
 	print 	"<form method=\"post\" action=\"".$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "")."\">$nn";
 	print	"<b>Please enter code:</b><br>$nn";
-	print	"<img src=\"$capimg\">$nn";
+	print	"<img src=\"$imgfile\">$nn";
 	print	"<input name=\"cookie\" value=\"$cook\" type=\"hidden\">$nn";
 	print	"<input name=\"ffi\" value=\"ok\" type=\"hidden\">$nn";
 	print	"<input name=\"link\" value=\"$link\" type=\"hidden\">$nn";	

@@ -76,7 +76,6 @@ function biscotti($content) {
             $download_link=cut_str($tmp,"href='",'"');
             $tmp = cut_str($upfiles,'File Delete Link','/>');
             $delete_link=cut_str($tmp,'value="','"');
-			# Автор плагина для sendspace.com - Director Of Zoo (ru-board aka  - kamyshew) 2007. Только для Rapidget Pro. Rapidkill вместе с Checkmate идите в жопу.
-// Edited by sert 06.06.2008
+
 // Fixed by kaox 07/05/09
 ?>

@@ -1,15 +1,15 @@
 <?php 
 
 ####### Free Account Info. ###########
-$mandamais_username=""; //  Set you username
-$mandamais_password=""; //  Set your password
+$filefront_username=""; //  Set you username
+$filefront_password=""; //  Set your password
 ##############################
 
 $not_done=true;
 $continue_up=false;
-if ($mandamais_username & $mandamais_password){
-	$_REQUEST['my_login'] = $mandamais_username;
-	$_REQUEST['my_pass'] = $mandamais_password;
+if ($filefront_username & $filefront_password){
+	$_REQUEST['my_login'] = $filefront_username;
+	$_REQUEST['my_pass'] = $filefront_password;
 	$_REQUEST['action'] = "FORM";
 	echo "<b><center>Use Default login/pass.</center></b>\n";
 }
@@ -23,7 +23,7 @@ else{
 <tr><td nowrap>&nbsp;Username*<td>&nbsp;<input type=text name=my_login value='' style="width:160px;" />&nbsp;</tr>
 <tr><td nowrap>&nbsp;Password*<td>&nbsp;<input type=password name=my_pass value='' style="width:160px;" />&nbsp;</tr>
 <tr><td colspan=2 align=center><input type=submit value='Upload' /></tr>
-<tr><td colspan=2 align=center><small>*You can set it as default in <b><?php echo $page_upload["mandamais.com"]; ?></b></small></tr>
+<tr><td colspan=2 align=center><small>*You can set it as default in <b><?php echo $page_upload["filefront.com"]; ?></b></small></tr>
 </table>
 </form>
 
@@ -39,37 +39,35 @@ if ($continue_up)
 <tr><td align=center>
 <div id=info width=100% align=center>Retrive upload ID</div>
 <?			
-            $referrer="http://www.mandamais.com.br/";
             $usr=$_REQUEST['my_login'];
             $pass=$_REQUEST['my_pass'];
-            $Url = parse_url("http://www.mandamais.com.br/validar.asp");  
-			$post['login'] = $usr;
-			$post['senha'] = $pass;
-			$post['imageField2.x'] = rand(1,150);
-            $post['imageField2.y'] = rand(1,150);
+            $referrer="http://hosted.filefront.com/".$usr; 
+            $Url = parse_url("http://signup.filefront.com/");
+			$post['uploadID'] = "";
+			$post['existingUser'] = "1";	
+            $post['redirectTo'] = $referrer;
+			$post['pageID'] = "49";
+			$post['loginUser'] = $usr;
+			$post['loginPass'] = $pass;
+			$post['x'] = rand(1,50);
+            $post['y'] = rand(1,20);
             $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referrer, 0, $post, 0, $_GET["proxy"],$pauth);
 			is_page($page);
+            is_present($page,"signup","Not logged in. Check your login details in filefront.com.php");
 		    preg_match_all('/Set-Cookie: (.*);/U',$page,$temp);
             $cook = $temp[1];
             $cookie = implode(';',$cook);	
-			$Url = parse_url("http://www.mandamais.com.br/discovirtual/");
+			$Url = parse_url("http://uploadhosted.filefront.com/");
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referrer, $cookie, 0, 0, $_GET["proxy"],$pauth);
-			is_page($page);
-            is_notpresent($page, $usr,"Not logged in. Check your login details in ".$page_upload["mandamais.com"] );
+			is_page($page);			
+			$formact=cut_str($page, '<div class="rightColUpload">', '</div>');
+			$url_action=cut_str($formact, 'action="', '"');
+			$fpost['UPLOAD_IDENTIFIER'] = cut_str($page, 'UPLOAD_IDENTIFIER value="', '"');
+			$fpost['FL'] = "k";
+			$fpost['upload'] = "1";
+			$fpost['game'] = "";		
 			
 
-			
-
-            $Url = parse_url($referrer."scripts_upload/upload_file.js");  
-			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referrer, $cookie, 0, 0, $_GET["proxy"],$pauth);
-			is_page($page);
-			$tid=time() % 1000000000;
-			$quer=cut_str($page, 'MyForm.action = "', '"');
-			$url_action = "http://".$Url["host"].$quer.$tid;
-			$fpost['descricao'] = $lname;
-			$fpost['categoria'] = "6";
-			$fpost['tipo_p'] = "1";
-			$fpost['pasta_cliente'] = "raiz";
 			
 	?>
 <script>document.getElementById('info').style.display='none';</script>
@@ -80,24 +78,25 @@ if ($continue_up)
 			<tr>
 				<td align=center>
 <?php		
-					
+			$referrer="http://uploadhosted.filefront.com/";
 			$url = parse_url($url_action);
 			$upagent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1";
-			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""),$referrer, $cookie, $fpost, $lfile, $lname, "arquivo");
+			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""),$referrer, $cookie, $fpost, $lfile, $lname, "upload_formdata[0]");
 
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
 <?php 	
 
-			is_notpresent($upfiles,"processa_upload","Error upload file",0);
-			$Url=parse_url("http://www.mandamais.com.br/scripts_upload/processa_upload.asp");
+			preg_match('/location: *(.*)/i', $upfiles, $redir);
+			$Href = rtrim($redir[1]);
+			$Url = parse_url($Href);
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referrer, $cookie, 0, 0, $_GET["proxy"],$pauth);
-			preg_match('/\/download\/.+/i', $page, $redir);
-			$down=rtrim("http://www.mandamais.com.br".$redir[0]);
-			$Url=parse_url($down);
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referrer, $cookie, 0, 0, $_GET["proxy"],$pauth);			
-			$download_link=$down;
+			is_present($page,"Duplicate file","You attempted to upload a file that already exists in your directory. Please rename the file or delete the existing file.",0);
+			is_notpresent($page,"Upload Successful!","Error upload file",0);
+			preg_match('/http:\/\/files\.filefront\.com\/\w+/i', $page, $down);
+
+			$download_link=$down[0];
 			}
-			// written by kaox 01/06/2009
-	
+			
+			// written by kaox 09/06/2009
 ?>
