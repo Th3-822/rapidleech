@@ -1,8 +1,8 @@
 <?php
 
 ####### Account Info. ###########
-$filefac_login = "kumar.sushant@rocketmail.com"; //Set your filefactory email id (login)
-$filefac_pass = "shivani143"; //Set your filefactory password
+$filefac_login = ""; //Set your filefactory email id (login)
+$filefac_pass = ""; //Set your filefactory password
 ##############################
 
 $not_done=true;
