@@ -41,7 +41,7 @@ if ($continue_up)
 <?			
 			$Url=parse_url("http://www.mediafire.com/");
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"],$pauth);
-			$cookies= GetCookies($page);
+			$cookies=implode("; ", GetCookies($page, true));
 
 			if (empty($_REQUEST['my_login']) || empty($_REQUEST['my_pass']))echo"<br>No enter Login/Password<br>";
 			else{
@@ -52,7 +52,7 @@ if ($continue_up)
 			$post["submit_login"]="Login+to+MediaFire";
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), "http://www.mediafire.com/", $cookies, $post, 0, $_GET["proxy"],$pauth);
 			if(strpos($page,"user=") !== false){
-				$cookies=$cookies."; ".GetCookies($page);
+				$cookies=$cookies."; ".implode("; ", GetCookies($page, true));
 			}else{
 				echo "<br>Login error<br>";
 			}}

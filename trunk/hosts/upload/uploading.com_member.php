@@ -1,5 +1,8 @@
 <?php
-
+//********* Login ************
+$_POST["login"]="";// username
+$_POST["pwd"]="";  // password
+//****************************
 if(!$_POST["login"] || !$_POST["pwd"])
 {
 	$not_done=true;
