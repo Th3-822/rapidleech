@@ -1,8 +1,8 @@
 <?php
 
 ####### Account Info. ###########
-$filefac_login = ""; //Set your filefactory email id (login)
-$filefac_pass = ""; //Set your filefactory password
+$filefac_login = "kumar.sushant@rocketmail.com"; //Set your filefactory email id (login)
+$filefac_pass = "shivani143"; //Set your filefactory password
 ##############################
 
 $not_done=true;
@@ -47,8 +47,8 @@ if ($continue_up)
 			is_page($page);
 			is_notpresent($page, 'HTTP/1.1 302 Found', 'Error logging in - are your logins correct?');
 			$cookie = GetCookies($page);
-			if (!preg_match('%(ff_membership=.+); expires%', $cookie, $lcook)) html_error('Error getting login-cookie');
-            $page = geturl("www.filefactory.com", 80, "/?login=1", 0, $lcook[1], 0, 0, $_GET["proxy"], $pauth);
+			if (!preg_match('%(ff_membership=.+)%', $cookie, $lcook)) html_error('Error getting login-cookie');
+			$page = geturl("www.filefactory.com", 80, "/?login=1", 0, $lcook[1], 0, 0, $_GET["proxy"], $pauth);
 			is_page($page);
 			is_notpresent($page, 'You have been logged in as', 'Error logging in - are your logins correct?');
 ?>
@@ -78,5 +78,5 @@ if ($continue_up)
 			is_notpresent($page, 'Upload Complete', 'Error getting download link - The upload probably failed');
 			$download_link = trim(cut_str($page, '<div class="metadata">', '</div>'));
 	}
-	////szal 15-03-09
+	////szal14-Jun-09
 ?>
