@@ -2,7 +2,7 @@
 function upload() {
 	global $upload_services, $list;
 	if (count ( $_GET ["files"] ) < 1) {
-		echo "Select atleast one file.<br><br>";
+		echo "Select at least one file.<br><br>";
 	} else {
 		$d = opendir ( HOST_DIR . "upload/" );
 		while ( false !== ($modules = readdir ( $d )) ) {
