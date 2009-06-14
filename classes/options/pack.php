@@ -1,5 +1,5 @@
 <?php
-function pack() {
+function rl_pack() {
 	global $list;
 	if (count ( $_GET ["files"] ) < 1) {
 		echo "Select at least one file.<br><br>";
