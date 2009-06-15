@@ -58,8 +58,10 @@ function zip() {
 }
 
 function zip_go() {
-	global $list;
+	global $list, $download_dir;
+	$saveTo = realpath ( $download_dir ) . '/';
 	$_GET ["archive"] = (strlen ( trim ( urldecode ( $_GET ["archive"] ) ) ) > 4 && substr ( trim ( urldecode ( $_GET ["archive"] ) ), - 4 ) == ".zip") ? trim ( urldecode ( $_GET ["archive"] ) ) : "archive.zip";
+	$_GET ["archive"] = $saveTo.$_GET ["archive"];
 	for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 		$files [] = $list [($_GET ["files"] [$i])];
 	}
@@ -85,6 +87,14 @@ function zip_go() {
 		echo "Error: " . $archive->errorInfo ( true ) . "<br><br>";
 	} else {
 		echo "Archive <b>" . $_GET ["archive"] . "</b> successfully created!<br><br>";
+	}
+	// Add zip file into files list
+	$time = filemtime($_GET['archive']);
+	$list[$time] = array('name' => $_GET['archive'],
+		"size" => bytesToKbOrMbOrGb ( filesize ( $_GET['archive'] ) ),
+		"date" => $time);
+	if (! updateListInFile ( $list )) {
+		echo "Couldn't update file list. Problem writing to file!<br><br>";
 	}
 }
 ?>
