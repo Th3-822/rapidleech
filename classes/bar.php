@@ -1,5 +1,5 @@
 <?php
-function drawRating($rating) {
+function drawRating() {
    $width = $_GET['width'];
    $height = $_GET['height'];
    if ($width == 0) {
@@ -24,5 +24,5 @@ function drawRating($rating) {
    imagedestroy($image);
 }
 Header("Content-type: image/png");
-drawRating($rating);
+drawRating();
 ?>

@@ -1,47 +1,46 @@
 <?php
 function unzip() {
-	global $list;
+	global $list, $PHP_SELF;
 	if (count ( $_GET ["files"] ) < 1) {
 		echo "Select at least one file.<br><br>";
 	} else {
-?>
-                          <form method="post"><input type="hidden"
-			name="act" value="unzip_go">
-		<table align="center">
-			<tr>
-				<td>
-				<table>
-<?php
+		echo('<form method="post" action="'.$PHP_SELF.'">');
+		echo('<input type="hidden" name="act" value="unzip_go" />');
+		echo('<table align="center">');
+		echo('<tr>');
+		echo('<td>');
+		echo('<table>');
 		for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 			$file = $list [$_GET ["files"] [$i]];
-?>
-                                    <input type="hidden"
-						name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>" />
-					<tr>
-						<td align="center"><b><?php echo basename ( $file ["name"] ); ?></b></td>
-					</tr>
-					<tr>
-						<td></td>
-					</tr>
-<?php
+			require_once (CLASS_DIR . "unzip.php");
+			if (file_exists($file['name'])) {
+				$zip = new dUnzip2 ( $file['name'] );
+				$flist = $zip->getList();
+				echo('<input type="hidden" name="files[]" value="'.$_GET['files'][$i].'" />');
+				echo('<tr>');
+				echo('<td align="center"><b>'.basename($file['name']).'</b> ('.count($flist).' files and folders)</tr>');
+				echo('</tr>');
+				echo('<tr><td>');
+				echo('<div style="overflow-y:scroll; height:150px; padding-left:5px;">');
+				foreach ($flist as $property) {
+					echo($property['file_name'].'<br />');
+				}
+				echo('</div>');
+				echo('</td></tr>');
+			}
 		}
-?>
-                                  </table>
-				</td>
-				<td><input type="submit" value="Unzip"></td>
-			</tr>
-			<tr>
-				<td></td>
-			</tr>
-		</table>
-		</form>
-<?php
+		echo('</table>');
+		echo('</td>');
+		echo('<td><input type="submit" name="submit" value="Unzip"></td>');
+		echo('</tr>');
+		echo('<tr><td></td></tr>');
+		echo('</table>');
+		echo('</form>');
 	}
 }
 
 function unzip_go() {
 	global $list, $forbidden_filetypes, $download_dir, $check_these_before_unzipping;
-	$unzip_file = FALSE;
 	require_once (CLASS_DIR . "unzip.php");
 	for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 		$file = $list [$_GET ["files"] [$i]];

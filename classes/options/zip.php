@@ -29,11 +29,6 @@ function zip() {
 						use compression<br>
 						</td>
 					</tr>
-					<tr>
-						<td><input type="checkbox" name="remove_path">&nbsp;Do not
-						include directories<br>
-						</td>
-					</tr>
 				</table>
 				<table>
 					<tr>
@@ -67,9 +62,7 @@ function zip_go() {
 	}
 	foreach ( $files as $file ) {
 		$CurrDir = ROOT_DIR;
-		
 		$inCurrDir = stristr ( dirname ( $file ["name"] ), $CurrDir ) ? TRUE : FALSE;
-		
 		if ($inCurrDir) {
 			$add_files [] = substr ( $file ["name"], (strlen ( $CurrDir ) + 1) );
 		}
@@ -77,7 +70,7 @@ function zip_go() {
 	require_once (CLASS_DIR . "pclzip.php");
 	$archive = new PclZip ( $_GET ["archive"] );
 	$no_compression = ($_GET ["no_compression"] == "on") ? PCLZIP_OPT_NO_COMPRESSION : 77777;
-	$remove_path = ($_GET ["remove_path"] == "on") ? PCLZIP_OPT_REMOVE_ALL_PATH : 77777;
+	$remove_path = PCLZIP_OPT_REMOVE_ALL_PATH;
 	if (file_exists ( $_GET ["archive"] )) {
 		$v_list = $archive->add ( $add_files, $no_compression, $remove_path );
 	} else {
