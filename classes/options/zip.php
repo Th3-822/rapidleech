@@ -85,16 +85,19 @@ function zip_go() {
 	}
 	if ($v_list == 0) {
 		echo "Error: " . $archive->errorInfo ( true ) . "<br><br>";
+		return;
 	} else {
 		echo "Archive <b>" . $_GET ["archive"] . "</b> successfully created!<br><br>";
 	}
-	// Add zip file into files list
-	$time = filemtime($_GET['archive']);
-	$list[$time] = array('name' => $_GET['archive'],
-		"size" => bytesToKbOrMbOrGb ( filesize ( $_GET['archive'] ) ),
-		"date" => $time);
-	if (! updateListInFile ( $list )) {
-		echo "Couldn't update file list. Problem writing to file!<br><br>";
+	if (!file_exists ( $_GET ['archive'] ) ) {
+		// Add zip file into files list
+		$time = filemtime($_GET['archive']);
+		$list[$time] = array('name' => $_GET['archive'],
+			"size" => bytesToKbOrMbOrGb ( filesize ( $_GET['archive'] ) ),
+			"date" => $time);
+		if (! updateListInFile ( $list )) {
+			echo "Couldn't update file list. Problem writing to file!<br><br>";
+		}
 	}
 }
 ?>
