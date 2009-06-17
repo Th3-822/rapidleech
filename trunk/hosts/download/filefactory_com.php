@@ -7,14 +7,14 @@ if (!defined('RAPIDLEECH'))
 
 
 //Use PREMIUM?
-if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["filefactory"]["user"] && $premium_acc["filefactory"]["pass"]))
+if (($_REQUEST["premium_acc"] == "on" && $_REQUEST["premium_user"] && $_REQUEST["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["filefactory"]["user"] && $premium_acc["filefactory"]["pass"]))
 {
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"],$pauth);
 	is_page($page);
 	is_present($page, 'File Not Found', 'Error - File was not found!');
 	$post = array();
-	$post['email'] = $_GET["premium_user"] ? trim($_GET["premium_user"]) : $premium_acc["filefactory"]["user"]  ;
-	$post['password'] = $_GET["premium_pass"] ? trim($_GET["premium_pass"]) : $premium_acc["filefactory"]["pass"];
+	$post['email'] = $_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc["filefactory"]["user"]  ;
+	$post['password'] = $_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc["filefactory"]["pass"];
 	$post['redirect'] = $LINK;
 	$page = geturl("www.filefactory.com", 80, "/", 0, 0, $post, 0, $_GET["proxy"], $pauth);
 	is_page($page);
@@ -22,7 +22,8 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 	if (!preg_match('%ocation: (.+)\r\n%', $page, $redir)) html_error('Error getting redirect', 0);
 	$Url = parse_url($redir[1]);
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $lcook[1], 0, 0, $_GET["proxy"],$pauth);
-	if (!preg_match('%ocation: (.+)\r\n%', $page, $redir2)) html_error('Error getting redirect 2', 0);
+	is_page($page);
+	if (!preg_match('%(http://dl\d{3}\.filefactory\.com/dlp/.+)">Download with FileFactory Premium%U', $page, $redir2)) html_error('Error getting redirect 2', 0);
 	$Url = parse_url($redir2[1]);
 	$FileName = basename($Url['path']);
 	insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&cookie=".urlencode($lcook[1])."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".$redir2[1].($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
@@ -98,4 +99,5 @@ else
   
   }
 }
+//szal 18-jun-09
 ?>
