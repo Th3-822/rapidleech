@@ -157,9 +157,9 @@ function setCheckboxes(act)
 	}
 <?php
 	}
-		for ($j=0;$j<$openwin;$j++) {
-			for ($i=0; $i<count($getlinks[$j]); $i++) {
-				echo "\tlinks{$j}[".$i."]='".$getlinks[$j][$i]."';\n";
+		for ($j=0;$j<=$openwin;$j++) {
+			foreach ($getlinks[$j] as $i=>$link) {
+				echo "\tlinks{$j}[".$i."]='".$link."';\n";
 			}
 		}
 ?>
