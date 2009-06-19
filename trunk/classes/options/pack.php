@@ -90,13 +90,6 @@ function pack_go() {
 		echo count ( $v_list ) > 1 ? "s" : "";
 		echo "<br>";
 		for($i = 0; $i < sizeof ( $v_list ); $i ++) {
-			/* для фичи с удалением нужно подредактровать код. не работает пока.
-                               if ($_GET["val_del_ok"] && !$disable_deleting)
-                                {
-                                 if(@unlink($v_list["name"]))
-                                 $v_ads=" and deleted";
-                                }
-                               else  $v_ads=", but not deleted !</b>";*/
 			echo "File " . $v_list [$i] ["filename"] . " was packed <br>";
 		}
 		echo "Packed in archive <b>$arc_name</b><br>";

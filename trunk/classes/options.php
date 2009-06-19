@@ -128,6 +128,11 @@ if (! $disable_action) {
 			require(CLASS_DIR . "options/pack.php");
 			pack_go();
 			break;
+		
+		case "list":
+			require(CLASS_DIR . "options/list.php");
+			rl_list();
+			break;
 	}
 }
 ?>

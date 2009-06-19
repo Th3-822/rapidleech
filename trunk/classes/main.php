@@ -265,6 +265,7 @@ else
 <?php if(!$disable_deleting) echo "<option value=\"rename\">Rename</option>".$nn;; ?>
 <?php if(!$disable_deleting) echo "<option value=\"mrename\">Mass Rename</option>".$nn;; ?>
 <?php if(!$disable_deleting) echo "<option value=\"delete\">Delete</option>".$nn;; ?>
+<option value="list">List Links</option>
 </select>
 <div style="overflow:auto; height:500px; width: 800px;">
 <table cellpadding="3" cellspacing="1" width="100%" class="filelist">
