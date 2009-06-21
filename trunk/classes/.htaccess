@@ -11,3 +11,7 @@ deny from all
 <files js.php>
 allow from all
 </files>
+
+<files bar.php>
+allow from all
+</files>
