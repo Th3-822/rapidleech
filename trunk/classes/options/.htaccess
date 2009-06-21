@@ -4,10 +4,6 @@ order deny,allow
 deny from all
 </files>
 
-<files bar.php>
-allow from all
-</files>
-
 <files ~ "^\.">
 deny from all
 </files>
