@@ -1,4 +1,5 @@
 <?php
+error_reporting(0);
 function drawRating() {
    $width = $_GET['width'];
    $height = $_GET['height'];
