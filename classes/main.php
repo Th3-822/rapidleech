@@ -108,7 +108,10 @@ foreach ($host as $site => $file)
 </tr>
 <tr>
 <td>
-<label><input type="checkbox" name="ytube_mp4">&nbsp;<small>Transload YouTube Video as a MP4 (H264 with AAC audio)</small></label>
+<label><input type="checkbox" name="ytube_mp4" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;"<?php echo isset($_POST['yt_fmt']) ? ' checked' : ''; ?>>&nbsp;<small>Transload YouTube Video as a MP4 (H264 with AAC audio)</small></label>
+<table width="150" border="0" id="ytubeopt" style="display: none;">
+<tr><td>&fmt=</td><td><select align="left" type="text" name="yt_fmt" id="yt_fmt"><option value="18">18 (works in most cases)</option><option value="34">34 (try as a last resort)</option></select></td></tr>
+</table>
 </td>
 </tr>
 <tr>
