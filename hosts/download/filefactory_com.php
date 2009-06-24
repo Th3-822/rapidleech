@@ -27,11 +27,33 @@ if (($_REQUEST["premium_acc"] == "on" && $_REQUEST["premium_user"] && $_REQUEST[
 	$Url = parse_url($redir2[1]);
 	$FileName = basename($Url['path']);
 	insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&cookie=".urlencode($lcook[1])."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".$redir2[1].($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+	//szal 18-jun-09
 }
 else
 //Use FREE instead?
 {
-if ($_GET["step"] == "1")
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], $Referer, 0, 0, 0, $_GET["proxy"], $pauth);
+	is_page($page);
+	preg_match('|id="freeBtnContainer">\n\t\t\t\t\t\t\t<form action="(.*)" method="post">|U', $page, $out);
+	$one = str_replace('/dlf', 'http://www.filefactory.com/dlf', $out[1]);
+	$Url = parse_url($one);
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], $Referer, 0, 0, 0, $_GET["proxy"], $pauth);
+	is_page($page);
+	preg_match('|href="(http.*)">Click here to begin your download</a>|u', $page, $link);
+	$file = $link[1];
+	$Href = $file;
+	$Url = parse_url($Href);
+	$wait = "60";
+	insert_timer($wait, "Preparing Your File");
+	$FileName = !$FileName ? basename($Url["path"]) : $FileName;
+
+	insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : ""));
+
+/*filefactory download plugin by mrbrownee70, created june 22, 2009 */
+}
+
+//older free download below
+/*if ($_GET["step"] == "1")
   {
  $cook = $_POST['cookie'];
   
@@ -96,8 +118,5 @@ else
   print "<h4>Enter <img src=\"$access_image_url\"> here: <input type=\"text\" name=\"captcha\" size=\"4\">&nbsp;&nbsp;<input type=\"submit\" onclick=\"return check()\" value=\"Download File\"></h4>\n";
   print "<script language=\"JavaScript\">".$nn."function check() {".$nn."var imagecode=document.dl.captcha.value;".$nn.'if (imagecode == "") { window.alert("You didn\'t enter the image verification code"); return false; }'.$nn.'else { return true; }'.$nn.'}'.$nn.'</script>'.$nn;
   print "</form>\n</body>\n</html>";
-  
-  }
-}
-//szal 18-jun-09
+  }*/
 ?>

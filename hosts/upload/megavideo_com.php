@@ -49,15 +49,19 @@ if ($continue_up)
 	        $post['nickname'] = $_REQUEST['my_login'];
             $post['password'] = $_REQUEST['my_pass'];
 			$post['action'] = "login";
+			$post['cnext'] = 'upload';
+			$post['snext'] = '';
+			$post['touser'] = '';
+			$post['user'] = '';
 			
-			$login_url = 'http://www.megavideo.com/?s=signup';
+			$login_url = 'http://www.megavideo.com/?s=signup&cnext=upload&snext=';
 			$Url = parse_url($login_url);		
             $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, $post, 0, $_GET["proxy"],$pauth);
 			is_page($page);
 			
-			$cookies = GetCookies($page);
-			preg_match('/user=(.*?);/i', $cookies, $cook);
-			$cookie = 'user='.$cook[1];
+			$cookie = GetCookies($page);
+			//preg_match('/user=(.*?);/i', $cookies, $cook);
+			//$cookie = 'user='.$cook[1];
 ?>
 <script>document.getElementById('login').style.display='none';</script>
 <div id=info width=100% align=center>Retrive upload ID</div>
@@ -70,10 +74,9 @@ if ($continue_up)
 			$ipost['tags'] = $_REQUEST['tags'];
 			$ipost['channel'] = $_REQUEST['channel'];
 			$Url = parse_url($url_id);
-			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, $ipost, 0, $_GET["proxy"],$pauth);
+			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $login_url, $cookie, $ipost, 0, $_GET["proxy"],$pauth);
 			is_page($page);
-			preg_match('/action="(.*?)"\s*id="uploadfrm"/i', $page, $upurl);
-			
+			preg_match('/action="(.*?)"\s*id="uploadfrm"/i', $page, $upurl);			
 			$url_action = $upurl[1];
 			$fpost['language'] = '1';
 			$fpost['title'] = $_REQUEST['title'];
