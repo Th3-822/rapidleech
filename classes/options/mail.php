@@ -1,5 +1,5 @@
 <?php
-function mail() {
+function rl_mail() {
 	global $disable_deleting, $list;
 	if (count ( $_GET ["files"] ) < 1) {
 			echo "Select at least one file.<br><br>";
