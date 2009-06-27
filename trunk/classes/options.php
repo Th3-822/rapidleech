@@ -22,7 +22,7 @@ if (! $disable_action) {
 		
 		case "mail" :
 			require(CLASS_DIR . "options/mail.php");
-			mail();
+			rl_mail();
 			break;
 		
 		case "mail_go" :
