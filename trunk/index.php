@@ -175,13 +175,12 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 	
 	$Url = parse_url ( $LINK );
 	$FileName = ! $FileName ? basename ( $Url ["path"] ) : $FileName;
-	/* $mydomain = $_SERVER['SERVER_NAME'];
-		$myip = $_SERVER['SERVER_ADDR'];
-		if($bw_antileech && preg_match("/($mydomain|$myip)/i", $Url["host"]))
-			{
-				html_error("You are not allowed to leech from <font color=black>".$mydomain." (".$myip.")</font>");
-			} */
-	
+	$mydomain = $_SERVER['SERVER_NAME'];
+	$myip = $_SERVER['SERVER_ADDR'];
+	if(!$bw_save && preg_match("/($mydomain|$myip)/i", $Url["host"])) {
+		html_error("You are not allowed to leech from <font color=black>".$mydomain." (".$myip.")</font>");
+	}
+
 	$auth = ($Url ["user"] && $Url ["pass"]) ? "&auth=" . base64_encode ( $Url ["user"] . ":" . $Url ["pass"] ) : "";
 	
 	if (isset ( $_GET ['cookieuse'] )) {
