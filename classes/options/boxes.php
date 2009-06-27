@@ -70,7 +70,7 @@ function boxes() {
 }
 
 function boxes_go() {
-	global $list, $disable_deleting;
+	global $list, $disable_deleting, $emails, $fromaddr;
 	require_once (CLASS_DIR . "mail.php");
 	$_GET ["partSize"] = ((isset ( $_GET ["partSize"] ) & $_GET ["split"] == "on") ? $_GET ["partSize"] * 1024 * 1024 : FALSE);
 	$v_mails = explode ( "\n", $emails );
