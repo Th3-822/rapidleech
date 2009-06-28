@@ -185,7 +185,10 @@ $content_tl.$nn.$postdata;
 
 //write_file(CONFIG_DIR."request.txt", $request);
 
-$fp = @fsockopen($proxyHost ? $scheme.$proxyHost : $scheme.$host, $proxyPort ? $proxyPort : $port, $errno, $errstr, 15);
+$errno = 0; $errstr = "";
+$host = ($proxyHost ? $scheme.$proxyHost : $scheme.$host).':'.($proxyPort ? $proxyPort : $port);
+$fp = @stream_socket_client($host,$errno,$errstr);
+//$fp = @fsockopen($proxyHost ? $scheme.$proxyHost : $scheme.$host, $proxyPort ? $proxyPort : $port, $errno, $errstr, 15);
 
 if (!$fp)
 	{
