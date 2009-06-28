@@ -1,6 +1,52 @@
 Rapidleech PlugMod (by eqbal)
 /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 
+Rev. 41 - 28 June 2009
+[PLUGIN] Added some newly made plugins (Baking, kaox)
+[SECURITY] Replaced megaupload download plugin for password protected files, to prevent premium cookie leak (thanhquanky)
+[FIX] Not sure if it will increase speed, but definately updated http.php for socket connections
+[FIX] Remove the var_dump in the imageshack.us plugin.
+[SECURITY] Prevented same host leeching with bw_save = false
+[BUG] Fixed forward slash shown in link list.
+[BUG] Fixed list links showing links that are url encoded.
+[FIX] Possible fix for mass submit problem with email
+[FIX] Fixed a problem with the mail function.
+[PLUGIN] Added Supernova member upload plugin (kaox)
+[FIX] Merged filefactory free fix (mrbrownee) with premium options pluin
+[FIX] Fixed Megavideo upload plugin (minor GetCookies problem)
+[FEATURE] Choose between Youtube formats (&fmt=18 or 34, more to follow)
+[FIX] Updated youtube_com.php download plugin for new selector, and set &fmt=18 back to the default HQ method; also some minor edits to main.php needed
+[FIX] Updated hotfile_com.php (kaox), turboupload.com for member upload, and renamed turboupload free to turboupload.com_free.php
+[PLUGIN] Added uploadbox.com member upload plugin
+[REMOVED] Deleted died hosts plugins.
+[FIX] Edited to megavideo_com.php to meet plugin specifications.
+[FIX] Fixed a problem where the bar for CPU load and hard drive space are not shown.
+[FIX] Removed improper entry from options/.htaccess.
+[FIX #0000041] Fixed server info not display in page in classes/.htaccess thanks to capitanonemo
+[FEATURE] Added link list feature.
+[FIX] Fixed filefactory_com.php premium download plugin. Will now also work with setting a premium (FileFactory) account under Settings Tab.
+[FIX] Fixed autoupload opened window is less than entered.
+[FEATURE] Now able to preview files and folders inside zip files before unzipping them
+[FEATURE] Removed the add directory option when zipping files
+[BUG] Fixed adding non-existent zip file when creation of zip file failed
+[BUG] Fixed adding extra entry when zip file already present.
+[FIX #0000037] Fixed zip features make zip file in "rapidleech" directory not in "files" directory
+[PLUGIN] Added uploaded.to member upload plugin
+[FIX] Fixed filefactory.com_member upload plugin
+[PLUGIN] Added in several of kaox's plugins and replaced some older versions with new
+[FIX] Fixed unable to pack files.
+[FIX] Fixed a js.php problem where it wasn't allowed because of missing directive in classes/.htaccess
+[FIX #0000014] Reimplemented fix when autoupload not sending correct file name to upload.php on files with special characters in name Thanks to DanielX_x
+[FIX] Fixed a typo error in autoupload error message.
+[FIX] Fixed youtube_com.php download plugin for getting HQ downloads (untested for all original file formats)
+[PLUGIN] Added usershare.net member upload plugin (kaox)
+[SECURITY] Added .htaccess files to each directory (also added index.html files for extra security), and added comment about using checker.php to root .htaccess
+[FIX] Fixed existing index.html files' paths to RL logo
+[FIX #0000033] Fixed file size not displayed after merging a file without crc Thanks to DanielX_x
+[FIX] Fixed unable to use premium account when auto download in server-side.
+[FIX] Fixed unable to split files.
+
+
 Rev. 40 - 06/12/2009
 [FEATURE] Added server side auto download capability.
 [CHANGE] Removed the <form> tag when files aren't present and made some html corrections thanks to DanielX_x
@@ -8,7 +54,6 @@ Rev. 40 - 06/12/2009
 [FIX] Fixed most of the plugin so that it will work with the new auto transload system.
 [CHANGE] The way depositfiles and easyshare premium plugin created was quite incorrect, it should be together with the free user plugin and be able to accept premium details from $_POST and in config.php
 [FIX] Added a missing configuration parameter
-
 [FIX] Fixed rapidshare plugin problem when auto transload
 [FIX] Fixed unable to use premium account in auto transload.
 [FIX] Fixed netload premium download plugin
@@ -16,7 +61,6 @@ Rev. 40 - 06/12/2009
 [CHANGE] Moved download plugin files into separate download/ folder in hosts/ directory
 [FEATURE] Updated to latest auto upload script.
 [SECURITY] Patched up a hole which was reported by BKiS long ago and should have been fixed but wasn't include in the previous release.
-
 
 Rev. 39b - 06/10/2009
 [CHANGE] Edited most $Array[String] to $Array["String"] which should improve speed a little
