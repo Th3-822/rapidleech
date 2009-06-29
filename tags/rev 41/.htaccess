@@ -1,0 +1,51 @@
+order deny,allow
+
+<files ~ "\.(php|php.*|sphp|php3|php4|php5|phtml|cgi|pl|shtml|dhtml|html|htm)$">
+deny from all
+</files>
+
+<files index.php>
+allow from all
+</files>
+
+#Uncomment the 3 lines below, ONLY when you want to run the checker.php!
+
+#<files checker.php>
+#allow from all
+#</files>
+
+<files js.php>
+allow from all
+</files>
+
+<files notes.php>
+allow from all
+</files>
+
+<files audl.php>
+allow from all
+</files>
+
+<files bar.php>
+allow from all
+</files>
+
+<files upload.php>
+allow from all
+</files>
+
+<files ~ "\.upload.html$">
+allow from all
+</files>
+
+<files auul.php>
+allow from all
+</files>
+
+<files ajax.php>
+allow from all
+</files>
+
+<files ~ "^\.">
+deny from all
+</files>

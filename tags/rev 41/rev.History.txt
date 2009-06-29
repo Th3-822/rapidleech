@@ -1,0 +1,315 @@
+Rapidleech PlugMod (by eqbal)
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
+
+Rev. 41 - 28 June 2009
+[PLUGIN] Added some newly made plugins (Baking, kaox)
+[SECURITY] Replaced megaupload download plugin for password protected files, to prevent premium cookie leak (thanhquanky)
+[FIX] Not sure if it will increase speed, but definately updated http.php for socket connections
+[FIX] Remove the var_dump in the imageshack.us plugin.
+[SECURITY] Prevented same host leeching with bw_save = false
+[BUG] Fixed forward slash shown in link list.
+[BUG] Fixed list links showing links that are url encoded.
+[FIX] Possible fix for mass submit problem with email
+[FIX] Fixed a problem with the mail function.
+[PLUGIN] Added Supernova member upload plugin (kaox)
+[FIX] Merged filefactory free fix (mrbrownee) with premium options pluin
+[FIX] Fixed Megavideo upload plugin (minor GetCookies problem)
+[FEATURE] Choose between Youtube formats (&fmt=18 or 34, more to follow)
+[FIX] Updated youtube_com.php download plugin for new selector, and set &fmt=18 back to the default HQ method; also some minor edits to main.php needed
+[FIX] Updated hotfile_com.php (kaox), turboupload.com for member upload, and renamed turboupload free to turboupload.com_free.php
+[PLUGIN] Added uploadbox.com member upload plugin
+[REMOVED] Deleted died hosts plugins.
+[FIX] Edited to megavideo_com.php to meet plugin specifications.
+[FIX] Fixed a problem where the bar for CPU load and hard drive space are not shown.
+[FIX] Removed improper entry from options/.htaccess.
+[FIX #0000041] Fixed server info not display in page in classes/.htaccess thanks to capitanonemo
+[FEATURE] Added link list feature.
+[FIX] Fixed filefactory_com.php premium download plugin. Will now also work with setting a premium (FileFactory) account under Settings Tab.
+[FIX] Fixed autoupload opened window is less than entered.
+[FEATURE] Now able to preview files and folders inside zip files before unzipping them
+[FEATURE] Removed the add directory option when zipping files
+[BUG] Fixed adding non-existent zip file when creation of zip file failed
+[BUG] Fixed adding extra entry when zip file already present.
+[FIX #0000037] Fixed zip features make zip file in "rapidleech" directory not in "files" directory
+[PLUGIN] Added uploaded.to member upload plugin
+[FIX] Fixed filefactory.com_member upload plugin
+[PLUGIN] Added in several of kaox's plugins and replaced some older versions with new
+[FIX] Fixed unable to pack files.
+[FIX] Fixed a js.php problem where it wasn't allowed because of missing directive in classes/.htaccess
+[FIX #0000014] Reimplemented fix when autoupload not sending correct file name to upload.php on files with special characters in name Thanks to DanielX_x
+[FIX] Fixed a typo error in autoupload error message.
+[FIX] Fixed youtube_com.php download plugin for getting HQ downloads (untested for all original file formats)
+[PLUGIN] Added usershare.net member upload plugin (kaox)
+[SECURITY] Added .htaccess files to each directory (also added index.html files for extra security), and added comment about using checker.php to root .htaccess
+[FIX] Fixed existing index.html files' paths to RL logo
+[FIX #0000033] Fixed file size not displayed after merging a file without crc Thanks to DanielX_x
+[FIX] Fixed unable to use premium account when auto download in server-side.
+[FIX] Fixed unable to split files.
+
+
+Rev. 40 - 06/12/2009
+[FEATURE] Added server side auto download capability.
+[CHANGE] Removed the <form> tag when files aren't present and made some html corrections thanks to DanielX_x
+[FIX #0000031] Fixed bytesToKbOrMbOrGb gives warning when filesize is 0 (Reported by DanielX_x)
+[FIX] Fixed most of the plugin so that it will work with the new auto transload system.
+[CHANGE] The way depositfiles and easyshare premium plugin created was quite incorrect, it should be together with the free user plugin and be able to accept premium details from $_POST and in config.php
+[FIX] Added a missing configuration parameter
+[FIX] Fixed rapidshare plugin problem when auto transload
+[FIX] Fixed unable to use premium account in auto transload.
+[FIX] Fixed netload premium download plugin
+[BUG] Fixed a bug which was fixed previously actually but just replaced by the new version of auto upload.
+[CHANGE] Moved download plugin files into separate download/ folder in hosts/ directory
+[FEATURE] Updated to latest auto upload script.
+[SECURITY] Patched up a hole which was reported by BKiS long ago and should have been fixed but wasn't include in the previous release.
+
+Rev. 39b - 06/10/2009
+[CHANGE] Edited most $Array[String] to $Array["String"] which should improve speed a little
+[CHANGE] Separated options' actions to make it easier to manage.
+[FIX] Fixed 'call-time pass-by-reference has been deprecated' warnings.
+[CHANGE] Removed gigaup.fr upload plugin on request
+
+Rev. 39 - 06/08/2009
+[FIX] Added more information on error when page is not found or forbidden.
+[CHANGE] Editted javascript so that the download progress will be displayed in front on titlebar so that you can see it even if you open a lot of tabs.
+[FIX] Fixed the split/merge option. Thanks to DanielX_x!
+[CHANGE] Rewrote get header function
+[CHANGE] Rewrote formpostdata function
+[CHANGE] GetCookies function will only get cookie name and its value
+[CHANGE] Rewrote bytesToKbOrMbOrGb function so that it can actually format to Yotabytes, and it's shorter too
+[FEATURE] Will check configs/files.lst and download directory chmod now
+[CHANGE] Made some documentation in http.php
+[SECURITY] Fixed a security exploit with merge/split - thanks to DanielX_x
+[FEATURE] Implemented doum's auto download
+[FIX] Fixed auto download not starting due to javascript problem
+[FIX #0000027] Fixed a javascript problem which cause the clearsettings cookie not being set
+[FIX #0000028] fixed bug in .htaccess that allowed running maliciously named php files
+[CHANGE] edited hosts/rapidshare_com.php to allow usage of the premium details which can be set via the settings tab
+[CHANGE] Removed .JD files which existed for unknown reasons
+[BUG] Upload is now working ok and most of the <? short tags have been replaced with proper <?php tags
+[FIX] Fixed netload premium plugin.
++lots of latest plugins integrated
++old theme returned, as black background is too dark, some minor css changes needed
+
+
+Rev. 38 - 05/09/2009
++lots of plugins updated, including premium features
++new GetCookies() function (should be faster)
++AJAX Link Checker and Storage infos
++server and local times synchronised, fixed formatting
++various http.php download function improvements
++index.php redirects updated for case insensitive location: redirects
++fixed a js/progressbar problem when uploading a file containing an apostrophe (') [see http://bugs.rapidleech.com/view.php?id=13]
++auul.php updated for ' in filenames (use base64 instead)
++some minor .htaccess updates
++some minor css updates
+
+Rev. 37 - (buggy test update)
+
+Rev.36 - 12/8/2008
++Upload-Plugin > Rapidshare.com(Premium), Netload.in, Megaupload.com, Uploadstube.de, Shareator.com, Flyupload.com, Load.to
++Added > Imageshack-torrent account to Auto-Download.
++Fixed > Letitbit.net
+
+Rev. 35 - 11/12/2008
++Download-Plugin > Uploaded.to(premium), vBulletin attachment (Set un/pass in config.php or Settings > Use Premium Account)
++Upload-Plugin > 4shared.com, Fileflyer.com, MyBloop.com, Ziddu.com
++Fixed > ADrive.com
++Updated > index.php, main.php, config.php
++RapidgetPro Upload-plugin > mediafire.com(fixed), sharedzilla.com, uploadground.com, dl4.ru, asapload.com, turboupload.com, storeandserve.com, fileshare.in.ua, old.nahraj.cz, filex.kz
+
+Rev. 34 - 11/5/2008
++Upload-Plugin > Adrive.com(needs cURL), 2shared.com
+
+Rev. 33 - 10/30/2008
++Upload-Plugin > MegaVideo.com
++Download-Plugin > Megashares.com Premium-plugin (by doum-ti-di-li-doom)
++Some php4 compatibility fixes. (thanx to doum-ti-di-li-doom)
+
+Rev. 32 - 10/28/2008
++Config.php > Auto-Rename (prefix/suffix)
++Updated > http.php, ftp.php, Rapidshare-Plugin
++Some minor fixes.
+
+Rev. 31 - 10/21/2008
++Download-Plugin > www.share-online.biz (only premium)
++Config.php > Auto-Delete(by doum-ti-di-li-doom)
+
+Rev. 30
++Upload-Plugin > Depositfiles.com (premium & free account)
++Download-Plugin > FileSend.net
++Fixed > netload.in(premium)
++Some minor fixes.
+---by doum-ti-di-li-doom:
++Download-Plugin > Gigasize.com(Premium)
++Fixed > 4shared.com
+
+Rev. 29 - 10/1/2008
++Upload-Plugin > www.filesend.net(Premium).
++Download Plugin(by doum-ti-di-li-doom) > uploads.bizhat.com
++fixed(by doum-ti-di-li-doom) > ziddu.com, ADrive.com.
+
+Rev. 28 - 9/6/2008
++Upload-Plugin > Gigasize.com(Premium and Free Account).
++Download-Plugin (by doum-ti-di-li-doom) > Sharebase.to, Megashare.com[Free&Premium], Sharedzilla.com, Depositfiles.com, Ziddu.com,  Uploaded.to .
++http.php fixed.
+---Update 1:
+	+Gigasize.com upload-plugin fixed.
+---Update 2:
+	+Updated > http.php/other.php/upload.php
+---Update 3:
+	+Letitbit.net fixed. (by doum-ti-di-li-doom)
+	+Rapidshare.com updated.
+	+LinkChecker fixed.
+---Update 4:
+	+ Security update.
+
+Rev. 27 - 8/25/2008
++UploadLinks format changed from plain-text to html.
++$download_dir_is_changeable fixed. (default: false)
+---Update 1:
+	+Some minor fixes.
+---Update 2:
+	+Some other fixes.
+
+Rev. 26 - 8/22/2008
++Upload-Section added.
++Upload-Plugin > yousendit.com, badongo.com(free-account)
++Config.php > Disable All Actions.
++Some other fixes.
+---Update 1:
+	+PHPRAPIDGET Upload-Plugins Added.
+---Update 2:
+	+Mediafire.com fixed.
+
+Rev. 25 - 8/18/2008
++Mediafire.com added.
++Sharebase.de added.
++Youtube.com MP4 fixed.
++ADrive.com fixed.
+
+Rev. 24 - 8/17/2008
++Netload.in premium added.(netload_in.php updated)
++config.php updated. ($premium_acc["netload"])
+
+Rev. 23 - 8/9/2008
++Filego.net added.
++Zippyshare.com added.
++Youtube.com fixed.
++Some other fixes.
+
+Rev. 22 - 7/29/2008
++Link Checker added. (coded by dman biatches)
++Megaupload.com premium fixed.
++Sendspace.com fixed.
+--Update 1
+	-main.php fixed.
+
+Rev. 21 - 7/10/2008
++Security update:
+	_Config.php -> check forbidden-filetypes before unzipping.
++Adrive.com updated.
+
+Rev. 20 - 7/3/2008
++Fixed:
+    _Rapidshare.com
+	_Filefactory.com
+	_Netload.in
+
+Rev. 19 - 6/27/2008
++Rapidshare.com updated.
++http.php updated.
++Basic Authentication for audl.php.
++Big-File Split Problem Fixed. (by Kingstone)
+
+
+Rev. 18 - 6/16/2008
++MD5 hash added.
++config.php > Bandwidth saving.
++Rapidshare.com updated.
+
+Rev. 17 - 6/9/2008
++2shared.com added.
++savefile.com added.
++4shared.com fixed.
++index.php fixed and now you can use any port in the Direct-URL. (like this: http://220.239.128.62:443/SONGS/SINHALA/ABEY%20-%20NIRANJALA/009%20-%20Diyapita%20Anda.mp3)
++config.php > Auto-Download Premium Accounts.
+
+Rev. 16 - 6/4/2008
++Rapidshare.com fixed.
+
+--Update 5
++mirror-server-list fixed.
+--Update 4
++Rapidshare Download-button fixed.
+--Update 3
++Megaupload.com premium updated. (now support both direct and indirect mode)
++Some minor bugs fixed.
+--Update 2
++Waiting-time fixed.
+--Update 1
++RS Happy Hour fixed.
+
+Rev. 15 - 6/2/2008
++Imageshack.us torrent plugin updated. (Use only final-direct-download-link, NOT http://img~.imageshack.us/tor/browse/?id=~)
++4shared.com updated.
++List style changed.
++Unzip files - beta.(zip archive will be extracted to your DOWNLOAD directory - '$download_dir' > default: 'files/')
+
+Rev. 14 - 6/1/2008
++PluginOptions > Megaupload.com Cookie Value (like: b658b369856766f621ca292fac113a5c, that contains un&pass of premium account and can be shared with others, because it's an encrypted value).
++Megaupload.com plugin updated.
++You can set Imageshack-account and Megaupload-cookie in config.php.
++filefactory.com fixed.
++MassRename.(batch file extension rename)
++Server Info. (space, cpu-load, time - you can disable it, see config.php)
+
+Rev. 13 - 5/30/2008
++PluginOptions > Disable All Plugins.
+
+Rev. 12 - 5/30/2008
++Imageshack torrent plugin added.
+
+Rev. 11 - 5/27/2008
++www.files.to added.
++www.fileflyer.com added.
++easy-share.com updated.
+
+Rev. 10 - 5/23/2008
++Security update.
+
+Rev. 9 - 5/21/2008
++Youtube.com updated.
++Options.php fixed.
++netload.in fixed.
+
+Rev. 8 - 5/19/2008
++easy-share.com added.
++netload.in added.
+
+Rev. 7 - 5/18/2008
++Megashares plugin updated.
++disable_deleting option fixed.
++Error style changed.
++RapidgetPro Auto-Download added.
+
+Rev. 6 - 5/14/2008
++Megashares.com added.
++cURL module is not needed anymore for Rapidshare.com plugin.
++New option: disable file deletion. (config.php)
+
+Rev. 5 - 5/9/2008
++Speedyshare.com fixed.
++array_walk error fixed.
+
+Rev. 4 - 5/9/2008
++Youtube fixed.
++PluginOptions > youtube HQ video.
+
+Rev. 3 - 5/8/2008
++RSCaptcha-image directory changed.
+
+Rev. 2 :
++Logo fixed.
+
+Rev. 1 :
++www.gigasize.com added.
