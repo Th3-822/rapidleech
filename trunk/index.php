@@ -164,7 +164,17 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 					print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1251\">$nn";
 					print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\"></center><br><br>$nn";
 					require_once (CLASS_DIR . "http.php");
+					require_once (HOST_DIR . "DownloadClass.php");
 					require_once (HOST_DIR . 'download/' . $file);
+					$class = substr($file,0,-4);
+					$firstchar = substr($file,0,1);
+					if ($firstchar > 0) {
+						$class = "d".$class;
+					}
+					if (class_exists($class)) {
+						$hostClass = new $class();
+						$hostClass->Download($LINK);
+					}
 					exit ();
 				}
 			}
