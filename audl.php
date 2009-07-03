@@ -121,7 +121,17 @@ function resetProgress()
 				echo "<div id=\"progress".$i."\" style=\"display:block;\">".$nn;
 				foreach ($host as $site => $file) {
 					if (preg_match("/^(.+\.)?".$site."$/i", $Url["host"])) {
-						require(HOST_DIR.'download/'.$file);
+						require_once (HOST_DIR . "DownloadClass.php");
+						require_once (HOST_DIR . 'download/' . $file);
+						$class = substr($file,0,-4);
+						$firstchar = substr($file,0,1);
+						if ($firstchar > 0) {
+							$class = "d".$class;
+						}
+						if (class_exists($class)) {
+							$hostClass = new $class();
+							$hostClass->Download($LINK);
+						}
 						$isHost = true;
 					}
 				}
