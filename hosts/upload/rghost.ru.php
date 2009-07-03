@@ -1,99 +1,96 @@
 <?php
-error_reporting(0);
-# АВТОР: TRiTON4ik.
-# Плагин сделан по просьбе: Pensal.
-# UPLOAD PLUGIN ONLY FOR PHP RAPID GET.
-if ($_REQUEST['action'] == "delete"){
-	$cookies=$_REQUEST['cookies'];$action=$_REQUEST['filepage'];$token=$_REQUEST['authenticity_token'];
 
-	$action=parse_url($action);$referer='http://rghost.ru/';$resulturl=parse_url($referer);
+//Input your <site> username and password
+$site_login = '';
+$site_pass = '';
 
-	$post["_method"]='delete';$post["authenticity_token"]=$token;
 
-	$dpage = geturl($action["host"],defport($action), $action["path"].($action["query"] ? "?".$action["query"] : ""),$referer, $cookies, $post, 0, "");
-	is_page($dpage);
-	$cookies = GetCookies($dpage);unset($post);
 
-	$result = geturl($resulturl["host"],defport($resulturl), $resulturl["path"].($resulturl["query"] ? "?".$resulturl["query"] : ""),$_REQUEST['filepage'], $cookies, $post, 0, "");
-	is_present($result,"Р¤Р°Р№Р» СѓРґР°Р»РµРЅ","File was be deleted.");
-	is_notpresent($result,"Р¤Р°Р№Р» СѓРґР°Р»РµРЅ","The file was not removed.");
-exit;
-	}
+/////////////////////////////////////////////////
+$not_done=true;
+$continue_up=false;
+if ($site_login & $site_pass)
+{
+$_REQUEST['my_login'] = $site_login;
+$_REQUEST['my_pass'] = $site_pass;
+$_REQUEST['action'] = "FORM";
+echo "<b><center>Use Default login/pass.</center></b>\n";
+}
+if ($_REQUEST['action'] == "FORM")
+{
+$continue_up=true;
+}
+else
+{
 ?>
-<table width=600 align=center>
-<tr><td align=center>
-<?php
-$continue_up=false;if ($_REQUEST['action'] == "OK"){$continue_up=true;}
-else{	?><form method=post>
-<div>Не используйте LetiT-Bit. Вот Вам <a href="http://rghost.ru/">альтернатива</a>.</div>
-<input type=hidden value=uploaded value='<?php $_REQUEST['uploaded']?>'>
-<input type=hidden name=filename value='<?php echo base64_encode($_REQUEST['filename']); ?>'>
-TAGS:<input name=tags value='' type=input style="width:160px;"><br>
-COMMENTS:<textarea name=comments rows="3"style="width:160px;"></textarea><br>
-DELETE PASSWORD:<input name=dpass value='' type=input style="width:160px;"><br>
-DOWNLOAD PASSWORD:<input name=pass value='' type=input style="width:160px;" disabled><br>
-<input type=hidden name=action value='OK'><br>
-<input type=submit value='Upload'><br>
+<table border=0 style="width:350px;" cellspacing=0 align=center>
+<form method=post>
+<input type=hidden name=action value='FORM' />
+<tr><td nowrap>&nbsp;Username*<td>&nbsp;<input type=text name=my_login value='' style="width:160px;" />&nbsp;</tr>
+<tr><td nowrap>&nbsp;Password*<td>&nbsp;<input type=password name=my_pass value='' style="width:160px;" />&nbsp;</tr>
+<tr><td colspan=2 align=center><input type=submit value='Upload'></tr>
 </table>
 </form>
-	<?php
-	exit;
-	}
-if($continue_up==true){
-					/* Config */
-					$tags=$_REQUEST['tags']; $comments=$_REQUEST['comments']; $dpass=$_REQUEST['dpass']; $pass=$_REQUEST['pass'];
-						//if (!$tegs) html_error("No tegs!<br>");
-						if ($pass) echo "Password used for download!<br>";
-					//Готовим параметры для загрузки файла.
-					$uploadurl=parse_url('http://rghost.ru/files');$referer='http://rghost.ru/';$paramurl=parse_url($referer);
+<?php
+}
 
-					$page = geturl($paramurl["host"],defport($paramurl), $paramurl["path"].($paramurl["query"] ? "?".$paramurl["query"] : ""),$referer, 0, 0, 0, "");
-					is_page($page);
+if ($continue_up)
+{
+$not_done = false;
 
-					$cookies = GetCookies($page);
-					$post["authenticity_token"]=$authenticity_token=cut_str($page,'<input name="authenticity_token" type="hidden" value="','" />');
-					$post["commit"]='Отправить';
+?>
+<table width=600 align=center>
+</td></tr>
+<tr><td align=center>
+<div id=login width=100% align=center>Login to Site</div>
+<?php
+if ( !isset($_REQUEST['my_login']) || !isset($_REQUEST['my_pass']) ) html_error('No user and pass given', 0);
 
-					//Делаем загрузку на сервер.
-					$upfiles=upfile($uploadurl["host"],$uploadurl["port"] ? $uploadurl["port"] : 80, $uploadurl["path"].($uploadurl["query"] ? "?".$uploadurl["query"] : "") ,$referer, $cookies, $post, $lfile, $lname, "file");
+$Url = parse_url('http://rghost.ru/');
+$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"], $pauth);
+is_page($page);
+$cookies = GetCookies($page);
+preg_match('%name="authenticity_token" type="hidden" value="(.+)" />%U', $page, $auth_token);
+$authenticity_token = $auth_token[1];
+$post = array();
+$post['email'] = urlencode(trim($_REQUEST['my_login']));
+$post['password'] = trim($_REQUEST['my_pass']);
+$post['authenticity_token'] = $authenticity_token;
+$post['remember_me'] = '0';
+$post['return_to'] = urlencode('http://rghost.ru/');
+$post['commit'] = 'Sign+in';
+$Url = parse_url('http://rghost.ru/profile/login');
+$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookies, $post, 0, $_GET["proxy"], $pauth);
+is_page($page);
+$cookies = GetCookies($page);
+$Url = parse_url('http://rghost.ru/');
+$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookies, 0, 0, $_GET["proxy"], $pauth);
+is_page($page);
+if (!preg_match('%var seed=\'(\d+)\';%U', $page, $pid)) html_error('Progress-ID not found');
+?>
 
-					//Получаем куки.
-					$cookies = GetCookies($upfiles);
-					//Смотрим номер файла.
-					$filepage=cut_str($upfiles,'Location: ',"\r\n");
-					//Подтверждаем загрузку.
-					$furl=parse_url($filepage);
-					unset($post);
-					$post["_method"]='put';
-					$post["authenticity_token"]=$authenticity_token;
-					$post["fileitem[tags]"]="quick_search,".$tags;
-					$post["fileitem[description]"]=$comments;
-					$post["fileitem[removal_code]"]=$dpass;
-					$post["fileitem[password]"]=$pass;
-					$post["commit"]='Обновить';
+<!-- now get rid of the login div -->
+<script>document.getElementById('login').style.display='none';</script>
+<div id=info width=100% align=center>Retrive upload ID</div>
+<?php
 
-					$fpage = geturl($furl["host"],defport($furl), $furl["path"].($furl["query"] ? "?".$furl["query"] : ""),$referer, $cookies, $post, 0, "");
-					is_page($fpage);
+$uploadpage = 'http://phonon.rghost.ru/files?X-Progress-Id=' . $pid[1];
+$url = parse_url($uploadpage);
+?>
+<script>document.getElementById('info').style.display='none';</script>
+<?php
 
-					$cookies = GetCookies($fpage);
-					unset($post);
+$post = array();
+$post['authenticity_token'] = $authenticity_token;
+$post['commit'] = 'Upload';
 
-					$lpage = geturl($furl["host"],defport($furl), $furl["path"].($furl["query"] ? "?".$furl["query"] : ""),0, $cookies, 0, 0, "");
-					is_page($lpage);
-
-					$cookies = GetCookies($lpage);
-					$downloadlink=cut_str($lpage,'<div id="file_edit">','</div>');
-					$downloadlink=cut_str($downloadlink,'<a href="','"');
-                    echo "<div>";
-					$download_link=$filepage." and ".$referer.$downloadlink;
-                    echo "<br><form method=post>";
-					echo "<input name='filepage' type='hidden' value=".$filepage." />";
-					echo "<input name='cookies' type='text' value=".$cookies[0]." />";
-					echo "<input name='authenticity_token' type='hidden' value=".$authenticity_token." />";
-					echo "<input type='hidden' value='uploaded' value=".$_REQUEST['uploaded']." />";
-					echo "<input type='hidden' name='filename' value=".base64_encode($_REQUEST['filename'])." />";
-					echo "<input type='hidden' name='action' value='delete'>";
-					echo "<input type='submit' value='Delete on rghost.ru' />";
-					echo "</form></div>";
-					}
-?><script>document.getElementById('progressblock').style.display='none';</script></td></tr></table>
+$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), 'http://rghost.ru/', $cookies, $post, $lfile, $lname, "file");
+?>
+<script>document.getElementById('progressblock').style.display='none';</script>
+<?php
+is_page($upfiles);
+if (!preg_match('%(http://rghost.ru/\d+)\'%U', $upfiles, $infos)) html_error('Download Link not found - please check your account.');
+$download_link = $infos[1];
+}
+//szal 03jul2009
+?>
