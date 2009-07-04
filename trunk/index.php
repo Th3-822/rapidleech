@@ -155,6 +155,17 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 		html_error ( "Unknown URL Type, <span style=color:#000>Only Use <span style=color:#05F>http</span> or <span style=color:#05F>https</span> or <span style=color:#05F>ftp</span> Protocol</span>" );
 	}
 	
+	if ($_GET['user_pass'] == "on") {
+		$Url['user'] = $_GET['iuser'];
+		$Url['pass'] = $_GET['ipass'];
+		// Rebuild url
+		$query = "";
+		if ($Url['query']) {
+			$query = '?' . $Url['query'];
+		}
+		$LINK = $Url['scheme'] . "://" . $Url['user'] . ":" . $Url['pass'] . "@" . $Url['host'] . $Url['path'] . $query;
+	}
+	
 	if ($_GET ["dis_plug"] != "on") {
 		//check Domain-Host
 		if (isset ( $_GET ["vBulletin_plug"] )) {
