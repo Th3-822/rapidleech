@@ -18,7 +18,7 @@
 		$temp = fopen("files/notes.txt","w");
 		fclose($temp);
 	}
-	if ($_POST['notes']) {
+	if (isset($_POST['notes']) && $_POST['notes']) {
 		file_put_contents("files/notes.txt",$_POST['notes']);
 ?>
 	<p>File successfully saved!</p>
