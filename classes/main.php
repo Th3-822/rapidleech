@@ -92,6 +92,15 @@ foreach ($host as $site => $file)
 <td align="center"><input type="submit" value="Transload File"></td>
 </tr>
 <tr>
+<td align="left"><input type="checkbox" name="user_pass" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('usernpass').style.display=displ;" value="on">&nbsp;User & Pass (HTTP/FTP)</td>
+</tr>
+<tr id="usernpass" style="display: none;">
+<td align="center">
+User: <input type="text" name="iuser" value="" /><br />
+Pass: <input type="text" name="ipass" value="" />
+</td>
+</tr>
+<tr>
 <td align="left"><input type="checkbox" name="add_comment" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('comment').style.display=displ;">&nbsp;Add Comments</td>
 </tr>
 <tr id="comment" style="DISPLAY: none;">
