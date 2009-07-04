@@ -269,9 +269,16 @@ if (isset($_GET['auul'])) {
 	// Write links to a file
 	$file = $download_dir."myuploads.txt";	// Obviously it was a mistake not making it a variable earlier
 	$fh = fopen($file, 'a');
-	$dash = "";
-	for ($i=0;$i<=80;$i++) $dash.="=";
-	fwrite($fh,$lname."\r\n".$dash."\r\n".$download_link."\r\n\r\n");
+	if (!$_GET['save_style']) {
+		$dash = "";
+		for ($i=0;$i<=80;$i++) $dash.="=";
+		fwrite($fh,$lname."\r\n".$dash."\r\n".$download_link."\r\n\r\n");
+	} else {
+		$save_style = base64_decode($_GET['save_style']);
+		$save_style = str_replace('{link}',$download_link,$save_style);
+		$save_style = str_replace('{name}',$lname,$save_style);
+		fwrite($fh,$save_style."\r\n");
+	}
 	fclose($fh);
 }
 ?>
