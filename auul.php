@@ -100,10 +100,14 @@ function setCheckboxes(act)
 			echo "No files or hosts selected for upload";
 			exit;
 		}
+		$save_style = "";
+		if ($_POST['save_style'] != 'Default') {
+			$save_style = '&save_style='.urlencode(base64_encode($_POST['save_style']));
+		}
 		$start_link = "upload.php";
 		$i = 0;
 		foreach ($uploads as $upload) {
-			$getlinks[$i][] = "?uploaded=".$upload['host']."&filename=".base64_encode($upload['file']);
+			$getlinks[$i][] = "?uploaded=".$upload['host']."&filename=".urlencode(base64_encode($upload['file'])).$save_style;
 			$i++;
 			if ($i>$openwin) $i = 0;
 		}
@@ -223,6 +227,7 @@ unset($Path);
 </div><br />
 <hr /><br />
 <input type=submit name="submit" value="Upload" /> Upload windows: <input type="text" size="2" name="windows" value="4" /><br />
+Link save format: <input type="text" size="50" name="save_style" value="Default" /><br />
 <a href="javascript:setCheckboxes(1);" style="color: #99C9E6;">Check All</a> |
 <a href="javascript:setCheckboxes(0);" style="color: #99C9E6;">Un-Check All</a> |
 <a href="javascript:setCheckboxes(2);" style="color: #99C9E6;">Invert Selection</a> |
@@ -255,6 +260,14 @@ if (!$list) {
 	}
 ?>
 </table>
+<br />
+Legend for link saving format: (case sensitive)<br />
+<ol>
+	<li>{link} : The link for the download</li>
+	<li>{name} : The name of the file</li>
+	<li>Default : Default link style</li>
+</ol><br />
+Anything besides the ones stated above will be treated as string, you are unable to do multi line format now, a new line will be inserted for each link.
 </div>
 </form>
 <?php
