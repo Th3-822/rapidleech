@@ -128,6 +128,12 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 		exit ();
 	}
 	
+	// Detect if it doesn't have a protocol assigned
+	if (substr($LINK,0,7) != "http://" && substr($LINK,0,6) != "ftp://" && substr($LINK,0,6) != "ssl://" && substr($LINK,0,8) != "https://") {
+		// Automatically assign http://
+		$LINK = "http://".$LINK;
+	}
+	
 	if (! empty ( $_GET ["saveto"] ) && ! $_GET ["path"]) {
 		html_error ( "Path is not specified for saving this file" );
 	}
