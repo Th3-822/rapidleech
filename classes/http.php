@@ -241,9 +241,9 @@ if (($responsecode[1] == 404 || $responsecode[1] == 403) && $saveToFile)
 {
 	// Do some checking, please, at least tell them what error it was
 	if ($responsecode[1] == 403) {
-		$lastError = 'The page was not found!';
-	} elseif ($responsecode[1] == 404) {
 		$lastError = 'You are forbidden to access the page!';
+	} elseif ($responsecode[1] == 404) {
+		$lastError = 'The page was not found!';
 	} else {
 		// Weird, it shouldn't come here...
 		$lastError = 'The page was either forbidden or not found!';
