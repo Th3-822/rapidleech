@@ -8,6 +8,7 @@ define('HOST_DIR', 'hosts/');
 define('IMAGE_DIR', 'images/');
 define('CLASS_DIR', 'classes/');
 define('CONFIG_DIR', 'configs/');
+define ( 'TEMPLATE_DIR', 'templates/' );
 // Some configuration
 error_reporting(0);	// This sets error reporting to none, which means no errors will be reported
 //ini_set('display_errors', 1);	// This sets error reporting to all, all errors will be reported
@@ -30,44 +31,9 @@ if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logg
 	header("HTTP/1.0 401 Unauthorized");
 	exit("<html>$nn<head>$nn<title>RAPIDLEECH PLUGMOD</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1251\">$nn</head>$nn<body>$nn<h1>$nn<center>$nn<a href=http://www.rapidleech.com>RapidLeech</a>: Access Denied - Wrong Username or Password$nn</center>$nn</h1>$nn</body>$nn</html>");
 }
+include(TEMPLATE_DIR.$options['template_used'].'/header.php');
 ?>
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>RAPIDLEECH PLUGMOD - Auto Upload</title>
-<style type="text/css">
-<!--
-@import url("images/rl_style_pm.css");
--->
-.container td {
-	background-color:#001825;
-	padding:2px;
-}
-</style>
-	<style type="text/css">
-<!--
-@import url("images/rl_style_pm.css");
--->
-</style>
-<script language="JavaScript">
-function setCheckboxes(act)
-  {
-  elts =  document.forms["flist"].elements["files[]"];
-  var elts_cnt  = (typeof(elts.length) != 'undefined') ? elts.length : 0;
-  if (elts_cnt)
-    {
-    for (var i = 0; i < elts_cnt; i++)
-      {
-      elts[i].checked = (act == 1 || act == 0) ? act : elts[i].checked ? 0 : 1;
-      }
-    }
-  }
-</script>
-
-<script type="text/javascript" src="classes/js.php"></script>
-</head>
-<body>
-<center><img src="images/logo_pm.gif" alt="RAPIDLEECH PLUGMOD"></center><br><br>
+<br>
 <center>
 <?php
 	// If the user submit to upload, go into upload page
@@ -276,5 +242,4 @@ Anything besides the ones stated above will be treated as string, you are unable
 
 ?>
 </center>
-</body>
-</html>
+<?php include(TEMPLATE_DIR.$options['template_used'].'/footer.php'); ?>
