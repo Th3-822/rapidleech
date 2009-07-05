@@ -57,10 +57,7 @@ $ajax_refresh = true;
 $bw_save = true; 
 
 ### Disable Delete & Rename Action ###
-$disable_deleting = false; //Set it to True to disallow users to DELETE OR RENAME files(useful for public servers)
-
-### Disable All Actions (upload, split, zip, etc.)###
-$disable_action = false;
+$options['disable_deleting'] = false; //Set it to True to disallow users to DELETE OR RENAME files(useful for public servers)
 
 ### Auto-Delete ###
 $delete_delay = 0; // Time in SECONDS before downloaded files are deleted // 0 = disabled
@@ -68,4 +65,25 @@ $delete_delay = 0; // Time in SECONDS before downloaded files are deleted // 0 =
 ### Auto-Rename ###
 $rename_prefix = ''; //i.e : prefix_filename.ext
 $rename_suffix = ''; //i.e : filename_suffix.ext
+
+### Template ###
+$template_used = "plugmod";
+
+### File Actions ###
+$options["disable_actions"] = false; // Disable all actions // false = use individual settings below
+$options["disable_delete"] = false; // Disable Delete action // false = allow
+$options["disable_email"] = false; // Disable Email action // false = allow
+$options["disable_ftp"] = false; // Disable FTP action // false = allow
+$options["disable_mass_email"] = true; // Disable Mass Email action // false = allow
+$options["disable_mass_rename"] = false; // Disable Mass Rename action // false = allow
+$options["disable_md5"] = false; // Disable MD5 action // false = allow
+$options["disable_merge"] = false; // Disable Merge action // false = allow
+$options["disable_rename"] = false; // Disable Rename action // false = allow
+$options["disable_split"] = false; // Disable Split action // false = allow
+$options["disable_tar"] = false; // Disable TAR action // false = allow
+$options["disable_untar"] = false; // Disable Untar action // false = allow
+$options["disable_unzip"] = false; // Disable Unzip action // false = allow
+$options["disable_upload"] = false; // Disable Upload action // false = allow
+$options["disable_zip"] = false; // Disable ZIP action // false = allow
+$options['disable_list'] = false; // Disable list links // false = allow
 ?>
