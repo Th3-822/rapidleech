@@ -53,6 +53,8 @@ define ( 'FTP_OS_Mac', 'm' );
 
 require_once (CLASS_DIR . "other.php");
 
+require_once ('templates/'.$template_used.'/functions.php');
+
 // If configs/files.lst is not writable, give a warning
 if (! is__writable ( CONFIG_DIR . 'files.lst' )) {
 	html_error ( "configs/files.lst is not writable, please make sure it is chmod to 777" );
@@ -322,34 +324,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 		echo ('<form method="post" name="flist">');
 		echo ('<input type="hidden" name="files[]" value="' . $file ['date'] . '" /><br />');
 		echo ('<div align="center">');
-		echo ('<select name="act" onChange="javascript:void(document.flist.submit());"');
-		if ($disable_action) {
-			echo (' style="display:none;"');
-		}
-		echo ('>');
-		echo ('<option selected="selected">Action</option>');
-		echo ('<option value="upload">Upload</option>');
-		echo ('<option value="ftp">FTP File</option>');
-		echo ('<option value="mail">E-Mail</option>');
-		echo ('<option value="boxes">Mass Submits</option>');
-		echo ('<option value="split">Split Files</option>');
-		echo ('<option value="merge">Merge Files</option>');
-		echo ('<option value="md5">MD5 Hash</option>');
-		if (file_exists ( CLASS_DIR . "pear.php" ) || file_exists ( CLASS_DIR . "tar.php" )) {
-			echo ('<option value="pack">Pack Files</option>');
-		}
-		if (file_exists ( CLASS_DIR . "pclzip.php" )) {
-			echo ('<option value="zip">ZIP Files</option>');
-		}
-		if (file_exists ( CLASS_DIR . "unzip.php" )) {
-			echo ('<option value="unzip">Unzip Files (beta)</option>');
-		}
-		if (! $disable_deleting) {
-			echo ('<option value="rename">Rename</option>');
-			echo ('<option value="mrename">Mass Rename</option>');
-			echo ('<option value="delete">Delete</option>');
-		}
-		echo ('</select>');
+		echo renderActions();
 		echo ('</div>');
 		echo ('</form>');
 		print "<br><a href=\"" . $PHP_SELF . "\">Go back to main</a>";
