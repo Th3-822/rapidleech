@@ -67,7 +67,7 @@ $rename_prefix = ''; //i.e : prefix_filename.ext
 $rename_suffix = ''; //i.e : filename_suffix.ext
 
 ### Template ###
-$template_used = "plugmod";
+$options['template_used'] = "plugmod";
 
 ### File Actions ###
 $options["disable_actions"] = false; // Disable all actions // false = use individual settings below

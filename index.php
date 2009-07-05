@@ -21,6 +21,7 @@ define ( 'HOST_DIR', 'hosts/' );
 define ( 'IMAGE_DIR', 'images/' );
 define ( 'CLASS_DIR', 'classes/' );
 define ( 'CONFIG_DIR', 'configs/' );
+define ( 'TEMPLATE_DIR', 'templates/' );
 define ( 'BUILD', '06282009' );
 define ( 'CREDITS', '<a href="http://www.rapidleech.com/" style="text-decoration:none"><b>RapidLeech</b></a>&nbsp;<b style="color:#F09D19">PlugMod rev. ' . $rev_num . '</b> <span style="color:#F09D19">by ' . $dev_name . '</span><br><small style="color:#239FD9">Credits to Pramode &amp; Checkmate &amp; Kloon</small>' );
 
@@ -53,7 +54,7 @@ define ( 'FTP_OS_Mac', 'm' );
 
 require_once (CLASS_DIR . "other.php");
 
-require_once ('templates/'.$template_used.'/functions.php');
+require_once (TEMPLATE_DIR.$options['template_used'].'/functions.php');
 
 // If configs/files.lst is not writable, give a warning
 if (! is__writable ( CONFIG_DIR . 'files.lst' )) {

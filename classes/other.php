@@ -152,24 +152,16 @@ function getmicrotime() {
 }
 
 function html_error($msg, $head = 1) {
-	global $PHP_SELF;
+	global $PHP_SELF, $options;
 	//if ($head == 1)
 	if (! headers_sent ()) {
-		echo ('<html>');
-		echo ('<head>');
-		echo ('<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">');
-		echo ('<title>Error...</title>');
-		echo ('<link type="text/css" rel="stylesheet" href="' . IMAGE_DIR . 'rl_style_pm.css" />');
-		echo ('</head>');
-		echo ('<body>');
-		echo ('<div align="center"><img src="' . IMAGE_DIR . 'logo_pm.gif" alt="RAPIDLEECH PLUGMOD" /></div><br /><br />');
+		include(TEMPLATE_DIR.$options['template_used'].'/header.php');
 	}
 	echo ('<div align="center">');
 	echo ('<span style="color: red; background-color: #fec; padding: 3px; border: 2px solid $FFAA00; line-height: 25px"><b>' . $msg . '</b></span><br /><br />');
 	echo ('<a href="' . $PHP_SELF . '">Go back to main</a>');
 	echo ('</div>');
-	echo ('</body>');
-	echo ('</html>');
+	include(TEMPLATE_DIR.$options['template_used'].'/footer.php');
 	exit ();
 }
 
