@@ -1,6 +1,6 @@
 <?php
 define('RAPIDLEECH', 'yes');
-error_reporting(0);
+//error_reporting(0);
 //ini_set('display_errors', 1);
 set_time_limit(0);
 ini_alter("memory_limit", "1024M");
@@ -13,7 +13,6 @@ define('HOST_DIR', 'hosts/');
 define('IMAGE_DIR', 'images/');
 define('CLASS_DIR', 'classes/');
 define('CONFIG_DIR', 'configs/');
-define ( 'TEMPLATE_DIR', 'templates/' );
 define('RAPIDLEECH', 'yes');
 define('ROOT_DIR', realpath("./"));
 define('PATH_SPLITTER', (strstr(ROOT_DIR, "\\") ? "\\" : "/"));
@@ -22,6 +21,7 @@ if (substr($download_dir,-1) != '/') $download_dir .= '/';
 define('DOWNLOAD_DIR', (substr($download_dir, 0, 6) == "ftp://" ? '' : $download_dir));
 $nn = "\r\n";
 require_once("classes/other.php");
+define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 
 if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logged_user($users)) === false))
 	{
@@ -29,7 +29,7 @@ if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logg
 		header("HTTP/1.0 401 Unauthorized");
 		exit("<html>$nn<head>$nn<title>RAPIDLEECH PLUGMOD</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1251\">$nn</head>$nn<body>$nn<h1>$nn<center>$nn<a href=http://www.rapidleech.com>RapidLeech</a>: Access Denied - Wrong Username or Password$nn</center>$nn</h1>$nn</body>$nn</html>");
 	}
-include(TEMPLATE_DIR.$options['template_used'].'/header.php');
+require(TEMPLATE_DIR.'/header.php');
 ?>
 <br>
 <center>
@@ -194,6 +194,9 @@ function resetProgress()
 					echo "<script type=\"text/javascript\" language=\"javascript\">document.getElementById('progress".$i."').style.display='none';</script>".$nn;
 				}
 			}
+			if ($_POST['server_dodelay'] == 'on') {
+				sleep((int) $_POST['serversidedelay']);
+			}
 		}
 		exit;
 	} else {
@@ -297,7 +300,7 @@ function resetProgress()
 </tr>
 </table>
 <?php
-		include(TEMPLATE_DIR.$options['template_used'].'/footer.php');
+		include(TEMPLATE_DIR.'footer.php');
 		exit;
 	}
 }
@@ -388,7 +391,11 @@ function resetProgress()
 			</td>
 			</tr>
 			<tr>
-			<td><input type="checkbox" name="server_side" value="on" />Run Server Side</td></tr>
+			<td><input type="checkbox" name="server_side" value="on" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('serverside').style.display=displ;" />Run Server Side</td></tr>
+			<tr id="serverside" style="display: none;"><td><input type="checkbox" name="server_dodelay" value="on" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('serverdelay').style.display=displ;" />Delay Time</td>
+			<td>&nbsp;</td>
+			<td id="serverdelay" style="display: none;">Delay (in seconds): <input type="text" name="serversidedelay" /></td>
+			</tr>
           </table>
         </td>
       </tr>
@@ -400,4 +407,4 @@ function resetProgress()
 </form>
 </td></tr></table>
 </center>
-<?php include(TEMPLATE_DIR.$options['template_used'].'/footer.php'); ?>
+<?php include(TEMPLATE_DIR.'footer.php'); ?>
