@@ -69,15 +69,15 @@ class megaupload_com extends DownloadClass {
 				print "An error occured, see details below:<br>" . $nn . str_replace ( "<HEAD>", "<HEAD>$nn<base href=\"http://www.megaupload.com\">", $page );
 				exit ();
 			}
-			$LINK = $Href;
+			$link = $Href;
 		}
 		
 		is_present ( $page, 'The file you are trying to access is temporarily unavailable' );
 		is_present ( $page, 'the link you have clicked is not available', 'Invalid link' );
 		is_present ( $page, 'This file has expired due to inactivity' );
 		
-		$Href = $LINK;
-		$Referer = $LINK;
+		$Href = $link;
+		$Referer = $link;
 		if (stristr ( $page, 'password protected' )) {
 			print "<form name=\"dl\" action=\"$PHP_SELF\" method=\"post\">\n";
 			print "<input type=\"hidden\" name=\"link\" value=\"" . urlencode ( $Href ) . "\">\n<input type=\"hidden\" name=\"referer\" value=\"" . urlencode ( $Referer ) . "\">\n<input type=\"hidden\" name=\"step\" value=\"1\">\n";
@@ -107,8 +107,8 @@ class megaupload_com extends DownloadClass {
 		
 		if (! stristr ( $page, "id=\"captchaform" )) html_error ( "Image code not found", 0 );
 	
-		$Href = $LINK;
-		$Referer = $LINK;
+		$Href = $link;
+		$Referer = $link;
 		$page = cut_str ( $page, 'id="captchaform">', '</FORM>' );
 		$imagecode = cut_str ( $page, 'captchacode" value="', '"' );
 		$megavar = cut_str ( $page, '<input type="hidden" name="megavar" value="', '">' );
