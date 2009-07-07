@@ -121,3 +121,11 @@ border-left-color: #cccccc;
 
 
 .linkchecker-load{filter:alpha(opacity=20);-moz-opacity:0.2;opacity:0.2;}
+
+.font-black {
+	color:#000;
+}
+
+.font-blue {
+	color:#05F;
+}

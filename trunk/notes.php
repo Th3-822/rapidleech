@@ -1,6 +1,8 @@
-<?php define('RAPIDLEECH', 'yes')?>
-<?php require('configs/config.php');?>
-<?php include(TEMPLATE_DIR.$options['template_used'].'/header.php'); ?>
+<?php
+define('RAPIDLEECH', 'yes');
+require('configs/config.php');
+define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
+include(TEMPLATE_DIR.'header.php'); ?>
 <br>
 <?php
 
@@ -22,4 +24,4 @@
 <br /><input type="submit" name="submit" value="Save Notes" />
 </form>
 </div>
-<?php include(TEMPLATE_DIR.$options['template_used'].'/footer.php'); ?>
+<?php include(TEMPLATE_DIR.'footer.php'); ?>

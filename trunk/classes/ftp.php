@@ -1,7 +1,7 @@
 <?php
 if (!defined('RAPIDLEECH'))
   {
-  require_once("index.html");
+  require('../deny.php');
   exit;
   }
 
@@ -12,8 +12,9 @@ $ftp = new ftp(FALSE, FALSE);
   if(!$ftp->SetServer($host, (int)$port))
     {
         $ftp->quit();
-        $lastError = "Couldn't establish connection with the server ".$host.":".$port.".<br>".
-                     "<a href=\"javascript:history.back(-1);\">Go Back</a><br><br>";
+        $server = $host.':'.$port;
+        $lastError = sprintf(lang(79),$server)."<br />".
+                     "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
         return FALSE;
     }
   else
@@ -21,8 +22,8 @@ $ftp = new ftp(FALSE, FALSE);
         if(!$ftp->connect())
           {
               $ftp->quit();
-              $lastError = "Couldn't connect to the server ".$host.":".$port.".<br>".
-                           "<a href=\"javascript:history.back(-1);\">Go Back</a><br><br>";
+              $lastError = sprintf(lang(79),$server)."<br />".
+                           "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
               return FALSE;
           }
         else
@@ -30,13 +31,15 @@ $ftp = new ftp(FALSE, FALSE);
                 if (!$ftp->login($AUTH["ftp"]["login"], $AUTH["ftp"]["password"]))
                   {
                       $ftp->quit();
-                      $lastError = "Incorrect username and/or password <b>".$AUTH["ftp"]["login"].":".$AUTH["ftp"]["password"]."</b>.<br>".
-                                   "<a href=\"javascript:history.back(-1);\">Go Back</a><br><br>";
+                      $lastError = lang(80)."<br />".
+                                   "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
                       return FALSE;
                   }
                 else
                   {
-					  echo "<p>Connected to: <b>".$host."</b>...<br>";
+                  	echo('<p>');
+                  	printf(lang(81),$host);
+                  	echo('<br />');
                       //$ftp->Passive(FALSE);
                       $tmp = explode("/", $url);
                       $ftp_file = array_pop($tmp);
@@ -68,7 +71,7 @@ $ftp = new ftp(FALSE, FALSE);
 							}
 						else
 							{
-							html_error("The filetype $filetype is forbidden to be downloaded");
+							html_error(sprintf(lang(82),$filetype));
 							}
 						}
                       
@@ -76,7 +79,8 @@ $ftp = new ftp(FALSE, FALSE);
                         {
                             $saveToFile = dirname($saveToFile).PATH_SPLITTER.time()."_".basename($saveToFile);
                         }
-                      echo "File <b>".$saveToFile."</b>, Size <b>".bytesToKbOrMbOrGb($fileSize)."</b>...<br>";
+					printf(lang(83),$saveToFile,bytesToKbOrMbOrGb($fileSize));
+                      echo "<br />";
                       ?>
 <br>
 <table cellspacing="0" cellpadding="0" style="FONT-FAMILY: Tahoma; FONT-SIZE: 11px;">

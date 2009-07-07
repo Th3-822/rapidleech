@@ -1,7 +1,7 @@
 <?php
-if (! defined ( 'RAPIDLEECH' )) {
-	require_once ("index.html");
-	exit ();
+if (!defined('RAPIDLEECH')) {
+	require('../deny.php');
+	exit;
 }
 
 function create_hosts_file($host_file = "hosts.php") {
@@ -155,13 +155,13 @@ function html_error($msg, $head = 1) {
 	global $PHP_SELF, $options;
 	//if ($head == 1)
 	if (! headers_sent ()) {
-		include(TEMPLATE_DIR.$options['template_used'].'/header.php');
+		include(TEMPLATE_DIR.'header.php');
 	}
 	echo ('<div align="center">');
 	echo ('<span style="color: red; background-color: #fec; padding: 3px; border: 2px solid $FFAA00; line-height: 25px"><b>' . $msg . '</b></span><br /><br />');
 	echo ('<a href="' . $PHP_SELF . '">Go back to main</a>');
 	echo ('</div>');
-	include(TEMPLATE_DIR.$options['template_used'].'/footer.php');
+	include(TEMPLATE_DIR.'footer.php');
 	exit ();
 }
 
@@ -401,5 +401,11 @@ function is__writable($path) {
 	if (! $rm)
 		unlink ( $path );
 	return true;
+}
+
+function lang($id) {
+	global $options;
+	include('languages/'.$options['default_language'].'.php');
+	return $lang[$id];
 }
 ?>

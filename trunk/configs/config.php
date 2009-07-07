@@ -68,6 +68,7 @@ $rename_suffix = ''; //i.e : filename_suffix.ext
 
 ### Template ###
 $options['template_used'] = "plugmod";
+$options['default_language'] = "zn";
 
 ### File Actions ###
 $options["disable_actions"] = false; // Disable all actions // false = use individual settings below

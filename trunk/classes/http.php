@@ -1,6 +1,6 @@
 <?php
 if (!defined('RAPIDLEECH')) {
-	require_once("index.html");
+	require('../deny.php');
 	exit;
 }
 
@@ -71,17 +71,17 @@ timer<?php echo $timerid; ?>();
  */
 function insert_new_timer($countd, $displaytext, $caption = "", $text = "") {
 	if (!is_numeric($countd)) {
-    	html_error("Text passed as counter is string!");
+    	html_error(lang(85));
     }
 	?>
 <p><div id="code"></div></p>
-<p><center><div id="dl"><h4>ERROR: Please enable JavaScript.</h4></div></center></p>
+<p><center><div id="dl"><h4><?php echo lang(86); ?></h4></div></center></p>
 <script language="JavaScript">
 var c = <?php echo $countd; ?>;
 fc();
 function fc() {
 	if(c>0) {
-		document.getElementById("dl").innerHTML = "<?php echo $caption; ?> Please wait <b>" + c.toFixed(1) + "</b> seconds...";
+		document.getElementById("dl").innerHTML = "<?php echo $caption; ?> <?php printf(lang(87),'" + c.toFixed(1) + "'); ?>";
 		c = c - .5;
 		setTimeout("fc()", 500);
 	} else {
@@ -106,7 +106,7 @@ function fc() {
 function is_page($lpage) {
 	global $lastError;
 	if (!$lpage) {
-		html_error("Error retriving the link<br>$lastError", 0);
+		html_error(lang(84)."<br />$lastError", 0);
 	}
 }
 
@@ -186,14 +186,15 @@ $content_tl.$nn.$postdata;
 //write_file(CONFIG_DIR."request.txt", $request);
 
 $errno = 0; $errstr = "";
-$host = ($proxyHost ? $scheme.$proxyHost : $scheme.$host).':'.($proxyPort ? $proxyPort : $port);
-$fp = @stream_socket_client($host,$errno,$errstr);
+$hosts = ($proxyHost ? $scheme.$proxyHost : $scheme.$host).':'.($proxyPort ? $proxyPort : $port);
+$fp = @stream_socket_client($hosts,$errno,$errstr);
 //$fp = @fsockopen($proxyHost ? $scheme.$proxyHost : $scheme.$host, $proxyPort ? $proxyPort : $port, $errno, $errstr, 15);
 
-if (!$fp)
-	{
-	html_error("Couldn't connect to ".($proxyHost ? $proxyHost : $host)." at port ".($proxyPort ? $proxyPort : $port), 0);
-	}
+if (!$fp) {
+	$dis_host = $proxyHost ? $proxyHost : $host;
+	$dis_port = $proxyPort ? $proxyPort : $port;
+	html_error(sprintf(lang(88),$dis_host,$dis_port));
+}
 
 socket_set_timeout($fp, 120);
 
@@ -208,7 +209,7 @@ if ($saveToFile)
 	if ($proxy)
 		{
 		echo "<p>Connected to proxy: <b>".$proxyHost."</b> at port <b>".$proxyPort."</b>...<br>\n";
-		echo "GET: <b>".$host.$url."</b>...<br>\n";
+		echo "GET: <b>".$url."</b>...<br>\n";
 		}
 	else
 		{

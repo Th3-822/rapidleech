@@ -18,7 +18,8 @@ if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logg
 	{
 		header("WWW-Authenticate: Basic realm=\"RAPIDLEECH PLUGMOD\"");
 		header("HTTP/1.0 401 Unauthorized");
-		exit("<html>$nn<head>$nn<title>RAPIDLEECH PLUGMOD</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1251\">$nn</head>$nn<body>$nn<h1>$nn<center>$nn<a href=http://www.rapidleech.com>RapidLeech</a>: Access Denied - Wrong Username or Password$nn</center>$nn</h1>$nn</body>$nn</html>");
+		include('deny.php');
+		exit;
 	}
 include("classes/http.php");
 
@@ -40,37 +41,17 @@ while ( false !== ($modules = readdir ( $d )) ) {
 		}
 	}
 }
-if (!in_array($_REQUEST['uploaded'],$upload_services)) {
-	html_error("Not selected upload services");
+if (!in_array($_REQUEST['uploaded'],$upload_services) || !$_REQUEST['uploaded'] || !$_REQUEST['filename']) {
+	html_error(lang(46));
 }
 
-if (!$_REQUEST['uploaded']) {
-	html_error("Not selected upload services", 0);
-}
-
-if (!$_REQUEST['filename']) {
-	html_error("Not select file to upload", 0);
-}
-
+$page_title = sprintf(lang(63),basename($_REQUEST['filename']),$_REQUEST['uploaded']);
+require(TEMPLATE_DIR.'/header.php');
 ?>
-<html>
-<head>
-<title>Uploading file <?php echo basename($_REQUEST['filename']); ?> to <?php echo $_REQUEST['uploaded']; ?></title>
-<style type="text/css">
-<!--
-@import url("images/rl_style_pm.css");
--->
-</style>
-<script>
-var orlink='<?php echo addslashes(basename($_REQUEST['filename'])); ?> to <?php echo $_REQUEST['uploaded']; ?>';
-</script>
-</head>
-<body>
-<center><img src="images/logo_pm.gif" alt="RapidLeech PlugMod" border="0"></center><br>
 <?php
 if (!file_exists($_REQUEST['filename']))
 	{
-		html_error("ERROR: file not exist $filename", 0);
+		html_error(sprintf(lang(64),$filename));
 	}
 				
 if (is_readable($_REQUEST['filename']))
@@ -80,7 +61,7 @@ if (is_readable($_REQUEST['filename']))
 	}
 		else
 	{
-		html_error("ERROR: not readable $filename", 0);
+		html_error(sprintf(lang(65),$filename));
 	}
 
 $fsize = getSize($lfile);
@@ -89,9 +70,9 @@ if (file_exists("hosts/upload/".$_REQUEST['uploaded'].".php")){
     include_once("hosts/upload/".$_REQUEST['uploaded'].".index.php");
     if ($max_file_size[$_REQUEST['uploaded']]!=false)
         if ($fsize > $max_file_size[$_REQUEST['uploaded']]*1024*1024)       
-            html_error("Bigger than file-size", 0);
+            html_error(lang(66));
     include_once("hosts/upload/".$page_upload[$_REQUEST['uploaded']]);
-}else html_error('This service not allowed', 0); 
+}else html_error(lang(67)); 
 
 ?>
 </td></tr></table>
@@ -113,13 +94,13 @@ if (file_exists("hosts/upload/".$_REQUEST['uploaded'].".php")){
 			*/			
 			
 			echo "\n<table width=100% border=0>";
-			echo ($download_link ? "<tr><td width=100 nowrap align=right><b>Download-Link:</b><td width=80%><input value='$download_link' style=\"width: 470px; border: 2px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>" : "");
-			echo ($delete_link ? "<tr><td width=100 nowrap align=right>Delete-Link:<td width=80%><input value='$delete_link' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>" : "");
-			echo ($stat_link ? "<tr><td width=100 nowrap align=right>Stat-Link:<td width=80%><input value='$stat_link' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>" : "");
-			echo ($adm_link ? "<tr><td width=100 nowrap align=right>Admin-Link:<td width=80%><input value='$adm_link' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>": "");
-			echo ($user_id ? "<tr><td width=100 nowrap align=right>USER-ID:<td width=80%><input value='$user_id' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>": "");
-			echo ($ftp_uplink ? "<tr><td width=100 nowrap align=right>FTP UPLOAD:<td width=80%><input value='$ftp_uplink' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>": "");
-			echo ($access_pass ? "<tr><td width=100 nowrap align=right>PASSWD:<td width=80%><input value='$access_pass' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>": "");
+			echo ($download_link ? "<tr><td width=100 nowrap align=right><b>".lang(68).":</b><td width=80%><input value='$download_link' style=\"width: 470px; border: 2px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>" : "");
+			echo ($delete_link ? "<tr><td width=100 nowrap align=right>".lang(69).":<td width=80%><input value='$delete_link' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>" : "");
+			echo ($stat_link ? "<tr><td width=100 nowrap align=right>".lang(70).":<td width=80%><input value='$stat_link' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>" : "");
+			echo ($adm_link ? "<tr><td width=100 nowrap align=right>".lang(71).":<td width=80%><input value='$adm_link' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>": "");
+			echo ($user_id ? "<tr><td width=100 nowrap align=right>".lang(72).":<td width=80%><input value='$user_id' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>": "");
+			echo ($ftp_uplink ? "<tr><td width=100 nowrap align=right>".lang(73).":<td width=80%><input value='$ftp_uplink' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>": "");
+			echo ($access_pass ? "<tr><td width=100 nowrap align=right>".lang(74).":<td width=80%><input value='$access_pass' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>": "");
 			/*echo ($protect ? "<tr><td width=100 nowrap align=right>Protect link:<td width=80%><input value='$protect' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>": "");*/
 			echo "</table>\n";
 			
@@ -129,7 +110,7 @@ if (file_exists("hosts/upload/".$_REQUEST['uploaded'].".php")){
 								<html xmlns=\"http://www.w3.org/1999/xhtml\">
 								<head>
 								<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />
-								<title>RapidleechPlugMod - UploadLinks</title>
+								<title>".lang(75)."</title>
 								<style type=\"text/css\">
 body {
 	font-family: tahoma, arial, \"times New Roman\", georgia, verdana, sans-serif;
@@ -229,7 +210,7 @@ hr {
 								";
 				$fp = fopen(trim($lfile).".upload.html",'w');
 				fwrite($fp, $html_header);
-				fwrite($fp, "<div class=\"linktitle\">Upload Links for <strong>".$lname."</strong> - <span class=\"bluefont\">Size: <strong>".bytesToKbOrMb($fsize)."</strong></span></div>");
+				fwrite($fp, sprintf(lang(76),$lname,bytesToKbOrMb($fsize)));
 				fclose($fp);
 			  }
 			$fr = fopen(trim($lfile).".upload.html",'a+');
@@ -248,18 +229,18 @@ hr {
 					fwrite($fr,"\n");*/
 					fwrite($fr, "<div class=\"host\"><div class=\"title\"><strong>".$_REQUEST['uploaded']."</strong> - <span class=\"bluefont\">".date("Y-m-d H:i:s")."</span></div>");
 					fwrite($fr, "<div class=\"links\">");
-					if ($download_link) fwrite($fr, "<strong>Download link: <a href=\"".$download_link."\" target=\"_blank\">".$download_link." </a></strong>");
-					if ($delete_link) fwrite($fr, "<br />Delete link: <a href=\"".$delete_link."\" target=\"_blank\">".$delete_link." </a>");
-					if ($stat_link) fwrite($fr, "<br />Stat link: <a href=\"".$stat_link."\" target=\"_blank\">".$stat_link." </a>");
-					if ($adm_link) fwrite($fr, "<br />Admin link: <a href=\"".$adm_link."\" target=\"_blank\">".$adm_link." </a>");
-					if ($user_id) fwrite($fr, "<br />USER ID: <a href=\"".$user_id."\" target=\"_blank\">".$user_id." </a>");
-					if ($access_pass) fwrite($fr, "<br />Password: <a href=\"".$access_pass."\" target=\"_blank\">".$access_pass." </a>");
-					if ($ftp_uplink) fwrite($fr, "<br />FTP upload: <a href=\"".$ftp_uplink."\" target=\"_blank\">".$ftp_uplink." </a>");
+					if ($download_link) fwrite($fr, "<strong>".lang(68).": <a href=\"".$download_link."\" target=\"_blank\">".$download_link." </a></strong>");
+					if ($delete_link) fwrite($fr, "<br />".lang(69).": <a href=\"".$delete_link."\" target=\"_blank\">".$delete_link." </a>");
+					if ($stat_link) fwrite($fr, "<br />".lang(70).": <a href=\"".$stat_link."\" target=\"_blank\">".$stat_link." </a>");
+					if ($adm_link) fwrite($fr, "<br />".lang(71).": <a href=\"".$adm_link."\" target=\"_blank\">".$adm_link." </a>");
+					if ($user_id) fwrite($fr, "<br />".lang(72).": <a href=\"".$user_id."\" target=\"_blank\">".$user_id." </a>");
+					if ($access_pass) fwrite($fr, "<br />".lang(74).": <a href=\"".$access_pass."\" target=\"_blank\">".$access_pass." </a>");
+					if ($ftp_uplink) fwrite($fr, "<br />".lang(73).": <a href=\"".$ftp_uplink."\" target=\"_blank\">".$ftp_uplink." </a>");
 					fwrite($fr, " </div></div>");
 					fclose($fr);
 				}
 		}
-echo $not_done ? "" : '<p><center><b><a href="javascript:window.close();">DONE</a></b></center>';
+echo $not_done ? "" : '<p><center><b><a href="javascript:window.close();">'.lang(77).'</a></b></center>';
 ?>
 </body>
 </html>
@@ -269,7 +250,7 @@ if (isset($_GET['auul'])) {
 	// Write links to a file
 	$file = $download_dir."myuploads.txt";	// Obviously it was a mistake not making it a variable earlier
 	$fh = fopen($file, 'a');
-	if (!$_GET['save_style']) {
+	if (!$_GET['save_style'] && $_GET['save_style'] !== lang(51)) {
 		$dash = "";
 		for ($i=0;$i<=80;$i++) $dash.="=";
 		fwrite($fh,$lname."\r\n".$dash."\r\n".$download_link."\r\n\r\n");

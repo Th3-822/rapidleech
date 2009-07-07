@@ -29,7 +29,7 @@ switch ($_GET['ajax']) {
 			if($debug == 1) 
 				debug();
 			else
-			echo "Please change the debug mode to <b>1</b>";
+			echo lang(16);
 			if ($_POST['k'] == 1) {
 				$kl = 1;
 				$l = 0; 
@@ -149,7 +149,10 @@ switch ($_GET['ajax']) {
 				}
 				
 				if($x > $maxlinks) {
-					echo "<p style=\"text-align:center\">Maximum No ($maxlinks) Of links have been reached.";
+					echo "<p style=\"text-align:center\">";
+					printf(lang(17),$maxlinks);
+					echo('</p>');
+					include(TEMPLATE_DIR.'/footer.php');
 					exit();
 				}
 				   }
@@ -159,9 +162,11 @@ switch ($_GET['ajax']) {
 			$endtime = $time;
 			$totaltime = ($endtime - $begintime);
 			$x--;
-			$plural = ($x == 1) ? "" : "s";
+			$plural = ($x == 1) ? "" : lang(19);
 			($fgc == 0) ? $method = 'cURL' : $method = 'file_get_contents';
-			echo "<p style=\"text-align:center\">$x Link$plural checked in $totaltime seconds. (Method: <b>$method</b>)</p>";
+			echo "<p style=\"text-align:center\">";
+			printf(lang(18),$x,$plural,$totaltime,$method);
+			echo "</p>";
 		}
 		break;
 }

@@ -8,7 +8,6 @@ define('HOST_DIR', 'hosts/');
 define('IMAGE_DIR', 'images/');
 define('CLASS_DIR', 'classes/');
 define('CONFIG_DIR', 'configs/');
-define ( 'TEMPLATE_DIR', 'templates/' );
 // Some configuration
 error_reporting(0);	// This sets error reporting to none, which means no errors will be reported
 //ini_set('display_errors', 1);	// This sets error reporting to all, all errors will be reported
@@ -20,6 +19,7 @@ ignore_user_abort(1);	// Continue executing the script even if the page was stop
 clearstatcache();	// Clear caches created by PHP
 require_once("configs/config.php");	// Reads the configuration file, so we can pick up any accounts needed to use
 define('DOWNLOAD_DIR', (substr($download_dir, 0, 6) == "ftp://" ? '' : $download_dir));	// Set the download directory constant
+define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 // Include other useful functions
 require_once('classes/other.php');
 require_once(HOST_DIR.'download/hosts.php');
@@ -31,7 +31,7 @@ if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logg
 	header("HTTP/1.0 401 Unauthorized");
 	exit("<html>$nn<head>$nn<title>RAPIDLEECH PLUGMOD</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1251\">$nn</head>$nn<body>$nn<h1>$nn<center>$nn<a href=http://www.rapidleech.com>RapidLeech</a>: Access Denied - Wrong Username or Password$nn</center>$nn</h1>$nn</body>$nn</html>");
 }
-include(TEMPLATE_DIR.$options['template_used'].'/header.php');
+include(TEMPLATE_DIR.'header.php');
 ?>
 <br>
 <center>
@@ -63,7 +63,7 @@ include(TEMPLATE_DIR.$options['template_used'].'/header.php');
 		$hostss = array_unique($hostss);
 		// If there aren't anything
 		if (count($uploads) == 0) {
-			echo "No files or hosts selected for upload";
+			echo lang(46);
 			exit;
 		}
 		$save_style = "";
@@ -139,7 +139,7 @@ include(TEMPLATE_DIR.$options['template_used'].'/header.php');
 	for ($i=0;$i<=$openwin;$i++) {
 		if (( $i+1 )% 2) echo "<br />";
 ?>
-<iframe width="49%" height="300" src="" name="idownload<?php echo $i; ?>" id="idownload<?php echo $i; ?>" border="1" style="float: left;">Frames not supported, update your browser</iframe>
+<iframe width="49%" height="300" src="" name="idownload<?php echo $i; ?>" id="idownload<?php echo $i; ?>" border="1" style="float: left;"><?php echo lang(30); ?></iframe>
 <?php
 	}
 ?>
@@ -157,7 +157,7 @@ require_once("classes/options.php");
 unset($Path);
 ?>
 <form name="flist" method="post" action="auul.php?action=upload">
-<p><b>Select Hosts to Upload</b></p>
+<p><b><?php echo lang(47); ?></b></p>
 <div style="overflow:auto; height:200px; width: 300px;">
 <table>
 <?php
@@ -174,7 +174,7 @@ unset($Path);
 		}
 	if (empty($upload_services)) 
 	{
-		echo "<span style='color:#FF6600'><b>No Supported Upload Services!</b></span>";
+		echo "<span style='color:#FF6600'><b>".lang(48)."</b></span>";
 	} else {
 		sort($upload_services); reset($upload_services);
 		$cc=0;
@@ -192,23 +192,23 @@ unset($Path);
 </table>
 </div><br />
 <hr /><br />
-<input type=submit name="submit" value="Upload" /> Upload windows: <input type="text" size="2" name="windows" value="4" /><br />
-Link save format: <input type="text" size="50" name="save_style" value="Default" /><br />
-<a href="javascript:setCheckboxes(1);" style="color: #99C9E6;">Check All</a> |
-<a href="javascript:setCheckboxes(0);" style="color: #99C9E6;">Un-Check All</a> |
-<a href="javascript:setCheckboxes(2);" style="color: #99C9E6;">Invert Selection</a> |
+<input type=submit name="submit" value="Upload" /> <?php echo lang(49); ?>: <input type="text" size="2" name="windows" value="4" /><br />
+<?php echo lang(50); ?>: <input type="text" size="50" name="save_style" value="<?php echo lang(51); ?>" /><br />
+<a href="javascript:setCheckboxes(1);" style="color: #99C9E6;"><?php echo lang(52); ?></a> |
+<a href="javascript:setCheckboxes(0);" style="color: #99C9E6;"><?php echo lang(53); ?></a> |
+<a href="javascript:setCheckboxes(2);" style="color: #99C9E6;"><?php echo lang(54); ?></a> |
 <a href="files/myuploads.txt" style="color: #99C9E6">myuploads.txt</a>
 <div style="overflow:auto; height:400px; width: 700px; border">
 <table cellpadding="3" cellspacing="1" width="100%" class="filelist">
 	<tr bgcolor="#4B433B" valign="bottom" align="center" style="color: white;">
 		<th></th>
-		<th>Name</th>
-		<th>Size</th>
+		<th><?php echo lang(55); ?></th>
+		<th><?php echo lang(56); ?></th>
 	</tr>
 <?php
 if (!$list) {
 ?>
-	<center>No files found</center>
+	<center><?php echo lang(57); ?></center>
 <?php
 } else {
 ?>
@@ -227,13 +227,13 @@ if (!$list) {
 ?>
 </table>
 <br />
-Legend for link saving format: (case sensitive)<br />
+<?php echo lang(58); ?><br />
 <ol>
-	<li>{link} : The link for the download</li>
-	<li>{name} : The name of the file</li>
-	<li>Default : Default link style</li>
+	<li>{link} : <?php echo lang(59); ?></li>
+	<li>{name} : <?php echo lang(60); ?></li>
+	<li><?php echo lang(51); ?> : <?php echo lang(61); ?></li>
 </ol><br />
-Anything besides the ones stated above will be treated as string, you are unable to do multi line format now, a new line will be inserted for each link.
+<?php echo lang(62); ?>
 </div>
 </form>
 <?php
@@ -242,4 +242,4 @@ Anything besides the ones stated above will be treated as string, you are unable
 
 ?>
 </center>
-<?php include(TEMPLATE_DIR.$options['template_used'].'/footer.php'); ?>
+<?php include(TEMPLATE_DIR.'footer.php'); ?>
