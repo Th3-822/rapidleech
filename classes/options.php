@@ -1,7 +1,7 @@
 <?php
-if (! defined ( 'RAPIDLEECH' )) {
-	require_once ("index.html");
-	exit ();
+if (!defined('RAPIDLEECH')) {
+	require('../deny.php');
+	exit;
 }
 if (! $disable_action) {
 	switch ($_GET ["act"]) {

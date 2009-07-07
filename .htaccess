@@ -14,7 +14,11 @@ allow from all
 #allow from all
 #</files>
 
-<files js.php>
+<files ~ "^classes/js.php">
+allow from all
+</files>
+
+<files ~ "^deny.php">
 allow from all
 </files>
 

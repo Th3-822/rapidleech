@@ -8,7 +8,13 @@
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 <link href="templates/plugmod/images/rl_style_pm.css" rel="stylesheet" type="text/css" />
 
-<title>Rapidleech v2 rev. <?php echo $rev_num; ?></title>
+<title><?php
+if (!isset($page_title)) {
+	echo 'Rapidleech v2 rev. '.$rev_num;
+} else {
+	echo htmlentities($page_title);
+}
+?></title>
 <script type="text/javascript" src="classes/js.php"></script>
 <SCRIPT language="JavaScript">
 <!--

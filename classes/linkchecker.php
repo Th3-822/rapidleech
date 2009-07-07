@@ -1,4 +1,8 @@
 <?php
+if (!defined('RAPIDLEECH')) {
+	require('../deny.php');
+	exit;
+}
 //Copyright Dman :p this has been coded by dman biatches!!!
 //Optimized by zpikdum :D
 //Moded by eqbal ;)

@@ -27,7 +27,8 @@ if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logg
 	{
 		header("WWW-Authenticate: Basic realm=\"RAPIDLEECH PLUGMOD\"");
 		header("HTTP/1.0 401 Unauthorized");
-		exit("<html>$nn<head>$nn<title>RAPIDLEECH PLUGMOD</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1251\">$nn</head>$nn<body>$nn<h1>$nn<center>$nn<a href=http://www.rapidleech.com>RapidLeech</a>: Access Denied - Wrong Username or Password$nn</center>$nn</h1>$nn</body>$nn</html>");
+		include('deny.php');
+		exit;
 	}
 require(TEMPLATE_DIR.'/header.php');
 ?>
@@ -47,17 +48,17 @@ if ($_REQUEST["GO"] == "GO") {
 		require_once(CLASS_DIR."ftp.php");
 		require_once(CLASS_DIR."http.php");
 		if (isset($_POST["useproxy"]) && $_POST["useproxy"] == true && (!$_POST["proxy"] || !strstr($_POST["proxy"], ":"))) {
-			html_error("Bad proxy server address", 0);
+			html_error(lang(20), 0);
 		}
 ?>
 <table width="90%" style="border:1px solid #666" class="container" cellspacing="1">
 <tr>
-<td width="80%" align="center"><b>Link</b></td>
-<td width="70" align="center"><b>Status</b></td>
+<td width="80%" align="center"><b><?php echo lang(21); ?></b></td>
+<td width="70" align="center"><b><?php echo lang(22); ?></b></td>
 </tr>
 <?php 
 		for ($i = 0; $i < count($getlinks); $i++) {
-			echo "<tr><td width=\"80%\" nowrap>".$getlinks[$i]."</td><td width=\"70\" id=\"status".$i."\">Waiting</td></tr>".$nn;
+			echo "<tr><td width=\"80%\" nowrap>".$getlinks[$i]."</td><td width=\"70\" id=\"status".$i."\">".lang(23)."</td></tr>".$nn;
 		}
 ?>
 </table>
@@ -103,7 +104,7 @@ function resetProgress()
 			}
 	
 			if ($Url['scheme'] != 'http' && $Url['scheme'] != 'https' && $Url['scheme'] != 'ftp') {
-				echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", 'Invalid URL');</script>".$nn;
+				echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", '".lang(24)."');</script>".$nn;
 			} else {
 				echo "<div id=\"progress".$i."\" style=\"display:block;\">".$nn;
 				foreach ($host as $site => $file) {
@@ -126,7 +127,7 @@ function resetProgress()
 					$FileName = basename($Url["path"]);
 					insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&port=".$Url["port"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=&partSize=&method=&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK));
 				}
-				echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", 'Preparing');</script>".$nn;
+				echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", '".lang(25)."');</script>".$nn;
 				$redir = "";
 				$lastError = "";
 				do {
@@ -162,7 +163,7 @@ function resetProgress()
 					}
 					list($pathWithName,$tmp) = explode('?',$pathWithName);
 	
-					echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", 'Started');</script>".$nn;
+					echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", '".lang(26)."');</script>".$nn;
 					if ($ftp["scheme"] == "ftp" && !$_GET["proxy"]) {
 						$file = getftpurl($_GET["host"], $ftp["port"] ? $ftp["port"] : 21, $_GET["path"], $pathWithName);
 					} else {
@@ -185,7 +186,7 @@ function resetProgress()
 						write_file(CONFIG_DIR."files.lst", serialize(array("name" => $file["file"], "size" => $file["size"], "date" => time(), "link" => $_GET["link"], "comment" => str_replace("\n", "\\n", str_replace("\r", "\\r", $_GET["comment"]))))."\r\n", 0);
 						$hideDiv = true;
 					} else {
-						echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", 'Connection lost');</script>".$nn;
+						echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", '".lang(27)."');</script>".$nn;
 					}
 				}
 				while ($redirectto && !$lastError);
@@ -205,7 +206,7 @@ function resetProgress()
 		$start_link='index.php?audl=doum';
 	
 		if(isset($_REQUEST['useproxy']) && $_REQUEST['useproxy'] && (!$_REQUEST['proxy'] || !strstr($_REQUEST['proxy'], ":"))) {
-	       	die('<span style="color:red; background-color:#fec; padding:3px; border:2px solid #FFaa00"><b>Not address of the proxy server is specified</b></span><br>');
+	       	html_error(lang(20));
 	   	} else {
 	   		if ($_REQUEST['useproxy'] == "on") {
 				$start_link.='&proxy='.$_REQUEST['proxy'];
@@ -234,11 +235,11 @@ function resetProgress()
 
 	function nextlink() {
 		if (document.getElementById('status'+current_dlink))
-			document.getElementById('status'+current_dlink).innerHTML='Finished';
+			document.getElementById('status'+current_dlink).innerHTML='<?php echo lang(28); ?>';
 		current_dlink++;
 
 		if (current_dlink < links.length) {
-			document.getElementById('status'+current_dlink).innerHTML='Started';
+			document.getElementById('status'+current_dlink).innerHTML='<?php echo lang(26); ?>';
 			opennewwindow(current_dlink);
 		}
 	}
@@ -279,8 +280,8 @@ function resetProgress()
 </script>
 
 <table id="links" width=90% style="border:1px solid #666" class="container" cellspacing="1">
-<thead><tr><td width=80% align="left"><b>Link</b></td><td width=70 align="left"><b>Status</b></td></tr></thead>
-<tfoot><tr id=auto><td colspan=2 align=center><input type=button value='Start auto Transload' onClick=javascript:startauto();></td></tr></tfoot>
+<thead><tr><td width=80% align="left"><b><?php echo lang(21); ?></b></td><td width=70 align="left"><b><?php echo lang(22); ?></b></td></tr></thead>
+<tfoot><tr id=auto><td colspan=2 align=center><input type=button value='<?php echo lang(29); ?>' onClick=javascript:startauto();></td></tr></tfoot>
 <tbody>
 <?php
 		for ($i=0; $i<count($getlinks); $i++)
@@ -291,12 +292,12 @@ function resetProgress()
 </tbody>
 </table>
 <br />
-<iframe width="90%" height="300" src="" name="idownload" border="1">Frames not supported, update your browser</iframe>
+<iframe width="90%" height="300" src="" name="idownload" border="1"><?php echo lang(30); ?></iframe>
 <br />
 <table style="border:1px solid #666" class="container" cellspacing="1">
 <tr>
 <td><textarea name="addlinks" id="addlinks" cols="100" rows="5"></textarea></td>
-<td><input type="button" value="Add links" onclick="javascript:addLinks();" /></td>
+<td><input type="button" value="<?php echo lang(31); ?>" onclick="javascript:addLinks();" /></td>
 </tr>
 </table>
 <?php
@@ -322,12 +323,12 @@ function resetProgress()
 <form action=?GO=GO method=post >
 <table width=700 border=0>
 <tr id=menu><td width=700 align=center>
-<a href=javascript:ViewPage('listing');>Links</a>&nbsp;|&nbsp;<a href=javascript:ViewPage('options');>Options</a>
+<a href=javascript:ViewPage('listing');><?php echo lang(32); ?></a>&nbsp;|&nbsp;<a href=javascript:ViewPage('options');><?php echo lang(33); ?></a>
 </td></tr>
 <tr> <td width=100% valign=top>
 <div id=listing style="display:block;">
 <table border=0 style="width:710px;">
-<tr><td><textarea id=links name=links rows=15 cols=60 style="width:600px; height:400px; border:1px solid #002E43"></textarea></td><td valign=top><input type=submit value="Transload files" onClick=javascript:HideAll(); style="width:100px;"></tr>
+<tr><td><textarea id=links name=links rows=15 cols=60 style="width:600px; height:400px; border:1px solid #002E43"></textarea></td><td valign=top><input type=submit value="<?php echo lang(34); ?>" onClick=javascript:HideAll(); style="width:100px;"></tr>
 </table>
 </div>
 <div width=100% id="options" style="display:none;">
@@ -339,16 +340,16 @@ function resetProgress()
           <table align="center">
             <tr>
               <td>
-                <input type="checkbox" id=useproxy name=useproxy onClick="javascript:var displ=this.checked?'':'none';document.getElementById('proxy').style.display=displ;"<?php echo $_COOKIE["useproxy"] ? " checked" : ""; ?>>&nbsp;Use Proxy Settings
+                <input type="checkbox" id=useproxy name=useproxy onClick="javascript:var displ=this.checked?'':'none';document.getElementById('proxy').style.display=displ;"<?php echo $_COOKIE["useproxy"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(35); ?>
               </td>
               <td>&nbsp;
 
               </td>
               <td id=proxy<?php echo $_COOKIE["useproxy"] ? "" : " style=\"display: none;\""; ?>>
                 <table border=0>
-                  <tr><td>Proxy:</td><td><input name=proxy size=25<?php echo $_COOKIE["proxy"] ? " value=\"".$_COOKIE["proxy"]."\"" : ""; ?>></td></tr>
-                  <tr><td>UserName:</td><td><input name=proxyuser size=25 <?php echo $_COOKIE["proxyuser"] ? " value=\"".$_COOKIE["proxyuser"]."\"" : ""; ?>></td></tr>
-                  <tr><td>Password:</td><td><input name=proxypass size=25 <?php echo $_COOKIE["proxypass"] ? " value=\"".$_COOKIE["proxypass"]."\"" : ""; ?>></td></tr>
+                  <tr><td><?php echo lang(36); ?>:</td><td><input name=proxy size=25<?php echo $_COOKIE["proxy"] ? " value=\"".$_COOKIE["proxy"]."\"" : ""; ?>></td></tr>
+                  <tr><td><?php echo lang(37); ?>:</td><td><input name=proxyuser size=25 <?php echo $_COOKIE["proxyuser"] ? " value=\"".$_COOKIE["proxyuser"]."\"" : ""; ?>></td></tr>
+                  <tr><td><?php echo lang(38); ?>:</td><td><input name=proxypass size=25 <?php echo $_COOKIE["proxypass"] ? " value=\"".$_COOKIE["proxypass"]."\"" : ""; ?>></td></tr>
                 </table>
               </td>
             </tr>
@@ -358,7 +359,7 @@ function resetProgress()
             </tr>
 			<tr>
 			<td>
-                <input type="checkbox" value="on" name=imageshack_acc id=imageshack_acc <?php if (is_array($imageshack_acc)) print ' checked'; ?>>&nbsp;Use Imageshack Account
+                <input type="checkbox" value="on" name=imageshack_acc id=imageshack_acc <?php if (is_array($imageshack_acc)) print ' checked'; ?>>&nbsp;<?php echo lang(39); ?>
               </td>
 			</tr>
             <?php
@@ -367,13 +368,13 @@ function resetProgress()
             ?>
             <tr>
               <td>
-                <input type="checkbox" name=saveto id=saveto onClick="javascript:var displ=this.checked?'':'none';document.getElementById('path').style.display=displ;"<?php echo $_COOKIE["saveto"] ? " checked" : ""; ?>>&nbsp;Save To
+                <input type="checkbox" name=saveto id=saveto onClick="javascript:var displ=this.checked?'':'none';document.getElementById('path').style.display=displ;"<?php echo $_COOKIE["saveto"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(40); ?>
               </td>
               <td>&nbsp;
 
               </td>
               <td id=path <?php echo $_COOKIE["saveto"] ? "" : " style=\"display: none;\""; ?> test>
-                Path:&nbsp;<input name=savedir size=30 value="<?php echo realpath(($_COOKIE["savedir"] ? $_COOKIE["savedir"] : (strstr(realpath("./"), ":") ? addslashes($workpath) : $workpath))) ?>">
+                <?php echo lang(41); ?>:&nbsp;<input name=savedir size=30 value="<?php echo realpath(($_COOKIE["savedir"] ? $_COOKIE["savedir"] : (strstr(realpath("./"), ":") ? addslashes($workpath) : $workpath))) ?>">
               </td>
             </tr>
             <?php
@@ -381,20 +382,20 @@ function resetProgress()
             ?>
 
 			<tr>
-			<td><input type="checkbox" name="premium_acc" id="premium_acc" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;"<?php if (count($premium_acc) > 0) print ' checked'; ?>>&nbsp;Use Premium Account</td>
+			<td><input type="checkbox" name="premium_acc" id="premium_acc" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;"<?php if (count($premium_acc) > 0) print ' checked'; ?>>&nbsp;<?php echo lang(42); ?></td>
 			<td>&nbsp;</td>
 			<td id="premiumblock" style="display: none;">
 			<table width="150" border="0">
-			<tr><td>Username:&nbsp;</td><td><input type="text" name="premium_user" id="premium_user" size="15" value=""></td></tr>
-			<tr><td>Password:&nbsp;</td><td><input type="password" name="premium_pass" id="premium_pass" size="15" value=""></td></tr>
+			<tr><td><?php echo lang(37); ?>:&nbsp;</td><td><input type="text" name="premium_user" id="premium_user" size="15" value=""></td></tr>
+			<tr><td><?php echo lang(38); ?>:&nbsp;</td><td><input type="password" name="premium_pass" id="premium_pass" size="15" value=""></td></tr>
 			</table>
 			</td>
 			</tr>
 			<tr>
-			<td><input type="checkbox" name="server_side" value="on" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('serverside').style.display=displ;" />Run Server Side</td></tr>
-			<tr id="serverside" style="display: none;"><td><input type="checkbox" name="server_dodelay" value="on" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('serverdelay').style.display=displ;" />Delay Time</td>
+			<td><input type="checkbox" name="server_side" value="on" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('serverside').style.display=displ;" /><?php echo lang(43); ?></td></tr>
+			<tr id="serverside" style="display: none;"><td><input type="checkbox" name="server_dodelay" value="on" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('serverdelay').style.display=displ;" /><?php echo lang(44); ?></td>
 			<td>&nbsp;</td>
-			<td id="serverdelay" style="display: none;">Delay (in seconds): <input type="text" name="serversidedelay" /></td>
+			<td id="serverdelay" style="display: none;"><?php echo lang(45); ?>: <input type="text" name="serversidedelay" /></td>
 			</tr>
           </table>
         </td>
