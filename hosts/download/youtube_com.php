@@ -21,8 +21,8 @@ class youtube_com extends DownloadClass
 		if ($yt_fmt = $_POST['yt_fmt'])
 		{
 			if (preg_match('%0|5|6|34|35%', $yt_fmt)) $ext = '.flv';
-			if (preg_match('%18|22%', $yt_fmt)) $ext = '.mp4';
-			if (preg_match('%13|17%', $yt_fmt)) $ext = '.3gp';
+			elseif (preg_match('%18|22%', $yt_fmt)) $ext = '.mp4';
+			elseif (preg_match('%13|17%', $yt_fmt)) $ext = '.3gp';
 		}
 		else $ext = '.flv';
 
@@ -37,7 +37,10 @@ class youtube_com extends DownloadClass
 
 		if ($_POST['ytdirect'] == 'on')
 		{
-			echo "<br /><h4>Click or copy the link to your download manager to download</h4><br /><a style='color:yellow' href='$furl'>$furl</a>";
+			$this->page = $this->GetPage($furl, $cookies, 0, $refmatch[1]);
+			if (!preg_match('%ocation: (.+)\r\n%', $this->page, $durl)) html_error('Video or video format not found');
+			echo "<br /><br /><h4><a style='color:yellow' href='$durl[1]'>Click here or copy the link to your download manager to download</a></h4>";
+			echo "<input name='dlurl' style='width: 1000px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px' value='$durl[1]' onclick='javascript:this.select();' readonly></input>";
 		}
 		else
 		{

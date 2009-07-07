@@ -1,35 +1,37 @@
 <?php
+
 if (!defined('RAPIDLEECH'))
 {
   require_once("index.html");
   exit;
 }
-	$post = array();
-	$post["download"] = 1;
 
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, $post, 0, $_GET["proxy"],$pauth);
-	is_page($page);
+class zshare_net extends DownloadClass
+{
+	private $page;
+	private $cookie;
 
-	is_present($page,"File Not Found");
-
-	if(preg_match('%location: (.+)\/%', $page, $loc)){
-		$newurl = $loc[1];
-		$Url = parse_url($newurl);
+	public function Download($link)
+	{
+		global $premium_acc;
+		if (($_POST ["premium_acc"] == "on" && $_POST ["premium_user"] && $_POST ["premium_pass"]) || ($_POST ["premium_acc"] == "on" && $premium_acc ["zshare"]))
+		{
+			$this->DownloadPremium($link);
+		}
+		else
+		{
+			$this->DownloadFree($link);
+		}
 	}
 
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, $post, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-	
-	if (preg_match('/Array\((.+)\);link/', $page, $jsaray)) {
+	private function DownloadFree($link)
+	{
+		$this->page = $this->GetPage($link, 0, array('referer2'=> '', 'download' => '1', 'imageField.x' => rand(0, 50), 'imageField.y' => rand(0,30)));
+		$this->cookie = GetCookies($this->page);
+		if ( !preg_match('/Array\((.+)\);.*link/', $this->page, $jsaray) ) html_error('Final link not found');
 		$linkenc = $jsaray[1];
 		$zsharelink = preg_replace('/\'[, ]?[ ,]?/six', '', $linkenc);
-		$Url = parse_url($zsharelink);
-	}elseif(preg_match('/<param name="URL" value="(.+)?">/', $page, $audio)){
-		$zsharelink =$audio[1];
-		$Url = parse_url($zsharelink);
+		$this->RedirectDownload($zsharelink, basename($zsharelink), $this->cookie);
 	}
-	$FileName = basename($Url["path"]);
-	
-
-insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+}
 ?>
