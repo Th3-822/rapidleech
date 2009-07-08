@@ -13,6 +13,7 @@ error_reporting(6135);
 $nn = "\r\n";
 require_once("configs/config.php");
 require_once("classes/other.php");
+define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 
 if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logged_user($users)) === false))
 	{
