@@ -129,3 +129,8 @@ border-left-color: #cccccc;
 .font-blue {
 	color:#05F;
 }
+
+.caption {
+	font-family: Tahoma;
+	font-size: 11px;
+}

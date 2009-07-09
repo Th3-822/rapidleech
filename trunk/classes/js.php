@@ -4,6 +4,12 @@ if (!defined('RAPIDLEECH')) {
 		$NotIn = true;
 		$PHP_SELF = $_SERVER['PHP_SELF'];
 		$PHP_SELF = str_replace('/classes/js.php','/index.php',$PHP_SELF);
+		require('../configs/config.php');
+function lang($id) {
+	global $options;
+	include('../languages/'.$options['default_language'].'.php');
+	return $lang[$id];
+}
   } else {
  ?>
  <script language="JavaScript">
@@ -294,6 +300,17 @@ function startLinkCheck() {
 		}
 	});
 	return false;
+}
+
+function fc(caption,displaytext) {
+	if(c>0) {
+		document.getElementById("dl").innerHTML = caption + " <?php printf(lang(87),'" + c.toFixed(1) + "'); ?>";
+		c = c - .5;
+		setTimeout("fc('"+caption+"','"+displaytext+"')", 500);
+	} else {
+		document.getElementById("dl").style.display="none";
+		document.getElementById("code").innerHTML = unescape(displaytext);
+	}
 }
 <?php
 if (!isset($NotIn)) {
