@@ -94,6 +94,17 @@ $lang[85]	=	'Text passed as counter is string!';
 $lang[86]	=	'ERROR: Please enable JavaScript.';
 $lang[87]	=	'Please wait <b>%1$s</b> seconds...';	// %1$s = number of seconds
 $lang[88]	=	'Couldn\'t connect to %1$s at port %2$s';	// %1$s = host name %2$s = port
+$lang[89]	=	'Connected to proxy: <b>%1$s</b> at port <b>%2$s</b>...';	// %1$s = Proxy host %2$s = Proxy port
+$lang[90]	=	'Connected to: <b>%1$s</b> at port <b>%2$s</b>...';	// %1$s = host %2$s = port
+$lang[91]	=	'No header received';
+$lang[92]	=	'You are forbidden to access the page!';
+$lang[93]	=	'The page was not found!';
+$lang[94]	=	'The page was either forbidden or not found!';
+$lang[95]	=	'Error! it is redirected to [%1$s]';	// %1$s = redirected address
+$lang[96]	=	'This site requires authorization. For the indication of username and password of access it is necessary to use similar url:<br />http://<b>login:password@</b>www.site.com/file.exe';
+$lang[97]	=	'Resume limit exceeded';
+$lang[98]	=	'This server doesn\'t support resume';
+$lang[99]	=	'Download';
 
 
 ?>
