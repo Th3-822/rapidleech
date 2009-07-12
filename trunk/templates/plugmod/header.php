@@ -16,12 +16,10 @@ if (!isset($page_title)) {
 }
 ?></title>
 <script type="text/javascript" src="classes/js.php"></script>
-<SCRIPT language="JavaScript">
-<!--
+<script type="text/javascript">
 pic1= new Image(); 
 pic1.src="templates/plugmod/images/ajax-loading.gif"; 
-//-->
-</SCRIPT>
+</script>
 
 </head>
 

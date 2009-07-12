@@ -2,53 +2,51 @@
 function ftp() {
 	global $list, $disable_deleting;
 	if (count ( $_GET ["files"] ) < 1) {
-		echo "Select at least one file.<br><br>";
+		echo lang(138)."<br /><br />";
 	} else {
-		?>
-                            <form method="post"><input type="hidden"
-			name="act" value="ftp_go">
-                            File<?php echo count ( $_GET ["files"] ) > 1 ? "s" : ""; ?>:
+?>
+<form method="post"><input type="hidden" name="act" value="ftp_go">
+<?php echo lang(104); ?>:
 <?php
 		for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 			$file = $list [($_GET ["files"] [$i])];
 ?>
-		<input type="hidden" name="files[]"
-			value="<?php echo $_GET ["files"] [$i]; ?>"> <b><?php echo basename ( $file ["name"] ); ?></b><?php echo $i == count ( $_GET ["files"] ) - 1 ? "." : ",&nbsp"; ?>
+<input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>"> <b><?php echo basename ( $file ["name"] ); ?></b><?php echo $i == count ( $_GET ["files"] ) - 1 ? "." : ",&nbsp"; ?>
 <?php
 		}
-?><br>
-		<br>
+?><br />
+		<br />
 		<table align="center">
 			<tr>
 				<td>
 				<table>
 					<tr>
-						<td>Host:</td>
+						<td><?php echo lang(153); ?>:</td>
 						<td><input type="text" name="host" id="host" <?php echo $_COOKIE ["host"] ? " value=\"" . $_COOKIE ["host"] . "\"" : ""; ?>
 							size="23"></td>
 					</tr>
 					<tr>
-						<td>Port:</td>
+						<td><?php echo lang(154); ?>:</td>
 						<td><input type="text" name="port" id="port" <?php echo $_COOKIE ["port"] ? " value=\"" . $_COOKIE ["port"] . "\"" : " value=\"21\""; ?>
 							size="4"></td>
 					</tr>
 					<tr>
-						<td>Username:</td>
+						<td><?php echo lang(37); ?>:</td>
 						<td><input type="text" name="login" id="login" <?php echo $_COOKIE ["login"] ? " value=\"" . $_COOKIE ["login"] . "\"" : ""; ?>
 							size="23"></td>
 					</tr>
 					<tr>
-						<td>Password:</td>
+						<td><?php echo lang(38); ?>:</td>
 						<td><input type="password" name="password" id="password" <?php echo $_COOKIE ["password"] ? " value=\"" . $_COOKIE ["password"] . "\"" : ""; ?>
 							size="23"></td>
 					</tr>
 					<tr>
-						<td>Directory:</td>
+						<td><?php echo lang(155); ?>:</td>
 						<td><input type="text" name="dir" id="dir" <?php echo $_COOKIE ["dir"] ? " value=\"" . $_COOKIE ["dir"] . "\"" : " value=\"/\""; ?>
 							size="23"></td>
 					</tr>
 					<tr>
-						<td><input type="checkbox" name="del_ok" <?php if ($disable_deleting) echo "disabled"; ?>>&nbsp;Delete source file after successful upload</td>
+						<td><input type="checkbox" name="del_ok" <?php if ($disable_deleting) echo "disabled"; ?>>&nbsp;<?php echo lang(156); ?></td>
 					</tr>
 				</table>
 				</td>
@@ -59,15 +57,10 @@ function ftp() {
 						<td><input type="submit" value="Upload"></td>
 					</tr>
 					<tr align="center">
-						<td>Options</td>
+						<td><?php echo lang(33); ?></td>
 					</tr>
 					<tr align="center">
-						<td><script language="JavaScript">
-                                        document.write(
-                                          '<a href="javascript:setFtpParams();" id="hrefSetFtpParams" style="color: ' + (getCookie('ftpParams') == 1 ? '#808080' : '#0000FF') + ';">Copy Files</a> | ' +
-                                          '<a href="javascript:delFtpParams();" id="hrefDelFtpParams" style="color: ' + (getCookie('ftpParams') == 1 ? '#0000FF' : '#808080') + '";">Move Files</a>'
-                                        );
-                                        </script></td>
+						<td><a href="javascript:setFtpParams();" id="hrefSetFtpParams"><?php echo lang(157); ?></a> | <a href="javascript:delFtpParams();" id="hrefDelFtpParams"><?php echo lang(158); ?></a></td>
 					</tr>
 				</table>
 				</td>
@@ -84,23 +77,30 @@ function ftp_go() {
 	$ftp = new ftp ( );
 	if (! $ftp->SetServer ( $_POST ["host"], ( int ) $_POST ["port"] )) {
 		$ftp->quit ();
-		echo "Couldn't connect to the server" . $_POST ["host"] . ":" . $_POST ["port"] . ".<br>" . "<a href=\"javascript:history.back(-1);\">Go Back</a><br><br>";
+		printf(lang(79),$_POST ["host"] . ":" . $_POST ["port"]);
+		echo "<br /><a href=\"javascript:history.back(-1);\">".lang(78)."</a><br /><br />";
 	} else {
 		if (! $ftp->connect ()) {
 			$ftp->quit ();
-			echo "<br>Couldn't connect to the server " . $_POST ["host"] . ":" . $_POST ["port"] . ".<br>" . "<a href=\"javascript:history.back(-1);\">Go Back</a><br><br>";
+			echo "<br />";
+			printf(lang(79),$_POST ["host"] . ":" . $_POST ["port"]);
+			echo "<br /><a href=\"javascript:history.back(-1);\">".lang(78)."</a><br /><br />";
 		} else {
-			echo "Connected to: <b>ftp://" . $_POST ["host"] . "</b> at port <b>" . $_POST ["port"] . "</b>";
+			printf(lang(81),'ftp://'.$_POST['host'].':'.$_POST['port']);
 			if (! $ftp->login ( $_POST ["login"], $_POST ["password"] )) {
 				$ftp->quit ();
-				echo "<br>Wrong username and/or password <b>" . $_POST ["login"] . ":" . $_POST ["password"] . "</b>.<br>" . "<a href=\"javascript:history.back(-1);\">Go Back</a><br><br>";
+				echo "<br />";
+				echo lang(80);
+				echo "<br />" . "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
 			} else {
 				//$ftp->Passive(FALSE);
 				if (! $ftp->chdir ( $_POST ["dir"] )) {
 					$ftp->quit ();
-					echo "<br>Cannot locate the folder<b>" . $_POST ["dir"] . "</b>.<br>" . "<a href=\"javascript:history.back(-1);\">Go Back</a><br><br>";
+					echo "<br />";
+					printf(lang(159),$_POST['dir']);
+					echo "<br /><a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
 				} else {
-					?>
+?>
 <br>
 				<div id="status"></div>
 				<br>
@@ -129,12 +129,10 @@ function ftp_go() {
 				</table>
 				<br>
 <?php
-					$FtpUpload = TRUE;
 					for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 						$file = $list [$_GET ["files"] [$i]];
 						echo "<script>changeStatus('" . basename ( $file ["name"] ) . "', '" . $file ["size"] . "');</script>";
 						$FtpBytesTotal = filesize ( $file ["name"] );
-						$FtpChunkSize = round ( $FtpBytesTotal / 333 );
 						$FtpTimeStart = getmicrotime ();
 						if ($ftp->put ( $file ["name"], basename ( $file ["name"] ) )) {
 							$time = round ( getmicrotime () - $FtpTimeStart );
@@ -144,18 +142,15 @@ function ftp_go() {
 							
 							if ($_GET ["del_ok"] && ! $disable_deleting) {
 								if (@unlink ( $file ["name"] )) {
-									$v_ads = " and deleted ";
 									unset ( $list [$_GET ["files"] [$i]] );
-								} else {
-									$v_ads = ", but <b>not deleted </b>";
 								}
-								;
-							} else
-								$v_ads = "";
+							}
 							
-							echo "File <a href=\"ftp://" . $_POST ["login"] . ":" . $_POST ["password"] . "@" . $_POST ["host"] . ":" . $_POST ["port"] . $_POST ["dir"] . "/" . basename ( $file ["name"] ) . "\"><b>" . basename ( $file ["name"] ) . "</b></a> successfully uploaded$v_ads!" . "<br>Time: <b>" . sec2time ( $time ) . "</b><br>Average speed: <b>" . $speed . " KB/s</b><br><br>";
+								printf(lang(160),'<a href="ftp://' . $_POST ["login"] . ':' . $_POST ["password"] . '@' . $_POST ["host"] . ':' . $_POST ["port"] . $_POST ["dir"] . '/' . basename ( $file ["name"] ) . '"><b>' . basename ( $file ["name"] ) . '</b></a>');
+								echo "<br />".lang(161).": <b>" . sec2time ( $time ) . "</b><br />".lang(162).": <b>" . $speed . " KB/s</b><br /><br />";
 						} else {
-							echo "Couldn't upload the file <b>" . basename ( $file ["name"] ) . "</b>!<br>";
+							printf(lang(163),basename($file['name']));
+							echo "<br />";
 						}
 					}
 					$ftp->quit ();

@@ -12,11 +12,11 @@ function create_hosts_file($host_file = "hosts.php") {
 		}
 	}
 	if (! is_array ( $host )) {
-		print "No host file found";
+		print lang(127);
 	} else {
 		$fs = fopen ( HOST_DIR . 'download/' . $host_file, "wb" );
 		if (! $fs) {
-			print "Cannot create hosts file";
+			print lang(128);
 		} else {
 			fwrite ( $fs, "<?php\r\n\$host = array(\r\n" );
 			$i = 0;
@@ -159,7 +159,7 @@ function html_error($msg, $head = 1) {
 	}
 	echo ('<div align="center">');
 	echo ('<span style="color: red; background-color: #fec; padding: 3px; border: 2px solid $FFAA00; line-height: 25px"><b>' . $msg . '</b></span><br /><br />');
-	echo ('<a href="' . $PHP_SELF . '">Go back to main</a>');
+	echo ('<a href="' . $PHP_SELF . '">'.lang(13).'</a>');
 	echo ('</div>');
 	include(TEMPLATE_DIR.'footer.php');
 	exit ();
@@ -177,9 +177,9 @@ function sec2time($time) {
 		$time -= $min * 60;
 	}
 	$sec = $time;
-	$hour = ($hour > 1) ? $hour . " hours " : ($hour == 1) ? $hour . " hour " : "";
-	$min = ($min > 1) ? $min . " minutes " : ($min == 1) ? $min . " minute " : "";
-	$sec = ($sec > 1) ? $sec . " seconds" : ($sec == 1 || $sec == 0) ? $sec . " second" : "";
+	$hour = ($hour > 1) ? $hour . " ".lang(129)." " : ($hour == 1) ? $hour . " ".lang(130)." " : "";
+	$min = ($min > 1) ? $min . " ".lang(131)." " : ($min == 1) ? $min . " ".lang(132)." " : "";
+	$sec = ($sec > 1) ? $sec . " ".lang(133) : ($sec == 1 || $sec == 0) ? $sec . " ".lang(134) : "";
 	return $hour . $min . $sec;
 }
 
@@ -329,16 +329,12 @@ function purge_files($delay) {
 			if (file_exists ( $files_data ["name"] ) && is_file ( $files_data ["name"] )) {
 				if (time () - $files_data ["date"] >= $delay) {
 					@unlink ( $files_data ["name"] );
-					//file_put_contents("purge.log", date("d-m-Y H:i:s")." DELETE ".$files_data["name"]."\r\n", FILE_APPEND);
 				} else {
 					$files_new .= $files_line;
-					//file_put_contents("purge.log", date("d-m-Y H:i:s")." PASS ".$files_data["name"]."\r\n", FILE_APPEND);
 				}
 			} else {
-				//file_put_contents("purge.log", date("d-m-Y H:i:s")." MISSING ".$files_data["name"]."\r\n", FILE_APPEND);
 			}
 		}
-		//file_put_contents("purge.log", "\r\n\r\n", FILE_APPEND);
 		file_put_contents ( CONFIG_DIR . "files.lst", $files_new );
 	}
 }
@@ -361,7 +357,7 @@ if (! function_exists ( "file_put_contents" ) && ! defined ( "FILE_APPEND" )) {
 	}
 }
 if (! function_exists ( "file_get_contents" )) {
-	function file_get_contents($filename, $incpath = false, $resource_context = null) {
+	function file_get_contents($filename, $incpath = false) {
 		if (false === $fh = fopen ( $filename, "rb", $incpath )) {
 			trigger_error ( "file_get_contents() failed to open stream: No such file or directory", E_USER_WARNING );
 			return false;

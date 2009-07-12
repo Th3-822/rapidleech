@@ -105,6 +105,69 @@ $lang[96]	=	'This site requires authorization. For the indication of username an
 $lang[97]	=	'Resume limit exceeded';
 $lang[98]	=	'This server doesn\'t support resume';
 $lang[99]	=	'Download';
-
+$lang[100]	=	'This premium account is already in use with another ip.';
+$lang[101]	=	'File %1$s cannot be saved in directory %2$s';	// %1$s = file name %2$s = directory name
+$lang[102]	=	'Try to chmod the folder to 777.';
+$lang[103]	=	'Try again';
+$lang[104]	=	'File';
+$lang[105]	=	'It is not possible to carry out a record in the file %1$s';	// %1$s = file name
+$lang[106]	=	'Invalid URL or unknown error occured';
+$lang[107]	=	'You have reached the limit for Free users.';
+$lang[108]	=	'The download session has expired';
+$lang[109]	=	'Wrong access code.';
+$lang[110]	=	'You have entered a wrong code too many times';
+$lang[111]	=	'Download limit exceeded';
+$lang[112]	=	'Error READ Data';
+$lang[113]	=	'Error SEND Data';
+$lang[114]	=	'Active';
+$lang[115]	=	'Unavailable';
+$lang[116]	=	'Dead';
+$lang[117]	=	'You need to load/activate the cURL extension (http://www.php.net/cURL) or you can set $fgc = 1 in config.php.';
+$lang[118]	=	'cURL is enabled';
+$lang[119]	=	'PHP version 5 is recommended although it is not obligatory';
+$lang[120]	=	'Check if your safe mode is turned off as the script cannot work with safe mode on';
+$lang[121]	=	'Sending file <b>%1$s</b>';	// %1$s = filename
+$lang[122]	=	'No need spliting, Send single mail';
+$lang[123]	=	'Spliting into %1$s part size';	// %1$s = part size
+$lang[124]	=	'Method';
+$lang[125]	=	'Sending part <b>%1$s</b>';	//%1$s = part number
+$lang[126]	=	'No need spliting, Send single mail';
+$lang[127]	=	'No host file found';
+$lang[128]	=	'Cannot create hosts file';
+$lang[129]	=	'hours';	// Plural
+$lang[130]	=	'hour';
+$lang[131]	=	'minutes';	// Plural
+$lang[132]	=	'minute';
+$lang[133]	=	'seconds';	// Plural
+$lang[134]	=	'second';
+$lang[135]	=	'getCpuUsage(): couldn\'t access STAT path or STAT file invalid';
+$lang[136]	=	'CPU Load';
+$lang[137]	=	'An error occured';
+$lang[138]	=	'Select at least one file.';
+$lang[139]	=	'Emails';
+$lang[140]	=	'Send';
+$lang[141]	=	'Delete successful submits';
+$lang[142]	=	'Split by Parts';
+$lang[143]	=	'Parts Size';
+$lang[144]	=	'<b>%1$s</b> - Invalid E-mail Address.';	// %1$s = email address
+$lang[145]	=	'File <b>%1$s</b> is not found!';	// %1$s = filename
+$lang[146]	=	'Couldn\'t update files list!';
+$lang[147]	=	'File deletion is disabled';
+$lang[148]	=	'Delete files';
+$lang[149]	=	'Yes';
+$lang[150]	=	'No';
+$lang[151]	=	'File <b>%1$s</b> Deleted';	// %1$s = filename
+$lang[152]	=	'Error deleting the file <b>%1$s</b>!';	// %1$s = filename
+$lang[153]	=	'Host';
+$lang[154]	=	'Port';
+$lang[155]	=	'Directory';
+$lang[156]	=	'Delete source file after successful upload';
+$lang[157]	=	'Copy Files';
+$lang[158]	=	'Move Files';
+$lang[159]	=	'Cannot locate the folder <b>%1$s</b>';	// %1$s = directory name
+$lang[160]	=	'File %1$s successfully uploaded!';	// %1$s = filename
+$lang[161]	=	'Time';
+$lang[162]	=	'Average speed';
+$lang[163]	=	'Couldn\'t upload the file <b>%1$s</b>!';	// %1$s = filename
 
 ?>
