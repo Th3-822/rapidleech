@@ -207,7 +207,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			while ( ! feof ( $fp ) ) {
 				$page_src .= fread ( $fp, 1024 * 8 );
 			}
-			is_present ( $page_src, "is already in use with another ip", "This premium account is already in use with another ip." );
+			is_present ( $page_src, "is already in use with another ip", lang(100) );
 		}
 		if (stristr ( $host, "imageshack" ) && $bytesTotal < 15000) {
 			while ( ! feof ( $fp ) ) {
@@ -279,7 +279,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		if (@file_exists ( $saveToFile ) && $Resume ["use"] === TRUE) {
 			$fs = @fopen ( $saveToFile, "ab" );
 			if (! $fs) {
-				$lastError = "File " . basename ( $saveToFile ) . " cannot be saved in directory " . dirname ( $saveToFile ) . "<br>" . "Try to chmod the folder to 777.<br><a href=\"javascript:location.reload();\">Try again</a>";
+				$lastError = sprintf(lang(101),basename ( $saveToFile ),dirname ( $saveToFile )).'<br />'.lang(102).'<br /><a href="javascript:location.reload();">'.lang(103).'</a>';
 				return FALSE;
 			}
 		} else {
@@ -291,7 +291,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				$secondName = dirname ( $saveToFile ) . PATH_SPLITTER . str_replace ( ":", "", str_replace ( "?", "", basename ( $saveToFile ) ) );
 				$fs = @fopen ( $secondName, "wb" );
 				if (! $fs) {
-					$lastError = "File " . basename ( $saveToFile ) . " cannot be saved in directory " . dirname ( $saveToFile ) . "<br>" . "Try to chmod the folder to 777.<br><a href=\"javascript:location.reload();\">Try again</a>";
+					$lastError = sprintf(lang(101),basename ( $saveToFile ),dirname ( $saveToFile )).'<br />'.lang(102).'<br /><a href="javascript:location.reload();">'.lang(103).'</a>';
 					return FALSE;
 				}
 			}
@@ -307,13 +307,15 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			$fileSize = bytesToKbOrMbOrGb ( $bytesTotal );
 		}
 		$chunkSize = GetChunkSize ( $bytesTotal );
-		print "File <b>" . $saveToFile . "</b>, Size <b>" . $fileSize . "</b>...<br>";
+		echo(lang(104).'<b>'.$saveToFile.'</b>, '.lang(56).'<b>'.$fileSize.'</b>...<br />');
 		
+		$scriptStarted = false;
 		require (TEMPLATE_DIR . '/transloadui.php');
 		if ($Resume ["use"] === TRUE) {
 			$received = bytesToKbOrMbOrGb ( filesize ( $saveToFile ) );
 			$percent = round ( $Resume ["from"] / ($bytesTotal + $Resume ["from"]) * 100, 2 );
-			echo "<script>pr('" . $percent . "', '" . $received . "', '0')</script>\r\n";
+			echo "<script type='text/javascript'>pr('" . $percent . "', '" . $received . "', '0');\r\n";
+			$scriptStarted = true;
 			flush ();
 		}
 	} else {
@@ -329,7 +331,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			if ($bytesSaved > - 1) {
 				$bytesReceived += $bytesSaved;
 			} else {
-				$lastError = "It is not possible to carry out a record in the file " . $saveToFile;
+				$lastError = sprintf(lang(105),$saveToFile);
 				return false;
 			}
 			if ($bytesReceived >= $bytesTotal) {
@@ -344,19 +346,24 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				$chunkTime = $chunkTime ? $chunkTime : 1;
 				$lastChunkTime = $time;
 				$speed = @round ( $chunkSize / 1024 / $chunkTime, 2 );
-				echo "<script>pr('" . $percent . "', '" . $received . "', '" . $speed . "')</script>\r\n";
+				if (!$scriptStarted) {
+					echo('<script type="text/javascript">');
+					$scriptStarted = true;
+				}
+				echo "pr('" . $percent . "', '" . $received . "', '" . $speed . "');\r\n";
 				$last = $bytesReceived;
 			}
 		} else {
 			$page .= $data;
 		}
 	}
+	echo('</script>');
 	
 	if ($saveToFile) {
 		flock ( $fs, LOCK_UN );
 		fclose ( $fs );
 		if ($bytesReceived <= 0) {
-			$lastError = "Invalid URL or unknown error occured";
+			$lastError = lang(106);
 			fclose ( $fp );
 			return FALSE;
 		}
@@ -367,13 +374,13 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	} else {
 		if ($NoDownload) {
 			if (stristr ( $host, "rapidshare" )) {
-				is_present ( $page, "You have reached the limit for Free users", "You have reached the limit for Free users.", 0 );
-				is_present ( $page, "The download session has expired", "The download session has expired", 0 );
-				is_present ( $page, "Wrong access code.", "Wrong access code.", 0 );
-				is_present ( $page, "You have entered a wrong code too many times", "You have entered a wrong code too many times", 0 );
+				is_present ( $page, "You have reached the limit for Free users", lang(107), 0 );
+				is_present ( $page, "The download session has expired", lang(108), 0 );
+				is_present ( $page, "Wrong access code.", lang(109), 0 );
+				is_present ( $page, "You have entered a wrong code too many times", lang(110), 0 );
 				print $page;
 			} elseif (stristr ( $host, "megaupload" )) {
-				is_present ( $page, "Download limit exceeded", "Download limit exceeded", 0 );
+				is_present ( $page, "Download limit exceeded", lang(111), 0 );
 				print $page;
 			}
 		} else {
@@ -446,10 +453,9 @@ function GetChunkSize($fsize) {
 function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file, $filename, $fieldname, $field2name = "", $upagent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.1", $proxy = 0) {
 	global $nn, $lastError, $sleep_time, $sleep_count;
 	
-	$bound = "--------" . substr ( md5 ( time () ), - 8 );
+	$bound = "Rapidleech-Upload-" . md5(microtime());
 	$saveToFile = 0;
 	
-	unset ( $postdata );
 	foreach ( $post as $key => $value ) {
 		$postdata .= "--" . $bound . $nn;
 		$postdata .= "Content-Disposition: form-data; name=\"$key\"" . $nn . $nn;
@@ -461,16 +467,16 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 	$fieldname = $fieldname ? $fieldname : file . md5 ( $filename );
 	
 	if (! is_readable ( $file )) {
-		$lastError = "Error read file $file";
+		$lastError = sprintf(lang(65),$file);
 		return FALSE;
 	}
 	if ($field2name != '') {
-		$postdata .= "--" . $bound . $nn;
+		$postdata .= "--" . $bound . '--' . $nn;
 		$postdata .= "Content-Disposition: form-data; name=\"$field2name\"; filename=\"\"" . $nn;
 		$postdata .= "Content-Type: application/octet-stream" . $nn . $nn;
 	}
 	
-	$postdata .= "--" . $bound . $nn;
+	$postdata .= "--" . $bound . '--' . $nn;
 	$postdata .= "Content-Disposition: form-data; name=\"$fieldname\"; filename=\"$filename\"" . $nn;
 	$postdata .= "Content-Type: application/octet-stream" . $nn . $nn;
 	
@@ -494,44 +500,40 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 	}
 	
 	$zapros = "POST " . str_replace ( " ", "%20", $url ) . " HTTP/1.0" . $nn . "Host: " . $host . $nn . $cookies . "Content-Type: multipart/form-data; boundary=" . $bound . $nn . "Content-Length: " . (strlen ( $postdata ) + strlen ( $nn . "--" . $bound . "--" . $nn ) + $fileSize) . $nn . "User-Agent: " . $upagent . $nn . "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5" . $nn . "Accept-Language: en-en,en;q=0.5" . $nn . "Accept-Charset: windows-1251;koi8-r;q=0.7,*;q=0.7" . $nn . "Connection: Close" . $nn . $auth . $referer . $nn . $postdata;
-	#print_r($zapros);
-	#write_file('debug',$zapros);
-	
 
-	$fp = @fsockopen ( $host, $port, $errno, $errstr, 150 );
-	stream_set_timeout ( $fp, 300 );
+	$errno = 0; $errstr = "";
+	$fp = @stream_socket_client ( $url, $errno, $errstr, 120, STREAM_CLIENT_CONNECT );
+	//$fp = @fsockopen ( $host, $port, $errno, $errstr, 150 );
+	//stream_set_timeout ( $fp, 300 );
 	
 	if ($errno || $errstr) {
-		$lastError = 'err' . $errstr;
+		$lastError = $errstr;
 		return false;
 	}
 	
-	echo "File <b>" . $filename . "</b>, size <b>" . bytesToKbOrMb ( $fileSize ) . "</b>...<br>";
+	echo(lang(104).'<b>'.$filename.'</b>, '.lang(56).'<b>'.bytesToKbOrMb ( $fileSize ).'</b>...<br />');
 	global $id;
 	$id = md5 ( time () * rand ( 0, 10 ) );
 	require (TEMPLATE_DIR . '/uploadui.php');
 	flush ();
 	
 	$timeStart = getmicrotime ();
-	$len = strlen ( $zapros );
 	
-	$chunkSize = GetChunkSize ( $fileSize );
+	$chunkSize = 16384;		// Use this value no matter what
 	
 	fputs ( $fp, $zapros );
 	fflush ( $fp );
 
-	$pac = ceil ( $fileSize / $chunkSize );
 	$fs = fopen ( $file, 'r' );
 	
-	$i = 0;
-	
 	$local_sleep = $sleep_count;
+	echo('<script type="text/javascript">');
 	while ( ! feof ( $fs ) ) {
 		$data = fread ( $fs, $chunkSize );
 		if ($data === false) {
 			fclose ( $fs );
 			fclose ( $fp );
-			html_error ( 'Error READ Data' );
+			html_error ( lang(112) );
 		}
 		
 		if (($sleep_count !== false) && ($sleep_time !== false) && is_numeric ( $sleep_time ) && is_numeric ( $sleep_count ) && ($sleep_count > 0) && ($sleep_time > 0)) {
@@ -548,7 +550,7 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 		if ($sendbyte === false) {
 			fclose ( $fs );
 			fclose ( $fp );
-			html_error ( 'Error SEND Data' );
+			html_error ( lang(113) );
 		}
 		
 		$totalsend += $sendbyte;
@@ -559,9 +561,10 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 		$lastChunkTime = $time;
 		$speed = round ( $sendbyte / 1024 / $chunkTime, 2 );
 		$percent = round ( $totalsend / $fileSize * 100, 2 );
-		echo "<script>pr(" . $percent . ", '" . bytesToKbOrMb ( $totalsend ) . "', " . $speed . ")</script>\n";
+		echo "pr(" . $percent . ", '" . bytesToKbOrMb ( $totalsend ) . "', " . $speed . ");\n";
 		flush ();
 	}
+	echo('</script>');
 	fclose ( $fs );
 	
 	fputs ( $fp, $nn . "--" . $bound . "--" . $nn );
@@ -574,7 +577,6 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 		}
 		$page .= $data;
 	}
-	;
 	
 	fclose ( $fp );
 	

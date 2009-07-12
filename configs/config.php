@@ -40,7 +40,7 @@ $download_dir_is_changeable = false; // Set it to true to allow users to change 
 ### /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\ ###
 
 ### CPU,  Memory & Time Info ###
-$server_info = false;
+$server_info = true;
 ### Ajax Auto Refresh Server Info ###
 $ajax_refresh = true;
 
@@ -68,7 +68,7 @@ $rename_suffix = ''; //i.e : filename_suffix.ext
 
 ### Template ###
 $options['template_used'] = "plugmod";
-$options['default_language'] = "zn";
+$options['default_language'] = "en";
 
 ### File Actions ###
 $options["disable_actions"] = false; // Disable all actions // false = use individual settings below

@@ -2,11 +2,11 @@
 function rl_mail() {
 	global $disable_deleting, $list;
 	if (count ( $_GET ["files"] ) < 1) {
-			echo "Select at least one file.<br><br>";
+			echo lang(138)."<br /><br />";
 		} else {
-				?>
+?>
 <form method="post"><input type="hidden" name="act" value="mail_go">
-                              File<?php echo count ( $_GET ["files"] ) > 1 ? "s" : ""; ?>:
+<?php echo lang(104); ?>:
 <?php
 			for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 				$file = $list [($_GET ["files"] [$i])];
@@ -32,8 +32,7 @@ function rl_mail() {
 			<?php
 				if ($disable_deleting)
 					echo "disabled";
-				?>>&nbsp;Delete
-		successful submits</td>
+				?>>&nbsp;Delete	successful submits</td>
 	</tr>
 	<tr>
 		<td></td>
@@ -52,11 +51,9 @@ function rl_mail() {
 					<tr>
 						<td>Method:&nbsp;<select name="method">
 							<option value="tc"
-								<?php echo $_COOKIE ["method"] == "tc" ? " selected" : ""; ?>>Total
-							Commander</option>
+								<?php echo $_COOKIE ["method"] == "tc" ? " selected" : ""; ?>>Total	Commander</option>
 							<option value="rfc"
-								<?php echo $_COOKIE ["method"] == "rfc" ? " selected" : ""; ?>>RFC
-							2046</option>
+								<?php echo $_COOKIE ["method"] == "rfc" ? " selected" : ""; ?>>RFC 2046</option>
 						</select></td>
 					</tr>
 					<tr>

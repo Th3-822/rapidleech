@@ -2,30 +2,28 @@
 function delete() {
 	global $disable_deleting,$list;
 	if (count ( $_GET ["files"] ) < 1) {
-			echo "Please select at least one file<br><br>";
+			echo lang(138)."<br /><br />";
 		} elseif ($disable_deleting) {
-			echo "File deletion is disabled";
+			echo lang(147);
 		} else {
 				?>
 <form method="post"><input type="hidden" name="act" value="delete_go">
-                              File<?php
-			echo count ( $_GET ["files"] ) > 1 ? "s" : "";
-				?>:
-                              <?php
+<?php echo lang(104)?>:
+<?php
 			for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 				$file = $list [$_GET ["files"] [$i]];
-					?>
-                                  <input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>"> <b><?php echo basename ( $file ["name"] ); ?></b><?php echo $i == count ( $_GET ["files"] ) - 1 ? "." : ",&nbsp"; ?>
+?>
+	<input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>"> <b><?php echo basename ( $file ["name"] ); ?></b><?php echo $i == count ( $_GET ["files"] ) - 1 ? "." : ",&nbsp"; ?>
 <?php
 				}
-				?><br>Delete<?php echo count ( $_GET ["files"] ) > 1 ? " These Files" : " This File"; ?>?<br>
+				?><br /><?php echo lang(148); ?>?<br />
 <table>
 	<tr>
 		<td><input type="submit" name="yes" style="width: 33px; height: 23px"
-			value="Yes"></td>
+			value="<?php echo lang(149); ?>"></td>
 		<td>&nbsp;&nbsp;&nbsp;</td>
 		<td><input type="submit" name="no" style="width: 33px; height: 23px"
-			value="No"></td>
+			value="<?php echo lang(150); ?>"></td>
 	</tr>
 </table>
 </form>
@@ -34,30 +32,29 @@ function delete() {
 }
 
 function delete_go() {
-	global $list;
+	global $list, $PHP_SELF;
 	if ($_GET ["yes"]) {
 		for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 			$file = $list [$_GET ["files"] [$i]];
 			if (file_exists ( $file ["name"] )) {
 				if (@unlink ( $file ["name"] )) {
-					echo "File <b>" . $file ["name"] . "</b> Deleted<br><br>";
+					printf(lang(151),$file['name']);
+					echo "<br /><br />";
 					unset ( $list [$_GET ["files"] [$i]] );
 				} else {
-					echo "Error deleting the file <b>" . $file ["name"] . "</b>!<br><br>";
+					printf(lang(152),$file['name']);
+					echo "<br /><br />";
 				}
 			} else {
-				echo "File <b>" . $file ["name"] . "</b> Not Found!<br><br>";
+				printf(lang(145),$file['name']);
+				echo "<br /><br />";
 			}
 		}
 		if (! updateListInFile ( $list )) {
-			echo "Error in updating the list!<br><br>";
+			echo lang(146)."<br /><br />";
 		}
 	} else {
-				?>
-<script language="JavaScript">
-	location.href="<?php echo $PHP_SELF . "?act=files"; ?>";
-</script>
-<?php
+		echo('<script type="text/javascript">location.href="'.$PHP_SELF.'?act=files";</script>');
 	}
 }
 ?>

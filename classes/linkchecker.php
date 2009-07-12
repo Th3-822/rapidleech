@@ -84,31 +84,30 @@ function check($link, $x, $regex, $pattern='', $replace='')
 	elseif(!$_POST['d'] && eregi($regex, $page)) 
 	{
 
-		echo "<div class=\"g\">$x: Active: <a href=\"$link\"><b>$link</b></a></div>\n";  
+		echo "<div class=\"g\">$x: ".lang(114).": <a href=\"$link\"><b>$link</b></a></div>\n";  
 	} 
 	elseif(!$_POST['d'] && eregi("The file you are trying to access is temporarily unavailable.", $page)) 
 	{
 
-		echo "<div class=\"y\">$x: Unavailable: <a href=\"$link\"><b>$link</b></a></div>\n";
+		echo "<div class=\"y\">$x: ".lang(115).": <a href=\"$link\"><b>$link</b></a></div>\n";
 	}
 	else 
 	{
 
-		echo "<div class=\"r\">$x: Dead: <a href=\"$link\"><b>$link</b></a></div>\n";			
+		echo "<div class=\"r\">$x: ".lang(116).": <a href=\"$link\"><b>$link</b></a></div>\n";			
 	}
 }
 	
 function debug() {
 	echo '<div style="text-align:left; margin:0 auto; width:450px;">';
 	if ( !extension_loaded("curl") )
-	echo "You need to load/activate the cURL extension (http://www.php.net/cURL) or you can set $fgc = 1 in config.php.<br/>";
+	echo lang(117)."<br />";
 		else
-		echo "<b>cURL is enabled</b><br/>";
+		echo "<b>".lang(118)."</b><br/>";
 	if( PHP_VERSION < 5 ){ 
-	echo "PHP version 5 is recommended although it is not obligatory<br/>";
+	echo lang(119)."<br/>";
 	}
-	//echo "This will display all of your PHP info on your server<br/>";
-	echo "Check if your safe mode is turned off as the script cannot work with safe mode on<br/>";
+	echo lang(120)."<br/>";
 	echo "</div>";
 }
 ?>
