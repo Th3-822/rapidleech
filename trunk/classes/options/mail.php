@@ -18,7 +18,7 @@ function rl_mail() {
 <br>
 <table align="center">
 	<tr>
-		<td>Email:&nbsp;<input type="text" name="email"
+		<td><?php echo lang(164); ?>:&nbsp;<input type="text" name="email"
 			value="<?php echo ($_COOKIE ["email"] ? $_COOKIE ["email"] : ""); ?>">
 		</td>
 		<td><input type="submit" value="Send"></td>
@@ -27,12 +27,12 @@ function rl_mail() {
 		<td><input type="checkbox" name="del_ok"
 			<?php
 				if (! $disable_deleting)
-					echo "checked";
+					echo "checked='checked'";
 				?>
 			<?php
 				if ($disable_deleting)
-					echo "disabled";
-				?>>&nbsp;Delete	successful submits</td>
+					echo "disabled='disabled'";
+				?>>&nbsp;<?php echo lang(165); ?></td>
 	</tr>
 	<tr>
 		<td></td>
@@ -42,14 +42,13 @@ function rl_mail() {
 			<tr>
 				<td><input id="splitchkbox" type="checkbox" name="split"
 					onClick="javascript:var displ=this.checked?'':'none';document.getElementById('methodtd2').style.display=displ;"
-					<?php echo $_COOKIE ["split"] ? " checked" : ""; ?>>&nbsp;Split by
-				Parts</td>
+					<?php echo $_COOKIE ["split"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(142); ?></td>
 				<td>&nbsp;</td>
 				<td id="methodtd2"
 					<?php echo $_COOKIE ["split"] ? "" : " style=\"display: none;\""; ?>>
 				<table>
 					<tr>
-						<td>Method:&nbsp;<select name="method">
+						<td><?php echo lang(124); ?>:&nbsp;<select name="method">
 							<option value="tc"
 								<?php echo $_COOKIE ["method"] == "tc" ? " selected" : ""; ?>>Total	Commander</option>
 							<option value="rfc"
@@ -57,7 +56,7 @@ function rl_mail() {
 						</select></td>
 					</tr>
 					<tr>
-						<td>Parts Size:&nbsp;<input type="text" name="partSize" size="2"
+						<td><?php echo lang(143); ?>:&nbsp;<input type="text" name="partSize" size="2"
 							value="<?php echo $_COOKIE ["partSize"] ? $_COOKIE ["partSize"] : 10; ?>">&nbsp;MB
 						</td>
 					</tr>
@@ -74,7 +73,7 @@ function mail_go() {
 	global $list, $disable_deleting;
 	require_once (CLASS_DIR . "mail.php");
 	if (! checkmail ( $_GET ["email"] )) {
-		echo "Invalid E-mail Address.<br><br>";
+		echo lang(166)."<br /><br />";
 	} else {
 		$_GET ["partSize"] = ((isset ( $_GET ["partSize"] ) & $_GET ["split"] == "on") ? $_GET ["partSize"] * 1024 * 1024 : FALSE);
 		for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
@@ -91,12 +90,13 @@ function mail_go() {
 						;
 					} else
 						$v_ads = " !";
-					echo "<script language=\"JavaScript\">mail('File <b>" . basename ( $file ["name"] ) . "</b> it is sent for the address <b>" . $_GET ["email"] . "</b>" . $v_ads . "', '" . md5 ( basename ( $file ["name"] ) ) . "');</script>\r\n<br>";
+					echo "<script type='text/javascript'>mail('File <b>" . basename ( $file ["name"] ) . "</b> it is sent for the address <b>" . $_GET ["email"] . "</b>" . $v_ads . "', '" . md5 ( basename ( $file ["name"] ) ) . "');</script>\r\n<br>";
 				} else {
-					echo "Error sending file!<br>";
+					echo lang(12)."<br />";
 				}
 			} else {
-				echo "File <b>" . $file ["name"] . "</b> not found!<br><br>";
+				printf(lang(145),$file['name']);
+				echo "<br /><br />";
 			}
 		}
 	}

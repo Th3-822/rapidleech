@@ -5,8 +5,7 @@ function rl_pack() {
 		echo "Select at least one file.<br><br>";
 	} else {
 ?>
-                            <form method="post"><input type="hidden"
-			name="act" value="pack_go">
+<form method="post"><input type="hidden" name="act" value="pack_go">
 <?php
 		echo count ( $_GET ["files"] ) . " file" . (count ( $_GET ["files"] ) > 1 ? "s" : "") . ":<br>";
 		
