@@ -169,5 +169,37 @@ $lang[160]	=	'File %1$s successfully uploaded!';	// %1$s = filename
 $lang[161]	=	'Time';
 $lang[162]	=	'Average speed';
 $lang[163]	=	'Couldn\'t upload the file <b>%1$s</b>!';	// %1$s = filename
+$lang[164]	=	'Email';
+$lang[165]	=	'Delete	successful submits';
+$lang[166]	=	'Invalid E-mail Address';
+$lang[167]	=	'Please select only the .crc or .001 file!';
+$lang[168]	=	'Please select the .crc file!';
+$lang[169]	=	'Please select the .crc or .001 file!';
+$lang[170]	=	'Perform a CRC check? (recommended)';
+$lang[171]	=	'CRC32 check mode';
+$lang[172]	=	'Use hash_file (Recommended)';
+$lang[173]	=	'Read file to memory';
+$lang[174]	=	'Fake crc';
+$lang[175]	=	'Delete source file after successful merge';
+$lang[176]	=	'Notice';
+$lang[177]	=	'The file size and crc32 won\'t be check';
+$lang[178]	=	'Can\'t read the .crc file!';
+$lang[179]	=	'Error, Output file already exists <b>%1$s</b>';	// %1$s = filename
+$lang[180]	=	'Error, missing or incomplete parts';
+$lang[181]	=	'Error, The filetype %1$s is forbidden';	// Filetype
+$lang[182]	=	'It is not possible to open destination file <b>%1$s</b>';	// %1$s = filename
+$lang[183]	=	'Error writing the file <b>%1$s</b>!';	// %1$s = filename
+$lang[184]	=	'CRC32 checksum doesn\'t match!';
+$lang[185]	=	'File <b>%1$s</b> successfully merged';	// %1$s = filename
+$lang[186]	=	'deleted';
+$lang[187]	=	'not deleted';
+$lang[188]	=	'Add extension';
+$lang[189]	=	'without';
+$lang[190]	=	'to';
+$lang[191]	=	'Rename?';
+$lang[192]	=	'Cancel';
+$lang[193]	=	'Error renaming file <b>%1$s</b>';	// %1$s = filename
+$lang[194]	=	'File <b>%1$s</b> has been renamed to <b>%2$s</b>';	// %1$s = original filename %2$s = renamed filename
+
 
 ?>

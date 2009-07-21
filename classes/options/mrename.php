@@ -2,31 +2,25 @@
 function mrename() {
 	global $list;
 	if (count ( $_GET ["files"] ) < 1) {
-		echo "Please select atleast one file<br><br>";
+		echo lang(138)."<br /><br />";
 	} else {
 		?>
-                            <form method="post"><input type="hidden"
-			name="act" value="mrename_go">
-                            File<?php echo count ( $_GET ["files"] ) > 1 ? "s" : ""; ?>:
+<form method="post"><input type="hidden" name="act" value="mrename_go">
+<?php echo lang(104); ?>:
 <?php
 		for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 			$file = $list [$_GET ["files"] [$i]];
 ?>
-        <input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>"> <b><?php echo basename ( $file ["name"] ); ?></b><?php echo $i == count ( $_GET ["files"] ) - 1 ? "." : ",&nbsp"; ?>
+<input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>"> <b><?php echo basename ( $file ["name"] ); ?></b><?php echo $i == count ( $_GET ["files"] ) - 1 ? "." : ",&nbsp"; ?>
 <?php
 		}
 ?>
-                 <table>
-			<tr>
-				<td valign="center"><b>Add extension&nbsp;</b><font size=2
-					color="yellow">without&nbsp; <b>.</b>&nbsp; (dot)</font><b><input
-					type="input" name="extension" style="width: 60px; height: 23px"
-					value=''>&nbsp;to <?php echo count ( $_GET ["files"] ) > 1 ? " files" : " file"; ?>.</b>&nbsp;<input
-					name="yes" type="submit" style="height: 23px" value="Rename?">&nbsp;&nbsp;<input
-					name="no" type="submit" style="height: 23px" value="Cancel"></td>
-			</tr>
-		</table>
-		</form>
+<table>
+<tr>
+<td valign="center"><b><?php echo lang(188); ?>&nbsp;</b><font size=2 color="yellow">&nbsp; <b><?php echo lang(189); ?>.</b>&nbsp; (dot)</font><b><input type="input" name="extension" style="width: 60px; height: 23px" value=''>&nbsp;<?php echo lang(190); ?> <?php echo lang(104); ?>.</b>&nbsp;<input name="yes" type="submit" style="height: 23px" value="<?php echo lang(191); ?>">&nbsp;&nbsp;<input name="no" type="submit" style="height: 23px" value="<?php echo lang(192); ?>"></td>
+</tr>
+</table>
+</form>
 <?php
 	}
 }
@@ -45,28 +39,29 @@ function mrename_go() {
 				if (file_exists ( $file ["name"] )) {
 					$filetype = '.' . strtolower ( $_REQUEST ['extension'] );
 					if (is_array ( $forbidden_filetypes ) && in_array ( '.' . strtolower ( $_REQUEST ['extension'] ), $forbidden_filetypes )) {
-						print "The filetype $filetype is forbidden to be renamed<br><br>";
+						printf(lang(82),$filetype);
+						echo('<br /><br />');
 					} else {
 						if (@rename ( $file ["name"], fixfilename ( $file ["name"] . ".{$_REQUEST['extension']}" ) )) {
-							echo "<font color=yellow>File</font> <b>" . basename ( $file ["name"] ) . "</b> <font color=yellow>rename to</font> <b>" . fixfilename ( basename ( $file ["name"] . ".{$_REQUEST['extension']}" ) ) . "</b><br>";
+							printf(lang(194),basename($file['name']),fixfilename ( basename ( $file ["name"] . ".{$_REQUEST['extension']}" ) ));
 							$list [$_GET ["files"] [$i]] ["name"] .= '.' . $_REQUEST ['extension'];
 							$list [$_GET ["files"] [$i]] ["name"] = fixfilename ( $list [$_GET ["files"] [$i]] ["name"] );
 						} else {
-							echo "<font color=red>Error rename the file</font><b>" . basename ( $file ["name"] ) . "</b>!<br>";
+							printf(lang(193),basename($file['name']));
+							echo '<br />';
 						}
 					}
 				} else {
-					echo "<font color=red>File</font> <b>" . basename ( $file ["name"] ) . "</b> <font color=red>Not Found!</font><br>";
+					printf(lang(145),basename($file['name']));
+					echo('<br />');
 				}
 			}
 			if (! updateListInFile ( $list ))
-				echo "Error in updating the list!<br>";
+				echo lang(146)."<br />";
 		}
 	} else {
 ?>
-                            <script>
-                              location.href="<?php echo substr ( $PHP_SELF, 0, strlen ( $PHP_SELF ) - strlen ( strstr ( $PHP_SELF, "?" ) ) ) . "?act=files"; ?>";
-                            </script>
+<script>location.href="<?php echo substr ( $PHP_SELF, 0, strlen ( $PHP_SELF ) - strlen ( strstr ( $PHP_SELF, "?" ) ) ) . "?act=files"; ?>";</script>
 <?php
 	}
 }
