@@ -200,6 +200,16 @@ $lang[191]	=	'Rename?';
 $lang[192]	=	'Cancel';
 $lang[193]	=	'Error renaming file <b>%1$s</b>';	// %1$s = filename
 $lang[194]	=	'File <b>%1$s</b> has been renamed to <b>%2$s</b>';	// %1$s = original filename %2$s = renamed filename
-
+$lang[195]	=	'Archive Name';
+$lang[196]	=	'Please enter an archive name!';
+$lang[197]	=	'Error the archive has not been created.';
+$lang[198]	=	'File %1$s was packed';	// %1$s = filename
+$lang[199]	=	'Packed in archive <b>%1$s</b>';	// %1$s = filename
+$lang[200]	=	'Error, the archive is empty.';
+$lang[201]	=	'New name';
+$lang[202]	=	'Couldn\'t rename the file <b>%1$s</b>!';	// %1$s = filename
+$lang[203]	=	'Delete source file after successful split';
+$lang[204]	=	'files and folders';
+$lang[205]	=	'Unzip';
 
 ?>

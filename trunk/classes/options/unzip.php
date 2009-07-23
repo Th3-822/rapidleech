@@ -2,7 +2,7 @@
 function unzip() {
 	global $list, $PHP_SELF;
 	if (count ( $_GET ["files"] ) < 1) {
-		echo "Select at least one file.<br><br>";
+		echo lang(138)."<br /><br />";
 	} else {
 		echo('<form method="post" action="'.$PHP_SELF.'">');
 		echo('<input type="hidden" name="act" value="unzip_go" />');
@@ -18,7 +18,7 @@ function unzip() {
 				$flist = $zip->getList();
 				echo('<input type="hidden" name="files[]" value="'.$_GET['files'][$i].'" />');
 				echo('<tr>');
-				echo('<td align="center"><b>'.basename($file['name']).'</b> ('.count($flist).' files and folders)</tr>');
+				echo('<td align="center"><b>'.basename($file['name']).'</b> ('.count($flist).' '.lang(204).')</tr>');
 				echo('</tr>');
 				echo('<tr><td>');
 				echo('<div style="overflow-y:scroll; height:150px; padding-left:5px;">');
@@ -31,7 +31,7 @@ function unzip() {
 		}
 		echo('</table>');
 		echo('</td>');
-		echo('<td><input type="submit" name="submit" value="Unzip"></td>');
+		echo('<td><input type="submit" name="submit" value="'.lang(205).'"></td>');
 		echo('</tr>');
 		echo('<tr><td></td></tr>');
 		echo('</table>');
@@ -45,15 +45,7 @@ function unzip_go() {
 	for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 		$file = $list [$_GET ["files"] [$i]];
 		if (file_exists ( $file ["name"] )) {
-			//$zip_dir = basename($file["name"], ".zip");
-			/*if(!@mkdir($download_dir.$zip_dir, 0777))
-						{
-							html_error('Error : Unable to create director', 0);
-						}*/
 			$zip = new dUnzip2 ( $file ["name"] );
-			//$zip->debug = true;
-			
-	
 			if ($check_these_before_unzipping) {
 				$allf = $zip->getList ();
 				foreach ( $allf as $file => $property ) {

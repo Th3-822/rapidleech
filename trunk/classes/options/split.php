@@ -5,9 +5,8 @@ function rl_split() {
 		echo "Select at least one file.<br><br>";
 	} else {
 ?>
-                          <form method="post"
-			action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act"
-			value="split_go">
+<form method="post"	action="<?php echo $PHP_SELF; ?>">
+<input type="hidden" name="act" value="split_go">
 		<table align="center">
 			<tr>
 				<td>
@@ -16,13 +15,13 @@ function rl_split() {
 		for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 			$file = $list [$_GET ["files"] [$i]];
 ?>
-                                        <tr>
-						<td align="center"><input type="hidden" name="files[]"
-							value="<?php echo $_GET ["files"] [$i]; ?>"> <b><?php echo basename ( $file ["name"] ); ?></b>
+<tr>
+<td align="center">
+<input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>"> <b><?php echo basename ( $file ["name"] ); ?></b>
 						</td>
 					</tr>
 					<tr>
-						<td>Parts Size:&nbsp;<input type="text" name="partSize[]"
+						<td><?php echo lang(143); ?>:&nbsp;<input type="text" name="partSize[]"
 							size="2"
 							value="<?php echo ($_COOKIE ["partSize"] ? $_COOKIE ["partSize"] : 10); ?>">&nbsp;MB
 						</td>
@@ -30,8 +29,8 @@ function rl_split() {
 <?php
 					if ($download_dir_is_changeable) {
 ?>
-                                        <tr>
-						<td>Save To:&nbsp;<input type="text" name="saveTo[]" size="40"
+<tr>
+						<td><?php echo lang(40); ?>:&nbsp;<input type="text" name="saveTo[]" size="40"
 							value="<?php echo addslashes ( dirname ( $file ["name"] ) ); ?>"></td>
 					</tr>
 <?php
@@ -39,8 +38,7 @@ function rl_split() {
 ?>
                                         <tr>
 						<td><input type="checkbox" name="del_ok"
-							<?php echo $disable_deleting ? 'disabled' : 'checked'; ?>>&nbsp;Delete
-						source file after successful split</td>
+							<?php echo $disable_deleting ? 'disabled' : 'checked'; ?>>&nbsp;<?php echo lang(203); ?></td>
 					</tr>
 					<tr>
 						<td>CRC32 generation mode:<br>
@@ -53,8 +51,7 @@ function rl_split() {
 			}
 ?>
                                             <input type="radio"
-							name="crc_mode[<?php echo $i; ?>]" value="file_read">&nbsp;Read
-						file to memory<br>
+							name="crc_mode[<?php echo $i; ?>]" value="file_read">&nbsp;Read	file to memory<br>
 						<input type="radio" name="crc_mode[<?php echo $i; ?>]"
 							value="fake"
 <?php
