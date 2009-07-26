@@ -37,11 +37,11 @@ require(TEMPLATE_DIR.'/header.php');
 <?php
 if ($_REQUEST["GO"] == "GO") {
 	$getlinks=explode("\r\n",trim($_REQUEST['links']));
-	
+
 	if (!count($getlinks) || (trim($_REQUEST['links']) == "")) {
 		html_error("No link submited");
 	}
-	
+
 	if ($_REQUEST['server_side'] == 'on') {
 		// Get supported download plugins
 		require_once(HOST_DIR."download/hosts.php");
@@ -56,7 +56,7 @@ if ($_REQUEST["GO"] == "GO") {
 <td width="80%" align="center"><b><?php echo lang(21); ?></b></td>
 <td width="70" align="center"><b><?php echo lang(22); ?></b></td>
 </tr>
-<?php 
+<?php
 		for ($i = 0; $i < count($getlinks); $i++) {
 			echo "<tr><td width=\"80%\" nowrap>".$getlinks[$i]."</td><td width=\"70\" id=\"status".$i."\">".lang(23)."</td></tr>".$nn;
 		}
@@ -76,7 +76,7 @@ function resetProgress()
 	document.title = 'RAPIDLEECH PLUGMOD - Auto Download';
 }
 //--></script>
-<?php 
+<?php
 		for ($i = 0; $i < count($getlinks); $i++) {
 			$isHost = false;
 			$hideDiv = false;
@@ -90,19 +90,19 @@ function resetProgress()
 			$_GET = Array();
 			$_GET["GO"] = "GO"; // for insert_location()
 			$_GET["path"] = ((substr($download_dir, 0, 6) != "ftp://") ? realpath(DOWNLOAD_DIR) : $download_dir);
-	
+
 			if (isset($_POST["useproxy"]) && $_POST["useproxy"] == true) {
 				$_GET["useproxy"] = "on";
 				$_GET["proxy"] = $_POST["proxy"];
 				$pauth = ($_POST["proxyuser"] && $_POST["proxypass"]) ? base64_encode($_POST["proxyuser"].":".$_POST["proxypass"]) : "";
 			}
-			
+
 			if (isset($_POST['premium_acc'])) {
 				$_GET["premium_acc"] = "on";
 				$_GET["premium_user"] = $_POST["premium_user"];
 				$_GET["premium_pass"] = $_POST["premium_pass"];
 			}
-	
+
 			if ($Url['scheme'] != 'http' && $Url['scheme'] != 'https' && $Url['scheme'] != 'ftp') {
 				echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", '".lang(24)."');</script>".$nn;
 			} else {
@@ -140,29 +140,29 @@ function resetProgress()
 					$_GET["link"] = urldecode(trim($_GET["link"]));
 					$_GET["post"] = $_GET["post"] ? unserialize(stripslashes(urldecode(trim($_GET["post"])))) : 0;
 					$_GET["cookie"] = $_GET["cookie"] ? urldecode(trim($_GET["cookie"])) : 0;
-	
+
 					$redirectto = "";
-	
+
 					$pauth = urldecode(trim($_GET["pauth"]));
 					$auth = urldecode(trim($_GET["auth"]));
-	
+
 					if($_GET["auth"]) {
 						$AUTH["use"] = TRUE;
 						$AUTH["str"] = $_GET["auth"];
 					} else {
 						unset($AUTH);
 					}
-	
+
 					$ftp = parse_url($_GET["link"]);
 					$IS_FTP = $ftp["scheme"] == "ftp" ? TRUE : FALSE;
 					$AUTH["ftp"] = array("login" => ($ftp["user"] ? $ftp["user"] : "anonymous"), "password" => ($ftp["pass"] ? $ftp["pass"] : "anonymous@leechget.com"));
-	
+
 					$pathWithName = $_GET["saveto"].PATH_SPLITTER.$_GET["filename"];
 					while (stristr($pathWithName, "\\\\")) {
-						$pathWithName = str_replace("\\\\", "\\", $pathWithName);				
+						$pathWithName = str_replace("\\\\", "\\", $pathWithName);
 					}
 					list($pathWithName,$tmp) = explode('?',$pathWithName);
-	
+
 					echo "<script type=\"text/javascript\" language=\"javascript\">updateStatus(".$i.", '".lang(26)."');</script>".$nn;
 					if ($ftp["scheme"] == "ftp" && !$_GET["proxy"]) {
 						$file = getftpurl($_GET["host"], $ftp["port"] ? $ftp["port"] : 21, $_GET["path"], $pathWithName);
@@ -201,10 +201,10 @@ function resetProgress()
 		}
 		exit;
 	} else {
-		
+
 
 		$start_link='index.php?audl=doum';
-	
+
 		if(isset($_REQUEST['useproxy']) && $_REQUEST['useproxy'] && (!$_REQUEST['proxy'] || !strstr($_REQUEST['proxy'], ":"))) {
 	       	html_error(lang(20));
 	   	} else {
@@ -214,12 +214,12 @@ function resetProgress()
 				$start_link.='&proxypass='.$_REQUEST['proxypass'];
 			}
 	   	}
-	
+
 		$start_link.='&imageshack_tor='.$_REQUEST['imageshack_acc'].'&premium_acc='.$_REQUEST['premium_acc'];
 		if (isset($_POST['premium_user'])) {
 			$start_link.='&premium_user='.urlencode($_POST['premium_user']).'&premium_pass='.urlencode($_POST['premium_pass']);
 		}
-		
+
 ?>
 <script type="text/javascript">
 
@@ -271,7 +271,7 @@ function resetProgress()
 		document.getElementById("addlinks").value = "";
 	}
 <?php
-		
+
 		for ($i=0; $i<count($getlinks); $i++)
 			{
 				echo "\tlinks[".$i."]='".urlencode($getlinks[$i])."';\n";
@@ -391,6 +391,31 @@ function resetProgress()
 			</table>
 			</td>
 			</tr>
+			<tr>
+			<td>
+			<label><input type="checkbox" name="ytube_mp4" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;"<?php echo isset($_POST['yt_fmt']) ? ' checked' : ''; ?>>&nbsp;YouTube Video Format Selector</label>
+			<table width="150" border="0" id="ytubeopt" style="display: none;">
+			<tr>
+			<td colspan="2" style="white-space: nowrap;"><input type="checkbox" name="ytdirect"></input><small> Direct Link</small></td>
+			</tr>
+			<tr>
+			<td><small>&fmt=</small></td>
+			<td>
+			<select align="left" type="text" name="yt_fmt" id="yt_fmt">
+			<option selected value="highest">Auto-get the highest quality format available</option>
+			<option value="0">0 [Video: FLV H263 251kbps 320x180 @ 29.896fps | Audio: MP3 64kbps 1ch @ 22.05kHz]</option>
+			<option value="5">5 [Video: FLV H263 251kbps 320x180 @ 29.885fps | Audio: MP3 64kbps 1ch @ 22.05kHz]</option>
+			<option value="6">6 [Video: FLV H263 892kbps 480x270 @ 29.887fps | Audio: MP3 96kbps 1ch @ 44.10kHz]</option>
+			<option value="13">13 [Video: 3GP H263 77kbps 176x144 @ 15.000fps | Audio: AMR 13kbps 1ch @ 8.000kHz]</option>
+			<option value="17">17 [Video: 3GP XVID 55kbps 176x144 @ 12.000fps | Audio: AAC 29kbps 1ch @ 22.05kHz]</option>
+			<option value="18">18 [Video: MP4 H264 505kbps 480x270 @ 29.886fps | Audio: AAC 125kbps 2ch @ 44.10kHz]</option>
+			<option value="22">22 [Video: MP4 H264 2001kbps 1280x720 @ 29.918fps | Audio: AAC 198kbps 2ch @ 44.10kHz]</option>
+			<option value="34">34 [Video: FLV H264 256kbps 320x180 @ 29.906fps | Audio: AAC 62kbps 2ch @ 22.05kHz]</option>
+			<option value="35">35 [Video: FLV H264 831kbps 640x360 @ 29.942fps | Audio: AAC 107kbps 2ch @ 44.10kHz]</option>
+			</select>
+			</td>
+			</tr>
+			</table>
 			<tr>
 			<td><input type="checkbox" name="server_side" value="on" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('serverside').style.display=displ;" /><?php echo lang(43); ?></td></tr>
 			<tr id="serverside" style="display: none;"><td><input type="checkbox" name="server_dodelay" value="on" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('serverdelay').style.display=displ;" /><?php echo lang(44); ?></td>
