@@ -93,21 +93,26 @@ Pass: <input type="text" name="ipass" value="" />
 </tr>
 <tr>
 <td>
-<label><input type="checkbox" name="ytube_mp4" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;"<?php echo isset($_POST['yt_fmt']) ? ' checked' : ''; ?>>&nbsp;<small>YouTube Video Format Selector</small></label>&nbsp;<input type="checkbox" name="ytdirect"><small> Direct Link</small></input>
+<label><input type="checkbox" name="ytube_mp4" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;"<?php echo isset($_POST['yt_fmt']) ? ' checked' : ''; ?>>&nbsp;<small>YouTube Video Format Selector</small></label>
 <table width="150" border="0" id="ytubeopt" style="display: none;">
 <tr>
-<td>&fmt=</td>
+<td colspan="2" style="white-space: nowrap;"><input type="checkbox" name="ytdirect"></input><small> Direct Link</small></td>
+</tr>
+<tr>
+<td><small>&fmt=</small></td>
 <td>
 <select align="left" type="text" name="yt_fmt" id="yt_fmt">
+<option selected value="highest">Auto-get the highest quality format available</option>
 <option value="0">0 [Video: FLV H263 251kbps 320x180 @ 29.896fps | Audio: MP3 64kbps 1ch @ 22.05kHz]</option>
 <option value="5">5 [Video: FLV H263 251kbps 320x180 @ 29.885fps | Audio: MP3 64kbps 1ch @ 22.05kHz]</option>
 <option value="6">6 [Video: FLV H263 892kbps 480x270 @ 29.887fps | Audio: MP3 96kbps 1ch @ 44.10kHz]</option>
 <option value="13">13 [Video: 3GP H263 77kbps 176x144 @ 15.000fps | Audio: AMR 13kbps 1ch @ 8.000kHz]</option>
 <option value="17">17 [Video: 3GP XVID 55kbps 176x144 @ 12.000fps | Audio: AAC 29kbps 1ch @ 22.05kHz]</option>
-<option selected value="18">18 [Video: MP4 H264 505kbps 480x270 @ 29.886fps | Audio: AAC 125kbps 2ch @ 44.10kHz]</option>
+<option value="18">18 [Video: MP4 H264 505kbps 480x270 @ 29.886fps | Audio: AAC 125kbps 2ch @ 44.10kHz]</option>
 <option value="22">22 [Video: MP4 H264 2001kbps 1280x720 @ 29.918fps | Audio: AAC 198kbps 2ch @ 44.10kHz]</option>
 <option value="34">34 [Video: FLV H264 256kbps 320x180 @ 29.906fps | Audio: AAC 62kbps 2ch @ 22.05kHz]</option>
 <option value="35">35 [Video: FLV H264 831kbps 640x360 @ 29.942fps | Audio: AAC 107kbps 2ch @ 44.10kHz]</option>
+
 </select>
 </td>
 </tr>
