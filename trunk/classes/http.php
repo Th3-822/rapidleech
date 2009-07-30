@@ -307,15 +307,15 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			$fileSize = bytesToKbOrMbOrGb ( $bytesTotal );
 		}
 		$chunkSize = GetChunkSize ( $bytesTotal );
-		echo(lang(104).'<b>'.$saveToFile.'</b>, '.lang(56).'<b>'.$fileSize.'</b>...<br />');
+		echo(lang(104).' <b>'.$saveToFile.'</b>, '.lang(56).' <b>'.$fileSize.'</b>...<br />');
 		
-		$scriptStarted = false;
+		//$scriptStarted = false;
 		require (TEMPLATE_DIR . '/transloadui.php');
 		if ($Resume ["use"] === TRUE) {
 			$received = bytesToKbOrMbOrGb ( filesize ( $saveToFile ) );
 			$percent = round ( $Resume ["from"] / ($bytesTotal + $Resume ["from"]) * 100, 2 );
-			echo "<script type='text/javascript'>pr('" . $percent . "', '" . $received . "', '0');\r\n";
-			$scriptStarted = true;
+			echo "<script type='text/javascript'>pr('" . $percent . "', '" . $received . "', '0');</script>";
+			//$scriptStarted = true;
 			flush ();
 		}
 	} else {
@@ -346,18 +346,18 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				$chunkTime = $chunkTime ? $chunkTime : 1;
 				$lastChunkTime = $time;
 				$speed = @round ( $chunkSize / 1024 / $chunkTime, 2 );
-				if (!$scriptStarted) {
+				/*if (!$scriptStarted) {
 					echo('<script type="text/javascript">');
 					$scriptStarted = true;
-				}
-				echo "pr('" . $percent . "', '" . $received . "', '" . $speed . "');\r\n";
+				}*/
+				echo "<script type='text/javascript'>pr('" . $percent . "', '" . $received . "', '" . $speed . "');</script>";
 				$last = $bytesReceived;
 			}
 		} else {
 			$page .= $data;
 		}
 	}
-	echo('</script>');
+	//echo('</script>');
 	
 	if ($saveToFile) {
 		flock ( $fs, LOCK_UN );
