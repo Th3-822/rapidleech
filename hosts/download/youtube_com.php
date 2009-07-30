@@ -60,6 +60,7 @@ class youtube_com extends DownloadClass
 				$furlmap = preg_split('%\|%', $fmtlist);
 				$fmturlmaps[] = $furlmap;
 			}
+			$fmt = $fmturlmaps[0][0];
 			$furl = $fmturlmaps[0][1];
 		}
 
