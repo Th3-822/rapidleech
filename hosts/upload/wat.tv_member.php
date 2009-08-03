@@ -1,11 +1,4 @@
 <?php
-// addon debug
-
-define('RAPIDLEECH', 'yes');
-require_once("http.php");
-require_once("other.php");
-$nn = "\r\n";
-
 //addon
 function BiscottiDiKaox($content)
 {
