@@ -453,7 +453,7 @@ function GetChunkSize($fsize) {
 function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file, $filename, $fieldname, $field2name = "", $upagent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.1", $proxy = 0) {
 	global $nn, $lastError, $sleep_time, $sleep_count;
 	
-	$bound = "Rapidleech-Upload-" . md5(microtime());
+	$bound = "--------" . md5(microtime());
 	$saveToFile = 0;
 	
 	foreach ( $post as $key => $value ) {
@@ -491,18 +491,24 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 			$cookies = "Cookie: " . trim ( $cookie ) . $nn;
 		}
 	}
-	
 	$referer = $referer ? "Referer: " . $referer . $nn : "";
+	
+/*
 	if ($proxy) {
 		list ( $proxyHost, $proxyPort ) = explode ( ":", $proxy );
-		$url = "http://" . $host . ":" . $port . $url;
 		$host = $host . ":" . $port;
+		$posturl = $host . ":" . $port . $url;
 	}
+	else
+		$posturl = $host . ":" . $port . $url;
+*/
 	
+	$posturl = ($proxyHost ? $scheme . $proxyHost : $scheme . $host) . ':' . ($proxyPort ? $proxyPort : $port);
+		
 	$zapros = "POST " . str_replace ( " ", "%20", $url ) . " HTTP/1.0" . $nn . "Host: " . $host . $nn . $cookies . "Content-Type: multipart/form-data; boundary=" . $bound . $nn . "Content-Length: " . (strlen ( $postdata ) + strlen ( $nn . "--" . $bound . "--" . $nn ) + $fileSize) . $nn . "User-Agent: " . $upagent . $nn . "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5" . $nn . "Accept-Language: en-en,en;q=0.5" . $nn . "Accept-Charset: windows-1251;koi8-r;q=0.7,*;q=0.7" . $nn . "Connection: Close" . $nn . $auth . $referer . $nn . $postdata;
-
+	
 	$errno = 0; $errstr = "";
-	$fp = @stream_socket_client ( $url, $errno, $errstr, 120, STREAM_CLIENT_CONNECT );
+	$fp = @stream_socket_client ( $posturl, $errno, $errstr, 120, STREAM_CLIENT_CONNECT );
 	//$fp = @fsockopen ( $host, $port, $errno, $errstr, 150 );
 	//stream_set_timeout ( $fp, 300 );
 	
@@ -511,7 +517,7 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 		return false;
 	}
 	
-	echo(lang(104).'<b>'.$filename.'</b>, '.lang(56).'<b>'.bytesToKbOrMb ( $fileSize ).'</b>...<br />');
+	echo(lang(104).' <b>'.$filename.'</b>, '.lang(56).' <b>'.bytesToKbOrMb ( $fileSize ).'</b>...<br />');
 	global $id;
 	$id = md5 ( time () * rand ( 0, 10 ) );
 	require (TEMPLATE_DIR . '/uploadui.php');
@@ -527,7 +533,7 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 	$fs = fopen ( $file, 'r' );
 	
 	$local_sleep = $sleep_count;
-	echo('<script type="text/javascript">');
+	//echo('<script type="text/javascript">');
 	while ( ! feof ( $fs ) ) {
 		$data = fread ( $fs, $chunkSize );
 		if ($data === false) {
@@ -561,10 +567,10 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 		$lastChunkTime = $time;
 		$speed = round ( $sendbyte / 1024 / $chunkTime, 2 );
 		$percent = round ( $totalsend / $fileSize * 100, 2 );
-		echo "pr(" . $percent . ", '" . bytesToKbOrMb ( $totalsend ) . "', " . $speed . ");\n";
+		echo "<script type='text/javascript'>pr(" . $percent . ", '" . bytesToKbOrMb ( $totalsend ) . "', " . $speed . ");</script>\n";
 		flush ();
 	}
-	echo('</script>');
+	//echo('</script>');
 	fclose ( $fs );
 	
 	fputs ( $fp, $nn . "--" . $bound . "--" . $nn );
