@@ -27,7 +27,7 @@ function insert_timer($countd, $caption = "", $timeouttext = "", $hide = false) 
 	echo ('<span class="caption">' . $caption . '</span>&nbsp;&nbsp;');
 	echo ('<span id="timerlabel' . $timerid . '" class="caption"></span></span>');
 	echo ('</div>');
-	echo ('<script type="text/javascript">');
+	echo ('<script type="text/javascript" language="javascript">');
 	echo ('var count' . $timerid . '=' . $countd . ';');
 	echo ('function timer' . $timerid . '() {');
 	echo ('if(count' . $timerid . ' > 0) {');
@@ -45,13 +45,13 @@ function insert_timer($countd, $caption = "", $timeouttext = "", $hide = false) 
 	flush ();
 	
 	if ($hide === true) {
-		echo ('<script type="text/javascript">$("#global' . $timerid . '").css("display","none");</script>');
+		echo ('<script type="text/javascript" language="javascript">$("#global' . $timerid . '").css("display","none");</script>');
 		flush ();
 		return true;
 	}
 	
 	if ($timeouttext) {
-		echo ('<script type="text/javascript">$("#global' . $timerid . '").html("' . $timeouttext . '");</script>');
+		echo ('<script type="text/javascript" language="javascript">$("#global' . $timerid . '").html("' . $timeouttext . '");</script>');
 		flush ();
 		return true;
 	}
@@ -72,7 +72,7 @@ function insert_new_timer($countd, $displaytext, $caption = "", $text = "") {
 	echo ('<div id="code"></div>');
 	echo ('<div align="center">');
 	echo ('<div id="dl"><h4>' . lang ( 86 ) . '</h4></div></div>');
-	echo ('<script type="text/javascript">var c = ' . $countd . ';fc("' . $caption . '","' . $displaytext . '");</script>');
+	echo ('<script type="text/javascript" language="javascript">var c = ' . $countd . ';fc("' . $caption . '","' . $displaytext . '");</script>');
 	if (! empty ( $text )) {
 		print $text;
 	}
@@ -314,7 +314,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		if ($Resume ["use"] === TRUE) {
 			$received = bytesToKbOrMbOrGb ( filesize ( $saveToFile ) );
 			$percent = round ( $Resume ["from"] / ($bytesTotal + $Resume ["from"]) * 100, 2 );
-			echo "<script type='text/javascript'>pr('" . $percent . "', '" . $received . "', '0');</script>";
+			echo "<script type='text/javascript' language='javascript'>pr('" . $percent . "', '" . $received . "', '0');</script>";
 			//$scriptStarted = true;
 			flush ();
 		}
@@ -350,7 +350,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 					echo('<script type="text/javascript">');
 					$scriptStarted = true;
 				}*/
-				echo "<script type='text/javascript'>pr('" . $percent . "', '" . $received . "', '" . $speed . "');</script>";
+				echo "<script type='text/javascript' language='javascript'>pr('" . $percent . "', '" . $received . "', '" . $speed . "');</script>";
 				$last = $bytesReceived;
 			}
 		} else {
@@ -471,12 +471,12 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 		return FALSE;
 	}
 	if ($field2name != '') {
-		$postdata .= "--" . $bound . '--' . $nn;
+		$postdata .= "--" . $bound . $nn;
 		$postdata .= "Content-Disposition: form-data; name=\"$field2name\"; filename=\"\"" . $nn;
 		$postdata .= "Content-Type: application/octet-stream" . $nn . $nn;
 	}
 	
-	$postdata .= "--" . $bound . '--' . $nn;
+	$postdata .= "--" . $bound . $nn;
 	$postdata .= "Content-Disposition: form-data; name=\"$fieldname\"; filename=\"$filename\"" . $nn;
 	$postdata .= "Content-Type: application/octet-stream" . $nn . $nn;
 	
@@ -567,7 +567,7 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 		$lastChunkTime = $time;
 		$speed = round ( $sendbyte / 1024 / $chunkTime, 2 );
 		$percent = round ( $totalsend / $fileSize * 100, 2 );
-		echo "<script type='text/javascript'>pr(" . $percent . ", '" . bytesToKbOrMb ( $totalsend ) . "', " . $speed . ");</script>\n";
+		echo "<script type='text/javascript' language='javascript'>pr('" . $percent . "', '" . bytesToKbOrMb ( $totalsend ) . "', '" . $speed . "');</script>\n";
 		flush ();
 	}
 	//echo('</script>');

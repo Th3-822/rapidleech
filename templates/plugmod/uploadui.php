@@ -1,21 +1,23 @@
 <div id=<?php echo $id; ?>>
-<table cellspacing=0 cellpadding=0 style="FONT-FAMILY: Tahoma; FONT-SIZE: 11px;" id=progressblock>
+<table cellspacing="0" cellpadding="0" style="FONT-FAMILY: Tahoma; FONT-SIZE: 11px;" id="progressblock">
 <tr>
-	<td width=100>&nbsp;</td>
-	<td width=300 nowrap>
-		<div style='border:1px solid royalblue; width:300px; height:10px;'>
+	<td></td>
+	<td>
+	<div style='border:1px solid royalblue; width:300px; height:10px;'>
 			<div id="progress" style='background-color:#FFFFFF; width:0%; height:10px;'>
     		</div>
-		</div>
+	</div>
 	</td>
-<td width=100>&nbsp;</td>
+<td></td>
 <tr>
-	<td align=right id=received width=100 nowrap>0 KB</td>
-	<td align=center id=percent width=300>0%</td>
-	<td align=left id=speed width=100 nowrap>0 KB/s</td>
+	<td align="right" id="received">0 KB</td>
+	<td align="center" id="percent">0%</td>
+	<td align="left" id="speed">0 KB/s</td>
 </tr>
 </table>
-<script>
+</div>
+
+<script type="text/javascript" language="javascript">
 function pr(percent, received, speed)
 {
 	document.getElementById("received").innerHTML = '<b>' + received + '</b>';
@@ -33,5 +35,3 @@ function mail(str, field)
 	return true;
 }
 </script>
-<br>
-</div>
