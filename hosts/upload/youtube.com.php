@@ -28,8 +28,8 @@ else
 		<tr><td nowrap>&nbsp;Username*</td><td>&nbsp;<input type=text name=my_login value='' style="width:160px;" />&nbsp;</td></tr>
 		<tr><td nowrap>&nbsp;Password*</td><td>&nbsp;<input type=password name=my_pass value='' style="width:160px;" />&nbsp;</td></tr>
 		<tr><td colspan=2 align=center><input type=submit value='Upload'></td></tr>
+	</form>
 </table>
-</form>
 EOF;
 }
 
@@ -50,7 +50,7 @@ EOF;
 
 
 	//////////////////////////	EDIT FROM HERE DOWN	///////////////////////////////////////
-	$Url = parse_url("http://www.youtube.com/login?next=/") ;
+	$Url = parse_url("http://www.youtube.com/login?next=/");
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://www.youtube.com/", $cookie, 0, 0, $_GET["proxy"], $pauth);
 	is_page($page);
 	$cookies = GetCookies($page);
@@ -60,7 +60,7 @@ EOF;
 		$geturl = rtrim($redir["1"]);
 	}
 	
-	$contents = sslcurl("get", $geturl, 0, $cook, 0);
+	$contents = sslcurl("get", $geturl, 0, $cookies, 0);
 	$cookie_GALX = GetCookies($contents);
 
 	$post_url = "https://www.google.com/accounts/ServiceLoginAuth?service=youtube";
@@ -82,19 +82,37 @@ EOF;
 	$cookie = 'GoogleAccountsLocale_session=en; ' . $cookie_GALX;
 	$contents = sslcurl("post", $post_url, $post, $cookie, $geturl);
 
-	if (preg_match('%ocation: (.+)\r\n%', $contents, $redir))
+	if (!preg_match('%ocation: (.+)\r\n%', $contents, $redir)) html_error('Error - logins incorrect');
+	$redirect = urldecode(rtrim($redir["1"]));
+	
+	if (preg_match('%^https://www.google.com/accounts/CheckCookie%', $redirect)) $google = true; else $google = false;
+	
+	if ($google === true)
 	{
-		$redirect = rtrim($redir["1"]);
+		$gcookies = preg_replace('%LSID=EXPIRED; %U', '', GetCookies($contents) . '; ' . $cookie);
 		$Url = parse_url($redirect);
+		$page = sslcurl('get', $redirect, 0, $gcookies, urldecode('https://www.google.com/accounts/ServiceLogin?uilel=3&service=youtube&passive=true&continue=http%3A%2F%2Fwww.youtube.com%2Fsignup%3Fnomobiletemp%3D1%26hl%3Den_US%26next%3D%252F&hl=en_US&ltmpl=sso'));
+		$lsid = preg_replace('%LSID=EXPIRED; %U', '', GetCookies($page));
+		$gredir = html_entity_decode(cut_str($page, '<meta http-equiv="refresh" content="0; url=&#39;', '&#39;">'));
+		$Url = parse_url($gredir);
+		$page = sslcurl('get', $gredir, 0, $lsid, 0);
+		preg_match('%ocation: (.+)\r\n%', $page, $redir3);
+		$Url = parse_url($redir3[1]);
+		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, $gcookies, 0, 0, $_GET["proxy"], $pauth);
+		is_page($page);
+		$ytcookies = GetCookies($page);
+		$utube_login_cookie = $ytcookies;
 	}
-
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, $cookies, 0, 0, $_GET["proxy"], $pauth);
-	is_page($page);
-	
-	$cookie_LOGIN_INFO = GetCookies($page);
-	$cookies = str_replace('PREF=f1=40000000; ', '', $cookies);
-	$utube_login_cookie = $cookies . '; ' . $cookie_LOGIN_INFO . '&uvdm=1';
-	
+	else
+	{
+		$Url = parse_url($redirect);
+		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, $cookies, 0, 0, $_GET["proxy"], $pauth);
+		is_page($page);
+		$cookie_LOGIN_INFO = GetCookies($page);
+		$cookies = str_replace('PREF=f1=40000000; ', '', $cookies);
+		$utube_login_cookie = $cookies . '; ' . $cookie_LOGIN_INFO . '&uvdm=1';
+	}
+		
 	$url = 'http://' . $Url['host'] . '/my_videos_upload';
 	$Url = parse_url($url);
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), $url, $utube_login_cookie, 0, 0, $_GET["proxy"], $pauth);
@@ -162,5 +180,5 @@ function sslcurl ($method, $link, $post, $cookie, $refer)
 	return $contents;
 }
 // written by kaox 26/05/09
-//updated by szalinski 09-Aug-2009
+//updated by szalinski 10-Aug-2009
 ?>
