@@ -43,9 +43,6 @@ if ($continue_up)
 EOF;
 	
 	if (empty($_REQUEST['my_login']) || empty($_REQUEST['my_pass'])) html_error('No user and pass given', 0);
-	$post = array();
-	$post['username'] = trim($_REQUEST['my_login']);
-	$post['password'] = trim($_REQUEST['my_pass']);
 	
 
 
@@ -73,8 +70,8 @@ EOF;
 	$post['hl'] = 'en_US' ;
 	$post['ltmpl'] = 'sso';
 	$post['GALX'] = substr($cookie_GALX, 5);
-	$post['Email'] = $_REQUEST['my_login'];
-	$post['Passwd'] = $_REQUEST['my_pass'];
+	$post['Email'] = trim($_REQUEST['my_login']);
+	$post['Passwd'] = trim($_REQUEST['my_pass']);
 	$post['PersistentCookie'] = 'yes';
 	$post['rmShown'] = '1';
 	$post['signIn'] = 'Sign in';

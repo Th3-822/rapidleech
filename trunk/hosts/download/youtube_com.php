@@ -72,7 +72,8 @@ class youtube_com extends DownloadClass
 
 		if (preg_match ("/<title>YouTube - ([^<]+)/", $this->page, $title))
 		{
-			$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode ($title [1])) . (isset ($_POST ['yt_fmt']) && $_POST ['yt_fmt'] !== 'highest' ? '-(f' . $_POST ['yt_fmt'] . ')' : '-(f' . $fmt . ')') . $ext;
+			if (!$video_id) preg_match ('/"video_id": "([^\"]+)/', $this->page, $video_id);
+			$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode ($title [1])) . (isset ($_POST ['yt_fmt']) && $_POST ['yt_fmt'] !== 'highest' ? '-[' . $video_id[1] . '][f' . $_POST ['yt_fmt'] . ']' : '-[' . $video_id[1] . '][f' . $fmt . ']') . $ext;
 		}
 
 		if ($_POST ['ytdirect'] == 'on')
