@@ -18,7 +18,7 @@
 </table>
 <br>
 <div id="resume" align="center"></div>
-<script language="javascript">
+<script type="text/javascript" language="javascript">
 function pr(percent, received, speed){
 	document.getElementById("received").innerHTML = '<b>' + received + '</b>';
 	document.getElementById("percent").innerHTML = '<b>' + percent + '%</b>';
