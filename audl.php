@@ -292,7 +292,7 @@ function resetProgress()
 </tbody>
 </table>
 <br />
-<iframe width="90%" height="300" src="" name="idownload" border="1"><?php echo lang(30); ?></iframe>
+<iframe width="90%" height="300" src="" name="idownload"><?php echo lang(30); ?></iframe>
 <br />
 <table style="border:1px solid #666" class="container" cellspacing="1">
 <tr>
@@ -306,7 +306,7 @@ function resetProgress()
 	}
 }
 ?>
-<script language=javascript>
+<script type="text/javascript" language=javascript>
 	function ViewPage(page)
 		{
 			document.getElementById('listing').style.display='none';
@@ -331,7 +331,7 @@ function resetProgress()
 <tr><td><textarea id=links name=links rows=15 cols=60 style="width:600px; height:400px; border:1px solid #002E43"></textarea></td><td valign=top><input type=submit value="<?php echo lang(34); ?>" onClick=javascript:HideAll(); style="width:100px;"></tr>
 </table>
 </div>
-<div width=100% id="options" style="display:none;">
+<div id="options" style="display:none;">
     <table cellspacing="5" style="width:710px;">
       <tbody>
       <tr>
@@ -340,7 +340,7 @@ function resetProgress()
           <table align="center">
             <tr>
               <td>
-                <input type="checkbox" id=useproxy name=useproxy onClick="javascript:var displ=this.checked?'':'none';document.getElementById('proxy').style.display=displ;"<?php echo $_COOKIE["useproxy"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(35); ?>
+                <input type="checkbox" id=useproxy name=useproxy onClick="javascript:var displ=this.checked?'':'none';document.getElementById('proxy').style.display=displ;" <?php echo $_COOKIE["useproxy"] ? " checked" : ""; ?> />&nbsp;<?php echo lang(35); ?>
               </td>
               <td>&nbsp;
 
@@ -368,7 +368,7 @@ function resetProgress()
             ?>
             <tr>
               <td>
-                <input type="checkbox" name=saveto id=saveto onClick="javascript:var displ=this.checked?'':'none';document.getElementById('path').style.display=displ;"<?php echo $_COOKIE["saveto"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(40); ?>
+                <input type="checkbox" name=saveto id=saveto onClick="javascript:var displ=this.checked?'':'none';document.getElementById('path').style.display=displ;" <?php echo $_COOKIE["saveto"] ? " checked" : ""; ?> />&nbsp;<?php echo lang(40); ?>
               </td>
               <td>&nbsp;
 
@@ -382,7 +382,7 @@ function resetProgress()
             ?>
 
 			<tr>
-			<td><input type="checkbox" name="premium_acc" id="premium_acc" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;"<?php if (count($premium_acc) > 0) print ' checked'; ?>>&nbsp;<?php echo lang(42); ?></td>
+			<td><input type="checkbox" name="premium_acc" id="premium_acc" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;" <?php if (count($premium_acc) > 0) print ' checked'; ?> />&nbsp;<?php echo lang(42); ?></td>
 			<td>&nbsp;</td>
 			<td id="premiumblock" style="display: none;">
 			<table width="150" border="0">
@@ -393,15 +393,15 @@ function resetProgress()
 			</tr>
 			<tr>
 			<td>
-			<label><input type="checkbox" name="ytube_mp4" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;"<?php echo isset($_POST['yt_fmt']) ? ' checked' : ''; ?>>&nbsp;YouTube Video Format Selector</label>
+			<label><input type="checkbox" name="ytube_mp4" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;" <?php echo isset($_POST['yt_fmt']) ? ' checked' : ''; ?> />&nbsp;<?php echo lang(206); ?></label>
 			<table width="150" border="0" id="ytubeopt" style="display: none;">
 			<tr>
-			<td colspan="2" style="white-space: nowrap;"><input type="checkbox" name="ytdirect"></input><small> Direct Link</small></td>
+			<td colspan="2" style="white-space: nowrap;"><input type="checkbox" name="ytdirect" /><small> Direct Link</small></td>
 			</tr>
 			<tr>
 			<td><small>&fmt=</small></td>
 			<td>
-			<select align="left" type="text" name="yt_fmt" id="yt_fmt">
+			<select name="yt_fmt" id="yt_fmt">
 			<option selected value="highest">Auto-get the highest quality format available</option>
 			<option value="0">0 [Video: FLV H263 251kbps 320x180 @ 29.896fps | Audio: MP3 64kbps 1ch @ 22.05kHz]</option>
 			<option value="5">5 [Video: FLV H263 251kbps 320x180 @ 29.885fps | Audio: MP3 64kbps 1ch @ 22.05kHz]</option>
@@ -417,7 +417,7 @@ function resetProgress()
 			</tr>
 			</table>
 			<tr>
-			<td><input type="checkbox" name="server_side" value="on" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('serverside').style.display=displ;" /><?php echo lang(43); ?></td></tr>
+			<td><label><input type="checkbox" name="server_side" value="on" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('serverside').style.display=displ;" />&nbsp;<?php echo lang(43); ?></label></td></tr>
 			<tr id="serverside" style="display: none;"><td><input type="checkbox" name="server_dodelay" value="on" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('serverdelay').style.display=displ;" /><?php echo lang(44); ?></td>
 			<td>&nbsp;</td>
 			<td id="serverdelay" style="display: none;"><?php echo lang(45); ?>: <input type="text" name="serversidedelay" /></td>

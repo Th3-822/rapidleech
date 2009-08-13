@@ -90,5 +90,6 @@ $lang[81]	=	'Connected to: <b>%1$s</b>...';	// %1$s = FTP server name
 $lang[82]	=	'The filetype %1$s is forbidden to be downloaded';	// %1$s = File type
 $lang[83]	=	'File <b>%1$s</b>, Size <b>%2$s</b>...';	// %1$s = file name %2$s = file size
 $lang[84]	=	'Error retriving the link';
+$lang[206]	=	'YouTube 视频格式选择';
 
 ?>

@@ -174,7 +174,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 	if ($_GET ["dis_plug"] != "on") {
 		//check Domain-Host
 		if (isset ( $_GET ["vBulletin_plug"] )) {
-			//print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1251\">$nn";
+			//print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">$nn";
 			include(TEMPLATE_DIR.'/header.php');
 			//print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\"></center><br><br>$nn";
 			require_once (CLASS_DIR . "http.php");
@@ -184,7 +184,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 			foreach ( $host as $site => $file ) {
 				//if ($Url["host"] == $site)
 				if (preg_match ( "/^(.+\.)?" . $site . "$/i", $Url ["host"] )) {
-					//print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1251\">$nn";
+					//print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">$nn";
 					//print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\"></center><br><br>$nn";
 					include(TEMPLATE_DIR.'/header.php');
 					require_once (CLASS_DIR . "http.php");
@@ -205,7 +205,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 		}
 	}
 	
-	//print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1251\">$nn</head>$nn<body>$nn";
+	//print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">$nn</head>$nn<body>$nn";
 	include(TEMPLATE_DIR.'/header.php');
 	
 	$Url = parse_url ( $LINK );

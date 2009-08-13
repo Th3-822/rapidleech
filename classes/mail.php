@@ -30,10 +30,10 @@ function xmail($from, $to, $subj, $text, $filename, $partSize = FALSE, $method =
 		$subzh .= "=" . strtoupper ( dechex ( ord ( substr ( $subj, $i, 1 ) ) ) );
 	}
 	
-	$subj = "=?Windows-1251?Q?" . $subzh . '?=';
+	$subj = "=?UTF-8?Q?" . $subzh . '?=';
 	$un = strtoupper ( uniqid ( time () ) );
 	$head = "From: " . $from . "\n" . "X-Mailer: PHP RapidLeech PlugMod\n" . "Reply-To: " . $from . "\n" . "Mime-Version: 1.0\n" . "Content-Type: multipart/mixed; boundary=\"----------" . $un . "\"\n\n";
-	$zag = "------------" . $un . "\nContent-Type: text/plain; charset=Windows-1251\n" . "Content-Transfer-Encoding: 8bit\n\n" . $text . "\n\n" . "------------" . $un . "\n" . "Content-Type: application/octet-stream; name=\"" . basename ( $filename ) . "\"\n" . "Content-Transfer-Encoding: base64\n" . "Content-Disposition: attachment; filename=\"" . basename ( $filename ) . "\"\n\n";
+	$zag = "------------" . $un . "\nContent-Type: text/plain; charset=UTF-8\n" . "Content-Transfer-Encoding: 8bit\n\n" . $text . "\n\n" . "------------" . $un . "\n" . "Content-Type: application/octet-stream; name=\"" . basename ( $filename ) . "\"\n" . "Content-Transfer-Encoding: base64\n" . "Content-Disposition: attachment; filename=\"" . basename ( $filename ) . "\"\n\n";
 	echo "<span id=mailPart." . md5 ( basename ( $filename ) ) . "></span><br>";
 	flush ();
 	if ($partSize) {
@@ -94,7 +94,7 @@ function xmail($from, $to, $subj, $text, $filename, $partSize = FALSE, $method =
 			for($i = 0; $i < $totalParts; $i ++) {
 				if ($i == 0) {
 					$fileChunk = substr ( $fileContents, 0, $partSize );
-					$addHeads = addAdditionalHeaders ( array ("msg" => $text . "\r\n" . "File " . basename ( $filename ) . " (часть " . ($i + 1) . " из " . $totalParts . ").", "file" => array ("filename" => $fileName . ".crc", "stream" => chunk_split ( base64_encode ( "filename=" . basename ( $filename ) . "\r\n" . "size=" . $fileSize . "\r\n" . "crc32=" . $crc . "\r\n" ) ) ) ) );
+					$addHeads = addAdditionalHeaders ( array ("msg" => $text . "\r\n" . "File " . basename ( $filename ) . " (пїЅпїЅпїЅпїЅпїЅ " . ($i + 1) . " пїЅпїЅ " . $totalParts . ").", "file" => array ("filename" => $fileName . ".crc", "stream" => chunk_split ( base64_encode ( "filename=" . basename ( $filename ) . "\r\n" . "size=" . $fileSize . "\r\n" . "crc32=" . $crc . "\r\n" ) ) ) ) );
 					$addHeads .= addAdditionalHeaders ( array ("file" => array ("filename" => $fileName . ".001", "stream" => chunk_split ( base64_encode ( $fileChunk ) ) ) ) );
 				} elseif ($i == $totalParts - 1) {
 					$fileChunk = substr ( $fileContents, $i * $partSize );
@@ -122,7 +122,7 @@ function xmail($from, $to, $subj, $text, $filename, $partSize = FALSE, $method =
 function addAdditionalHeaders($head) {
 	global $un;
 	if ($head ["msg"]) {
-		$ret = "------------" . $un . "\nContent-Type: text/plain; charset=Windows-1251\n" . "Content-Transfer-Encoding: 8bit\n\n" . $head ["msg"] . "\n\n";
+		$ret = "------------" . $un . "\nContent-Type: text/plain; charset=UTF-8\n" . "Content-Transfer-Encoding: 8bit\n\n" . $head ["msg"] . "\n\n";
 	}
 	if ($head ["file"] ["filename"]) {
 		$ret .= "------------" . $un . "\n" . "Content-Type: application/octet-stream; name=\"" . basename ( $head ["file"] ["filename"] ) . "\"\n" . "Content-Transfer-Encoding: base64\n" . "Content-Disposition: attachment; filename=\"" . basename ( $head ["file"] ["filename"] ) . "\"\n\n" . $head ["file"] ["stream"] . "\n\n";
