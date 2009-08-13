@@ -53,7 +53,6 @@ if ($continue_up)
 			$post['submit.y'] = rand(4, 22);
 			$post['submit'] = 'submit';
 
-			//$login_url = 'http://zshare.net/UserRegistration/process.php?loc=http://zshare.net/UserRegistration/login.php';
 			$login_url = 'http://www.zshare.net/myzshare/process.php?loc=http://www.zshare.net/myzshare/login.php';
 			$Url = parse_url($login_url);
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, $post, 0, $_GET["proxy"], $pauth);
@@ -108,9 +107,10 @@ if ($continue_up)
 			$info_page = $infos[1];
 			$Url = parse_url($info_page);
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $upload_cookie, 0, 0, $_GET["proxy"], $pauth);
-			preg_match('/value=\"(http:\/\/www.zshare.net\/download\/.*\/)\" size=/i', $page, $glink);
+			preg_match('/value=\"(http:\/\/www.zshare.net\/(download|video)\/.*\/)\" size=/i', $page, $glink);
 			preg_match('/value=\"(http:\/\/www.zshare.net\/delete.html\?.*)\" size=/i', $page, $dlink);
 			$download_link = $glink[1];
 			$delete_link = $dlink[1];
 	}
+	//updated by szalinski 12-Aug-2009
 ?>

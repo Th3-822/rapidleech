@@ -46,10 +46,10 @@ foreach ($host as $site => $file)
 <td align="center" valign="top"><table border="0" cellpadding="0" cellspacing="0">
 <tbody>
 <tr>
-<td id="navcell1" align="center"> <a href="javascript:switchCell(1)"><img src="templates/plugmod/images/main_window_pm.gif" border="0"></a> </td>
-<td id="navcell2" align="center"> <a href="javascript:switchCell(2)"><img src="templates/plugmod/images/settings_pm.gif" border="0"></a> </td>
-<td id="navcell3" align="center"> <a href="javascript:switchCell(3)"><img src="templates/plugmod/images/server_files_pm.gif" border="0"></a> </td>
-<td id="navcell4" align="center"> <a href="javascript:switchCell(4)"><img src="templates/plugmod/images/link_checker_pm.gif" border="0"></a> </td>
+<td id="navcell1" align="center"> <a href="javascript:switchCell(1)"><img alt="" src="templates/plugmod/images/main_window_pm.gif" border="0"></a> </td>
+<td id="navcell2" align="center"> <a href="javascript:switchCell(2)"><img alt="" src="templates/plugmod/images/settings_pm.gif" border="0"></a> </td>
+<td id="navcell3" align="center"> <a href="javascript:switchCell(3)"><img alt="" src="templates/plugmod/images/server_files_pm.gif" border="0"></a> </td>
+<td id="navcell4" align="center"> <a href="javascript:switchCell(4)"><img alt="" src="templates/plugmod/images/link_checker_pm.gif" border="0"></a> </td>
 </tr>
 </tbody>
 </table>
@@ -68,7 +68,7 @@ foreach ($host as $site => $file)
 <td align="center"><input type="submit" value="Transload File"></td>
 </tr>
 <tr>
-<td align="left"><input type="checkbox" name="user_pass" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('usernpass').style.display=displ;" value="on">&nbsp;User & Pass (HTTP/FTP)</td>
+<td align="left"><input type="checkbox" name="user_pass" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('usernpass').style.display=displ;" value="on" />&nbsp;User & Pass (HTTP/FTP)</td>
 </tr>
 <tr id="usernpass" style="display: none;">
 <td align="center">
@@ -77,9 +77,9 @@ Pass: <input type="text" name="ipass" value="" />
 </td>
 </tr>
 <tr>
-<td align="left"><input type="checkbox" name="add_comment" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('comment').style.display=displ;">&nbsp;Add Comments</td>
+<td align="left"><input type="checkbox" name="add_comment" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('comment').style.display=displ;" />&nbsp;Add Comments</td>
 </tr>
-<tr id="comment" style="DISPLAY: none;">
+<tr id="comment" style="display: none;">
 <td align="center">
 <textarea name="comment" rows="4" cols="50"></textarea>
 </td>
@@ -93,7 +93,7 @@ Pass: <input type="text" name="ipass" value="" />
 </tr>
 <tr>
 <td>
-<label><input type="checkbox" name="ytube_mp4" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;"<?php echo isset($_POST['yt_fmt']) ? ' checked' : ''; ?>>&nbsp;<small>YouTube Video Format Selector</small></label>
+<label><input type="checkbox" name="ytube_mp4" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;" <?php echo isset($_POST['yt_fmt']) ? ' checked' : ''; ?> />&nbsp;<small>YouTube Video Format Selector</small></label>
 <table width="150" border="0" id="ytubeopt" style="display: none;">
 <tr>
 <td colspan="2" style="white-space: nowrap;"><input type="checkbox" name="ytdirect"></input><small> Direct Link</small></td>
@@ -120,7 +120,7 @@ Pass: <input type="text" name="ipass" value="" />
 </td>
 </tr>
 <tr>
-<td><label><input type="checkbox" name="imageshack_tor" id="imageshack_tor" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('torpremiumblock').style.display=displ;"<?php if (is_array($imageshack_acc)) print ' checked'; ?>>&nbsp;<small>ImageShack&reg; TorrentService</small></label><table width="150" border="0" id="torpremiumblock" style="display: none;">
+<td><label><input type="checkbox" name="imageshack_tor" id="imageshack_tor" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('torpremiumblock').style.display=displ;" <?php if (is_array($imageshack_acc)) print ' checked'; ?> />&nbsp;<small>ImageShack&reg; TorrentService</small></label><table width="150" border="0" id="torpremiumblock" style="display: none;">
 <tr><td>Username:&nbsp;</td><td><input type="text" name="tor_user" id="tor_user" size="15" value=""></td></tr>
 <tr><td>Password:&nbsp;</td><td><input type="password" name="tor_pass" id="tor_pass" size="15" value=""></td></tr>
 </table>
@@ -128,7 +128,7 @@ Pass: <input type="text" name="ipass" value="" />
 </tr>
 <tr>
 <td>
-<label><input type="checkbox" name="mu_acc" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('mupremiumblock').style.display=displ;"<?php if ($mu_cookie_user_value) print ' checked'; ?>>&nbsp;<small>Megaupload.com Cookie Value</small></label>
+<label><input type="checkbox" name="mu_acc" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('mupremiumblock').style.display=displ;" <?php if ($mu_cookie_user_value) print ' checked'; ?> />&nbsp;<small>Megaupload.com Cookie Value</small></label>
 <table width="150" border="0" id="mupremiumblock" style="display: none;">
 <tr><td>user=</td><td><input type="text" name="mu_cookie" id="tor_user" size="25" value=""></td></tr>
 </table>
@@ -141,7 +141,7 @@ Pass: <input type="text" name="ipass" value="" />
 </tr>
 <tr>
 <td>
-<label><input type="checkbox" name="cookieuse" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('cookieblock').style.display=displ;">&nbsp;<small>Additional Cookie Value</small></label>
+<label><input type="checkbox" name="cookieuse" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('cookieblock').style.display=displ;" />&nbsp;<small>Additional Cookie Value</small></label>
 <table width="150" border="0" id="cookieblock" style="display: none;">
 <tr><td>Key=Value;</td><td><input type="text" name="cookie" id="cookie" size="25" value=""></td></tr>
 </table>
@@ -155,22 +155,22 @@ Pass: <input type="text" name="ipass" value="" />
 <td align="center">
 <table align="center">
 <tr>
-<td><input type="checkbox" name="domail" id="domail" onClick="javascript:document.getElementById('emailtd').style.display=document.getElementById('splittd').style.display=this.checked?'':'none';document.getElementById('methodtd').style.display=(document.getElementById('splitchkbox').checked&this.checked)?'':'none';"<?php echo $_COOKIE["domail"] ? " checked" : ""; ?>>&nbsp;Send File to Email</td>
+<td><input type="checkbox" name="domail" id="domail" onClick="javascript:document.getElementById('emailtd').style.display=document.getElementById('splittd').style.display=this.checked?'':'none';document.getElementById('methodtd').style.display=(document.getElementById('splitchkbox').checked&this.checked)?'':'none';" <?php echo $_COOKIE["domail"] ? " checked" : ""; ?> />&nbsp;Send File to Email</td>
 <td>&nbsp;</td>
-<td id="emailtd"<?php echo $_COOKIE["domail"] ? "" : " style=\"display: none;\""; ?>>Email:&nbsp;<input type="text" name="email" id="email"<?php echo $_COOKIE["email"] ? " value=\"".$_COOKIE["email"]."\"" : ""; ?>></td>
+<td id="emailtd"<?php echo $_COOKIE["domail"] ? "" : " style=\"display: none;\""; ?> />Email:&nbsp;<input type="text" name="email" id="email"<?php echo $_COOKIE["email"] ? " value=\"".$_COOKIE["email"]."\"" : ""; ?> /></td>
 </tr>
 <tr>
 <td></td>
 </tr>
-<tr id="splittd"<?php echo $_COOKIE["split"] ? "" : " style=\"display: none;\""; ?>>
+<tr id="splittd"<?php echo $_COOKIE["split"] ? "" : " style=\"display: none;\""; ?> />
 <td>
-<input id="splitchkbox" type="checkbox" name="split" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('methodtd').style.display=displ;"<?php echo $_COOKIE["split"] ? " checked" : ""; ?>>&nbsp;Split Files
+<input id="splitchkbox" type="checkbox" name="split" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('methodtd').style.display=displ;" <?php echo $_COOKIE["split"] ? " checked" : ""; ?> />&nbsp;Split Files
 </td>
 <td>&nbsp;</td>
 <td id="methodtd"<?php echo $_COOKIE["split"] ? "" : " style=\"display: none;\""; ?>>
 <table>
 <tr>
-<td>Method:&nbsp;<select name="method"><option value="tc"<?php echo $_COOKIE["method"] == "tc" ? " selected" : ""; ?>>Total Commander</option><option value=rfc<?php echo $_COOKIE["method"] == "rfc" ? " selected" : ""; ?>>RFC 2046</option></select></td>
+<td>Method:&nbsp;<select name="method"><option value="tc"<?php echo $_COOKIE["method"] == "tc" ? " selected" : ""; ?>>Total Commander</option><option value=rfc<?php echo $_COOKIE["method"] == "rfc" ? " selected" : ""; ?> />RFC 2046</option></select></td>
 </tr>
 <tr>
 <td>Parts Size:&nbsp;<input type="text" name="partSize" size="2" value=<?php echo $_COOKIE["partSize"] ? $_COOKIE["partSize"] : 10; ?>>&nbsp;MB</td>
@@ -179,13 +179,13 @@ Pass: <input type="text" name="ipass" value="" />
 </td>
 </tr>
 <tr>
-<td><input type="checkbox" id="useproxy" name="useproxy" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('proxy').style.display=displ;"<?php echo $_COOKIE["useproxy"] ? " checked" : ""; ?>>&nbsp;Use Proxy Settings</td>
+<td><input type="checkbox" id="useproxy" name="useproxy" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('proxy').style.display=displ;" <?php echo $_COOKIE["useproxy"] ? " checked" : ""; ?> />&nbsp;Use Proxy Settings</td>
 <td>&nbsp;</td>
-<td id="proxy"<?php echo $_COOKIE["useproxy"] ? "" : " style=\"display: none;\""; ?>>
+<td id="proxy"<?php echo $_COOKIE["useproxy"] ? "" : " style=\"display: none;\""; ?> />
 <table width="150" border="0">
 <tr><td>Proxy:&nbsp;</td><td><input type="text" name="proxy" id="proxy" size="20"<?php echo $_COOKIE["proxy"] ? " value=\"".$_COOKIE["proxy"]."\"" : ""; ?>></td></tr>
-<tr><td>Username:&nbsp;</td><td><input type="text" name="proxyuser" id="proxyuser" size="20" <?php echo $_COOKIE["proxyuser"] ? " value=\"".$_COOKIE["proxyuser"]."\"" : ""; ?>></td></tr>
-<tr><td>Password:&nbsp;</td><td><input type="text" name="proxypass" id="proxypass" size="20" <?php echo $_COOKIE["proxypass"] ? " value=\"".$_COOKIE["proxypass"]."\"" : ""; ?>></td></tr>
+<tr><td>Username:&nbsp;</td><td><input type="text" name="proxyuser" id="proxyuser" size="20" <?php echo $_COOKIE["proxyuser"] ? " value=\"".$_COOKIE["proxyuser"]."\"" : ""; ?> /></td></tr>
+<tr><td>Password:&nbsp;</td><td><input type="text" name="proxypass" id="proxypass" size="20" <?php echo $_COOKIE["proxypass"] ? " value=\"".$_COOKIE["proxypass"]."\"" : ""; ?> /></td></tr>
 </table>
 </td>
 </tr>
@@ -193,7 +193,7 @@ Pass: <input type="text" name="ipass" value="" />
 <td></td>
 </tr>
 <tr>
-<td><input type="checkbox" name="premium_acc" id="premium_acc" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;"<?php if (count($premium_acc) > 0) print ' checked'; ?>>&nbsp;Use Premium Account</td>
+<td><input type="checkbox" name="premium_acc" id="premium_acc" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;" <?php if (count($premium_acc) > 0) print ' checked'; ?> />&nbsp;Use Premium Account</td>
 <td>&nbsp;</td>
 <td id="premiumblock" style="display: none;">
 <table width="150" border="0">
@@ -206,7 +206,7 @@ Pass: <input type="text" name="ipass" value="" />
 <td></td>
 </tr>
 <tr>
-<td><input type="checkbox" name="saveto" id="saveto" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('path').style.display=displ;"<?php echo $_COOKIE["saveto"] ? " checked" : ""; ?>>&nbsp;Save To</td>
+<td><input type="checkbox" name="saveto" id="saveto" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('path').style.display=displ;" <?php echo $_COOKIE["saveto"] ? " checked" : ""; ?> />&nbsp;Save To</td>
 <td>&nbsp;</td>
 <td id="path"<?php echo $_COOKIE["saveto"] ? "" : " style=\"display: none;\""; ?>>Path:&nbsp;<input type="text" name="path" size="40" value="<?php echo ($_COOKIE["path"] ? $_COOKIE["path"] : (substr($download_dir, 0, 6) != "ftp://" ? realpath(DOWNLOAD_DIR) : $download_dir)); ?>"></td>
 </tr>
@@ -214,7 +214,7 @@ Pass: <input type="text" name="ipass" value="" />
 <td></td>
 </tr>
 <tr>
-<td><input type="checkbox" name="savesettings" id="savesettings"<?php echo $_COOKIE["savesettings"] ? " checked" : ""; ?> onClick="javascript:var displ=this.checked?'':'none';document.getElementById('clearsettings').style.display=displ;">&nbsp;Save Settings</td>
+<td><input type="checkbox" name="savesettings" id="savesettings"<?php echo $_COOKIE["savesettings"] ? " checked" : ""; ?> onClick="javascript:var displ=this.checked?'':'none';document.getElementById('clearsettings').style.display=displ;" />&nbsp;Save Settings</td>
 <td>&nbsp;</td>
 <td id="clearsettings"<?php echo $_COOKIE["savesettings"] ? "" : " style=\"display: none;\""; ?>><a href="javascript:clearSettings();">Clear Current Settings</a></td>
 </tr>
@@ -292,7 +292,7 @@ else
   {
   document.write("Everything");
   }
-</script></a><br><br>
+</script></a><br /><br />
 <?php
     }
   }
@@ -315,7 +315,7 @@ if($list)
          ?>
 <tr onMouseOver="this.bgColor='#F5A249';" onMouseOut="this.bgColor='#D49659';" align="center" bgcolor="#D49659" style="color: black;" title="<?php echo $file["name"]; ?>" onmousedown="checkFile(<?php	echo $filecount;?>); return false;">
 <td bgcolor="#D49659"><input onmousedown="checkFile(<?php	echo $filecount;?>); return false;" id="files<?php echo $filecount; ?>" type=checkbox name="files[]" value="<?php echo $file["date"]; ?>"></td>
-<td><?php echo $inCurrDir ? "<b><a href=\"".$Path.substr(dirname($file["name"]), strlen(ROOT_DIR))."/".basename($file["name"]) : ""; echo $inCurrDir ? "\" style=\"color: #000;\">".basename($file["name"])."</a></b>" : basename($file["name"]); ?></td>
+<td><?php echo $inCurrDir ? "<b><a href=\"" . str_replace('\\', '', $Path.substr(dirname($file["name"]), strlen(ROOT_DIR)))."/".basename($file["name"]) : ""; echo $inCurrDir ? "\" style=\"color: #000;\">".basename($file["name"])."</a></b>" : basename($file["name"]); ?></td>
 <td bgcolor="#DC9F5F"><?php echo $file["size"]; ?></td>
 <!--<td bgcolor="#CF965D"><?php echo $file["link"] ? "<a href=\"".$file["link"]."\" style=\"color: #000;\">".$file["link"]."</a>" : "" ; ?></td>-->
 <td bgcolor="#C29569"><?php echo $file["comment"] ? str_replace("\\r\\n", "<br>", $file["comment"]) : ""; ?></td>

@@ -133,7 +133,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	$http_auth = ($auth) ? "Authorization: Basic " . $auth . $nn : "";
 	$proxyauth = ($pauth) ? "Proxy-Authorization: Basic " . $pauth . $nn : "";
 	
-	$request = $method . " " . str_replace ( " ", "%20", $url ) . " HTTP/1.1" . $nn . "Host: " . $host . $nn . "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.14) Gecko/20080404 Firefox/2.0.0.14" . $nn . "Accept: */*" . $nn . "Accept-Language: en-us;q=0.7,en;q=0.3" . $nn . "Accept-Charset: windows-1251,utf-8;q=0.7,*;q=0.7" . $nn . "Pragma: no-cache" . $nn . "Cache-Control: no-cache" . $nn . ($Resume ["use"] === TRUE ? "Range: bytes=" . $Resume ["from"] . "-" . $nn : "") . $http_auth . $proxyauth . $referer . $cookies . "Connection: Close" . $nn . $content_tl . $nn . $postdata;
+	$request = $method . " " . str_replace ( " ", "%20", $url ) . " HTTP/1.1" . $nn . "Host: " . $host . $nn . "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.14) Gecko/20080404 Firefox/2.0.0.14" . $nn . "Accept: */*" . $nn . "Accept-Language: en-us;q=0.7,en;q=0.3" . $nn . "Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7" . $nn . "Pragma: no-cache" . $nn . "Cache-Control: no-cache" . $nn . ($Resume ["use"] === TRUE ? "Range: bytes=" . $Resume ["from"] . "-" . $nn : "") . $http_auth . $proxyauth . $referer . $cookies . "Connection: Close" . $nn . $content_tl . $nn . $postdata;
 	
 	$errno = 0;
 	$errstr = "";
@@ -505,7 +505,7 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 	
 	$posturl = ($proxyHost ? $scheme . $proxyHost : $scheme . $host) . ':' . ($proxyPort ? $proxyPort : $port);
 		
-	$zapros = "POST " . str_replace ( " ", "%20", $url ) . " HTTP/1.0" . $nn . "Host: " . $host . $nn . $cookies . "Content-Type: multipart/form-data; boundary=" . $bound . $nn . "Content-Length: " . (strlen ( $postdata ) + strlen ( $nn . "--" . $bound . "--" . $nn ) + $fileSize) . $nn . "User-Agent: " . $upagent . $nn . "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5" . $nn . "Accept-Language: en-en,en;q=0.5" . $nn . "Accept-Charset: windows-1251;koi8-r;q=0.7,*;q=0.7" . $nn . "Connection: Close" . $nn . $auth . $referer . $nn . $postdata;
+	$zapros = "POST " . str_replace ( " ", "%20", $url ) . " HTTP/1.0" . $nn . "Host: " . $host . $nn . $cookies . "Content-Type: multipart/form-data; boundary=" . $bound . $nn . "Content-Length: " . (strlen ( $postdata ) + strlen ( $nn . "--" . $bound . "--" . $nn ) + $fileSize) . $nn . "User-Agent: " . $upagent . $nn . "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5" . $nn . "Accept-Language: en-en,en;q=0.5" . $nn . "Accept-Charset: utf-8,windows-1251;koi8-r;q=0.7,*;q=0.7" . $nn . "Connection: Close" . $nn . $auth . $referer . $nn . $postdata;
 	
 	$errno = 0; $errstr = "";
 	$fp = @stream_socket_client ( $posturl, $errno, $errstr, 120, STREAM_CLIENT_CONNECT );
