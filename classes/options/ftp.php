@@ -108,11 +108,8 @@ function ftp_go() {
 					<tr>
 						<td></td>
 						<td>
-						<div
-							style='border: #BBBBBB 1px solid; width: 300px; height: 10px;'>
-						<div id="progress"
-							style='background-color: #000099; margin: 1px; width: 0%; height: 8px;'>
-						</div>
+						<div class="progressouter">
+							<div id="progress" class="ftpprogress"></div>
 						</div>
 						</td>
 						<td></td>

@@ -61,7 +61,7 @@ function mrename_go() {
 		}
 	} else {
 ?>
-<script>location.href="<?php echo substr ( $PHP_SELF, 0, strlen ( $PHP_SELF ) - strlen ( strstr ( $PHP_SELF, "?" ) ) ) . "?act=files"; ?>";</script>
+<script type="text/javascript" language="javascript">location.href="<?php echo substr ( $PHP_SELF, 0, strlen ( $PHP_SELF ) - strlen ( strstr ( $PHP_SELF, "?" ) ) ) . "?act=files"; ?>";</script>
 <?php
 	}
 }

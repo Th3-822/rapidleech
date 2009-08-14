@@ -5,8 +5,8 @@
 <tr>
 	<td></td>
 	<td>
-	<div style='border:1px solid royalblue; width:300px; height:10px;'>
-			<div id="progress" style='background-color:#FFFFFF; width:0%; height:10px;'>
+	<div class="progressouter">
+			<div id="progress" class="progressup">
     		</div>
 	</div>
 	</td>
