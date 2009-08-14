@@ -158,7 +158,7 @@ function html_error($msg, $head = 1) {
 		include(TEMPLATE_DIR.'header.php');
 	}
 	echo ('<div align="center">');
-	echo ('<span style="color: red; background-color: #fec; padding: 3px; border: 2px solid $FFAA00; line-height: 25px"><b>' . $msg . '</b></span><br /><br />');
+	echo ('<span class="htmlerror"><b>' . $msg . '</b></span><br /><br />');
 	echo ('<a href="' . $PHP_SELF . '">'.lang(13).'</a>');
 	echo ('</div>');
 	include(TEMPLATE_DIR.'footer.php');

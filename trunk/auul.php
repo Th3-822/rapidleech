@@ -174,7 +174,7 @@ unset($Path);
 		}
 	if (empty($upload_services)) 
 	{
-		echo "<span style='color:#FF6600'><b>".lang(48)."</b></span>";
+		echo "<span class='warning'><b>".lang(48)."</b></span>";
 	} else {
 		sort($upload_services); reset($upload_services);
 		$cc=0;
@@ -194,13 +194,13 @@ unset($Path);
 <hr /><br />
 <input type=submit name="submit" value="Upload" /> <?php echo lang(49); ?>: <input type="text" size="2" name="windows" value="4" /><br />
 <?php echo lang(50); ?>: <input type="text" size="50" name="save_style" value="<?php echo lang(51); ?>" /><br />
-<a href="javascript:setCheckboxes(1);" style="color: #99C9E6;"><?php echo lang(52); ?></a> |
-<a href="javascript:setCheckboxes(0);" style="color: #99C9E6;"><?php echo lang(53); ?></a> |
-<a href="javascript:setCheckboxes(2);" style="color: #99C9E6;"><?php echo lang(54); ?></a> |
-<a href="files/myuploads.txt" style="color: #99C9E6">myuploads.txt</a>
+<a href="javascript:setCheckboxes(1);" class="chkmenu"><?php echo lang(52); ?></a> |
+<a href="javascript:setCheckboxes(0);" class="chkmenu"><?php echo lang(53); ?></a> |
+<a href="javascript:setCheckboxes(2);" class="chkmenu"><?php echo lang(54); ?></a> |
+<a href="files/myuploads.txt" class="chkmenu">myuploads.txt</a>
 <div style="overflow:auto; height:400px; width: 700px; border">
 <table cellpadding="3" cellspacing="1" width="100%" class="filelist">
-	<tr bgcolor="#4B433B" valign="bottom" align="center" style="color: white;">
+	<tr class="flistablehdr" valign="bottom">
 		<th></th>
 		<th><?php echo lang(55); ?></th>
 		<th><?php echo lang(56); ?></th>

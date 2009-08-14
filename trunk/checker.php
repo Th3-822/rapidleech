@@ -6,66 +6,66 @@ $phpver = phpversion();
 $phpverr = str_replace(".", "", $phpver);
 
 if ($phpverr >= 430) {
-	$phpverr = "<font face=\"Verdana\" size=\"2\" color=\"#008000\">Passed</font>";
+	$phpverr = "<font face=\"Verdana\" size=\"2\" class='checkerp'>Passed</font>";
 } else {
-	$phpverr = "<font face=\"Verdana\" size=\"2\" color=\"#FF0000\">Failed</font>";
+	$phpverr = "<font face=\"Verdana\" size=\"2\" class='checkerf'>Failed</font>";
 }
 
 if ( ini_get('safe_mode') ){
-	$safemode = "<font face=\"Verdana\" size=\"2\" color=\"#FF0000\">Failed</font>";
+	$safemode = "<font face=\"Verdana\" size=\"2\" class='checkerf'>Failed</font>";
 } else {
-	$safemode = "<font face=\"Verdana\" size=\"2\" color=\"#008000\">Passed</font>";
+	$safemode = "<font face=\"Verdana\" size=\"2\" class='checkerp'>Passed</font>";
 }
 
 if (!function_exists('fsockopen')) {
-	$fsockopen = "<font face=\"Verdana\" size=\"2\" color=\"#FF0000\">Failed</font>";
+	$fsockopen = "<font face=\"Verdana\" size=\"2\" class='checkerf'>Failed</font>";
 } else {
-	$fsockopen = "<font face=\"Verdana\" size=\"2\" color=\"#008000\">Passed</font>";
+	$fsockopen = "<font face=\"Verdana\" size=\"2\" class='checkerp'>Passed</font>";
 }
 
 if ((int)ini_get('memory_limit') > 32) {
-	$memory_limit = "<font face=\"Verdana\" size=\"2\" color=\"#008000\">Passed</font>";
+	$memory_limit = "<font face=\"Verdana\" size=\"2\" class='checkerp'>Passed</font>";
 } else {
-	$memory_limit = "<font face=\"Verdana\" size=\"2\" color=\"#FF0000\">Failed</font>";
+	$memory_limit = "<font face=\"Verdana\" size=\"2\" class='checkerf'>Failed</font>";
 }
 
 if (!function_exists('curl_version')) {
-	$curl = "<font face=\"Verdana\" size=\"2\" color=\"#FF0000\">Failed</font>";
+	$curl = "<font face=\"Verdana\" size=\"2\" class='checkerf'>Failed</font>";
 } else {
-	$curl = "<font face=\"Verdana\" size=\"2\" color=\"#008000\">Passed</font>";
+	$curl = "<font face=\"Verdana\" size=\"2\" class='checkerp'>Passed</font>";
 }
 
 if (!ini_get('allow_url_fopen')) {
-	$fopen = "<font face=\"Verdana\" size=\"2\" color=\"#FF0000\">Failed</font>";
+	$fopen = "<font face=\"Verdana\" size=\"2\" class='checkerf'>Failed</font>";
 } else {
-	$fopen = "<font face=\"Verdana\" size=\"2\" color=\"#008000\">Passed</font>";
+	$fopen = "<font face=\"Verdana\" size=\"2\" class='checkerp'>Passed</font>";
 }
 
 if (!ini_get('allow_call_time_pass_reference')) {
-	$call_time = "<font face=\"Verdana\" size=\"2\" color=\"#FF0000\">You might see warnings without this turned on</font>";
+	$call_time = "<font face=\"Verdana\" size=\"2\" class='checkerf'>You might see warnings without this turned on</font>";
 } else {
-	$call_time = "<font face=\"Verdana\" size=\"2\" color=\"#008000\">Passed</font>";
+	$call_time = "<font face=\"Verdana\" size=\"2\" class='checkerp'>Passed</font>";
 }
 
 if (!function_exists('passthru')) {
-	$passthru = "<font face=\"Verdana\" size=\"2\" color=\"#FF0000\">You might not be able to turn on server stats</font>";
+	$passthru = "<font face=\"Verdana\" size=\"2\" class='checkerf'>You might not be able to turn on server stats</font>";
 } else {
-	$passthru = "<font face=\"Verdana\" size=\"2\" color=\"#008000\">Passed</font>";
+	$passthru = "<font face=\"Verdana\" size=\"2\" class='checkerp'>Passed</font>";
 }
 
 if (!function_exists('disk_free_space')) {
-	$disk_free_space = "<font face=\"Verdana\" size=\"2\" color=\"#FF0000\">You might not be able to turn on server stats</font>";
+	$disk_free_space = "<font face=\"Verdana\" size=\"2\" class='checkerf'>You might not be able to turn on server stats</font>";
 } else {
-	$disk_free_space = "<font face=\"Verdana\" size=\"2\" color=\"#008000\">Passed</font>";
+	$disk_free_space = "<font face=\"Verdana\" size=\"2\" class='checkerp'>Passed</font>";
 }
 
 if (function_exists('apache_get_version')) {
 	$apache_version = apache_get_version();
 	preg_match('/Apache\/([0-9])\./U',$apache_version,$apacver);
 	if ($apacver[1] < 2) {
-		$apacver = "<font face=\"Verdana\" size=\"2\" color=\"#FF0000\">Your server might not be able to support files more than 2 GB</font>";
+		$apacver = "<font face=\"Verdana\" size=\"2\" class='checkerf'>Your server might not be able to support files more than 2 GB</font>";
 	} else {
-		$apacver = "<font face=\"Verdana\" size=\"2\" color=\"#008000\">Passed</font>";
+		$apacver = "<font face=\"Verdana\" size=\"2\" class='checkerp'>Passed</font>";
 	}
 }
 
@@ -74,7 +74,7 @@ if (function_exists('apache_get_version')) {
 	<tr>
 		<td>
 			<div align="center">
-				<table border="1" cellpadding="20" style="border-collapse: collapse" bordercolor="#000000">
+				<table border="1" cellpadding="20" style="border-collapse: collapse">
 					<tr>
 						<td align="center">
 							<img border="0" src="http://www.rapidleech.com/logo.gif" /><br />

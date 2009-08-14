@@ -4,10 +4,11 @@ set_time_limit(0);
 define('RAPIDLEECH', 'yes');
 define('CLASS_DIR', 'classes/');
 define('CONFIG_DIR', 'configs/');
+require_once(CONFIG_DIR."config.php");
+require_once(CLASS_DIR . 'other.php');
 // For ajax calls, lets make it use less resource as possible
 switch ($_GET['ajax']) {
 	case 'server_stats':
-		require_once(CONFIG_DIR."config.php");
 		if ($server_info && $ajax_refresh) {
 			ob_start();
 			require(CLASS_DIR."sinfo.php");

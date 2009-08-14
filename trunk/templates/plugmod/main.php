@@ -18,7 +18,7 @@ if (!defined('RAPIDLEECH')) {
 </tr>
 <tr>
 <td>
-<div align="center" style="background-color:#657B87; color:#eee; padding:1px; width:102px; margin:1px auto 2px 1px"><?php echo '<b><small>'.count($host).'</small></b> Plugins'; ?></div></td>
+<div align="center" class="plugincolhd"><?php echo '<b><small>'.count($host).'</small></b> Plugins'; ?></div></td>
 </tr>
 <tr>
 <td height="100%" style="padding:3px;">
@@ -27,7 +27,7 @@ if (!defined('RAPIDLEECH')) {
 ksort($host);
 foreach ($host as $site => $file)
 	{
-	echo "<span style=color:ccc>".$site."</span><br>";
+	echo "<span class='plugincollst'>".$site."</span><br>";
 	}
 ?>
 </div>
@@ -46,10 +46,10 @@ foreach ($host as $site => $file)
 <td align="center" valign="top"><table border="0" cellpadding="0" cellspacing="0">
 <tbody>
 <tr>
-<td id="navcell1" align="center"> <a href="javascript:switchCell(1)"><img alt="" src="templates/plugmod/images/main_window_pm.gif" border="0"></a> </td>
-<td id="navcell2" align="center"> <a href="javascript:switchCell(2)"><img alt="" src="templates/plugmod/images/settings_pm.gif" border="0"></a> </td>
-<td id="navcell3" align="center"> <a href="javascript:switchCell(3)"><img alt="" src="templates/plugmod/images/server_files_pm.gif" border="0"></a> </td>
-<td id="navcell4" align="center"> <a href="javascript:switchCell(4)"><img alt="" src="templates/plugmod/images/link_checker_pm.gif" border="0"></a> </td>
+<td id="navcell1" align="center" onclick="javascript:switchCell(1)"></td>
+<td id="navcell2" align="center" onclick="javascript:switchCell(2)"></td>
+<td id="navcell3" align="center" onclick="javascript:switchCell(3)"></td>
+<td id="navcell4" align="center" onclick="javascript:switchCell(4)"></td>
 </tr>
 </tbody>
 </table>
@@ -237,9 +237,9 @@ if($list)
     }
   ?>
 <form name="flist" method="post">
-<a href="javascript:setCheckboxes(1);" style="color: #99C9E6;">Check All</a> |
-<a href="javascript:setCheckboxes(0);" style="color: #99C9E6;">Un-Check All</a> |
-<a href="javascript:setCheckboxes(2);" style="color: #99C9E6;">Invert Selection</a>
+<a href="javascript:setCheckboxes(1);" class="chkmenu">Check All</a> |
+<a href="javascript:setCheckboxes(0);" class="chkmenu">Un-Check All</a> |
+<a href="javascript:setCheckboxes(2);" class="chkmenu">Invert Selection</a>
 <?php if ($show_all === true)
   {
   ?>
@@ -262,7 +262,7 @@ else
 <div style="overflow:auto; height:500px; width: 800px;">
 <table cellpadding="3" cellspacing="1" width="100%" class="filelist">
 <tbody>
-<tr bgcolor="#4B433B" valign="bottom" align="center" style="color: white;">
+<tr class="flisttblhdr" valign="bottom">
 <td>
 
 </td>
@@ -313,13 +313,13 @@ if($list)
          $Path = substr($Path["path"], 0, strlen($Path["path"]) - strlen(strrchr($Path["path"], "/")));
          }
          ?>
-<tr onMouseOver="this.bgColor='#F5A249';" onMouseOut="this.bgColor='#D49659';" align="center" bgcolor="#D49659" style="color: black;" title="<?php echo $file["name"]; ?>" onmousedown="checkFile(<?php	echo $filecount;?>); return false;">
-<td bgcolor="#D49659"><input onmousedown="checkFile(<?php	echo $filecount;?>); return false;" id="files<?php echo $filecount; ?>" type=checkbox name="files[]" value="<?php echo $file["date"]; ?>"></td>
+<tr class="flistmouseoff" onMouseOver="this.className='flistmouseon'" onMouseOut="this.className='flistmouseoff'" align="center" title="<?php echo $file["name"]; ?>" onmousedown="checkFile(<?php	echo $filecount;?>); return false;">
+<td><input onmousedown="checkFile(<?php echo $filecount;?>); return false;" id="files<?php echo $filecount; ?>" type=checkbox name="files[]" value="<?php echo $file["date"]; ?>" /></td>
 <td><?php echo $inCurrDir ? "<b><a href=\"" . str_replace('\\', '', $Path.substr(dirname($file["name"]), strlen(ROOT_DIR)))."/".basename($file["name"]) : ""; echo $inCurrDir ? "\" style=\"color: #000;\">".basename($file["name"])."</a></b>" : basename($file["name"]); ?></td>
-<td bgcolor="#DC9F5F"><?php echo $file["size"]; ?></td>
+<td><?php echo $file["size"]; ?></td>
 <!--<td bgcolor="#CF965D"><?php echo $file["link"] ? "<a href=\"".$file["link"]."\" style=\"color: #000;\">".$file["link"]."</a>" : "" ; ?></td>-->
-<td bgcolor="#C29569"><?php echo $file["comment"] ? str_replace("\\r\\n", "<br>", $file["comment"]) : ""; ?></td>
-<td bgcolor="#C29569"><?php echo date("d.m.Y H:i:s", $file["date"]) ?></td>
+<td><?php echo $file["comment"] ? str_replace("\\r\\n", "<br>", $file["comment"]) : ""; ?></td>
+<td><?php echo date("d.m.Y H:i:s", $file["date"]) ?></td>
 </tr>
 <?php
 			$filecount ++;
@@ -327,7 +327,7 @@ if($list)
     }
   if (($total_files > 1) && ($total_size > 0))
     {
-    print "<tr bgcolor=\"#4B433B\"  style=\"color: white;\" align=\"center\">$nn<td></td>$nn<td>Total:</td>$nn<td>".bytesToKbOrMbOrGb($total_size)."</td>$nn<td></td>$nn<td><!--</td>$nn<td>--></td>$nn</tr>";
+    print "<tr class='flisttblftr'>$nn<td></td>$nn<td>Total:</td>$nn<td>".bytesToKbOrMbOrGb($total_size)."</td>$nn<td></td>$nn<td><!--</td>$nn<td>--></td>$nn</tr>";
     }
   unset($total_files,$total_size);
   }
@@ -366,7 +366,7 @@ else
 	?>
 	<div style="text-align:center">
 	<div align="center"><b>Works With</b></div>
-	<div style="text-align:center; padding:3px; color:#dedede; margin:0 auto; width:450px; font-size:9px; height:50px;overflow:auto; border:1px solid #666">Axifile.com | Badongo.com | <b>Depositfiles.com</b> | <strong>Megarotic.com</strong>
+	<div class="workswith">Axifile.com | Badongo.com | <b>Depositfiles.com</b> | <strong>Megarotic.com</strong>
 	Easy-Share.com | Egoshare.com | <b>Filefactory.com</b> | <strong>Adrive.com</strong>
 	Files.to | Gigasize.com | <b>Mediafire.com</b> | iFolder.ru | BitRoad.net
 	<b>Megashares.com</b> | <b>Megaupload.com</b> | Mihd.net | UploadPalace.com
@@ -379,21 +379,20 @@ else
 	Rapidshare.com Folders | Usercash.com</div><br>
 	<div align="center">
 	<form action="ajax.php?ajax=linkcheck" method="post" id="linkchecker" onsubmit="return startLinkCheck();">
-	<textarea rows="10" cols="87" name="links" id="links"></textarea><br /><br>
+	<textarea rows="10" cols="87" name="links" id="links"></textarea><br /><br />
+	<div style="text-align:center; margin:0 auto; width:450px;"><a href="<?php echo $PHP_SELF.'?debug=1' ?>" style="color:#3B5A6F"><b>Debug Mode</b></a></div><br />
 	Display Links Only: <input type="checkbox" value="d" name="d" />
-	Kill Links Only: <input type ="checkbox" value ="1" name="k" /><br /><br>
+	Kill Links Only: <input type ="checkbox" value ="1" name="k" /><br /><br />
 	<input type="submit" id="submit" value="Check Links" name="submit" />
 	</form>
 	</div>
-	<!-- <p style="text-align:center; font-size:8px"><small>Lix Checker v3.0.0 | Copyright Dman - MaxW.org | Optimized by zpikdum and sarkar<br /><b>Mod by eqbal</b></p> -->
-	<div style="text-align:left; margin:0 auto; width:450px;">
-	<a href="<?php echo $PHP_SELF.'?debug=1' ?>" style="color:#3B5A6F"><b>Debug Mode</b></a>
-	</div>
-	</small>
+	<p style="text-align:center; font-size:10px">
+		<small>Lix Checker v3.0.0 | Copyright Dman - MaxW.org | Optimized by zpikdum and sarkar<br /><b>Mod by eqbal | Ajax'd by TheOnly92</b></p></small><br />
+	
 	<span id="loading" style="display: none;">
       &nbsp;&nbsp;
       Loading...
-      <img src="templates/plugmod/images/ajax-loading.gif" name="pic1" />    </span>
+      <img alt="Processing, please wait..." src="templates/plugmod/images/ajax-loading.gif" name="pic1" />    </span>
 	<div align="center">
 	<div id="linkchecker-results" style="text-align: left;">
 </div>
@@ -430,10 +429,10 @@ var show2 = 0;
 if (is_numeric($delete_delay) && $delete_delay > 0){
 	if($delete_delay > 3600){
 		$ddelay = round($delete_delay/3600, 1);
-		print '<span style="color:#FFCC00">Auto-Delete: <b>'.$ddelay.'</b> Hours After Transload</span>';
+		print '<span class="autodel">Auto-Delete: <b>'.$ddelay.'</b> Hours After Transload</span>';
 	}else{
 		$ddelay = round($delete_delay/60);
-		print '<span style="color:#FFCC00">Auto-Delete: <b>'.$ddelay.'</b> Minutes After Transload</span>';
+		print '<span class="autodel">Auto-Delete: <b>'.$ddelay.'</b> Minutes After Transload</span>';
 	}
 }
 ?>

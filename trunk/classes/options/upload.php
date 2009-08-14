@@ -15,7 +15,7 @@ function upload() {
 		}
 		
 		if (empty ( $upload_services )) {
-			echo "<span style='color:#FF6600'><b>No Supported Upload Services!</b></span>";
+			echo "<span class='warning'><b>No Supported Upload Services!</b></span>";
 		} else {
 			sort ( $upload_services );
 			reset ( $upload_services );
