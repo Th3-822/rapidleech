@@ -404,7 +404,7 @@ function formpostdata($post) {
 function GetCookies($content) {
 	// The U option will make sure that it matches the first character
 	// So that it won't grab other information about cookie such as expire, domain and etc
-	preg_match_all ( '/Set-Cookie: (.*);/U', $content, $temp );
+	preg_match_all ( '/Set-Cookie: (.*)(;|\r\n)/U', $content, $temp );
 	$cookie = $temp [1];
 	$cook = implode ( '; ', $cookie );
 	return $cook;

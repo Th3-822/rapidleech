@@ -12,9 +12,8 @@ hr {
 	background-color: #4A4A4A;
 	color: #4A4A4A;
 }
-img{
-	border:0
-}
+
+img { border: 0; }
 
 body {
 	font-family: "Segoe UI", Tahoma, sans-serif;
@@ -27,17 +26,16 @@ body {
 	background-position: left top;
 	margin: 0px;
 	padding: 0px;
-      }
-  tr        {font-family: "Segoe UI", Tahoma; font-size: 11px; line-height: 14.5px; color: #FFFFFF;}
-  input     {
-	font-family: "Segoe UI", Tahoma;
-	font-size: 11px;
 }
-  select    {font-family: "Segoe UI", Tahoma; font-size: 11px;}
-  textarea  {font-family: "Segoe UI", Tahoma; font-size: 11.5px;}
-  a         {color: #55aaff;}
-  color     {color: #FFFFFF;}
 
+tr { font-family: "Segoe UI", Tahoma; font-size: 11px; line-height: 14.5px; color: #FFFFFF; }
+input { font-family: "Segoe UI", Tahoma; font-size: 11px; }
+select { font-family: "Segoe UI", Tahoma; font-size: 11px; }
+textarea { font-family: "Segoe UI", Tahoma; font-size: 11.5px; }
+a { color: #55aaff; }
+color { color: #FFFFFF; }
+
+/*
 .tab-on {
 	padding: 2px 0;
 	color: #000000;
@@ -70,23 +68,25 @@ body {
 
 .tab-none
 {
-border-top-width: 1px;
-border-right-width: 1px;
-border-bottom-width: 1px;
-border-left-width: 1px;
-border-top-style: none;
-border-right-style: none;
-border-bottom-style: solid;
-border-left-style: solid;
-border-top-color: #cccccc;
-border-right-color: #cccccc;
-border-bottom-color: #cccccc;
-border-left-color: #cccccc;
+	border-top-width: 1px;
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+	border-left-width: 1px;
+	border-top-style: none;
+	border-right-style: none;
+	border-bottom-style: solid;
+	border-left-style: solid;
+	border-top-color: #cccccc;
+	border-right-color: #cccccc;
+	border-bottom-color: #cccccc;
+	border-left-color: #cccccc;
 }
+*/
 
 .show-table {display: block;}
 
 .hide-table {display: none;}
+
 .filelist a {
 	text-decoration:none;
 }
@@ -112,13 +112,12 @@ border-left-color: #cccccc;
 .n {
 	text-align:center;
 	color:blue;
-	}
+}
 .style1 {
 	font-size: 12px;
 	font-weight: bold;
 }
 .style2 {font-weight: bold}
-
 
 .linkchecker-load{filter:alpha(opacity=20);-moz-opacity:0.2;opacity:0.2;}
 
@@ -140,7 +139,7 @@ th {
 }
 
 /*
-** All Classes **
+** All previous inline-style classes **
 */
 
 /*any printed warnings */
@@ -199,6 +198,7 @@ th {
 	color: #FF0000;
 }
 
+/* upstyles are for the *.upload.html files link styles */
 .upstyles-dllink
 {
 	width: 470px;
@@ -269,9 +269,8 @@ th {
 
 .plugincollst
 {
-	color:ccc;
+	color: #ccc;
 }
-
 
 .flistmouseon
 {
@@ -306,29 +305,29 @@ th {
 /* The progressbar for upload and download, including the outer div holder */
 .progressouter
 {
-	border:1px solid royalblue; width:300px; height:10px;
+	border:1px solid #FFFFFF; width:300px; height:10px;
 }
 
 .progressdown
 {
-	background-color:#FFFFFF;
+	background-color:orange;
 	width:0%;
 	height:10px;
 }
 
 .progressup
 {
-	background-color:#FFFFFF;
+	background-color:orange;
 	width:0%;
 	height:10px;
 }
 
-/* The dumb-ass tabs */
+/* The "dumb-ass" tabs xD */
 #navcell1
 {
 	background: url(../images/main_window_pm.gif);
 	height: 31px;
-	padding: 12px;
+	width: 119px;
 	background-position: center;
 	background-repeat: no-repeat;
 }
@@ -336,7 +335,7 @@ th {
 {
 	background: url(../images/settings_pm.gif);
 	height: 31px;
-	padding: 12px;
+	width: 119px;
 	background-position: center;
 	background-repeat: no-repeat;
 }
@@ -344,7 +343,7 @@ th {
 {
 	background: url(../images/server_files_pm.gif);
 	height: 31px;
-	padding: 12px;
+	width: 119px;
 	background-position: center;
 	background-repeat: no-repeat;
 }
@@ -352,7 +351,7 @@ th {
 {
 	background: url(../images/link_checker_pm.gif);
 	height: 31px;
-	padding: 12px;
+	width: 119px;
 	background-position: center;
 	background-repeat: no-repeat;
 }
