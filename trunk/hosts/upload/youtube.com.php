@@ -56,29 +56,27 @@ EOF;
 	{
 		$geturl = rtrim($redir["1"]);
 	}
-	
+
 	$contents = sslcurl("get", $geturl, 0, $cookies, 0);
 	$cookie_GALX = GetCookies($contents);
-
+	
 	$post_url = "https://www.google.com/accounts/ServiceLoginAuth?service=youtube";
 	$post = array();
 	$post['ltmpl'] = 'sso';
-	$post['continue'] = 'http://www.youtube.com/signup?hl=en_US&warned=&nomobiletemp=1&next=/index';
+	$post['continue'] = urldecode('http%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26nomobiletemp%3D1%26hl%3Den_US%26next%3D%252F');
 	$post['service'] = 'youtube';
 	$post['uilel'] = '3';
 	$post['ltmpl'] = 'sso';
 	$post['hl'] = 'en_US' ;
 	$post['ltmpl'] = 'sso';
-	$post['GALX'] = substr($cookie_GALX, 5);
+	$post['GALX'] = substr($cookie_GALX, 38);
 	$post['Email'] = trim($_REQUEST['my_login']);
 	$post['Passwd'] = trim($_REQUEST['my_pass']);
 	$post['PersistentCookie'] = 'yes';
 	$post['rmShown'] = '1';
-	$post['signIn'] = 'Sign in';
+	$post['signIn'] = 'Sign+in';
 	$post['asts'] = '';
-	$cookie = 'GoogleAccountsLocale_session=en; ' . $cookie_GALX;
-	$contents = sslcurl("post", $post_url, $post, $cookie, $geturl);
-
+	$contents = sslcurl("post", $post_url, $post, $cookie_GALX, $geturl);
 	if (!preg_match('%ocation: (.+)\r\n%', $contents, $redir)) html_error('Error - logins incorrect');
 	$redirect = urldecode(rtrim($redir["1"]));
 	
@@ -86,9 +84,9 @@ EOF;
 	
 	if ($google === true)
 	{
-		$gcookies = preg_replace('%LSID=EXPIRED; %U', '', GetCookies($contents) . '; ' . $cookie);
+		$gcookies = preg_replace('%LSID=EXPIRED; %U', '', GetCookies($contents));
 		$Url = parse_url($redirect);
-		$page = sslcurl('get', $redirect, 0, $gcookies, urldecode('https://www.google.com/accounts/ServiceLogin?uilel=3&service=youtube&passive=true&continue=http%3A%2F%2Fwww.youtube.com%2Fsignup%3Fnomobiletemp%3D1%26hl%3Den_US%26next%3D%252F&hl=en_US&ltmpl=sso'));
+		$page = sslcurl('get', $redirect, 0, $gcookies, urldecode($geturl));
 		$lsid = preg_replace('%LSID=EXPIRED; %U', '', GetCookies($page));
 		$gredir = html_entity_decode(cut_str($page, '<meta http-equiv="refresh" content="0; url=&#39;', '&#39;">'));
 		$Url = parse_url($gredir);
@@ -97,8 +95,13 @@ EOF;
 		$Url = parse_url($redir3[1]);
 		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, $gcookies, 0, 0, $_GET["proxy"], $pauth);
 		is_page($page);
+		$lcookies = GetCookies($page);
+		preg_match('%ocation: (.+)\r\n%', $page, $redir4);
+		$Url = parse_url($redir4[1]);
+		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, $lcookies, 0, 0, $_GET["proxy"], $pauth);
+		is_page($page);
 		$ytcookies = GetCookies($page);
-		$utube_login_cookie = $ytcookies;
+		$utube_login_cookie = $lcookies . '; ' . $ytcookies;
 	}
 	else
 	{
@@ -106,11 +109,10 @@ EOF;
 		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, $cookies, 0, 0, $_GET["proxy"], $pauth);
 		is_page($page);
 		$cookie_LOGIN_INFO = GetCookies($page);
-		$cookies = str_replace('PREF=f1=40000000; ', '', $cookies);
-		$utube_login_cookie = $cookies . '; ' . $cookie_LOGIN_INFO . '&uvdm=1';
+		$utube_login_cookie = $cookies . '; ' . $cookie_LOGIN_INFO;
 	}
 		
-	$url = 'http://' . $Url['host'] . '/my_videos_upload';
+	$url = 'http://www.youtube.com/my_videos_upload';
 	$Url = parse_url($url);
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), $url, $utube_login_cookie, 0, 0, $_GET["proxy"], $pauth);
 	is_page($page);
@@ -118,8 +120,7 @@ EOF;
 	
 	$action_url = 'http://upload.youtube.com/my_videos_post';
 	$Url = parse_url($action_url);
-	$dkv_cookie = 'dkv=' . cut_str($page, 'Set-Cookie: dkv=', ';');
-	$upload_cookie = $utube_login_cookie . '; ' . $dkv_cookie . '; ' . $cookie_GALX;
+	$upload_cookie = $utube_login_cookie . '; ' . $cookie_GALX;
 	$return_address = cut_str($page, '<input type="hidden" name="return_address" value="', '">');
 	$upload_key = cut_str($page, '<input type="hidden" name="upload_key" value="', '">');
 	$session_token = cut_str($page, "\t\tgXSRF_token = '", "';");
@@ -177,5 +178,5 @@ function sslcurl ($method, $link, $post, $cookie, $refer)
 	return $contents;
 }
 // written by kaox 26/05/09
-//updated by szalinski 10-Aug-2009
+//updated by szalinski 15-Aug-2009
 ?>

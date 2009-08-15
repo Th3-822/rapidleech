@@ -43,13 +43,17 @@ foreach ($host as $site => $file)
 </td>
 </tr>
 </table></td>
-<td align="center" valign="top"><table border="0" cellpadding="0" cellspacing="0">
+<td align="center" valign="top"><table border="0" cellpadding="0" cellspacing="1">
 <tbody>
 <tr>
-<td id="navcell1" align="center" onclick="javascript:switchCell(1)"></td>
+<td id="navcell1" align="center"></td>
+<td id="navcell2" align="center"></td>
+<td id="navcell3" align="center"></td>
+<td id="navcell4" align="center"></td>
+<!--<td id="navcell1" align="center" onclick="javascript:switchCell(1)"></td>
 <td id="navcell2" align="center" onclick="javascript:switchCell(2)"></td>
 <td id="navcell3" align="center" onclick="javascript:switchCell(3)"></td>
-<td id="navcell4" align="center" onclick="javascript:switchCell(4)"></td>
+<td id="navcell4" align="center" onclick="javascript:switchCell(4)"></td>-->
 </tr>
 </tbody>
 </table>
@@ -57,7 +61,7 @@ foreach ($host as $site => $file)
 <tbody>
 <tr>
 <td align="center">
-<table class="tab-content" id="tb1" name="tb" cellspacing="5" width="100%">
+<table class="tab-content" id="tb1" name="tb1" cellspacing="5" width="100%">
 <tbody>
 <tr>
 <td align="center">
