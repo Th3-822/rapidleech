@@ -51,7 +51,7 @@ if ($_REQUEST["GO"] == "GO") {
 			html_error(lang(20), 0);
 		}
 ?>
-<table width="90%" style="border:1px solid #666" class="container" cellspacing="1">
+<table class="container" cellspacing="1">
 <tr>
 <td width="80%" align="center"><b><?php echo lang(21); ?></b></td>
 <td width="70" align="center"><b><?php echo lang(22); ?></b></td>
@@ -279,7 +279,7 @@ function resetProgress()
 ?>
 </script>
 
-<table id="links" width=90% style="border:1px solid #666" class="container" cellspacing="1">
+<table id="links" class="container" cellspacing="1">
 <thead><tr><td width=80% align="left"><b><?php echo lang(21); ?></b></td><td width=70 align="left"><b><?php echo lang(22); ?></b></td></tr></thead>
 <tfoot><tr id=auto><td colspan=2 align=center><input type=button value='<?php echo lang(29); ?>' onClick=javascript:startauto();></td></tr></tfoot>
 <tbody>
@@ -294,7 +294,7 @@ function resetProgress()
 <br />
 <iframe width="90%" height="300" src="" name="idownload"><?php echo lang(30); ?></iframe>
 <br />
-<table style="border:1px solid #666" class="container" cellspacing="1">
+<table class="container" cellspacing="1">
 <tr>
 <td><textarea name="addlinks" id="addlinks" cols="100" rows="5"></textarea></td>
 <td><input type="button" value="<?php echo lang(31); ?>" onclick="javascript:addLinks();" /></td>
@@ -319,7 +319,7 @@ function resetProgress()
 			document.getElementById('worked_frame').style.display='block';
 		}
 </script>
-<table style="border:1px solid #666" cellspacing=0 cellpadding=1 id=entered bgcolor="#001825"><tr><td>
+<table class="container" cellspacing=0 cellpadding=1 id="entered"><tr><td>
 <form action=?GO=GO method=post >
 <table width=700 border=0>
 <tr id=menu><td width=700 align=center>
@@ -328,7 +328,7 @@ function resetProgress()
 <tr> <td width=100% valign=top>
 <div id=listing style="display:block;">
 <table border=0 style="width:710px;">
-<tr><td><textarea id=links name=links rows=15 cols=60 style="width:600px; height:400px; border:1px solid #002E43"></textarea></td><td valign=top><input type=submit value="<?php echo lang(34); ?>" onClick=javascript:HideAll(); style="width:100px;"></tr>
+<tr><td><textarea id=links name=links rows=15 cols=60 class="adlinks"></textarea></td><td valign=top><input type=submit value="<?php echo lang(34); ?>" onClick=javascript:HideAll(); style="width:100px;"></tr>
 </table>
 </div>
 <div id="options" style="display:none;">

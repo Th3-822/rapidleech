@@ -322,7 +322,7 @@ th {
 	height:10px;
 }
 
-/* The "dumb-ass" tabs xD */
+/* The "new-and-improved" tabs xD */
 #navcell1
 {
 	background: url(../images/main_window_pm.gif);
@@ -354,4 +354,57 @@ th {
 	width: 119px;
 	background-position: center;
 	background-repeat: no-repeat;
+}
+
+/* MD5.php */
+.md5table
+{
+	font-family: monospace;
+	color: #FFA300;
+}
+
+.md5table th
+{
+	 background-color: #243E4A;
+	 border: none;
+}
+
+.md5table td
+{
+	background-color: #2B3C43;
+}
+
+
+.notes
+{
+	width: 70%;
+	height: 300px;
+}
+
+/* audl.php */
+.container
+{
+	border:1px solid #666;
+	width: 90%;
+	background-color: #001825;
+}
+
+.adlinks
+{
+	width:600px;
+	height:400px;
+	border:1px solid #002E43;
+}
+
+/* Transfer UIs (User interfaces) */
+.transloadui
+{
+	font-family: Tahoma;
+	font-size: 11px;
+}
+
+.uploadui
+{
+	font-family: Tahoma;
+	font-size: 11px;
 }
