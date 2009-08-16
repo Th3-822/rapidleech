@@ -249,6 +249,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				$saveToFile = dirname ( $saveToFile ) . PATH_SPLITTER . $FileName;
 			} else {
 				$FileName = trim ( trim ( trim ( trim ( trim ( cut_str ( $ContentDisposition, "filename=", "\n" ) ), "=" ), "?" ), ";" ), '"' );
+				if (strpos($FileName,"/")) $FileName = basename($FileName);
 				$saveToFile = dirname ( $saveToFile ) . PATH_SPLITTER . $FileName;
 			}
 		}

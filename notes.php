@@ -20,7 +20,7 @@ include(TEMPLATE_DIR.'header.php'); ?>
 ?>
 <div align="center">
 <form method="post">
-<textarea style="width: 70%; height: 300px" name="notes"><?php echo $content; ?></textarea>
+<textarea class="notes" name="notes"><?php echo $content; ?></textarea>
 <br /><input type="submit" name="submit" value="Save Notes" />
 </form>
 </div>
