@@ -96,7 +96,7 @@ class megaupload_com extends DownloadClass {
 				html_error ( "Download link not found in happy hour" );
 			}
 			$Href = $tmp [1];
-			$Url = parse_url ( $Href );
+			$Url = parse_url ( html_entity_decode($Href, ENT_QUOTES, 'UTF-8') );
 			if (! is_array ( $Url )) {
 				html_error ( "Download link not found", 0 );
 			}
@@ -140,7 +140,7 @@ class megaupload_com extends DownloadClass {
 			$countDown = (! is_numeric ( $countDown ) ? 26 : $countDown);
 			
 			$Href = cut_str ( $page, 'downloadlink"><a href="', '"' );
-			$Url = parse_url ( $Href );
+			$Url = parse_url ( html_entity_decode($Href, ENT_QUOTES, 'UTF-8') );
 			if (! is_array ( $Url )) {
 				html_error ( "Download link not found", 0 );
 			}
@@ -190,17 +190,15 @@ class megaupload_com extends DownloadClass {
         
         if (stristr ( $page, "Location:" )) {
                 $Href = trim ( cut_str ( $page, "Location: ", "\n" ) );
-                $Url = parse_url ( $Href );
-                $FileName = basename ( $Url ["path"] );
-                
+                $Url = parse_url ( html_entity_decode($Href, ENT_QUOTES, 'UTF-8') );
+                $FileName = basename ( $Url ["path"] );                
                 $this->RedirectDownload($Href,$FileName,$premium_cookie);
                 
         } elseif ($page = cut_str ( $page, 'downloadlink">', '</div>' )) {
                 $Href = cut_str ( $page, 'href="', '"' );
                 $Referer = $link;
-                $Url = parse_url ( $Href );
-                $FileName = basename ( $Url ["path"] );
-                
+                $Url = parse_url ( html_entity_decode($Href, ENT_QUOTES, 'UTF-8') );
+                $FileName = basename ( $Url ["path"] );                
                 $this->RedirectDownload($Href,$FileName,$premium_cookie);
         } else {
                 html_error ( "Download link not found", 0 );

@@ -35,54 +35,6 @@ textarea { font-family: "Segoe UI", Tahoma; font-size: 11.5px; }
 a { color: #55aaff; }
 color { color: #FFFFFF; }
 
-/*
-.tab-on {
-	padding: 2px 0;
-	color: #000000;
-	background-color: #85cbeb;
-	width: 100px;
-}
-
-.tab-onr {
-	padding: 2px 0;
-	color: #000000;
-	background-color: #85cbeb;
-	width: 100px;
-}
-
-.tab-off
-{
-	padding: 2px 0;
-	color: #666666;
-	width: 100px;
-	background-color: #17668C;
-}
-
-.tab-offr
-{
-	padding: 2px 0;
-	color: #666666;
-	width: 100px;
-	background-color: #17668C;
-}
-
-.tab-none
-{
-	border-top-width: 1px;
-	border-right-width: 1px;
-	border-bottom-width: 1px;
-	border-left-width: 1px;
-	border-top-style: none;
-	border-right-style: none;
-	border-bottom-style: solid;
-	border-left-style: solid;
-	border-top-color: #cccccc;
-	border-right-color: #cccccc;
-	border-bottom-color: #cccccc;
-	border-left-color: #cccccc;
-}
-*/
-
 .show-table {display: block;}
 
 .hide-table {display: none;}
@@ -151,11 +103,11 @@ th {
 /* any printed error messages */
 .htmlerror
 {
-	color: red;
-	background-color: #fec;
+	color: #fffa1e;
+	background-color: #1e90ff;
 	padding: 3px;
-	border: 2px solid #FFAA00;
 	line-height: 25px;
+	border: thin solid #ffffff;
 }
 
 /*the file checkbox menu */
@@ -310,22 +262,28 @@ th {
 
 .progressdown
 {
-	background-color:orange;
+	background-color:#FFFFFF;
 	width:0%;
 	height:10px;
 }
 
 .progressup
 {
-	background-color:orange;
+	background-color:#FFFFFF;
 	width:0%;
 	height:10px;
 }
 
 /* The "new-and-improved" tabs xD */
+
+.selected
+{
+	background-color: #85cbeb !important;
+}
+
 #navcell1
 {
-	background: url(../images/main_window_pm.gif);
+	background: #17668C url(../images/main_window_pm.gif);
 	height: 31px;
 	width: 119px;
 	background-position: center;
@@ -333,7 +291,7 @@ th {
 }
 #navcell2
 {
-	background: url(../images/settings_pm.gif);
+	background: #17668C url(../images/settings_pm.gif);
 	height: 31px;
 	width: 119px;
 	background-position: center;
@@ -341,7 +299,7 @@ th {
 }
 #navcell3
 {
-	background: url(../images/server_files_pm.gif);
+	background: #17668C url(../images/server_files_pm.gif);
 	height: 31px;
 	width: 119px;
 	background-position: center;
@@ -349,7 +307,7 @@ th {
 }
 #navcell4
 {
-	background: url(../images/link_checker_pm.gif);
+	background: #17668C url(../images/link_checker_pm.gif);
 	height: 31px;
 	width: 119px;
 	background-position: center;

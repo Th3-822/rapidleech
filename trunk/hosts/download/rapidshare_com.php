@@ -7,7 +7,7 @@ if (! defined ( 'RAPIDLEECH' )) {
 class rapidshare_com extends DownloadClass {
 	public function Download($link) {
 		global $premium_acc;
-		if (($_POST ["premium_acc"] == "on" && $_POST ["premium_user"] && $_POST ["premium_pass"]) ||
+		if (($_POST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) ||
 			($_POST ["premium_acc"] == "on" && $premium_acc ["rs_com"])) {
 			$this->DownloadPremium($link);
 		} else {
@@ -140,9 +140,8 @@ class rapidshare_com extends DownloadClass {
 		$FileName = basename ( trim ( cut_str ( $page, '<form action="', '"' ) ) );
 		$Url = parse_url($link);
 		! $FileName ? $FileName = basename ( $Url ["path"] ) : "";
-		if (isset ( $premium_acc ["rs_com"] ['user'] ) || $_POST["premium_user"] && $_POST['premium_pass']) {
-			$auth = $_POST ["premium_user"] ? base64_encode ( $_POST ["premium_user"] . ":" . $_POST ["premium_pass"] ) : base64_encode ( $premium_acc ["rs_com"] ["user"] . ":" . $premium_acc ["rs_com"] ["pass"] );
-
+		if (isset ( $premium_acc ["rs_com"] ['user'] ) || $_REQUEST["premium_user"] && $_REQUEST['premium_pass']) {
+			$auth = $_REQUEST ["premium_user"] ? base64_encode ( $_REQUEST ["premium_user"] . ":" . $_REQUEST ["premium_pass"] ) : base64_encode ( $premium_acc ["rs_com"] ["user"] . ":" . $premium_acc ["rs_com"] ["pass"] );
 			$page = $this->GetPage($link,0,0,0,$auth);
 			is_present ( $page, "password is incorrect" );
 			is_present ( $page, "Account not found" );
@@ -151,7 +150,7 @@ class rapidshare_com extends DownloadClass {
 				$Href = trim ( cut_str ( $page, "Location:", "\n" ) );
 				$Url = parse_url ( $Href );
 
-				$this->RedirectDownload($Href,$FileName, 0, 0, $auth);
+				$this->RedirectDownload($Href,$FileName, 0, 0, 0, $auth);
 			} else {
 				html_error ( "Cannot use premium account", 0 );
 			}
