@@ -67,19 +67,19 @@ if (is_readable($_REQUEST['filename']))
 
 $fsize = getSize($lfile);
 
+echo '<script type="text/javascript" language="javascript">var orlink="' . basename($_REQUEST['filename']) . ' to ' . $_REQUEST['uploaded'] . '";</script>';
+
 if (file_exists("hosts/upload/".$_REQUEST['uploaded'].".php")){    
     include_once("hosts/upload/".$_REQUEST['uploaded'].".index.php");
     if ($max_file_size[$_REQUEST['uploaded']]!=false)
         if ($fsize > $max_file_size[$_REQUEST['uploaded']]*1024*1024)       
             html_error(lang(66));
     include_once("hosts/upload/".$page_upload[$_REQUEST['uploaded']]);
-}else html_error(lang(67)); 
+}
+else html_error(lang(67));
 
-?>
-</td></tr></table>
-<?php
-	if ($download_link || $delete_link || $stat_link || $adm_link)
-		{
+if ($download_link || $delete_link || $stat_link || $adm_link)
+	{
 			//Protect down link with http://lix.in/
 			/*
 			if ($_REQUEST['protect']==1){
@@ -240,14 +240,14 @@ hr {
 					fwrite($fr, " </div></div>");
 					fclose($fr);
 				}
-		}
+	}
 echo $not_done ? "" : '<p><center><b><a href="javascript:window.close();">'.lang(77).'</a></b></center>';
 ?>
 </body>
 </html>
 <?php
 if (isset($_GET['auul'])) {
-?><script language=javascript>parent.nextlink<?php echo $_GET['auul']; ?>();</script><?php
+?><script type='text/javascript' language='javascript'>parent.nextlink<?php echo $_GET['auul']; ?>();</script><?php
 	// Write links to a file
 	$file = $download_dir."myuploads.txt";	// Obviously it was a mistake not making it a variable earlier
 	$fh = fopen($file, 'a');

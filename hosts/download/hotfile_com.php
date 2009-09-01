@@ -1,33 +1,33 @@
 <?php
-if (! defined ( 'RAPIDLEECH' )) {
+if (! defined ( 'RAPIDLEECH' ))
+{
 	require_once ("index.html");
 	exit ();
 }
-$hotfile_username = "hgemini"; // username
-$hotfile_password = "gemini"; // password
 
-
-if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_pass"]) || ($_GET ["premium_acc"] == "on" && $premium_acc ["hotfile"] ["user"] && $premium_acc ["hotfile"] ["pass"])) {
+if (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_POST ["premium_acc"] == "on" && $premium_acc ["hotfile"] ["user"] && $premium_acc ["hotfile"] ["pass"]))
+{
 	$in = parse_url ( "http://hotfile.com/login.php" );
 	$post = array ();
 	$post ["returnto"] = "/";
-	$post ["user"] = $_GET ["premium_user"] ? $_GET ["premium_user"] : $premium_acc ["hotfile"] ["user"];
-	$post ["pass"] = $_GET ["premium_pass"] ? $_GET ["premium_pass"] : $premium_acc ["hotfile"] ["pass"];
+	$post ["user"] = $_REQUEST ["premium_user"] ? $_REQUEST ["premium_user"] : $premium_acc ["hotfile"] ["user"];
+	$post ["pass"] = $_REQUEST ["premium_pass"] ? $_REQUEST ["premium_pass"] : $premium_acc ["hotfile"] ["pass"];
 	$page = geturl ( $in ["host"], $in ["port"] ? $in ["port"] : 80, $in ["path"] . ($in ["query"] ? "?" . $in ["query"] : ""), "http://hotfile.com/", 0, $post, 0, $_GET ["proxy"], $pauth );
-	preg_match ( '/auth=\w{64}/i', $page, $ook );
-	$cook = $ook [0];
-	if (! $cook) {
-		html_error ( "Login Failed , Bad username/password combination.", 0 );
-	}
+	$cook = GetCookies($page);
+	if (!$cook)	html_error ( "Login Failed , Bad username/password combination.", 0);
 	$Url = parse_url ( $Referer );
 	$page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"], $Referer, $cook, 0, 0, $_GET ["proxy"], $pauth );
-	preg_match ( '/http:\/\/.+get[^"\']+/i', $page, $dwn );
-	$Url = parse_url ( $dwn [0] );
+	$cook .= '; ' . GetCookies($page);
+	preg_match ( '%ocation: (.+)\r\n%U', $page, $dwn );
+	$Url = parse_url ( $dwn [1] );
 	$FileName = basename ( $Url ["path"] );
-	insert_location ( "$PHP_SELF?filename=" . urlencode ( $FileName ) . "&host=" . $Url ["host"] . "&path=" . urlencode ( $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "") ) . "&referer=" . urlencode ( $Referer ) . "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&method=" . $_GET ["method"] . "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&link=" . urlencode ( $LINK ) . ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ( $_GET ["comment"] ) : "") . "&auth=" . $auth . ($pauth ? "&pauth=$pauth" : "") . (isset ( $_GET ["audl"] ) ? "&audl=doum" : "") );
-} else {
+	insert_location ( "$PHP_SELF?filename=" . urlencode ( $FileName ) . "&host=" . $Url ["host"] . "&path=" . urlencode ( $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "") ) . "&referer=" . urlencode ( $Referer ) . "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&method=" . $_GET ["method"] . "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&link=" . urlencode ( $LINK ) . "&cookie=" . urlencode($cook) . ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ( $_GET ["comment"] ) : "") . "&auth=" . $auth . ($pauth ? "&pauth=$pauth" : "") . (isset ( $_GET ["audl"] ) ? "&audl=doum" : "") );
+}
+else
+{
 	$hf = $_POST ['hf'];
-	if ($hf == "ok") {
+	if ($hf == "ok")
+	{
 		$post = array ();
 		$post ["action"] = "checkcaptcha";
 		$post ["captchaid"] = $_POST ["captchaid"];
@@ -35,33 +35,37 @@ if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_
 		$post ["hash2"] = $_POST ["hash2"];
 		$post ["captcha"] = $_POST ["captcha"];
 		$Referer = $_POST ["link"];
-		
+
 		$Url = parse_url ( $Referer );
 		$page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : ""), $Referer, $cookie, $post, 0, $_GET ["proxy"], $pauth );
 		is_page ( $page );
-		
+
 		preg_match ( '/http:\/\/.+get[^\'"]+/i', $page, $down );
 		$LINK = rtrim ( $down ['0'] );
-		if ($LINK == "") {
+		if ($LINK == "")
+		{
 			html_error ( "You may forgot the security code or it might be wrong!", 0 );
 		}
 		$Url = parse_url ( $LINK );
 		$FileName = basename ( $Url ["path"] );
 		$page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"], $Referer, 0, 0, 0, $_GET ["proxy"], $pauth );
 		preg_match ( '/Location: *(.+)/', $page, $redir );
-		if (strpos ( $redir [1], "http://" ) === false) {
+		if (strpos ( $redir [1], "http://" ) === false)
+		{
 			html_error ( "Server problem. Please try again after", 0 );
 		}
 		$redirect = rtrim ( $redir [1] );
 		$Url = parse_url ( $redirect );
 		insert_location ( "$PHP_SELF?filename=" . urlencode ( $FileName ) . "&host=" . $Url ["host"] . "&path=" . urlencode ( $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "") ) . "&referer=" . urlencode ( $Referer ) . "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&method=" . $_GET ["method"] . "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&link=" . urlencode ( $LINK ) . ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ( $_GET ["comment"] ) : "") . "&auth=" . $auth . ($pauth ? "&pauth=$pauth" : "") . (isset ( $_GET ["audl"] ) ? "&audl=doum" : "") );
-	} else {
+	} else
+	{
 		$page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"], $Referer, 0, 0, 0, $_GET ["proxy"], $pauth );
 		is_present ( $page, "File not found", "File not found, the file is not present or bad link", "0" );
 		is_present ( $page, "You are currently downloading", "You are currently downloading. Only one connection with server allow for free users", "0" );
 		preg_match_all ( '/timerend=d\.getTime\(\)\+(\d+)/i', $page, $arraytime );
 		$wtime = $arraytime [1] [1] / 1000;
-		if ($wtime > 0) {
+		if ($wtime > 0)
+		{
 			$dowait = true;
 			insert_timer ( $wtime, "You reached your hourly traffic limit" );
 		}
@@ -80,27 +84,31 @@ if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_
 		$page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"], $Referer, 0, $post, 0, $_GET ["proxy"], $pauth );
 		preg_match ( '/http:\/\/.+get[^\'"]+/i', $page, $down );
 		$LINK = rtrim ( $down ['0'] );
-		if ($LINK == "") {
+		if ($LINK == "")
+		{
 			$nofinish = true;
-			if (preg_match ( '/\/captcha\.php[^"\']+/i', $page, $img )) {
+			if (preg_match ( '/\/captcha\.php[^"\']+/i', $page, $img ))
+			{
 				$imglink = "http://hotfile.com" . $img [0];
 				$Url = parse_url ( $imglink );
 				$imgpage = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : ""), $free_link, $cookie, 0, 0, $_GET ["proxy"], $pauth );
 				$headerend = strpos ( $imgpage, "JFIF" );
 				$pass_img = substr ( $imgpage, $headerend - 6 );
 				$imgfile = $download_dir . "hotfile_captcha.jpg";
-				if (file_exists ( $imgfile )) {
+				if (file_exists ( $imgfile ))
+				{
 					unlink ( $imgfile );
 				}
 				write_file ( $imgfile, $pass_img );
-			} else {
+			} else
+			{
 				html_error ( "Error get captcha", 0 );
 			}
-			
+
 			$captchaid = cut_str ( $page, "captchaid value=", ">" );
 			$hash1 = cut_str ( $page, "hash1 value=", ">" );
 			$hash2 = cut_str ( $page, "hash2 value=", ">" );
-			
+
 			print "<form method=\"post\" action=\"" . $PHP_SELF . (isset ( $_GET ["audl"] ) ? "?audl=doum" : "") . "\">$nn";
 			print "<b>Please enter code:</b><br>$nn";
 			print "<img src=\"$imgfile\">$nn";
@@ -112,12 +120,14 @@ if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_
 			print "<input name=\"captcha\" type=\"text\" >";
 			print "<input name=\"Submit\" value=\"Submit\" type=\"submit\"></form>";
 		}
-		if (! $nofinish) {
+		if (! $nofinish)
+		{
 			$Url = parse_url ( $LINK );
 			$FileName = basename ( $Url ["path"] );
 			$page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"], $Referer, 0, 0, 0, $_GET ["proxy"], $pauth );
 			preg_match ( '/Location: *(.+)/i', $page, $redir );
-			if (strpos ( $redir [1], "http://" ) === false) {
+			if (strpos ( $redir [1], "http://" ) === false)
+			{
 				html_error ( "Server problem. Please try again after", 0 );
 			}
 			$redirect = rtrim ( $redir [1] );
@@ -128,5 +138,6 @@ if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_
 }
 /*************************\  
 written by kaox 21/06/2009 rev.2
+premium download updated by szalinski 30/Aug/09
  *************************/
 ?>

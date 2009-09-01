@@ -1,5 +1,3 @@
-<script type="text/javascript" language="javascript">var orlink='<?php echo basename($_REQUEST[filename]) . " to " . $_REQUEST[uploaded]; ?>';</script>
-
 <div id=<?php echo $id; ?>>
 <table cellspacing="0" cellpadding="0" class="uploadui" id="progressblock">
 <tr>

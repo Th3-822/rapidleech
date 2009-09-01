@@ -1,39 +1,38 @@
-<?php //szalinski 09-May-09
+<?php //szalinski 25-Aug-09
 if (!defined('RAPIDLEECH'))
 {
 	require_once("index.html");
 	exit;
 }
-if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["uploaded_to"]["user"] && $premium_acc["uploaded_to"]["pass"]))
+
+if (($_POST["premium_acc"] == "on" && $_REQUEST["premium_user"] && $_REQUEST["premium_pass"]) || ($_POST["premium_acc"] == "on" && $premium_acc["uploaded_to"]["user"] && $premium_acc["uploaded_to"]["pass"]))
 {
 	$Url = parse_url('http://uploaded.to');
 	$post = array();
-	$post["email"] = $_GET["premium_user"] ? $_GET["premium_user"] : $premium_acc["uploaded_to"]["user"];
-	$post["password"] = $_GET["premium_pass"] ? $_GET["premium_pass"] : $premium_acc["uploaded_to"]["pass"];
+	$post["email"] = $_REQUEST["premium_user"] ? $_REQUEST["premium_user"] : $premium_acc["uploaded_to"]["user"];
+	$post["password"] = $_REQUEST["premium_pass"] ? $_REQUEST["premium_pass"] : $premium_acc["uploaded_to"]["pass"];
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, "/login", 0, 0, $post, 0, $_GET["proxy"],$pauth);
 	is_page($page);
 	$cook = GetCookies($page);
-	preg_match('/auth=(.*?);/', $cook, $cookie);
-	$cookie = 'auth='.$cookie[1];
 	$Url = parse_url($LINK);
 	if ($Url['host'] == 'uploaded.to')
 	{
 		$LINK = str_replace(array('uploaded.to', 'file/'), array('ul.to', ''), $LINK);
 		$Url = parse_url($LINK);
 	}
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cook, 0, 0, $_GET["proxy"], $pauth);
 	is_page($page);
 	preg_match('%ocation: (.+)\r\n%', $page, $redir);
 	$Href = trim($redir[1]);
 	$Url = parse_url($Href);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cook, 0, 0, $_GET["proxy"], $pauth);
 	is_page($page);
 	preg_match('%ocation: (.+)\r\n%', $page, $redir);
 	$Href = trim($redir[1]);
 	$Url = parse_url($Href);
 	$Url["path"] = str_replace('//', '/', $Url["path"]);
 	$FileName = !$FileName ? basename($Url["path"]) : $FileName;
-	insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&cookie=".urlencode($cookie)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+	insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&cookie=".urlencode($cook)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
 }
 else
 {
