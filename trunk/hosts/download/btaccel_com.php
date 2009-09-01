@@ -1,48 +1,112 @@
 <?php
 
-class btaccel_com extends DownloadClass
-{
-	private $page;
-	private $cookie;
+if (!defined('RAPIDLEECH'))
+  {
+  require_once("index.html");
+  exit;
+  }
+####### Free Account Info. ###########
+$btaccel_login = ""; //  Set your username
+$btaccel_pass = ""; //  Set your password
+##############################
 
-	private function loginto($link)
-	{
-		global $premium_acc;
-		$this->page = $this->GetPage($link, 0, array('email' => urlencode($premium_acc['btaccel']['user']), 'password' => $premium_acc['btaccel']['pass']));
-		$this->cookie = GetCookies($this->page);
-		$this->page = $this->GetPage('http://www.btaccel.com/home/', $this->cookie);
-		is_notpresent($this->page, 'logout', 'Error logging in - perhaps logins are incorrect');
-	}
 
-	public function Download($link)
-	{
-		global $premium_acc;
-		if (($_POST ["premium_acc"] == "on" && $_POST ["premium_user"] && $_POST ["premium_pass"]) || ($_POST ["premium_acc"] == "on" && $premium_acc ["btaccel"]))
-		{
-			$this->loginto('http://www.btaccel.com/login/');
-			$this->page = $this->GetPage($link, $this->cookie);
-			$string = cut_str($this->page, '<form name="form" method="post" action="http://94.75.237.89:80/getfile/"', '</form>');
-			preg_match('%id="info_hash" value="(.+)"%U', $string, $infohash);
-			preg_match('%id="url_hash" value="(.+)"%U', $string, $urlhash);
-			preg_match('%name="checksum" value="(.+)"%U', $string, $checksum);
-			preg_match('%name="file_name" value="(.+)"%U', $string, $fname);
-			preg_match_all('%&file_name=(.+)" onclick%', $string, $files);
-			array_shift($files[1]);
-			foreach ($files[1] as $file)
-			{
-				$flist .= $file . "\r\n";
-			}
-			$post = array();
-			$post['info_hash'] = $infohash[1];
-			$post['urlhash'] = $urlhash[1];
-			$post['checksum'] = $checksum[1];
-			$post['file_name'] = $fname[1];
-			$post['files'] = $flist;
-			$FileName = $fname[1];
-			$this->RedirectDownload('http://94.75.237.89:80/getfile/', $FileName, 0, $post);
-		}
-		else html_error('There are no BTAccel logins set. Please set them in the config.php.');
-	}
+?>
+<table width=600 align=center>
+</td></tr>
+<tr><td align=center>
+<div id=info width=100% align=center>Retrive upload ID</div>
+<?			
+           $usr=$btaccel_login;
+			$pass=$btaccel_pass;
+			if (empty($usr) || empty($pass))html_error("Login/Pass not inserted",0);
+			else{
+			$lg=parse_url("http://www.btaccel.com/login/");
+			$post["email"]=$usr;
+			$post["password"]=$pass;
+			$page = geturl($lg["host"], $lg["port"] ? $lg["port"] : 80, $lg["path"].($lg["query"] ? "?".$lg["query"] : ""), "http://www.btaccel.com/", 0, $post, 0, $_GET["proxy"],$pauth);			
+			$cookies=GetCookies($page);
+		    $hom=parse_url("http://www.btaccel.com/home/");
+		    $page = geturl($hom["host"], $hom["port"] ? $hom["port"] : 80, $hom["path"].($hom["query"] ? "?".$hom["query"] : ""), "http://www.btaccel.com/home/", $cookies, 0, 0, $_GET["proxy"],$pauth);			
+            
+           if(strpos($page,$usr) !== false){
+<<<HTML
+<table width=600 align=center>
+    </td>
+    </tr>
+    <tr>
+        <td align=center>
+        <div id=info width=100% align=center>Retrive upload ID</div>
+HTML;
+            }else{
+                html_error("Login error", 0);
+               
+            }
+?>
+<table border="1" cellspacing="5" cellpadding="5">
+<form id="tavola" >
+<?php
+$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookies, 0, 0, $_GET["proxy"],$pauth); 
+$frmfiles=cut_str($page,'<table id="files"','</table>');
+preg_match_all('%http://.+/getfile\?info_hash=[^\'"]+%i',$frmfiles,$files) ;
+$cc=1 ;
+
+foreach($files[0] as $tmp){
+    $tmp2=cut_str($tmp,'&file_name=','\n');
+    $ff=explode("/",$tmp2);
+     $fi=$ff[count($ff)-1];
+$fil=urldecode($fi);
+$file=str_replace(":80/getfile?","/getfile/?",$tmp);
+$namefile=$fil;
+echo "<tr><td><input type=checkbox id=cs$cc ></td><td><input type=hidden id=lin$cc value=$file ></td><td id=link$cc >$namefile</td></tr>";
+$cc++;
 }
-//szal 01jul09
+
+}
+?>
+<tr align="center"><input type=button onclick='selt(<?php echo $cc-1 ?>)' value='Step1 select and click'><input type='checkbox' name='checkall' id='checkall' onclick='checkedAll();'> all</tr>
+</table>
+</form>
+<script language="javascript" type="text/javascript">
+    function selt(cc)
+    {
+        var pp;
+        var lks="";    
+        var ck;
+        var tmp;
+        for(pp=1;pp<=cc;pp++){
+        ck=    document.getElementById("cs"+ pp );
+        if (ck.checked) {
+        tmp=document.getElementById("lin"+ pp );
+        lks= lks + tmp.value + "\r\n";}
+        }
+	document.write('<form action=audl.php?GO=GO method=post >');
+    document.write('<Input type=Hidden name=links value= "' + lks + '" >');	
+	document.write('<center><Input type=submit name=submit value="Step2 click for send selected to Autodownloader"></center>');	
+	document.write('</form>');
+   	
+    }
+checked=false;
+function checkedAll (frm1) {
+	var aa= document.getElementById('tavola');
+	 if (checked == false)
+          {
+           checked = true
+          }
+        else
+          {
+          checked = false
+          }
+	for (var i =0; i < aa.elements.length; i++) 
+	{
+	 aa.elements[i].checked = checked;
+	}
+      }
+
+	</script>	
+<?php
+flush();
+/*************************\  
+written by kaox 21/07/2009
+\*************************/
 ?>

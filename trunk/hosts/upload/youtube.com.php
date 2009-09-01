@@ -77,8 +77,8 @@ EOF;
 	$post['signIn'] = 'Sign+in';
 	$post['asts'] = '';
 	$contents = sslcurl("post", $post_url, $post, $cookie_GALX, $geturl);
-	if (!preg_match('%ocation: (.+)\r\n%', $contents, $redir)) html_error('Error - logins incorrect');
-	$redirect = urldecode(rtrim($redir["1"]));
+	if (!preg_match('%ocation: (.+)\r\n%', $contents, $redir) and !preg_match('%url=&#39;(.+)&#39;%', $contents, $redir)) html_error('Error - logins incorrect');
+	$redirect = html_entity_decode($redir[1]);
 	
 	if (preg_match('%^https://www.google.com/accounts/CheckCookie%', $redirect)) $google = true; else $google = false;
 	
@@ -110,6 +110,8 @@ EOF;
 		is_page($page);
 		$cookie_LOGIN_INFO = GetCookies($page);
 		$utube_login_cookie = $cookies . '; ' . $cookie_LOGIN_INFO;
+		$page = geturl('www.youtube.com', 80, '/', $redirect, $utube_login_cookie, 0, 0, $_GET["proxy"], $pauth);
+		is_page($page);
 	}
 		
 	$url = 'http://www.youtube.com/my_videos_upload';
@@ -178,5 +180,5 @@ function sslcurl ($method, $link, $post, $cookie, $refer)
 	return $contents;
 }
 // written by kaox 26/05/09
-//updated by szalinski 15-Aug-2009
+//updated by szalinski 31-Aug-2009
 ?>

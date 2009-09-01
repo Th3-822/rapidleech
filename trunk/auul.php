@@ -200,7 +200,7 @@ unset($Path);
 <a href="files/myuploads.txt" class="chkmenu">myuploads.txt</a>
 <div style="overflow:auto; height:400px; width: 700px; border">
 <table cellpadding="3" cellspacing="1" width="100%" class="filelist">
-	<tr class="flistablehdr" valign="bottom">
+	<tr class="flisttblhdr" valign="bottom">
 		<th></th>
 		<th><?php echo lang(55); ?></th>
 		<th><?php echo lang(56); ?></th>
