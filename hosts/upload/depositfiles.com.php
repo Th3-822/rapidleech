@@ -83,5 +83,10 @@ if ($continue_up)
 			preg_match('/ud_delete_url\s*=.*\'(.*)\'/i', $upfiles, $dlink);
 			$download_link = $flink[1];
 			$delete_link = $dlink[1];
+			echo "<h3><font color='green'>File successfully uploaded to your account</font></h3>";
 	}
+/*************************\
+WRITTEN by kaox 08/05/2009
+UPDATE by kaox 05/09/2009
+\*************************/
 ?>
