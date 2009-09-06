@@ -46,9 +46,8 @@ if ($continue_up)
             $page = geturl("depositfiles.com", 80, "/en/login.php?return=/en/", 0, 0, $post);			
 			is_page($page);
 			
-			$cookies = GetCookies($page);
-			preg_match('/autologin=(.*?);/i', $cookies, $cookie);
-			$cookie = 'autologin='.$cookie[1];
+			$cookie = GetCookies($page);
+
 ?>
 <script>document.getElementById('login').style.display='none';</script>
 <div id=info width=100% align=center>Retrive upload ID</div>
@@ -84,11 +83,5 @@ if ($continue_up)
 			preg_match('/ud_delete_url\s*=.*\'(.*)\'/i', $upfiles, $dlink);
 			$download_link = $flink[1];
 			$delete_link = $dlink[1];
-			 echo "<h3><font color='green'>File successfully uploaded to your account</font></h3>";  
 	}
-	
-/*************************\  
-WRITTEN by kaox 08/05/2009
-UPDATE by kaox 05/09/2009
-\*************************/
 ?>
