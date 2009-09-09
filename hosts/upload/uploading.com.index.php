@@ -1,5 +1,5 @@
 <?php
-$upload_services[]="uploading.com_member";
-$max_file_size["uploading.com_member"]=1000;
-$page_upload["uploading.com_member"] = "uploading.com_member.php";
+$upload_services[]="uploading.com";
+$max_file_size["uploading.com"]=1000;
+$page_upload["uploading.com"] = "uploading.com.php";
 ?>
