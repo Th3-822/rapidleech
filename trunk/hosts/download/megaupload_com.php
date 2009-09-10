@@ -28,10 +28,10 @@ class megaupload_com extends DownloadClass {
 			$link = preg_replace ( "/\.com\/[a-z]{2}\//", ".com/", $link );
 			$this->filepassword = trim($filepassword);
 		}
-		if (isset($_POST['premium_acc'])) {
-			if (($_POST ["premium_acc"] == "on" && $_POST ["premium_user"] && $_POST ["premium_pass"]) || 
-				($_POST ["premium_acc"] == "on" && $premium_acc ["megaupload"] ["user"] && $premium_acc ["megaupload"] ["pass"] || 
-				$_POST ["mu_acc"] == "on" && $_POST ["mu_cookie"]) || $_POST ["mu_acc"] == "on" && $mu_cookie_user_value) {
+		if (isset($_REQUEST['premium_acc'])) {
+			if (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) ||
+				($_REQUEST ["premium_acc"] == "on" && $premium_acc ["megaupload"] ["user"] && $premium_acc ["megaupload"] ["pass"] ||
+				$_REQUEST ["mu_acc"] == "on" && $_REQUEST ["mu_cookie"]) || $_REQUEST ["mu_acc"] == "on" && $mu_cookie_user_value) {
 				$this->DownloadPremium($link);
 			} else {
 				if ($_POST['step'] == 1) {
