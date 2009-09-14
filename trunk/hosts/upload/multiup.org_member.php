@@ -63,7 +63,7 @@ if ($continue_up)
 
 			$post["Filename"]="$lname";
 			$post["Upload"]="Submit Query";
-			$u1='http://multiup.org/script.php'.'?login='.$_REQUEST['login'];
+			$u1='http://91.121.82.68/script.php'.'?login='.$_REQUEST['login'];
 			$url = parse_url($u1);
 			$upagent = "Shockwave Flash";
 			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), 0, 0, $post, $lfile, $lname, "photoupload",0,$upagent);
@@ -72,7 +72,7 @@ if ($continue_up)
 <div id=final width=100% align=center>Get final code</div>
 <?php		
 			is_page($upfiles);
-			$form=cut_str($upfiles,'href=http:\/\/multiup.org\/?lien=','>http:');
+			$form=cut_str($upfiles,'?lien=','>http');
 			$download_link='http://multiup.org/?lien='.$form;
 			
 
