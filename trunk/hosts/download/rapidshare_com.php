@@ -184,7 +184,7 @@ class rapidshare_com extends DownloadClass
 		{
 			$totalpremium = count ( $premium_acc ["rs_com"] );
 			$success = 0;
-			for($i = 0; $i <= $totalpremium; $i ++)
+			for($i = 0; $i < $totalpremium; $i++)
 			{
 				$acc = $premium_acc ["rs_com"] [$i] ['user'];
 				$pass = $premium_acc ["rs_com"] [$i] ['pass'];
