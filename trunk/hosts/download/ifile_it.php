@@ -26,7 +26,7 @@ if($_POST["ffi"] == "ok")
 }
 else
 {
-	if (!$_POST ["premium_acc"] == "on" || !$premium_acc ['ifile_it'] ['user'] || !$premium_acc ['ifile_it'] ['pass']) html_error('iFile.it Free Account Logins Required. Please set them in the config.php.');
+	/*if (!$_POST ["premium_acc"] == "on" || !$premium_acc ['ifile_it'] ['user'] || !$premium_acc ['ifile_it'] ['pass']) html_error('iFile.it Free Account Logins Required. Please set them in the config.php.');
 
 	$page = sslcurl('https://secure.ifile.it/account:process_signin', array('usernameFld' => $premium_acc ['ifile_it'] ['user'], 'passwordFld' => $premium_acc ['ifile_it'] ['pass'], 'submitBtn' => 'continue'));
 	$cook = GetCookies($page);
@@ -34,6 +34,8 @@ else
 	$Referer = $LINK;
 	$loc = trim($redir[1]);
 	$Url = parse_url($loc);
+	*/
+	$Url = parse_url($LINK);
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], 0, $cook, 0, 0, $_GET["proxy"],$pauth);
 	is_page($page);
 	$cook .= '; ' . GetCookies($page);
@@ -111,5 +113,5 @@ function sslcurl ($link, $post = 0, $cookie = 0, $refer = 0)
 	return $contents;
 }
 // written by kaox 24/05/09
-//updated by szalinski 01-Sep-09
+//updated by szalinski 16-Sep-09
 ?>
