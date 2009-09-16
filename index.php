@@ -11,8 +11,8 @@ error_reporting ( 6135 );
 
 $nn = "\r\n";
 $fromaddr = "RapidLeech";
-$dev_name = 'eqbal, updated by szalinski';
-$rev_num = '41';
+$dev_name = 'Pre-Release T1';
+$rev_num = '42';
 $PHP_SELF = ! $PHP_SELF ? $_SERVER ["PHP_SELF"] : $PHP_SELF;
 define ( 'RAPIDLEECH', 'yes' );
 define ( 'ROOT_DIR', realpath ( "./" ) );
@@ -22,7 +22,7 @@ define ( 'IMAGE_DIR', 'images/' );
 define ( 'CLASS_DIR', 'classes/' );
 define ( 'CONFIG_DIR', 'configs/' );
 define ( 'BUILD', '06282009' );
-define ( 'CREDITS', '<a href="http://www.rapidleech.com/" style="text-decoration:none"><b>RapidLeech</b></a>&nbsp;<b style="color:#F09D19">PlugMod rev. ' . $rev_num . '</b> <span style="color:#F09D19">by ' . $dev_name . '</span><br><small style="color:#239FD9">Credits to Pramode &amp; Checkmate &amp; Kloon</small>' );
+define ( 'CREDITS', '<a href="http://www.rapidleech.com/" style="text-decoration:none"><b>RapidLeech</b></a>&nbsp;<b style="color:#F09D19">PlugMod (eqbal) rev. ' . $rev_num . '</b> <span style="color:#F09D19">' . $dev_name . '</span><br><small style="color:#239FD9">Credits to Pramode &amp; Checkmate &amp; Kloon</small>' );
 
 require_once (CONFIG_DIR . "config.php");
 // $download_dir should always end with a '/'
