@@ -10,6 +10,7 @@ function merge() {
 		} elseif (substr ( $file ["name"], - 4 ) !== '.crc' && substr ( $file ["name"], - 4 ) !== '.001') {
 			echo lang(169)."<br /><br />";
 		} else {
+			echo lang(207)."<b>".basename(substr($file["name"], 0, -4))."</b><br><br>";
 			$usingcrcfile = (substr ( $file ["name"], - 4 ) === '.001') ? false : true;
 ?>
 <form method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="files[0]" value="<?php echo $_GET ["files"] [0]; ?>">

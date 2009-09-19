@@ -19,10 +19,10 @@
 <script type="text/javascript" language="javascript">
 function pr(percent, received, speed)
 {
-	document.getElementById("received").innerHTML = '<b>' + received + '</b>';
-	document.getElementById("percent").innerHTML = '<b>' + percent + '%</b>';
+	document.getElementById("received").innerHTML = '<b>' + received + "<\/b>";
+	document.getElementById("percent").innerHTML = '<b>' + percent + "%<\/b>";
 	document.getElementById("progress").style.width = percent + '%';
-	document.getElementById("speed").innerHTML = '<b>' + speed + ' KB/s</b>';
+	document.getElementById("speed").innerHTML = '<b>' + speed + " KB\/s<\/b>";
 	document.title = percent + '% Downloaded';
 	return true;
 }
