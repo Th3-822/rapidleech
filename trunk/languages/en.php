@@ -212,5 +212,6 @@ $lang[203]	=	'Delete source file after successful split';
 $lang[204]	=	'files and folders';
 $lang[205]	=	'Unzip';
 $lang[206]	=	'YouTube Video Format Selector';
+$lang[207]	=	'Merging File';
 
 ?>

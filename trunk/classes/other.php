@@ -401,7 +401,7 @@ function is__writable($path) {
 
 function lang($id) {
 	global $options;
-	include('languages/'.$options['default_language'].'.php');
+	include('languages/'.basename($options['default_language']).'.php');
 	return $lang[$id];
 }
 ?>

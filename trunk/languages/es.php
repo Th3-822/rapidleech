@@ -4,7 +4,6 @@ if (!defined('RAPIDLEECH')) {
  exit;
 }
 // The Spanish language file
-// Need to verify context of: 50, 58, 139
 
 $lang[1] = 'Acceso denegado';
 $lang[2] = 'El servidor se ha negado a cumplir con tu solicitud';
@@ -63,7 +62,7 @@ $lang[54] = 'Invertir Selecci&oacute;n';
 $lang[55] = 'Nombre';
 $lang[56] = 'Tama&ntilde;o';
 $lang[57] = 'No se encontraron archivos';
-$lang[58] = 'Texto para formato de guardado de enlaces: (sensible a may&uacute;sculas y min&uacute;sculas)';
+$lang[58] = 'Leyenda para formato de guardado de enlaces: (sensible a may&uacute;sculas y min&uacute;sculas)';
 $lang[59] = 'El enlace para la descarga ';
 $lang[60] = 'El nombre del archivo';
 $lang[61] = 'Estilo predeterminado del enlace';
@@ -211,6 +210,7 @@ $lang[202] = 'No se ha podido renombrar el archivo <b>%1$s</b>!';       // %1$s 
 $lang[203] = 'Eliminar archivos origen despu&eacute;s de dividir correctamente';
 $lang[204] = 'archivos y directorios';
 $lang[205] = 'Descomprimir';
-$lang[206] = 'Youtube Video Formato Selector';
+$lang[206] = 'Selector de Formato de Video de Youtube';
+$lang[207] = 'Uniendo archivo';
 
 ?>

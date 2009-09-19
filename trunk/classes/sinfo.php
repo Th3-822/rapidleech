@@ -139,7 +139,7 @@ $prozent_belegt = 100 * $belegt / $insgesamt;
 			$percentages = array ();
 			
 			foreach ( $delta as $k => $v ) {
-				$percentages [$k] = round ( $v / $deltaTotal * 100, 2 );
+				$percentages [$k] = @round ( $v / $deltaTotal * 100, 2 );
 			}
 			return $percentages;
 		}
@@ -147,7 +147,7 @@ $prozent_belegt = 100 * $belegt / $insgesamt;
 		$cpulast = 100 - $cpu ['idle'];
 		$cpu_string = '';
 		$cpu_string .= lang(136).": <span id='cpuload'>" . round ( $cpulast, "0" ) . "</span>%<br />";
-		$cpu_string .= '<img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpulast, "2" ) . '" border="0" name="cpupercent" id="cpupercent"><br>';
+		$cpu_string .= '<img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpulast, "2" ) . '" border="0" name="cpupercent" id="cpupercent" alt=""><br>';
 	} elseif ($os == "nocpu") {
 		echo "";
 	} else {
