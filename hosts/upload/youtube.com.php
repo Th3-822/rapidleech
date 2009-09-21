@@ -57,7 +57,7 @@ EOF;
 		$geturl = rtrim($redir["1"]);
 	}
 
-	$contents = sslcurl("get", $geturl, 0, $cookies, 0);
+	$contents = sslcurl($geturl, 0, $cookies);
 	$cookie_GALX = GetCookies($contents);
 	
 	$post_url = "https://www.google.com/accounts/ServiceLoginAuth?service=youtube";
@@ -76,7 +76,8 @@ EOF;
 	$post['rmShown'] = '1';
 	$post['signIn'] = 'Sign+in';
 	$post['asts'] = '';
-	$contents = sslcurl("post", $post_url, $post, $cookie_GALX, $geturl);
+
+	$contents = sslcurl($post_url, $post, $cookie_GALX, $geturl);
 	if (!preg_match('%ocation: (.+)\r\n%', $contents, $redir) and !preg_match('%url=&#39;(.+)&#39;%', $contents, $redir)) html_error('Error - logins incorrect');
 	$redirect = html_entity_decode($redir[1]);
 	
@@ -86,19 +87,18 @@ EOF;
 	{
 		$gcookies = preg_replace('%LSID=EXPIRED; %U', '', GetCookies($contents));
 		$Url = parse_url($redirect);
-		$page = sslcurl('get', $redirect, 0, $gcookies, urldecode($geturl));
+		$page = sslcurl($redirect, 0, $gcookies, urldecode($geturl));
 		$lsid = preg_replace('%LSID=EXPIRED; %U', '', GetCookies($page));
 		$gredir = html_entity_decode(cut_str($page, '<meta http-equiv="refresh" content="0; url=&#39;', '&#39;">'));
 		$Url = parse_url($gredir);
-		$page = sslcurl('get', $gredir, 0, $lsid, 0);
-		preg_match('%ocation: (.+)\r\n%', $page, $redir3);
-		$Url = parse_url($redir3[1]);
+		if (stripos($gredir, 'accounts/SetSID?'))
+		{
+			$page = sslcurl($gredir, 0, $lsid);
+			preg_match('%ocation: (.+)\r\n%', $page, $redir3);
+			$lcookies = GetCookies($page);
+			$Url = parse_url($redir3[1]);
+		}
 		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, $gcookies, 0, 0, $_GET["proxy"], $pauth);
-		is_page($page);
-		$lcookies = GetCookies($page);
-		preg_match('%ocation: (.+)\r\n%', $page, $redir4);
-		$Url = parse_url($redir4[1]);
-		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, $lcookies, 0, 0, $_GET["proxy"], $pauth);
 		is_page($page);
 		$ytcookies = GetCookies($page);
 		$utube_login_cookie = $lcookies . '; ' . $ytcookies;
@@ -147,38 +147,7 @@ EOF;
 	echo "<script>document.getElementById('progressblock').style.display='none';</script>";
 }
 
-/////////// DO NOT TOUCH ///////////
-function sslcurl ($method, $link, $post, $cookie, $refer)
-{
-	if ($method == "post")
-	{
-		$mm = 1;
-		$postdata = formpostdata($post);
-	}
-	elseif ($method == "get")
-	{
-		$mm = 0;
-	}
-
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $link);
-	curl_setopt($ch, CURLOPT_HEADER, 1);
-	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U;Windows NT 5.1; de;rv:1.8.0.1)\r\nGecko/20060111\r\nFirefox/1.5.0.1');
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_POST, $mm);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-	curl_setopt($ch, CURLOPT_REFERER, $refer);
-	curl_setopt($ch, CURLOPT_COOKIE, $cookie) ;
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0); 
-	// curl_setopt ( $ch , CURLOPT_TIMEOUT, 15);
-	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
-	$contents .= curl_exec($ch); 
-	// $info = curl_getinfo($ch);
-	// $stat = $info['http_code'];
-	curl_close($ch);
-	return $contents;
-}
+//sslcurl function moved to http.php
 // written by kaox 26/05/09
-//updated by szalinski 31-Aug-2009
+//updated by szalinski 21-sep-2009
 ?>

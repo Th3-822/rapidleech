@@ -95,9 +95,9 @@ $prozent_belegt = 100 * $belegt / $insgesamt;
 		$cpus = $wmi->execquery ( "SELECT * FROM Win32_Processor" );
 		$cpu_string = lang(136).':';
 		foreach ( $cpus as $cpu ) {
-			$cpu_string .= "" . $cpu->loadpercentage . "%<br />";
+			$cpu_string .= "" . $cpu->loadpercentage;
 		}
-		$cpu_string .= '<img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpu->loadpercentage, "2" ) . '" border="0"><br>';
+		$cpu_string .= '%<br /><img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpu->loadpercentage, "2" ) . '" border="0"><br />';
 	} elseif ($os == "linux") {
 		function getStat($_statPath) {
 			if (trim ( $_statPath ) == '') {
