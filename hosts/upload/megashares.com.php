@@ -3,10 +3,48 @@
 <tr><td align=center>
 <div id=info width=100% align=center>Retrive upload ID</div>
 <?php
+
+				####### Account Info. ###########
+				$megashares_login = ""; //Set you username
+				$megashares_pass = ""; //Set your password
+				##############################
+				$not_done=true;
+                $continue_up=false;
+
+				
+				
 				$refm='http://www.megashares.com/';
 				$cookies='';
-				if (empty($megashares_login) || empty($megashares_pass))echo"<br>No enter Login/Password<br><br>";
-				else{
+				if (!empty($megashares_login) || !empty($megashares_pass)){
+				$_REQUEST['my_login'] = $megashares_login;
+				$_REQUEST['my_pass'] = $megashares_pass;
+				$_REQUEST['action'] = "FORM";
+				echo "<b><center>Use Default login/pass.</center></b>\n";
+				if ($_REQUEST['action'] == "FORM")
+                $continue_up=true;
+                else{
+?>
+<table border=0 style="width:270px;" cellspacing=0 align=center>
+<form method=post>
+<input type=hidden name=action value='FORM' />
+<tr><td nowrap>&nbsp;Login*<td>&nbsp;<input type=text name=my_login value='' style="width:160px;" />&nbsp;</tr>
+<tr><td nowrap>&nbsp;Password*<td>&nbsp;<input type=password name=my_pass value='' style="width:160px;" />&nbsp;</tr>
+<tr><td colspan=2 align=center><input type=submit value='Upload' /></tr>
+<tr><td colspan=2 align=center><small>*You can set it as default in <b>megashares.com.php</b></small></tr>
+</table>
+</form>	
+<?php
+	}
+
+if ($continue_up)
+	{
+		$not_done=false;
+?>
+<table width=600 align=center>
+</td></tr>
+<tr><td align=center>
+<div id=login width=100% align=center>Login to megashares.com</div>	
+<?php			
 					$ref1='http://www.megashares.com/myms_login.php';
 					$Url=parse_url($ref1);
 					$post['mymslogin_name']=$megashares_login;
