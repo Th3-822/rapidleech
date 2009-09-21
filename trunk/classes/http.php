@@ -390,6 +390,35 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	}
 }
 
+
+//simple curl function for https:// logins
+function sslcurl($link, $post = 0, $cookie = 0, $refer = 0)
+{
+	$mm = !empty($post) ? 1 : 0;
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $link);
+	curl_setopt($ch, CURLOPT_HEADER, 1);
+	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U;Windows NT 5.1; de;rv:1.8.0.1)\r\nGecko/20060111\r\nFirefox/1.5.0.1');
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	if ($mm == 1)
+	{
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, formpostdata($post));
+	}
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+	curl_setopt($ch, CURLOPT_REFERER, $refer);
+	curl_setopt($ch, CURLOPT_COOKIE, $cookie) ;
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+	// curl_setopt ( $ch , CURLOPT_TIMEOUT, 15);
+	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+	$contents .= curl_exec($ch);
+	// $info = curl_getinfo($ch);
+	// $stat = $info['http_code'];
+	curl_close($ch);
+	return $contents;
+}
+
+
 // This new function requires less line and actually reduces filesize :P
 // Besides, using less globals means more variables available for us to use
 function formpostdata($post) {
