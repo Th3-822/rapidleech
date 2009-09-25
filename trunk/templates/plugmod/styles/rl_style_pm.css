@@ -264,14 +264,16 @@ th {
 {
 	background-color:#FFFFFF;
 	width:0%;
-	height:10px;
+	height:8px;
+	margin: 1px;
 }
 
 .progressup
 {
 	background-color:#FFFFFF;
 	width:0%;
-	height:10px;
+	height:8px;
+	margin: 1px;
 }
 
 /* The "new-and-improved" tabs xD */

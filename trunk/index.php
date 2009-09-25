@@ -22,7 +22,7 @@ define ( 'IMAGE_DIR', 'images/' );
 define ( 'CLASS_DIR', 'classes/' );
 define ( 'CONFIG_DIR', 'configs/' );
 define ( 'BUILD', '06282009' );
-define ( 'CREDITS', '<a href="http://www.rapidleech.com/" style="text-decoration:none"><b>RapidLeech</b></a>&nbsp;<b style="color:#F09D19">PlugMod (eqbal) rev. ' . $rev_num . '</b> <span style="color:#F09D19">' . $dev_name . '</span><br><small style="color:#239FD9">Credits to Pramode &amp; Checkmate &amp; Kloon</small>' );
+define ( 'CREDITS', '<a href="http://www.rapidleech.com/" style="text-decoration:none"><b>RapidLeech</b></a>&nbsp;<b style="color:#F09D19">PlugMod (eqbal) rev. ' . $rev_num . '</b> <span style="color:#F09D19">' . $dev_name . '</span><br><small style="color:#239FD9">Credits to Pramode &amp; Checkmate &amp; Kloon</small><br /><p style="text-align:center; margin:0 auto; font-weight:bold"><a href="http://www.rapidleechhost.com/aff.php?aff=001" target="_blank">RapidleechHost Offical Hosting</a></p>' );
 
 require_once (CONFIG_DIR . "config.php");
 // $download_dir should always end with a '/'
