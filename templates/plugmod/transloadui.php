@@ -1,5 +1,5 @@
 <br />
-<table cellspacing="0" cellpadding="0" class="transloadui">
+<table align="center" cellspacing="0" cellpadding="0" class="transloadui">
 <tr>
 <td></td>
 <td>

@@ -1,5 +1,5 @@
 <div id=<?php echo $id; ?>>
-<table cellspacing="0" cellpadding="0" class="uploadui" id="progressblock">
+<table align="center" cellspacing="0" cellpadding="0" class="uploadui" id="progressblock">
 <tr>
 	<td></td>
 	<td>

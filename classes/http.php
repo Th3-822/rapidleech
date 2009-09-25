@@ -555,7 +555,8 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 	
 	$timeStart = getmicrotime ();
 	
-	$chunkSize = 16384;		// Use this value no matter what
+	//$chunkSize = 16384;		// Use this value no matter what (using this actually just causes massive cpu usage for large files, too much data is flushed to the browser!)
+	$chunkSize = GetChunkSize ( $fileSize );
 	
 	fputs ( $fp, $zapros );
 	fflush ( $fp );
