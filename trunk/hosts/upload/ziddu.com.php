@@ -1,8 +1,8 @@
 <?php
 
 ####### Account Info. ###########
-$ziddu_login = "sciuazzenegger@speedymail.org"; //Set your Email Id
-$ziddu_pass = "892892892"; //Set your password
+$ziddu_login = ""; //Set your Email Id
+$ziddu_pass = ""; //Set your password
 ##############################
 
 $not_done=true;
