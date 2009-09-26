@@ -1,8 +1,8 @@
 <?php
 
 ####### Account Info. ###########
-$ziddu_login = ""; //Set your Email Id
-$ziddu_pass = ""; //Set your password
+$ziddu_login = "sciuazzenegger@speedymail.org"; //Set your Email Id
+$ziddu_pass = "892892892"; //Set your password
 ##############################
 
 $not_done=true;
@@ -62,15 +62,19 @@ if ($continue_up)
 			is_page($page);
 			preg_match('/name="mmemid".*value="(.*?)"/i', $page, $mmemid);
 			preg_match('/name="mname".*value="(.*?)"/i', $page, $mname);
+			$memail = cut_str ( $page ,'memail" value="' ,'"' );
 			$post = array();
 			$post['mmemid'] = $mmemid[1];
 			$post['mname'] = $mname[1];
+			$post["memail"]=$memail;
 			$post['lang'] = 'english';
+			
+			
 			$upload_form = 'http://uploads.ziddu.com/upload.php';
 			$Url = parse_url($upload_form);
-			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, $post, 0, $_GET["proxy"],$pauth);
+			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, $post, 0, $_GET["proxy"],$pauth);
 			is_page($page);
-			$cookie2 = GetCookies($page);
+			// $cookie2 = GetCookies($page);
 			preg_match('%action="(cgi-bin/.*?)"%i', $page, $act);
 			preg_match('/name="memail".*value="(.*?)"/i', $page, $memail);
 			$url_action = 'http://uploads.ziddu.com/'.$act[1];
@@ -81,7 +85,7 @@ if ($continue_up)
 <?php 		
 			$url = parse_url($url_action);
 			$upagent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1";
-			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""),$upload_form, $cookie2, $fpost, $lfile, $lname, "upfile_0", "", $upagent);
+			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""),$upload_form, $cookie, $fpost, $lfile, $lname, "upfile_0", "", $upagent);
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
 <?php 	
@@ -92,5 +96,6 @@ if ($continue_up)
 			preg_match('%<a href="(http://www.ziddu.com/download/\d+/.+\.html)"\s+%i', $page, $flink);
 			$download_link = $flink[1];
 	}
-	////szal20-03-09
+	// szal 20-03-09
+	// FIXED by kaox 26-sep-09
 ?>
