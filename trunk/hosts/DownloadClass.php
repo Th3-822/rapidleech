@@ -14,7 +14,7 @@ class DownloadClass {
 		echo('<table width="600" align="center">');
 		echo('<tr>');
 		echo('<td align="center">');
-		echo('<div id="mesg" width="100%" align="center">Retrieving download page</div>');
+		echo('<div id="mesg" width="100%" align="center">'.lang(300).'</div>');
 	}
 	
 	/**
@@ -97,7 +97,7 @@ class DownloadClass {
 		foreach ($inputs as $name => $input) {
 			echo('<input type="hidden" name="'.$name.'" id="'.$name.'" value="'.$input.'" />');
 		}
-		echo('<h4>Enter <img src="'.$captchaImg.'" /> here: <input type="text" name="captcha" size="5" />&nbsp;&nbsp;<input type="submit" onclick="return check();" value="Transload File" /></h4>');
+		echo('<h4>'.lang(301).' <img src="'.$captchaImg.'" /> '.lang(302).': <input type="text" name="captcha" size="5" />&nbsp;&nbsp;<input type="submit" onclick="return check();" value="Transload File" /></h4>');
 		echo('<script type="text/javascript">');
 		echo('function check() {');
 		echo('var captcha=document.dl.captcha.value;');

@@ -411,7 +411,7 @@ function getthedate(){
     if (seconds<=9)    seconds="0"+seconds; 
     
 
-    var cdate="<span style=\"color:#994A1D\">Local Time:</span> &nbsp;&nbsp;&nbsp;<span style=\"color:#999\">"+hours+":"+minutes+":"+seconds+" "+dn+"</span><BR>";
+    var cdate="<span style=\"color:#994A1D\"><?php echo lang(281); ?>:</span> &nbsp;&nbsp;&nbsp;<span style=\"color:#999\">"+hours+":"+minutes+":"+seconds+" "+dn+"</span><BR>";
     if (document.all) 
         document.all.clock.innerHTML=cdate; 
     else if (document.getElementById) 
