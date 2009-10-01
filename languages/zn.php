@@ -188,5 +188,7 @@ $lang[300]	=	'Retrieving download page';
 $lang[301]	=	'Enter';
 $lang[302]	=	'here';
 $lang[303]  =   'Download File';
+$lang[304]  =   'configs/files.lst is not writable, please make sure it is chmod to 777';
+$lang[305]  =   '&nbsp;is selected as your download path and it is not writable. Please chmod it to 777';
 
 ?>

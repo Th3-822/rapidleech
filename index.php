@@ -59,12 +59,12 @@ require_once (TEMPLATE_DIR.'functions.php');
 
 // If configs/files.lst is not writable, give a warning
 if (! is__writable ( CONFIG_DIR . 'files.lst' )) {
-	html_error ( "configs/files.lst is not writable, please make sure it is chmod to 777" );
+	html_error ( lang ( 304 ) );
 }
 
 // If the download path is not writable, show error
 if (! is__writable ( DOWNLOAD_DIR )) {
-	html_error ( DOWNLOAD_DIR . " is selected as your download path and it is not writable. Please chmod it to 777" );
+	html_error ( DOWNLOAD_DIR . lang ( 305 ) );
 }
 
 purge_files ( $delete_delay );
