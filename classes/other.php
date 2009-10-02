@@ -99,6 +99,18 @@ function cut_str($str, $left, $right) {
 	return $str;
 }
 
+// tweaked cutstr with pluresearch functionality
+function cutter($str, $left, $right,$cont=1)
+	{
+    for($iii=1;$iii<=$cont;$iii++){
+	$str = substr ( stristr ( $str, $left ), strlen ( $left ) );
+	}
+    $leftLen = strlen ( stristr ( $str, $right ) );
+    $leftLen = $leftLen ? - ($leftLen) : strlen ( $str );
+    $str = substr ( $str, 0, $leftLen );
+    return $str;
+}
+
 function write_file($file_name, $data, $trunk = 1) {
 	if ($trunk == 1) {
 		$mode = "wb";
