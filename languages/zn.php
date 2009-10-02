@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('RAPIDLEECH')) {
 	require('../deny.php');
 	exit;
@@ -94,7 +94,7 @@ $lang[206]	=	'YouTube 视频格式选择';
 $lang[207]	=	'Link to Transload';
 $lang[208]	=	'Referrer';
 $lang[209]	=	'Transload File';
-$lang[210]	=	'User & Pass (HTTP/FTP)';
+$lang[210]	=	'User &amp; Pass (HTTP/FTP)';
 $lang[211]	=	'User';
 $lang[212]	=	'Pass';
 $lang[213]	=	'Add Comments';
@@ -102,7 +102,7 @@ $lang[214]	=	'PluginOptions';
 $lang[215]	=	'Disable All Plugins';
 $lang[216]	=	'YouTube Video Format Selector';
 $lang[217]	=	'Direct Link';
-$lang[218]	=	'&fmt=';
+$lang[218]	=	'&amp;fmt=';
 $lang[219]	=	'Auto-get the highest quality format available';
 $lang[220]	=	'0 [Video: FLV H263 251kbps 320x180 @ 29.896fps | Audio: MP3 64kbps 1ch @ 22.05kHz]';
 $lang[221]	=	'5 [Video: FLV H263 251kbps 320x180 @ 29.885fps | Audio: MP3 64kbps 1ch @ 22.05kHz]';
@@ -190,5 +190,6 @@ $lang[302]	=	'here';
 $lang[303]  =   'Download File';
 $lang[304]  =   'configs/files.lst is not writable, please make sure it is chmod to 777';
 $lang[305]  =   '&nbsp;is selected as your download path and it is not writable. Please chmod it to 777';
+$lang[306] = 'Merging File';
 
 ?>
