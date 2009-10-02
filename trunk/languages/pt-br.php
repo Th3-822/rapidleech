@@ -215,7 +215,7 @@ $lang[206]	=	'YouTube Formato de V&iacute;deo Seletor';
 $lang[207]	=	'Link para Baixar';
 $lang[208]	=	'Refer&ecirc;ncia';
 $lang[209]	=	'Baixar Arquivo';
-$lang[210]	=	'Usu&aacute;rio & Senha (HTTP/FTP)';
+$lang[210]	=	'Usu&aacute;rio &amp; Senha (HTTP/FTP)';
 $lang[211]	=	'Usu&aacute;rio';
 $lang[212]	=	'Senha';
 $lang[213]	=	'Adicionar Coment&aacute;rios';
@@ -223,7 +223,7 @@ $lang[214]	=	'Op&ccedil;&otilde;es de Plugin';
 $lang[215]	=	'Desabilitar Todos os Plugins';
 $lang[216]	=	'YouTube Formato de V&iacute;deo Seletor';
 $lang[217]	=	'Link direto';
-$lang[218]	=	'&fmt=';
+$lang[218]	=	'&amp;fmt=';
 $lang[219]	=	'Auto-obter o formato de alta qualidade dispon&iacute;vel';
 $lang[220]	=	'0 [V&iacute;deo: FLV H263 251kbps 320x180 @ 29.896fps | &Aacute;udio: MP3 64kbps 1ch @ 22.05kHz]';
 $lang[221]	=	'5 [V&iacute;deo: FLV H263 251kbps 320x180 @ 29.885fps | &Aacute;udio: MP3 64kbps 1ch @ 22.05kHz]';
@@ -311,5 +311,6 @@ $lang[302]	=	'aqui';
 $lang[303]  =   'Baixar Arquivo';
 $lang[304]  =   'configs/files.lst n&atilde;o &eacute; grav&aacute;vel, por favor, certifique-se que &eacute; chmod para 777';
 $lang[305]  =   '&nbsp;&eacute; selecionado como o caminho de download e n&atilde;o &eacute; grav&aacute;vel. Por favor chmod para 777';
+$lang[306] = 'Juntando Arqivo';
 
 ?>
