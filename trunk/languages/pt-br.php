@@ -311,6 +311,6 @@ $lang[302]	=	'aqui';
 $lang[303]  =   'Baixar Arquivo';
 $lang[304]  =   'configs/files.lst n&atilde;o &eacute; grav&aacute;vel, por favor, certifique-se que &eacute; chmod para 777';
 $lang[305]  =   '&nbsp;&eacute; selecionado como o caminho de download e n&atilde;o &eacute; grav&aacute;vel. Por favor chmod para 777';
-$lang[306] = 'Juntando Arqivo';
+$lang[306]  =   'Juntando Arquivos';
 
 ?>
