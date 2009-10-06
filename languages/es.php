@@ -311,5 +311,6 @@ $lang[303] = 'Descargar Archivo';
 $lang[304] = 'No se ha podido escribir en configs/files.lst aseg&uacute;rate de que sus permisos sean 777';
 $lang[305] = '&nbsp; ha sido seleccionado como tu ruta de descarga y no es escribible. Por favor, cambia sus permisos a 777';
 $lang[306] = 'Uniendo Archivo';
+$lang[307] = 'Lugar';
 
 ?>

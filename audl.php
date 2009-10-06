@@ -286,7 +286,7 @@ function resetProgress()
 <?php
 		for ($i=0; $i<count($getlinks); $i++)
 			{
-				echo "<tr><td nowrap>".$getlinks[$i]."</td><td id=status".$i.">Waiting</td></tr>\r\n";
+				echo "<tr><td nowrap>".$getlinks[$i]."</td><td id=status".$i.">".lang(307)."</td></tr>\r\n";
 			}
 ?>
 </tbody>

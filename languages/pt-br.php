@@ -15,7 +15,7 @@ $lang[6]	=	'O caminho n&atilde;o especificado para salvar este arquivo';
 $lang[7]	=	'Voc&ecirc; n&atilde;o est&aacute; autorizado a baixar de <span class="font-black">%1$s (%2$s)</span>';	// %1$s = host name %2$s = host ip
 $lang[8]	=	'Redirecionando para:';
 $lang[9]	=	'N&atilde;o foi poss&iacute;vel atualizar a lista de arquivos';
-$lang[10]	=	'Arquivo <b>%1$s</b> (<b>%2$s</b>) Salvado!<br />Tempo: <b>%3$s</b><br />Velocidade M&eacute;dia: <b>%4$s KB/s</b><br />';	// %1$s = filename %2$s = filesize %3$s = time of download %4$s = speed
+$lang[10]	=	'Arquivo <b>%1$s</b> (<b>%2$s</b>) Salvo!<br />Tempo: <b>%3$s</b><br />Velocidade M&eacute;dia: <b>%4$s KB/s</b><br />';	// %1$s = filename %2$s = filesize %3$s = time of download %4$s = speed
 $lang[11]	=	'<script>E-mail("O arquivo foi enviado para este endere&ccedil;o<b>%1$s</b>.", "%2$s");</script>';	// %1$s = E-mail address %2$s = filename
 $lang[12]	=	'Erro ao enviar arquivo!';
 $lang[13]	=	'Voltar para a principal';
@@ -312,5 +312,7 @@ $lang[303]  =   'Baixar Arquivo';
 $lang[304]  =   'configs/files.lst n&atilde;o &eacute; grav&aacute;vel, por favor, certifique-se que &eacute; chmod para 777';
 $lang[305]  =   '&nbsp;&eacute; selecionado como o caminho de download e n&atilde;o &eacute; grav&aacute;vel. Por favor chmod para 777';
 $lang[306]  =   'Juntando Arquivos';
+$lang[307]  =   'Esperando';
+
 
 ?>
