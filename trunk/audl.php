@@ -321,14 +321,14 @@ function resetProgress()
 </script>
 <table class="container" cellspacing=0 cellpadding=1 id="entered"><tr><td>
 <form action=?GO=GO method=post >
-<table width=700 border=0>
+<table align="center" width=700 border=0>
 <tr id=menu><td width=700 align=center>
 <a href=javascript:ViewPage('listing');><?php echo lang(32); ?></a>&nbsp;|&nbsp;<a href=javascript:ViewPage('options');><?php echo lang(33); ?></a>
 </td></tr>
 <tr> <td width=100% valign=top>
 <div id=listing style="display:block;">
 <table border=0 style="width:710px;">
-<tr><td><textarea id=links name=links rows=15 cols=60 class="adlinks"></textarea></td><td valign=top><input type=submit value="<?php echo lang(34); ?>" onClick=javascript:HideAll(); style="width:100px;"></tr>
+<tr><td align="center"><textarea id=links name=links rows=15 cols=60 class="adlinks"></textarea></td></tr><tr><td align="center" valign=top><input type=submit value="<?php echo lang(34); ?>" onClick=javascript:HideAll(); style="width:100px;"></tr>
 </table>
 </div>
 <div id="options" style="display:none;">

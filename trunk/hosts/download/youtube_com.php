@@ -13,7 +13,7 @@ class youtube_com extends DownloadClass
 	public function Download($link)
 	{
 		$this->page = $this->GetPage ($link);
-		if (!preg_match('%"fmt_url_map": "(.+)", %U', $this->page, $fmt_url_map)) html_error('Video link not found.');
+		if (!preg_match('%"fmt_url_map"\:\s"(.+)",\s%Us', $this->page, $fmt_url_map)) html_error('Video link not found.');
 		$fmt_url_maps = preg_split('%,%', urldecode($fmt_url_map[1]));
 		$fmts = array(22,35,18,34,6,5,0,17,13);
 		$yt_fmt = $_POST['yt_fmt'];
