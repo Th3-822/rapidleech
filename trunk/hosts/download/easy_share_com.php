@@ -1,26 +1,11 @@
 <?php
+
 if (! defined ( 'RAPIDLEECH' )) {
 	require_once ("index.html");
 	exit ();
 }
 if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_pass"]) || ($_GET ["premium_acc"] == "on" && $premium_acc ["easyshare"] ["user"] && $premium_acc ["easyshare"] ["pass"])) {
-	function BiscottiDiKaox($content) {
-		preg_match_all ( "/Set-Cookie: (.*)\n/", $content, $matches );
-		foreach ( $matches [1] as $coll ) {
-			$bis0 = split ( ";", $coll );
-			$bis1 = $bis0 [0] . "; ";
-			$bis2 = split ( "=", $bis1 );
-			if (substr_count ( $bis, $bis2 [0] ) > 0) {
-				$patrn = $bis2 [0] . "[^ ]+";
-				$bis = preg_replace ( "/$patrn/", $bis1, $bis );
-			} else {
-				$bis .= $bis1;
-			}
-		}
-		$bis = str_replace ( "  ", " ", $bis );
-		return rtrim ( $bis );
-	}
-	
+
 	// login 
 	$login = "http://www.easy-share.com/accounts/login";
 	$urlg = parse_url ( $login );
@@ -28,7 +13,7 @@ if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_
 	$post ["password"] = $_GET ["premium_pass"] ? $_GET ["premium_pass"] : $premium_acc ["easyshare"] ["pass"];
 	$post ["remember"] = "1";
 	$page = geturl ( $urlg ["host"], $urlg ["port"] ? $urlg ["port"] : 80, $urlg ["path"] . ($urlg ["query"] ? "?" . $urlg ["query"] : ""), "http://www.easy-share.com/", 0, $post, 0, $_GET ["proxy"], $pauth );
-	$cook = BiscottiDiKaox ( $page );
+	$cook = getcookies ( $page );
 	
 	// end login 
 	
@@ -49,43 +34,71 @@ if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_
 
 } else {
 	$es = $_POST ['es'];
-	if ($es == "ok") {
+	if ($es == "ok") {    
 		$post = array ();
-		$post ["id"] = $_POST ["id"];
 		$post ["captcha"] = $_POST ["captcha"];
-		
+		$post ["id"] = $_POST ["id"];
 		$cookie = $_POST ["cookie"];
 		$Referer = $_POST ["referer"];
-		$Href = $_POST ["flink"];
-		$FileName = urldecode ( $_POST ["name"] );
-		
-		$Url = parse_url ( $Href );
-		$FileName = ! $FileName ? basename ( $Url ["path"] ) : $FileName;
-		
-		insert_location ( "$PHP_SELF?filename=" . urlencode ( $FileName ) . "&host=" . $Url ["host"] . "&path=" . urlencode ( $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "") ) . "&referer=" . urlencode ( $Referer ) . "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&cookie=" . urlencode ( $cookie ) . "&post=" . urlencode ( serialize ( $post ) ) . "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&method=POST&link=" . urlencode ( $LINK ) . ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ( $_GET ["comment"] ) : "") . "&auth=" . $auth . ($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : "") );
-	} else {
+		$FileName = urldecode ( $_POST ["name"] );       
+		$Url = parse_url ($_POST ["link"] );
+	
+        insert_location ( "$PHP_SELF?filename=" . urlencode ( $FileName ) . "&host=" . $Url ["host"] . "&path=" . urlencode ( $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "") ) . "&referer=" . urlencode ( $Referer ) . "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&cookie=" . urlencode ( $cookie ) . "&post=" . urlencode ( serialize ( $post ) ) . "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&method=POST&link=" . urlencode ( $LINK ) . ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ( $_GET ["comment"] ) : "") . "&auth=" . $auth . ($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : "") );
+	    
+        } else {
 		$page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : ""), 0, 0, 0, 0, $_GET ["proxy"], $pauth );
-		
+        $cookies=biscottiDiKaox($page);
 		is_present ( $page, 'File was deleted' );
 		is_present ( $page, 'File not found' );
-		
+        is_present ( $page, 'You have downloaded over 150MB during last hour.' );  
 		$name = cut_str ( $page, "<title>Download ", "," );
-		if (preg_match_all ( "/Set-Cookie: (([^=]+)=[^;]*;)/", $page, $matches ))
-			foreach ( $matches [2] as $k => $v )
-				$cookies [$v] = $matches [1] [$k];
+		$count = (cut_str ( $page, "w='", "'" ));
+		insert_timer ( $count, "Waiting link timelock", "", true );
+        if ( $src = cut_str ( $page, "u='", "'" )){
+        $Url=parse_url("http://".$Url["host"].$src);
+        $page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"], $LINK, $cookies, 0, 0, $_GET ["proxy"], $pauth );
+        is_page ( $page );
+        }
+        $LINK=cut_str($page,'post" action="','"');
+        $id=cut_str($page,'"id" value="','"'); 
+        $imgpath=cut_str($page,'<img src="','"');
+        if (!$imgpath) html_error ( 'Error getting link' );   
+        $imgurl="http://".$Url["host"].$imgpath;
+        $Url=parse_url($imgurl);
+        $page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"], $LINK, $cookies, 0, 0, $_GET ["proxy"], $pauth );
+        is_page ( $page );
+        
+    
+        $cook=GetCookies($page);
+        $cookies.="; ".$cook;
 		
-		if ($count = (cut_str ( $page, "w='", "'" ))) {
-			if (! $Url ["path"] = cut_str ( $page, "u='", "'" ))
-				html_error ( 'Error getting link' );
-			insert_timer ( $count, "Waiting link timelock", "", true );
-			$page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"], $LINK, $cookies, 0, 0, $_GET ["proxy"], $pauth );
-			if (preg_match_all ( "/Set-Cookie: (([^=]+)=[^;]*;)/", $page, $matches ))
-				foreach ( $matches [2] as $k => $v )
-					$cookies [$v] = $matches [1] [$k];
-		}
+		
+        $headerend = strpos($page,"JFIF");
+        $pass_img = substr($page,$headerend-6);
+        $imgfile=$download_dir."easyshare_captcha.jpg"; 
+        if (file_exists($imgfile)){ unlink($imgfile);} 
+	    write_file($imgfile, $pass_img);
+
+        print "<form method=\"post\" action=\"$PHP_SELF\">$nn";
+        print "<b>Please enter code:</b><br>$nn";
+        print "<img src=\"$imgfile?" . time () . "\" >$nn";
+        print "<input name=\"link\" value=\"$LINK\" type=\"hidden\">$nn";
+        print "<input name=\"referer\" value=\"$Referer\" type=\"hidden\">$nn";
+        print "<input type=hidden name=id value=$id>$nn";
+        print "<input name=\"es\" value=\"ok\" type=\"hidden\">$nn";
+        print "<input name=\"cookie\" value=\"$cookies\" type=\"hidden\">$nn";
+        print "<input name=\"name\" value=\"" . urlencode ( $name ) . "\" type=\"hidden\">$nn";
+        print "<input name=\"captcha\" type=\"text\" >";
+        print "<input name=\"Submit\" value=\"Submit\" type=\"submit\"></form>";        
+        
+
+          
+        
+        /*-----------------------------------------------------------
 		
 		if (! $new_url = cut_str ( $page, "document.location='", "'" )) {
-			is_present ( $page, 'You have downloaded over 150MB during last hour.' );
+			is_present ( $page, 'You have downloaded over 150MB during last hour.','You have downloaded over 150MB during last hour.',0);
+			is_present ( $page, 'Requested file is deleted.','Requested file is deleted.',0 );
 			html_error ( 'Error getting link location' );
 		}
 		$Url = parse_url ( $new_url );
@@ -109,38 +122,28 @@ if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_
 			$Url = parse_url ( $Href );
 			$FileName = $name;
 			
-			insert_location ( "$PHP_SELF?filename=" . urlencode ( $FileName ) . "&host=" . $Url ["host"] . "&path=" . urlencode ( $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "") ) . "&referer=" . urlencode ( $Referer ) . "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&cookie=" . urlencode ( $cookie ) . "&post=" . urlencode ( serialize ( $post ) ) . "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&method=POST&link=" . urlencode ( $LINK ) . ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ( $_GET ["comment"] ) : "") . "&auth=" . $auth . ($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : "") );
-			exit ();
+			*/
+			
 		}
-		
-		$page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $src, $new_url, $cookies, 0, 0, $_GET ["proxy"], $pauth );
-		is_page ( $page );
-		
-		list ( $header, $img ) = explode ( "\r\n\r\n", $page, 2 );
-		$img = preg_replace ( "%^\w*\r\n%", "", $img );
-		$cap_img = $download_dir . "easyshare_captcha.jpg";
-		if (! write_file ( $cap_img, $img )) {
-			unlink ( $cap_img );
-			write_file ( $cap_img, $img );
-		}
-		if (preg_match_all ( "/Set-Cookie: (([^=]+)=[^;]*;)/", $header, $matches ))
-			foreach ( $matches [2] as $k => $v )
-				$cookies [$v] = $matches [1] [$k];
-		
-		print "<form method=\"post\" action=\"$PHP_SELF\">$nn";
-		print "<b>Please enter code:</b><br>$nn";
-		print "<img src=\"$cap_img?" . time () . "\" >$nn";
-		print "<input name=\"link\" value=\"$LINK\" type=\"hidden\">$nn";
-		print "<input name=\"flink\" value=\"$Href\" type=\"hidden\">$nn";
-		print "<input name=\"referer\" value=\"$new_url\" type=\"hidden\">$nn";
-		print "<input type=hidden name=id value=$id>$nn";
-		print "<input name=\"es\" value=\"ok\" type=\"hidden\">$nn";
-		print "<input name=\"cookie\" value=\"" . implode ( "", $cookies ) . "\" type=\"hidden\">$nn";
-		print "<input name=\"name\" value=\"" . urlencode ( $name ) . "\" type=\"hidden\">$nn";
-		foreach ( array ("comment", "email", "partSize", "method", "proxy", "proxyuser", "proxypass", "path" ) as $v )
-			print "<input type=\"hidden\" name=\"$v\" value=\"" . $_GET [$v] . "\">\n";
-		print "<input name=\"captcha\" type=\"text\" >";
-		print "<input name=\"Submit\" value=\"Submit\" type=\"submit\"></form>";
+
 	}
-}
+    
+  function biscottiDiKaox($content)
+ {
+ preg_match_all("/Set-Cookie: (.*)\n/",$content,$matches);
+ foreach ($matches[1] as $coll) {
+ $bis0=split(";",$coll);
+ $bis1=$bis0[0]."; ";
+ $bis2=split("=",$bis1);
+ $cek=" ".$bis2[0]."="; 
+ if(strpos($bis1,"=deleted") || strpos($bis1,$cek.";")) {
+ }else{
+if  (substr_count($bis,$cek)>0)
+{$patrn=" ".$bis2[0]."=[^ ]+";
+$bis=preg_replace("/$patrn/"," ".$bis1,$bis);     
+} else {$bis.=$bis1;}}}  
+$bis=str_replace("  "," ",$bis);     
+return rtrim($bis);}
+    // fixed by kaox 04/07/2009
+	
 ?>

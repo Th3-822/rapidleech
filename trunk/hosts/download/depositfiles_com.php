@@ -1,27 +1,12 @@
 <?php
+
 if (! defined ( 'RAPIDLEECH' )) {
 	require_once ("index.html");
 	exit ();
 }
 
 if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_pass"]) || ($_GET ["premium_acc"] == "on" && $premium_acc ["depositfiles"] ["user"] && $premium_acc ["depositfiles"] ["pass"])) {
-	function BiscottiDiKaox($content) {
-		preg_match_all ( "/Set-Cookie: (.*)\n/", $content, $matches );
-		foreach ( $matches [1] as $coll ) {
-			$bis0 = split ( ";", $coll );
-			$bis1 = $bis0 [0] . "; ";
-			$bis2 = split ( "=", $bis1 );
-			if (substr_count ( $bis, $bis2 [0] ) > 0) {
-				$patrn = $bis2 [0] . "[^ ]+";
-				$bis = preg_replace ( "/$patrn/", $bis1, $bis );
-			} else {
-				$bis .= $bis1;
-			}
-		}
-		$bis = str_replace ( "  ", " ", $bis );
-		return rtrim ( $bis );
-	}
-	
+
 	// login 
 	$login = "http://depositfiles.com/en/login.php";
 	$urlg = parse_url ( $login );
@@ -29,8 +14,7 @@ if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_
 	$post ["password"] = $_GET ["premium_pass"] ? $_GET ["premium_pass"] : $premium_acc ["depositfiles"] ["pass"];
 	$post ["go"] = "1";
 	$page = geturl ( $urlg ["host"], $urlg ["port"] ? $urlg ["port"] : 80, $urlg ["path"] . ($urlg ["query"] ? "?" . $urlg ["query"] : ""), "http://depositfiles.com/en/", 0, $post, 0, $_GET ["proxy"], $pauth );
-	$cook = BiscottiDiKaox ( $page );
-	
+	 $cook = GetCookies ( $page ); 
 	// end login 
 	
 
@@ -87,4 +71,5 @@ if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_
 	
 	insert_location ( "$PHP_SELF?filename=" . urlencode ( $FileName ) . "&host=" . $Url ["host"] . "&path=" . urlencode ( $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "") ) . "&referer=" . urlencode ( $LINK ) . "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&method=" . $_GET ["method"] . "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&link=" . urlencode ( $LINK ) . ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ( $_GET ["comment"] ) : "") . ($pauth ? "&pauth=$pauth" : "") . (isset ( $_GET ["audl"] ) ? "&audl=doum" : "") );
 }
+// FIXED by kaox 29/09/2009
 ?>
