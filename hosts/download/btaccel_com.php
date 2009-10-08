@@ -9,14 +9,7 @@ if (!defined('RAPIDLEECH'))
 $btaccel_login = ""; //  Set your username
 $btaccel_pass = ""; //  Set your password
 ##############################
-
-
-?>
-<table width=600 align=center>
-</td></tr>
-<tr><td align=center>
-<div id=info width=100% align=center>Retrive upload ID</div>
-<?			
+		
            $usr=$btaccel_login;
 			$pass=$btaccel_pass;
 			if (empty($usr) || empty($pass))html_error("Login/Pass not inserted",0);
@@ -43,8 +36,8 @@ HTML;
                
             }
 ?>
-<table border="1" cellspacing="5" cellpadding="5">
-<form id="tavola" >
+<table border="1" align="center" cellspacing="5" cellpadding="5">
+<form id="tavola"  >
 <?php
 $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookies, 0, 0, $_GET["proxy"],$pauth); 
 $frmfiles=cut_str($page,'<table id="files"','</table>');
@@ -64,9 +57,9 @@ $cc++;
 
 }
 ?>
-<tr align="center"><input type=button onclick='selt(<?php echo $cc-1 ?>)' value='Step1 select and click'><input type='checkbox' name='checkall' id='checkall' onclick='checkedAll();'> all</tr>
-</table>
+<tr><td><input type='checkbox' name='checkall' id='checkall' onclick='checkedAll();'> all<td><td align=center><input type=button onclick='selt(<?php echo $cc-1 ?>)' value='Step1 select and click'></tr>
 </form>
+</table>
 <script language="javascript" type="text/javascript">
     function selt(cc)
     {
@@ -74,17 +67,19 @@ $cc++;
         var lks="";    
         var ck;
         var tmp;
+		var tmp2;
         for(pp=1;pp<=cc;pp++){
         ck=    document.getElementById("cs"+ pp );
         if (ck.checked) {
         tmp=document.getElementById("lin"+ pp );
-        lks= lks + tmp.value + "\r\n";}
+		tmp2=tmp.value.replace(/%/g,"%25");
+        lks= lks + tmp2 + "\r\n";}
         }
 	document.write('<form action=audl.php?GO=GO method=post >');
     document.write('<Input type=Hidden name=links value= "' + lks + '" >');	
 	document.write('<center><Input type=submit name=submit value="Step2 click for send selected to Autodownloader"></center>');	
 	document.write('</form>');
-   	
+	
     }
 checked=false;
 function checkedAll (frm1) {
@@ -107,6 +102,7 @@ function checkedAll (frm1) {
 <?php
 flush();
 /*************************\  
-written by kaox 21/07/2009
+WRITTEN by kaox 21-jul-2009
+UPDATED by kaox 04-oct-2009
 \*************************/
 ?>
