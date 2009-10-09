@@ -27,6 +27,8 @@ $premium_acc = array();
 //$premium_acc["btaccel"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["hotfile"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["ifile_it"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["sharingmatrix"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["letitbit"] = array('user' => 'your username', 'pass' => 'your password');
 
 $no_cache = true; # true - Prohibition by Browser; otherwise allowed (You should leave this intact unless you know what you are doing)
 //$images_via_php = false; # true - RapidShare images are downloaded through the script, but it requires ssl support; turn it off if you can't see the image.
