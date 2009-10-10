@@ -3,7 +3,7 @@ if (!defined('RAPIDLEECH')) {
 	require('../deny.php');
 	exit;
 }
-// The English language file
+// Arquivo para o idioma Português-BR
 // You should always use this file as a template for translating
 
 $lang[1]	=	'Acesso negado';
@@ -313,6 +313,26 @@ $lang[304]  =   'configs/files.lst n&atilde;o &eacute; grav&aacute;vel, por favo
 $lang[305]  =   '&nbsp;&eacute; selecionado como o caminho de download e n&atilde;o &eacute; grav&aacute;vel. Por favor chmod para 777';
 $lang[306]  =   'Juntando Arquivos';
 $lang[307]  =   'Esperando';
-
+$lang[308]  =   'Passou';
+$lang[309]  =   'Falhou';
+$lang[310]  =   'Voc&ecirc; pode ver os avisos sem esta ligado';
+$lang[311]  =   'Voc&ecirc; pode n&atilde;o ser capaz de transformar em estat&iacute;sticas do servidor';
+$lang[312]  =   'O servidor pode n&atilde;o ser capaz de suportar arquivos com tamanho superior a 2GB';
+$lang[313]  =   'Rapidleech Checker Script';
+$lang[314]  =   'fsockopen';
+$lang[315]  =   'limite de mem&oacute;ria';
+$lang[316]  =   'safe_mode';
+$lang[317]  =   'cURL';
+$lang[318]  =   'permitir url fopen';
+$lang[319]  =   'Vers&atilde;o do PHP &#45;';
+$lang[320]  =   'permitir passar tempo de perman&ecirc;ncia de refer&ecirc;ncia';
+$lang[321]  =   'Passar';
+$lang[322]  =   'Fun&ccedil;&otilde;es de Espa&ccedil;o de Disco';
+$lang[323]  =   'Apache vers&atilde;o &#45; ';
+$lang[324]  =   'Endere&ccedil;o de proxy errado';
+$lang[325]  =   'Arquivo salvo com sucesso!';
+$lang[326]  =   'Salvar Notas';
+$lang[327]  =   'Notas';
+$lang[328]  =   'A&ccedil;&otilde;es Desabilitadas';
 
 ?>

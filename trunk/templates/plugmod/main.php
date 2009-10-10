@@ -36,7 +36,7 @@ foreach ($host as $site => $file)
 <br>
 <a href="auul.php" target="_blank"><img src="templates/plugmod/images/auto_ul_pm.gif" alt="AutoUpload"></a>
 <br />
-[ <a href="javascript:openNotes();">Notes.txt</a> ]
+[ <a href="javascript:openNotes();"><?php echo lang(327); ?>.txt</a> ]
 </td>
 </tr>
 </table>

@@ -312,5 +312,26 @@ $lang[304] = 'No se ha podido escribir en configs/files.lst aseg&uacute;rate de 
 $lang[305] = '&nbsp; ha sido seleccionado como tu ruta de descarga y no es escribible. Por favor, cambia sus permisos a 777';
 $lang[306] = 'Uniendo Archivo';
 $lang[307] = 'Lugar';
+$lang[308]  =   'Passed';
+$lang[309]  =   'Failed';
+$lang[310]  =   'You might see warnings without this turned on';
+$lang[311]  =   'You might not be able to turn on server stats';
+$lang[312]  =   'Your server might not be able to support files more than 2 GB';
+$lang[313]  =   'Rapidleech Checker Script';
+$lang[314]  =   'fsockopen';
+$lang[315]  =   'memory_limit';
+$lang[316]  =   'safe_mode';
+$lang[317]  =   'cURL';
+$lang[318]  =   'allow_url_fopen';
+$lang[319]  =   'PHP Version - ';
+$lang[320]  =   'allow_call_time_pass_reference';
+$lang[321]  =   'passthru';
+$lang[322]  =   'Disk Space Functions';
+$lang[323]  =   'Apache Version - ';
+$lang[324]  =   'Wrong proxy address entered';
+$lang[325]  =   'File successfully saved!';
+$lang[326]  =   'Save Notes';
+$lang[327]  =   'Notes';
+$lang[328]  =   'Actions Disabled';
 
 ?>
