@@ -107,7 +107,7 @@ if (! empty ( $_GET ["image"] )) {
 }
 
 if (isset ( $_GET ["useproxy"] ) && (! $_GET ["proxy"] || ! strstr ( $_GET ["proxy"], ":" ))) {
-	html_error ( "Wrong proxy address entered" );
+	html_error ( lang(324) );
 } else {
 	if ($_GET ["pauth"]) {
 		$pauth = $_GET ["pauth"];

@@ -10,7 +10,7 @@ function renderActions() {
 	$return = "";
 	$return .= '<select name="act" onChange="javascript:void(document.flist.submit());">';
 	if ($options['disable_actions']) {
-		$return .= '<option selected="selected">Actions Disabled</option>';
+		$return .= '<option selected="selected">'.lang(328).'</option>';
 		$return .= '</select>';
 		return $return;
 	}
