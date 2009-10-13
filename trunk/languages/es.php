@@ -183,9 +183,9 @@ $lang[175] = 'Borrar archivos de origen despu&eacute;s de unirlos correctamente'
 $lang[176] = 'Nota:';
 $lang[177] = 'El tama&ntilde;o de archivo y el crc32 no se verificar&aacute;n';
 $lang[178] = '¡No es sposible leer el archivo .crc!';
-$lang[179] = 'Error, el archivo de salida ya existe <b>%1$s</b>';  // %1$s = nombre de archivo
+$lang[179] = 'Error, el archivo de salida ya existe <b>%1$s</b>'; // %1$s = nombre de archivo
 $lang[180] = 'Error, partes faltantes o incompletas';
-$lang[181] = 'Error, el tipo de archivo %1$s est&aacute; prohibido';  // Tipo de archivo
+$lang[181] = 'Error, el tipo de archivo %1$s est&aacute; prohibido'; // Tipo de archivo
 $lang[182] = 'No es posible abrir el archivo de destino <b>%1$s</b>'; // %1$s = nombre de archivo
 $lang[183] = 'Error al escribir el archivo <b>%1$s</b>!'; // %1$s = nombre de archivo
 $lang[184] = '¡La verificaci&oacute;n de CRC32 no coincide!';
@@ -198,15 +198,15 @@ $lang[190] = 'a';
 $lang[191] = '¿Renombrar?';
 $lang[192] = 'Cancelar';
 $lang[193] = 'Error al renombrar el archivo <b>%1$s</b>'; // %1$s = nombre de archivo
-$lang[194] = 'El archivo <b>%1$s</b> ha sido renombrado a <b>%2$s</b>';   // %1$s = nombre original del archivo %2$s = nombre nuevo del archivo
+$lang[194] = 'El archivo <b>%1$s</b> ha sido renombrado a <b>%2$s</b>'; // %1$s = nombre original del archivo %2$s = nombre nuevo del archivo
 $lang[195] = 'Nombre de archivo';
 $lang[196] = '¡Por favor introduce un nombre de archivo!';
 $lang[197] = 'Error, el archivo no ha sido creado.';
 $lang[198] = 'El archivo %1$s fue empaquetado'; // %1$s = nombre de archivo
-$lang[199] = 'Empaquetado en el archivo <b>%1$s</b>';        // %1$s = nombre de archivo
+$lang[199] = 'Empaquetado en el archivo <b>%1$s</b>'; // %1$s = nombre de archivo
 $lang[200] = 'Error, el archivo est&aacute; vacio.';
 $lang[201] = 'Nuevo nombre';
-$lang[202] = 'No se ha podido renombrar el archivo <b>%1$s</b>!';       // %1$s = nombre de archivo
+$lang[202] = 'No se ha podido renombrar el archivo <b>%1$s</b>!'; // %1$s = nombre de archivo
 $lang[203] = 'Eliminar archivos origen despu&eacute;s de dividir correctamente';
 $lang[204] = 'archivos y directorios';
 $lang[205] = 'Descomprimir';
@@ -311,27 +311,27 @@ $lang[303] = 'Descargar Archivo';
 $lang[304] = 'No se ha podido escribir en configs/files.lst aseg&uacute;rate de que sus permisos sean 777';
 $lang[305] = '&nbsp; ha sido seleccionado como tu ruta de descarga y no es escribible. Por favor, cambia sus permisos a 777';
 $lang[306] = 'Uniendo Archivo';
-$lang[307] = 'Lugar';
-$lang[308]  =   'Passed';
-$lang[309]  =   'Failed';
-$lang[310]  =   'You might see warnings without this turned on';
-$lang[311]  =   'You might not be able to turn on server stats';
-$lang[312]  =   'Your server might not be able to support files more than 2 GB';
-$lang[313]  =   'Rapidleech Checker Script';
-$lang[314]  =   'fsockopen';
-$lang[315]  =   'memory_limit';
-$lang[316]  =   'safe_mode';
-$lang[317]  =   'cURL';
-$lang[318]  =   'allow_url_fopen';
-$lang[319]  =   'PHP Version - ';
-$lang[320]  =   'allow_call_time_pass_reference';
-$lang[321]  =   'passthru';
-$lang[322]  =   'Disk Space Functions';
-$lang[323]  =   'Apache Version - ';
-$lang[324]  =   'Wrong proxy address entered';
-$lang[325]  =   'File successfully saved!';
-$lang[326]  =   'Save Notes';
-$lang[327]  =   'Notes';
-$lang[328]  =   'Actions Disabled';
+$lang[307] = 'Esperando';
+$lang[308] = 'Pas&oacute;';
+$lang[309] = 'Fall&oacute;';
+$lang[310] = 'Podr&iacute;as ver advertencias con esto desactivado';
+$lang[311] = 'Quiz&aacute; no seas capaz de activar la informaci&oacute;n del servidor';
+$lang[312] = 'Puede que tu servidor no soporte archivos mayores de 2 GB';
+$lang[313] = 'Script Verificador de Rapidleech';
+$lang[314] = 'fsockopen';
+$lang[315] = 'memory_limit';
+$lang[316] = 'safe_mode';
+$lang[317] = 'cURL';
+$lang[318] = 'allow_url_fopen';
+$lang[319] = 'Versi&oacute;n de PHP - ';
+$lang[320] = 'allow_call_time_pass_reference';
+$lang[321] = 'passthru';
+$lang[322] = 'Funciones de Espacio de disco';
+$lang[323] = 'Versi&oacute;n de Apache - ';
+$lang[324] = 'Direcci&oacute;n de Proxy introducida es err&oacute;nea';
+$lang[325] = 'Archivo guardado correctamente';
+$lang[326] = 'Guardar notas';
+$lang[327] = 'Notas';
+$lang[328] = 'Acciones Desactivadas';
 
 ?>
