@@ -8,6 +8,7 @@
 </div>
 </td>
 <td></td>
+</tr>
 <tr>
 <td align="left" id="received">0 KB</td>
 <td align="center" id="percent">0%</td>

@@ -105,7 +105,7 @@ foreach ($host as $site => $file)
 <tr>
 <td><small><?php echo lang(218); ?></small></td>
 <td>
-<select align="left" type="text" name="yt_fmt" id="yt_fmt">
+<select name="yt_fmt" id="yt_fmt">
 <option selected value="highest"><?php echo lang(219); ?></option>
 <option value="0"><?php echo lang(220); ?></option>
 <option value="5"><?php echo lang(221); ?></option>
@@ -187,7 +187,7 @@ foreach ($host as $site => $file)
 <td>&nbsp;</td>
 <td id="proxy"<?php echo $_COOKIE["useproxy"] ? "" : " style=\"display: none;\""; ?>>
 <table width="150" border="0">
-<tr><td><?php echo lang(246); ?>:&nbsp;</td><td><input type="text" name="proxy" id="proxy" size="20"<?php echo $_COOKIE["proxy"] ? " value=\"".$_COOKIE["proxy"]."\"" : ""; ?>></td></tr>
+<tr><td><?php echo lang(246); ?>:&nbsp;</td><td><input type="text" name="proxy" id="proxyproxy" size="20"<?php echo $_COOKIE["proxy"] ? " value=\"".$_COOKIE["proxy"]."\"" : ""; ?>></td></tr>
 <tr><td><?php echo lang(247); ?>:&nbsp;</td><td><input type="text" name="proxyuser" id="proxyuser" size="20"<?php echo $_COOKIE["proxyuser"] ? " value=\"".$_COOKIE["proxyuser"]."\"" : ""; ?>></td></tr>
 <tr><td><?php echo lang(248); ?>:&nbsp;</td><td><input type="text" name="proxypass" id="proxypass" size="20"<?php echo $_COOKIE["proxypass"] ? " value=\"".$_COOKIE["proxypass"]."\"" : ""; ?>></td></tr>
 </table>

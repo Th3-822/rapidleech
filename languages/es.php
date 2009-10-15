@@ -1,4 +1,4 @@
-<?php
+ï»¿<?php
 if (!defined('RAPIDLEECH')) {
  require('../deny.php');
  exit;
@@ -14,14 +14,14 @@ $lang[6] = 'Ruta de acceso no se especifica para guardar este archivo';
 $lang[7] = 'No se te permite descargar desde <span class="font-black">%1$s (%2$s)</span>'; // %1$s = nombre host %2$s = ip del host
 $lang[8] = 'Redireccionando a:';
 $lang[9] = 'No se pudo actualizar la lista de archivos';
-$lang[10] = 'Archivo <b>%1$s</b> (<b>%2$s</b>) ¡Guardado!<br />Tiempo: <b>%3$s</b><br />Velocidad Promedio: <b>%4$s KB/s</b><br />'; // %1$s = nombre de archivo %2$s = tamaño de archivo %3$s = tiempo de descarga %4$s = velocidad
-$lang[11] = '<script>mail("El archivo fue enviado a esta direcci&oacute;n<b>%1$s</b>.", "%2$s");</script>'; // %1$s = dirección de E-mail %2$s = nombre de archivo
-$lang[12] = '¡Error al enviar el archivo!';
-$lang[13] = 'Volver al inicio';
+$lang[10] = 'Archivo <b>%1$s</b> (<b>%2$s</b>) Â¡Guardado!<br />Tiempo: <b>%3$s</b><br />Velocidad Promedio: <b>%4$s KB/s</b><br />'; // %1$s = nombre de archivo %2$s = tamaÃ±o de archivo %3$s = tiempo de descarga %4$s = velocidad
+$lang[11] = '<script>mail("El archivo fue enviado a esta direcci&oacute;n<b>%1$s</b>.", "%2$s");</script>'; // %1$s = direcciÃ³n de E-mail %2$s = nombre de archivo
+$lang[12] = 'Â¡Error al enviar el archivo!';
+$lang[13] = 'Volver a la p&aacute;gina principal';
 $lang[14] = 'Conexi&oacute;n perdida, archivo borrado.';
 $lang[15] = 'Actualizar';
 $lang[16] = 'Por favor, cambia el modo de depuraci&oacute;n a <b>1</b>';
-$lang[17] = 'El N&uacute;mero M&aacute;ximo (%1$s) de enlaces ha sido alcanzado.'; // %1$s = número máximo de enlaces
+$lang[17] = 'El N&uacute;mero M&aacute;ximo (%1$s) de enlaces ha sido alcanzado.'; // %1$s = nÃºmero mÃ¡ximo de enlaces
 $lang[18] = '%1$s Enlace%2$s verificados en %3$s segundos. (M&eacute;todo: <b>%4$s</b>)'; // %1$s = Number of links %2$s = Plural form %3$s = seconds %4$s = method for checking links
 $lang[19] = 's'; // End of a plural
 $lang[20] = 'Direcci&oacute;n del servidor proxy incorrecta';
@@ -52,7 +52,7 @@ $lang[44] = 'Tiempo de retardo';
 $lang[45] = 'Retardo (en segundos)';
 $lang[46] = 'No hay archivos o hosts seleccionados para subir';
 $lang[47] = 'Selecciona Hosts para Subida';
-$lang[48] = '¡Ning&uacute;n Servicio de Subida Soportado!';
+$lang[48] = 'Â¡Ning&uacute;n Servicio de Subida Soportado!';
 $lang[49] = 'Ventanas de subida';
 $lang[50] = 'Formato de guardado de enlace';
 $lang[51] = 'Predeterminado';
@@ -87,19 +87,19 @@ $lang[79] = 'No se pudo establecer una conecci&oacute;n con el servidor %1$s.'; 
 $lang[80] = 'Nombre de usuario y/o contrase&ntilde;a incorrectos';
 $lang[81] = 'Conectado a: <b>%1$s</b>...'; // %1$s = nombre del servidor FTP
 $lang[82] = 'No se permite descargar el tipo de archivo %1$s'; // %1$s = Tipo de archivo
-$lang[83] = 'Archivo <b>%1$s</b>, Tama&ntilde;o <b>%2$s</b>...'; // %1$s = nombre de archivo %2$s = tamaño del archivo
+$lang[83] = 'Archivo <b>%1$s</b>, Tama&ntilde;o <b>%2$s</b>...'; // %1$s = nombre de archivo %2$s = tamaÃ±o del archivo
 $lang[84] = 'Error obteniendo el enlace';
-$lang[85] = '¡Texto pasado como contador no es un n&uacute;mero!';
+$lang[85] = 'Â¡Texto pasado como contador no es un n&uacute;mero!';
 $lang[86] = 'ERROR: Por favor, activa JavaScript.';
-$lang[87] = 'Por favor espera <b>%1$s</b> segundos...'; // %1$s = número de segundos
+$lang[87] = 'Por favor espera <b>%1$s</b> segundos...'; // %1$s = nÃºmero de segundos
 $lang[88] = 'No fue posible conectarse a %1$s en el puerto %2$s'; // %1$s = nombre de host %2$s = puerto
 $lang[89] = 'Conectado al proxy: <b>%1$s</b> en el puerto <b>%2$s</b>...'; // %1$s = host del proxy %2$s = puerto del proxy
 $lang[90] = 'Conectado a: <b>%1$s</b> en el puerto <b>%2$s</b>...'; // %1$s = host %2$s = puerto
 $lang[91] = 'no se recivi&oacute; encabezado';
-$lang[92] = '¡No tienes permiso de acceder a la p&aacute;gina!';
-$lang[93] = '¡La p&aacute;gina no fue encontrada!';
-$lang[94] = '¡La p&aacute;gina fue prohibida o no encontrada!';
-$lang[95] = '¡Error! ha sido redireccionado a [%1$s]'; // %1$s = dirección de redirección
+$lang[92] = 'Â¡No tienes permiso de acceder a la p&aacute;gina!';
+$lang[93] = 'Â¡La p&aacute;gina no fue encontrada!';
+$lang[94] = 'Â¡La p&aacute;gina fue prohibida o no encontrada!';
+$lang[95] = 'Â¡Error! ha sido redireccionado a [%1$s]'; // %1$s = direcciÃ³n de redirecciÃ³n
 $lang[96] = 'Este sitio requiere autorizaci&oacute;n. Para indicar el nombre de usuario y contrase&ntilde;a use una url como esta:<br />http://<b>login:password@</b>www.sitio.com/archivo.exe';
 $lang[97] = 'Resume superado el l&iacute;mite ';
 $lang[98] = 'Este servidor no soporta reanudar';
@@ -148,10 +148,10 @@ $lang[140] = 'Enviar';
 $lang[141] = 'Eliminar env&iacute;os exitosos';
 $lang[142] = 'Dividir en partes';
 $lang[143] = 'Tama&ntilde;o de las partes';
-$lang[144] = '<b>%1$s</b> - Direcci&oacute;n de E-mail no v&aacute;lida'; // %1$s = dirección de e-mail
-$lang[145] = 'Archivo <b>%1$s</b> ¡no encontrado!'; // %1$s = nombre de archivo
+$lang[144] = '<b>%1$s</b> - Direcci&oacute;n de E-mail no v&aacute;lida'; // %1$s = direcciÃ³n de e-mail
+$lang[145] = 'Archivo <b>%1$s</b> Â¡no encontrado!'; // %1$s = nombre de archivo
 $lang[146] = 'No se pudo actualizar la lista de archivos';
-$lang[147] = '¡La eliminaci&oacute;n de archivos est&aacute; desactivada!';
+$lang[147] = 'Â¡La eliminaci&oacute;n de archivos est&aacute; desactivada!';
 $lang[148] = 'Eliminar archivos';
 $lang[149] = 'S&iacute;';
 $lang[150] = 'No';
@@ -164,16 +164,16 @@ $lang[156] = 'Borrar archivo de origen despu&eacute;s de subida exitosa';
 $lang[157] = 'Copiar archivos';
 $lang[158] = 'Mover archivos';
 $lang[159] = 'No se puede encontrar el directorio <b>%1$s</b>'; // %1$s nombre del directorio
-$lang[160] = 'Archivo %1$s ¡subido correctamente!'; // %1$s = nombre de archivo
+$lang[160] = 'Archivo %1$s Â¡subido correctamente!'; // %1$s = nombre de archivo
 $lang[161] = 'Tiempo';
 $lang[162] = 'Velocidad promedio';
 $lang[163] = 'No ha sido posible subir el archivo <b>%1$s</b>!'; // %1$s = nombre de archivo
 $lang[164] = 'Email';
 $lang[165] = 'Borrar env&iacute;os exitosos';
 $lang[166] = 'Direcci&oacute;n de E-mail no v&aacute;lida';
-$lang[167] = '¡Por favor selecciona solamente el archivo .crc o .001!';
-$lang[168] = '¡Por favor selecciona el archivo .crc!';
-$lang[169] = '¡Por favor selecciona el archivo .crc o .001!';
+$lang[167] = 'Â¡Por favor selecciona solamente el archivo .crc o .001!';
+$lang[168] = 'Â¡Por favor selecciona el archivo .crc!';
+$lang[169] = 'Â¡Por favor selecciona el archivo .crc o .001!';
 $lang[170] = 'Realizar verificaci&oacute;n de CRC? (recomendado)';
 $lang[171] = 'Modo de verificaci&oacute;n CRC32';
 $lang[172] = 'Usar hash_file (Recomendado)';
@@ -182,25 +182,25 @@ $lang[174] = 'crc falso';
 $lang[175] = 'Borrar archivos de origen despu&eacute;s de unirlos correctamente';
 $lang[176] = 'Nota:';
 $lang[177] = 'El tama&ntilde;o de archivo y el crc32 no se verificar&aacute;n';
-$lang[178] = '¡No es sposible leer el archivo .crc!';
+$lang[178] = 'Â¡No es sposible leer el archivo .crc!';
 $lang[179] = 'Error, el archivo de salida ya existe <b>%1$s</b>'; // %1$s = nombre de archivo
 $lang[180] = 'Error, partes faltantes o incompletas';
 $lang[181] = 'Error, el tipo de archivo %1$s est&aacute; prohibido'; // Tipo de archivo
 $lang[182] = 'No es posible abrir el archivo de destino <b>%1$s</b>'; // %1$s = nombre de archivo
 $lang[183] = 'Error al escribir el archivo <b>%1$s</b>!'; // %1$s = nombre de archivo
-$lang[184] = '¡La verificaci&oacute;n de CRC32 no coincide!';
+$lang[184] = 'Â¡La verificaci&oacute;n de CRC32 no coincide!';
 $lang[185] = 'Archivo <b>%1$s</b> unido correctamente'; // %1$s = nombre de archivo
 $lang[186] = 'borrado';
 $lang[187] = 'no borrado';
 $lang[188] = 'A&ntilde;adir extensi&oacute;n';
 $lang[189] = 'sin';
 $lang[190] = 'a';
-$lang[191] = '¿Renombrar?';
+$lang[191] = 'Â¿Renombrar?';
 $lang[192] = 'Cancelar';
 $lang[193] = 'Error al renombrar el archivo <b>%1$s</b>'; // %1$s = nombre de archivo
 $lang[194] = 'El archivo <b>%1$s</b> ha sido renombrado a <b>%2$s</b>'; // %1$s = nombre original del archivo %2$s = nombre nuevo del archivo
 $lang[195] = 'Nombre de archivo';
-$lang[196] = '¡Por favor introduce un nombre de archivo!';
+$lang[196] = 'Â¡Por favor introduce un nombre de archivo!';
 $lang[197] = 'Error, el archivo no ha sido creado.';
 $lang[198] = 'El archivo %1$s fue empaquetado'; // %1$s = nombre de archivo
 $lang[199] = 'Empaquetado en el archivo <b>%1$s</b>'; // %1$s = nombre de archivo
@@ -247,7 +247,7 @@ $lang[239] = 'Dividir archivos';
 $lang[240] = 'M&eacute;todo';
 $lang[241] = 'Total Commander';
 $lang[242] = 'RFC 2046';
-$lang[243] = 'Tamaño de las partes';
+$lang[243] = 'Tama&ntilde;o de las partes';
 $lang[244] = 'MB';
 $lang[245] = 'Usar configuraci&oacute;n de Proxy';
 $lang[246] = 'Proxy';
@@ -267,10 +267,10 @@ $lang[259] = 'Mostrar';
 $lang[260] = 'Descargados';
 $lang[261] = 'Todos';
 $lang[262] = 'Nombre';
-$lang[263] = 'Tamaño';
+$lang[263] = 'Tama&ntilde;o';
 $lang[264] = 'Comentarios';
 $lang[265] = 'Fecha';
-$lang[266] = 'No se ecnontraron archivos';
+$lang[266] = 'No se encontraron archivos';
 $lang[267] = 'Funciona con';
 $lang[268] = 'Kills';
 $lang[269] = 'Modo de Depuraci&oacute;n';
@@ -289,7 +289,7 @@ $lang[281] = 'Hora Local';
 $lang[282] = 'Auto - Borrado';
 $lang[283] = 'Horas Despu&eacute;s de la Transferencia';
 $lang[284] = 'Minutos Despu&eacute;s de la Transferencia';
-$lang[285] = 'Acción';
+$lang[285] = 'Acci&oacute;n';
 $lang[286] = 'Subir';
 $lang[287] = 'Enviar por FTP';
 $lang[288] = 'E-Mail';

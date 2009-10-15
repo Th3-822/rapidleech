@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('RAPIDLEECH')) {
 	require('../deny.php');
 	exit;
@@ -215,7 +215,7 @@ $lang[206]	=	'Liste de choix du format de vid&eacute;o YouTube';
 $lang[207]	=	'Lien &agrave; transf&eacute;rer';
 $lang[208]	=	'Referrer';
 $lang[209]	=	'Transfert du fichier';
-$lang[210]	=	'Utilisateur &amp;amp; Mot de passe (HTTP/FTP)';
+$lang[210]	=	'Utilisateur &amp; Mot de passe (HTTP/FTP)';
 $lang[211]	=	'Utilisateur';
 $lang[212]	=	'Mot de passe';
 $lang[213]	=	'Ajouter un commentaire';
@@ -223,7 +223,7 @@ $lang[214]	=	'Options du Plugin';
 $lang[215]	=	'D&eacute;sactiver tous les Plugins';
 $lang[216]	=	'Liste de choix du format de vid&eacute;o YouTube';
 $lang[217]	=	'Lien direct';
-$lang[218]	=	'&amp;amp;fmt=';
+$lang[218]	=	'&amp;fmt=';
 $lang[219]	=	'Acqu&eacute;rir automatiquement la plus haute qualit&eacute; disponible';
 $lang[220]	=	'0 [Video: FLV H263 251kbps 320x180 @ 29.896fps | Audio: MP3 64kbps 1ch @ 22.05kHz]';
 $lang[221]	=	'5 [Video: FLV H263 251kbps 320x180 @ 29.885fps | Audio: MP3 64kbps 1ch @ 22.05kHz]';
@@ -234,7 +234,7 @@ $lang[225]	=	'18 [Video: MP4 H264 505kbps 480x270 @ 29.886fps | Audio: AAC 125kb
 $lang[226]	=	'22 [Video: MP4 H264 2001kbps 1280x720 @ 29.918fps | Audio: AAC 198kbps 2ch @ 44.10kHz]';
 $lang[227]	=	'34 [Video: FLV H264 256kbps 320x180 @ 29.906fps | Audio: AAC 62kbps 2ch @ 22.05kHz]';
 $lang[228]	=	'35 [Video: FLV H264 831kbps 640x360 @ 29.942fps | Audio: AAC 107kbps 2ch @ 44.10kHz]';
-$lang[229]	=	'ImageShack&amp;reg; TorrentService';
+$lang[229]	=	'ImageShack&reg; TorrentService';
 $lang[230]	=	'Utilisateur';
 $lang[231]	=	'Mot de passe';
 $lang[232]	=	'Valeur du Cookie Megaupload.com';
@@ -310,7 +310,7 @@ $lang[301]	=	'Entrer';
 $lang[302]	=	'ici';
 $lang[303]	=	'T&eacute;l&eacute;charger le fichier';
 $lang[304]	=	'configs/files.lst n\'est pas accessible en &eacute;criture, s\'il vous pla&icirc;t, assurez-vous qu\'il est chmod&eacute; &agrave; 777';
-$lang[305]	=	'&amp;nbsp;est s&eacute;lectionn&eacute; comme chemin de t&eacute;l&eacute;chargement et il n\'est pas accessible en &eacute;criture. S\'il vous pla&icirc;t, mettre le chmod &agrave; 777';
+$lang[305]	=	'&nbsp;est s&eacute;lectionn&eacute; comme chemin de t&eacute;l&eacute;chargement et il n\'est pas accessible en &eacute;criture. S\'il vous pla&icirc;t, mettre le chmod &agrave; 777';
 $lang[306]	=	'Fusion du fichier';
 $lang[307]	=	'En attente';
 $lang[308]	=	'R&eacute;ussi';
