@@ -54,13 +54,13 @@ if ($continue_up)
 	is_page($page);
 	is_notpresent($page, 'You have been signed in as', 'Error logging in - are your logins correct?');
 	?>
-	<script language="javascript" type="text/javascript">document.getElementById('login').style.display='none';</script>
+	<script type="text/javascript" language="javascript">document.getElementById('login').style.display='none';</script>
 	<div id=info width="100%" align=center>Retrive upload ID</div>
 	<?php
 	$upload_form = cut_str($page, '<form accept-charset="UTF-8" id="uploader" action="', '"');
 	if (!$url = parse_url($upload_form)) html_error('Error getting upload url');
 	?>
-	<script language="javascript" type="text/javascript">document.getElementById('info').style.display='none';</script>
+	<script type="text/javascript" language="javascript">document.getElementById('info').style.display='none';</script>
 	<?php
 	$fpost = array();
 	$fpost['Filename'] = $lname;
@@ -69,7 +69,7 @@ if ($continue_up)
 	$fpost['Upload'] = 'Submit Query';
 	$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), $upload_form, 0, $fpost, $lfile, $lname, "Filedata");
 	?>
-	<script language="javascript" type="text/javascript">document.getElementById('progressblock').style.display='none';</script>
+	<script type="text/javascript" language="javascript">document.getElementById('progressblock').style.display='none';</script>
 	<?php
 	is_page($upfiles);
 	if (!preg_match('%\r\n\r\n([a-z0-9]{7})$%', $upfiles, $curi)) html_error('Couldn\'t get the download link, but the file might have been uploaded to your account ok');

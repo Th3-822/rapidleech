@@ -35,7 +35,7 @@ textarea { font-family: "Segoe UI", Tahoma; font-size: 11.5px; }
 a { color: #55aaff; }
 color { color: #FFFFFF; }
 
-.show-table {display: block;}
+/*.show-table {display: block;}*/
 
 .hide-table {display: none;}
 
@@ -254,6 +254,37 @@ th {
 	color:#FFCC00;
 }
 
+.cell-plugin
+{
+	height: 27px;
+	width: 109px;
+	font-family: "Tahoma";
+	font-size: 10px;
+	color: #FFC500;
+	text-align: center;
+	line-height: 27px;
+	background: url(../images/button_bg2.gif);
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.button-auto
+{
+	height: 23px;
+	width: 105px;
+	margin-bottom: 1px;
+	margin-top: 1px;
+	font-family: "Tahoma";
+	font-size: 10px;
+	color: #FFAD00;
+	text-align: center;
+	border: 0px solid;
+	background: #17668C url(../images/button_bg3.gif);
+	background-position: center;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+
 /* The progressbar for upload and download, including the outer div holder */
 .progressouter
 {
@@ -283,37 +314,18 @@ th {
 	background-color: #85cbeb !important;
 }
 
-#navcell1
+.cell-nav
 {
-	background: #17668C url(../images/main_window_pm.gif);
 	height: 31px;
 	width: 119px;
+	font-family: "Tahoma";
+	font-size: 10px;
+	color: #FFC500;
+	text-align: center;
+	background: #17668C url(../images/button_bg1.gif);
 	background-position: center;
 	background-repeat: no-repeat;
-}
-#navcell2
-{
-	background: #17668C url(../images/settings_pm.gif);
-	height: 31px;
-	width: 119px;
-	background-position: center;
-	background-repeat: no-repeat;
-}
-#navcell3
-{
-	background: #17668C url(../images/server_files_pm.gif);
-	height: 31px;
-	width: 119px;
-	background-position: center;
-	background-repeat: no-repeat;
-}
-#navcell4
-{
-	background: #17668C url(../images/link_checker_pm.gif);
-	height: 31px;
-	width: 119px;
-	background-position: center;
-	background-repeat: no-repeat;
+	cursor: pointer;
 }
 
 /* MD5.php */

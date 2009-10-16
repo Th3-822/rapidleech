@@ -78,7 +78,7 @@ include(TEMPLATE_DIR.'header.php');
 			if ($i>$openwin) $i = 0;
 		}
 ?>
-<script language="javascript">
+<script type="text/javascript" language="javascript">
 
 <?php
 	for ($i=0;$i<=$openwin;$i++) {

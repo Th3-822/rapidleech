@@ -60,7 +60,7 @@ $cc++;
 <tr><td><input type='checkbox' name='checkall' id='checkall' onclick='checkedAll();'> all<td><td align=center><input type=button onclick='selt(<?php echo $cc-1 ?>)' value='Step1 select and click'></tr>
 </form>
 </table>
-<script language="javascript" type="text/javascript">
+<script type="text/javascript" language="javascript">
     function selt(cc)
     {
         var pp;

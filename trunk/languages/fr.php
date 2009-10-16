@@ -1,7 +1,7 @@
-﻿<?php
+<?php
 if (!defined('RAPIDLEECH')) {
-	require('../deny.php');
-	exit;
+  require('../deny.php');
+  exit;
 }
 // Le fichier de langue anglaise
 // Vous devriez toujours utiliser ce fichier comme mod&egrave;le pour la traduction
@@ -334,5 +334,11 @@ $lang[325]	=	'Le fichier a &eacute;t&eacute; enregistr&eacute; avec succ&egrave;
 $lang[326]	=	'Enregistrer les notes';
 $lang[327]	=	'Notes';
 $lang[328]	=	'Actions D&eacute;sactiv&eacute;es';
-
+$lang[329]	=	'Main Window';
+$lang[330]	=	'Settings';
+$lang[331]	=	'Server Files';
+$lang[332]	=	'Link Checker';
+$lang[333]	=	'Plugins';
+$lang[334]	=	'Auto Transload';
+$lang[335]	=	'Auto Upload';
 ?>

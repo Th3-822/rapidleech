@@ -34,7 +34,7 @@
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
 <div id=final width=100% align=center>Get final code</div>
-<?		
+<?php
 			is_page($upfiles);
 			$finish_url=trim(cut_str($upfiles,'location:',"\n"));
 			if (!$finish_url) html_error ('Error get location 1');

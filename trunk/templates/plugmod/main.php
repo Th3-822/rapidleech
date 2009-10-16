@@ -14,11 +14,12 @@ if (!defined('RAPIDLEECH')) {
 <table border="0" cellpadding="0" cellspacing="0">
 <tr>
 <td width="131" height="100%">
-<img src="templates/plugmod/images/currently_works_with_pm.gif" alt="supports"></td>
+<div class="cell-plugin"><?php echo lang(333); ?></div>
+</td>
 </tr>
 <tr>
 <td>
-<div align="center" class="plugincolhd"><?php echo '<b><small>'.count($host).'</small></b> Plugins'; ?></div></td>
+<div align="center" class="plugincolhd"><b><small><?php echo count($host); ?></small></b> <?php echo lang(333); ?></div></td>
 </tr>
 <tr>
 <td height="100%" style="padding:3px;">
@@ -32,9 +33,9 @@ foreach ($host as $site => $file)
 ?>
 </div>
 <br>
-<a href="audl.php" target="_blank"><img src="templates/plugmod/images/auto_dl_pm.gif" alt="AutoDownload"></a>
+<input class="button-auto" type="button" value="<?php echo lang(334); ?>" onClick="window.open('audl.php');return false;">
 <br>
-<a href="auul.php" target="_blank"><img src="templates/plugmod/images/auto_ul_pm.gif" alt="AutoUpload"></a>
+<input class="button-auto" type="button" value="<?php echo lang(335); ?>" onClick="window.open('auul.php');return false;">
 <br />
 [ <a href="javascript:openNotes();"><?php echo lang(327); ?>.txt</a> ]
 </td>
@@ -46,14 +47,10 @@ foreach ($host as $site => $file)
 <td align="center" valign="top"><table border="0" cellpadding="0" cellspacing="1">
 <tbody>
 <tr>
-<td id="navcell1" align="center"></td>
-<td id="navcell2" align="center"></td>
-<td id="navcell3" align="center"></td>
-<td id="navcell4" align="center"></td>
-<!--<td id="navcell1" align="center" onclick="javascript:switchCell(1)"></td>
-<td id="navcell2" align="center" onclick="javascript:switchCell(2)"></td>
-<td id="navcell3" align="center" onclick="javascript:switchCell(3)"></td>
-<td id="navcell4" align="center" onclick="javascript:switchCell(4)"></td>-->
+<td id="navcell1" class="cell-nav"><?php echo lang(329); ?></td>
+<td id="navcell2" class="cell-nav"><?php echo lang(330); ?></td>
+<td id="navcell3" class="cell-nav"><?php echo lang(331); ?></td>
+<td id="navcell4" class="cell-nav"><?php echo lang(332); ?></td>
 </tr>
 </tbody>
 </table>
@@ -406,8 +403,9 @@ elseif($_GET["debug"] || $_POST["links"])
   }
 else
   {
-	echo '<script type="text/javascript">switchCell(1);</script>';
+	echo '<script type="text/javascript">'."$('#navcell1').addClass('selected');</script>";
   }
+
 ?>
 </td>
 <td valign="top">&nbsp;</td>

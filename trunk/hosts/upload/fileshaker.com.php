@@ -14,7 +14,7 @@
 	is_page($upfiles);
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
-<?	
+<?php
 	$locat=cut_str($upfiles,'shorturl=',true);
 	$Url=parse_url("http://www.fileshaker.com/".$locat);
 	$page = geturl($Url["host"],  80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 'http://www.fileshaker.com/', 0, 0, 0, $_GET["proxy"],$pauth);

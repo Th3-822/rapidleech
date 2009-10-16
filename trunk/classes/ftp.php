@@ -102,7 +102,7 @@ $ftp = new ftp(FALSE, FALSE);
 </table>
 <br>
 <div id="resume" align="center" style="FONT-FAMILY: Tahoma; FONT-SIZE: 11px;"></div>
-<script language="javascript">
+<script type="text/javascript" language="javascript">
 function pr(percent, received, speed){
 	document.getElementById("received").innerHTML = '<b>' + received + '</b>';
 	document.getElementById("percent").innerHTML = '<b>' + percent + '%</b>';

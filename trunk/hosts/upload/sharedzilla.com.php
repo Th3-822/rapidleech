@@ -25,7 +25,7 @@
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
 <div id=final width=100% align=center>Get final code</div>
-<?		
+<?php
 			is_page($upfiles);
 			$tmp=cut_str($upfiles,'[URL=',']');
 			if (!$tmp) html_error ('Error upload file');
