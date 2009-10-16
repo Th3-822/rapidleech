@@ -40,7 +40,7 @@ if ($continue_up)
 </td></tr>
 <tr><td align=center>
 <div id=info width=100% align=center>Retrive upload ID</div>
-<?			
+<?php
             $usr=$_REQUEST['my_login'];
             $pass=$_REQUEST['my_pass'];
             $referrer="http://usershare.net/"; 

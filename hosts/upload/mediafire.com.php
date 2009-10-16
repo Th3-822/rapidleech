@@ -39,7 +39,7 @@ if ($continue_up)
 </td></tr>
 <tr><td align=center>
 <div id=info width=100% align=center>Retrive upload ID</div>
-<?			
+<?php
 			$Url=parse_url("http://www.mediafire.com/");
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"],$pauth);
 			$cookies=GetCookies($page);
@@ -91,7 +91,7 @@ is_page($upfiles);
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
 <div id=final width=100% align=center>Get final code</div>
-<? 			
+<?php
 			$key = cut_str($upfiles,"<key>","</key>");
 			if (!$key) html_error("Error retrive final id");
 			$error=true;

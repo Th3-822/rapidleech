@@ -41,7 +41,7 @@
 	is_page($upfiles);
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
-<?	
+<?php
 	$locat=trim(cut_str($upfiles,'Location:',"\n"));
 	$Url=parse_url($locat);
 	$page = geturl($Url["host"],  80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 'http://uploadcloud.com/', $cookies, 0, 0, $_GET["proxy"],$pauth);
@@ -67,7 +67,7 @@
 		
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
-<?	
+<?php
 	
 	$ddl=cut_str($page,'<a href="http://uploadcloud.com/file/','">');
 	$del=cut_str($page,'<a href="http://uploadcloud.com/delete.php?id=','">');

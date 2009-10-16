@@ -40,7 +40,7 @@ preg_match('/(var wannaplayagameofpong[\s\S]+?)function/i',$page,$scr)  ;
 $script1=$scr[1];
 $var=trim(cutter($script1,'var','=',2));
 $script1=str_replace($var,"encoded",$script1);
-$script=$ss.'<script language="Javascript">'.$script1.'document.getElementById("link").value=encoded; document.plink.submit();</script>' ;
+$script=$ss.'<script type="text/javascript" language="javascript">'.$script1.'document.getElementById("link").value=encoded; document.plink.submit();</script>' ;
 insert_timer("10", "Waiting link timelock.","",true);
 echo ($script);
 }

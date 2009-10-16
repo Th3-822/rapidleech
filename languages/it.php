@@ -1,7 +1,7 @@
-﻿<?php
+<?php
 if (!defined('RAPIDLEECH')) {
-	require('../deny.php');
-	exit;
+  require('../deny.php');
+  exit;
 }
 // file per la lingua italiana
 
@@ -307,31 +307,37 @@ $lang[299]	=	'Lista indirizzi';
 $lang[300]	=	'Sto ricevendo la pagina di download';
 $lang[301]	=	'Introduci';
 $lang[302]	=	'qui';
-$lang[303]  =   'Download File';
-$lang[304]  =   'configs/files.lst non &eacute; scrivibile, assicurati che il chmod &eacute; 777';
-$lang[305]  =   '&nbsp;&eacute; selezionato come tuo percorso di download ed &eacute; non scrivibile. Per piacere setta il chmod a 777';
-$lang[306]  =   'Sto unendo il File';
-$lang[307]  =   'Attendi';
-$lang[308]  =   'Passato';
-$lang[309]  =   'Fallito';
-$lang[310]  =   'Puoi vedere gli avvisi se questo non &eacute; settato on';
-$lang[311]  =   'Non hai la possibilit&agrave di settare on le statistiche sul server';
-$lang[312]  =   'Il tuo server non supporta file pi&ugrave grandi di 2 GB';
-$lang[313]  =   'Rapidleech Script di verifica';
-$lang[314]  =   'fsockopen';
-$lang[315]  =   'memory_limit';
-$lang[316]  =   'safe_mode';
-$lang[317]  =   'cURL';
-$lang[318]  =   'allow_url_fopen';
-$lang[319]  =   'PHP Versione - ';
-$lang[320]  =   'allow_call_time_pass_reference';
-$lang[321]  =   'passthru';
-$lang[322]  =   'Funzioni Sullo Spazio Del Disco';
-$lang[323]  =   'Versione Apache - ';
-$lang[324]  =   'Indirizzo proxy introdotto errato';
-$lang[325]  =   'File salvato con successo!';
-$lang[326]  =   'Salva Le Note';
-$lang[327]  =   'Note';
-$lang[328]  =   'Azione Disattivata';
-
+$lang[303]	=	'Download File';
+$lang[304]	=	'configs/files.lst non &eacute; scrivibile, assicurati che il chmod &eacute; 777';
+$lang[305]	=	'&nbsp;&eacute; selezionato come tuo percorso di download ed &eacute; non scrivibile. Per piacere setta il chmod a 777';
+$lang[306]	=	'Sto unendo il File';
+$lang[307]	=	'Attendi';
+$lang[308]	=	'Passato';
+$lang[309]	=	'Fallito';
+$lang[310]	=	'Puoi vedere gli avvisi se questo non &eacute; settato on';
+$lang[311]	=	'Non hai la possibilit&agrave di settare on le statistiche sul server';
+$lang[312]	=	'Il tuo server non supporta file pi&ugrave grandi di 2 GB';
+$lang[313]	=	'Rapidleech Script di verifica';
+$lang[314]	=	'fsockopen';
+$lang[315]	=	'memory_limit';
+$lang[316]	=	'safe_mode';
+$lang[317]	=	'cURL';
+$lang[318]	=	'allow_url_fopen';
+$lang[319]	=	'PHP Versione - ';
+$lang[320]	=	'allow_call_time_pass_reference';
+$lang[321]	=	'passthru';
+$lang[322]	=	'Funzioni Sullo Spazio Del Disco';
+$lang[323]	=	'Versione Apache - ';
+$lang[324]	=	'Indirizzo proxy introdotto errato';
+$lang[325]	=	'File salvato con successo!';
+$lang[326]	=	'Salva Le Note';
+$lang[327]	=	'Note';
+$lang[328]	=	'Azione Disattivata';
+$lang[329]	=	'Main Window';
+$lang[330]	=	'Settings';
+$lang[331]	=	'Server Files';
+$lang[332]	=	'Link Checker';
+$lang[333]	=	'Plugins';
+$lang[334]	=	'Auto Transload';
+$lang[335]	=	'Auto Upload';
 ?>

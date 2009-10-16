@@ -19,7 +19,7 @@ else{
 <table border=1 style="width:270px;" cellspacing=0 align=center>
 <form method=post>
 <input type=hidden name=action value='FORM'><input type=hidden value=uploaded value'<?php $_REQUEST[uploaded]?>'>
-<input type=hidden name=filename value='<? echo base64_encode($_REQUEST[filename]); ?>'>
+<input type=hidden name=filename value='<?php echo base64_encode($_REQUEST[filename]); ?>'>
 <tr><td nowrap>&nbsp;Login<td>&nbsp;<input name=bin_login value='' style="width:160px;">&nbsp;</tr>
 <tr><td nowrap>&nbsp;Password<td>&nbsp;<input name=bin_pass value='' style="width:160px;">&nbsp;</tr>
 <tr><td colspan=2 align=center>Let it empty for free user</tr>
@@ -37,7 +37,7 @@ if ($continue_up)
 </td></tr> 
 <tr><td align=center> 
 <div id=login width=100% align=center>Login to site</div> 
-<? 
+<?php
 			$ref='http://www.share-online.biz/';
 			$Url=parse_url($ref);
 			if ($_REQUEST['action'] == "FORM")
@@ -83,13 +83,13 @@ if ($continue_up)
              
 ?> 
 <script>document.getElementById('info').style.display='none';</script> 
-<? 
+<?php
             $upfiles=upfile($url['host'],defport($url),$url['path']."?".$url["query"],$ref, $cookies, $post, $lfile, $lname, "uploadfile_0"); 
 
 ?> 
 <script>document.getElementById('progressblock').style.display='none';</script> 
 <div id=info2 width=100% align=center>Get links</div> 
-<?     
+<?php
             is_page($upfiles);
 
             $temp2 = trim(cut_str($upfiles,"Location: ","\n")); 

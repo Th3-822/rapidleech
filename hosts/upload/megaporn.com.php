@@ -23,7 +23,7 @@
 
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
-<?		
+<?php
 			is_page($upfiles);
 			$download_link=cut_str($upfiles,"B', '","'");
 

@@ -14,26 +14,10 @@ function lang($id) {
 ?>
 function switchCell(m)
   {
-  var style;
-  document.getElementById("navcell1").className = "tab-off";
-  document.getElementById("navcell2").className = "tab-off";
-  document.getElementById("navcell3").className = "tab-off";
-  document.getElementById("navcell4").className = "tab-offr";
-
-  document.getElementById("tb1").className = "hide-table";
-  document.getElementById("tb2").className = "hide-table";
-  document.getElementById("tb3").className = "hide-table";
-  document.getElementById("tb4").className = "hide-table";
-  if(m == 4)
-    {
-    style = "tab-onr";
-    }
-  else
-    {
-    style = "tab-on";
-    }
-  document.getElementById("navcell" + m).className = style;
-  document.getElementById("tb" + m).className = "tab-content show-table";
+		$('#tb1, #tb2, #tb3, #tb4').hide();
+		$('#navcell1, #navcell2, #navcell3, #navcell4').removeClass('selected');
+		$('#navcell' + m).addClass('selected');
+		$('#tb'+ m).fadeIn('slow');
   }
 
 function getCookie(name)
