@@ -3,7 +3,7 @@ if (!defined('RAPIDLEECH')) {
   require('../deny.php');
   exit;
 }
-// Arquivo para o idioma Portuguê-BR
+// Arquivo para o idioma Português-BR
 // You should always use this file as a template for translating
 
 $lang[1]	=	'Acesso negado';
@@ -52,7 +52,7 @@ $lang[43]	=	'Executar Server Side';
 $lang[44]	=	'Tempo de atraso';
 $lang[45]	=	'Atraso (em segundos)';
 $lang[46]	=	'Nenhum arquivo ou hosts selecionados para upload';
-$lang[47]	=	'Selecione Hosts para upload';
+$lang[47]	=	'Selecione os Hosts para upload';
 $lang[48]	=	'N&atilde;o suporta servi&ccedil;os de upload!';
 $lang[49]	=	'Upload em janelas';
 $lang[50]	=	'Link para o formato salvo';
@@ -63,7 +63,7 @@ $lang[54]	=	'Inverter Sele&ccedil;&atilde;o';
 $lang[55]	=	'Nome';
 $lang[56]	=	'Tamanho';
 $lang[57]	=	'N&atilde;o foram encontrados arquivos';
-$lang[58]	=	'Leganda para o link salvado formato: (mai&uacute;sculas e min&uacute;sculas)';
+$lang[58]	=	'Leganda para o link salvo no formato: (mai&uacute;sculas e min&uacute;sculas)';
 $lang[59]	=	'O link para baixar';
 $lang[60]	=	'O nome do arquivo';
 $lang[61]	=	'Padr&atilde;o de estilo link';
@@ -84,7 +84,7 @@ $lang[75]	=	'Rapidleech PlugMod - Upload Links';
 $lang[76]	=	'<div class="linktitle">Links para upload <strong>%1$s</strong> - <span class="bluefont">Tamanho: <strong>%2$s</strong></span></div>';	// %1$s = file name %2$s = file size
 $lang[77]	=	'Conclu&iacute;do';
 $lang[78]	=	'Voltar';
-$lang[79]	=	'N&atilde;o foi poss&iacute;vel estabelecer conex&atilde;o com o servidor %1$s.';		// %1$s = FTP server name
+$lang[79]	=	'N&atilde;o foi poss&iacute;vel estabelecer uma conex&atilde;o com o servidor %1$s.';		// %1$s = FTP server name
 $lang[80]	=	'Nome de usu&aacute;rio incorreto e/ou senha.';
 $lang[81]	=	'Conectado a: <b>%1$s</b>...';	// %1$s = FTP server name
 $lang[82]	=	'O tipo de ficheiro %1$s &eacute; proibido de ser baixado';	// %1$s = File type
@@ -99,7 +99,7 @@ $lang[90]	=	'Conectado a: <b>%1$s</b> na porta <b>%2$s</b>...';	// %1$s = host %
 $lang[91]	=	'N&atilde;o recebeu o cabe&ccedil;alho';
 $lang[92]	=	'Voc&ecirc; est&aacute; proibido de acessar a p&aacute;gina!';
 $lang[93]	=	'A p&aacute;gina n&atilde;o foi encontrada!';
-$lang[94]	=	'A p&aacute;gina foi proibida ou n&atilde;o encontrada!';
+$lang[94]	=	'A p&aacute;gina foi proibida ou n&atilde;o &eacute; encontrada!';
 $lang[95]	=	'Error! it is redirected to [%1$s]';	// %1$s = redirected address
 $lang[96]	=	'Este site requer autoriza&ccedil;&atilde;o. Para a indica&ccedil;&atilde;o do nome de usu&aacute;rio e senha de acesso &eacute; necess&aacute;rio usar uma URL similar a essa:<br />http://<b>usu&aacute;rio:senha@</b>www.site.com/arquivo.exe';
 $lang[97]	=	'O limite do resumo excedeu';
@@ -302,7 +302,7 @@ $lang[293]	=	'Pacote de Arquivos';
 $lang[294]	=	'ZIP Arquivos';
 $lang[295]	=	'Unzip Arquivos';
 $lang[296]	=	'Renomear';
-$lang[297]	=	'Renomear em Massa';
+$lang[297]	=	'Adicionar extens&atilde;o';
 $lang[298]	=	'Excluir';
 $lang[299]	=	'Lista de Links';
 $lang[300]	=	'Recuperando p&aacute;gina de download';
