@@ -3,7 +3,7 @@ if (!defined('RAPIDLEECH')) {
   require('../deny.php');
   exit;
 }
-// Arquivo para o idioma PortuguÃªs-BR
+// Arquivo para o idioma Portuguê-BR
 // You should always use this file as a template for translating
 
 $lang[1]	=	'Acesso negado';
@@ -56,7 +56,7 @@ $lang[47]	=	'Selecione Hosts para upload';
 $lang[48]	=	'N&atilde;o suporta servi&ccedil;os de upload!';
 $lang[49]	=	'Upload em janelas';
 $lang[50]	=	'Link para o formato salvo';
-$lang[51]	=	'Padr&atilde;o';
+$lang[51]	=	'Default';
 $lang[52]	=	'Marcar Todos';
 $lang[53]	=	'Desmarcar Todos';
 $lang[54]	=	'Inverter Sele&ccedil;&atilde;o';
@@ -334,11 +334,11 @@ $lang[325]	=	'Arquivo salvo com sucesso!';
 $lang[326]	=	'Salvar Notas';
 $lang[327]	=	'Notas';
 $lang[328]	=	'A&ccedil;&otilde;es Desabilitadas';
-$lang[329]	=	'Main Window';
-$lang[330]	=	'Settings';
-$lang[331]	=	'Server Files';
-$lang[332]	=	'Link Checker';
+$lang[329]	=	'In&iacute;cio';
+$lang[330]	=	'Configura&ccedil;&otilde;es';
+$lang[331]	=	'Arquivos no Servidor';
+$lang[332]	=	'Verificador de Links';
 $lang[333]	=	'Plugins';
-$lang[334]	=	'Auto Transload';
-$lang[335]	=	'Auto Upload';
+$lang[334]	=	'Auto Baixar';
+$lang[335]	=	'Auto Enviar';
 ?>
