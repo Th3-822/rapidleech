@@ -356,35 +356,41 @@ if($list)
 <tr><td align="center" width="100%">
 	<div style="text-align:center">
 	<div align="center"><b><?php echo lang(267); ?></b></div>
-	<div class="workswith">Axifile.com | Badongo.com | <b>Depositfiles.com</b> | <strong>Megarotic.com</strong>
-	Easy-Share.com | Egoshare.com | <b>Filefactory.com</b> | <strong>Adrive.com</strong>
-	Files.to | Gigasize.com | <b>Mediafire.com</b> | iFolder.ru | BitRoad.net
-	<b>Megashares.com</b> | <b>Megaupload.com</b> | Mihd.net | UploadPalace.com
-	Momupload.com | <b>Rapidshare.com</b> | Rapidshare.de | Shareonall.com
-	Rndbload.com |  Savefile.com | <b>Sendspace.com</b> | Ziddu.com | <strong>MegaShare.com</strong>
-	Speedyshare.com | Turboupload.com | Uploaded.to | Cocoshare.com
-	Uploading.com | Usaupload.net | Zshare.net | <strong>FileFront.com </strong>
-	<br><b><?php echo lang(268); ?></b><br>
-	Anonym.to | Linkbucks.com | Lix.in<br />
-	Rapidshare.com Folders | Usercash.com</div><br>
-	<div align="center">
-	<form action="ajax.php?ajax=linkcheck" method="post" id="linkchecker" onsubmit="return startLinkCheck();">
-	<textarea rows="10" cols="87" name="links" id="links"></textarea><br /><br />
-	<div style="text-align:center; margin:0 auto; width:450px;"><a href="<?php echo $PHP_SELF.'?debug=1' ?>" style="color:#3B5A6F"><b><?php echo lang(269); ?></b></a></div><br />
-	<?php echo lang(270); ?>: <input type="checkbox" value="d" name="d">
-	<?php echo lang(271); ?>: <input type ="checkbox" value ="1" name="k"><br /><br />
-	<input type="submit" id="submit" value="<?php echo lang(272); ?>" name="submit">
-	</form>
-	</div>
-	<p style="text-align:center; font-size:10px">
-		<small>Lix Checker v3.0.0 | Copyright Dman - MaxW.org | Optimized by zpikdum and sarkar<br /><b>Mod by eqbal | Ajax'd by TheOnly92</b></small></p><br />
-	
-	<span id="loading" style="display: none;">
+<?php
+// Print out workable sites for link checker
+$name = array();
+foreach ($sites as $i=>$v) {
+	$name[] = $v['name'];
+}
+sort($name);
+$workswith = '';
+foreach ($name as $v) {
+	$workswith .= $v.' | ';
+}
+$workswith = substr($workswith,0,-3);
+?>
+<div class="workswith"><?php echo $workswith; ?>
+<br /><b><?php echo lang(268); ?></b><br />
+Anonym.to | Linkbucks.com | Lix.in<br />
+Rapidshare.com Folders | Usercash.com</div><br>
+<div align="center">
+<form action="ajax.php?ajax=linkcheck" method="post" id="linkchecker" onsubmit="return startLinkCheck();">
+<textarea rows="10" cols="87" name="links" id="links"></textarea><br /><br />
+<div style="text-align:center; margin:0 auto; width:450px;"><a href="<?php echo $PHP_SELF.'?debug=1' ?>" style="color:#3B5A6F"><b><?php echo lang(269); ?></b></a></div><br />
+<?php echo lang(270); ?>: <input type="checkbox" value="d" name="d">
+<?php echo lang(271); ?>: <input type ="checkbox" value ="1" name="k"><br /><br />
+<input type="submit" id="submit" value="<?php echo lang(272); ?>" name="submit">
+</form>
+</div>
+<p style="text-align:center; font-size:10px">
+	<small>Lix Checker v3.0.0 | Copyright Dman - MaxW.org | Optimized by zpikdum and sarkar<br /><b>Mod by eqbal | Ajax'd by TheOnly92</b></small></p><br />
+
+<span id="loading" style="display: none;">
       &nbsp;&nbsp;
       <?php echo lang(273); ?>
       <img alt="<?php echo lang(274); ?>" src="templates/plugmod/images/ajax-loading.gif" name="pic1">    </span>
-	<div align="center">
-	<div id="linkchecker-results" style="text-align: left;">
+<div align="center">
+<div id="linkchecker-results" style="text-align: left;">
 </div>
 	</div></div>
 </td>
