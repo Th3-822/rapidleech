@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('RAPIDLEECH')) {
   require('../deny.php');
   exit;
@@ -83,7 +83,7 @@ $lang[75]	=	'Rapidleech PlugMod - Enlaces de Subida';
 $lang[76]	=	'Subir class="linktitle"><div Enlaces para <strong>%1$s</strong> - <span class="bluefont"> Tama&ntilde;o: <strong>%2$s</strong> </span> </div> '; //%1$s = nombre de archivo %2$s = tama&ntilde;o de archivo 
 $lang[77]	=	'Terminado';
 $lang[78]	=	'Regresar';
-$lang[79]	=	'No se pudo establecer una conecci&oacute;n con el servidor %1$s.'; // %1$s = nombre de servidor FTP
+$lang[79]	=	'No se pudo establecer una conexi&oacute;n con el servidor %1$s.'; // %1$s = nombre de servidor FTP
 $lang[80]	=	'Nombre de usuario y/o contrase&ntilde;a incorrectos';
 $lang[81]	=	'Conectado a: <b>%1$s</b>...'; // %1$s = nombre del servidor FTP
 $lang[82]	=	'No se permite descargar el tipo de archivo %1$s'; // %1$s = Tipo de archivo
