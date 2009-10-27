@@ -70,7 +70,7 @@ function clearSettings()
   document.getElementById('savesettings').checked = false;
 
   document.getElementById('email').value= "";
-  document.getElementById('proxy').value= "";
+  document.getElementById('proxyproxy').value= "";
   document.getElementById('proxyuser').value= "";
   document.getElementById('proxypass').value= "";
   document.getElementById('premium_user').value= "";
