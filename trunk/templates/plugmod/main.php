@@ -47,10 +47,10 @@ foreach ($host as $site => $file)
 <td align="center" valign="top"><table border="0" cellpadding="0" cellspacing="1">
 <tbody>
 <tr>
-<td id="navcell1" class="cell-nav"><?php echo lang(329); ?></td>
-<td id="navcell2" class="cell-nav"><?php echo lang(330); ?></td>
-<td id="navcell3" class="cell-nav"><?php echo lang(331); ?></td>
-<td id="navcell4" class="cell-nav"><?php echo lang(332); ?></td>
+<td id="navcell1" class="cell-nav" onClick="javascript:switchCell(1);"><?php echo lang(329); ?></td>
+<td id="navcell2" class="cell-nav" onClick="javascript:switchCell(2);"><?php echo lang(330); ?></td>
+<td id="navcell3" class="cell-nav" onClick="javascript:switchCell(3);"><?php echo lang(331); ?></td>
+<td id="navcell4" class="cell-nav" onClick="javascript:switchCell(4);"><?php echo lang(332); ?></td>
 </tr>
 </tbody>
 </table>
