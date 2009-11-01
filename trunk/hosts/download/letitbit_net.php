@@ -8,24 +8,26 @@ if (!defined('RAPIDLEECH'))
 
 if (($_GET ["premium_acc"] == "on"  && $_GET ["premium_pass"]) || ($_GET ["premium_acc"] == "on" && $premium_acc ["letitbit"] ["pass"])) {
 
- $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, 0, 0, 0, $_GET["proxy"],$pauth);
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, 0, 0, 0, $_GET["proxy"],$pauth);
     is_page($page);
     is_present($page, "The requested file was not found");
     is_present($page, "Gesuchte Datei wurde nicht gefunden", "The requested file was not found");
     is_present($page, "Запрашиваемый файл не найден", "The requested file was not found");
 
-    $cookie=biscottiDiKaox($page);
-    $PreForm = cut_str ( $page ,'password here:' ,'</form>' );
+	//$cookie=biscottiDiKaox($page);
+	$cookie=GetCookies($page);
 
-    $uid5 = cut_str($PreForm,'uid5" value="','"');
-    $uid = cut_str($PreForm,'uid" value="','"');
-    $name = cut_str($PreForm,'name="name" value="','"');
-    $pin = cut_str($PreForm,'pin" value="','"');
-    $realuid = cut_str($PreForm,'realuid" value="','"');
-    $realname = cut_str($PreForm,'realname" value="','"');
-    $host = cut_str($PreForm,'host" value="','"');
-    $ssserver = cut_str($PreForm,'ssserver" value="','"');
-    $sssize = cut_str($PreForm,'sssize" value="','"');
+	//$PreForm = cut_str ( $page ,'password here:' ,'</form>' );
+
+    $uid5 = cut_str($page,'uid5" value="','"');
+    $uid = cut_str($page,'uid" value="','"');
+    $name = cut_str($page,'name="name" value="','"');
+    $pin = cut_str($page,'pin" value="','"');
+    $realuid = cut_str($page,'realuid" value="','"');
+    $realname = cut_str($page,'realname" value="','"');
+    $host = cut_str($page,'host" value="','"');
+    $ssserver = cut_str($page,'ssserver" value="','"');
+    $sssize = cut_str($page,'sssize" value="','"');
 
     $UrlAct="http://letitbit.net/sms/check2.php";
     $post['pass']=$_GET ["premium_pass"] ? $_GET ["premium_pass"] : $premium_acc ["letitbit"] ["pass"];
