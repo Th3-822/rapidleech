@@ -24,12 +24,22 @@ if(preg_match('/Location: (.*)/i', $page, $redir))
 }
 }
 $cookie = GetCookies($page);
-if(preg_match('/cu\((.*?)\);/', $page, $values)){
+
+if(preg_match('/cu\([^qk](.*?)\);/', $page, $values))
+{
+	$values = str_replace("'", '', $values[1]);
+	$value = explode(',', $values);
+	$qk = $value[0];
+	$pk = $value[1];
+	$r = $value[2];
+}
+/*if(preg_match('/cu\((.*?)\);/', $page, $values)){
 $value = preg_split('/\',?\'?/', $values[1], -1, PREG_SPLIT_NO_EMPTY);
 $qk = $value[0];
 $pk = $value[1];
 $r = $value[2];
-}else{
+}*/
+else{
 echo("<div style=\"text-align: center\"><br><br>");
 $trynumber ++;
 if($trynumber>1){
@@ -72,6 +82,7 @@ insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]
 
 // edited by mrbrownee70
 //updated by szalinski 15-Sep-09
-//update by kaox 01-oct-09  - support for password protected file 
+//update by kaox 01-oct-09  - support for password protected file
+//update by szalinski 03-nov-09 (mediafire layout change)
 
 ?>
