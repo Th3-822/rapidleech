@@ -438,6 +438,12 @@ var show2 = 0;
 </script>
 <div align="center">
 <?php
+if ($fileSizeLimited > 0) {
+	print '<span style="color:#FFCC00">'.lang(337).' <b>' . bytesToKbOrMbOrGb ( $fileSizeLimited ) . '</b><br /></span>';
+}
+?>
+
+<?php
 if (is_numeric($delete_delay) && $delete_delay > 0){
 	if($delete_delay > 3600){
 		$ddelay = round($delete_delay/3600, 1);
