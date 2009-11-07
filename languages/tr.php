@@ -341,4 +341,6 @@ $lang[332]	=	'Link Checker';
 $lang[333]	=	'Plugins';
 $lang[334]	=	'Auto Transload';
 $lang[335]	=	'Auto Upload';
+$lang[336]	=	'Dosya boyutu sinirlidir ';
+$lang[337]	=	'Boyut Siniri Dosya: ';
 ?>

@@ -340,4 +340,6 @@ $lang[332]	=	'Verificar enlaces';
 $lang[333]	=	'Plugins';
 $lang[334]	=	'Auto Transferir';
 $lang[335]	=	'Auto Subir';
+$lang[336]	=	'Tamaño del archivo está limitada a ';
+$lang[337]	=	'Límite de tamaño de archivo: ';
 ?>

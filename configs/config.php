@@ -65,6 +65,9 @@ $ajax_refresh = true;
 ### Bandwidth Saving ###
 $bw_save = true;
 
+### Limit file size ###
+//$fileSizeLimited = 100 * 1024 * 1024; // Bytes (MB * 1024 * 1024) // Remove "//" to enable it.
+
 ### Disable Delete & Rename Action ###
 $options['disable_deleting'] = false; //Set it to True to disallow users to DELETE OR RENAME files(useful for public servers)
 

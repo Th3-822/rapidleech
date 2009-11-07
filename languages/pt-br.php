@@ -341,4 +341,6 @@ $lang[332]	=	'Verificador de Links';
 $lang[333]	=	'Plugins';
 $lang[334]	=	'Auto Baixar';
 $lang[335]	=	'Auto Enviar';
+$lang[336]	=	'Tamanho do arquivo é limitado a ';
+$lang[337]	=	'Limite de tamanho do arquivo: ';
 ?>

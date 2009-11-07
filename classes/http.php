@@ -205,6 +205,13 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		//$bytesTotal = intval ( trim ( cut_str ( $header, "Content-Length:", "\n" ) ) );
 		$bytesTotal = trim ( cut_str ( $header, "Content-Length:", "\n" ) );
 		
+		global $fileSizeLimited;
+		if ($fileSizeLimited > 0) {
+			if ($bytesTotal > $fileSizeLimited) {
+				$lastError = lang(336) . bytesToKbOrMbOrGb ( $fileSizeLimited ) .".";
+				return false;
+			}
+}
 		if (stristr ( $host, "rapidshare" ) && $bytesTotal < 10000) {
 			while ( ! feof ( $fp ) ) {
 				$page_src .= fread ( $fp, 1024 * 8 );
