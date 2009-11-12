@@ -43,7 +43,9 @@ if ($continue_up)
 			
 			$post['user'] = $_REQUEST['user'];
 			$post['pass'] = $_REQUEST['password'];
-			$post['Submit'] = "Login" ;
+			$post['Submit.x'] = "0";
+			$post['Submit.y'] = "0";
+			$post['Submit'] = "Submit";
 			$page = geturl("movshare.net", 80, "/login.php", 0, 0, $post, 0, $_GET["proxy"], $pauth);
 			is_page($page);
 			is_notpresent($page, 'HTTP/1.1 302 Found', 'Error logging in - are your logins correct? First');
@@ -64,12 +66,12 @@ if ($continue_up)
 	$Url=parse_url($ref.'panel.php?q=3');
 	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookies, 0, 0, $_GET["proxy"],$pauth);
 	is_page($page);
-	$userid = cut_str($page,'movshare.net/upload/ubr_file_upload.php?u=','" frameborder="0"');
+	$userid = cut_str($page,'upload/ubr_file_upload.php?u=','" frameborder="0"');
 	if (!$userid) html_error ('Error get userID');
 
 	$rand = mt_rand(1000000000000, 1999999999999);
 	
-	$refup='http://c.movshare.net/upload/ubr_link_upload.php?rnd_id='.$rand;
+	$refup='http://95.211.84.49/upload/ubr_link_upload.php?rnd_id='.$rand;
 	$Url=parse_url($refup);
 	
 	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, "user=$userid", 0, 0, $_GET["proxy"],$pauth);
@@ -79,8 +81,8 @@ if ($continue_up)
 	$post['title']=$_REQUEST['title'];
 	$post['desc']=$_REQUEST['description'];
 	
-	$url=parse_url('http://c.movshare.net/'.'/cgi-bin/ubr_upload.pl?upload_id='.$upid);
-	$refup2='http://c.movshare.net/upload/ubr_file_upload.php?u='.$userid;
+	$url=parse_url('http://95.211.84.49/'.'/cgi-bin/ubr_upload.pl?upload_id='.$upid);
+	$refup2='http://95.211.84.49/';
 ?>
 <script>document.getElementById('info').style.display='none';</script>
 <?
@@ -98,7 +100,7 @@ if ($continue_up)
 	is_page($page);
 		
 	$end_url=cut_str($page,'Location: ',"\n");
-	$Url=parse_url('http://c.movshare.net/upload/'.$end_url);
+	$Url=parse_url('http://95.211.84.49/upload/'.$end_url);
 	
 	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $refup2, "user=$userid", 0, 0, $_GET["proxy"],$pauth);
 	is_page($page);
