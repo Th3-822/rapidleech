@@ -201,8 +201,6 @@ function resetProgress()
 		}
 		exit;
 	} else {
-
-
 		$start_link='index.php?audl=doum';
 
 		if(isset($_REQUEST['useproxy']) && $_REQUEST['useproxy'] && (!$_REQUEST['proxy'] || !strstr($_REQUEST['proxy'], ":"))) {
@@ -217,7 +215,9 @@ function resetProgress()
 
 		$start_link.='&imageshack_tor='.$_REQUEST['imageshack_acc'].'&premium_acc='.$_REQUEST['premium_acc'];
 		if (isset($_POST['premium_user'])) {
-			$start_link.='&premium_user='.urlencode($_POST['premium_user']).'&premium_pass='.urlencode($_POST['premium_pass']);
+			$start_link.='&premium_acc=on&premium_user='.urlencode($_POST['premium_user']).'&premium_pass='.urlencode($_POST['premium_pass']);
+		} elseif (isset($_POST['premium_acc'])) {
+			$start_link .= '&premium_acc=on';
 		}
 
 ?>
