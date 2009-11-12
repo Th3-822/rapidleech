@@ -51,11 +51,12 @@ if ($continue_up)
 <div id=login width=100% align=center>Login to cinshare.com</div>
 <?php
 
+			$post['submit'] = 1;
 			$post['username'] =  $_REQUEST['login'];
 			$post['password'] = $_REQUEST['password'];
 			$page = geturl("www.cinshare.com", 80, "/user/login", 'http://www.cinshare.com/', 0, $post, 0, $_GET["proxy"], $pauth);
 			is_page($page);
-			is_notpresent($page, 'HTTP/1.1 302', 'Error logging in - are your logins correct?');
+			is_notpresent($page, 'cin_temp', 'Error logging in - are your logins correct?');
 			preg_match_all('/Set-Cookie: (.*);/U',$page,$temp);
 			$cookie = $temp[1];
 			$cookies = implode(';',$cookie);
@@ -66,7 +67,7 @@ if ($continue_up)
 <?php
 
 	
-	$ref='http://www.cinshare.com/home';
+	$ref='http://www.cinshare.com/upload/local';
 	$Url=parse_url($ref);
 	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 'http://www.cinshare.com/', $cookies, 0, 0, $_GET["proxy"],$pauth);
 	is_page($page);
@@ -95,4 +96,5 @@ if ($continue_up)
 	$delete_link= "http://www.cinshare.com/files/delete/".$ID;
 	}
 // Made by Baking 30/07/2009 16:55
+// Fixed by Baking 09/11/2009 12:42
 ?>
