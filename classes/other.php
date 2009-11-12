@@ -219,7 +219,11 @@ function updateListInFile($list) {
 			return TRUE;
 		}
 	} elseif (@file_exists ( CONFIG_DIR . "files.lst" )) {
-		return unlink ( CONFIG_DIR . "files.lst" );
+		// Truncate files.lst instead of removing it since we don't have full
+		// read/write permission on the configs folder
+		$fh = fopen(CONFIG_DIR.'files.lst','w');
+		fclose($fh);
+		return true;
 	}
 }
 
