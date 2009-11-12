@@ -8,8 +8,7 @@ if (! defined ('RAPIDLEECH'))
 class youtube_com extends DownloadClass
 {
 	private $page;
-	private $cookie;
-
+	
 	public function Download($link)
 	{
 		$this->page = $this->GetPage ($link);
@@ -70,12 +69,17 @@ class youtube_com extends DownloadClass
 		elseif (preg_match ('%highest%', $yt_fmt)) $ext = '.mp4';
 		else $ext = '.flv';
 
-		if (preg_match ("/<title>YouTube - ([^<]+)/", $this->page, $title))
-		{
-			if (!$video_id) preg_match ('/"video_id": "([^\"]+)/', $this->page, $video_id);
-			$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode ($title [1])) . (isset ($_POST ['yt_fmt']) && $_POST ['yt_fmt'] !== 'highest' ? '-[' . $video_id[1] . '][f' . $_POST ['yt_fmt'] . ']' : '-[' . $video_id[1] . '][f' . $fmt . ']') . $ext;
-		}
+		/*
+		 * $title = cut_str($this->page, '<title>', '</title>');
+		 * if (!$title) html_error('No video title found! Download halted.');
+		 * $title = preg_replace('#YouTube.*-\s#Us', '', trim($title));
+		 */
 
+		if (!preg_match('#<title>.*YouTube.*-(.*)</title>#Us', $this->page, $title)) html_error('No video title found! Download halted.');
+		if (!$video_id) preg_match ('/"video_id": "([^\"]+)/', $this->page, $video_id);
+
+		$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode (trim($title[1]))) . (isset ($_POST ['yt_fmt']) && $_POST ['yt_fmt'] !== 'highest' ? '-[' . $video_id[1] . '][f' . $_POST ['yt_fmt'] . ']' : '-[' . $video_id[1] . '][f' . $fmt . ']') . $ext;
+		
 		if ($_POST ['ytdirect'] == 'on')
 		{
 			echo "<br /><br /><h4><a style='color:yellow' href='" . urldecode($furl) . "'>Click here or copy the link to your download manager to download</a></h4>";
