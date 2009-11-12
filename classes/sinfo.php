@@ -147,9 +147,12 @@ $prozent_belegt = 100 * $belegt / $insgesamt;
 		$cpulast = 100 - $cpu ['idle'];
 		$cpu_string = '';
 		$cpu_string .= lang(136).": <span id='cpuload'>" . round ( $cpulast, "0" ) . "</span>%<br />";
-		$cpu_string .= '<img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpulast, "2" ) . '" border="0" name="cpupercent" id="cpupercent" alt=""><br>';
+		if (extension_loaded('gd') && function_exists('gd_info')) {
+			$cpu_string .= '<img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpulast, "2" ) . '" border="0" name="cpupercent" id="cpupercent" alt="">';
+		}
+		$cpu_string .= '<br />';
 	} elseif ($os == "nocpu") {
-		echo "";
+		$cpu_string = '';
 	} else {
 		$cpu_string = lang(136).'<br />';
 		$cpu_string .= lang(136).": ".lang(137)."<br />";
