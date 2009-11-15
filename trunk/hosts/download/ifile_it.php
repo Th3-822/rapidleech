@@ -20,7 +20,6 @@ $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], $lo
 $snap = cut_str ( $page ,'id="req_btn2' ,'>download' );
 $Href  = cut_str ( $snap ,'href="' ,'"' );
 
-$Href = $loc[1];
 $Url = parse_url($Href);
 $FileName = !$FileName ? basename($Url["path"]) : $FileName;
 
