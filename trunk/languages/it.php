@@ -84,7 +84,7 @@ $lang[76]	=	'<div class="linktitle">Indirizzi di upload <strong>%1$s</strong> - 
 $lang[77]	=	'Eseguito';
 $lang[78]	=	'Torna indietro';
 $lang[79]	=	'Non posso stabilire una connessione con il server %1$s.';		// %1$s = nome del server FTP
-$lang[80]	=	'username e/o password errati.';
+$lang[80]	=	'Errato username e/o password.';
 $lang[81]	=	'Connesso a: <b>%1$s</b>...';	// %1$s = nome del server FTP
 $lang[82]	=	'Il tipo di file %1$s &eacute; vietato di essere scaricato';	// %1$s = File type
 $lang[83]	=	'File <b>%1$s</b>, Dimensione <b>%2$s</b>...';	// %1$s = nome del file %2$s = dimensione file
