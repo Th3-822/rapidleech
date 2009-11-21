@@ -17,7 +17,7 @@ if ( ini_get('safe_mode') ){
 	$safemode = "<font face=\"Verdana\" size=\"2\" class='checkerp'>".lang(308)."</font>";
 }
 
-if (!function_exists('fsockopen')) {
+if (!function_exists('stream_socket_client')) {
 	$fsockopen = "<font face=\"Verdana\" size=\"2\" class='checkerf'>".lang(309)."</font>";
 } else {
 	$fsockopen = "<font face=\"Verdana\" size=\"2\" class='checkerp'>".lang(308)."</font>";
