@@ -10,18 +10,18 @@ if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_
 {
 $in=parse_url("http://uploading.com/general/login_form/");
 $post=array();
-$post["email"]=$uploading_username;
-$post["password"]=$uploading_password;
+$post["email"]= $_GET ["premium_user"] ? $_GET ["premium_user"] : $premium_acc ["uploading"] ["user"];
+$post["password"]= $_GET ["premium_pass"] ? $_GET ["premium_pass"] : $premium_acc ["uploading"] ["pass"];
 $page = geturl($in["host"], $in["port"] ? $in["port"] : 80, $in["path"].($in["query"] ? "?".$in["query"] : ""), "http://uploading.com/login/", 0, $post, 0, $_GET["proxy"],$pauth);
 $cookie=GetCookies($page);
-$in=parse_url("http://uploading.com/");
-$page = geturl($in["host"], $in["port"] ? $in["port"] : 80, $in["path"].($in["query"] ? "?".$in["query"] : ""), "http://uploading.com/login/", $cookie, 0, 0, $_GET["proxy"],$pauth);
-if(!strpos($page,$uploading_username)){
+if(strpos($cookie,"error=") != false){
 html_error("Login Failed , Bad username/password combination.",0);
 }
+$in=parse_url("http://uploading.com/");
+$page = geturl($in["host"], $in["port"] ? $in["port"] : 80, $in["path"].($in["query"] ? "?".$in["query"] : ""), "http://uploading.com/login/", $cookie, 0, 0, $_GET["proxy"],$pauth);
 
 $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
-$fileID=cut_str($page,"file_id: '","'");
+$fileID=cut_str($page,"get_link', file_id: ",",");
 $tmp = basename($Url["path"]);
 $FileName=str_replace(".html","",$tmp);
 
@@ -43,7 +43,7 @@ $post["file_id"]=$fileID;
 $post["action"]="step_2";
 $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, $post, 0, $_GET["proxy"],$pauth);
 
-$dUrl=str_replace("\\","",cut_str($page,'redirect": "','"'));
+$dUrl=str_replace("\\","",cut_str($page,'link": "','"'));
 if ($dUrl=="") {html_error("Download url error , Please reattempt",0);
 }
 $Url=parse_url($dUrl);
@@ -99,7 +99,7 @@ insert_location("$PHP_SELF?cookie=".urlencode($cookie)."&filename=".urlencode($F
 
 }
 /**************************************************\  
-WRITTEN by kaox 24/05/2009
-UPDATE by kaox 30/09/2009
+WRITTEN by kaox 24-may-2009
+UPDATE by kaox  29-nov-2009
 \**************************************************/
 ?>
