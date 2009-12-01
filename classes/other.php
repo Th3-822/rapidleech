@@ -170,7 +170,7 @@ function html_error($msg, $head = 1) {
 		include(TEMPLATE_DIR.'header.php');
 	}
 	echo ('<div align="center">');
-	echo ('<span class="htmlerror"><b>' . $msg . '</b></span><br /><br />');
+	echo ('<span class="htmlerror"><b>' . $msg . '</b></span><br><br>');
 	echo ('<a href="' . $PHP_SELF . '">'.lang(13).'</a>');
 	echo ('</div>');
 	include(TEMPLATE_DIR.'footer.php');
@@ -239,7 +239,7 @@ function _create_list() {
 		while ( false !== ($file = $dir->read ()) ) {
 			if ($file != "." && $file != ".." && (! is_array ( $forbidden_filetypes ) || ! in_array ( strtolower ( strrchr ( $file, "." ) ), $forbidden_filetypes )) && is_file ( DOWNLOAD_DIR . $file ) && basename ( $file ) != "files.lst") {
 				$file = DOWNLOAD_DIR . $file;
-				$time = filectime ( $file );
+				$time = filemtime ( $file );
 				while ( isset ( $glist [$time] ) )
 					$time ++;
 				$glist [$time] = array ("name" => realpath ( $file ), "size" => bytesToKbOrMbOrGb ( filesize ( $file ) ), "date" => $time );
@@ -413,6 +413,39 @@ function is__writable($path) {
 	if (! $rm)
 		unlink ( $path );
 	return true;
+}
+
+function link_for_file($filename, $only_link = FALSE, $style = '') {
+	$inCurrDir = strstr(dirname($filename), ROOT_DIR) ? TRUE : FALSE;
+	if ($inCurrDir) {
+		$PHP_SELF = !$PHP_SELF ? $_SERVER ["PHP_SELF"] : $PHP_SELF;
+		$Path = parse_url($PHP_SELF);
+		$Path = substr($Path["path"], 0, strlen($Path["path"]) - strlen(strrchr($Path["path"], "/")));
+		$Path = str_replace('\\', '', $Path.substr(dirname($filename), strlen(ROOT_DIR)));
+	}
+	elseif (dirname($PHP_SELF.'safe') != '/') {
+		$in_webdir_path = dirname(str_replace('\\', '/', $PHP_SELF.'safe'));
+		$in_webdir_sub = substr_count($in_webdir_path, '/');
+		$in_webdir_root = ROOT_DIR.'/';
+		for ($i=1; $i <= $in_webdir_sub; $i++) {
+			$in_webdir_path = substr($in_webdir_path, 0, strrpos($in_webdir_path, '/'));
+			$in_webdir_root = realpath($in_webdir_root.'/../').'/';
+			$in_webdir = (strpos(dirname($filename).'/', $in_webdir_root) === 0) ? TRUE : FALSE;
+			if ($in_webdir) {
+				$Path = dirname($in_webdir_path.'/'.substr($filename, strlen($in_webdir_root)));
+				break;
+			}
+		}
+	}
+	else {
+		$Path = FALSE;
+		if ($only_link) { return ''; }
+	}
+	$basename = htmlentities(basename($filename));
+	$Path = htmlentities($Path).'/'.rawurlencode(basename($filename));
+	if ($only_link) { return 'http://'.urldecode($_SERVER['HTTP_HOST']).$Path; }
+	elseif ($Path === FALSE) { return $basename; }
+	else { return '<a href="'.$Path.'"'.($style !== '' ? ' '.$style : '').'>'.$basename.'</a>'; }
 }
 
 function lang($id) {

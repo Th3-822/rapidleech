@@ -284,7 +284,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		}
 		
 		if (@file_exists ( $saveToFile ) && $bw_save) {
-			html_error ( lang(99).': <a href="' . DOWNLOAD_DIR . basename ( $saveToFile ) . '">' . basename ( $saveToFile ) . '</a>', 0 );
+			html_error ( lang(99).': '.link_for_file($saveToFile), 0 );
 		}
 		if (@file_exists ( $saveToFile ) && $Resume ["use"] === TRUE) {
 			$fs = @fopen ( $saveToFile, "ab" );

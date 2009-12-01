@@ -162,8 +162,8 @@ $lang[153]	=	'Host';
 $lang[154]	=	'Port';
 $lang[155]	=	'Dizin';
 $lang[156]	=	'Kaynak dosyalar&#305;n&#305; ba&#351;ar&#305;l&#305; y&uuml;kleme sonras&#305; sil';
-$lang[157]	=	'Dosyalar&#305; Kopyala';
-$lang[158]	=	'Dosyalar&#305; Ta&#351;&#305;';
+$lang[157]	=	'FTP kaydet verileri';
+$lang[158]	=	'FTP veri silin';
 $lang[159]	=	'<b>%1$s</b> Dizini Tesbit Edilemedi.';	// %1$s = directory name
 $lang[160]	=	'%1$s dosyas&#305; ba&#351;ar&#305;l&#305; bir &#351;ekilde y&uuml;klendi!';	// %1$s = filename
 $lang[161]	=	'Zaman';
@@ -341,6 +341,6 @@ $lang[332]	=	'Link Checker';
 $lang[333]	=	'Plugins';
 $lang[334]	=	'Auto Transload';
 $lang[335]	=	'Auto Upload';
-$lang[336]	=	'Dosya boyutu sinirlidir ';
-$lang[337]	=	'Boyut Siniri Dosya: ';
+$lang[336]	=	'Dosya boyutu s&#305;n&#305;rl&#305;d&#305;r ';
+$lang[337]	=	'Boyut S&#305;n&#305;r&#305; Dosya: ';
 ?>

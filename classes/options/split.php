@@ -1,9 +1,6 @@
 <?php
 function rl_split() {
 	global $PHP_SELF, $list, $download_dir_is_changeable, $disable_deleting;
-	if (count ( $_GET ["files"] ) < 1) {
-		echo "Select at least one file.<br><br>";
-	} else {
 ?>
 <form method="post"	action="<?php echo $PHP_SELF; ?>">
 <input type="hidden" name="act" value="split_go">
@@ -12,8 +9,8 @@ function rl_split() {
 				<td>
 				<table>
 <?php
-		for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
-			$file = $list [$_GET ["files"] [$i]];
+	for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
+		$file = $list [$_GET ["files"] [$i]];
 ?>
 <tr>
 <td align="center">
@@ -27,30 +24,30 @@ function rl_split() {
 						</td>
 					</tr>
 <?php
-					if ($download_dir_is_changeable) {
+		if ($download_dir_is_changeable) {
 ?>
 <tr>
 						<td><?php echo lang(40); ?>:&nbsp;<input type="text" name="saveTo[]" size="40"
-							value="<?php echo addslashes ( dirname ( $file ["name"] ) ); ?>"></td>
+							value="<?php echo addslashes ( $download_dir ); ?>"></td>
 					</tr>
 <?php
-					}
+		}
 ?>
-                                        <tr>
+					<tr>
 						<td><input type="checkbox" name="del_ok"
 							<?php echo $disable_deleting ? 'disabled' : 'checked'; ?>>&nbsp;<?php echo lang(203); ?></td>
 					</tr>
 					<tr>
 						<td>CRC32 generation mode:<br>
 <?php
-			if (function_exists ( 'hash_file' )) {
-				?><input
+		if (function_exists ( 'hash_file' )) {
+?><input
 							type="radio" name="crc_mode[<?php echo $i; ?>]"
 							value="hash_file" checked>&nbsp;Use hash_file (Recommended)<br>
 <?php
-			}
+		}
 ?>
-                                            <input type="radio"
+						<input type="radio"
 							name="crc_mode[<?php echo $i; ?>]" value="file_read">&nbsp;Read	file to memory<br>
 						<input type="radio" name="crc_mode[<?php echo $i; ?>]"
 							value="fake"
@@ -65,11 +62,11 @@ function rl_split() {
 						<td></td>
 					</tr>
 <?php
-		}
+	}
 ?>
                                   </table>
 				</td>
-				<td><input type="submit" value="Split"></td>
+				<td><input type="submit" value="<?php echo lang(290); ?>"></td>
 			</tr>
 			<tr>
 				<td></td>
@@ -77,20 +74,19 @@ function rl_split() {
 		</table>
 		</form>
 <?php
-	}
 }
 
 function split_go() {
 	global $list, $download_dir, $download_dir_is_changeable, $disable_deleting;
-	for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
+	for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {
 		$split_ok = true;
-		$file = $list [$_GET ["files"] [$i]];
-		$partSize = round ( ($_GET ["partSize"] [$i]) * 1024 * 1024 );
-		$saveTo = ($download_dir_is_changeable ? stripslashes ( $_GET ["saveTo"] [$i] ) : realpath ( $download_dir )) . '/';
+		$file = $list [$_POST ["files"] [$i]];
+		$partSize = round ( ($_POST ["partSize"] [$i]) * 1024 * 1024 );
+		$saveTo = ($download_dir_is_changeable ? stripslashes ( $_POST ["saveTo"] [$i] ) : realpath ( $download_dir )) . '/';
 		$dest_name = basename ( $file ["name"] );
 		$fileSize = filesize ( $file ["name"] );
 		$totalParts = ceil ( $fileSize / $partSize );
-		$crc = ($_GET ['crc_mode'] [$i] == 'file_read') ? dechex ( crc32 ( read_file ( $file ["name"] ) ) ) : (($_GET ['crc_mode'] [$i] == 'hash_file' && function_exists ( 'hash_file' )) ? hash_file ( 'crc32b', $file ["name"] ) : '111111');
+		$crc = ($_POST ['crc_mode'] [$i] == 'file_read') ? dechex ( crc32 ( read_file ( $file ["name"] ) ) ) : (($_POST ['crc_mode'] [$i] == 'hash_file' && function_exists ( 'hash_file' )) ? hash_file ( 'crc32b', $file ["name"] ) : '111111');
 		$crc = str_repeat ( "0", 8 - strlen ( $crc ) ) . strtoupper ( $crc );
 		echo "Started to split file <b>" . basename ( $file ["name"] ) . "</b> parts of " . bytesToKbOrMbOrGb ( $partSize ) . ", Using Method - Total Commander...<br>";
 		echo "Total Parts: <b>" . $totalParts . "</b><br><br>";
@@ -109,7 +105,7 @@ function split_go() {
 		} elseif (! @write_file ( $saveTo . $dest_name . ".crc", "filename=" . $dest_name . "\r\n" . "size=" . $fileSize . "\r\n" . "crc32=" . $crc . "\r\n" )) {
 			echo "It is not possible to split the file. CRC Error<b>" . $dest_name . ".crc" . "</b> !<br><br>";
 		} else {
-			$time = filectime ( $saveTo . $dest_name . '.crc' );
+			$time = filemtime ( $saveTo . $dest_name . '.crc' );
 			while ( isset ( $list [$time] ) ) {
 				$time ++;
 			}
@@ -146,7 +142,7 @@ function split_go() {
 				}
 				fclose ( $split_dest );
 				if ($split_ok) {
-					$time = filectime ( $saveTo . $dest_name . '.' . sprintf ( "%03d", $j ) );
+					$time = filemtime ( $saveTo . $dest_name . '.' . sprintf ( "%03d", $j ) );
 					while ( isset ( $list [$time] ) ) {
 						$time ++;
 					}
@@ -155,9 +151,9 @@ function split_go() {
 			}
 			fclose ( $split_source );
 			if ($split_ok) {
-				if ($_GET ["del_ok"] && ! $disable_deleting) {
+				if ($_POST ["del_ok"] && ! $disable_deleting) {
 					if (@unlink ( $file ["name"] )) {
-						unset ( $list [$_GET ["files"] [$i]] );
+						unset ( $list [$_POST ["files"] [$i]] );
 						echo "Source file deleted.<br><br>";
 					} else {
 						echo "Source file is<b>not deleted!</b><br><br>";

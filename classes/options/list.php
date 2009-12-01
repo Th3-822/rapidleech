@@ -1,17 +1,30 @@
 <?php
 function rl_list() {
-	global $list, $PHP_SELF;
+	global $list;
 	if ($list) {
+?>
+<table><tr><td>
+<table class="md5table">
+<?php
 		foreach($list as $file) {
 			if(file_exists($file["name"])) {
-				$inCurrDir = strstr(dirname($file["name"]), ROOT_DIR) ? TRUE : FALSE;
-				if($inCurrDir) {
-					$Path = parse_url($PHP_SELF);
-					$Path = 'http://'.urldecode($_SERVER['HTTP_HOST']).substr($Path["path"], 0, strlen($Path["path"]) - strlen(strrchr($Path["path"], "/")));
-					echo($Path.str_replace("\\",'/',substr(dirname($file["name"]), strlen(ROOT_DIR)))."/".basename($file["name"]).'<br />');
-				}
+			echo '<tr><td>'.htmlentities(basename($file["name"])).'</td></tr>'.$nn;
 			}
 		}
+?>
+</table>
+</td><td>
+<table class="md5table">
+<?php
+		foreach($list as $file) {
+			if(file_exists($file["name"])) {
+        echo '<tr><td>'.link_for_file($file["name"], TRUE).'</td></tr>'.$nn;
+			}
+		}
+?>
+</table>
+</tr></table>
+<?php
 	}
 }
 ?>

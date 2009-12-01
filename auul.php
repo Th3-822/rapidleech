@@ -198,7 +198,7 @@ unset($Path);
 <a href="javascript:setCheckboxes(0);" class="chkmenu"><?php echo lang(53); ?></a> |
 <a href="javascript:setCheckboxes(2);" class="chkmenu"><?php echo lang(54); ?></a> |
 <a href="files/myuploads.txt" class="chkmenu">myuploads.txt</a>
-<div style="overflow:auto; height:400px; width: 700px; border">
+<div style="overflow:auto; height:400px; width: 700px;">
 <table cellpadding="3" cellspacing="1" width="100%" class="filelist">
 	<tr class="flisttblhdr" valign="bottom">
 		<th></th>

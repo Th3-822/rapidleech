@@ -1,11 +1,10 @@
 <?php
 function rl_rename() {
 	global $disable_deleting, $list;
-	if (count ( $_GET ["files"] ) < 1) {
-		echo "Select at least one file.<br><br>";
-	} elseif ($disable_deleting) {
-		echo "you don't have permission to rename files";
-	} else {
+  if ($disable_deleting) {
+    echo lang(147);
+  }
+  else {
 ?>
 <form method="post"><input type="hidden" name="act" value="rename_go">
 		<table align="center">
@@ -16,7 +15,7 @@ function rl_rename() {
 		for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 			$file = $list [$_GET ["files"] [$i]];
 ?>
-<input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>" />
+<input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>">
 <tr>
 	<td align="center"><b><?php echo basename ( $file ["name"] ); ?></b></td>
 </tr>
@@ -44,22 +43,22 @@ function rl_rename() {
 function rename_go() {
 	global $list, $forbidden_filetypes;
 	$smthExists = FALSE;
-	for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
-		$file = $list [$_GET ["files"] [$i]];
+	for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {
+		$file = $list [$_POST ["files"] [$i]];
 		
 		if (file_exists ( $file ["name"] )) {
 			$smthExists = TRUE;
-			$newName = dirname ( $file ["name"] ) . PATH_SPLITTER . $_GET ["newName"] [$i];
+			$newName = dirname ( $file ["name"] ) . PATH_SPLITTER . stripslashes(basename($_POST["newName"][$i]));
 			$filetype = strrchr ( $newName, "." );
 			
 			if (is_array ( $forbidden_filetypes ) && in_array ( strtolower ( $filetype ), $forbidden_filetypes )) {
 				printf(lang(82),$filetype);
-				echo "<br /><br />";
+				echo "<br><br>";
 			} else {
 				if (@rename ( $file ["name"], $newName )) {
 					printf(lang(194),$file['name'],basename($newName));
 					echo "<br><br>";
-					$list [$_GET ["files"] [$i]] ["name"] = $newName;
+					$list [$_POST ["files"] [$i]] ["name"] = $newName;
 				} else {
 					printf(lang(202),$file['name']);
 					echo "<br><br>";
@@ -67,12 +66,12 @@ function rename_go() {
 			}
 		} else {
 			printf(lang(145),$file['name']);
-			echo "<br /><br />";
+			echo "<br><br>";
 		}
 	}
 	if ($smthExists) {
 		if (! updateListInFile ( $list )) {
-			echo lang(9)."<br /><br />";
+			echo lang(9)."<br><br>";
 		}
 	}
 }

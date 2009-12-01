@@ -1,21 +1,18 @@
 <?php
 function ftp() {
 	global $list, $disable_deleting;
-	if (count ( $_GET ["files"] ) < 1) {
-		echo lang(138)."<br /><br />";
-	} else {
 ?>
 <form method="post"><input type="hidden" name="act" value="ftp_go">
 <?php echo lang(104); ?>:
 <?php
-		for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
-			$file = $list [($_GET ["files"] [$i])];
+	for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
+		$file = $list [($_GET ["files"] [$i])];
 ?>
 <input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>"> <b><?php echo basename ( $file ["name"] ); ?></b><?php echo $i == count ( $_GET ["files"] ) - 1 ? "." : ",&nbsp"; ?>
 <?php
-		}
-?><br />
-		<br />
+	}
+?><br>
+		<br>
 		<table align="center">
 			<tr>
 				<td>
@@ -68,7 +65,6 @@ function ftp() {
 		</table>
 		</form>
 <?php
-	}
 }
 
 function ftp_go() {
@@ -78,27 +74,27 @@ function ftp_go() {
 	if (! $ftp->SetServer ( $_POST ["host"], ( int ) $_POST ["port"] )) {
 		$ftp->quit ();
 		printf(lang(79),$_POST ["host"] . ":" . $_POST ["port"]);
-		echo "<br /><a href=\"javascript:history.back(-1);\">".lang(78)."</a><br /><br />";
+		echo "<br><a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
 	} else {
 		if (! $ftp->connect ()) {
 			$ftp->quit ();
-			echo "<br />";
+			echo "<br>";
 			printf(lang(79),$_POST ["host"] . ":" . $_POST ["port"]);
-			echo "<br /><a href=\"javascript:history.back(-1);\">".lang(78)."</a><br /><br />";
+			echo "<br><a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
 		} else {
 			printf(lang(81),'ftp://'.$_POST['host'].':'.$_POST['port']);
 			if (! $ftp->login ( $_POST ["login"], $_POST ["password"] )) {
 				$ftp->quit ();
-				echo "<br />";
+				echo "<br>";
 				echo lang(80);
-				echo "<br />" . "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
+				echo "<br>" . "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
 			} else {
 				//$ftp->Passive(FALSE);
 				if (! $ftp->chdir ( $_POST ["dir"] )) {
 					$ftp->quit ();
-					echo "<br />";
+					echo "<br>";
 					printf(lang(159),$_POST['dir']);
-					echo "<br /><a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
+					echo "<br><a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
 				} else {
 ?>
 <br>
@@ -109,7 +105,9 @@ function ftp_go() {
 						<td></td>
 						<td>
 						<div class="progressouter">
+						<div style="width:298px">
 							<div id="progress" class="ftpprogress"></div>
+						</div>
 						</div>
 						</td>
 						<td></td>
@@ -126,28 +124,28 @@ function ftp_go() {
 				</table>
 				<br>
 <?php
-					for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
-						$file = $list [$_GET ["files"] [$i]];
-						echo "<script>changeStatus('" . basename ( $file ["name"] ) . "', '" . $file ["size"] . "');</script>";
+					for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {
+						$file = $list [$_POST ["files"] [$i]];
+						echo "<script>changeStatus('" . addslashes(basename ( $file ["name"] )) . "', '" . $file ["size"] . "');</script>";
 						$FtpBytesTotal = filesize ( $file ["name"] );
 						$FtpTimeStart = getmicrotime ();
 						if ($ftp->put ( $file ["name"], basename ( $file ["name"] ) )) {
 							$time = round ( getmicrotime () - $FtpTimeStart );
-							$speed = round ( $FtpBytesTotal / 1024 / $time, 2 );
+							$speed = @round ( $FtpBytesTotal / 1024 / $time, 2 );
 							echo "<script>pr(100, '" . bytesToKbOrMbOrGb ( $FtpBytesTotal ) . "', " . $speed . ")</script>\r\n";
 							flush ();
 							
-							if ($_GET ["del_ok"] && ! $disable_deleting) {
+							if ($_POST ["del_ok"] && ! $disable_deleting) {
 								if (@unlink ( $file ["name"] )) {
-									unset ( $list [$_GET ["files"] [$i]] );
+									unset ( $list [$_POST ["files"] [$i]] );
 								}
 							}
 							
 								printf(lang(160),'<a href="ftp://' . $_POST ["login"] . ':' . $_POST ["password"] . '@' . $_POST ["host"] . ':' . $_POST ["port"] . $_POST ["dir"] . '/' . basename ( $file ["name"] ) . '"><b>' . basename ( $file ["name"] ) . '</b></a>');
-								echo "<br />".lang(161).": <b>" . sec2time ( $time ) . "</b><br />".lang(162).": <b>" . $speed . " KB/s</b><br /><br />";
+								echo "<br>".lang(161).": <b>" . sec2time ( $time ) . "</b><br>".lang(162).": <b>" . $speed . " KB/s</b><br><br>";
 						} else {
 							printf(lang(163),basename($file['name']));
-							echo "<br />";
+							echo "<br>";
 						}
 					}
 					$ftp->quit ();

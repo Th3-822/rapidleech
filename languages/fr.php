@@ -1,4 +1,4 @@
-<?php
+ï»¿<?php
 if (!defined('RAPIDLEECH')) {
   require('../deny.php');
   exit;
@@ -162,8 +162,8 @@ $lang[153]	=	'H&ocirc;te';
 $lang[154]	=	'Port';
 $lang[155]	=	'R&eacute;pertoire';
 $lang[156]	=	'Supprimer le fichier source apr&egrave;s le transfert';
-$lang[157]	=	'Copier les fichiers';
-$lang[158]	=	'D&eacute;placer des fichiers';
+$lang[157]	=	'Sauvegarder les donn&eacute;es de FTP';
+$lang[158]	=	'Supprimer les donn&eacute;es de FTP';
 $lang[159]	=	'Impossible de localiser le dossier <b>%1$s</ b>';	// %1$s = nom de r&eacute;pertoire
 $lang[160]	=	'Le fichier %1$s a &eacute;t&eacute; transf&eacute;r&eacute; avec succ&egrave;s !';	//  %1$s = nom du fichier
 $lang[161]	=	'Temps';
@@ -341,6 +341,6 @@ $lang[332]	=	'Link Checker';
 $lang[333]	=	'Plugins';
 $lang[334]	=	'Auto Transload';
 $lang[335]	=	'Auto Upload';
-$lang[336]	=	'Taille des fichiers est limitée à ';
+$lang[336]	=	'Taille des fichiers est limit&eacute;e &agrave; ';
 $lang[337]	=	'Limite de taille du fichier: ';
 ?>

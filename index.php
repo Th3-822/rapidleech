@@ -300,13 +300,8 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 	if ($lastError) {
 		html_error ( $lastError, 0 );
 	} elseif ($file ["bytesReceived"] == $file ["bytesTotal"] || $file ["size"] == "Unknown") {
-		$inCurrDir = stristr ( dirname ( $pathWithName ), ROOT_DIR ) ? TRUE : FALSE;
-		if ($inCurrDir) {
-			$Path = parse_url ( $PHP_SELF );
-			$Path = substr ( $Path ["path"], 0, strlen ( $Path ["path"] ) - strlen ( strrchr ( $Path ["path"], "/" ) ) );
-		}
 		echo "<script type='text/javascript'>pr(100, '" . $file ["size"] . "', '" . $file ["speed"] . "')</script>\r\n";
-		echo sprintf(lang(10),($inCurrDir ? "<a href=\"" . $Path . "/" . substr ( dirname ( $pathWithName ), strlen ( ROOT_DIR ) + 1 ) . "/" . basename ( $file ["file"] ) . "\">" : "") . basename ( $file ["file"] ) . ($inCurrDir ? "</a>" : ""),$file ["size"],$file ["time"],$file ["speed"]);
+		echo sprintf(lang(10), link_for_file(dirname($pathWithName).'/'.basename($file["file"])), $file ["size"], $file ["time"], $file ["speed"]);
 		$file ['date'] = time ();
 		if (! write_file ( CONFIG_DIR . "files.lst", serialize ( array ("name" => $file ["file"], "size" => $file ["size"], "date" => $file ['date'], "link" => $_GET ["link"], "comment" => str_replace ( "\n", "\\n", str_replace ( "\r", "\\r", $_GET ["comment"] ) ) ) ) . "\r\n", 0 )) {
 			echo lang(9).'<br />';

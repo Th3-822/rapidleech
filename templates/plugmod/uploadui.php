@@ -4,8 +4,10 @@
 	<td></td>
 	<td>
 	<div class="progressouter">
+		<div style="width:298px">
 			<div id="progress" class="progressup">
-    		</div>
+			</div>
+		</div>
 	</div>
 	</td>
 <td></td>
@@ -23,7 +25,6 @@ function pr(percent, received, speed)
 	document.getElementById("received").innerHTML = '<b>' + received + '</b>';
 	document.getElementById("percent").innerHTML = '<b>' + percent + '%</b>';
 	document.title='Uploading ' + percent + '% [' + orlink + ']';
-	if (percent > 90) {percent=percent-1;}
 	document.getElementById("progress").style.width = percent + '%';
 	document.getElementById("speed").innerHTML = '<b>' + speed + ' KB/s</b>';
 	return true;

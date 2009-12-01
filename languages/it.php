@@ -1,4 +1,4 @@
-<?php
+ï»¿<?php
 if (!defined('RAPIDLEECH')) {
   require('../deny.php');
   exit;
@@ -161,8 +161,8 @@ $lang[153]	=	'Server';
 $lang[154]	=	'Porta';
 $lang[155]	=	'Percorso';
 $lang[156]	=	'Cancella il file sorgente dopo l\'upload con successo';
-$lang[157]	=	'Copia I Files';
-$lang[158]	=	'Muovi I Files';
+$lang[157]	=	'Salva i dati di FTP';
+$lang[158]	=	'Eliminare i dati di FTP';
 $lang[159]	=	'Non trovo il percorso della cartella <b>%1$s</b>';	// %1$s = nome percorso
 $lang[160]	=	'File %1$s caricato con successo!';	// %1$s = nome del file
 $lang[161]	=	'Tempo';
@@ -340,6 +340,6 @@ $lang[332]	=	'Link Checker';
 $lang[333]	=	'Plugins';
 $lang[334]	=	'Auto Transload';
 $lang[335]	=	'Auto Upload';
-$lang[336]	=	'Dimensioni del file è limitata a ';
+$lang[336]	=	'Dimensioni del file &egrave; limitata a ';
 $lang[337]	=	'File Size Limit: ';
 ?>

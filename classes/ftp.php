@@ -13,7 +13,7 @@ $ftp = new ftp(FALSE, FALSE);
     {
         $ftp->quit();
         $server = $host.':'.$port;
-        $lastError = sprintf(lang(79),$server)."<br />".
+        $lastError = sprintf(lang(79),$server)."<br>".
                      "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
         return FALSE;
     }
@@ -22,7 +22,7 @@ $ftp = new ftp(FALSE, FALSE);
         if(!$ftp->connect())
           {
               $ftp->quit();
-              $lastError = sprintf(lang(79),$server)."<br />".
+              $lastError = sprintf(lang(79),$server)."<br>".
                            "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
               return FALSE;
           }
@@ -31,7 +31,7 @@ $ftp = new ftp(FALSE, FALSE);
                 if (!$ftp->login($AUTH["ftp"]["login"], $AUTH["ftp"]["password"]))
                   {
                       $ftp->quit();
-                      $lastError = lang(80)."<br />".
+                      $lastError = lang(80)."<br>".
                                    "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
                       return FALSE;
                   }
@@ -39,7 +39,7 @@ $ftp = new ftp(FALSE, FALSE);
                   {
                   	echo('<p>');
                   	printf(lang(81),$host);
-                  	echo('<br />');
+                  	echo('<br>');
                       //$ftp->Passive(FALSE);
                       $tmp = explode("/", $url);
                       $ftp_file = array_pop($tmp);
@@ -80,7 +80,7 @@ $ftp = new ftp(FALSE, FALSE);
                             $saveToFile = dirname($saveToFile).PATH_SPLITTER.time()."_".basename($saveToFile);
                         }
 					printf(lang(83),$saveToFile,bytesToKbOrMbOrGb($fileSize));
-                      echo "<br />";
+                      echo "<br>";
                       ?>
 <br>
 <table cellspacing="0" cellpadding="0" style="FONT-FAMILY: Tahoma; FONT-SIZE: 11px;">
