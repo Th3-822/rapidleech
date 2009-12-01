@@ -1,101 +1,111 @@
+<?php
+define ( 'CONFIG_DIR', 'configs/' );
+define ( 'RAPIDLEECH', 'yes' );
+require_once (CONFIG_DIR . "config.php");
+define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
+require_once('classes/other.php');
+?>
 <html>
-<head><title>Rapidleech Checker Script!</title></head>
+<head><title>Rapidleech Checker Script!</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link title="Rapidleech Style" href="<?php echo TEMPLATE_DIR; ?>styles/rl_style_pm.css" rel="stylesheet" type="text/css">
+</head>
 <body>
 <?php
 $phpver = phpversion();
 $phpverr = str_replace(".", "", $phpver);
 
 if ($phpverr >= 430) {
-	$phpverr = "<font face=\"Verdana\" size=\"2\" class='checkerp'>".lang(308)."</font>";
+	$phpverr = '<span class="checkerp">'.lang(308).'</span>';
 } else {
-	$phpverr = "<font face=\"Verdana\" size=\"2\" class='checkerf'>".lang(309)."</font>";
+	$phpverr = '<span class="checkerf">'.lang(309).'</span>';
 }
 
 if ( ini_get('safe_mode') ){
-	$safemode = "<font face=\"Verdana\" size=\"2\" class='checkerf'>".lang(309)."</font>";
+	$safemode = '<span class="checkerf">'.lang(309).'</span>';
 } else {
-	$safemode = "<font face=\"Verdana\" size=\"2\" class='checkerp'>".lang(308)."</font>";
+	$safemode = '<span class="checkerp">'.lang(308).'</span>';
 }
 
 if (!function_exists('stream_socket_client')) {
-	$fsockopen = "<font face=\"Verdana\" size=\"2\" class='checkerf'>".lang(309)."</font>";
+	$fsockopen = '<span class="checkerf">'.lang(309).'</span>';
 } else {
-	$fsockopen = "<font face=\"Verdana\" size=\"2\" class='checkerp'>".lang(308)."</font>";
+	$fsockopen = '<span class="checkerp">'.lang(308).'</span>';
 }
 
+@ini_set('memory_limit', '64M');
 if ((int)ini_get('memory_limit') > 32) {
-	$memory_limit = "<font face=\"Verdana\" size=\"2\" class='checkerp'>".lang(308)."</font>";
+	$memory_limit = '<span class="checkerp">'.lang(308).'</span>';
 } else {
-	$memory_limit = "<font face=\"Verdana\" size=\"2\" class='checkerf'>".lang(309)."</font>";
+	$memory_limit = '<span class="checkerf">'.lang(309).'</span>';
 }
 
 if (!function_exists('curl_version')) {
-	$curl = "<font face=\"Verdana\" size=\"2\" class='checkerf'>".lang(309)."</font>";
+	$curl = '<span class="checkerf">'.lang(309).'</span>';
 } else {
-	$curl = "<font face=\"Verdana\" size=\"2\" class='checkerp'>".lang(308)."</font>";
+	$curl = '<span class="checkerp">'.lang(308).'</span>';
 }
 
 if (!ini_get('allow_url_fopen')) {
-	$fopen = "<font face=\"Verdana\" size=\"2\" class='checkerf'>".lang(309)."</font>";
+	$fopen = '<span class="checkerf">'.lang(309).'</span>';
 } else {
-	$fopen = "<font face=\"Verdana\" size=\"2\" class='checkerp'>".lang(308)."</font>";
+	$fopen = '<span class="checkerp">'.lang(308).'</span>';
 }
 
 if (!ini_get('allow_call_time_pass_reference')) {
-	$call_time = "<font face=\"Verdana\" size=\"2\" class='checkerf'>".lang(310)."</font>";
+	$call_time = '<span class="checkerf">'.lang(310).'</span>';
 } else {
-	$call_time = "<font face=\"Verdana\" size=\"2\" class='checkerp'>".lang(308)."</font>";
+	$call_time = '<span class="checkerp">'.lang(308).'</span>';
 }
 
 if (!function_exists('passthru')) {
-	$passthru = "<font face=\"Verdana\" size=\"2\" class='checkerf'>".lang(311)."</font>";
+	$passthru = '<span class="checkerf">'.lang(311).'</span>';
 } else {
-	$passthru = "<font face=\"Verdana\" size=\"2\" class='checkerp'>".lang(308)."</font>";
+	$passthru = '<span class="checkerp">'.lang(308).'</span>';
 }
 
 if (!function_exists('disk_free_space')) {
-	$disk_free_space = "<font face=\"Verdana\" size=\"2\" class='checkerf'>".lang(311)."</font>";
+	$disk_free_space = '<span class="checkerf">'.lang(311).'</span>';
 } else {
-	$disk_free_space = "<font face=\"Verdana\" size=\"2\" class='checkerp'>".lang(308)."</font>";
+	$disk_free_space = '<span class="checkerp">'.lang(308).'</span>';
 }
 
 if (function_exists('apache_get_version')) {
 	$apache_version = apache_get_version();
 	preg_match('/Apache\/([0-9])\./U',$apache_version,$apacver);
 	if ($apacver[1] < 2) {
-		$apacver = "<font face=\"Verdana\" size=\"2\" class='checkerf'>".lang(312)."</font>";
+		$apacver = '<span class="checkerf">'.lang(312).'</span>';
 	} else {
-		$apacver = "<font face=\"Verdana\" size=\"2\" class='checkerp'>".lang(308)."</font>";
+		$apacver = '<span class="checkerp">'.lang(308).'</span>';
 	}
 }
-
 ?>
-<table border="0" width="100%" height="100%" cellpadding="5" style="border-collapse: collapse" align="center">
+<center><img src="<?php echo TEMPLATE_DIR; ?>images/logo_pm.gif" alt="RapidLeech PlugMod" border="0"></center>
+<br>
+<table border="0" width="100%" align="center">
 	<tr>
 		<td>
 			<div align="center">
 				<table border="1" cellpadding="20" style="border-collapse: collapse">
 					<tr>
-						<td align="center">
-							<img border="0" src="http://www.rapidleech.com/logo.gif" /><br />
-							<font face="Verdana" size="2"><b><?php echo lang(313); ?></b>
-							</font>
+						<td align="center" style="font-family: 'Verdana'; font-size: smaller">
+							<b><?php echo lang(313); ?></b>
 						</td>
 					</tr>
 					<tr>
-						<td align="center">
-							<font face="Verdana" size="2"><b><?php echo lang(314); ?></b>:</font> <?php echo $fsockopen; ?><br /><br />
-							<font face="Verdana" size="2"><b><?php echo lang(315); ?></b>:</font> <?php echo $memory_limit; ?><br /><br />
-							<font face="Verdana" size="2"><b><?php echo lang(316); ?></b>:</font> <?php echo $safemode; ?><br /><br />
-							<font face="Verdana" size="2"><b><?php echo lang(317); ?></b>:</font> <?php echo $curl; ?><br /><br />
-							<font face="Verdana" size="2"><b><?php echo lang(318); ?></b>:</font> <?php echo $fopen; ?><br /><br />
-							<font face="Verdana" size="2"><b><?php echo lang(319); ?><?php echo $phpver; ?></b>:</font> <?php echo $phpverr; ?><br /><br />
-							<font face="Verdana" size="2"><b><?php echo lang(320); ?></b>:</font> <?php echo $call_time; ?><br /><br />
-							<font face="Verdana" size="2"><b><?php echo lang(321); ?></b>:</font> <?php echo $passthru; ?><br /><br />
-							<font face="Verdana" size="2"><b><?php echo lang(322); ?></b>:</font> <?php echo $disk_free_space; ?><br /><br />
+						<td align="center" style="font-family: 'Verdana'; font-size: smaller;">
+							<b><?php echo lang(314); ?></b>: <?php echo $fsockopen; ?><br><br>
+							<b><?php echo lang(315); ?></b>: <?php echo $memory_limit; ?><br><br>
+							<b><?php echo lang(316); ?></b>: <?php echo $safemode; ?><br><br>
+							<b><?php echo lang(317); ?></b>: <?php echo $curl; ?><br><br>
+							<b><?php echo lang(318); ?></b>: <?php echo $fopen; ?><br><br>
+							<b><?php echo lang(319); ?><?php echo $phpver; ?></b>: <?php echo $phpverr; ?><br><br>
+							<b><?php echo lang(320); ?></b>: <?php echo $call_time; ?><br><br>
+							<b><?php echo lang(321); ?></b>: <?php echo $passthru; ?><br><br>
+							<b><?php echo lang(322); ?></b>: <?php echo $disk_free_space; ?><br><br>
 <?php if ($apache_version) {
 ?>
-							<font face="Verdana" size="2"><b><?php echo lang(323); ?><?php echo $apache_version; ?></b>:</font> <?php echo $apacver; ?><br /><br />
+							<b><?php echo lang(323); ?><?php echo $apache_version; ?></b>: <?php echo $apacver; ?><br><br>
 <?php
 }?>
 						</td>
