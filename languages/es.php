@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (!defined('RAPIDLEECH')) {
   require('../deny.php');
   exit;
