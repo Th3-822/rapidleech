@@ -4,7 +4,9 @@
 <td></td>
 <td>
 <div class="progressouter">
+<div style="width:298px">
 <div id="progress" class="progressdown"></div>
+</div>
 </div>
 </td>
 <td></td>

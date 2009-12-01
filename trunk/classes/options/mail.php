@@ -1,19 +1,16 @@
 <?php
 function rl_mail() {
 	global $disable_deleting, $list;
-	if (count ( $_GET ["files"] ) < 1) {
-			echo lang(138)."<br /><br />";
-		} else {
 ?>
 <form method="post"><input type="hidden" name="act" value="mail_go">
 <?php echo lang(104); ?>:
 <?php
-			for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
-				$file = $list [($_GET ["files"] [$i])];
+	for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
+		$file = $list [($_GET ["files"] [$i])];
 ?>
                 <input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>"> <b><?php echo basename ( $file ["name"] ); ?></b><?php echo $i == count ( $_GET ["files"] ) - 1 ? "." : ",&nbsp"; ?>
 <?php
-				}
+	}
 ?><br>
 <br>
 <table align="center">
@@ -24,15 +21,7 @@ function rl_mail() {
 		<td><input type="submit" value="Send"></td>
 	</tr>
 	<tr>
-		<td><input type="checkbox" name="del_ok"
-			<?php
-				if (! $disable_deleting)
-					echo "checked='checked'";
-				?>
-			<?php
-				if ($disable_deleting)
-					echo "disabled='disabled'";
-				?>>&nbsp;<?php echo lang(165); ?></td>
+		<td><input type="checkbox" name="del_ok" <?php echo $disable_deleting ? "disabled" : "checked";?>>&nbsp;<?php echo lang(165); ?></td>
 	</tr>
 	<tr>
 		<td></td>
@@ -64,39 +53,40 @@ function rl_mail() {
 				</td>
 			</tr>
 		</table>
-		</form>
+  </tr>
+</table>
+</form>
 <?php
-			}
 }
 
 function mail_go() {
 	global $list, $disable_deleting;
 	require_once (CLASS_DIR . "mail.php");
-	if (! checkmail ( $_GET ["email"] )) {
-		echo lang(166)."<br /><br />";
+	if (! checkmail ( $_POST ["email"] )) {
+		echo lang(166)."<br><br>";
 	} else {
-		$_GET ["partSize"] = ((isset ( $_GET ["partSize"] ) & $_GET ["split"] == "on") ? $_GET ["partSize"] * 1024 * 1024 : FALSE);
-		for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
-			$file = $list [$_GET ["files"] [$i]];
+		$_POST ["partSize"] = ((isset ( $_POST ["partSize"] ) & $_POST ["split"] == "on") ? $_POST ["partSize"] * 1024 * 1024 : FALSE);
+		for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {
+			$file = $list [$_POST ["files"] [$i]];
 			if (file_exists ( $file ["name"] )) {
-				if (xmail ( "$fromaddr", $_GET ['email'], "File " . basename ( $file ["name"] ), "File: " . basename ( $file ["name"] ) . "\r\n" . "Link: " . $file ["link"] . ($file ["comment"] ? "\r\nComments: " . str_replace ( "\\r\\n", "\r\n", $file ["comment"] ) : ""), $file ["name"], $_GET ["partSize"], $_GET ["method"] )) {
-					if ($_GET ["del_ok"] && ! $disable_deleting) {
+				if (xmail ( "$fromaddr", $_POST ['email'], "File " . basename ( $file ["name"] ), "File: " . basename ( $file ["name"] ) . "\r\n" . "Link: " . $file ["link"] . ($file ["comment"] ? "\r\nComments: " . str_replace ( "\\r\\n", "\r\n", $file ["comment"] ) : ""), $file ["name"], $_POST ["partSize"], $_POST ["method"] )) {
+					if ($_POST ["del_ok"] && ! $disable_deleting) {
 						if (@unlink ( $file ["name"] )) {
 							$v_ads = " and deleted.";
-							unset ( $list [$_GET ["files"] [$i]] );
+							unset ( $list [$_POST ["files"] [$i]] );
 						} else {
 							$v_ads = ", but <b>not deleted!</b>";
 						}
 						;
 					} else
 						$v_ads = " !";
-					echo "<script type='text/javascript'>mail('File <b>" . basename ( $file ["name"] ) . "</b> it is sent for the address <b>" . $_GET ["email"] . "</b>" . $v_ads . "', '" . md5 ( basename ( $file ["name"] ) ) . "');</script>\r\n<br>";
+					echo "<script type='text/javascript'>mail('File <b>" . basename ( $file ["name"] ) . "</b> it is sent for the address <b>" . $_POST ["email"] . "</b>" . $v_ads . "', '" . md5 ( basename ( $file ["name"] ) ) . "');</script>\r\n<br>";
 				} else {
-					echo lang(12)."<br />";
+					echo lang(12)."<br>";
 				}
 			} else {
 				printf(lang(145),$file['name']);
-				echo "<br /><br />";
+				echo "<br><br>";
 			}
 		}
 	}

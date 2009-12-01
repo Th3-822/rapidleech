@@ -3,7 +3,25 @@ if (!defined('RAPIDLEECH')) {
 	require('../deny.php');
 	exit;
 }
-if (! $disable_action) {
+$all_act_files_exist = false;
+if ((isset($_GET["act"]) || isset($_POST["act"])) && @$_GET["act"] !== 'files') {
+  if ($disable_action) { echo lang(328)."<br><br>"; }
+  elseif ($_GET['act'] == 'list') { $all_act_files_exist = true; }
+  elseif ((!is_array($_GET['files']) || count($_GET['files']) < 1) && (!is_array($_POST['files']) || count($_POST['files']) < 1)) {
+    echo lang(138)."<br><br>";
+  }
+  else {
+    $all_act_files_exist = true;
+    foreach($_GET["files"] as $v) {
+      if (!is_file($list[$v]["name"])) {
+        $all_act_files_exist = false;
+        echo sprintf(lang(64),htmlentities($list[$v]["name"]));
+        break;
+      }
+    }
+  }
+}
+if ($all_act_files_exist) {
 	switch ($_GET ["act"]) {
 		case "upload" :
 			require(CLASS_DIR . "options/upload.php");
@@ -114,7 +132,7 @@ if (! $disable_action) {
 			zip();
 			break;
 		
-		case "zip_add" :
+		case "zip_go" :
 			require(CLASS_DIR . "options/zip.php");
 			zip_go();
 			break;

@@ -1,9 +1,9 @@
-<?php
+ï»¿<?php
 if (!defined('RAPIDLEECH')) {
   require('../deny.php');
   exit;
 }
-// Arquivo para o idioma Português-BR
+// Arquivo para o idioma PortuguÃªs-BR
 // You should always use this file as a template for translating
 
 $lang[1]	=	'Acesso negado';
@@ -162,8 +162,8 @@ $lang[153]	=	'Host';
 $lang[154]	=	'Porta';
 $lang[155]	=	'Diret&oacute;rio';
 $lang[156]	=	'Exclus&atilde;o do arquivo de origem ap&oacute;s o upload com sucesso';
-$lang[157]	=	'Copiar Arquivos';
-$lang[158]	=	'Mover Arquivos';
+$lang[157]	=	'Salvar dados de FTP';
+$lang[158]	=	'Apagar dados de FTP';
 $lang[159]	=	'N&atilde;o &eacute; poss&iacute;vel localizar a pasta <b>%1$s</b>';	// %1$s = directory name
 $lang[160]	=	'Arquivo %1$s carregado com sucesso!';	// %1$s = filename
 $lang[161]	=	'Tempo';
@@ -341,6 +341,6 @@ $lang[332]	=	'Verificador de Links';
 $lang[333]	=	'Plugins';
 $lang[334]	=	'Auto Baixar';
 $lang[335]	=	'Auto Enviar';
-$lang[336]	=	'Tamanho do arquivo é limitado a ';
+$lang[336]	=	'Tamanho do arquivo &eacute; limitado a ';
 $lang[337]	=	'Limite de tamanho do arquivo: ';
 ?>

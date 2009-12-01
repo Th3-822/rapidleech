@@ -36,7 +36,7 @@ foreach ($host as $site => $file)
 <input class="button-auto" type="button" value="<?php echo lang(334); ?>" onClick="window.open('audl.php');return false;">
 <br>
 <input class="button-auto" type="button" value="<?php echo lang(335); ?>" onClick="window.open('auul.php');return false;">
-<br />
+<br>
 [ <a href="javascript:openNotes();"><?php echo lang(327); ?>.txt</a> ]
 </td>
 </tr>
@@ -63,8 +63,8 @@ foreach ($host as $site => $file)
 <tbody>
 <tr>
 <td align="center">
-<p align="left"><b><?php echo lang(207); ?>:</b><br />&nbsp;<input type="text" name="link" id="link" size="50">
-<p align="left"><b><?php echo lang(208); ?>:</b><br />&nbsp;<input type="text" name="referer" id="referer" size="50">
+<p align="left"><b><?php echo lang(207); ?>:</b><br>&nbsp;<input type="text" name="link" id="link" size="50">
+<p align="left"><b><?php echo lang(208); ?>:</b><br>&nbsp;<input type="text" name="referer" id="referer" size="50">
 </td>
 <td align="center"><input type="submit" value="<?php echo lang(209); ?>"></td>
 </tr>
@@ -73,7 +73,7 @@ foreach ($host as $site => $file)
 </tr>
 <tr id="usernpass" style="display: none;">
 <td align="center">
-<?php echo lang(211); ?>: <input type="text" name="iuser" value=""><br />
+<?php echo lang(211); ?>: <input type="text" name="iuser" value=""><br>
 <?php echo lang(212); ?>: <input type="text" name="ipass" value="">
 </td>
 </tr>
@@ -295,7 +295,7 @@ else
   {
   document.write("<?php echo lang(261); ?>");
   }
-</script></a><br /><br />
+</script></a><br><br>
 <?php
     }
   }
@@ -309,16 +309,10 @@ if($list)
        {
        $total_files++;
        $total_size+=filesize($file["name"]);
-       $inCurrDir = strstr(dirname($file["name"]), ROOT_DIR) ? TRUE : FALSE;
-       if($inCurrDir)
-         {
-         $Path = parse_url($PHP_SELF);
-         $Path = substr($Path["path"], 0, strlen($Path["path"]) - strlen(strrchr($Path["path"], "/")));
-         }
-         ?>
-<tr class="flistmouseoff" onMouseOver="this.className='flistmouseon'" onMouseOut="this.className='flistmouseoff'" align="center" title="<?php echo $file["name"]; ?>" onmousedown="checkFile(<?php	echo $filecount;?>); return false;">
+?>
+<tr class="flistmouseoff" onMouseOver="this.className='flistmouseon'" onMouseOut="this.className='flistmouseoff'" align="center" title="<?php echo htmlentities($file["name"]); ?>" onmousedown="checkFile(<?php	echo $filecount;?>); return false;">
 <td><input onmousedown="checkFile(<?php echo $filecount;?>); return false;" id="files<?php echo $filecount; ?>" type=checkbox name="files[]" value="<?php echo $file["date"]; ?>"></td>
-<td><?php echo $inCurrDir ? "<b><a href=\"" . str_replace('\\', '', $Path.substr(dirname($file["name"]), strlen(ROOT_DIR)))."/".basename($file["name"]) : ""; echo $inCurrDir ? "\" style=\"color: #000;\">".basename($file["name"])."</a></b>" : basename($file["name"]); ?></td>
+<td><?php echo link_for_file($file["name"], FALSE, 'style="font-weight: bold; color: #000;"'); ?></td>
 <td><?php echo $file["size"]; ?></td>
 <!--<td bgcolor="#CF965D"><?php echo $file["link"] ? "<a href=\"".$file["link"]."\" style=\"color: #000;\">".$file["link"]."</a>" : "" ; ?></td>-->
 <td><?php echo $file["comment"] ? str_replace("\\r\\n", "<br>", $file["comment"]) : ""; ?></td>
@@ -370,20 +364,20 @@ foreach ($name as $v) {
 $workswith = substr($workswith,0,-3);
 ?>
 <div class="workswith"><?php echo $workswith; ?>
-<br /><b><?php echo lang(268); ?></b><br />
-Anonym.to | Linkbucks.com | Lix.in<br />
+<br><b><?php echo lang(268); ?></b><br>
+Anonym.to | Linkbucks.com | Lix.in<br>
 Rapidshare.com Folders | Usercash.com</div><br>
 <div align="center">
 <form action="ajax.php?ajax=linkcheck" method="post" id="linkchecker" onsubmit="return startLinkCheck();">
-<textarea rows="10" cols="87" name="links" id="links"></textarea><br /><br />
-<div style="text-align:center; margin:0 auto; width:450px;"><a href="<?php echo $PHP_SELF.'?debug=1' ?>" style="color:#3B5A6F"><b><?php echo lang(269); ?></b></a></div><br />
+<textarea rows="10" cols="87" name="links" id="links"></textarea><br><br>
+<div style="text-align:center; margin:0 auto; width:450px;"><a href="<?php echo $PHP_SELF.'?debug=1' ?>" style="color:#3B5A6F"><b><?php echo lang(269); ?></b></a></div><br>
 <?php echo lang(270); ?>: <input type="checkbox" value="d" name="d">
-<?php echo lang(271); ?>: <input type ="checkbox" value ="1" name="k"><br /><br />
+<?php echo lang(271); ?>: <input type ="checkbox" value ="1" name="k"><br><br>
 <input type="submit" id="submit" value="<?php echo lang(272); ?>" name="submit">
 </form>
 </div>
 <p style="text-align:center; font-size:10px">
-	<small>Lix Checker v3.0.0 | Copyright Dman - MaxW.org | Optimized by zpikdum and sarkar<br /><b>Mod by eqbal | Ajax'd by TheOnly92</b></small></p><br />
+	<small>Lix Checker v3.0.0 | Copyright Dman - MaxW.org | Optimized by zpikdum and sarkar<br><b>Mod by eqbal | Ajax'd by TheOnly92</b></small></p><br>
 
 <span id="loading" style="display: none;">
       &nbsp;&nbsp;
@@ -439,7 +433,7 @@ var show2 = 0;
 <div align="center">
 <?php
 if ($fileSizeLimited > 0) {
-	print '<span style="color:#FFCC00">'.lang(337).' <b>' . bytesToKbOrMbOrGb ( $fileSizeLimited ) . '</b><br /></span>';
+	print '<span style="color:#FFCC00">'.lang(337).' <b>' . bytesToKbOrMbOrGb ( $fileSizeLimited ) . '</b><br></span>';
 }
 ?>
 
@@ -462,10 +456,15 @@ if (is_numeric($delete_delay) && $delete_delay > 0){
 <div id="server_stats">
 <?php	require_once(CLASS_DIR."sinfo.php"); ?>
 </div>
-<script type="text/javascript">refreshStats();</script>
 <?php
+  if ($ajax_refresh) {
+?>
+<script type="text/javascript">var stats_timer = setTimeout("refreshStats()",10 * 1000);</script>
+<?php
+  }
 	ob_end_flush();
-}?>
+}
+?>
 <hr>
 <?php
 print CREDITS;

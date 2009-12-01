@@ -161,8 +161,8 @@ $lang[153]	=	'Host';
 $lang[154]	=	'Puerto';
 $lang[155]	=	'Directorio';
 $lang[156]	=	'Borrar archivo de origen despu&eacute;s de subida exitosa';
-$lang[157]	=	'Copiar archivos';
-$lang[158]	=	'Mover archivos';
+$lang[157]	=	'Guardar datos FTP';
+$lang[158]	=	'Borrar datos FTP';
 $lang[159]	=	'No se puede encontrar el directorio <b>%1$s</b>'; // %1$s nombre del directorio
 $lang[160]	=	'Archivo %1$s ¡subido correctamente!'; // %1$s = nombre de archivo
 $lang[161]	=	'Tiempo';
@@ -340,6 +340,6 @@ $lang[332]	=	'Verificar enlaces';
 $lang[333]	=	'Plugins';
 $lang[334]	=	'Auto Transferir';
 $lang[335]	=	'Auto Subir';
-$lang[336]	=	'Tamaño del archivo está limitada a ';
-$lang[337]	=	'Límite de tamaño de archivo: ';
+$lang[336]	=	'El Tama&ntilde;o del archivo está limitado a ';
+$lang[337]	=	'Límite de tama&ntilde;o de archivo: ';
 ?>

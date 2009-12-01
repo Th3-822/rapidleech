@@ -94,13 +94,13 @@ function clear(name)
 
 function setCheckboxes(act)
   {
-  elts =  document.forms["flist"].elements["files[]"];
+  elts = document.getElementsByName("files[]");
   var elts_cnt  = (typeof(elts.length) != 'undefined') ? elts.length : 0;
   if (elts_cnt)
     {
     for (var i = 0; i < elts_cnt; i++)
       {
-      elts[i].checked = (act == 1 || act == 0) ? act : elts[i].checked ? 0 : 1;
+      elts[i].checked = (act == 1 || act == 0) ? act : (elts[i].checked ? 0 : 1);
       }
     }
   }
@@ -174,24 +174,6 @@ function changeStatus(file, size)
 	document.getElementById("status").innerHTML = 'Uploading File <b>' + file + '</b>, Size <b>' + size + '</b>...<br>';
 	}
 
-function zip()
-  {
-	var i = document.ziplist.act.selectedIndex;
-	var selected = document.ziplist.act.options[i].value;
-	document.getElementById('add').style.display = 'none';
-	switch (selected)
-		{
-		case "zip_add":
-			document.getElementById('add').style.display = 'block';
-		break;
-		//case "zip_extract":
-			
-		//break;
-		//case "zip_list":
-			//void(document.ziplist.submit());
-		//break;
-		}
-	}
 function checkFile(id) {
 	if (document.getElementById('files'+id).checked == true) {
 		document.getElementById('files'+id).checked = false;
@@ -227,7 +209,17 @@ function openNotes() {
 <?php
 	if ($ajax_refresh) {
 ?>
-var stats_timed = 5;
+var idleTime = 0;
+$(document).ready(function(){
+  var idleInterval = setInterval("idleTime++;", 1000);
+  $(this).mousemove(function(e){
+    var tmp = idleTime;
+    idleTime = 0;
+    if (tmp >= 120) { refreshStats(); }
+  });
+});
+
+var stats_timed = 10;
 function refreshStats() {
 	$.ajax({
 		type: "GET",
@@ -245,8 +237,11 @@ function refreshStats() {
 			cpuPercent = new Image();
 			cpuPercent.src = "classes/bar.php?rating=" + data.CPUPercent;
 			$('#cpupercent').attr('src',cpuPercent.src);
-			stats_timed++;
-			setTimeout("refreshStats()",stats_timed * 1000);
+			if (stats_timed < 60) { stats_timed = stats_timed + 10; }
+			if (idleTime < 120) {
+				clearTimeout(stats_timer);
+				stats_timer = setTimeout("refreshStats()",stats_timed * 1000);
+			}
 		}
 	});
 }

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('RAPIDLEECH')) {
   require('../deny.php');
   exit;
@@ -90,7 +90,128 @@ $lang[81]	=	'Connected to: <b>%1$s</b>...';	// %1$s = FTP server name
 $lang[82]	=	'The filetype %1$s is forbidden to be downloaded';	// %1$s = File type
 $lang[83]	=	'File <b>%1$s</b>, Size <b>%2$s</b>...';	// %1$s = file name %2$s = file size
 $lang[84]	=	'Error retriving the link';
-$lang[206]	=	'YouTube 视频格式选择';
+$lang[85]	=	'Text passed as counter is string!';
+$lang[86]	=	'ERROR: Please enable JavaScript.';
+$lang[87]	=	'Please wait <b>%1$s</b> seconds...';	// %1$s = number of seconds
+$lang[88]	=	'Couldn\'t connect to %1$s at port %2$s';	// %1$s = host name %2$s = port
+$lang[89]	=	'Connected to proxy: <b>%1$s</b> at port <b>%2$s</b>...';	// %1$s = Proxy host %2$s = Proxy port
+$lang[90]	=	'Connected to: <b>%1$s</b> at port <b>%2$s</b>...';	// %1$s = host %2$s = port
+$lang[91]	=	'No header received';
+$lang[92]	=	'You are forbidden to access the page!';
+$lang[93]	=	'The page was not found!';
+$lang[94]	=	'The page was either forbidden or not found!';
+$lang[95]	=	'Error! it is redirected to [%1$s]';	// %1$s = redirected address
+$lang[96]	=	'This site requires authorization. For the indication of username and password of access it is necessary to use similar url:<br />http://<b>login:password@</b>www.site.com/file.exe';
+$lang[97]	=	'Resume limit exceeded';
+$lang[98]	=	'This server doesn\'t support resume';
+$lang[99]	=	'Download';
+$lang[100]	=	'This premium account is already in use with another ip.';
+$lang[101]	=	'File %1$s cannot be saved in directory %2$s';	// %1$s = file name %2$s = directory name
+$lang[102]	=	'Try to chmod the folder to 777.';
+$lang[103]	=	'Try again';
+$lang[104]	=	'File';
+$lang[105]	=	'It is not possible to carry out a record in the file %1$s';	// %1$s = file name
+$lang[106]	=	'Invalid URL or unknown error occured';
+$lang[107]	=	'You have reached the limit for Free users.';
+$lang[108]	=	'The download session has expired';
+$lang[109]	=	'Wrong access code.';
+$lang[110]	=	'You have entered a wrong code too many times';
+$lang[111]	=	'Download limit exceeded';
+$lang[112]	=	'Error READ Data';
+$lang[113]	=	'Error SEND Data';
+$lang[114]	=	'Active';
+$lang[115]	=	'Unavailable';
+$lang[116]	=	'Dead';
+$lang[117]	=	'You need to load/activate the cURL extension (http://www.php.net/cURL) or you can set $fgc = 1 in config.php.';
+$lang[118]	=	'cURL is enabled';
+$lang[119]	=	'PHP version 5 is recommended although it is not obligatory';
+$lang[120]	=	'Check if your safe mode is turned off as the script cannot work with safe mode on';
+$lang[121]	=	'Sending file <b>%1$s</b>';	// %1$s = filename
+$lang[122]	=	'No need spliting, Send single mail';
+$lang[123]	=	'Spliting into %1$s part size';	// %1$s = part size
+$lang[124]	=	'Method';
+$lang[125]	=	'Sending part <b>%1$s</b>';	//%1$s = part number
+$lang[126]	=	'No need spliting, Send single mail';
+$lang[127]	=	'No host file found';
+$lang[128]	=	'Cannot create hosts file';
+$lang[129]	=	'hours';	// Plural
+$lang[130]	=	'hour';
+$lang[131]	=	'minutes';	// Plural
+$lang[132]	=	'minute';
+$lang[133]	=	'seconds';	// Plural
+$lang[134]	=	'second';
+$lang[135]	=	'getCpuUsage(): couldn\'t access STAT path or STAT file invalid';
+$lang[136]	=	'CPU Load';
+$lang[137]	=	'An error occured';
+$lang[138]	=	'Select at least one file.';
+$lang[139]	=	'Emails';
+$lang[140]	=	'Send';
+$lang[141]	=	'Delete successful submits';
+$lang[142]	=	'Split by Parts';
+$lang[143]	=	'Parts Size';
+$lang[144]	=	'<b>%1$s</b> - Invalid E-mail Address.';	// %1$s = email address
+$lang[145]	=	'File <b>%1$s</b> is not found!';	// %1$s = filename
+$lang[146]	=	'Couldn\'t update files list!';
+$lang[147]	=	'File deletion is disabled';
+$lang[148]	=	'Delete files';
+$lang[149]	=	'Yes';
+$lang[150]	=	'No';
+$lang[151]	=	'File <b>%1$s</b> Deleted';	// %1$s = filename
+$lang[152]	=	'Error deleting the file <b>%1$s</b>!';	// %1$s = filename
+$lang[153]	=	'Host';
+$lang[154]	=	'Port';
+$lang[155]	=	'Directory';
+$lang[156]	=	'Delete source file after successful upload';
+$lang[157]	=	'Save FTP data';
+$lang[158]	=	'Delete FTP data';
+$lang[159]	=	'Cannot locate the folder <b>%1$s</b>';	// %1$s = directory name
+$lang[160]	=	'File %1$s successfully uploaded!';	// %1$s = filename
+$lang[161]	=	'Time';
+$lang[162]	=	'Average speed';
+$lang[163]	=	'Couldn\'t upload the file <b>%1$s</b>!';	// %1$s = filename
+$lang[164]	=	'Email';
+$lang[165]	=	'Delete	successful submits';
+$lang[166]	=	'Invalid E-mail Address';
+$lang[167]	=	'Please select only the .crc or .001 file!';
+$lang[168]	=	'Please select the .crc file!';
+$lang[169]	=	'Please select the .crc or .001 file!';
+$lang[170]	=	'Perform a CRC check? (recommended)';
+$lang[171]	=	'CRC32 check mode';
+$lang[172]	=	'Use hash_file (Recommended)';
+$lang[173]	=	'Read file to memory';
+$lang[174]	=	'Fake crc';
+$lang[175]	=	'Delete source file after successful merge';
+$lang[176]	=	'Notice';
+$lang[177]	=	'The file size and crc32 won\'t be check';
+$lang[178]	=	'Can\'t read the .crc file!';
+$lang[179]	=	'Error, Output file already exists <b>%1$s</b>';	// %1$s = filename
+$lang[180]	=	'Error, missing or incomplete parts';
+$lang[181]	=	'Error, The filetype %1$s is forbidden';	// Filetype
+$lang[182]	=	'It is not possible to open destination file <b>%1$s</b>';	// %1$s = filename
+$lang[183]	=	'Error writing the file <b>%1$s</b>!';	// %1$s = filename
+$lang[184]	=	'CRC32 checksum doesn\'t match!';
+$lang[185]	=	'File <b>%1$s</b> successfully merged';	// %1$s = filename
+$lang[186]	=	'deleted';
+$lang[187]	=	'not deleted';
+$lang[188]	=	'Add extension';
+$lang[189]	=	'without';
+$lang[190]	=	'to';
+$lang[191]	=	'Rename?';
+$lang[192]	=	'Cancel';
+$lang[193]	=	'Error renaming file <b>%1$s</b>';	// %1$s = filename
+$lang[194]	=	'File <b>%1$s</b> has been renamed to <b>%2$s</b>';	// %1$s = original filename %2$s = renamed filename
+$lang[195]	=	'Archive Name';
+$lang[196]	=	'Please enter an archive name!';
+$lang[197]	=	'Error the archive has not been created.';
+$lang[198]	=	'File %1$s was packed';	// %1$s = filename
+$lang[199]	=	'Packed in archive <b>%1$s</b>';	// %1$s = filename
+$lang[200]	=	'Error, the archive is empty.';
+$lang[201]	=	'New name';
+$lang[202]	=	'Couldn\'t rename the file <b>%1$s</b>!';	// %1$s = filename
+$lang[203]	=	'Delete source file after successful split';
+$lang[204]	=	'files and folders';
+$lang[205]	=	'Unzip';
+$lang[206]	=	'YouTube Video Format Selector';
 $lang[207]	=	'Link to Transload';
 $lang[208]	=	'Referrer';
 $lang[209]	=	'Transload File';
@@ -195,7 +316,7 @@ $lang[307]	=	'Waiting';
 $lang[308]	=	'Passed';
 $lang[309]	=	'Failed';
 $lang[310]	=	'You might see warnings without this turned on';
-$lang[311]	=	'You might not be able to turn on server stats';
+$lang[311]	=	'You might not be able to turn on Server Info';
 $lang[312]	=	'Your server might not be able to support files more than 2 GB';
 $lang[313]	=	'Rapidleech Checker Script';
 $lang[314]	=	'fsockopen';

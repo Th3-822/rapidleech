@@ -162,8 +162,8 @@ $lang[153]	=	'Host';
 $lang[154]	=	'Port';
 $lang[155]	=	'Directory';
 $lang[156]	=	'Delete source file after successful upload';
-$lang[157]	=	'Copy Files';
-$lang[158]	=	'Move Files';
+$lang[157]	=	'Save FTP data';
+$lang[158]	=	'Delete FTP data';
 $lang[159]	=	'Cannot locate the folder <b>%1$s</b>';	// %1$s = directory name
 $lang[160]	=	'File %1$s successfully uploaded!';	// %1$s = filename
 $lang[161]	=	'Time';

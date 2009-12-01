@@ -6,6 +6,7 @@ define('CLASS_DIR', 'classes/');
 define('CONFIG_DIR', 'configs/');
 require_once(CONFIG_DIR."config.php");
 require_once(CLASS_DIR . 'other.php');
+define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 // For ajax calls, lets make it use less resource as possible
 switch ($_GET['ajax']) {
 	case 'server_stats':

@@ -2,7 +2,7 @@
 /**
  * Renders the file actions, this function does NOT output directly to the browser
  * 
- * @return string The string will contain the <select></select tag
+ * @return string The string will contain the <select></select> tag
  *
  */
 function renderActions() {
