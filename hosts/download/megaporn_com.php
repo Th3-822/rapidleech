@@ -22,10 +22,11 @@ class megaporn_com extends DownloadClass
 		$k1 = trim ( cut_str ( $page, 'flashvars.k1 = "', '";' ) );
 		$k2 = trim ( cut_str ( $page, 'flashvars.k2 = "', '";' ) );
 		$s = trim ( cut_str ( $page, 'flashvars.s = "', '";' ) );
-			 
-		$Href = "http://www".$s.".megaporn.com/files/".$this->decrypt($un, $k1, $k2 )."/";
+		
+		$id = $this->decrypt($un, $k1, $k2 );	
+		$Href = "http://www".$s.".megaporn.com/files/".$id."/";
 				
-		$FileName = "video.flv";
+		$FileName = $id.".flv";
 		$this->RedirectDownload( $Href, $FileName );
 		exit ();
 	}
