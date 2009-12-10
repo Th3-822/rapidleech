@@ -90,5 +90,6 @@ class megaporn_com extends DownloadClass
 	}
 }	
 
-// download plug-in writted by rajmalhotra  09 Dec 2009
+// written by kaox  25 April 09
+// update and converted in oop by rajmalhotra  09 Dec 2009
 ?>
