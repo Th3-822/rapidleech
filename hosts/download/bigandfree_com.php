@@ -47,12 +47,22 @@ class bigandfree_com extends DownloadClass
 		$post ["current"] = $current;
 		$post ["limit_reached"] = $limitReached;
 		$post ["download_now"] = "Click here to download";
-				
-		$FileName = "filename";
-		$this->RedirectDownload($link,$FileName,$cookie, $post,$Referer);
+		
+		$page = $this->GetPage($link, $cookie, $post, $Referer );
+		is_present ( $page, "Performing scheduled network maintenance" );
+		
+		preg_match('/Location: *(.+)/i', $page, $newredir );		
+		
+		$FileName = "";		
+		$Href = trim ( $newredir [1] );
+		$Url = parse_url ( $Href );
+		$FileName = ! $FileName ? basename ( $Url ["path"] ) : $FileName;
+		
+		$this->RedirectDownload($Href,$FileName,0, 0,$Referer);
 		exit ();
 	}
 }
 
 // Created by rajmalhotra on 04 Dec 09	
+// Updated by rajmalhotra on 14 Dec 09 for adding server maintaince error message	
 ?>
