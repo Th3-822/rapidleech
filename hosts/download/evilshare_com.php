@@ -43,7 +43,7 @@ class evilshare_com extends DownloadClass
 		{
 			$cookie=$cookie.array_shift($cook[1]);
 		}
-			
+		
 		$count = trim ( cut_str ( $page, '<span id="countdown">', '</span>' ) );
 		
 		$op = trim ( cut_str ( $page, '<input type="hidden" name="op" value="', '"' ) );
@@ -112,7 +112,7 @@ class evilshare_com extends DownloadClass
 		preg_match ( '/Location: (.*)/', $page, $newredir );
 		
 		$FileName = "";		
-		$Href = $newredir [1];
+		$Href = trim ( $newredir [1] );
 		$Url = parse_url ( $Href );
 		$FileName = ! $FileName ? basename ( $Url ["path"] ) : $FileName;
 		
@@ -121,5 +121,6 @@ class evilshare_com extends DownloadClass
 		exit ();
 	}
 }	
-// download plug-in writted by rajmalhotra  12 Dec 2009		
+// download plug-in writted by rajmalhotra  12 Dec 2009	
+// Updated by rajmalhotra on 14 Dec 09 for trim the Href		
 ?>
