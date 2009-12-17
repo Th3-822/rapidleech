@@ -49,7 +49,18 @@ class rapidshare_com extends DownloadClass
 		is_present ( $page, "This limit is reached", "This file is neither allocated to a Premium Account, or a Collector's Account, and can therefore only be downloaded 10 times. This limit is reached." );
 		is_present ( $page, "This file exceeds your download-limit", "Download limit exceeded" );
 		is_present ( $page, "is already downloading a file", "Your IP-address is already downloading a file, Please wait until the download is completed." );
-
+		
+		if (stristr ( $page, "This file can only be downloaded by becoming a" ))
+		{
+			html_error ( "This file can only be downloaded by becoming a Premium member", 0 );
+		}
+		
+		if (stristr ( $page, "lot of users are downloading files" ))
+		{
+			$minutes = trim ( cut_str ( $page, "Please try again in ", " minutes" ) );
+			html_error ( "Currently a lot of users are downloading files. Please try again in <font color=black><span id='waitTime'>$minutes</span></font> minutes or become a Premium member", 0 );
+		}
+		
 		if (stristr ( $page, "try again in" ))
 		{
 			$minutes = trim ( cut_str ( $page, "Or try again in about ", " minutes." ) );
@@ -73,13 +84,13 @@ class rapidshare_com extends DownloadClass
 				html_error ( "Download limit exceeded.", 0 );
 			}
 		}
-
+		
 		if (stristr ( $page, "Too many users downloading right now" ) || stristr ( $page, "Too many connections" ))
 		{
 			html_error ( "Too many users downloading right now", 0 );
 		}
 		$countDown = trim ( cut_str ( $page, "var c=", ";" ) );
-
+	
 		$form_content = "";
 		preg_match ( '%<form name="dlf?".*</form>%s', $page, $form_content );
 		$middle_str = str_replace ( "\\", "", preg_replace ( '/(\' *\+.*?(\r\n)*.*?\'|display:none;)/s', '', $form_content [0] ) );
@@ -211,4 +222,5 @@ class rapidshare_com extends DownloadClass
 		}
 	}
 }
+// updated by rajmalhotra  on 17 Dec 09 :  added some error messages
 ?>
