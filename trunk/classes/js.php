@@ -215,7 +215,7 @@ $(document).ready(function(){
   $(this).mousemove(function(e){
     var tmp = idleTime;
     idleTime = 0;
-    if (tmp >= 120) { refreshStats(); }
+    if (tmp >= 120) { stats_timer = setTimeout("refreshStats()",1000); }
   });
 });
 
