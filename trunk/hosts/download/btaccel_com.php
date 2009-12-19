@@ -77,12 +77,6 @@ if( $pos == true )
 	$Url = parse_url($Href);
 	
 	$loc = "$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($LINK)."&cookie=".urlencode($cookies)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : "");
-	
-	$file_self = $download_dir."link1.txt";
-	$fpt = fopen($file_self, "w");
-	fwrite($fpt, $loc);
-	fclose($fpt);
-
 	insert_location( $loc );
 }
 else
@@ -106,19 +100,19 @@ else
 	preg_match_all('%http://.+/get\?[^\'"]+%i',$frmfiles,$files) ;
 	$cc=1 ;
 
-	foreach($files[0] as $tmp){
+	foreach( $files[0] as $tmp )
+	{
 	    $tmp2=cut_str($tmp,'&file_name=','\n');
 	    $ff=explode("/",$tmp2);
-	     $fi=$ff[count($ff)-1];
-	$fil=urldecode($fi);
-	$file=str_replace(":80/get?","/get/?",$tmp);
-	$file .= "&step=1&cookies=".urlencode ( $cookies );
+	    $fi=$ff[count($ff)-1];
+		$fil=urldecode($fi);
+		$file=str_replace(":80/get?","/get/?",$tmp);
+		$file .= "&step=1&cookies=".urlencode ( $cookies );
 
-	$namefile=$fil;
-	echo "<tr><td><input type=checkbox id=cs$cc ></td><td><input type=hidden id=lin$cc value=$file ></td><td id=link$cc >$namefile</td></tr>";
-	$cc++;
-
-}
+		$namefile=$fil;
+		echo "<tr><td><input type=checkbox id=cs$cc ></td><td><input type=hidden id=lin$cc value=$file ></td><td id=link$cc >$namefile</td></tr>";
+		$cc++;
+	}
 ?>
 <tr><td><input type='checkbox' name='checkall' id='checkall' onclick='checkedAll();'> all<td><td align=center><input type=button onclick='selt(<?php echo $cc-1 ?>)' value='Step1 select and click'></tr>
 </form>
@@ -131,37 +125,42 @@ else
         var ck;
         var tmp;
 		var tmp2;
-        for(pp=1;pp<=cc;pp++){
-        ck=    document.getElementById("cs"+ pp );
-        if (ck.checked) {
-        tmp=document.getElementById("lin"+ pp );
-		tmp2=tmp.value.replace(/%/g,"%25");
-        lks= lks + tmp2 + "\r\n";}
+        for( pp=1; pp<=cc; pp++ )
+		{
+			ck = document.getElementById("cs"+ pp );
+			if (ck.checked) 
+			{
+				tmp = document.getElementById("lin"+ pp );
+				tmp2 = tmp.value.replace(/%/g,"%25");
+				lks = lks + tmp2 + "\r\n";
+			}
         }
-	document.write('<form action=audl.php?GO=GO method=post >');
-    document.write('<Input type=Hidden name=links value= "' + lks + '" >');	
-	document.write('<center><Input type=submit name=submit value="Step2 click for send selected to Autodownloader"></center>');	
-	document.write('</form>');
-	
+		
+		document.write('<form action=audl.php?GO=GO method=post >');
+		document.write('<Input type=Hidden name=links value= "' + lks + '" >');	
+		document.write('<center><Input type=submit name=submit value="Step2 click for send selected to Autodownloader"></center>');	
+		document.write('</form>');
     }
-checked=false;
-function checkedAll (frm1) {
-	var aa= document.getElementById('tavola');
-	 if (checked == false)
-          {
-           checked = true
-          }
-        else
-          {
-          checked = false
-          }
-	for (var i =0; i < aa.elements.length; i++) 
+	
+	checked=false;
+	function checkedAll (frm1) 
 	{
-	 aa.elements[i].checked = checked;
-	}
-      }
-
-	</script>	
+		var aa= document.getElementById('tavola');
+		if (checked == false)
+        {
+           checked = true
+        }
+        else
+        {
+          checked = false
+        }
+		for (var i =0; i < aa.elements.length; i++) 
+		{
+			aa.elements[i].checked = checked;
+		}
+    }
+</script>
+	
 <?php	
 }
 
@@ -169,6 +168,6 @@ flush();
 /*************************\  
 WRITTEN by kaox 21-jul-2009
 UPDATED by kaox 04-oct-2009
-UPDATED by rajmalhotra 19-Dec-2009 
+UPDATED and Fixed by rajmalhotra 19-Dec-2009 
 \*************************/
 ?>
