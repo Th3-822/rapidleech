@@ -37,28 +37,31 @@ if ($continue_up)
 <tr><td align=center>
 <div id=login width=100% align=center>Login to uGotFile.com</div>
 <?php
-			$post['username'] = $_REQUEST['username'];
-			$post['password'] = $_REQUEST['password'];
-			$post['rememberMe'] = 0;
+			$post['ugfLoginUserName'] = $_REQUEST['username'];
+			$post['ugfLoginPassword'] = $_REQUEST['password'];
+			$post['ugfLoginRememberMe'] = 0;
 			$post['login'] = 'Login';
-			
-			$page = geturl("ugotfile.com", 80, "/", 0, 0, 0, 0, $_GET["proxy"], $pauth);
+
 			$page = geturl("ugotfile.com", 80, "/user/login/", 0, 0, $post, 0, $_GET["proxy"], $pauth);
 			is_page($page);
-			is_notpresent($page, 'HTTP/1.1 302 Found', 'Error logging in - are your logins correct? First');
-			
+			is_notpresent($page, 'Set-Cookie', 'Error logging in - are your logins correct? First');
+
 			preg_match_all('/Set-Cookie: (.*);/U',$page,$temp);
 			$cookie1 = $temp[1];
 			$cookie = implode(';',$cookie1);
 			
 			$page = geturl("ugotfile.com", 80, "/", 'http://ugotfile.com/', $cookie, 0, 0, "");
 			is_page($page);
-			is_notpresent($page, 'HTTP/1.1 200 OK', 'Error logging in - are your logins correct? Second');
+			is_notpresent($page, 'headerLogout', 'Error logging in - are your logins correct? Second');
 ?>
 <script>document.getElementById('login').style.display='none';</script>
 <div id=info width=100% align=center>Retrive upload ID</div>
 <?php
-			$upload_form = cut_str($page, 'upload_url: "', '"');
+			$upload_srv = cut_str($page, 'uploadServer = "', '"');
+			$upload_sid = cut_str($page, 'upload_url: uploadServer+"/upload/web?PHPSESSID=', '"');
+
+			$upload_form = $upload_srv."/upload/web?PHPSESSID=".$upload_sid;
+			
 			$url = parse_url($upload_form);
 			$post['Filename'] = $lname;
 			$post['destinationFolder'] = 'Web Uploads';
@@ -73,11 +76,12 @@ if ($continue_up)
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
 <?php
-			$ddl = cut_str($upfiles,"/file","'");
-			$del = cut_str($upfiles,'?remove=',"'");
+			$ddl = cut_str($upfiles,"/file",'"');
+			$del = cut_str($upfiles,'?remove=','"');
 			$ddl1 = 'http://ugotfile.com/file'.str_replace('\\', "", $ddl);
 			$download_link = $ddl1;
 			$delete_link = $ddl1.'?remove='.$del;
 	}		
 // Made by Baking 10/08/2009 18:30
+// Fixed by Baking 15/12/2009 17:44
 ?>
