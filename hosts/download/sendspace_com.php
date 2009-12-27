@@ -1,4 +1,5 @@
 <?php
+
 if (!defined('RAPIDLEECH'))
   {
   require_once("index.html");
@@ -105,6 +106,8 @@ function sendspace_base64ToText($t)
     
   return $r;
   }
+  
+  
 }
 $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], 0, 0, 0, 0, $_GET["proxy"],$pauth);
 is_page($page);
@@ -113,31 +116,32 @@ is_present($page,"There are no free download slots available");
 is_present($page,"Sorry, the file you requested is not available");
 //$countDown=trim(cut_str($page,"var count = ",";"));
 //insert_timer($countDown, "File is being prepared.","",true);
+$cookie = GetCookies($page);
+$post["download"]="%C2%A0REGULAR+DOWNLOAD%C2%A0";
+$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, $post, 0, $_GET["proxy"],$pauth);
+is_page($page);
 
-$code_enc = cut_str($page,'function enc(text){','}</script>');
+
+//$code_enc = cut_str($page,"utf8_decode(enc(base64ToText('","'");
+/*
 if (!$code_enc)
 	{
 	html_error('Error getting link');
 	}
+	*/
+//$dec_text = $code_enc;
 				
-$par1 = cut_str($code_enc,'Array();',';');
-list($tmp,$par1) = explode('=',$par1);
-				
-$par2 = cut_str($code_enc,"='","';");
-				
-$dec_text = cut_str($page,"enc(base64ToText('","')));");
-				
-$d64text = sendspace_base64ToText($dec_text);
-$urlnew = sendspace_enc($par1,$par2,$d64text);
+//$d64text = sendspace_base64ToText($dec_text);
+//$urlnew = sendspace_utf8_decode($d64text);
 
-is_notpresent($urlnew,'href="','Error decrypting URL page');
-				
-$Href = cut_str($urlnew,'href="','" onclick');
+//is_notpresent($urlnew,'href="','Error decrypting URL page');
+$snap = cut_str ( $page ,'Download Link: ' ,'</a>' );			
+$Href = cut_str($snap,'href="','" onclick');
 if (!$Href)
 	{
 	html_error('Error decrypting URL page');
 	}
-
+$post=array();
 $Url = parse_url($Href);
 $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, $post, 0, $_GET["proxy"],$pauth);
 if(preg_match('/location: (.*)/im', $page, $loc)){
