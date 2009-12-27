@@ -57,7 +57,7 @@ if ($continue_up)
 			$post['password'] = $_REQUEST['password'];
 			$page = geturl("www.wat.tv", 80, "/login", 0, 0, $post, 0, $_GET["proxy"], $pauth);
 			is_page($page);
-			is_notpresent($page, 'HTTP/1.1 302 Found', 'Error logging in - are your logins correct?');
+			is_notpresent($page, 'wat_auth', 'Error logging in - are your logins correct?');
 			$cookie=BiscottiDiKaox($page);
 			$page = geturl("www.wat.tv", 80, "/upload", 0, $cookie, 0, 0, "");
 			is_page($page);
@@ -88,5 +88,5 @@ if ($continue_up)
 			$download_link = 'http://www.wat.tv'.$infos[1];
 	}		
 // Made by Baking 08/05/2008
-// Thank to Kaox for it's help ^^
+// Thank to Kaox for his help ^^
 ?>
