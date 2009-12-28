@@ -93,8 +93,13 @@ class rapidshare_com extends DownloadClass
 	
 		$form_content = "";
 		preg_match ( '%<form name="dlf?".*</form>%s', $page, $form_content );
+		
+		$form_content [0] = trim ( cut_str ( $form_content [0], '<form name="dlf"', '</form>' ) );
+		$form_content [0] = '<form name="dlf" '.$form_content[0].'</form>';
+		
 		$middle_str = str_replace ( "\\", "", preg_replace ( '/(\' *\+.*?(\r\n)*.*?\'|display:none;)/s', '', $form_content [0] ) );
 		$code = '<center>' . trim ( $middle_str );
+		
 		$FileAddr = trim ( cut_str ( $code, '<form name="dlf" action="', '"' ) );
 		$Href = parse_url ( $FileAddr );
 		$FileName = basename ( $Href ["path"] );
@@ -223,4 +228,5 @@ class rapidshare_com extends DownloadClass
 	}
 }
 // updated by rajmalhotra  on 17 Dec 09 :  added some error messages
+// Fixed by rajmalhotra  on 28 Dec 09
 ?>
