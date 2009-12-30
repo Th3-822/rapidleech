@@ -9,6 +9,45 @@ $sendspace_login="";
 $sendspace_pass="";
 //**************************************************
 
+$not_done = true;
+$continue_up = false;
+
+if ($sendspace_login & $sendspace_pass) {
+	$_REQUEST ['my_login'] = $sendspace_login;
+	$_REQUEST ['my_pass'] = $sendspace_pass;
+	$_REQUEST ['action'] = "FORM";
+	echo "<b><center>Use Default Sendspace.com login/pass.</center></b>\n";
+}
+
+if ($_REQUEST ['action'] == "FORM")
+	$continue_up = true; else {
+	?>
+<table border=1 style="width: 540px;" cellspacing=0 align=center>
+	<form method=post><input type=hidden name=action value='FORM' />
+	
+	<tr >
+	  <td colspan=4 align=center height=25px ><b>	Enter Free or Premium Account</b> </td>
+	</tr>
+	<tr>
+		<td nowrap>&nbsp;Login		
+		<td>&nbsp;<input name=my_login value='' style="width: 160px;" />&nbsp;		
+		<td nowrap>&nbsp;Password		
+		<td>&nbsp;<input type=password name=my_pass value='' style="width: 160px;" />&nbsp;	
+	</tr>	
+	<tr>
+		<td nowrap colspan=0>&nbsp;Note		
+		<td colspan=3>&nbsp;<b>If you have no sendspace account then, kindly press upload button to upload</b>&nbsp;			
+	</tr>
+	<tr>
+		<td colspan=4 align=center><input type=submit value='Upload' />
+	</tr>	
+</table>
+</form>
+<?php
+}
+
+if ($continue_up) {
+
             $page = geturl("sendspace.com", 80, "/", "", 0, 0, 0, "");
 ?>
     <script>document.getElementById('info').style.display='none';</script>
@@ -20,6 +59,9 @@ function biscotti($content) {
         $bis.=cut_str($coll,"Set-Cookie: ","; ")."; ";	
         }return $bis;}
         
+			$sendspace_login = $_REQUEST ['my_login'];
+			$sendspace_pass = $_REQUEST ['my_pass'];
+			
             $cook=biscotti($page);
      		if ($sendspace_login && $sendspace_pass){
 			$post["action"]="login";
@@ -77,5 +119,7 @@ function biscotti($content) {
             $tmp = cut_str($upfiles,'File Delete Link','/>');
             $delete_link=cut_str($tmp,'value="','"');
 
+}
 // Fixed by kaox 07/05/09
+// Added GUI for asking username and password by Raj Malhotra
 ?>
