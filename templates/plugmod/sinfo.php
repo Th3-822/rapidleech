@@ -8,9 +8,12 @@
 <?php } ?>
 <?php echo lang(277); ?> = <b><span id="freespace"><?php echo ZahlenFormatieren($frei); ?></span></b><br>
 <?php echo lang(278); ?> = <b><span id="diskspace"><?php echo ZahlenFormatieren($insgesamt); ?></span></b></td>
-<td align="left" valign="top" style="color:ccc"><span style="color:#FF8700"><?php echo lang(279); ?>:</span><br>
-<?php echo $cpu_string; ?>
-<span style="color:#FF8700"><?php echo lang(280); ?>:</span> &nbsp;&nbsp;&nbsp;<span style="color:#999"><span id="server"></span></span><br /><span id="clock"></span>
+<td align="left" valign="top" style="color:ccc;width:200px"><span style="color:#FF8700;">
+<?php
+	if ($cpu_string === -1) { echo lang(135).'</span><hr>'; }
+	else { echo lang(279).':</span><br>'.$cpu_string; }
+?>
+<span style="color:#FF8700"><?php echo lang(280); ?>:</span> &nbsp;&nbsp;&nbsp;<span style="color:#999"><span id="server"></span></span><br><span id="clock"></span>
 </td>
 </tr>
 </table>
