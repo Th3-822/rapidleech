@@ -104,7 +104,7 @@ $prozent_belegt = 100 * $belegt / $insgesamt;
 			}
 			
 			ob_start ();
-			passthru ( 'cat ' . $_statPath );
+			@readfile($_statPath);
 			$stat = ob_get_contents ();
 			ob_end_clean ();
 			
