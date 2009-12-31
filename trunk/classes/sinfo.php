@@ -124,7 +124,7 @@ $prozent_belegt = 100 * $belegt / $insgesamt;
 		
 		function getCpuUsage($_statPath = '/proc/stat') {
 			$time1 = getStat ( $_statPath );
-			if (!$time1) die ( lang(135) );
+			if (!$time1) return -1;
 			sleep ( 1 );
 			$time2 = getStat ( $_statPath );
 			
@@ -142,14 +142,16 @@ $prozent_belegt = 100 * $belegt / $insgesamt;
 			}
 			return $percentages;
 		}
-		$cpu = getCpuUsage ();
-		$cpulast = 100 - $cpu ['idle'];
 		$cpu_string = '';
-		$cpu_string .= lang(136).": <span id='cpuload'>" . round ( $cpulast, "0" ) . "</span>%<br>";
-		if (extension_loaded('gd') && function_exists('gd_info')) {
-			$cpu_string .= '<img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpulast, "2" ) . '" border="0" name="cpupercent" id="cpupercent" alt="">';
+		if (($cpu = getCpuUsage()) === -1) { $cpu_string = -1; }
+		else {
+			$cpulast = 100 - $cpu ['idle'];
+			$cpu_string .= lang(136).": <span id='cpuload'>" . round ( $cpulast, "0" ) . "</span>%<br>";
+			if (extension_loaded('gd') && function_exists('gd_info')) {
+				$cpu_string .= '<img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpulast, "2" ) . '" border="0" name="cpupercent" id="cpupercent" alt="">';
+			}
+			$cpu_string .= '<br>';
 		}
-		$cpu_string .= '<br>';
 	} elseif ($os == "nocpu") {
 		$cpu_string = '';
 	} else {
