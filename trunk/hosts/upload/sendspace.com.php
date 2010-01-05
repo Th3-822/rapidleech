@@ -48,7 +48,7 @@ if ($_REQUEST ['action'] == "FORM")
 
 if ($continue_up) {
 
-            $page = geturl("sendspace.com", 80, "/", "", 0, 0, 0, "");
+            $page = geturl("www.sendspace.com", 80, "/", "", 0, 0, 0, "");
 ?>
     <script>document.getElementById('info').style.display='none';</script>
 <?php 
@@ -71,10 +71,10 @@ function biscotti($content) {
 			$post["submit"]="login";
 			$post["openid_url"]="";
 			$post["action_type"]="login";
-			$page=geturl("sendspace.com", 80, "/login.html", "http://sendspace.com/login.html", $cook, $post, 0, $_GET["proxy"]);
+			$page=geturl("www.sendspace.com", 80, "/login.html", "http://www.sendspace.com/login.html", $cook, $post, 0, $_GET["proxy"]);
 			$cook=$cook." ".biscotti($page);
 			is_present($cook,"ssal=deleted","Login incorrect retype your username or password correctly");
-			$page=geturl("sendspace.com", 80, "/", "http://sendspace.com/", $cook, 0, 0, $_GET["proxy"]);
+			$page=geturl("www.sendspace.com", 80, "/", "http://www.sendspace.com/", $cook, 0, 0, $_GET["proxy"]);
 			unset($post);
 			}else{
 				echo("<br> <b>No enter login & pass</b> to sendspace.com <br><br>");
@@ -105,7 +105,7 @@ function biscotti($content) {
 //			$post["btnupload"]="Upload File";
             
             $url=parse_url($url_action);
-            $upfiles=upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""),"http://sendspace.com/", $cook, $post, $lfile, $lname, "file_0");
+            $upfiles=upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""),"http://www.sendspace.com/", $cook, $post, $lfile, $lname, "file_0");
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
 <?php        
@@ -122,4 +122,5 @@ function biscotti($content) {
 }
 // Fixed by kaox 07/05/09
 // Added GUI for asking username and password by Raj Malhotra
+// Fixed "Error retrive upload idHTTP/1.1 301 " by Raj Malhotra
 ?>
