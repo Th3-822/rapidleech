@@ -1,38 +1,62 @@
 <?php
-
-if (! defined ( 'RAPIDLEECH' )) {
+if (! defined ( 'RAPIDLEECH' ))
+{
 	require_once ("index.html");
 	exit ();
 }
-if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_pass"]) || ($_GET ["premium_acc"] == "on" && $premium_acc ["easyshare"] ["user"] && $premium_acc ["easyshare"] ["pass"])) {
 
-	// login 
-	$login = "http://www.easy-share.com/accounts/login";
-	$urlg = parse_url ( $login );
-	$post ["login"] = $_GET ["premium_user"] ? $_GET ["premium_user"] : $premium_acc ["easyshare"] ["user"];
-	$post ["password"] = $_GET ["premium_pass"] ? $_GET ["premium_pass"] : $premium_acc ["easyshare"] ["pass"];
-	$post ["remember"] = "1";
-	$page = geturl ( $urlg ["host"], $urlg ["port"] ? $urlg ["port"] : 80, $urlg ["path"] . ($urlg ["query"] ? "?" . $urlg ["query"] : ""), "http://www.easy-share.com/", 0, $post, 0, $_GET ["proxy"], $pauth );
-	$cook = getcookies ( $page );
-	
-	// end login 
-	
-
-	is_notpresent ( $cook, "PREMIUMSTATUS", "Login failed<br>Wrong login/password?" );
-	
-	$page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : ""), 0, $cook, 0, 0, $_GET ["proxy"], $pauth );
-	$FileName = ! $FileName ? basename ( $Url ["path"] ) : $FileName;
-	is_present ( $page, 'File was deleted' );
-	is_present ( $page, 'File not found' );
-	preg_match ( '/Location:.+?\\r/i', $page, $loca );
-	$redir = rtrim ( $loca [0] );
-	preg_match ( '/http:.+/i', $redir, $loca );
-	$Url = parse_url ( $loca [0] );
-	$cookie = $cook . "; " . BiscottiDiKaox ( $page );
-	
-	insert_location ( "$PHP_SELF?filename=" . urlencode ( $FileName ) . "&host=" . $Url ["host"] . "&path=" . urlencode ( $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "") ) . "&referer=" . urlencode ( $Referer ) . "&cookie=" . urlencode ( $cookie ) . "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&method=" . $_GET ["method"] . "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&link=" . $_POST ["link2"] . ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ( $_GET ["comment"] ) : "") . ($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : "") );
-
-} else {
+class easy_share_com extends DownloadClass
+{
+	public function Download( $link )
+	{
+		global $premium_acc;
+		if ( ( $_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"] ) ||
+			( $_REQUEST ["premium_acc"] == "on" && $premium_acc ["easyshare"] ["user"] && $premium_acc ["easyshare"] ["pass"] ) )
+		{
+			$this->DownloadPremium( $link );
+		}
+		else
+		{
+			$this->DownloadFree( $link );
+		}
+	}
+		
+	private function DownloadFree( $link )
+	{
+		global $pauth;
+		$Referer = $link;
+		
+		$page = $this->GetPage( $link, 0, 0, 0, $pauth );
+		
+		$cookies = $this->biscottiDiKaox( $page );
+		is_present ( $page, 'File was deleted' );
+		is_present ( $page, 'File not found' );
+        is_present ( $page, 'You have downloaded over 150MB during last hour.' );  
+		$FileName = trim ( cut_str ( $page, "<title>Download ", "," ) );
+				
+		$div = trim ( cut_str ( $page, '<div id="block-captcha">', "</div>" ) );
+		$count = trim ( cut_str ( $div, "w='", "'" ) );
+		
+		insert_timer( $count, "Waiting link timelock");
+			
+		if ( $src = trim ( cut_str ( $page, "u='", "'" ) ) )
+		{
+			$Url = parse_url( $link );
+			$Href = "http://".$Url["host"].$src;
+			$page = $this->GetPage( $Href, $cookies, 0, $Referer, $pauth );
+        }
+		
+        $Href = trim ( cut_str($page,'post" action="','"') );
+        $id = trim ( cut_str($page,'"id" value="','"') ); 
+		
+		$post = array ();
+		$post ["captcha"] = "";
+		$post ["id"] = $id;
+		
+		$this->RedirectDownload( $Href, $FileName, $cookies, $post, $Referer, $pauth );
+		exit ();
+		
+		/*
 	$es = $_POST ['es'];
 	if ($es == "ok") {    
 		$post = array ();
@@ -90,60 +114,77 @@ if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_
         print "<input name=\"name\" value=\"" . urlencode ( $name ) . "\" type=\"hidden\">$nn";
         print "<input name=\"captcha\" type=\"text\" >";
         print "<input name=\"Submit\" value=\"Submit\" type=\"submit\"></form>";        
-        
-
-          
-        
-        /*-----------------------------------------------------------
-		
-		if (! $new_url = cut_str ( $page, "document.location='", "'" )) {
-			is_present ( $page, 'You have downloaded over 150MB during last hour.','You have downloaded over 150MB during last hour.',0);
-			is_present ( $page, 'Requested file is deleted.','Requested file is deleted.',0 );
-			html_error ( 'Error getting link location' );
 		}
-		$Url = parse_url ( $new_url );
-		$page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : ""), $LINK, $cookies, 0, 0, $_GET ["proxy"], $pauth );
-		is_page ( $page );
-		
-		if (preg_match_all ( "/Set-Cookie: (([^=]+)=[^;]*;)/", $page, $matches ))
-			foreach ( $matches [2] as $k => $v )
-				$cookies [$v] = $matches [1] [$k];
-		
-		$page = cut_str ( $page, "<div class=\"timer\">", "</form>" );
-		if (! $Href = cut_str ( $page, 'form action="', '"' ))
-			html_error ( 'Download link not found' );
-		$id = cut_str ( $page, 'id" value="', '"' );
-		
-		if (! $src = cut_str ( $page, 'src="', '"' )) {
-			$post ["captcha"] = "1";
-			$post ["id"] = $id;
-			$cookie = implode ( "", $cookies );
-			$Referer = $new_url;
-			$Url = parse_url ( $Href );
-			$FileName = $name;
-			
-			*/
-			
-		}
-
+		*/
 	}
-    
-  function biscottiDiKaox($content)
- {
- preg_match_all("/Set-Cookie: (.*)\n/",$content,$matches);
- foreach ($matches[1] as $coll) {
- $bis0=split(";",$coll);
- $bis1=$bis0[0]."; ";
- $bis2=split("=",$bis1);
- $cek=" ".$bis2[0]."="; 
- if(strpos($bis1,"=deleted") || strpos($bis1,$cek.";")) {
- }else{
-if  (substr_count($bis,$cek)>0)
-{$patrn=" ".$bis2[0]."=[^ ]+";
-$bis=preg_replace("/$patrn/"," ".$bis1,$bis);     
-} else {$bis.=$bis1;}}}  
-$bis=str_replace("  "," ",$bis);     
-return rtrim($bis);}
-    // fixed by kaox 04/07/2009
 	
+	private function DownloadPremium( $link )
+	{
+		global $premium_acc, $pauth;
+		$Referer = $link;
+		
+		// login 
+		$login = "http://www.easy-share.com/accounts/login";
+		
+		$post ["login"] = $_REQUEST ["premium_user"] ? $_REQUEST ["premium_user"] : $premium_acc ["easyshare"] ["user"];
+		$post ["password"] = $_REQUEST ["premium_pass"] ? $_REQUEST ["premium_pass"] : $premium_acc ["easyshare"] ["pass"];
+		$post ["remember"] = "1";
+		
+		$page = $this->GetPage( $login, 0, $post, "http://www.easy-share.com/", $pauth );
+		
+		$cook = getcookies ( $page );
+		// end login 
+		
+		is_notpresent ( $cook, "PREMIUMSTATUS", "Login failed<br>Wrong login/password?" );
+		
+		$Url = parse_url ( $link );
+		$page = $this->GetPage( $login, $cook, 0, 0, $pauth );
+			
+		$FileName = ! $FileName ? basename ( $Url ["path"] ) : $FileName;
+		is_present ( $page, 'File was deleted' );
+		is_present ( $page, 'File not found' );
+		preg_match ( '/Location:.+?\\r/i', $page, $loca );
+		$redir = rtrim ( $loca [0] );
+		preg_match ( '/http:.+/i', $redir, $loca );
+		$Href = trim ( $loca [0] );
+		
+		$cookie = $cook . "; " . $this->BiscottiDiKaox ( $page );
+	
+		$this->RedirectDownload( $Href, $FileName, $cookie, 0, $Referer, $pauth );
+		exit ();
+	}
+	
+	private function biscottiDiKaox( $content )
+	{
+		preg_match_all("/Set-Cookie: (.*)\n/",$content,$matches);
+		foreach ( $matches[1] as $coll ) 
+		{
+			$bis0=split(";",$coll);
+			$bis1=$bis0[0]."; ";
+			$bis2=split("=",$bis1);
+			$cek=" ".$bis2[0]."="; 
+			if( strpos( $bis1,"=deleted" ) || strpos( $bis1,$cek.";" ) ) 
+			{
+			}
+			else
+			{
+				if ( substr_count( $bis,$cek ) > 0 )
+				{
+					$patrn=" ".$bis2[0]."=[^ ]+";
+					$bis=preg_replace("/$patrn/"," ".$bis1,$bis);     
+				} 
+				else 
+				{
+					$bis.=$bis1;
+				}
+			}
+		}  
+		
+		$bis=str_replace("  "," ",$bis);     
+		return rtrim($bis);
+	}
+
+}	
+    // fixed by kaox 04/07/2009
+	// FIXED and re-written by rajmalhotra on 10 Jan 2010
 ?>
