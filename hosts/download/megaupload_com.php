@@ -54,7 +54,7 @@ class megaupload_com extends DownloadClass {
 		return "";
 	}
 	private function EnterCaptchaCode($link) {
-		global $nn, $PHP_SELF;
+		global $nn, $PHP_SELF, $download_dir;
 		$page = $this->GetPage($link,$this->cookie);
 		
 		if (stristr ( $page, "Location:" )) {
@@ -115,11 +115,33 @@ class megaupload_com extends DownloadClass {
 		
 		$access_image_url = cut_str ( $page, 'img src="', '"' );
 		
+		// Fetching megaupload captha image STARTED 
+		$cap_img = $download_dir."megaupload_captcha.gif";
+		if ($fp = fopen($access_image_url, 'r')) 
+		{
+		   $content = '';
+		   // keep reading until there's nothing left
+		   while ($line = fgets($fp, 1024)) 
+		   {
+			  $content .= $line;
+		   }
+			 // Deleting old captcha image file
+		   if ( file_exists( $cap_img ) )
+		   {
+				unlink( $cap_img );
+		   }
+			// Saving megaupload new captcha image
+			$fpt = fopen($cap_img, "w");
+			fwrite($fpt, $content);
+			fclose($fpt);
+		}
+		// Fetching megaupload captha image ENDED 
+		
 		print "<form name=\"dl\" action=\"$PHP_SELF\" method=\"post\">\n";
 		print "<input type=\"hidden\" name=\"link\" value=\"" . urlencode ( $Href ) . "\">\n<input type=\"hidden\" name=\"referer\" value=\"" . urlencode ( $Referer ) . "\">\n<input type=\"hidden\" name=\"imagecode\" value=\"$imagecode\">\n<input type=\"hidden\" name=\"megavar\" value=\"$megavar\">\n<input type=\"hidden\" name=\"step\" value=\"1\">\n";
 		print "<input type=\"hidden\" name=\"comment\" id=\"comment\" value=\"" . $_GET ["comment"] . "\">\n<input type=\"hidden\" name=\"email\" id=\"email\" value=\"" . $_GET ["email"] . "\">\n<input type=\"hidden\" name=\"partSize\" id=\"partSize\" value=\"" . $_GET ["partSize"] . "\">\n<input type=\"hidden\" name=\"method\" id=\"method\" value=\"" . $_GET ["method"] . "\">\n";
 		print "<input type=\"hidden\" name=\"proxy\" id=\"proxy\" value=\"" . $_GET ["proxy"] . "\">\n<input type=\"hidden\" name=\"proxyuser\" id=\"proxyuser\" value=\"" . $_GET ["proxyuser"] . "\">\n<input type=\"hidden\" name=\"proxypass\" id=\"proxypass\" value=\"" . $_GET ["proxypass"] . "\">\n<input type=\"hidden\" name=\"path\" id=\"path\" value=\"" . $_GET ["path"] . "\">\n";
-		print "<h4>".lang(301)." <img src=\"$access_image_url\" style='background-color: #FFF'> ".lang(302).": <input type=\"text\" name=\"imagestring\" size=\"3\">&nbsp;&nbsp;<input type=\"submit\" onclick=\"return check()\" value=\"".lang(303)."\"></h4>\n";
+		print "<h4>".lang(301)." <img src=\"$cap_img\" style='background-color: #FFF'> ".lang(302).": <input type=\"text\" name=\"imagestring\" size=\"3\">&nbsp;&nbsp;<input type=\"submit\" onclick=\"return check()\" value=\"".lang(303)."\"></h4>\n";
 		print "<script language=\"JavaScript\">" . $nn . "function check() {" . $nn . "var imagecode=document.dl.imagestring.value;" . $nn . 'if (imagecode == "") { window.alert("You didn\'t enter the image verification code"); return false; }' . $nn . 'else { return true; }' . $nn . '}' . $nn . '</script>' . $nn;
 		print "</form>\n</body>\n</html>";
 	}
@@ -206,4 +228,5 @@ class megaupload_com extends DownloadClass {
 	}
 }
 
+// Updated by rajmalhotra on 10 Jan 2010 MegaUpload captcha is downloaded on server, then display
 ?>
