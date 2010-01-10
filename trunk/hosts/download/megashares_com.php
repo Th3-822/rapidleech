@@ -21,6 +21,17 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 	$Url = parse_url($LINK);
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookies, 0, 0, $_GET["proxy"], $pauth);
 	is_page($page);
+	
+	preg_match('/Location: *(.+)/i', $page, $newredir );
+	$newHref = trim( $newredir[1] );	
+	if ( $newHref != "" )
+	{
+		$Referer = $newHref;
+		$Url = parse_url( $newHref );
+		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
+	is_page($page);
+	}
+		
 	is_present($page, "This link requires a password to continue:", "This file is password protected");
 	is_present($page, "Link was deleted as it was not downloaded", "Deleted due to inactivity");
 	is_present($page, "Invalid link", "Invalid link");
@@ -71,6 +82,17 @@ else
 	}else{
 		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
 		is_page($page);
+		
+		preg_match('/Location: *(.+)/i', $page, $newredir );
+		$newHref = trim( $newredir[1] );	
+		if ( $newHref != "" )
+		{
+			$Referer = $newHref;
+			$Url = parse_url( $newHref );
+			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
+		is_page($page);
+		}
+		
 		$cookies = GetCookies($page);
 		
 		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "index.php?".$Url["query"] : ""), $Referer, $cookies, 0, 0, $_GET["proxy"],$pauth);
@@ -130,4 +152,8 @@ Please try again momentarily.", 0);
 
 // update by kaox 09-jan-2010 (FIX for free download)
 // update by snatch 09-jan-2010 (FIX for premium download with kaox update)
+// update by rajmalhotra 10-Jan-2010 ( Added support for this type of Link : http://d01.megashares.com/dl/8644cd8/hotfile_com[DL]_03_nov_2009.rar ) 
+// Now can download from any link like 
+// a)  http://d01.megashares.com/?d01=8644cd8
+// b)  http://d01.megashares.com/dl/8644cd8/hotfile_com[DL]_03_nov_2009.rar
 ?>
