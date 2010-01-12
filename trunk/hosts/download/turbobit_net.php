@@ -1,6 +1,5 @@
 <?php
 
-
 if (!defined('RAPIDLEECH'))
   {
   require_once("index.html");
@@ -24,15 +23,19 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_pass"]) || ($_GET["premium_a
 	is_notpresent($page, "Turbo-access granted", "Invalid password");
 
 	$Url = parse_url($LINK);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, 0, 0, $_GET["proxy"],$pauth);
 	//file_put_contents("turbobit_2.txt", $page);
 	is_page($page);
 	//is_present($page, "The file you are looking for is not available", "The file has been deleted");
 	
 	$dsrg=cut_str($page,'<div class="download-file">','Download file');
 	$durl=cut_str($dsrg,'href="','"');
-    $FileName=cut_str($durl,'name=','&'); 
-	$Url = parse_url($durl);
+    
+	$Url = parse_url("http://turbobit.net".$durl);
+    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, 0, 0, $_GET["proxy"],$pauth);
+    $locat=cut_str ($page ,"Location: ","\r"); 
+	$FileName=cut_str($locat,'name=','&'); 
+	$Url=parse_url($locat);
 	
 	insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
 }
@@ -93,8 +96,8 @@ insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]
       // $capimg = $PHP_SELF."?image=".urlencode($img_link)."&referer=".urlencode($referer)."&cookie=".urlencode($cookie);       
         $Url = parse_url($img_link); 
         $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
-        $headerend = strpos($page,"\r\n\r\n");
-        $imgfile = substr($page,$headerend+4);
+        $headerend = strpos($page,"PNG");
+        $imgfile = substr($page,$headerend-1);
         $capimg= $download_dir."turbobit_captcha.png" ;
       
         if (file_exists($capimg)) unlink($capimg) ;
@@ -113,7 +116,7 @@ insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]
 	print	"<b>Please enter code:</b><br>$nn";
 	print	"<img src=\"$capimg\">$nn";
 	print	"<input name=\"referer\" value=\"$referer\" type=\"hidden\">$nn";
-   print    "<input name=\"link\" value=\"$link\" type=\"hidden\">$nn"; 
+    print    "<input name=\"link\" value=\"$link\" type=\"hidden\">$nn"; 
 	print	"<input name=\"cookie\" value=\"$cookie\" type=\"hidden\">$nn";
 	print	"<input name=\"tbit\" value=\"ok\" type=\"hidden\">$nn";
 	print	"<input name=\"captcha_response\" type=\"text\" >";
@@ -123,6 +126,7 @@ insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]
 
 /*************************\  
 written by kaox 18/09/2009
+update by kaox 31-dec-2009
 \*************************/
-
+ 
 ?>
