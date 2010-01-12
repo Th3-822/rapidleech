@@ -6,7 +6,6 @@ if (!defined('RAPIDLEECH'))
   exit;
   }
 
-//Use PREMIUM? [szalinski 09-May-09]
 if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["sendspace"]["user"] && $premium_acc["sendspace"]["pass"]))
 {
 	function biscotti($content)
@@ -152,4 +151,7 @@ $Url = parse_url($Href);
 $FileName = !$FileName ? basename(trim($loc[1])) : $FileName;
 
 insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+
+// Use PREMIUM? [szalinski 09-May-09]
+// fix free download by kaox 19-dec-2009
 ?>
