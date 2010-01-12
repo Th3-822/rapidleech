@@ -11,7 +11,12 @@ $LINK=$_POST["link"];
 $cookie = $_POST['cookie'];
 $FileName = $_POST['filename'];
 $Url=parse_url($LINK);
-	
+
+//$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
+//is_page($page);
+
+//insert_timer("10");
+
 insert_location("$PHP_SELF?filename=".urlencode($FileName)."&force_name=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&cookie=".urlencode($cookie)."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : ""));
     
 }else{			
@@ -35,13 +40,13 @@ $ss = <<<HTML
 </form>
 HTML;
 
-preg_match('/(var wannaplayagameofpong[\s\S]+?)function/i',$page,$scr)  ;
+preg_match('/(var pong[\s\S]+?)function/i',$page,$scr)  ;
 //$script1=cutter($page,'var','function',3);
 $script1=$scr[1];
 $var=trim(cutter($script1,'var','=',2));
 $script1=str_replace($var,"encoded",$script1);
-$script=$ss.'<script type="text/javascript" language="javascript">'.$script1.'document.getElementById("link").value=encoded; document.plink.submit();</script>' ;
-insert_timer("10", "Waiting link timelock.","",true);
+$script=$ss.'<script language="Javascript">'.$script1.'document.getElementById("link").value=encoded; document.plink.submit();</script>' ;
+
 echo ($script);
 }
 
@@ -57,7 +62,7 @@ function cutter($str, $left, $right,$cont=1)
 }
 
 /*************************\
- WRITTEN BY KAOX 03-oct-09
+ WRITTEN BY KAOX 27-dec-09
 \*************************/
 
 ?>
