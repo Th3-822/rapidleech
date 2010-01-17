@@ -125,21 +125,39 @@ else
         var ck;
         var tmp;
 		var tmp2;
+		
+		var totalCheckedLinks = 0;
         for( pp=1; pp<=cc; pp++ )
 		{
 			ck = document.getElementById("cs"+ pp );
 			if (ck.checked) 
 			{
+				totalCheckedLinks++;
 				tmp = document.getElementById("lin"+ pp );
 				tmp2 = tmp.value.replace(/%/g,"%25");
 				lks = lks + tmp2 + "\r\n";
 			}
         }
 		
-		document.write('<form action=audl.php?GO=GO method=post >');
-		document.write('<Input type=Hidden name=links value= "' + lks + '" >');	
-		document.write('<center><Input type=submit name=submit value="Step2 click for send selected to Autodownloader"></center>');	
-		document.write('</form>');
+		if ( totalCheckedLinks == 1 )
+		{
+			// only one link to download, so rl can download it.
+			document.write('<form id="downloadFormId" name="downloadForm" action=index.php method=post >');
+			document.write('<Input type=Hidden name=link value= "' + lks + '" >');	
+			// document.write('<center><Input type=submit name=submitButton value="Step2 click for download"></center>');	
+			document.write('</form>');
+		}
+		else
+		{
+			// morethan one link to download, so autodownloader will download it.
+			document.write('<form id="downloadFormId" name="downloadForm" action=audl.php?GO=GO method=post >');
+			document.write('<Input type=Hidden name=links value= "' + lks + '" >');	
+			// document.write('<center><Input type=submit name=submit value="Step2 click for send selected to Autodownloader"></center>');	
+			document.write('</form>');
+		}
+		
+		document.getElementById( "downloadFormId" ).submit();
+		
     }
 	
 	checked=false;
@@ -169,5 +187,6 @@ flush();
 WRITTEN by kaox 21-jul-2009
 UPDATED by kaox 04-oct-2009
 UPDATED and Fixed by rajmalhotra 19-Dec-2009 
+UPDATED by rajmalhotra 17-Jan-2010 If only one link to download then rapidleech will take care of it and removed step 2 button
 \*************************/
 ?>
