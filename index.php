@@ -13,6 +13,7 @@ $nn = "\r\n";
 $fromaddr = "RapidLeech";
 $dev_name = 'Pre-Release t2';
 $rev_num = '42';
+$plusrar_v = '4.1';
 $PHP_SELF = ! $PHP_SELF ? $_SERVER ["PHP_SELF"] : $PHP_SELF;
 define ( 'RAPIDLEECH', 'yes' );
 define ( 'ROOT_DIR', realpath ( "./" ) );
