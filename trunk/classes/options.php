@@ -127,6 +127,26 @@ if ($all_act_files_exist) {
 			ftp_go();
 			break;
 		
+		case "unrar" :
+			require(CLASS_DIR . "options/unrar.php");
+			unrar();
+			break;
+		
+		case "unrar_go" :
+			require(CLASS_DIR . "options/unrar.php");
+			unrar_go();
+			break;
+		
+		case "rar" :
+			require(CLASS_DIR . "options/rar.php");
+			rar();
+			break;
+		
+		case "rar_go" :
+			require(CLASS_DIR . "options/rar.php");
+			rar_go();
+			break;
+		
 		case "zip" :
 			require(CLASS_DIR . "options/zip.php");
 			zip();

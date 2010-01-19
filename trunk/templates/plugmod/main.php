@@ -324,7 +324,7 @@ if($list)
     }
 ?>
 </tbody>
-<?
+<?php
   if (($total_files > 1) && ($total_size > 0))
     {
     print "<tbody><tr class='flisttblftr'>$nn<td></td>$nn<td>Total:</td>$nn<td>".bytesToKbOrMbOrGb($total_size)."</td>$nn<td></td>$nn<td><!--</td>$nn<td>--></td>$nn</tr></tbody>";
@@ -473,3 +473,13 @@ print CREDITS;
 </td>
 </tr>
 </table>
+<?php
+if (($_GET["act"] == 'unrar_go')) {
+  require_once(CLASS_DIR."options/unrar.php");
+  unrar_go_go();
+}
+elseif (($_GET["act"] == 'rar_go')) {
+  require_once(CLASS_DIR."options/rar.php");
+  rar_go_go();
+}
+?>
