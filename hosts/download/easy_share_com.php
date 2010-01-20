@@ -37,8 +37,8 @@ class easy_share_com extends DownloadClass
 		$div = trim ( cut_str ( $page, '<div id="block-captcha">', "</div>" ) );
 		$count = trim ( cut_str ( $div, "w='", "'" ) );
 		
-		insert_timer( $count, "Waiting link timelock");
-			
+		insert_timer( $count, "Waiting link timelock", "", true );
+		
 		if ( $src = trim ( cut_str ( $page, "u='", "'" ) ) )
 		{
 			$Url = parse_url( $link );
