@@ -92,17 +92,24 @@ class megaupload_com extends DownloadClass {
 		if (stristr ( $page, "?c=happyhour" )) {
 			$tmp = "";
 			preg_match ( '/<a href="(.*)" style="font-size:15px;"/', $page, $tmp );
-			if (! $tmp [1]) {
-				html_error ( "Download link not found in happy hour" );
+				
+			if (! $tmp [1]) 
+			{
+				// Going ahead because in Happy Hour megaupload need Captcha
+				//html_error ( "Download link not found in happy hour" );
 			}
-			$Href = $tmp [1];
-			$Url = parse_url ( html_entity_decode($Href, ENT_QUOTES, 'UTF-8') );
-			if (! is_array ( $Url )) {
-				html_error ( "Download link not found", 0 );
+			else
+			{
+				$Href = $tmp [1];
+				$Url = parse_url ( html_entity_decode($Href, ENT_QUOTES, 'UTF-8') );
+				if (! is_array ( $Url )) 
+				{
+					html_error ( "Download link not found", 0 );
+				}
+				$FileName = basename ( $Url ["path"] );
+				$this->RedirectDownload($Href,$FileName,$this->cookie);
+				exit ();
 			}
-			$FileName = basename ( $Url ["path"] );
-			$this->RedirectDownload($Href,$FileName,$this->cookie);
-			exit ();
 		}
 		
 		if (! stristr ( $page, "id=\"captchaform" )) html_error ( "Image code not found", 0 );
@@ -229,4 +236,5 @@ class megaupload_com extends DownloadClass {
 }
 
 // Updated by rajmalhotra on 10 Jan 2010 MegaUpload captcha is downloaded on server, then display
+// Fixed by rajmalhotra on 20 Jan 2010 Fixed for Download link not found in happy hour
 ?>
