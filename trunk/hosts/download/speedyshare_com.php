@@ -1,35 +1,43 @@
 <?php
-if (!defined('RAPIDLEECH'))
+if (! defined ( 'RAPIDLEECH' ))
 {
-  require_once("index.html");
-  exit;
+	require_once ("index.html");
+	exit ();
 }
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
 
-	is_present($page,"This file has been deleted");
-	is_present($page,"The one-hour limit has been reached");
-	
-	if(preg_match_all('/Set-Cookie: *(.+);/', $page, $cook)){
-		$cookie = implode(';', $cook[1]);
-	}else{
-		html_error("Cookie not found.", 0);
+class speedyshare_com extends DownloadClass
+{
+	public function Download( $link )
+	{
+		global $premium_acc;
+		$this->DownloadFree($link);
 	}
 
-	if(preg_match('/<a.+?(http.+?data.+?)">/', $page, $loc)){
-		$newurl = $loc[1];
-	}
-	$Url = parse_url($newurl);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-	
-	if(preg_match('/ocation: (.+)/', $page, $location)){
-		$link = $location[1];
-		$Url = parse_url($link);
-	}
-	
-	//$FileName = basename($Url["path"]);
-	$FileName = urldecode(basename(trim($link)));
+	private function DownloadFree($link)
+	{
+		$Referer = $link;
+		$page = $this->GetPage( $link );
 
-insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&cookie=".urlencode($cookie)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+		is_present($page,"This file has been deleted");
+		is_present($page,"The one-hour limit has been reached");
+		is_present($page,"File not found. It has been either deleted, or it never existed at all.");
+		
+		$cookie = GetCookies( $page );
+		
+		$newurl = "http://www.speedyshare.com".trim( cut_str( $page,'resultlink><a href="','">' ) );
+		$page = $this->GetPage( $newurl, $cookie, 0, $Referer );
+		
+		if(preg_match('/ocation: (.+)/', $page, $location))
+		{
+			$Href = trim( $location[1] );
+			$Url = parse_url( $Href );
+		}
+
+		$FileName = urldecode ( basename($Url['path']) );
+		$this->RedirectDownload($Href, $FileName, $cookie, 0, $Referer );
+		exit ();
+	}
+}
+
+// Created by rajmalhotra on 20 Jan 2010
 ?>
