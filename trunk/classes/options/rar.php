@@ -2,7 +2,7 @@
 
 function rar() {
   global $PHP_SELF, $list;
-  if (!is_file(ROOT_DIR.'/rar/rar')) { echo 'Can not find "rar"<br>You may need to download it and extract "rar" to "/rar/" directory<br><br>'; }
+  if (!is_file(ROOT_DIR.'/rar/rar')) { echo lang(343).'<br><br>'; }
   else {
 ?>
   <form name="rar_files" method="post" action="<?php echo $PHP_SELF; ?>">
@@ -12,7 +12,7 @@ function rar() {
           <table>
             <tr>
               <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:6px; background-color:#001825;">
-                <b>Files that will be on the archive:</b>
+                <b><?php echo lang(344); ?></b>
               </td>
             </tr>
 <?php
@@ -34,7 +34,7 @@ function rar() {
 ?>
             <tr>
               <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:6px; background-color:#001825;">
-                <b>Archive name:</b>
+                <b><?php echo lang(345); ?></b>
               </td>
             </tr>
             <tr>
@@ -44,23 +44,23 @@ function rar() {
             </tr>
             <tr>
               <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:6px; background-color:#001825;">
-                <b>Options:</b>
+                <b><?php echo lang(346); ?></b>
               </td>
             </tr>
             <tr>
               <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
-                Compresion level:
+                <?php echo lang(347); ?>
                 <select name="rar_opts[comp_lvl]">
-                	<option value="0" selected>Store</option>
-                	<option value="1">Fastest</option>
-                	<option value="2">Fast</option>
-                	<option value="3">Normal</option>
-                	<option value="4">Good</option>
-                	<option value="5">Best</option>
+                	<option value="0" selected><?php echo lang(348); ?></option>
+                	<option value="1"><?php echo lang(349); ?></option>
+                	<option value="2"><?php echo lang(350); ?></option>
+                	<option value="3"><?php echo lang(351); ?></option>
+                	<option value="4"><?php echo lang(352); ?></option>
+                	<option value="5"><?php echo lang(353); ?></option>
                 </select>
               </td>
               <td style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
-                <input type="checkbox" name="rar_opts[vols]" value="1" onClick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_vols').style.display=displ;var fc=document.getElementsByName('rar_opts[vols_s]')[0]; fc.focus(); fc.selectionStart = 0; fc.selectionEnd = fc.value.length;">Create volumes
+                <input type="checkbox" name="rar_opts[vols]" value="1" onClick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_vols').style.display=displ;var fc=document.getElementsByName('rar_opts[vols_s]')[0]; fc.focus(); fc.selectionStart = 0; fc.selectionEnd = fc.value.length;"><?php echo lang(354); ?>
                 <span id="rar_opts_vols" style="display:none">
                   <br>Size: <input type="text" size="3" name="rar_opts[vols_s]" value="1">&nbsp;
                   <select name="rar_opts[vols_sm]">
@@ -77,35 +77,35 @@ function rar() {
             </tr>
             <tr>
               <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
-                <input type="checkbox" name="rar_opts[delete]" value="1">Delete files after archiving
+                <input type="checkbox" name="rar_opts[delete]" value="1"><?php echo lang(355); ?>
               </td>
               <td style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
-                <input type="checkbox" name="rar_opts[solid]" value="1">Create solid archive
+                <input type="checkbox" name="rar_opts[solid]" value="1"><?php echo lang(356); ?>
               </td>
             </tr>
             <tr>
               <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
-                <input type="checkbox" name="rar_opts[rec_rec]" value="1" onClick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_rec_rec').style.display=displ; var fc=document.getElementsByName('rar_opts[rec_rec_s]')[0]; fc.focus(); fc.selectionStart = 0; fc.selectionEnd = fc.value.length;">Create recovery record
+                <input type="checkbox" name="rar_opts[rec_rec]" value="1" onClick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_rec_rec').style.display=displ; var fc=document.getElementsByName('rar_opts[rec_rec_s]')[0]; fc.focus(); fc.selectionStart = 0; fc.selectionEnd = fc.value.length;"><?php echo lang(357); ?>
                 <span id="rar_opts_rec_rec" style="display:none">
                   <br>From 1 to 10: <input type="text" size="3" name="rar_opts[rec_rec_s]" value="1">%
                 </span>
               </td>
               <td style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
-                <input type="checkbox" name="rar_opts[test]" value="1">Test archive after compression
+                <input type="checkbox" name="rar_opts[test]" value="1"><?php echo lang(358); ?>
               </td>
             </tr>
             <tr>
               <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
-                <input type="checkbox" name="rar_opts[use_pass1]" value="1" onClick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_pass').style.display=displ;document.getElementsByName('rar_opts[pass]')[0].focus();">Use password
+                <input type="checkbox" name="rar_opts[use_pass1]" value="1" onClick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_pass').style.display=displ;document.getElementsByName('rar_opts[pass]')[0].focus();"><?php echo lang(359); ?>
                 <span id="rar_opts_pass" style="display:none">
                   <br>
                   <input type="password" size="15" name="rar_opts[pass]" value="">
                   <br>
-                  <input type="checkbox" name="rar_opts[use_pass2]" value="1">Encryt file names too
+                  <input type="checkbox" name="rar_opts[use_pass2]" value="1"><?php echo lang(360); ?>
                 </span>
               </td>
               <td style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
-                <input type="checkbox" name="rar_opts[path_i]" value="1" onClick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_path_i').style.display=displ;document.getElementsByName('rar_opts[path_i_path]')[0].focus();">Set path inside archive
+                <input type="checkbox" name="rar_opts[path_i]" value="1" onClick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_path_i').style.display=displ;document.getElementsByName('rar_opts[path_i_path]')[0].focus();"><?php echo lang(361); ?>
                 <span id="rar_opts_path_i" style="display:none;"><br><input type="text" size="15" name="rar_opts[path_i_path]" value=""></span>
               </td>
             </tr>
@@ -123,7 +123,7 @@ function rar() {
       <tr>
         <td align="center">
           <input type="hidden" name="act" value="rar_go">
-          <input type="submit" value="Rar">
+          <input type="submit" value="<?php echo lang(362); ?>">
         </td>
       </tr>
       <tr>
@@ -153,12 +153,12 @@ function rar_go() {
 ?>
           <tr>
             <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:6px; background-color:#001825;">
-              Creating archive <b><?php echo $_GET['rar_opts']['rarfilename'];?></b>
+              <?php printf(lang(363),$_GET['rar_opts']['rarfilename']); ?>
             </td>
           </tr>
           <tr>
-            <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">Status:</td>
-            <td id="rar_status" style="border-right:1px solid #666; padding:2px; background-color:#001825;">Waiting...</td>
+            <td style="border-left:1px solid #666; padding:2px; background-color:#001825;"><?php echo lang(374); ?></td>
+            <td id="rar_status" style="border-right:1px solid #666; padding:2px; background-color:#001825;"><?php echo lang(364); ?></td>
           </tr>
           <tr>
             <td colspan="2" style="border-top:1px solid #666;">&nbsp;</td>
@@ -171,7 +171,7 @@ function rar_go() {
       </td>
     </tr>
   </table>
-  <span id="rar_finished" style="display:none;"><a href="<?php echo $PHP_SELF."?act=files"; ?>">Go back to file list</a><br><br><br></span>
+  <span id="rar_finished" style="display:none;"><a href="<?php echo $PHP_SELF."?act=files"; ?>"><?php echo lang(365); ?></a><br><br><br></span>
 <?php
 }
 
@@ -194,7 +194,7 @@ function rar_st(elementid, st){
   $rar = new rlRar(stripslashes($_GET['rar_opts']['rarfilename']), $check_these_before_unzipping ? $forbidden_filetypes : array('.xxx'));
   if ($rar->rar_return !== 'rar') {
 ?>
-<script type="text/javascript">rar_st('rar_status', 'Can not find "rar"<br>You may need to download it and extract "rar" to "/rar/" directory');</script>
+<script type="text/javascript">rar_st('rar_status', '<?php echo lang(343); ?>');</script>
 <?php 
   }
   else {
