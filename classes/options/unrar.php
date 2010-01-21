@@ -29,11 +29,11 @@ function unrar_setCheckboxes(act, filestounrar) {
             <tr align="center">
               <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:6px; background-color:#001825;">
                 <input type="hidden" name="files[<?php echo $i; ?>]" value="<?php echo $_GET["files"][$i]; ?>">
-                <b>Files from <?php echo basename($file["name"]); ?>:</b>
+                <?php printf(lang(366),basename($file["name"])); ?>
                 <br>
-                <a href="javascript:unrar_setCheckboxes(1, <?php echo $i;?>);">Check All</a> |
-                <a href="javascript:unrar_setCheckboxes(0, <?php echo $i;?>);">Un-Check All</a> |
-                <a href="javascript:unrar_setCheckboxes(2, <?php echo $i;?>);">Invert Selection</a>
+                <a href="javascript:unrar_setCheckboxes(1, <?php echo $i;?>);"><?php echo lang(52); ?></a> |
+                <a href="javascript:unrar_setCheckboxes(0, <?php echo $i;?>);"><?php echo lang(53); ?></a> |
+                <a href="javascript:unrar_setCheckboxes(2, <?php echo $i;?>);"><?php echo lang(54); ?></a>
               </td>
             </tr>
             <tr>
@@ -42,12 +42,12 @@ function unrar_setCheckboxes(act, filestounrar) {
 <?php
     unset ($rar);
     $rar = new rlRar($file["name"], $check_these_before_unzipping ? $forbidden_filetypes : array('.xxx'));
-    if ($rar->rar_return === false) { echo 'Can not find "unrar"'; }
+    if ($rar->rar_return === false) { echo lang(367); }
     else {
       $rar_list = $rar->listthem(@$_GET['passwords'][$i], $download_dir, $i);
-      if ($rar_list[0] == 'PASS') { $rar_passl_needed = true; echo 'Pasword needed to list archive:'; }
-      elseif ($rar_list['NEEDP'] == true) { echo 'Pasword needed to extract archive:'; }
-      elseif ($rar_list[0] == 'ERROR') { echo 'Error:'.$rar_list[1].' '.$rar_list[2]; }
+      if ($rar_list[0] == 'PASS') { $rar_passl_needed = true; echo lang(368); }
+      elseif ($rar_list['NEEDP'] == true) { echo lang(369); }
+      elseif ($rar_list[0] == 'ERROR') { printf(lang(370),$rar_list[1].' '.$rar_list[2]); }
     }
 ?>
                 <input type="<?php echo ($rar_list['NEEDP'] == true) ? 'password' : 'hidden'; ?>" name="passwords[]" value="<?php echo $_GET['passwords'][$i]; ?>">
@@ -82,7 +82,7 @@ function unrar_setCheckboxes(act, filestounrar) {
       <tr>
         <td align="center">
           <input type="hidden" name="act" value="<?php echo $rar_passl_needed ? 'unrar' : 'unrar_go'; ?>">
-          <input type="submit" value="<?php echo $rar_passl_needed ? 'Try to list again' : 'Unrar selected'; ?>">
+          <input type="submit" value="<?php echo $rar_passl_needed ? lang(371) : lang(372); ?>">
         </td>
       </tr>
       <tr>
@@ -111,7 +111,7 @@ function unrar_go() {
     if (count($_GET['filestounrar'][$i]) == 0) { continue; }
 ?>
           <tr align="center">
-            <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:2px; background-color:#001825;"><b>Extracting files from <?php echo basename($file["name"]); ?>:</b></td>
+            <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:2px; background-color:#001825;"><?php printf(lang(373),basename($file["name"])); ?></td>
           </tr>
 <?php
     foreach ($_GET['filestounrar'][$i] as $rar_item) {
@@ -122,7 +122,7 @@ function unrar_go() {
       echo link_for_file(realpath($download_dir).'/'.basename(base64_decode($rar_item)));
 ?>
             </td>
-            <td id="<?php echo 'unrar'.$_GET["files"][$i].'-'.str_replace('=', '-', $rar_item); ?>" align="center" style="border-right:1px solid #666; padding:2px; background-color:#001825;">Waiting...</td>
+            <td id="<?php echo 'unrar'.$_GET["files"][$i].'-'.str_replace('=', '-', $rar_item); ?>" align="center" style="border-right:1px solid #666; padding:2px; background-color:#001825;"><?php echo lang(364); ?></td>
           </tr>
 <?php
     }
@@ -141,7 +141,7 @@ function unrar_go() {
       </td>
     </tr>
   </table>
-  <span id="unrar_finished" style="display:none;"><a href="<?php echo $PHP_SELF."?act=files"; ?>">Go back to file list</a><br><br><br></span>
+  <span id="unrar_finished" style="display:none;"><a href="<?php echo $PHP_SELF."?act=files"; ?>"><?php echo lang(365); ?></a><br><br><br></span>
 <?php
 }
 
@@ -167,7 +167,7 @@ function rar_st(elementid, st){
       $rar = new rlRar($file["name"], $check_these_before_unzipping ? $forbidden_filetypes : array('.xxx'));
       if ($rar->rar_return === false) {
 ?>
-<script type="text/javascript">rar_st('<?php echo 'unrar'.$_GET["files"][$i].'-'.str_replace('=', '-', $rar_item); ?>', 'Can not find "rar"<br>You may need to download it and extract "rar" to "/rar/" directory');</script>
+<script type="text/javascript">rar_st('<?php echo 'unrar'.$_GET["files"][$i].'-'.str_replace('=', '-', $rar_item); ?>', '<?php echo lang(343); ?>');</script>
 <?php
       }
       else {

@@ -29,8 +29,8 @@ function renderActions() {
 	if (file_exists ( CLASS_DIR . "unzip.php" ) && !$options['disable_unzip'])
 		$return .= '<option value="unzip">'.lang(295).'</option>';
 	if (substr(PHP_OS, 0, 3) != "WIN" && @file_exists(CLASS_DIR."rar.php")) {
-		$return .= '<option value="rar">Rar Files</option>';
-		if (@file_exists(ROOT_DIR.'/rar/rar') || @file_exists(ROOT_DIR.'/rar/unrar')) { $return .= '<option value="unrar">Unrar Files</option>'; }
+		$return .= '<option value="rar">'.lang(338).'</option>';
+		if (@file_exists(ROOT_DIR.'/rar/rar') || @file_exists(ROOT_DIR.'/rar/unrar')) { $return .= '<option value="unrar">'.lang(339).'</option>'; }
 	}
 	if (!$options['disable_deleting']) {
 		if (!$options['disable_rename']) $return .= '<option value="rename">'.lang(296).'</option>';

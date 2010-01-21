@@ -307,7 +307,7 @@ class rlRar {
       }
 ?>
     <div id="rar_debug<?php echo $debug_id; ?>" style="padding:2px;position:absolute; top:<?php echo (intval($debug_id)*24)+2; ?>px; left:10px; background:#082330; border:2px solid #666666; text-align: left;">
-      <b>Plusrar Debug Window<?php echo (!$this->debug ? '(Error detected), ' : '')?></b>&nbsp;&nbsp;&nbsp;&nbsp;<span onclick="javascript:$('#rar_debug_contents<?php echo $debug_id; ?>').toggle();">(click here to expand)</span>
+      <b>Plusrar Debug Window<?php echo (!$this->debug ? '('.lang(340).'), ' : '')?></b>&nbsp;&nbsp;&nbsp;&nbsp;<span onclick="javascript:$('#rar_debug_contents<?php echo $debug_id; ?>').toggle();">(<?php echo lang(341); ?>)</span>
 
 
       <div id="rar_debug_contents<?php echo $debug_id; ?>" style="display: none">
@@ -327,8 +327,8 @@ class rlRar {
       echo "===Executed command===\r\n".htmlentities("'".$this->rar_exec."' ".$params.' '.$this->rar_forbidden.' -- '.escapeshellarg($this->filename).' '.$extra);
 ?></textarea>
         <br>
-        <input type="button" value="Highlight text" onclick="javascript:document.getElementById('rar_debug_text<?php echo $debug_id; ?>').focus();document.getElementById('rar_debug_text<?php echo $debug_id; ?>').select();">
-        <div class="dragzone" style="text-align: center;font-weight: bold">&nbsp;<br>You can drag window from here<br>&nbsp;</div>
+        <input type="button" value="<?php echo lang(375); ?>" onclick="javascript:document.getElementById('rar_debug_text<?php echo $debug_id; ?>').focus();document.getElementById('rar_debug_text<?php echo $debug_id; ?>').select();">
+        <div class="dragzone" style="text-align: center;font-weight: bold">&nbsp;<br><?php echo lang(342); ?><br>&nbsp;</div>
       </div>
   </div>
 <script type="text/javascript">
