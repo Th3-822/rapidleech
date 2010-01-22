@@ -14,7 +14,11 @@ allow from all
 #allow from all
 #</files>
 
-<files js.php>
+<files js.js>
+allow from all
+</files>
+
+<files ajax_refresh.js>
 allow from all
 </files>
 
