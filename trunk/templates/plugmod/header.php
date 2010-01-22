@@ -15,7 +15,13 @@ if (!isset($page_title)) {
 	echo htmlentities($page_title);
 }
 ?></title>
-<script type="text/javascript" src="classes/js.php"></script>
+<script type="text/javascript">
+var php_js_strings = [];
+php_js_strings[87] = " <?php echo lang(87); ?>";
+php_js_strings[281] = "<?php echo lang(281); ?>";
+</script>
+<script type="text/javascript" src="classes/js.js"></script>
+<?php if ($ajax_refresh) { echo '<script type="text/javascript" src="classes/ajax_refresh.js"></script>'; } ?>
 <script type="text/javascript">
 pic1= new Image(); 
 pic1.src="templates/plugmod/images/ajax-loading.gif"; 
