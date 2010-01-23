@@ -8,47 +8,53 @@ if (!defined('RAPIDLEECH'))
 
 if (($_GET ["premium_acc"] == "on" && $_GET ["premium_user"] && $_GET ["premium_pass"]) || ($_GET ["premium_acc"] == "on" && $premium_acc ["uploading"] ["user"] && $premium_acc ["uploading"] ["pass"])) 
 {
-$in=parse_url("http://uploading.com/general/login_form/");
-$post=array();
-$post["email"]= $_GET ["premium_user"] ? $_GET ["premium_user"] : $premium_acc ["uploading"] ["user"];
-$post["password"]= $_GET ["premium_pass"] ? $_GET ["premium_pass"] : $premium_acc ["uploading"] ["pass"];
-$page = geturl($in["host"], $in["port"] ? $in["port"] : 80, $in["path"].($in["query"] ? "?".$in["query"] : ""), "http://uploading.com/login/", 0, $post, 0, $_GET["proxy"],$pauth);
-$cookie=GetCookies($page);
-if(strpos($cookie,"error=") != false){
-html_error("Login Failed , Bad username/password combination.",0);
-}
-$in=parse_url("http://uploading.com/");
-$page = geturl($in["host"], $in["port"] ? $in["port"] : 80, $in["path"].($in["query"] ? "?".$in["query"] : ""), "http://uploading.com/login/", $cookie, 0, 0, $_GET["proxy"],$pauth);
+	$tid=str_replace(".","12",microtime(true));
+	$loginUrl = "http://uploading.com/general/login_form/?JsHttpRequest=".$tid."-xml";
+	$usrEmail = "";
 
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
-$fileID=cut_str($page,"get_link', file_id: ",",");
-$tmp = basename($Url["path"]);
-$FileName=str_replace(".html","",$tmp);
+	$in=parse_url( $loginUrl );
+	$post=array();
+	$usrEmail = $_GET ["premium_user"] ? $_GET ["premium_user"] : $premium_acc ["uploading"] ["user"];
+	$post["email"] = $usrEmail;
+	$post["password"]= $_GET ["premium_pass"] ? $_GET ["premium_pass"] : $premium_acc ["uploading"] ["pass"];
+	$page = geturl($in["host"], $in["port"] ? $in["port"] : 80, $in["path"].($in["query"] ? "?".$in["query"] : ""), "http://uploading.com/login/", 0, $post, 0, $_GET["proxy"],$pauth);
 
-$tid=str_replace(".","12",microtime(true));
-$sUrl="http://uploading.com/files/get/?JsHttpRequest=".$tid."-xml";
-$Url=parse_url($sUrl);
 
-unset($post);
-$post["file_id"]=$fileID;
-$post["action"]="step_1";
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, $post, 0, $_GET["proxy"],$pauth);
+	$cookie=GetCookies($page);
+	if(strpos($cookie,"error=") != false)
+	{
+		html_error("Login Failed , Bad username/password combination.",0);
+	}
 
-$tid=str_replace(".","12",microtime(true));
-$sUrl="http://uploading.com/files/get/?JsHttpRequest=".$tid."-xml";
-$Url=parse_url($sUrl);
+	$in=parse_url("http://uploading.com/");
+	$page = geturl($in["host"], $in["port"] ? $in["port"] : 80, $in["path"].($in["query"] ? "?".$in["query"] : ""), "http://uploading.com/login/", $cookie, 0, 0, $_GET["proxy"],$pauth);
 
-unset($post);
-$post["file_id"]=$fileID;
-$post["action"]="step_2";
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, $post, 0, $_GET["proxy"],$pauth);
+	if( !strpos( $page, $usrEmail ) )
+	{
+		html_error("Login Failed , Bad username/password combination.",0);
+	}
+	
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
 
-$dUrl=str_replace("\\","",cut_str($page,'link": "','"'));
-if ($dUrl=="") {html_error("Download url error , Please reattempt",0);
-}
-$Url=parse_url($dUrl);
+	$fileID=cut_str($page,"get_link', file_id: ",",");
+	$tmp = basename($Url["path"]);
+	$FileName=str_replace(".html","",$tmp);
 
-insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK)."&cookie=".urlencode($cookie).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+	$tid=str_replace(".","12",microtime(true));
+	$sUrl="http://uploading.com/files/get/?JsHttpRequest=".$tid."-xml";
+	$Url=parse_url($sUrl);
+	
+	unset($post);
+	$post["file_id"]=$fileID;
+	$post["action"]="get_link";
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, $post, 0, $_GET["proxy"],$pauth);
+	
+	$dUrl=str_replace("\\","",cut_str($page,'link": "','"'));
+	if ($dUrl=="") {html_error("Download url error , Please reattempt",0);
+	}
+	$Url=parse_url($dUrl);
+
+	insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK)."&cookie=".urlencode($cookie).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
 }else
 {
 $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"],$pauth);
@@ -113,7 +119,8 @@ $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Ur
 
 $dUrl=str_replace("\\","",cut_str($page,'answer": { "link": "','"'));
 
-if ($dUrl=="") {html_error("Download url error , Please wait for some minute and reattempt",0);
+if ($dUrl=="") {
+	html_error("Download url error , Please wait for some minute and reattempt",0);
 }
 $Url=parse_url($dUrl);
 
@@ -125,5 +132,6 @@ insert_location( $loc );
 WRITTEN by kaox 24-may-2009
 UPDATE by kaox  29-nov-2009
 UPDATE by rajmalhotra  20 Jan 2010
+UPDATE by rajmalhotra Fix for downloading from Premium Accounts 23 Jan 2010
 \**************************************************/
 ?>
