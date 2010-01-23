@@ -16,10 +16,11 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 	is_page($page);
 	is_present($page, "Failed login message:", "Wrong username or password");
 	is_notpresent($page, "Set-Cookie: linkcard=", "Cannot use premium account");
-	preg_match_all("/Set-Cookie: ([^\;]+)/", $page, $matches);
-	$cookies = implode("; ", $matches[1]);
+		
+	$cookies = GetCookies( $page );
+	
 	$Url = parse_url($LINK);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookies, 0, 0, $_GET["proxy"], $pauth);
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookies, 0, 0, $_GET["proxy"], $pauth);	
 	is_page($page);
 	
 	preg_match('/Location: *(.+)/i', $page, $newredir );
@@ -28,8 +29,8 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 	{
 		$Referer = $newHref;
 		$Url = parse_url( $newHref );
-		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
+		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookies, 0, 0, $_GET["proxy"],$pauth);
+		is_page($page);
 	}
 		
 	is_present($page, "This link requires a password to continue:", "This file is password protected");
@@ -156,4 +157,5 @@ Please try again momentarily.", 0);
 // Now can download from any link like 
 // a)  http://d01.megashares.com/?d01=8644cd8
 // b)  http://d01.megashares.com/dl/8644cd8/hotfile_com[DL]_03_nov_2009.rar
+// update by rajmalhotra 23-Jan-2010 Small fix for downloading from premium account
 ?>
