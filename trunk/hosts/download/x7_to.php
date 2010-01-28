@@ -25,8 +25,10 @@ class x7_to extends DownloadClass
 	{
 		global $Referer;
 		
-		$Url = parse_url( $link );
-		$id = basename($Url['path']);
+		$id = substr( $link, 13, 6 );
+				
+		//$Url = parse_url( $link );
+		//$id = basename($Url['path']);
 		//preg_match('%/x7.to/(.+?)/%', $link, $id);
 		//$id = $id[1];
 		
@@ -119,5 +121,6 @@ class x7_to extends DownloadClass
 
 /**************************************************\  
 WRITTEN by rajmalhotra  26 Jan 2010
+Fixed by rajmalhotra 28 Jan 2010 
 \**************************************************/
 ?>
