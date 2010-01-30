@@ -20,29 +20,62 @@ class x7_to extends DownloadClass
 			$this->DownloadFree($link);
 		}
 	}
-		
+	
 	private function DownloadFree( $link )
+	{
+		$this->DownloadLink( $link );
+	}
+	
+	private function DownloadPremium( $link )
+	{
+		global $premium_acc, $Referer;
+		
+		$loginUrl = "http://x7.to/james/login";
+		$usrId = "";
+
+		$post=array();
+		$usrId = $_REQUEST ["premium_user"] ? $_REQUEST ["premium_user"] : $premium_acc ["x7"] ["user"];
+		$post["id"] = $usrId;
+		$post["pw"] = $_REQUEST ["premium_pass"] ? $_REQUEST ["premium_pass"] : $premium_acc ["x7"] ["pass"];
+		$page = $this->GetPage( $loginUrl, 0, $post, $loginUrl );
+		
+		$cookie = $this->GetX7Cookies($page);
+		
+		$badJson = trim ( cut_str ( $page, '{', '}' ) );
+		$badJson = "{". $badJson. "}";
+			
+		$loginResponseJson = $this->convertToJson( $badJson );
+		
+		$json = str_replace( "'", "\"", $loginResponseJson );
+		$jsarray = json_decode($json, true);
+				
+		if ( ( !$jsarray ) || ( $jsarray['succ'] != "true" ) )
+		{
+			html_error("Login Failed , Bad username/password combination.",0 );
+		}
+
+		$this->DownloadLink( $link, $cookie );		
+	}
+	
+	private function DownloadLink( $link, $cookie = 0 )	
 	{
 		global $Referer;
 		
 		$id = substr( $link, 13, 6 );
-				
-		//$Url = parse_url( $link );
-		//$id = basename($Url['path']);
-		//preg_match('%/x7.to/(.+?)/%', $link, $id);
-		//$id = $id[1];
-		
-		$getlink = "http://x7.to/james/ticket/dl/$id";
-		
-		$post = Array();
-		$page = $this->GetPage( $getlink, 0, $post, $Referer );
 			
-		$cookie = GetCookies($page);
+		$getlink = "http://x7.to/james/ticket/dl/$id";
+			
+		$post = Array();
+		$page = $this->GetPage( $getlink, $cookie, $post, $Referer );
+		
+		if( !$cookie )
+		{
+			$cookie = GetCookies($page);
+		}		
 		
 		$badJson = trim ( cut_str ( $page, '{', '}' ) );
 		$badJson = "{". $badJson. "}";
 		
-				
 		$raj = $this->convertToJson( $badJson );
 		
 		$json = str_replace( "'", "\"", $raj );
@@ -53,10 +86,14 @@ class x7_to extends DownloadClass
 			html_error("Cannot decode Json string!",0);
 		}
 
-		if ( $jsarray['err'] == "limit-dl" )
+		if ( ( $jsarray['err'] == "limit-dl" ) || ( $jsarray['err'] == "limit-parallel" ) )
 		{
 			//html_error("Download limit exceeded.",0 );
 			html_error( lang(111), 0 );
+		}
+		else if ( $jsarray['err'] )
+		{
+			html_error( $jsarray['err'], 0 );
 		}
 		else if ( $jsarray['type'] == "download" )
 		{
@@ -82,11 +119,6 @@ class x7_to extends DownloadClass
 		
 		$this->RedirectDownload($Href, $FileName, $cookie);
 		exit ();
-	}
-	
-	private function DownloadPremium( $link )
-	{
-		html_error("Working with Premium Account is not coded. This plugin need to update.",0);
 	}
 	
 	private function convertToJson( $badJson )
@@ -117,10 +149,37 @@ class x7_to extends DownloadClass
 		
 		return $json;
 	}
+	
+	private function GetX7Cookies( $content ) 
+	{
+		// The U option will make sure that it matches the first character
+		// So that it won't grab other information about cookie such as expire, domain and etc
+		preg_match_all ( '/Set-Cookie: (.*)(;|\r\n)/U', $content, $temp );
+	
+		$cookie = $temp [1];
+					
+		$cookieMap = array();
+		foreach( $cookie as $key => $value )
+		{
+			$explodedArray = explode( "=", $value, 2 );
+			$cookieMap[ $explodedArray[0] ] = $explodedArray[1]; 
+		}
+		
+		$x7cookie = array();
+		foreach( $cookieMap as $key => $value )
+		{
+			array_push( $x7cookie,$key."=".$value );
+		}
+		
+		$cook = implode ( '; ', $x7cookie );
+
+		return $cook;
+	}
 }	
 
 /**************************************************\  
 WRITTEN by rajmalhotra  26 Jan 2010
 Fixed by rajmalhotra 28 Jan 2010 
+Added premium account support by rajmalhotra 31 Jan 2010 
 \**************************************************/
 ?>
