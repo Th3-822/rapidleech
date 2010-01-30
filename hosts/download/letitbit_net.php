@@ -43,8 +43,8 @@ if (($_GET ["premium_acc"] == "on"  && $_GET ["premium_pass"]) || ($_GET ["premi
 
 $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, $post, 0, $_GET["proxy"],$pauth);
     is_page($page);
-    $dlink=cutter($page,"Download Master","</table>",3);
-    $dwnl=cutter($dlink,"<a href='","'",1);
+    $dlink=slice($page,"Download Master","</table>",3);
+    $dwnl=slice($dlink,"<a href='","'",1);
     $Url = parse_url($dwnl);
     $FileName = basename($dwnl);
 insert_location("index.php?filename=".urlencode($FileName)."&force_name=".urlencode($FileName)."&host=".$Url["host"]."&port=".$Url["port"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&cookie=".urlencode($cookie)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
@@ -101,7 +101,7 @@ insert_location("index.php?filename=".urlencode($FileName)."&force_name=".urlenc
     $FreeForm = cut_str ( $page ,'id="dvifree">' ,'</form>' );
 
 	$act = "http://".cut_str ( $page ,'form action="http://' ,'"' );
-    $uid = cutter($FreeForm,'name="uid" value="','"',2);
+    $uid = slice($FreeForm,'name="uid" value="','"',2);
     $md5crypt = cut_str($FreeForm,'="md5crypt" value="','"');
    // $uid2 = cut_str($FreeForm,'name="uid2" value="','"');
     $uid5 = cut_str($FreeForm,'name="uid5" value="','"');
@@ -181,7 +181,7 @@ function biscottiDiKaox($content)
     return rtrim($bis);
  }
  // tweaked cutstr with pluresearch functionality
-function cutter($str, $left, $right,$cont=1)
+function slice($str, $left, $right,$cont=1)
     {
     for($iii=1;$iii<=$cont;$iii++){
     $str = substr ( stristr ( $str, $left ), strlen ( $left ) );
