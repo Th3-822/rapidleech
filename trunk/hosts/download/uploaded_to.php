@@ -10,6 +10,7 @@ class uploaded_to extends DownloadClass
 	public function Download($link) 
 	{
 		global $premium_acc;
+		
 		if ( ($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) ||
 			($_REQUEST ["premium_acc"] == "on" && $premium_acc ["uploaded_to"] ["user"] && $premium_acc ["uploaded_to"] ["pass"] ) )
 		{
@@ -61,19 +62,10 @@ class uploaded_to extends DownloadClass
 		
 		$cook = GetCookies($page);
 		
-		$page = $this->GetPage( $link, $cook );
-		
-		preg_match ( '/Location: (.*)/', $page, $redir );
-		$hr = $redir[1];
-		if ( !isset( $hr ) )
-		{
-			$Href = trim ( cut_str ( $page, 'download_form" method="post" action="', '">' ) );
-			$Href = "http://uploaded.to".$Href;
-					
-			$post = array();
-			$page = $this->GetPage( $Href, $cook, $post );
-		}
-				
+		$newHref = "http://uploaded.to/file/bvzd23/?redirect";
+		$post = array();
+		$page = $this->GetPage( $newHref, $cook, $post, $Referer );
+			
 		preg_match ( '/Location: (.*)/', $page, $newredir );
 		$Href = trim ( $newredir [1] );
 		$Url = parse_url($Href);
@@ -86,5 +78,6 @@ class uploaded_to extends DownloadClass
 
 /**************************************************\  
 Fixed premium account support and Updated by rajmalhotra 31 Jan 2010
+Simplified downloading from premium account by rajmalhotra 02 Feb 2010
 \**************************************************/
 ?>
