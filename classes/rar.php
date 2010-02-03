@@ -276,6 +276,36 @@ class rlRar {
         array("rar_static 3.80 for Linux x64", 966536, "8b6ae6251bbf0a3f930a918701bb7e59"),
         array("rar_static 3.80 for FreeBSD", 822516, "3f4673a12c7912c361c1470d9d265ab5"),
 
+        array("unrar 3.9.1 for Linux", 205328, "15bd278b2b905834bb8fe079532d0498"),
+        array("rar 3.9.1 for Linux", 364580, "07eb62d407d4e6f575354fae0e8e7ea7"),
+        array("rar_static 3.9.1 for Linux", 949084, "5ef45c28023d5f56b353ba1201f90103"),
+        array("unrar 3.9.1 for Linux x64", 210448, "91bb156dab53dee2be10aeb093b1a678"),
+        array("rar 3.9.1 for Linux x64", 357472, "7466ef2effb2724e320c41222d351bfe"),
+        array("rar_static 3.9.1 for Linux x64", 1057072, "934cd9022d61ba155e3e2a8a3624cff0"),
+        array("unrar 3.9.1 for FreeBSD", 197836, "394517ec69dcf7c635d054c349dc036a"),
+        array("rar 3.9.1 for FreeBSD", 344960, "cb8d9d877d54d99672ffab249fea7bae"),
+        array("rar_static 3.9.1 for FreeBSD", 923720, "a674de60c0e262099624c6a1d8201ae9"),
+
+        array("unrar 3.90 for Linux", 205328, "494f48e37fbdeb5148262db837c7e6bd"),
+        array("rar 3.90 for Linux", 364580, "719ac9dc6add5fcf6e6ce7f102c62a63"),
+        array("rar_static 3.90 for Linux", 949084, "18e46dadef087241774d960f2a95d584"),
+        array("unrar 3.90 for Linux x64", 210448, "a18f3538f7cf5ee105951e4f2fc19eb0"),
+        array("rar 3.90 for Linux x64", 357472, "da0e42db1838d4f65f1cbab75b51241b"),
+        array("rar_static 3.90 for Linux x64", 1057072, "68ceb739c3cc815d54cdb6f8d76cc81c"),
+        array("unrar 3.90 for FreeBSD", 197804, "42569551ec6557b191bb5a6e7f57c4dc"),
+        array("rar 3.90 for FreeBSD", 344960, "c2dc606dade7f1c49d1bc6eda0703bce"),
+        array("rar_static 3.90 for FreeBSD", 923688, "d1463a8ea6673c0d207eb08c1258ea37"),
+
+        array("unrar 3.9.2b1 for Linux", 205328, "99c2eb2270b967b90f3024763035eb29"),
+        array("rar 3.9.2b1 for Linux", 364596, "b65d96493716453e360c273adcf29db1"),
+        array("rar_static 3.9.2b1 for Linux", 949116, "f01297add55e19e15bb5baac452f0d5c"),
+        array("unrar 3.9.2b1 for Linux x64", 210448, "e2e777fb0af336143f02442069e78b21"),
+        array("rar 3.9.2b1 for Linux x64", 357488, "0f13c5fb9da60ba71ae2aa003cb143ed"),
+        array("rar_static 3.9.2b1 for Linux x64", 1057072, "b3d8dd806197158af2ca7840ed8e6b2f"),
+        array("unrar 3.9.2b1 for FreeBSD", 198412, "2475c0713059fbdf5bb389a52e0af7a6"),
+        array("rar 3.9.2b1 for FreeBSD", 345024, "f1a4500ccce68223533cb14904b83339"),
+        array("rar_static 3.9.2b1 for FreeBSD", 924264, "10695f2bbf0c7a0b7e1902083bd5cad9"),
+
         array("rar 3.90 beta 3 for Linux", 364580, "d6db5efb088276f07539f9f40a6465a5"),
         array("unrar 3.90 beta 3 for Linux", 205328, "6672ba3eef5a2117cbc38badc3fbca6a"),
         array("rar 3.90 beta 3 for Linux x64", 357472, "9b3a80c0c33cee46b4ffc0ba7e33afc2"),
@@ -286,21 +316,12 @@ class rlRar {
         array("rar_static 3.90 beta 3 for Linux x64", 1057072, "375e3b4423f49c8c6b77ad11a7611f32"),
         array("rar_static 3.90 beta 3 for FreeBSD", 923592, "854ccfc0e8faa3e9715f3459cb46b3d0"),
 
-        array("rar 3.90 for Linux", 364580, "719ac9dc6add5fcf6e6ce7f102c62a63"),
-        array("unrar 3.90 for Linux", 205328, "494f48e37fbdeb5148262db837c7e6bd"),
-        array("rar 3.90 for Linux x64", 357472, "da0e42db1838d4f65f1cbab75b51241b"),
-        array("unrar 3.90 for Linux x64", 210448, "a18f3538f7cf5ee105951e4f2fc19eb0"),
-        array("rar 3.90 for FreeBSD", 344960, "c2dc606dade7f1c49d1bc6eda0703bce"),
-        array("unrar 3.90 for FreeBSD", 197804, "42569551ec6557b191bb5a6e7f57c4dc"),
-        array("rar_static 3.90 for Linux", 949084, "18e46dadef087241774d960f2a95d584"),
-        array("rar_static 3.90 for Linux x64", 1057072, "68ceb739c3cc815d54cdb6f8d76cc81c"),
-        array("rar_static 3.90 for FreeBSD", 923688, "d1463a8ea6673c0d207eb08c1258ea37"),
-
         array("unrar 3.7.7 for centos", 170252, "b73d067dcf3ea1d23ea264e9ea9fbada"),
       );
-      $tmp = 'Unknown rar executable('.filesize($this->rar_exec).' bytes md5:'.md5_file($this->rar_exec).')'; 
+      $rarp = array(filesize($this->rar_exec), md5_file($this->rar_exec));
+      $tmp = 'Unknown rar executable('.$rarp[0].' bytes md5:'.$rarp[1].')'; 
       foreach($rar_es as $rar_e) {
-        if (filesize($this->rar_exec) == $rar_e[1] && md5_file($this->rar_exec) == $rar_e[2]) {
+        if ($rarp[0] == $rar_e[1] && $rarp[1] == $rar_e[2]) {
           $tmp = $rar_e[0];
           break;
         }
