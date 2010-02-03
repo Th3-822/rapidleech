@@ -6,7 +6,7 @@ $enter_pass = "";
 
 $not_done=true;
 $continue_up=false;
-if ($ezy_login & $ezy_pass){
+if ($enter_login & $enter_pass){
 	$_REQUEST['login'] = $enter_login;
 	$_REQUEST['password'] = $enter_pass;
 	$_REQUEST['action'] = "FORM";
@@ -89,10 +89,19 @@ if ($continue_up)
 	$gpost['op'] = "upload_result" ;
 	$Url=parse_url($ref);
 	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $uurl, $cookies, $gpost, 0, $_GET["proxy"],$pauth);
-	$ddl=cut_str($page,'Download Link:</b></td><td colspan=2><a href="','"');
-	$del=cut_str($page,'killcode=','"');
+	
+	$ddlLinkData = trim ( cut_str($page,'input id="ic2','>') ); 
+	$ddl = trim ( cut_str( $ddlLinkData,'value="','"') );
+	
+	$delLinkData = trim ( cut_str( $page,'input id="ic3','>') ); 
+	$del = trim ( cut_str( $delLinkData,'value="','"') );
 	$download_link=$ddl;
-	$delete_link= $ddl.'?killcode='.$del;
+	$delete_link= $del;
+	
 	}
-// Made by churongcon  on 12 Jan 2010
+	
+/**************************************************\  
+WRITTEN by churongcon 12 Jan 2010
+Fixed by rajmalhotra 03 Feb 2010 -> Error is that Download and delete links are not visible
+\**************************************************/
 ?>
