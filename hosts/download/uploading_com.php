@@ -29,6 +29,8 @@ class uploading_com extends DownloadClass
 		$page = $this->GetPage($link);
 		
 		$fileID = trim ( cut_str($page,'file_id" value="','"') );
+		$code = trim ( cut_str($page,'code" value="','"') );
+				
 		$action = trim ( cut_str($page,'action" value="','"') );
 		$Href_1 = trim ( cut_str($page,'form action="http://uploading.com/files','"') );
 		$Href_1 = "http://uploading.com/files".$Href_1;
@@ -55,8 +57,10 @@ class uploading_com extends DownloadClass
 		$post = Array();
 		$post["action"] = $action;
 		$post["file_id"] = $fileID;
+		$post["code"] = $code;
+		
 		$page = $this->GetPage( $Href_1, $cookie, $post, $Referer );
-
+		
 		is_present($page, "Requested file not found");
 
 		preg_match_all('/start_timer\((\d+)\)/i', $page,$tm);
@@ -66,13 +70,16 @@ class uploading_com extends DownloadClass
 
 		$tid=str_replace(".","12",microtime(true));
 		$sUrl="http://uploading.com/files/get/?JsHttpRequest=".$tid."-xml";
-
+		
+		$code = trim( cut_str( $page, 'code: "', '",' ) );
+		
 		unset($post);
 		$post["file_id"]=$fileID;
+		$post["code"] = $code;
 		$post["action"]="get_link";
 		$post["pass"]="";
 		$page = $this->GetPage( $sUrl, $cookie, $post, $Referer );
-
+	
 		//$dUrl=str_replace("\\","",cut_str($page,'answer": { "link": "','"'));
 		$dUrl = str_replace("\\","",cut_str($page,'link": "','"'));
 
@@ -114,6 +121,8 @@ class uploading_com extends DownloadClass
 		$page = $this->GetPage( $link, $cookie, 0, $Referer );
 		
 		$fileID = cut_str($page,"get_link', file_id: ",",");
+		$code = trim( cut_str( $page, 'code: "', '",' ) );
+				
 		$Url = parse_url( $link );
 		$tmp = basename($Url["path"]);
 		$FileName = str_replace(".html","",$tmp);
@@ -123,7 +132,8 @@ class uploading_com extends DownloadClass
 		
 		unset($post);
 		$post["file_id"]=$fileID;
-		$post["action"]="get_link";
+		$post["code"] = $code;
+		$post["action"] = "get_link";
 		$page = $this->GetPage( $sUrl, $cookie, $post, $Referer );
 		
 		$dUrl = str_replace("\\","",cut_str($page,'link": "','"'));
@@ -142,5 +152,6 @@ WRITTEN by kaox 24-may-2009
 UPDATE by kaox  29-nov-2009
 UPDATE by rajmalhotra  20 Jan 2010
 UPDATE by rajmalhotra Fix for downloading from Premium Accounts 23 Jan 2010 and converted in OOP's format
+Fixed by rajmalhotra Fix for downloading from Free and Premium Accounts 07 Feb 2010. Basically fix changes due to change in Site
 \**************************************************/
 ?>
