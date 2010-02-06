@@ -60,14 +60,21 @@ class uploaded_to extends DownloadClass
 			html_error("Login Failed , Bad username/password combination.",0);
 		}
 		
-		$cook = GetCookies($page);
+		$cook = GetCookies( $page );
 		
-		$newHref = "http://uploaded.to/file/bvzd23/?redirect";
+		$id = trim( substr( $link, 24, 6 ) );
+		$newHref = "http://uploaded.to/file/".$id."/?redirect";
+		
 		$post = array();
 		$page = $this->GetPage( $newHref, $cook, $post, $Referer );
 			
 		preg_match ( '/Location: (.*)/', $page, $newredir );
 		$Href = trim ( $newredir [1] );
+		if ( strpos( $Href, "view=error_fileremoved" ) )
+		{ 
+			html_error( "Error getting Download Link", 0 );
+		}
+		
 		$Url = parse_url($Href);
 		$FileName = !$FileName ? basename($Url["path"]) : $FileName;
 		
@@ -77,7 +84,6 @@ class uploaded_to extends DownloadClass
 }	
 
 /**************************************************\  
-Fixed premium account support and Updated by rajmalhotra 31 Jan 2010
-Simplified downloading from premium account by rajmalhotra 02 Feb 2010
+Fixed premium account support and Converted in OOPs architecture by rajmalhotra 07 Feb 2010
 \**************************************************/
 ?>
