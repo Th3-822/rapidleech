@@ -83,14 +83,15 @@ else
 {
 	$GetUser = parse_url( $LINK );
 	
-	$user = trim ( $GetUser['user'] );
-	$pass = trim ( $GetUser['pass'] );
-	$LINK = $GetUser['scheme'] . "://" . $GetUser['host'] .$GetUser['path'];
-		
+	$user = $GetUser['user'];
+	$pass = $GetUser['pass'];
+			
 	if ( isset ( $user ) && isset ( $pass ) )
 	{
-		$btaccel_login = $user;
-		$btaccel_pass = $pass;
+		$btaccel_login = trim( $user );
+		$btaccel_pass = trim( $pass );
+		
+		$LINK = $GetUser['scheme'] . "://" . $GetUser['host'] .$GetUser['path'];
 	}
 	
 	$cookies = loginto( $btaccel_login, $btaccel_pass );
@@ -188,5 +189,6 @@ WRITTEN by kaox 21-jul-2009
 UPDATED by kaox 04-oct-2009
 UPDATED and Fixed by rajmalhotra 19-Dec-2009 
 UPDATED by rajmalhotra 17-Jan-2010 If only one link to download then rapidleech will take care of it and removed step 2 button
+UPDATED by rajmalhotra 07 Feb 2010
 \*************************/
 ?>
