@@ -33,6 +33,7 @@ $premium_acc = array();
 //$premium_acc["turbobit"] = array('pass' => 'your password');
 //$premium_acc["storage"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["x7"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["bigandfree_com"] = array('user' => 'your username', 'pass' => 'your password');
 
 $no_cache = true; # true - Prohibition by Browser; otherwise allowed (You should leave this intact unless you know what you are doing)
 //$images_via_php = false; # true - RapidShare images are downloaded through the script, but it requires ssl support; turn it off if you can't see the image.
