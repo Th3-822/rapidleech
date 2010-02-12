@@ -37,7 +37,7 @@ class easy_share_com extends DownloadClass
 		$div = trim ( cut_str ( $page, '<div id="block-captcha">', "</div>" ) );
 		$count = trim ( cut_str ( $div, "w='", "'" ) );
 		
-		insert_timer( $count, "Waiting link timelock", "", true );
+		insert_timer( $count, "Waiting link timelock");
 		
 		if ( $src = trim ( cut_str ( $page, "u='", "'" ) ) )
 		{
@@ -55,73 +55,18 @@ class easy_share_com extends DownloadClass
 		
 		$this->RedirectDownload( $Href, $FileName, $cookies, $post, $Referer, $pauth );
 		exit ();
-		
-		/*
-	$es = $_POST ['es'];
-	if ($es == "ok") {    
-		$post = array ();
-		$post ["captcha"] = $_POST ["captcha"];
-		$post ["id"] = $_POST ["id"];
-		$cookie = $_POST ["cookie"];
-		$Referer = $_POST ["referer"];
-		$FileName = urldecode ( $_POST ["name"] );       
-		$Url = parse_url ($_POST ["link"] );
-	
-        insert_location ( "$PHP_SELF?filename=" . urlencode ( $FileName ) . "&host=" . $Url ["host"] . "&path=" . urlencode ( $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "") ) . "&referer=" . urlencode ( $Referer ) . "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&cookie=" . urlencode ( $cookie ) . "&post=" . urlencode ( serialize ( $post ) ) . "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&method=POST&link=" . urlencode ( $LINK ) . ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ( $_GET ["comment"] ) : "") . "&auth=" . $auth . ($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : "") );
-	    
-        } else {
-		$page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : ""), 0, 0, 0, 0, $_GET ["proxy"], $pauth );
-        $cookies=biscottiDiKaox($page);
-		is_present ( $page, 'File was deleted' );
-		is_present ( $page, 'File not found' );
-        is_present ( $page, 'You have downloaded over 150MB during last hour.' );  
-		$name = cut_str ( $page, "<title>Download ", "," );
-		$count = (cut_str ( $page, "w='", "'" ));
-		insert_timer ( $count, "Waiting link timelock", "", true );
-        if ( $src = cut_str ( $page, "u='", "'" )){
-        $Url=parse_url("http://".$Url["host"].$src);
-        $page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"], $LINK, $cookies, 0, 0, $_GET ["proxy"], $pauth );
-        is_page ( $page );
-        }
-        $LINK=cut_str($page,'post" action="','"');
-        $id=cut_str($page,'"id" value="','"'); 
-        $imgpath=cut_str($page,'<img src="','"');
-        if (!$imgpath) html_error ( 'Error getting link' );   
-        $imgurl="http://".$Url["host"].$imgpath;
-        $Url=parse_url($imgurl);
-        $page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"], $LINK, $cookies, 0, 0, $_GET ["proxy"], $pauth );
-        is_page ( $page );
-        
-    
-        $cook=GetCookies($page);
-        $cookies.="; ".$cook;
-		
-		
-        $headerend = strpos($page,"JFIF");
-        $pass_img = substr($page,$headerend-6);
-        $imgfile=$download_dir."easyshare_captcha.jpg"; 
-        if (file_exists($imgfile)){ unlink($imgfile);} 
-	    write_file($imgfile, $pass_img);
-
-        print "<form method=\"post\" action=\"$PHP_SELF\">$nn";
-        print "<b>Please enter code:</b><br>$nn";
-        print "<img src=\"$imgfile?" . time () . "\" >$nn";
-        print "<input name=\"link\" value=\"$LINK\" type=\"hidden\">$nn";
-        print "<input name=\"referer\" value=\"$Referer\" type=\"hidden\">$nn";
-        print "<input type=hidden name=id value=$id>$nn";
-        print "<input name=\"es\" value=\"ok\" type=\"hidden\">$nn";
-        print "<input name=\"cookie\" value=\"$cookies\" type=\"hidden\">$nn";
-        print "<input name=\"name\" value=\"" . urlencode ( $name ) . "\" type=\"hidden\">$nn";
-        print "<input name=\"captcha\" type=\"text\" >";
-        print "<input name=\"Submit\" value=\"Submit\" type=\"submit\"></form>";        
-		}
-		*/
 	}
 	
 	private function DownloadPremium( $link )
 	{
-		global $premium_acc, $pauth;
-		$Referer = $link;
+		global $premium_acc, $pauth, $Referer;
+		
+		// Getting file name
+		$page = $this->GetPage( $link, 0, 0, 0, $pauth );
+		is_present ( $page, 'File was deleted' );
+		is_present ( $page, 'File not found' );
+        $FileName = trim ( cut_str ( $page, "<title>Download ", "," ) );
+		// Getting file name end
 		
 		// login 
 		$login = "http://www.easy-share.com/accounts/login";
@@ -129,20 +74,24 @@ class easy_share_com extends DownloadClass
 		$post ["login"] = $_REQUEST ["premium_user"] ? $_REQUEST ["premium_user"] : $premium_acc ["easyshare"] ["user"];
 		$post ["password"] = $_REQUEST ["premium_pass"] ? $_REQUEST ["premium_pass"] : $premium_acc ["easyshare"] ["pass"];
 		$post ["remember"] = "1";
-		
+			
 		$page = $this->GetPage( $login, 0, $post, "http://www.easy-share.com/", $pauth );
 		
-		$cook = getcookies ( $page );
+		$cook = GetCookies( $page );
 		// end login 
 		
-		is_notpresent ( $cook, "PREMIUMSTATUS", "Login failed<br>Wrong login/password?" );
+		is_notpresent ( $cook, "PREMIUM", "Login failed<br>Wrong login/password?" );
 		
-		$Url = parse_url ( $link );
-		$page = $this->GetPage( $login, $cook, 0, 0, $pauth );
-			
-		$FileName = ! $FileName ? basename ( $Url ["path"] ) : $FileName;
+		$page = $this->GetPage( $link, $cook, 0, 0, $pauth );
 		is_present ( $page, 'File was deleted' );
 		is_present ( $page, 'File not found' );
+		
+		if ( !isset($FileName) || $FileName == "" )
+		{
+			$Url = parse_url ( $link );
+			$FileName = ! $FileName ? basename ( $Url ["path"] ) : $FileName;
+		}
+		
 		preg_match ( '/Location:.+?\\r/i', $page, $loca );
 		$redir = rtrim ( $loca [0] );
 		preg_match ( '/http:.+/i', $redir, $loca );
@@ -183,8 +132,12 @@ class easy_share_com extends DownloadClass
 		$bis=str_replace("  "," ",$bis);     
 		return rtrim($bis);
 	}
+}
 
-}	
-    // fixed by kaox 04/07/2009
-	// FIXED and re-written by rajmalhotra on 10 Jan 2010
+/**************************************************\  
+FIXED by kaox 04/07/2009
+FIXED and RE-WRITTEN by rajmalhotra on 10 Jan 2010
+FIXED by rajmalhotra on 12 Feb 2010 => FIXED downloading from Premium Account
+\**************************************************/	
+
 ?>
