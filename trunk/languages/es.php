@@ -380,4 +380,5 @@ $lang[372]	=	'Descomprimir ficheros seleccionados';
 $lang[373]	=	'<b>Extrayendo ficheros desde %1$s</b>:';
 $lang[374]	=	'Estado:';
 $lang[375]	=	'Seleccionar texto';
+$lang[376]  =   'Cuentas Premium :'; 
 ?>

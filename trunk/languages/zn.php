@@ -381,4 +381,5 @@ $lang[372]	=	'Unrar selected';
 $lang[373]	=	'<b>Extracting files from %1</b>:';
 $lang[374]	=	'Status:';
 $lang[375]	=	'Select text';
+$lang[376]  =   'Premium Accounts :'; 
 ?>
