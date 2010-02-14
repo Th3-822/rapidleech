@@ -1,5 +1,6 @@
 <?php
 // You can do some initialization for the template here
+@date_default_timezone_set(date_default_timezone_get());
 ?>
 <!DOCTYPE html public "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>

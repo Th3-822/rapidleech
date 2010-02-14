@@ -417,11 +417,11 @@ function is__writable($path) {
 
 function link_for_file($filename, $only_link = FALSE, $style = '') {
 	$inCurrDir = strstr(dirname($filename), ROOT_DIR) ? TRUE : FALSE;
+	$PHP_SELF = !$PHP_SELF ? $_SERVER ["PHP_SELF"] : $PHP_SELF;
 	if ($inCurrDir) {
-		$PHP_SELF = !$PHP_SELF ? $_SERVER ["PHP_SELF"] : $PHP_SELF;
 		$Path = parse_url($PHP_SELF);
 		$Path = substr($Path["path"], 0, strlen($Path["path"]) - strlen(strrchr($Path["path"], "/")));
-		$Path = str_replace('\\', '', $Path.substr(dirname($filename), strlen(ROOT_DIR)));
+		$Path = str_replace('\\', '/', $Path.substr(dirname($filename), strlen(ROOT_DIR)));
 	}
 	elseif (dirname($PHP_SELF.'safe') != '/') {
 		$in_webdir_path = dirname(str_replace('\\', '/', $PHP_SELF.'safe'));
@@ -430,7 +430,7 @@ function link_for_file($filename, $only_link = FALSE, $style = '') {
 		for ($i=1; $i <= $in_webdir_sub; $i++) {
 			$in_webdir_path = substr($in_webdir_path, 0, strrpos($in_webdir_path, '/'));
 			$in_webdir_root = realpath($in_webdir_root.'/../').'/';
-			$in_webdir = (strpos(dirname($filename).'/', $in_webdir_root) === 0) ? TRUE : FALSE;
+			$in_webdir = (strpos(str_replace('\\', '/', dirname($filename).'/'), str_replace('\\', '/', $in_webdir_root)) === 0) ? TRUE : FALSE;
 			if ($in_webdir) {
 				$Path = dirname($in_webdir_path.'/'.substr($filename, strlen($in_webdir_root)));
 				break;
