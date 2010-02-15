@@ -140,6 +140,7 @@ if ( !empty ( $premium_acc ) )
 <option value="22"><?php echo lang(226); ?></option>
 <option value="34"><?php echo lang(227); ?></option>
 <option value="35"><?php echo lang(228); ?></option>
+<option value="35"><?php echo lang(377); ?></option>
 
 </select>
 </td>
