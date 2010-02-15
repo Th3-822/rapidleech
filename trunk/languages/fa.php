@@ -382,5 +382,6 @@ $lang[372]	=	'Unrar selected';
 $lang[373]	=	'<b>Extracting files from %1</b>:';
 $lang[374]	=	'Status:';
 $lang[375]	=	'Select text';
-$lang[376]  =   'Premium Accounts :'; 
+$lang[376]  =   'Premium Accounts :';
+$lang[377]	=	'37 [Video: MP4 1920×1080 | Audio: AAC 2ch 44.10kHz]';
 ?>
