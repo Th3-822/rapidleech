@@ -46,7 +46,7 @@ if(!$ifr == "ok"){
     $page=geturl($gurl["host"], defport($Url), $gurl["path"]."?".$gurl["query"], 0, $cook, 0, 0, $_GET["proxy"],$pauth);
     	$headerend = strpos($page,"GIF");
 		$pass_img = substr($page,$headerend);
-        $imgfile=$download_dir."ifolder_captcha.gif";
+        $imgfile=$options['download_dir']."ifolder_captcha.gif";
 //	    if (file_exists($imgfile)) unlink($imgfile);
 //		write_file($imgfile, $pass_img);
 		$fimg= fopen($imgfile,"w");

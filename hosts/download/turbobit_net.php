@@ -98,7 +98,7 @@ insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]
         $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
         $headerend = strpos($page,"PNG");
         $imgfile = substr($page,$headerend-1);
-        $capimg= $download_dir."turbobit_captcha.png" ;
+        $capimg= $options['download_dir']."turbobit_captcha.png" ;
       
         if (file_exists($capimg)) unlink($capimg) ;
         

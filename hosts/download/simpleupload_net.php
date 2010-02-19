@@ -22,7 +22,7 @@ if($su == "ok"){
 	preg_match('/name="anyCaptcha".+value="(.+?)">/', $page, $hn);
 	preg_match('/name="public_key".+value="(.+?)">/', $page, $public);
 	preg_match('/<img *class="img" *src=http://www.simpleupload.net/imagecode/ (.+?)"/', $page, $imagecode);
-	$imgfile=$download_dir."Captcha.gif";
+	$imgfile=$options['download_dir']."Captcha.gif";
 	write_file($imgfile, $pass_img);
 	preg_match('/[^\'"]+download\d\/[^\'"]+/', $page, $dwn);
 	$Url=parse_url($dwn[0]);	

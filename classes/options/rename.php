@@ -1,7 +1,7 @@
 <?php
 function rl_rename() {
-	global $disable_deleting, $list;
-  if ($disable_deleting) {
+	global $list, $options;
+	if ($options['disable_deleting'] || $options['disable_disable_rename']) {
     echo lang(147);
   }
   else {
@@ -41,38 +41,44 @@ function rl_rename() {
 }
 
 function rename_go() {
-	global $list, $forbidden_filetypes;
+	global $list, $options;
 	$smthExists = FALSE;
-	for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {
-		$file = $list [$_POST ["files"] [$i]];
-		
-		if (file_exists ( $file ["name"] )) {
-			$smthExists = TRUE;
-			$newName = dirname ( $file ["name"] ) . PATH_SPLITTER . stripslashes(basename($_POST["newName"][$i]));
-			$filetype = strrchr ( $newName, "." );
+
+  if (!$options['disable_deleting'] && !$options['disable_rename']) {
+		for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {
+			$file = $list [$_POST ["files"] [$i]];
 			
-			if (is_array ( $forbidden_filetypes ) && in_array ( strtolower ( $filetype ), $forbidden_filetypes )) {
-				printf(lang(82),$filetype);
-				echo "<br><br>";
-			} else {
-				if (@rename ( $file ["name"], $newName )) {
-					printf(lang(194),$file['name'],basename($newName));
+			if (file_exists ( $file ["name"] )) {
+				$smthExists = TRUE;
+				$newName = dirname ( $file ["name"] ) . PATH_SPLITTER . stripslashes(basename($_POST["newName"][$i]));
+				$filetype = strrchr ( $newName, "." );
+				
+				if (is_array ( $options['forbidden_filetypes'] ) && in_array ( strtolower ( $filetype ), $options['forbidden_filetypes'] )) {
+					printf(lang(82),$filetype);
 					echo "<br><br>";
-					$list [$_POST ["files"] [$i]] ["name"] = $newName;
 				} else {
-					printf(lang(202),$file['name']);
-					echo "<br><br>";
+					if (@rename ( $file ["name"], $newName )) {
+						printf(lang(194),$file['name'],basename($newName));
+						echo "<br><br>";
+						$list [$_POST ["files"] [$i]] ["name"] = $newName;
+					} else {
+						printf(lang(202),$file['name']);
+						echo "<br><br>";
+					}
 				}
+			} else {
+				printf(lang(145),$file['name']);
+				echo "<br><br>";
 			}
-		} else {
-			printf(lang(145),$file['name']);
-			echo "<br><br>";
+		}
+		if ($smthExists) {
+			if (! updateListInFile ( $list )) {
+				echo lang(9)."<br><br>";
+			}
 		}
 	}
-	if ($smthExists) {
-		if (! updateListInFile ( $list )) {
-			echo lang(9)."<br><br>";
-		}
+	else {
+		echo('<script type="text/javascript">location.href="'.$PHP_SELF.'?act=files";</script>');
 	}
 }
 ?>

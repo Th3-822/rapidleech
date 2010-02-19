@@ -1,6 +1,6 @@
 <?php
 function merge() {
-	global $disable_deleting, $list, $PHP_SELF;
+	global $options, $list, $PHP_SELF;
 	if (count($_GET["files"]) !== 1) {
 		echo lang(167)."<br><br>";
 	}
@@ -30,7 +30,7 @@ function merge() {
 <input type="radio" name="crc_mode" value="fake"<?php if (! function_exists ( 'hash_file' )) { echo 'checked="checked"'; }?>>&nbsp;<?php echo lang(174); ?></span></td>
 </tr>
 <tr>
-<td><input type="checkbox" name="del_ok" <?php echo $disable_deleting ? 'disabled' : 'checked'; ?>>&nbsp;<?php echo lang(175); ?></td>
+<td><input type="checkbox" name="del_ok" <?php echo $options['disable_deleting'] ? 'disabled' : 'checked'; ?>>&nbsp;<?php echo lang(175); ?></td>
 </tr>
 <?php
 					} else {
@@ -52,7 +52,7 @@ function merge() {
 }
 
 function merge_go() {
-	global $list, $check_these_before_unzipping, $forbidden_filetypes, $disable_deleting;
+	global $list, $options;
 	if (count($_POST["files"]) !== 1) {
 		echo lang(167)."<br><br>";
 	} else {
@@ -98,7 +98,7 @@ function merge_go() {
 					echo "<br><br>";
 				} elseif ($usingcrcfile && $partsSize != $data ['size']) {
 					echo lang(180)."<br><br>";
-				} elseif ($check_these_before_unzipping && is_array ( $forbidden_filetypes ) && in_array ( strtolower ( strrchr ( $filename, "." ) ), $forbidden_filetypes )) {
+				} elseif ($options['check_these_before_unzipping'] && is_array ( $options['forbidden_filetypes'] ) && in_array ( strtolower ( strrchr ( $filename, "." ) ), $options['forbidden_filetypes'] )) {
 					printf(lang(181),strrchr ( $filename, "." ));
 					echo "<br><br>";
 				} else {
@@ -140,7 +140,7 @@ function merge_go() {
 							} else {
 								printf(lang(185),$filename);
 								echo '!<br><br>';
-								if ($usingcrcfile && $fc != '00111111' && $_POST ["del_ok"] && ! $disable_deleting) {
+								if ($usingcrcfile && $fc != '00111111' && $_POST["del_ok"] && !$options['disable_deleting']) {
 									if ($usingcrcfile) {
 										$partfiles [] = $file ["name"];
 									}

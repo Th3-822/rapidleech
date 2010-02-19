@@ -122,7 +122,7 @@ $lang[113]	=	'Erro ao enviar dados';
 $lang[114]	=	'Ativo';
 $lang[115]	=	'Indispon&iacute;vel';
 $lang[116]	=	'Morto';
-$lang[117]	=	'Voc&ecirc; precisa carregar/ativar a extens&atilde;o cURL (http://www.php.net/cURL) ou voc&ecirc; pode definir $fgc = 1 em config.php.';
+$lang[117]	=	'Voc&ecirc; precisa carregar/ativar a extens&atilde;o cURL (http://www.php.net/cURL) ou voc&ecirc; pode definir \'fgc\' => 1 em config.php.';
 $lang[118]	=	'cURL est&aacute; habilitado';
 $lang[119]	=	'PHP vers&atilde;o 5 &eacute; recomendada, embora n&atilde;o seja obrigat&oacute;rio';
 $lang[120]	=	'Verifique se o safe mode est&aacute; desativado pois o script n&atilde;o funciona com ele ativado';

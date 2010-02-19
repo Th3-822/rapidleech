@@ -61,7 +61,7 @@ if ($zd == "ok") {
 	
 	$headerend = strpos($page,"\r\n\r\n");
 	$pass_img = substr($page,$headerend+4);
-	write_file($download_dir."ziddu_captcha.jpg", $pass_img);
+	write_file($options['download_dir']."ziddu_captcha.jpg", $pass_img);
 	$randnum = rand(10000, 100000);
 	
 	$img_data = explode("\r\n\r\n", $page);
@@ -70,7 +70,7 @@ if ($zd == "ok") {
 	
 	print 	"<form method=\"post\" action=\"$PHP_SELF\">$nn";
 	print	"<b>Please enter code:</b><br>$nn";
-	print	"<img src=\"{$download_dir}ziddu_captcha.jpg?id=".$randnum."\" >$nn";
+	print	"<img src=\"{$options['download_dir']}ziddu_captcha.jpg?id=".$randnum."\" >$nn";
 	print	"<input name=\"link\" value=\"$LINK\" type=\"hidden\">$nn";
 	print	"<input name=\"referer\" value=\"$referer\" type=\"hidden\">$nn";
 	print	"<input name=\"flink\" value=\"$flink\" type=\"hidden\">$nn";

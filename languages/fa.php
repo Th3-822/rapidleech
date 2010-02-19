@@ -123,7 +123,7 @@ $lang[113]	=	'خطا در ارسال اطلاعات';
 $lang[114]	=	'فعال';
 $lang[115]	=	'دردسترس نيست';
 $lang[116]	=	'غير فعال';
-$lang[117]	=	'You need to load/activate the cURL extension (http://www.php.net/cURL) or you can set $fgc = 1 in config.php.';
+$lang[117]	=	'You need to load/activate the cURL extension (http://www.php.net/cURL) or you can set \'fgc\' => 1 in config.php.';
 $lang[118]	=	'cURL فعال';
 $lang[119]	=	'PHP version 5 is recommended although it is not obligatory';
 $lang[120]	=	'Check if your safe mode is turned off as the script cannot work with safe mode on';

@@ -121,7 +121,7 @@ $lang[113]	=	'Errore Nell\'Invio Dei Dati';
 $lang[114]	=	'Attivo';
 $lang[115]	=	'Non disponibile';
 $lang[116]	=	'Inattivo';
-$lang[117]	=	'Hai bisogno di caricare/attivare l\'estensione cURL (http://www.php.net/cURL) oppure puoi settare $fgc = 1 in config.php.';
+$lang[117]	=	'Hai bisogno di caricare/attivare l\'estensione cURL (http://www.php.net/cURL) oppure puoi settare \'fgc\' => 1 in config.php.';
 $lang[118]	=	'cURL &eacute; attivo';
 $lang[119]	=	'&Eacute; raccomandata la versione 5 di PHP sebbene non sia obbligatoria';
 $lang[120]	=	'Verifica se l\'opzione safe mode &eacute; disattivata poich&eacute; lo script non funziona con safe mode attivo';

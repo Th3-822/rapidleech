@@ -232,12 +232,12 @@ function _cmp_list_enums($a, $b) {
 }
 
 function _create_list() {
-	global $list, $_COOKIE, $show_all, $forbidden_filetypes;
+	global $list, $_COOKIE, $options;
 	$glist = array ();
-	if (($show_all === true) & ($_COOKIE ["showAll"] == 1)) {
+	if (($options['show_all'] === true) & ($_COOKIE ["showAll"] == 1)) {
 		$dir = dir ( DOWNLOAD_DIR );
 		while ( false !== ($file = $dir->read ()) ) {
-			if ($file != "." && $file != ".." && (! is_array ( $forbidden_filetypes ) || ! in_array ( strtolower ( strrchr ( $file, "." ) ), $forbidden_filetypes )) && is_file ( DOWNLOAD_DIR . $file ) && basename ( $file ) != "files.lst") {
+			if ($file != "." && $file != ".." && (! is_array ( $options['forbidden_filetypes'] ) || ! in_array ( strtolower ( strrchr ( $file, "." ) ), $options['forbidden_filetypes'] )) && is_file ( DOWNLOAD_DIR . $file ) && basename ( $file ) != "files.lst") {
 				$file = DOWNLOAD_DIR . $file;
 				$time = filemtime ( $file );
 				while ( isset ( $glist [$time] ) )

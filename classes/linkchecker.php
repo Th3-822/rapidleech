@@ -16,11 +16,11 @@ $debug = 1; // change it to one to enable it.
 set_time_limit(120);
 $maxlinks = 300;
 $lcver = 301;
-$fgc = (extension_loaded("curl") ? 0 : 1);
+$options['fgc'] = (extension_loaded("curl") ? 0 : 1);
 //Lets use this as a function to visit the site.
 function curl($link, $post='0') {
-	global $fgc;
-	if($fgc == 1) {
+	global $options;
+	if($options['fgc'] == 1) {
 		file_get_contents($link);
 	} else {
 		$ch = curl_init($link);

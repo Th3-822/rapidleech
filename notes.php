@@ -1,6 +1,7 @@
 <?php
 define('RAPIDLEECH', 'yes');
-require('configs/config.php');
+define('CONFIG_DIR', 'configs/');
+require_once(CONFIG_DIR.'setup.php');
 define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 // Include other useful functions
 require_once('classes/other.php');

@@ -1,7 +1,7 @@
 <?php
 function delete() {
-	global $disable_deleting,$list;
-	if ($disable_deleting) {
+	global $list, $options;
+	if ($options['disable_deleting'] || $options['disable_delete']) {
 		echo lang(147);
 	}
 	else {
@@ -37,7 +37,7 @@ function delete() {
 
 function delete_go() {
 	global $list;
-	if (isset($_POST["yes"])) {
+	if (isset($_POST["yes"]) && !$options['disable_deleting'] && !$options['disable_delete']) {
 		for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {
 			$file = $list [$_POST ["files"] [$i]];
 			if (file_exists ( $file ["name"] )) {

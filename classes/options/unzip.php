@@ -44,7 +44,7 @@ function unzip() {
 }
 
 function unzip_go() {
-	global $list, $forbidden_filetypes, $download_dir, $check_these_before_unzipping;
+	global $list, $options;
 	require_once (CLASS_DIR . "unzip.php");
 	$any_file_unzippped = false;
 	for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {
@@ -55,14 +55,14 @@ function unzip_go() {
 			$file_inside_zip_exists = false;
 			$forbidden_inside_zip = false;
 			foreach ($allf as $k => $properties) {
-				if (file_exists($download_dir.basename($properties['file_name']))) {
+				if (file_exists($options['download_dir'].basename($properties['file_name']))) {
 					$file_inside_zip_exists = true; break;
 				}
 			}
-			if ($check_these_before_unzipping) {
+			if ($options['check_these_before_unzipping']) {
 				foreach ( $allf as $k => $property ) {
 					$zfiletype = strrchr ( $property ['file_name'], "." );
-					if (is_array ( $forbidden_filetypes ) && in_array ( strtolower ( $zfiletype ), $forbidden_filetypes )) {
+					if (is_array ( $options['forbidden_filetypes'] ) && in_array ( strtolower ( $zfiletype ), $options['forbidden_filetypes'] )) {
 						$forbidden_inside_zip = true; break;
 					}
 				}
@@ -76,12 +76,12 @@ function unzip_go() {
 				echo "<br><br>";
 			}
 			else {
-				$zip->unzipAll ( $download_dir );
+				$zip->unzipAll ( $options['download_dir'] );
 				if ($zip->getList () != false) {
 					$any_file_unzippped = true;
 					echo '<b>'.htmlentities(basename($file["name"])).'</b>&nbsp;unzipped successfully<br><br>';
 					foreach ($allf as $k => $properties) {
-						$efile = $download_dir.basename($properties['file_name']);
+						$efile = $options['download_dir'].basename($properties['file_name']);
 						if (is_file($efile)) {
 							$time = filemtime($efile); while (isset($list[$time])) { $time++; }
 							$list[$time] = array("name" => $efile, "size" => bytesToKbOrMbOrGb(filesize($efile)), "date" => $time);

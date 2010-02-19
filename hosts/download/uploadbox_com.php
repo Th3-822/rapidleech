@@ -36,7 +36,7 @@ if ($_POST['ub'] == 'ok') {
 	$pass_img = substr($page,$headerend+4);
 	$pngstart = strpos($pass_img,"PNG");
 	$pass_img = substr($pass_img,$pngstart-1);
-	write_file($download_dir."uploadbox_captcha.png", $pass_img);
+	write_file($options['download_dir']."uploadbox_captcha.png", $pass_img);
 	$randnum = rand(10000, 100000);
 	
 	$img_data = explode("\r\n\r\n", $page);
@@ -46,7 +46,7 @@ if ($_POST['ub'] == 'ok') {
 
 	print 	"<form method=\"post\" action=\"".$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "")."\">$nn";
 	print	"<b>Please enter code:</b><br>$nn";
-	print	"<img src=\"{$download_dir}uploadbox_captcha.png?id=".$randnum."\" >$nn";
+	print	"<img src=\"{$options['download_dir']}uploadbox_captcha.png?id=".$randnum."\" >$nn";
 	print	"<input name=\"link\" value=\"$LINK\" type=\"hidden\">$nn";
 	print	"<input type='hidden' name='code' value=$code>$nn";
 	print	"<input name=\"ub\" value=\"ok\" type=\"hidden\">$nn";

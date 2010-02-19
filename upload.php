@@ -1,6 +1,7 @@
 <?php
 define('RAPIDLEECH', 'yes');
 define('IMAGE_DIR', 'images/');
+define('CONFIG_DIR', 'configs/');
 define('HOST_DIR', 'hosts/');
 error_reporting(0);
 set_time_limit(0);
@@ -11,11 +12,11 @@ ignore_user_abort(1);
 clearstatcache();
 error_reporting(6135);
 $nn = "\r\n";
-require_once("configs/config.php");
+require_once(CONFIG_DIR.'setup.php');
 require_once("classes/other.php");
 define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 
-if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logged_user($users)) === false))
+if ($options['login'] === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logged_user($options['users'])) === false))
 	{
 		header("WWW-Authenticate: Basic realm=\"RAPIDLEECH PLUGMOD\"");
 		header("HTTP/1.0 401 Unauthorized");
@@ -27,10 +28,10 @@ include("classes/http.php");
 if(!defined('CRLF')) define('CRLF',"\r\n");
 $_REQUEST['filename']=base64_decode($_REQUEST['filename']);
 
-// Check if requested upload file is within our $download_dir
+// Check if requested upload file is within our $options['download_dir']
 // We put basename() because we are quite sure that no one is able to upload things besides the download directory normally
 // htmlentities() prevents XSS attacks
-$_REQUEST['filename'] = htmlentities($download_dir.basename($_REQUEST['filename']));
+$_REQUEST['filename'] = htmlentities($options['download_dir'].basename($_REQUEST['filename']));
 $_REQUEST['uploaded'] = htmlentities($_REQUEST['uploaded']);
 // We want to check if the selected upload service is a valid ones
 $d = opendir ( HOST_DIR . "upload/" );
@@ -249,7 +250,7 @@ echo $not_done ? "" : '<p><center><b><a href="javascript:window.close();">'.lang
 if (isset($_GET['auul'])) {
 ?><script type='text/javascript' language='javascript'>parent.nextlink<?php echo $_GET['auul']; ?>();</script><?php
 	// Write links to a file
-	$file = $download_dir."myuploads.txt";	// Obviously it was a mistake not making it a variable earlier
+	$file = $options['download_dir']."myuploads.txt";	// Obviously it was a mistake not making it a variable earlier
 	$fh = fopen($file, 'a');
 	if (!$_GET['save_style'] && $_GET['save_style'] !== lang(51)) {
 		$dash = "";

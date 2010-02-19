@@ -1,6 +1,6 @@
 <?php
 function rl_mail() {
-	global $disable_deleting, $list;
+	global $options, $list;
 ?>
 <form method="post"><input type="hidden" name="act" value="mail_go">
 <?php echo lang(104); ?>:
@@ -21,7 +21,7 @@ function rl_mail() {
 		<td><input type="submit" value="Send"></td>
 	</tr>
 	<tr>
-		<td><input type="checkbox" name="del_ok" <?php echo $disable_deleting ? "disabled" : "checked";?>>&nbsp;<?php echo lang(165); ?></td>
+		<td><input type="checkbox" name="del_ok" <?php echo $options['disable_deleting'] ? "disabled" : "checked";?>>&nbsp;<?php echo lang(165); ?></td>
 	</tr>
 	<tr>
 		<td></td>
@@ -60,7 +60,7 @@ function rl_mail() {
 }
 
 function mail_go() {
-	global $list, $disable_deleting;
+	global $list, $options;
 	require_once (CLASS_DIR . "mail.php");
 	if (! checkmail ( $_POST ["email"] )) {
 		echo lang(166)."<br><br>";
@@ -70,7 +70,7 @@ function mail_go() {
 			$file = $list [$_POST ["files"] [$i]];
 			if (file_exists ( $file ["name"] )) {
 				if (xmail ( "$fromaddr", $_POST ['email'], "File " . basename ( $file ["name"] ), "File: " . basename ( $file ["name"] ) . "\r\n" . "Link: " . $file ["link"] . ($file ["comment"] ? "\r\nComments: " . str_replace ( "\\r\\n", "\r\n", $file ["comment"] ) : ""), $file ["name"], $_POST ["partSize"], $_POST ["method"] )) {
-					if ($_POST ["del_ok"] && ! $disable_deleting) {
+					if ($_POST["del_ok"] && !$options['disable_deleting']) {
 						if (@unlink ( $file ["name"] )) {
 							$v_ads = " and deleted.";
 							unset ( $list [$_POST ["files"] [$i]] );

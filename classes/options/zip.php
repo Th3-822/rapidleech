@@ -39,8 +39,8 @@ function zip() {
 }
 
 function zip_go() {
-	global $list, $download_dir;
-	$saveTo = realpath ( $download_dir ) . '/';
+	global $list, $options;
+	$saveTo = realpath ( $options['download_dir'] ) . '/';
 	$_POST ["archive"] = (strlen ( trim ( urldecode ( $_POST ["archive"] ) ) ) > 4 && substr ( trim ( urldecode ( $_POST ["archive"] ) ), - 4 ) == ".zip") ? trim ( urldecode ( $_POST ["archive"] ) ) : "archive.zip";
 	$_POST ["archive"] = $saveTo.basename($_POST ["archive"]);
 	for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {

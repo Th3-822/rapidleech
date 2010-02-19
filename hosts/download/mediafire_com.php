@@ -52,7 +52,7 @@ $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Ur
 		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cook, 0, 0, $_GET["proxy"],$pauth);
 		$headerend = strpos($page,"\r\n\r\n");
 		$pass_img = substr($page,$headerend+4);
-		$imgfile=$download_dir."mediafire_captcha.jpg";
+		$imgfile=$options['download_dir']."mediafire_captcha.jpg";
 		
 		if (file_exists($imgfile)){ unlink($imgfile);} 
         write_file($imgfile, $pass_img);

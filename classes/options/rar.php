@@ -1,7 +1,7 @@
 <?php
 
 function rar() {
-  global $PHP_SELF, $list;
+  global $PHP_SELF, $list, $options;
   if (!is_file(ROOT_DIR.'/rar/rar')) { echo lang(343).'<br><br>'; }
   else {
 ?>
@@ -77,7 +77,7 @@ function rar() {
             </tr>
             <tr>
               <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
-                <input type="checkbox" name="rar_opts[delete]" value="1"><?php echo lang(355); ?>
+                <input type="checkbox" name="rar_opts[delete]" value="1"<?php echo ($options['disable_deleting'] ? ' disabled="disabled"' : '');?>><?php echo lang(355); ?>
               </td>
               <td style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
                 <input type="checkbox" name="rar_opts[solid]" value="1"><?php echo lang(356); ?>
@@ -179,7 +179,7 @@ function rar_go() {
 
 
 function rar_go_go() {
-  global $check_these_before_unzipping, $download_dir, $forbidden_filetypes, $list;
+  global $options, $list;
 ?>
 <script type="text/javascript">
 function rar_st(elementid, st){
@@ -191,14 +191,15 @@ function rar_st(elementid, st){
 <?php
   flush();
   require_once(CLASS_DIR."rar.php");
-  $rar = new rlRar(stripslashes($_GET['rar_opts']['rarfilename']), $check_these_before_unzipping ? $forbidden_filetypes : array('.xxx'));
+  $rar = new rlRar(stripslashes($_GET['rar_opts']['rarfilename']), $options['check_these_before_unzipping'] ? $options['forbidden_filetypes'] : array('.xxx'));
   if ($rar->rar_return !== 'rar') {
 ?>
 <script type="text/javascript">rar_st('rar_status', '<?php echo lang(343); ?>');</script>
 <?php 
   }
   else {
-    $rar_result = $rar->addtoarchive($_GET['rar_opts'], $download_dir, 'rar_status');
+    if ($options['disable_deleting']) { $_GET['rar_opts']['delete'] = 0; }
+    $rar_result = $rar->addtoarchive($_GET['rar_opts'], $options['download_dir'], 'rar_status');
     echo $rar_result;
     if (strpos($rar_result, ", 'Done')") !== false) {
       _create_list();
@@ -207,22 +208,22 @@ function rar_st(elementid, st){
         foreach ($_GET['rar_opts']['filestorar'] as $rar_tounlist) {
           $rar_tounlist = basename(base64_decode($rar_tounlist));
           if ($rar_tounlist === false) { continue; }
-          $rar_tounlist = realpath($download_dir).'/'.$rar_tounlist;
+          $rar_tounlist = realpath($options['download_dir']).'/'.$rar_tounlist;
           if (is_file($rar_tounlist)) { continue; }
           foreach ($list as $list_key => $list_item) {
             if ($list_item["name"] === $rar_tounlist) { unset($list[$list_key]); }
           }
         }
       }
-      $rar_tolist = realpath($download_dir).'/'.basename($rar->filename);
+      $rar_tolist = realpath($options['download_dir']).'/'.basename($rar->filename);
       if ($_GET['rar_opts']['vols'] && !is_file($rar_tolist)) {
         if (substr(strtolower($rar_tolist), -4) == '.rar') { $rar_tolist = substr($rar_tolist, 0, -4); }
         $tmp = basename(strtolower($rar_tolist)).'.part';
-        $rar_dir = opendir(realpath($download_dir).'/');
+        $rar_dir = opendir(realpath($options['download_dir']).'/');
         while (false !== ($rar_f_dd = readdir($rar_dir))) {
           $rar_f_dd_ = basename(strtolower($rar_f_dd));
           if ($tmp == substr($rar_f_dd_, 0, strlen($tmp)) && is_numeric(substr($rar_f_dd_, strlen($tmp), -4))) {
-            $rar_f_dd = realpath($download_dir).'/'.basename($rar_f_dd);
+            $rar_f_dd = realpath($options['download_dir']).'/'.basename($rar_f_dd);
             $time = filemtime($rar_f_dd); while (isset($list[$time])) { $time++; }
             $list[$time] = array("name" => $rar_f_dd, "size" => bytesToKbOrMbOrGb(filesize($rar_f_dd)), "date" => $time);
           }

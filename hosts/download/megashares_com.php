@@ -123,11 +123,11 @@ Please try again momentarily.", 0);
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookies, 0, 0, $_GET["proxy"],$pauth);
 			$headerend = strpos($page,"\r\n\r\n");
 			$pass_img = substr($page,$headerend+4);
-			write_file($download_dir."megashare_captcha.png", $pass_img);
+			write_file($options['download_dir']."megashare_captcha.png", $pass_img);
 			
 			print 	"<form method=\"post\" action=\"".$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "")."\" name=\"msform\">$nn";
 			print	"<b>Enter the passport reactivation code in the graphic, then hit the 'Reactivate Passport' button.</b><br><br>$nn";
-			print	"<img src=\"{$download_dir}megashare_captcha.png?id=".rand(10000, 100000)."\" >$nn";
+			print	"<img src=\"{$options['download_dir']}megashare_captcha.png?id=".rand(10000, 100000)."\" >$nn";
 			print	"<input name=\"link\" value=\"$LINK\" type=\"hidden\">$nn";
 			print	"<input name=\"mhost\" value=\"$mhost\" type=\"hidden\">$nn";
 			print	"<input name=\"fquery\" value=\"$fquery[1]\" type=\"hidden\">$nn";

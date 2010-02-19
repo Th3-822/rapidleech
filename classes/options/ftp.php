@@ -1,6 +1,6 @@
 <?php
 function ftp() {
-	global $list, $disable_deleting;
+	global $list, $options;
 ?>
 <form method="post"><input type="hidden" name="act" value="ftp_go">
 <?php echo lang(104); ?>:
@@ -43,7 +43,7 @@ function ftp() {
 							size="23"></td>
 					</tr>
 					<tr>
-						<td><input type="checkbox" name="del_ok" <?php if ($disable_deleting) echo "disabled"; ?>>&nbsp;<?php echo lang(156); ?></td>
+						<td><input type="checkbox" name="del_ok" <?php if ($options['disable_deleting']) echo "disabled"; ?>>&nbsp;<?php echo lang(156); ?></td>
 					</tr>
 				</table>
 				</td>
@@ -68,7 +68,7 @@ function ftp() {
 }
 
 function ftp_go() {
-	global $list, $disable_deleting;
+	global $list, $options;
 	require_once (CLASS_DIR . "ftp.php");
 	$ftp = new ftp ( );
 	if (! $ftp->SetServer ( $_POST ["host"], ( int ) $_POST ["port"] )) {
@@ -135,7 +135,7 @@ function ftp_go() {
 							echo "<script>pr(100, '" . bytesToKbOrMbOrGb ( $FtpBytesTotal ) . "', " . $speed . ")</script>\r\n";
 							flush ();
 							
-							if ($_POST ["del_ok"] && ! $disable_deleting) {
+							if ($_POST["del_ok"] && !$options['disable_deleting']) {
 								if (@unlink ( $file ["name"] )) {
 									unset ( $list [$_POST ["files"] [$i]] );
 								}

@@ -1,6 +1,6 @@
 <?php
 function rl_split() {
-	global $PHP_SELF, $list, $download_dir_is_changeable, $disable_deleting;
+	global $PHP_SELF, $list, $options;
 ?>
 <form method="post"	action="<?php echo $PHP_SELF; ?>">
 <input type="hidden" name="act" value="split_go">
@@ -24,18 +24,18 @@ function rl_split() {
 						</td>
 					</tr>
 <?php
-		if ($download_dir_is_changeable) {
+		if ($options['download_dir_is_changeable']) {
 ?>
 <tr>
 						<td><?php echo lang(40); ?>:&nbsp;<input type="text" name="saveTo[]" size="40"
-							value="<?php echo addslashes ( $download_dir ); ?>"></td>
+							value="<?php echo addslashes ( $options['download_dir'] ); ?>"></td>
 					</tr>
 <?php
 		}
 ?>
 					<tr>
 						<td><input type="checkbox" name="del_ok"
-							<?php echo $disable_deleting ? 'disabled' : 'checked'; ?>>&nbsp;<?php echo lang(203); ?></td>
+							<?php echo $options['disable_deleting'] ? 'disabled' : 'checked'; ?>>&nbsp;<?php echo lang(203); ?></td>
 					</tr>
 					<tr>
 						<td>CRC32 generation mode:<br>
@@ -77,12 +77,12 @@ function rl_split() {
 }
 
 function split_go() {
-	global $list, $download_dir, $download_dir_is_changeable, $disable_deleting;
+	global $list, $options;
 	for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {
 		$split_ok = true;
 		$file = $list [$_POST ["files"] [$i]];
 		$partSize = round ( ($_POST ["partSize"] [$i]) * 1024 * 1024 );
-		$saveTo = ($download_dir_is_changeable ? stripslashes ( $_POST ["saveTo"] [$i] ) : realpath ( $download_dir )) . '/';
+		$saveTo = ($options['download_dir_is_changeable'] ? stripslashes ( $_POST ["saveTo"] [$i] ) : realpath ( $options['download_dir'] )) . '/';
 		$dest_name = basename ( $file ["name"] );
 		$fileSize = filesize ( $file ["name"] );
 		$totalParts = ceil ( $fileSize / $partSize );
@@ -151,7 +151,7 @@ function split_go() {
 			}
 			fclose ( $split_source );
 			if ($split_ok) {
-				if ($_POST ["del_ok"] && ! $disable_deleting) {
+				if ($_POST["del_ok"] && !$options['disable_deleting']) {
 					if (@unlink ( $file ["name"] )) {
 						unset ( $list [$_POST ["files"] [$i]] );
 						echo "Source file deleted.<br><br>";

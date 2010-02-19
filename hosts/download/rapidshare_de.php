@@ -94,7 +94,7 @@ else
 		html_error('Error getting access image url');
 		}
 					
-	if ($images_via_php === true)
+	if ($options['images_via_php'] === true)
 		{
 		$code = str_replace($access_image_url, $PHP_SELF."?image=".urlencode(trim(cut_str($code, '<img src="', '">')))."&referer=".urlencode($Url["scheme"]."://".$Url["host"]."/"), $code);
 		}

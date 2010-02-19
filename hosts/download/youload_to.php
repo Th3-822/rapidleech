@@ -44,7 +44,7 @@ if(preg_match_all('/Set-Cookie: *(.+);/', $page, $cook)){
 $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $free_link, $cookie, 0, 0, $_GET["proxy"],$pauth);
 		$headerend = strpos($page,"GIF89a");
 		$pass_img = substr($page,$headerend);
-                $imgfile=$download_dir."youload_captcha.gif";
+                $imgfile=$options['download_dir']."youload_captcha.gif";
 				if (file_exists($imgfile)) unlink($imgfile);
 		write_file($imgfile, $pass_img);
 

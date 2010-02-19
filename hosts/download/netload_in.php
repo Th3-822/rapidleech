@@ -135,7 +135,7 @@ if($nl == "ok"){
 		
 		$headerend = strpos($page,"\r\n\r\n");
 		$pass_img = substr($page,$headerend+4);
-		write_file($download_dir."netload_captcha.png", $pass_img);
+		write_file($options['download_dir']."netload_captcha.png", $pass_img);
 		*/
 	}else{
 		html_error("Error[getIMG-Link]", 0);

@@ -17,8 +17,8 @@ ob_end_clean();	// Cleans any previous outputs
 ob_implicit_flush(TRUE);	// Sets so that we can update the page without refreshing
 ignore_user_abort(1);	// Continue executing the script even if the page was stopped or closed
 clearstatcache();	// Clear caches created by PHP
-require_once("configs/config.php");	// Reads the configuration file, so we can pick up any accounts needed to use
-define('DOWNLOAD_DIR', (substr($download_dir, 0, 6) == "ftp://" ? '' : $download_dir));	// Set the download directory constant
+require_once(CONFIG_DIR.'setup.php');	// Reads the configuration file, so we can pick up any accounts needed to use
+define('DOWNLOAD_DIR', (substr($options['download_dir'], 0, 6) == "ftp://" ? '' : $options['download_dir']));	// Set the download directory constant
 define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 // Include other useful functions
 require_once('classes/other.php');
@@ -26,10 +26,10 @@ require_once(HOST_DIR.'download/hosts.php');
 require_once(CLASS_DIR.'http.php');
 
 // If you set password for your rapidleech site, this asks for the password
-if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logged_user($users)) === false)) {
+if ($options['login'] === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logged_user($options['users'])) === false)) {
 	header("WWW-Authenticate: Basic realm=\"RAPIDLEECH PLUGMOD\"");
 	header("HTTP/1.0 401 Unauthorized");
-	exit("<html>$nn<head>$nn<title>RAPIDLEECH PLUGMOD</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">$nn</head>$nn<body>$nn<h1>$nn<center>$nn<a href=http://www.rapidleech.com>RapidLeech</a>: Access Denied - Wrong Username or Password$nn</center>$nn</h1>$nn</body>$nn</html>");
+	include('deny.php');
 }
 include(TEMPLATE_DIR.'header.php');
 ?>
@@ -150,7 +150,7 @@ include(TEMPLATE_DIR.'header.php');
 	} else {
 ?>
 <?php 
-$show_all = true;
+$options['show_all'] = true;
 $_COOKIE["showAll"] = 1;
 _create_list();
 require_once("classes/options.php");

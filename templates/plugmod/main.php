@@ -234,10 +234,10 @@ if ( !empty ( $premium_acc ) )
 <tr>
 <td></td>
 </tr>
-<tr>
+<tr<?php echo (!$options['download_dir_is_changeable'] ? ' style="display:none;"' : '');?>>
 <td><input type="checkbox" name="saveto" id="saveto" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('path').style.display=displ;"<?php echo $_COOKIE["saveto"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(252); ?></td>
 <td>&nbsp;</td>
-<td id="path"<?php echo $_COOKIE["saveto"] ? "" : " style=\"display: none;\""; ?>><?php echo lang(253); ?>:&nbsp;<input type="text" name="path" size="40" value="<?php echo ($_COOKIE["path"] ? $_COOKIE["path"] : (substr($download_dir, 0, 6) != "ftp://" ? realpath(DOWNLOAD_DIR) : $download_dir)); ?>"></td>
+<td id="path"<?php echo $_COOKIE["saveto"] ? "" : " style=\"display: none;\""; ?>><?php echo lang(253); ?>:&nbsp;<input type="text" name="path" size="40" value="<?php echo ($_COOKIE["path"] ? $_COOKIE["path"] : (substr($options['download_dir'], 0, 6) != "ftp://" ? realpath(DOWNLOAD_DIR) : $options['download_dir'])); ?>"></td>
 </tr>
 <tr>
 <td></td>
@@ -260,7 +260,7 @@ _create_list();
 require_once(CLASS_DIR."options.php");
 if($list)
   {
-  if ($show_all === true)
+  if ($options['show_all'] === true)
     {
     unset($Path);
     }
@@ -268,7 +268,7 @@ if($list)
 <a href="javascript:setCheckboxes(1);" class="chkmenu"><?php echo lang(256); ?></a> |
 <a href="javascript:setCheckboxes(0);" class="chkmenu"><?php echo lang(257); ?></a> |
 <a href="javascript:setCheckboxes(2);" class="chkmenu"><?php echo lang(258); ?></a>
-<?php if ($show_all === true)
+<?php if ($options['show_all'] === true)
   {
   ?>
 | <a href="javascript:showAll();"><?php echo lang(259); ?>&#173;
@@ -309,7 +309,7 @@ else
 else
   {
   echo "<center>".lang(266)."</center>";
-  if ($show_all === true)
+  if ($options['show_all'] === true)
     {
     unset($Path);
     ?>
@@ -460,12 +460,13 @@ var show2 = 0;
 </script>
 <div align="center">
 <?php
-if ($fileSizeLimited > 0) {
-	print '<span style="color:#FFCC00">'.lang(337).' <b>' . bytesToKbOrMbOrGb ( $fileSizeLimited ) . '</b><br></span>';
+if ($options['file_size_limit'] > 0) {
+	print '<span style="color:#FFCC00">'.lang(337).' <b>' . bytesToKbOrMbOrGb ( $options['file_size_limit']*1024*1024 ) . '</b><br></span>';
 }
 ?>
 
 <?php
+$delete_delay = $options['delete_delay'];
 if (is_numeric($delete_delay) && $delete_delay > 0){
 	if($delete_delay > 3600){
 		$ddelay = round($delete_delay/3600, 1);
@@ -478,14 +479,14 @@ if (is_numeric($delete_delay) && $delete_delay > 0){
 ?>
 </div>
 <div align="center" style="color:#ccc">
-<?php if($server_info) {
+<?php if($options['server_info']) {
 	ob_start();
 ?>
 <div id="server_stats">
 <?php	require_once(CLASS_DIR."sinfo.php"); ?>
 </div>
 <?php
-  if ($ajax_refresh) {
+  if ($options['ajax_refresh']) {
 ?>
 <script type="text/javascript">var stats_timer = setTimeout("refreshStats()",10 * 1000);</script>
 <?php
@@ -502,11 +503,11 @@ print CREDITS;
 </tr>
 </table>
 <?php
-if (($_GET["act"] == 'unrar_go')) {
+if (($_GET["act"] == 'unrar_go') && !$options['disable_unrar']) {
   require_once(CLASS_DIR."options/unrar.php");
   unrar_go_go();
 }
-elseif (($_GET["act"] == 'rar_go')) {
+elseif (($_GET["act"] == 'rar_go') && !$options['disable_rar']) {
   require_once(CLASS_DIR."options/rar.php");
   rar_go_go();
 }
