@@ -84,7 +84,7 @@ is_page($page);
        
         $headerend = strpos($page,"JFIF");
         $pass_img = substr($page,$headerend-6);
-        $imgfile=$download_dir."ifile_captcha.jpg"; 
+        $imgfile=$options['download_dir']."ifile_captcha.jpg"; 
         if (file_exists($imgfile)){ unlink($imgfile);} 
 		write_file($imgfile, $pass_img);
 	

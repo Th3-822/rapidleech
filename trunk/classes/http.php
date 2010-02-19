@@ -90,7 +90,7 @@ function is_page($lpage) {
 }
 
 function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveToFile = 0, $proxy = 0, $pauth = 0, $auth = 0, $scheme = "http", $resume_from = 0) {
-	global $nn, $lastError, $PHP_SELF, $AUTH, $IS_FTP, $FtpBytesTotal, $FtpBytesReceived, $FtpTimeStart, $FtpChunkSize, $Resume, $bytesReceived, $fs, $forbidden_filetypes, $rename_these_filetypes_to, $bw_save, $force_name, $rename_prefix, $rename_suffix;
+	global $nn, $lastError, $PHP_SELF, $AUTH, $IS_FTP, $FtpBytesTotal, $FtpBytesReceived, $FtpTimeStart, $FtpChunkSize, $Resume, $bytesReceived, $fs, $force_name, $options;
 	$scheme .= "://";
 	
 	if (($post !== 0) && ($scheme == "http://")) {
@@ -205,10 +205,10 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		//$bytesTotal = intval ( trim ( cut_str ( $header, "Content-Length:", "\n" ) ) );
 		$bytesTotal = trim ( cut_str ( $header, "Content-Length:", "\n" ) );
 		
-		global $fileSizeLimited;
-		if ($fileSizeLimited > 0) {
-			if ($bytesTotal > $fileSizeLimited) {
-				$lastError = lang(336) . bytesToKbOrMbOrGb ( $fileSizeLimited ) .".";
+		global $options;
+		if ($options['file_size_limit'] > 0) {
+			if ($bytesTotal > $options['file_size_limit']*1024*1024) {
+				$lastError = lang(336) . bytesToKbOrMbOrGb ( $options['file_size_limit']*1024*1024 ) .".";
 				return false;
 			}
 }
@@ -263,27 +263,28 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			}
 		}
 		
-		if (! empty ( $rename_prefix )) {
-			$File_Name = $rename_prefix . '_' . basename ( $saveToFile );
+		if (! empty ( $options['rename_prefix'] )) {
+			$File_Name = $options['rename_prefix'] . '_' . basename ( $saveToFile );
 			$saveToFile = dirname ( $saveToFile ) . PATH_SPLITTER . $File_Name;
 		}
-		if (! empty ( $rename_suffix )) {
+		if (! empty ( $options['rename_suffix'] )) {
 			$ext = strrchr ( basename ( $saveToFile ), "." );
 			$before_ext = explode ( $ext, basename ( $saveToFile ) );
-			$File_Name = $before_ext [0] . '_' . $rename_suffix . $ext;
+			$File_Name = $before_ext [0] . '_' . $options['rename_suffix'] . $ext;
 			$saveToFile = dirname ( $saveToFile ) . PATH_SPLITTER . $File_Name;
 		}
 		$filetype = strrchr ( $saveToFile, "." );
-		if (is_array ( $forbidden_filetypes ) && in_array ( strtolower ( $filetype ), $forbidden_filetypes )) {
-			if ($rename_these_filetypes_to !== false) {
-				$saveToFile = str_replace ( $filetype, $rename_these_filetypes_to, $saveToFile );
-			} else {
+		if (is_array ( $options['forbidden_filetypes'] ) && in_array ( strtolower ( $filetype ), $options['forbidden_filetypes'] )) {
+			if ($options['forbidden_filetypes_block']) {
 				$lastError = sprintf(lang(82),$filetype);
 				return false;
 			}
+			else {
+				$saveToFile = str_replace ( $filetype, $options['rename_these_filetypes_to'], $saveToFile );
+			}
 		}
 		
-		if (@file_exists ( $saveToFile ) && $bw_save) {
+		if (@file_exists ( $saveToFile ) && $options['bw_save']) {
 			html_error ( lang(99).': '.link_for_file($saveToFile), 0 );
 		}
 		if (@file_exists ( $saveToFile ) && $Resume ["use"] === TRUE) {

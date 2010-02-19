@@ -16,14 +16,14 @@ define('CONFIG_DIR', 'configs/');
 define('RAPIDLEECH', 'yes');
 define('ROOT_DIR', realpath("./"));
 define('PATH_SPLITTER', (strstr(ROOT_DIR, "\\") ? "\\" : "/"));
-require_once("configs/config.php");
-if (substr($download_dir,-1) != '/') $download_dir .= '/';
-define('DOWNLOAD_DIR', (substr($download_dir, 0, 6) == "ftp://" ? '' : $download_dir));
+require_once(CONFIG_DIR.'setup.php');
+if (substr($options['download_dir'],-1) != '/') $options['download_dir'] .= '/';
+define('DOWNLOAD_DIR', (substr($options['download_dir'], 0, 6) == "ftp://" ? '' : $options['download_dir']));
 $nn = "\r\n";
 require_once("classes/other.php");
 define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 
-if ($login === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logged_user($users)) === false))
+if ($options['login'] === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logged_user($options['users'])) === false))
 	{
 		header("WWW-Authenticate: Basic realm=\"RAPIDLEECH PLUGMOD\"");
 		header("HTTP/1.0 401 Unauthorized");
@@ -89,7 +89,7 @@ function resetProgress()
 			$Url = parse_url($LINK);
 			$_GET = Array();
 			$_GET["GO"] = "GO"; // for insert_location()
-			$_GET["path"] = ((substr($download_dir, 0, 6) != "ftp://") ? realpath(DOWNLOAD_DIR) : $download_dir);
+			$_GET["path"] = ((substr($options['download_dir'], 0, 6) != "ftp://") ? realpath(DOWNLOAD_DIR) : $options['download_dir']);
 
 			if (isset($_POST["useproxy"]) && $_POST["useproxy"] == true) {
 				$_GET["useproxy"] = "on";

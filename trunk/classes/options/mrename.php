@@ -1,7 +1,7 @@
 <?php
 function mrename() {
-	global $list;
-	if ($disable_deleting) {
+	global $list, $options;
+	if ($options['disable_deleting'] || $options['disable_disable_mass_rename']) {
 		echo lang(147);
 	}
 	else {
@@ -29,8 +29,8 @@ function mrename() {
 }
 
 function mrename_go() {
-	global $list, $forbidden_filetypes;
-	if ($_POST ["yes"] && @trim ( $_POST ['extension'] )) {
+	global $list, $options;
+	if ($_POST ["yes"] && !$options['disable_deleting'] && !$options['disable_mass_rename'] && @trim ( $_POST ['extension'] )) {
 		$_POST ['extension'] = @trim ( $_POST ['extension'] );
 		
 		while ( $_POST ['extension'] [0] == '.' )
@@ -41,7 +41,7 @@ function mrename_go() {
 				$file = $list [$_POST ["files"] [$i]];
 				if (file_exists ( $file ["name"] )) {
 					$filetype = '.' . strtolower ( $_POST ['extension'] );
-					if (is_array ( $forbidden_filetypes ) && in_array ( '.' . strtolower ( $_POST ['extension'] ), $forbidden_filetypes )) {
+					if (is_array ( $options['forbidden_filetypes'] ) && in_array ( '.' . strtolower ( $_POST ['extension'] ), $options['forbidden_filetypes'] )) {
 						printf(lang(82),$filetype);
 						echo('<br><br>');
 					} else {

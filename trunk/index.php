@@ -25,16 +25,17 @@ define ( 'CONFIG_DIR', 'configs/' );
 define ( 'BUILD', '10092009' );
 define ( 'CREDITS', '<a href="http://www.rapidleech.com/" style="text-decoration:none"><b>RapidLeech</b></a>&nbsp;<b style="color:#F09D19">PlugMod (eqbal) rev. ' . $rev_num . '</b> <span style="color:#F09D19">' . $dev_name . '</span><br><small style="color:#239FD9">Credits to Pramode &amp; Checkmate &amp; Kloon</small><br /><p style="text-align:center; margin:0 auto; font-weight:bold"><a href="http://www.rapidleechhost.com/aff.php?aff=001" target="_blank">RapidleechHost Offical Hosting</a></p>' );
 
-require_once (CONFIG_DIR . "config.php");
-// $download_dir should always end with a '/'
-if (substr ( $download_dir, - 1 ) != '/')
-	$download_dir .= '/';
+require_once(CONFIG_DIR.'setup.php');
 
-define ( 'DOWNLOAD_DIR', (substr ( $download_dir, 0, 6 ) == "ftp://" ? '' : $download_dir) );
+// $options['download_dir'] should always end with a '/'
+if (substr ( $options['download_dir'], - 1 ) != '/')
+	$options['download_dir'] .= '/';
+
+define ( 'DOWNLOAD_DIR', (substr ( $options['download_dir'], 0, 6 ) == "ftp://" ? '' : $options['download_dir']) );
 
 define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 
-if ($no_cache) {
+if ($options['no_cache']) {
 	header ( "Expires: Mon, 26 Jul 1997 05:00:00 GMT" );
 	header ( "Last-Modified: " . gmdate ( "D, d M Y H:i:s" ) . "GMT" );
 	header ( "Cache-Control: no-cache, must-revalidate" );
@@ -68,11 +69,11 @@ if (! is__writable ( DOWNLOAD_DIR )) {
 	html_error ( DOWNLOAD_DIR . lang ( 305 ) );
 }
 
-purge_files ( $delete_delay );
+purge_files ( $options['delete_delay'] );
 
 register_shutdown_function ( "pause_download" );
 
-if ($login === true && (! isset ( $_SERVER ['PHP_AUTH_USER'] ) || ($loggeduser = logged_user ( $users )) === false)) {
+if ($options['login'] === true && (! isset ( $_SERVER ['PHP_AUTH_USER'] ) || ($loggeduser = logged_user ( $options['users'] )) === false)) {
 	header ( "WWW-Authenticate: Basic realm=\"RAPIDLEECH PLUGMOD\"" );
 	header ( "HTTP/1.0 401 Unauthorized" );
 	include('deny.php');
@@ -117,11 +118,11 @@ if (isset ( $_GET ["useproxy"] ) && (! $_GET ["proxy"] || ! strstr ( $_GET ["pro
 	}
 }
 
-if (! $_GET ["path"] || $download_dir_is_changeable == false) {
+if (! $_GET ["path"] || $options['download_dir_is_changeable'] == false) {
 	if (! $_GET ["host"]) {
-		$_GET ["path"] = (substr ( $download_dir, 0, 6 ) != "ftp://") ? realpath ( DOWNLOAD_DIR ) : $download_dir;
+		$_GET ["path"] = (substr ( $options['download_dir'], 0, 6 ) != "ftp://") ? realpath ( DOWNLOAD_DIR ) : $options['download_dir'];
 	} else {
-		$_GET ["saveto"] = (substr ( $download_dir, 0, 6 ) != "ftp://") ? realpath ( DOWNLOAD_DIR ) : $download_dir;
+		$_GET ["saveto"] = (substr ( $options['download_dir'], 0, 6 ) != "ftp://") ? realpath ( DOWNLOAD_DIR ) : $options['download_dir'];
 	}
 }
 if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
@@ -213,7 +214,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 	$FileName = basename ( $Url ["path"] );
 	$mydomain = $_SERVER['SERVER_NAME'];
 	$myip = $_SERVER['SERVER_ADDR'];
-	if(!$bw_save && preg_match("/($mydomain|$myip)/i", $Url["host"])) {
+	if(!$options['bw_save'] && preg_match("/($mydomain|$myip)/i", $Url["host"])) {
 		html_error(sprintf(lang(7),$mydomain,$myip));
 	}
 
@@ -281,7 +282,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 			$file = geturl ( $_GET ["host"], $_GET ["port"], $_GET ["path"], $_GET ["referer"], $_GET ["cookie"], $_GET ["post"], $pathWithName, $_GET ["proxy"], $pauth, $auth, $ftp ["scheme"] );
 		}
 		
-		if ($redir && $lastError && stristr ( $lastError, "Error! it is redirected to [" )) {
+		if ($options['redir'] && $lastError && stristr ( $lastError, "Error! it is redirected to [" )) {
 			$redirectto = trim ( cut_str ( $lastError, "Error! it is redirected to [", "]" ) );
 			print lang(8)." <b>$redirectto</b> ... <br>$nn";
 			$_GET ["referer"] = $_GET ["link"];

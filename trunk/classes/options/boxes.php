@@ -1,6 +1,6 @@
 <?php
 function boxes() {
-	global $list, $disable_deleting;
+	global $list, $options;
 ?>
 <form method="post"><input type="hidden" name="act" value="boxes_go">
 <?php
@@ -24,7 +24,7 @@ function boxes() {
 	</tr>
 	<tr>
 		<td><input type="checkbox" name="del_ok"
-			<?php if (!$disable_deleting) echo 'checked="checked"'; ?> <?php if ($disable_deleting) echo 'disabled="disabled"'; ?>>&nbsp;<?php echo lang(141); ?></td>
+			<?php if (!$options['disable_deleting']) echo 'checked="checked"'; ?> <?php if ($options['disable_deleting']) echo 'disabled="disabled"'; ?>>&nbsp;<?php echo lang(141); ?></td>
 	</tr>
 	<tr>
 		<td></td>
@@ -61,7 +61,7 @@ function boxes() {
 }
 
 function boxes_go() {
-	global $list, $disable_deleting, $fromaddr;
+	global $list, $options, $fromaddr;
 	require_once (CLASS_DIR . "mail.php");
 	$_POST ["partSize"] = ((isset ( $_POST ["partSize"] ) & $_POST ["split"] == "on") ? $_POST ["partSize"] * 1024 * 1024 : FALSE);
 	$v_mails = explode ( "\n", $_POST['emails'] );
@@ -75,7 +75,7 @@ function boxes_go() {
 			echo "<br><br>";
 		} elseif (file_exists ( $file ["name"] )) {
 			if (xmail ( "$fromaddr", $v_mail, "File " . basename ( $file ["name"] ), "File: " . basename ( $file ["name"] ) . "\r\n" . "Link: " . $file ["link"] . ($file ["comment"] ? "\r\nComments: " . str_replace ( "\\r\\n", "\r\n", $file ["comment"] ) : ""), $file ["name"], $_POST ["partSize"], $_POST ["method"] )) {
-				if ($_POST ["del_ok"] && ! $disable_deleting) {
+				if ($_POST["del_ok"] && !$options['disable_deleting']) {
 					if (@unlink ( $file ["name"] )) {
 						$v_ads = " and deleted!";
 						unset ( $list [$_POST ["files"] [$i]] );

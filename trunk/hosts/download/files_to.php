@@ -38,13 +38,13 @@ if($ft == "ok"){
 	
 	$headerend = strpos($page,"\r\n\r\n");
 	$pass_img = substr($page,$headerend+4);
-	write_file($download_dir."files_to_captcha.jpg", $pass_img);
+	write_file($options['download_dir']."files_to_captcha.jpg", $pass_img);
 	$randnum = rand(10000, 100000);
 	
 	
 	print 	"<form method=\"post\" action=\"".$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "")."\">$nn";
 	print	"<b>Please enter code:</b><br>$nn";
-	print	"<img src=\"{$download_dir}files_to_captcha.jpg?id=".$randnum."\" >$nn";
+	print	"<img src=\"{$options['download_dir']}files_to_captcha.jpg?id=".$randnum."\" >$nn";
 	print	"<input name=\"link\" value=\"$LINK\" type=\"hidden\">$nn";
 	print	"<input name=\"flink\" value=\"$flink\" type=\"hidden\">$nn";
 	print	"<input name=\"ft\" value=\"ok\" type=\"hidden\">$nn";

@@ -54,7 +54,7 @@ else
 	//file_put_contents("bizhat_2.txt", $page);
 	$headerend = strpos($page, "\r\n\r\n");
 	$pass_img = substr($page, $headerend + 4);
-	write_file($download_dir."bizhat_com_captcha.jpg", $pass_img);
+	write_file($options['download_dir']."bizhat_com_captcha.jpg", $pass_img);
 
 	$code = '<form method="post" action="'.$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "").'">'.$nn;
 	//$code .= '<input type="hidden" name="filename" value="none">'.$nn;
@@ -76,7 +76,7 @@ else
 	$code .= '<input type="hidden" name="proxy" value="'.($_GET["useproxy"] ? $_GET["proxy"] : "").'">'.$nn;
 	$code .= ($pauth ? '<input type="hidden" name="pauth" value="'.$pauth.'">'.$nn : "");
 	$code .= '<input type="hidden" name="step" value="1">'.$nn;
-	$code .= 'Please enter : <img src="'.$download_dir.'bizhat_com_captcha.jpg?'.rand(1,10000).'"><br><br>'.$nn;
+	$code .= 'Please enter : <img src="'.$options['download_dir'].'bizhat_com_captcha.jpg?'.rand(1,10000).'"><br><br>'.$nn;
 	$code .= '<input type="text" name="captcha"> <input type="submit" value="Download">'.$nn;
 	$code .= '</form>';
 	echo $code;

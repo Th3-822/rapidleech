@@ -143,14 +143,14 @@ if (stristr($page,"cap.php?"))
 
     $headerend = strpos($page,"\r\n\r\n");
     $pass_img = substr($page,$headerend+9);
-    write_file($download_dir."letitbit_captcha.jpg", $pass_img);
+    write_file($options['download_dir']."letitbit_captcha.jpg", $pass_img);
 
     $code = '<form method="post" action="'.$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "").'">'.$nn;
     $code .= '<input type="hidden" name="link" value="'.urlencode($LINK).'">'.$nn;
     $code .= '<input type="hidden" name="post" value="'.urlencode(serialize($post)).'">'.$nn;
     $code .= '<input type="hidden" name="step" value="1">'.$nn;
     $code .= '<input type="hidden" name="cookie" value="'.urlencode($cookie).'">'.$nn;
-    $code .= 'Please enter : <img src="'.$download_dir.'letitbit_captcha.jpg?'.rand(1,10000).'"><br><br>'.$nn;
+    $code .= 'Please enter : <img src="'.$options['download_dir'].'letitbit_captcha.jpg?'.rand(1,10000).'"><br><br>'.$nn;
     $code .= '<input type="text" name="captcha"> <input type="submit" value="Download">'.$nn;
     $code .= '</form>';
     echo $code;

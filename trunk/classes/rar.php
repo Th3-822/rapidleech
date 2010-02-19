@@ -19,7 +19,6 @@ class rlRar {
     $this->debug = false;
     $this->filename = trim($filename);
     $this->rar_forbidden = '-x*'.implode($forbidden_filetypes, ' -x*');
-    //$rar_exec_after = ((strstr(PHP_OS, 'BSD') === false) ? ((strstr(php_uname('m'), '64') === false) ? '' : '64') : 'bsd');
     if (is_file(ROOT_DIR.'/rar/rar')) { $this->rar_exec = ROOT_DIR.'/rar/rar'; $return = 'rar'; } 
     elseif (is_file(ROOT_DIR.'/rar/unrar')) { $this->rar_exec = ROOT_DIR.'/rar/unrar'; $return = 'unrar'; }
     else { $return = false; }
@@ -329,8 +328,6 @@ class rlRar {
 ?>
     <div id="rar_debug<?php echo $debug_id; ?>" style="padding:2px;position:absolute; top:<?php echo (intval($debug_id)*24)+2; ?>px; left:10px; background:#082330; border:2px solid #666666; text-align: left;">
       <b>Plusrar Debug Window<?php echo (!$this->debug ? '('.lang(340).'), ' : '')?></b>&nbsp;&nbsp;&nbsp;&nbsp;<span onclick="javascript:$('#rar_debug_contents<?php echo $debug_id; ?>').toggle();">(<?php echo lang(341); ?>)</span>
-
-
       <div id="rar_debug_contents<?php echo $debug_id; ?>" style="display: none">
         <br>
         <textarea cols="100" rows="20" id="rar_debug_text<?php echo $debug_id; ?>">

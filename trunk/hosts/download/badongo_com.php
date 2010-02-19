@@ -69,7 +69,7 @@ $post["user_code"]=$_POST["usercode"];
 		
 	$headerend = strpos($page,"\r\n\r\n");
 	$pass_img = substr($page,$headerend+10);
-    $imgfile=$download_dir."badongo_captcha.jpg";
+    $imgfile=$options['download_dir']."badongo_captcha.jpg";
     if (file_exists($imgfile)){
     unlink($imgfile) ;
     }

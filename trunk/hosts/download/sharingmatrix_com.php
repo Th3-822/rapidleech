@@ -134,7 +134,7 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 	
 	$headerend = strpos($page,"\r\n\r\n");
 	$pass_img = substr($page,$headerend+9);
-	write_file($download_dir."sharingmatrix_captcha.jpg", $pass_img);
+	write_file($options['download_dir']."sharingmatrix_captcha.jpg", $pass_img);
 	
 	 			$code = '<div align=center ><form method="post" action="'.$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "").'">'.$nn;
 	 			$code .= '<input type="hidden" name="step" value="1">'.$nn;
@@ -142,7 +142,7 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 				$code .= '<input type="hidden" name="id" value="'.$id.'">'.$nn;
 				$code .= '<input type="hidden" name="filename" value="'.urlencode($link_name).'">'.$nn;
 				$code .= '<input type="hidden" name="cookie" value="'.urlencode($cookie).'">'.$nn;
-	 			$code .= 'Please enter : <img src="'.$download_dir.'sharingmatrix_captcha.jpg?'.rand(1,10000).'"><br><br>'.$nn;
+	 			$code .= 'Please enter : <img src="'.$options['download_dir'].'sharingmatrix_captcha.jpg?'.rand(1,10000).'"><br><br>'.$nn;
 	 			$code .= '<input type="text" name="captcha"> <input type="submit" value="Download">'.$nn;
 	 			$code .= '</form></div>';
                 echo ($code);

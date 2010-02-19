@@ -61,7 +61,7 @@ if(preg_match_all('/Set-Cookie: *(.+);/', $page, $cook)){
 $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $free_link, $cookie, 0, 0, $_GET["proxy"],$pauth);
 		$headerend = strpos($page,"\r\n\r\n");
 		$pass_img = substr($page,$headerend+4);
-        $imgfile=$download_dir."bitroad_captcha.jpg";
+        $imgfile=$options['download_dir']."bitroad_captcha.jpg";
 		write_file($imgfile, $pass_img);
 
 		

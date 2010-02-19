@@ -122,7 +122,7 @@ $lang[113]	=	'Verinin Gönderiminde Hata Oluştu';
 $lang[114]	=	'Etkin';
 $lang[115]	=	'Erişim şu An Için Mümkün değil';
 $lang[116]	=	'Ölü';
-$lang[117]	=	'Sunucunuzda CURL özelliği etkin olması gerekiyor (http://www.php.net/cURL) yada  config.php yi $fgc = 1 şeklinde ayarlayın .';
+$lang[117]	=	'Sunucunuzda CURL özelliği etkin olması gerekiyor (http://www.php.net/cURL) yada  config.php yi \'fgc\' => 1 şeklinde ayarlayın .';
 $lang[118]	=	'cURL Etkin';
 $lang[119]	=	'PHP 5 sürümü tavsiye ediliyor ancak yazılımın çalışması için bir zorunluluğu yok';
 $lang[120]	=	'Sunucunuzda Güvenlik Kipi\'nin (Safe Mode) kapalı olduğundan emin olunuz. Yazılım güvenlik kipi açıkken çalışmamamktadır. ';

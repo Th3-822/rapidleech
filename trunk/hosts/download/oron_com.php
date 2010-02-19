@@ -87,7 +87,7 @@ if (!defined('RAPIDLEECH'))
 		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
 		$headerend = strpos($page,"\r\n\r\n");
 		$pass_img = substr($page,$headerend+4);
-		write_file($download_dir."oron_captcha.jpg", $pass_img);
+		write_file($options['download_dir']."oron_captcha.jpg", $pass_img);
 		
 		$post['recaptcha_challenge_field']=$ch;
 
@@ -96,7 +96,7 @@ if (!defined('RAPIDLEECH'))
 		$code .= '<input type="hidden" name="post" value="'.urlencode(serialize($post)).'">'.$nn;
 		$code .= '<input type="hidden" name="link" value="'.urlencode($LINK).'">'.$nn;
 		$code .= '<input type="hidden" name="dwn" value="'.urlencode($dwn).'">'.$nn;
-		$code .= 'Please enter : <img src="'.$download_dir.'oron_captcha.jpg?'.rand(1,10000).'"><br><br>'.$nn;
+		$code .= 'Please enter : <img src="'.$options['download_dir'].'oron_captcha.jpg?'.rand(1,10000).'"><br><br>'.$nn;
 		$code .= '<input type="text" name="captcha"> <input type="submit" value="Download">'.$nn;
 		$code .= '</form>';
 		echo ($code) ;

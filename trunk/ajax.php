@@ -10,7 +10,7 @@ define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 // For ajax calls, lets make it use less resource as possible
 switch ($_GET['ajax']) {
 	case 'server_stats':
-		if ($server_info && $ajax_refresh) {
+		if ($options['server_info'] && $options['ajax_refresh']) {
 			ob_start();
 			require(CLASS_DIR."sinfo.php");
 			ob_end_clean();
@@ -129,7 +129,7 @@ switch ($_GET['ajax']) {
 			$totaltime = ($endtime - $begintime);
 			$x--;
 			$plural = ($x == 1) ? "" : lang(19);
-			($fgc == 0) ? $method = 'cURL' : $method = 'file_get_contents';
+			($options['fgc'] == 0) ? $method = 'cURL' : $method = 'file_get_contents';
 			echo "<p style=\"text-align:center\">";
 			printf(lang(18),$x,$plural,$totaltime,$method);
 			echo "</p>";

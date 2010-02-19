@@ -54,7 +54,7 @@ class megaupload_com extends DownloadClass {
 		return "";
 	}
 	private function EnterCaptchaCode($link) {
-		global $nn, $PHP_SELF, $download_dir;
+		global $nn, $PHP_SELF, $options;
 		$page = $this->GetPage($link,$this->cookie);
 		
 		if (stristr ( $page, "Location:" )) {
@@ -123,7 +123,7 @@ class megaupload_com extends DownloadClass {
 		$access_image_url = cut_str ( $page, 'img src="', '"' );
 		
 		// Fetching megaupload captha image STARTED 
-		$cap_img = $download_dir."megaupload_captcha.gif";
+		$cap_img = $options['download_dir']."megaupload_captcha.gif";
 		if ($fp = fopen($access_image_url, 'r')) 
 		{
 		   $content = '';

@@ -1,7 +1,7 @@
 <?php
-define ( 'CONFIG_DIR', 'configs/' );
 define ( 'RAPIDLEECH', 'yes' );
-require_once (CONFIG_DIR . "config.php");
+define ( 'CONFIG_DIR', 'configs/' );
+require_once(CONFIG_DIR.'setup.php');
 define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 require_once('classes/other.php');
 ?>

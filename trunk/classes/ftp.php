@@ -6,7 +6,7 @@ if (!defined('RAPIDLEECH'))
   }
 
 function getftpurl($host, $port, $url, $saveToFile = 0) {
-global $nn, $lastError, $PHP_SELF, $AUTH, $IS_FTP, $FtpBytesTotal, $FtpBytesReceived, $FtpTimeStart, $FtpChunkSize, $forbidden_filetypes, $rename_these_filetypes_to, $rename_prefix, $rename_suffix;
+global $nn, $lastError, $PHP_SELF, $AUTH, $IS_FTP, $FtpBytesTotal, $FtpBytesReceived, $FtpTimeStart, $FtpChunkSize, $options;
 
 $ftp = new ftp(FALSE, FALSE);
   if(!$ftp->SetServer($host, (int)$port))
@@ -50,28 +50,26 @@ $ftp = new ftp(FALSE, FALSE);
                       
                       list($saveToFile,$tmp) = explode('?',$saveToFile);
                       
-						if(!empty($rename_prefix)){
-							$File_Name = $rename_prefix.'_'.basename($saveToFile);
+						if(!empty($options['rename_prefix'])){
+							$File_Name = $options['rename_prefix'].'_'.basename($saveToFile);
 							$saveToFile = dirname($saveToFile).PATH_SPLITTER.$File_Name;
 						}
-						if(!empty($rename_suffix)){
+						if(!empty($options['rename_suffix'])){
 							$ext = strrchr(basename($saveToFile), ".");
 							$before_ext = explode($ext, basename($saveToFile));
-							$File_Name = $before_ext[0].'_'.$rename_suffix.$ext;
+							$File_Name = $before_ext[0].'_'.$options['rename_suffix'].$ext;
 							$saveToFile = dirname($saveToFile).PATH_SPLITTER.$File_Name;
 						}
                     
                       $filetype = strrchr($saveToFile, ".");
                       
-                      if (is_array($forbidden_filetypes) && in_array(strtolower($filetype), $forbidden_filetypes))
+                      if (is_array($options['forbidden_filetypes']) && in_array(strtolower($filetype), $options['forbidden_filetypes']))
 						{
-						if ($rename_these_filetypes_to !== false)
-							{
-							$saveToFile = str_replace($filetype, $rename_these_filetypes_to, $saveToFile);
-							}
-						else
-							{
+  						if ($options['forbidden_filetypes_block']) {
 							html_error(sprintf(lang(82),$filetype));
+  						}
+  						else {
+   							$saveToFile = str_replace($filetype, $options['rename_these_filetypes_to'], $saveToFile);
 							}
 						}
                       
