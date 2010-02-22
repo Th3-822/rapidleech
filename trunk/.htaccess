@@ -9,18 +9,9 @@ allow from all
 </files>
 
 #Uncomment the 3 lines below, ONLY when you want to run the checker.php!
-
 #<files checker.php>
 #allow from all
 #</files>
-
-<files js.js>
-allow from all
-</files>
-
-<files ajax_refresh.js>
-allow from all
-</files>
 
 <files ~ "^deny.php">
 allow from all
@@ -31,10 +22,6 @@ allow from all
 </files>
 
 <files audl.php>
-allow from all
-</files>
-
-<files bar.php>
 allow from all
 </files>
 

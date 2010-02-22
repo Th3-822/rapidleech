@@ -8,10 +8,6 @@ deny from all
 deny from all
 </files>
 
-<files js.php>
-allow from all
-</files>
-
 <files bar.php>
 allow from all
 </files>
