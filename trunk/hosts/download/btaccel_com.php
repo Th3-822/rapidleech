@@ -62,11 +62,11 @@ $btaccel_pass = ""; //  Set your password
 <?php
 
 $pos = strpos($LINK,"step=1");
-if( $pos == true )
+if( !( $pos === false ) )
 {
-	$cookie = substr( $LINK, ( strpos($LINK,"cookies=") + 8 ) );
+	$cookie = trim ( cut_str ( $LINK, "cookies=", "&" ) );
 	$cookie = urldecode( $cookie );
-	
+		
 	$Href = $LINK;
 	$tmp = $Href ;
 
@@ -76,7 +76,7 @@ if( $pos == true )
 
 	$Url = parse_url($Href);
 	
-	$loc = "$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($LINK)."&cookie=".urlencode($cookies)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : "");
+	$loc = "$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($LINK)."&cookie=".urlencode($cookie)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : "");
 	insert_location( $loc );
 }
 else
@@ -95,12 +95,14 @@ else
 	}
 	
 	$cookies = loginto( $btaccel_login, $btaccel_pass );
-		
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookies, 0, 0, $_GET["proxy"],$pauth); 
+	
+	$page = GetPage( $LINK, $cookies ); 
+	
+	//$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookies, 0, 0, $_GET["proxy"],$pauth); 
 	$frmfiles=cut_str($page,'<table id="files"','</table>');
 	preg_match_all('%http://.+/get\?[^\'"]+%i',$frmfiles,$files) ;
 	$cc=1 ;
-
+	
 	foreach( $files[0] as $tmp )
 	{
 	    $tmp2=cut_str($tmp,'&file_name=','\n');
@@ -108,10 +110,10 @@ else
 	    $fi=$ff[count($ff)-1];
 		$fil=urldecode($fi);
 		$file=str_replace(":80/get?","/get/?",$tmp);
-		$file .= "&step=1&cookies=".urlencode ( $cookies );
-
+		$file .= "&step=1&cookies=".urlencode ( $cookies )."&";
+		
 		$namefile=$fil;
-		echo "<tr><td><input type=checkbox id=cs$cc ></td><td><input type=hidden id=lin$cc value=$file ></td><td id=link$cc >$namefile</td></tr>";
+		echo "<tr><td><input type=checkbox id=cs$cc ></td><td><input type=\"hidden\" id=\"lin$cc\" value=\"$file\" ></td><td id=link$cc >$namefile</td></tr>";
 		$cc++;
 	}
 ?>
@@ -189,6 +191,6 @@ WRITTEN by kaox 21-jul-2009
 UPDATED by kaox 04-oct-2009
 UPDATED and Fixed by rajmalhotra 19-Dec-2009 
 UPDATED by rajmalhotra 17-Jan-2010 If only one link to download then rapidleech will take care of it and removed step 2 button
-UPDATED by rajmalhotra 07 Feb 2010
+Fixed by Raj Malhotra on 28 Feb 2010
 \*************************/
 ?>
