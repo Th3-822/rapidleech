@@ -266,8 +266,8 @@ else {
                                                 	<option value="300">300</option>
                                                 	<option value="other">Other</option>
                                                   </select></td></tr>
-          <tr><td>File name suffix</td><td><input type="text" id="opt_rename_prefix" name="opt_rename_prefix"></td></tr>
-          <tr><td>File name prefix</td><td><input type="text" id="opt_rename_suffix" name="opt_rename_suffix"></td></tr>
+          <tr><td>File name prefix</td><td><input type="text" id="opt_rename_prefix" name="opt_rename_prefix"></td></tr>
+          <tr><td>File name suffix</td><td><input type="text" id="opt_rename_suffix" name="opt_rename_suffix"></td></tr>
           <tr><td>Bandwidth saving</td><td><input type="checkbox" value="1" name="opt_bw_save" id="opt_bw_save"></td></tr>
           <tr><td>File size limit in MiB</td><td> <select size="1" name="opt_file_size_limit" id="opt_file_size_limit">
                                                 	<option value="0">Disabled</option>
