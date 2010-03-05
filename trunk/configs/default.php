@@ -6,25 +6,25 @@
 /*Default Options Start*/
 $default_options = array(
 //General
-'download_dir' => 'files/',
-'download_dir_is_changeable' => false,
-'delete_delay' => 0,
-'rename_prefix' => '',
-'rename_suffix' => '',
-'bw_save' => true,
-'file_size_limit' => 0,
+'download_dir' => 'files/', # This is where your downloaded files are saved
+'download_dir_is_changeable' => false, # true - Allow users to change the download dir
+'delete_delay' => 0, # 0 - Disabled, time in SECONDS before downloaded files are deleted
+'rename_prefix' => '', # i.e : prefix_filename.ext
+'rename_suffix' => '', # i.e : filename_suffix.ext
+'bw_save' => true, # Bandwidth Saving
+'file_size_limit' => 0, # 0 - Disabled, limit file size in MiB
 //Authorization
-'login' => false,
-'users' => array('test' => 'test'),
+'login' => false, # false - Authorization mode is off, true - on
+'users' => array('test' => 'test'), # false - Authorization mode is off, enter the username and password in the given way
 //Presentation
 'template_used' => 'plugmod',
 'default_language' => 'en',
-'show_all' => true,
-'server_info' => true,
-'ajax_refresh' => true,
+'show_all' => true, # true - To show all files in the catalog, false to hide it
+'server_info' => true, # CPU, Memory & Time Info
+'ajax_refresh' => true, # Ajax Auto Refresh Server Info
 //Actions Restrictions
-'disable_actions' => false,
-'disable_deleting' => false,
+'disable_actions' => false, # Disable all file actions
+'disable_deleting' => false, # Disable deleting and renaming in all file actions
 'disable_delete' => false,
 'disable_rename' => false,
 'disable_mass_rename' => false,
@@ -42,13 +42,13 @@ $default_options = array(
 'disable_md5' => false,
 'disable_list' => false,
 //Advanced
-'forbidden_filetypes' => array('.htaccess', '.htpasswd', '.php', '.php3', '.php4', '.php5', '.phtml', '.asp', '.aspx', '.cgi'),
-'forbidden_filetypes_block' => false,
-'rename_these_filetypes_to' => '.xxx',
-'check_these_before_unzipping' => true,
-'no_cache' => true,
-'images_via_php' => false,
-'redir' => true,
+'forbidden_filetypes' => array('.htaccess', '.htpasswd', '.php', '.php3', '.php4', '.php5', '.phtml', '.asp', '.aspx', '.cgi'), # Enter the forbidden filetypes in the given way
+'forbidden_filetypes_block' => false, # false - rename forbidden_filetypes, true - completely block them 
+'rename_these_filetypes_to' => '.xxx', # If forbidden_filetypes_block = false then rename those filetypes to this
+'check_these_before_unzipping' => true, # true - Don't allow extraction/creation of these filetypes from file actions
+'no_cache' => true, # true - Prohibition by Browser; otherwise allowed
+'images_via_php' => false, # true - RapidShare images are downloaded through the script, but it requires ssl support; turn it off if you can't see the image.
+'redir' => true, # true - Redirect passive method
 'fgc' => 0
 );
 /*Default Options End*/
