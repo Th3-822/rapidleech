@@ -55,7 +55,7 @@ foreach ($options as $k => $v) {
   }
   elseif (is_numeric($default_options[$k])) {
     $v = floor($v);
-    echo "  set_element_val('opt_{$k}', '{$v}');\n";
+    echo "  set_element_val('opt_{$k}', '".($k == 'delete_delay' ? $v."', '".floor($v/60) : $v)."');\n";
   }  
   else { echo "  set_element_val('opt_{$k}', '{$v}');\n"; }
 }
