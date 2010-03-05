@@ -82,8 +82,10 @@ foreach ($options['users'] as $k => $v) {
   else { $('#opt_login_0').hide(); }
 }
 
-function set_element_val(id, v) { var e = $('#'+id);
-  e.val(v); if (e.val() != v) { e.append($('<option><\/option>').val(v).html(v)); e.val(v); }
+function set_element_val(id, value, display) {
+  display = (typeof display == 'undefined') ? value : display;
+  var e = $('#'+id);
+  e.val(value); if (e.val() != value) { e.append($('<option><\/option>').val(value).html(display)); e.val(value); }
 }
 
 function save_config() {
@@ -126,7 +128,7 @@ $(document).ready(function() {
   $('#opt_delete_delay').change(function() {
     if ($(this).val() == 'other') {
       var other = parseInt(prompt('How many minutes?', '0'), 10) || 0;
-      set_element_val('opt_delete_delay', other);
+      set_element_val('opt_delete_delay', other*60, other);
     }
   });
   $('#opt_file_size_limit').change(function() {
@@ -259,11 +261,11 @@ else {
           <tr><td>Allow users to change<br>download directory</td><td><input type="checkbox" value="1" name="opt_download_dir_is_changeable" id="opt_download_dir_is_changeable"></td></tr>
           <tr><td>Auto Delete in minutes</td><td> <select size="1" name="opt_delete_delay" id="opt_delete_delay">
                                                 	<option value="0">Disabled</option>
-                                                	<option value="60">60</option>
-                                                	<option value="120">120</option>
-                                                	<option value="180">180</option>
-                                                	<option value="240">240</option>
-                                                	<option value="300">300</option>
+                                                	<option value="3600">60</option>
+                                                	<option value="7200">120</option>
+                                                	<option value="10800">180</option>
+                                                	<option value="14400">240</option>
+                                                	<option value="18000">300</option>
                                                 	<option value="other">Other</option>
                                                   </select></td></tr>
           <tr><td>File name prefix</td><td><input type="text" id="opt_rename_prefix" name="opt_rename_prefix"></td></tr>
@@ -399,7 +401,7 @@ $d->close();
           <tr><td colspan="2" style="text-align: center;"><input size="50" type="text" id="opt_forbidden_filetypes" name="opt_forbidden_filetypes"></td></tr>
           <tr><td>Block download of forbidden file types</td><td><input type="checkbox" value="1" name="opt_forbidden_filetypes_block" id="opt_forbidden_filetypes_block"></td></tr>
           <tr id="opt_rename_these_filetypes_to_0"><td>Rename forbidden file types to</td><td><input type="text" size="8" value="" name="opt_rename_these_filetypes_to" id="opt_rename_these_filetypes_to"></tr>
-          <tr><td>Block forbidden file types for file operations</td><td><input type="checkbox" value="1" name="opt_check_these_before_unzipping" id="opt_check_these_before_unzipping"></td></tr>
+          <tr><td>Block forbidden file types for file actions</td><td><input type="checkbox" value="1" name="opt_check_these_before_unzipping" id="opt_check_these_before_unzipping"></td></tr>
           <tr><td>Images via php</td><td><input type="checkbox" value="1" name="opt_images_via_php" id="opt_images_via_php"></td></tr>
           <tr><td>Redirect passive method</td><td><input type="checkbox" value="1" name="opt_redir" id="opt_redir"></td></tr>
           <tr><td>No cache</td><td><input type="checkbox" value="1" name="opt_no_cache" id="opt_no_cache"></td></tr>
