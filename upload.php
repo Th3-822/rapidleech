@@ -66,6 +66,24 @@ if (is_readable($_REQUEST['filename']))
 		html_error(sprintf(lang(65),$filename));
 	}
 
+if (isset ( $_REQUEST ["useuproxy"] ) && (! $_REQUEST ["uproxy"] || ! strstr ( $_REQUEST ["uproxy"], ":" )))
+{
+	html_error ( lang(324) );
+}
+else
+{
+	$proxy = $_REQUEST ["uproxy"];
+}
+
+if ($_REQUEST ["upauth"])
+{
+	$pauth = $_REQUEST ["upauth"];
+}
+else
+{
+	$pauth = ($_REQUEST ["uproxyuser"] && $_REQUEST ["uproxypass"]) ? base64_encode ( $_REQUEST ["uproxyuser"] . ":" . $_REQUEST ["uproxypass"] ) : "";
+}
+
 $fsize = getSize($lfile);
 
 echo '<script type="text/javascript" language="javascript">var orlink="' . basename($_REQUEST['filename']) . ' to ' . $_REQUEST['uploaded'] . '";</script>';
