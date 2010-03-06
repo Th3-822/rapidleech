@@ -42,7 +42,7 @@ if ($_REQUEST ['action'] == "FORM")
 }
 
 if ($continue_up) {
-	$lang = "l=en"; // определяем язык    
+	$lang = "l=en"; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ    
 	$not_done = false;
 	if (empty ( $_REQUEST ['my_login'] ) || empty ( $_REQUEST ['my_pass'] )) {
 		echo "<b><center>Empty login/pass Megaupload.com. Use <span style='color:red'>FREE</span> Megaupload Account.</center></b>\n";
@@ -58,10 +58,10 @@ if ($continue_up) {
   
   $post["username"] = $_REQUEST ['my_login'] ? $_REQUEST ['my_login'] : $premium_acc["megaupload"]["user"];
   $post["password"] = $_REQUEST ['my_pass'] ? $_REQUEST ['my_pass'] : $premium_acc["megaupload"]["pass"];
-  $Url = parse_url("http://megaupload.com");
-  $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, "/?c=login", 0, 0, $post, 0, $_GET["proxy"],$pauth);
+  $Url = parse_url("http://megaupload.com/?c=login");
+  $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url['path'], 'http://megaupload.com/?c=login', 0, $post, 0, $_GET["proxy"]);
 		is_page ( $page );
-		//print_r($page);
+		//print_r($page); exit;
 		if (strpos ( $page, "Invalid nickname" )) {
 			echo "<b><center>Error login to Megaupload.com. Use <span style='color:red'>FREE</span> Megaupload Account.</center></b>\n";
 		} else {
@@ -81,11 +81,20 @@ if ($continue_up) {
 
 		<div id=info width=100% align=center>Retrieve upload ID</div>
 <?php
-	$page = geturl ( "www.megaupload.com", 80, "/", 0, $cook, 0, 0, "" );
-	?>
+	//$page = geturl ("megaupload.com", 80, "/", 'http://megaupload.com/?c=login', $cook, 0, 0, $_GET['proxy']);
+	//is_page ( $page );
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, 'http://megaupload.com');
+	curl_setopt($ch, CURLOPT_HEADER, 1);
+	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U;Windows NT 5.1; de;rv:1.8.0.1)\r\nGecko/20060111\r\nFirefox/1.5.0.1');
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_REFERER, 'http://megaupload.com/?c=login');
+	curl_setopt($ch, CURLOPT_COOKIE, $cook);
+	curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+	$page = curl_exec($ch);
+?>
 	<script>document.getElementById('info').style.innerHTML='Connected to megaupload, retrieving form...';</script>
 <?php
-	is_page ( $page );
 	unset ( $post );
 	preg_match('/="multipart\/form-data" action="(.*)" target="uploadframe"/',$page,$temp);
 	$url_action = $temp[1];
@@ -106,13 +115,11 @@ if ($continue_up) {
 ?>
 	<script>document.getElementById('info').style.innerHTML='Uploading...';</script>
 <?php
-	$upfiles = upfile ( $url ["host"], $url ["port"] ? $url ["port"] : 80, $url ["path"] . ($url ["query"] ? "?" . $url ["query"] : ""), "http://www.megaupload.com/", $cook, $post, $lfile, $lname, "multifile_0" );
-	
+	$upfiles = upfile ( $url ["host"], $url ["port"] ? $url ["port"] : 80, $url ["path"] . ($url ["query"] ? "?" . $url ["query"] : ""), "http://www.megaupload.com/", $cook, $post, $lfile, $lname, "multifile_0", "", $_REQUEST['proxy']);
 	?>
 <script>document.getElementById('progressblock').style.display='none';</script>
 <?php
 	is_page ( $upfiles );
-	
 	//is_notpresent ( $upfiles, "downloadurl = '", "File not upload" );
 	preg_match ( '/\'(http:.*)\'/' ,$upfiles, $temp);
 	$download_link = $temp[1];
