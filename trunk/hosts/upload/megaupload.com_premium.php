@@ -113,11 +113,11 @@ if ($continue_up) {
 	
 	$url = parse_url ( $url_action );
 ?>
-	<script>document.getElementById('info').style.innerHTML='Uploading...';</script>
+	<script type="text/javascript">document.getElementById('info').style.innerHTML='Uploading...';</script>
 <?php
-	$upfiles = upfile ( $url ["host"], $url ["port"] ? $url ["port"] : 80, $url ["path"] . ($url ["query"] ? "?" . $url ["query"] : ""), "http://www.megaupload.com/", $cook, $post, $lfile, $lname, "multifile_0", "", $_REQUEST['proxy']);
+	$upfiles = upfile ( $url ["host"], $url ["port"] ? $url ["port"] : 80, $url ["path"] . ($url ["query"] ? "?" . $url ["query"] : ""), "http://www.megaupload.com/", $cook, $post, $lfile, $lname, "multifile_0", "", $proxy, $pauth);
 	?>
-<script>document.getElementById('progressblock').style.display='none';</script>
+<script type="text/javascript">document.getElementById('progressblock').style.display='none';</script>
 <?php
 	is_page ( $upfiles );
 	//is_notpresent ( $upfiles, "downloadurl = '", "File not upload" );

@@ -332,9 +332,9 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	} else {
 		$page = $header;
 	}
-	
+
 	while ( ! feof ( $fp ) ) {
-		$data = @fread ( $fp, $chunkSize );	// 16384 saw this value in Pear HTTP_Request2 package // (fix - szal) using this actually just causes massive cpu usage for large files, too much data is flushed to the browser!)
+		$data = @fread ( $fp, ($saveToFile ? $chunkSize : 16384) );	// 16384 saw this value in Pear HTTP_Request2 package // (fix - szal) using this actually just causes massive cpu usage for large files, too much data is flushed to the browser!)
 		if ($data == '')
 			break;
 		if ($saveToFile) {
@@ -490,7 +490,7 @@ function GetChunkSize($fsize) {
 	return 4096 * 210;
 }
 
-function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, $fieldname, $field2name = "", $proxy = 0, $upagent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.1") {
+function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, $fieldname, $field2name = "", $proxy = 0, $pauth = 0, $upagent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.1") {
 	global $nn, $lastError, $sleep_time, $sleep_count;
 
 	$scheme = "http://";

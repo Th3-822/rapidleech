@@ -115,13 +115,13 @@ if ( !empty ( $premium_acc ) )
 <tr>
 <td>
 <br>
-<small style="color:55bbff"><?php echo lang(214); ?>:</small><hr>
+<small style="color:#55bbff"><?php echo lang(214); ?>:</small><hr>
 <label><input type="checkbox" name="dis_plug">&nbsp;<small><?php echo lang(215); ?></small></label>
 </td>
 </tr>
 <tr>
 <td>
-<label><input type="checkbox" name="ytube_mp4" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;"<?php echo isset($_POST['yt_fmt']) ? ' checked' : ''; ?>>&nbsp;<small><?php echo lang(216); ?></small></label>
+<label><input type="checkbox" name="ytube_mp4" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;" <?php echo isset($_POST['yt_fmt']) ? ' checked' : ''; ?>>&nbsp;<small><?php echo lang(216); ?></small></label>
 <table width="150" border="0" id="ytubeopt" style="display: none;">
 <tr>
 <td colspan="2" style="white-space: nowrap;"><input type="checkbox" name="ytdirect"><small>&nbsp;<?php echo lang(217); ?></small></td>
@@ -149,7 +149,7 @@ if ( !empty ( $premium_acc ) )
 </td>
 </tr>
 <tr>
-<td><label><input type="checkbox" name="imageshack_tor" id="imageshack_tor" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('torpremiumblock').style.display=displ;"<?php if (is_array($imageshack_acc)) print ' checked'; ?>>&nbsp;<small><?php echo lang(229); ?></small></label><table width="150" border="0" id="torpremiumblock" style="display: none;">
+<td><label><input type="checkbox" name="imageshack_tor" id="imageshack_tor" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('torpremiumblock').style.display=displ;" <?php if (is_array($imageshack_acc)) print ' checked'; ?>>&nbsp;<small><?php echo lang(229); ?></small></label><table width="150" border="0" id="torpremiumblock" style="display: none;">
 <tr><td><?php echo lang(230); ?>:&nbsp;</td><td><input type="text" name="tor_user" id="tor_user" size="15" value=""></td></tr>
 <tr><td><?php echo lang(231); ?>:&nbsp;</td><td><input type="password" name="tor_pass" id="tor_pass" size="15" value=""></td></tr>
 </table>
@@ -157,7 +157,7 @@ if ( !empty ( $premium_acc ) )
 </tr>
 <tr>
 <td>
-<label><input type="checkbox" name="mu_acc" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('mupremiumblock').style.display=displ;"<?php if ($mu_cookie_user_value) print ' checked'; ?>>&nbsp;<small><?php echo lang(232); ?></small></label>
+<label><input type="checkbox" name="mu_acc" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('mupremiumblock').style.display=displ;" <?php if ($mu_cookie_user_value) print ' checked'; ?>>&nbsp;<small><?php echo lang(232); ?></small></label>
 <table width="150" border="0" id="mupremiumblock" style="display: none;">
 <tr><td><?php echo lang(233); ?>=</td><td><input type="text" name="mu_cookie" id="mu_cookie" size="25" value=""></td></tr>
 </table>
@@ -184,7 +184,7 @@ if ( !empty ( $premium_acc ) )
 <td align="center">
 <table align="center">
 <tr>
-<td><input type="checkbox" name="domail" id="domail" onClick="javascript:document.getElementById('emailtd').style.display=document.getElementById('splittd').style.display=this.checked?'':'none';document.getElementById('methodtd').style.display=(document.getElementById('splitchkbox').checked & this.checked)?'':'none';"<?php echo $_COOKIE["domail"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(237); ?></td>
+<td><input type="checkbox" name="domail" id="domail" onClick="javascript:document.getElementById('emailtd').style.display=document.getElementById('splittd').style.display=this.checked?'':'none';document.getElementById('methodtd').style.display=(document.getElementById('splitchkbox').checked & this.checked)?'':'none';" <?php echo $_COOKIE["domail"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(237); ?></td>
 <td>&nbsp;</td>
 <td id="emailtd"<?php echo $_COOKIE["domail"] ? "" : " style=\"display: none;\""; ?>><?php echo lang(238); ?>:&nbsp;<input type="text" name="email" id="email"<?php echo $_COOKIE["email"] ? " value=\"".$_COOKIE["email"]."\"" : ""; ?>></td>
 </tr>
@@ -193,7 +193,7 @@ if ( !empty ( $premium_acc ) )
 </tr>
 <tr id="splittd"<?php echo $_COOKIE["split"] ? "" : " style=\"display: none;\""; ?>>
 <td>
-<input id="splitchkbox" type="checkbox" name="split" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('methodtd').style.display=displ;"<?php echo $_COOKIE["split"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(239); ?>
+<input id="splitchkbox" type="checkbox" name="split" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('methodtd').style.display=displ;" <?php echo $_COOKIE["split"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(239); ?>
 </td>
 <td>&nbsp;</td>
 <td id="methodtd"<?php echo $_COOKIE["split"] ? "" : " style=\"display: none;\""; ?>>
@@ -208,7 +208,7 @@ if ( !empty ( $premium_acc ) )
 </td>
 </tr>
 <tr>
-<td><input type="checkbox" id="useproxy" name="useproxy" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('proxy').style.display=displ;"<?php echo $_COOKIE["useproxy"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(245); ?></td>
+<td><input type="checkbox" id="useproxy" name="useproxy" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('proxy').style.display=displ;" <?php echo $_COOKIE["useproxy"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(245); ?></td>
 <td>&nbsp;</td>
 <td id="proxy"<?php echo $_COOKIE["useproxy"] ? "" : " style=\"display: none;\""; ?>>
 <table width="150" border="0">
@@ -222,7 +222,7 @@ if ( !empty ( $premium_acc ) )
 <td></td>
 </tr>
 <tr>
-<td><input type="checkbox" name="premium_acc" id="premium_acc" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;"<?php if (count($premium_acc) > 0) print ' checked'; ?>>&nbsp;<?php echo lang(249); ?></td>
+<td><input type="checkbox" name="premium_acc" id="premium_acc" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;" <?php if (count($premium_acc) > 0) print ' checked'; ?>>&nbsp;<?php echo lang(249); ?></td>
 <td>&nbsp;</td>
 <td id="premiumblock" style="display: none;">
 <table width="150" border="0">
@@ -235,7 +235,7 @@ if ( !empty ( $premium_acc ) )
 <td></td>
 </tr>
 <tr<?php echo (!$options['download_dir_is_changeable'] ? ' style="display:none;"' : '');?>>
-<td><input type="checkbox" name="saveto" id="saveto" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('path').style.display=displ;"<?php echo $_COOKIE["saveto"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(252); ?></td>
+<td><input type="checkbox" name="saveto" id="saveto" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('path').style.display=displ;" <?php echo $_COOKIE["saveto"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(252); ?></td>
 <td>&nbsp;</td>
 <td id="path"<?php echo $_COOKIE["saveto"] ? "" : " style=\"display: none;\""; ?>><?php echo lang(253); ?>:&nbsp;<input type="text" name="path" size="40" value="<?php echo ($_COOKIE["path"] ? $_COOKIE["path"] : (substr($options['download_dir'], 0, 6) != "ftp://" ? realpath(DOWNLOAD_DIR) : $options['download_dir'])); ?>"></td>
 </tr>
