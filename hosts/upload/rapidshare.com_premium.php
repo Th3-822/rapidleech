@@ -63,7 +63,7 @@ if ($continue_up)
 <?php 		
 			$url = parse_url($url_action);
 			$upagent = "RAPIDSHARE MANAGER Application Version: NOT INSTALLED VERSION STARTED";
-			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""),0, 0, $post, $lfile, $lname, "filecontent");
+			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""),0, 0, $post, $lfile, $lname, "filecontent", "", $_REQUEST['proxy']);
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
 <?php 	

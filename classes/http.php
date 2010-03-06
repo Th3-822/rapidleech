@@ -132,7 +132,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	
 	$http_auth = ($auth) ? "Authorization: Basic " . $auth . $nn : "";
 	$proxyauth = ($pauth) ? "Proxy-Authorization: Basic " . $pauth . $nn : "";
-	
+
 	$request = $method . " " . str_replace ( " ", "%20", $url ) . " HTTP/1.1" . $nn . "Host: " . $host . $nn . "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.14) Gecko/20080404 Firefox/2.0.0.14" . $nn . "Accept: */*" . $nn . "Accept-Language: en-us;q=0.7,en;q=0.3" . $nn . "Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7" . $nn . "Pragma: no-cache" . $nn . "Cache-Control: no-cache" . $nn . ($Resume ["use"] === TRUE ? "Range: bytes=" . $Resume ["from"] . "-" . $nn : "") . $http_auth . $proxyauth . $referer . $cookies . "Connection: Close" . $nn . $content_tl . $nn . $postdata;
 	
 	$errno = 0;
@@ -140,7 +140,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	$hosts = ($proxyHost ? $scheme . $proxyHost : $scheme . $host) . ':' . ($proxyPort ? $proxyPort : $port);
 	$fp = @stream_socket_client ( $hosts, $errno, $errstr, 120, STREAM_CLIENT_CONNECT );
 	//$fp = @fsockopen($proxyHost ? $scheme.$proxyHost : $scheme.$host, $proxyPort ? $proxyPort : $port, $errno, $errstr, 15);
-	
+
 
 	if (! $fp) {
 		$dis_host = $proxyHost ? $proxyHost : $host;
@@ -334,7 +334,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	}
 	
 	while ( ! feof ( $fp ) ) {
-		$data = @fgets ( $fp, 16384 );	// 16384 saw this value in Pear HTTP_Request2 package
+		$data = @fread ( $fp, $chunkSize );	// 16384 saw this value in Pear HTTP_Request2 package // (fix - szal) using this actually just causes massive cpu usage for large files, too much data is flushed to the browser!)
 		if ($data == '')
 			break;
 		if ($saveToFile) {
@@ -490,9 +490,10 @@ function GetChunkSize($fsize) {
 	return 4096 * 210;
 }
 
-function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file, $filename, $fieldname, $field2name = "", $upagent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.1", $proxy = 0) {
+function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, $fieldname, $field2name = "", $proxy = 0, $upagent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.1") {
 	global $nn, $lastError, $sleep_time, $sleep_count;
-	
+
+	$scheme = "http://";
 	$bound = "--------" . md5(microtime());
 	$saveToFile = 0;
 	
@@ -533,29 +534,50 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 	}
 	$referer = $referer ? "Referer: " . $referer . $nn : "";
 	
-/*
-	if ($proxy) {
-		list ( $proxyHost, $proxyPort ) = explode ( ":", $proxy );
-		$host = $host . ":" . $port;
-		$posturl = $host . ":" . $port . $url;
+	if ($scheme == "https://") {
+		$scheme = "ssl://";
+		$port = 443;
 	}
-	else
-		$posturl = $host . ":" . $port . $url;
-*/
-	
-	$posturl = ($proxyHost ? $scheme . $proxyHost : $scheme . $host) . ':' . ($proxyPort ? $proxyPort : $port);
-		
-	$zapros = "POST " . str_replace ( " ", "%20", $url ) . " HTTP/1.0" . $nn . "Host: " . $host . $nn . $cookies . "Content-Type: multipart/form-data; boundary=" . $bound . $nn . "Content-Length: " . (strlen ( $postdata ) + strlen ( $nn . "--" . $bound . "--" . $nn ) + $fileSize) . $nn . "User-Agent: " . $upagent . $nn . "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5" . $nn . "Accept-Language: en-en,en;q=0.5" . $nn . "Accept-Charset: utf-8,windows-1251;koi8-r;q=0.7,*;q=0.7" . $nn . "Connection: Close" . $nn . $auth . $referer . $nn . $postdata;
-	
+
+	if ($proxy) {
+		list ( $proxyHost, $proxyPort ) = explode ( ":", $proxy);
+		$url = $scheme . $host . ":" . $port . $url;
+		$host = $host . ":" . $port;
+	}
+
+	if ($scheme != "ssl://") {
+		$scheme = "";
+	}
+
+	$http_auth = ($auth) ? "Authorization: Basic " . $auth . $nn : "";
+	$proxyauth = ($pauth) ? "Proxy-Authorization: Basic " . $pauth . $nn : "";
+
+	$zapros = "POST " . str_replace ( " ", "%20", $url ) . " HTTP/1.0" . $nn . "Host: " . $host . $nn . $cookies . "Content-Type: multipart/form-data; boundary=" . $bound . $nn . "Content-Length: " . (strlen ( $postdata ) + strlen ( $nn . "--" . $bound . "--" . $nn ) + $fileSize) . $nn . "User-Agent: " . $upagent . $nn . "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5" . $nn . "Accept-Language: en-en,en;q=0.5" . $nn . "Accept-Charset: utf-8,windows-1251;koi8-r;q=0.7,*;q=0.7" . $nn . "Connection: Close" . $nn . $http_auth . $proxyauth . $referer . $nn . $postdata;
 	$errno = 0; $errstr = "";
+	$posturl = ($proxyHost ? $scheme . $proxyHost : $scheme . $host) . ':' . ($proxyPort ? $proxyPort : $port);
 	$fp = @stream_socket_client ( $posturl, $errno, $errstr, 120, STREAM_CLIENT_CONNECT );
 	//$fp = @fsockopen ( $host, $port, $errno, $errstr, 150 );
 	//stream_set_timeout ( $fp, 300 );
+
+	if (! $fp) {
+		$dis_host = $proxyHost ? $proxyHost : $host;
+		$dis_port = $proxyPort ? $proxyPort : $port;
+		html_error ( sprintf ( lang ( 88 ), $dis_host, $dis_port ) );
+	}
 	
 	if ($errno || $errstr) {
 		$lastError = $errstr;
 		return false;
 	}
+
+	if ($proxy) {
+			echo '<p>'.sprintf(lang(89),$proxyHost,$proxyPort).'<br />';
+			echo "UPLOAD: <b>" . $url . "</b>...<br>\n";
+		} else {
+			echo "<p>";
+			printf(lang(90),$host,$port);
+			echo "<br />";
+		}
 	
 	echo(lang(104).' <b>'.$filename.'</b>, '.lang(56).' <b>'.bytesToKbOrMb ( $fileSize ).'</b>...<br />');
 	global $id;
@@ -618,7 +640,7 @@ function upfile($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $file,
 	fflush ( $fp );
 	
 	while ( ! feof ( $fp ) ) {
-		$data = fgets ( $fp, 1024 );
+		$data = fgets ( $fp, 16384 );
 		if ($data === false) {
 			break;
 		}
