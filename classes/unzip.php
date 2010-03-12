@@ -1,4 +1,4 @@
-<?php 
+<?php
 if(!function_exists('file_put_contents')){
 	// If not PHP5, creates a compatible function
 	Function file_put_contents($file, $data){
