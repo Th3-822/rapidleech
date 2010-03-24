@@ -9,7 +9,7 @@ if (!defined('RAPIDLEECH'))
   
 if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["sharingmatrix"]["user"] && $premium_acc["sharingmatrix"]["pass"]))
 	{
-	echo ('<b><center style="color: #FF0000"><span style="background-color: #F8F8B6">Use premium mode</span></center></b><br>');
+	
 	$lg='http://sharingmatrix.com/ajax_scripts/login.php?email='.$premium_acc["sharingmatrix"]["user"].'&password='.$premium_acc["sharingmatrix"]["pass"].'&remember_me=false';
 	$Url=parse_url($lg);
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), "http://sharingmatrix.com/login", 0, 0, 0, $_GET["proxy"],$pauth);
@@ -58,7 +58,7 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 	 }
 	else
 	{
-	echo ('<b><center style="color: #00FF00"><span style="background-color: #F8F8B6">Use guest mode</span></center></b><br>');
+	
 	if( $_POST['step'] == "1")
 	{
 		
@@ -71,14 +71,14 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 	$snap = substr ( stristr ( $page, "\r\n\r\n" ), strlen ( "\r\n\r\n" ) );
 	$st=explode("\r\n",$snap);
     $st= join("",$st);
-	if( $st !== "510" ){
+	if( $st !== "710" ){
 	html_error( "Captcha incorrect! Return to main and reattempt" , 0 );
 	}
 	$Url=parse_url("http://sharingmatrix.com/ajax_scripts/dl.php");
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
 	is_page($page);
-	preg_match('/(\d{7})/i', $page, $mh);
-	$did=$mh[0];
+	preg_match('/(\d{5})\r/i', $page, $mh);
+	$did=$mh[1];
 	$id=$_POST["id"];
 	$FileName = urldecode($_POST["filename"]);
 	
@@ -90,6 +90,7 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 	$hs = cut_str ( $page ,'hash:"' ,'"' );
 	$dwn=$sv."/download/".$hs."/".$did."/";
 	$Url=parse_url($dwn);
+	insert_timer ( 60, "The file is being prepared.", "", true );
 		$loc = "$PHP_SELF?filename=" . urlencode ( $FileName ) . 
 		"&force_name=".urlencode($FileName) .
 		"&host=" . $Url ["host"] . 
@@ -114,9 +115,7 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
 	is_page($page);
     is_present($page,"File has been deleted", "File has been deleted", 0);
-	is_present($page,"already downloading file", "You are already downloading file. Only premium users can download several files at the same time.", 0);
     if($snap) html_error("download link not foun , please verify the link in your browser" , 0 );
-	
 	$cookie = GetCk($page);
 	preg_match('/\/file\/(\d+)/i', $LINK, $mh);
 	$id = $mh[1];
@@ -124,27 +123,30 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 	$Url=parse_url($req);
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
 	is_page($page);
+    $tmp=rand(1000,9000);  
 	$link_name = cut_str ( $page ,"link_name = '" ,"'" );
-	$img_url="http://sharingmatrix.com/include/crypt/cryptographp.inc.php?cfg=0&sn=PHPSESSID&";
-	$cookie2 = $cookie."; cryptcookietest=1";
+    $Url=parse_url("http://sharingmatrix.com/ajax_scripts/check_timer.php?tmp=".$tmp);
+    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
+    is_page($page);
+    $imgcod=cut_str($page,"img:","\r");
+	$img_url="http://sharingmatrix.com/images/captcha/".$imgcod.".jpg";
 	$Url=parse_url($img_url);	
-	insert_timer(5);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie2, 0, 0, $_GET["proxy"],$pauth);
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
 	is_page($page);
 	
-	$headerend = strpos($page,"\r\n\r\n");
-	$pass_img = substr($page,$headerend+9);
-	write_file($options['download_dir']."sharingmatrix_captcha.jpg", $pass_img);
+	$headerend = strpos($page,"JFIF");
+	$pass_img = substr($page,$headerend-6);
+	write_file($download_dir."sharingmatrix_captcha.jpg", $pass_img);
 	
-	 			$code = '<div align=center ><form method="post" action="'.$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "").'">'.$nn;
+	 			$code = '<form method="post" action="'.$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "").'">'.$nn;
 	 			$code .= '<input type="hidden" name="step" value="1">'.$nn;
 	 			$code .= '<input type="hidden" name="link" value="'.urlencode($LINK).'">'.$nn;
 				$code .= '<input type="hidden" name="id" value="'.$id.'">'.$nn;
 				$code .= '<input type="hidden" name="filename" value="'.urlencode($link_name).'">'.$nn;
 				$code .= '<input type="hidden" name="cookie" value="'.urlencode($cookie).'">'.$nn;
-	 			$code .= 'Please enter : <img src="'.$options['download_dir'].'sharingmatrix_captcha.jpg?'.rand(1,10000).'"><br><br>'.$nn;
+	 			$code .= 'Please enter : <img src="'.$download_dir.'sharingmatrix_captcha.jpg?'.rand(1,10000).'"><br><br>'.$nn;
 	 			$code .= '<input type="text" name="captcha"> <input type="submit" value="Download">'.$nn;
-	 			$code .= '</form></div>';
+	 			$code .= '</form>';
                 echo ($code);
 	    	 }
 	}
@@ -157,7 +159,9 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 	return $cook;
 }
 
+
 /*************************\
- WRITTEN BY KAOX 08-oct-09
+ WRITTEN by kaox 08-oct-2009
+ FIXED by kaox 22-mar-2010
 \*************************/
 ?>
