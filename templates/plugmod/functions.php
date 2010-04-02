@@ -8,7 +8,7 @@
 function renderActions() {
 	global $options;
 	$return = "";
-	$return .= '<select name="act" onChange="javascript:void(document.flist.submit());">';
+	$return .= '<select name="act" onchange="javascript:void(document.flist.submit());">';
 	if ($options['disable_actions']) {
 		$return .= '<option selected="selected">'.lang(328).'</option>';
 		$return .= '</select>';

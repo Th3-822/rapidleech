@@ -6,7 +6,7 @@ function mrename() {
 	}
 	else {
 ?>
-<form method="post"><input type="hidden" name="act" value="mrename_go">
+<form method="post"><input type="hidden" name="act" value="mrename_go" />
 <?php echo lang(104); ?>:
 <?php
 		for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
@@ -18,9 +18,9 @@ function mrename() {
 ?>
 <table>
 <tr>
-<td valign="center"><b><?php echo lang(188); ?>&nbsp;</b><font size=2 color="yellow">&nbsp; <b><?php echo lang(189); ?>.</b>&nbsp; (dot)</font><b><input type="input" name="extension" style="width: 60px; height: 23px" value=''>&nbsp;<?php echo lang(190); ?> <?php echo lang(104); ?>.</b>&nbsp;
-<input name="yes" type="submit" style="height: 23px" value="<?php echo lang(191); ?>">&nbsp;&nbsp;
-<input name="no" type="submit" style="height: 23px" value="<?php echo lang(192); ?>"></td>
+<td valign="center"><b><?php echo lang(188); ?>&nbsp;</b><font size=2 color="yellow">&nbsp; <b><?php echo lang(189); ?>.</b>&nbsp; (dot)</font><b><input type="input" name="extension" style="width: 60px; height: 23px" value='' />&nbsp;<?php echo lang(190); ?> <?php echo lang(104); ?>.</b>&nbsp;
+<input name="yes" type="submit" style="height: 23px" value="<?php echo lang(191); ?>" />&nbsp;&nbsp;
+<input name="no" type="submit" style="height: 23px" value="<?php echo lang(192); ?>" /></td>
 </tr>
 </table>
 </form>
@@ -43,24 +43,24 @@ function mrename_go() {
 					$filetype = '.' . strtolower ( $_POST ['extension'] );
 					if (is_array ( $options['forbidden_filetypes'] ) && in_array ( '.' . strtolower ( $_POST ['extension'] ), $options['forbidden_filetypes'] )) {
 						printf(lang(82),$filetype);
-						echo('<br><br>');
+						echo('<br /><br />');
 					} else {
 						if (@rename ( $file ["name"], fixfilename ( $file ["name"] . ".{$_POST['extension']}" ) )) {
-							printf(lang(194).'<br>',basename($file['name']),fixfilename ( basename ( $file ["name"] . ".{$_POST['extension']}" ) ));
+							printf(lang(194).'<br />',basename($file['name']),fixfilename ( basename ( $file ["name"] . ".{$_POST['extension']}" ) ));
 							$list [$_POST ["files"] [$i]] ["name"] .= '.' . $_POST ['extension'];
 							$list [$_POST ["files"] [$i]] ["name"] = fixfilename ( $list [$_POST ["files"] [$i]] ["name"] );
 						} else {
 							printf(lang(193),basename($file['name']));
-							echo '<br>';
+							echo '<br />';
 						}
 					}
 				} else {
 					printf(lang(145),basename($file['name']));
-					echo('<br>');
+					echo('<br />');
 				}
 			}
 			if (! updateListInFile ( $list ))
-				echo lang(146)."<br>";
+				echo lang(146)."<br />";
 		}
 	} else {
 ?>

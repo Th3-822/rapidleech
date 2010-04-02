@@ -2,7 +2,7 @@
 function zip() {
 	global $list;
 ?>
-<form name="ziplist" method="post"><input type="hidden" name="act" value="zip_go">
+<form name="ziplist" method="post"><input type="hidden" name="act" value="zip_go" />
 	<table cellspacing="5">
 		<tr>
 			<td align="center"><strong>Adding files to a ZIP archive</strong></td>
@@ -11,7 +11,7 @@ function zip() {
 			<td align="center">
 				<table>
 					<tr>
-						<td>Archive Name:&nbsp;<input type="text" name="archive" size="25" value=".zip"></td>
+						<td>Archive Name:&nbsp;<input type="text" name="archive" size="25" value=".zip" /></td>
 					</tr>
 					<tr>
 						<td><input type="checkbox" name="no_compression">&nbsp;Do not use compression</td>
@@ -19,17 +19,17 @@ function zip() {
 				</table>
 				<table>
 					<tr>
-						<td><input type="submit" value="Add Files"></td>
+						<td><input type="submit" value="Add Files" /></td>
 					</tr>
 				</table>
 			</td>
 		</tr>
 	</table>
 <?php
-	echo "<br>Selected File" . (count ( $_GET ["files"] ) > 1 ? "s" : "") . ": ";
+	echo "<br />Selected File" . (count ( $_GET ["files"] ) > 1 ? "s" : "") . ": ";
 	for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 		$file = $list [($_GET ["files"] [$i])];
-		echo "<input type=\"hidden\" name=\"files[]\" value=\"{$_GET[files][$i]}\">\r\n";
+		echo "<input type=\"hidden\" name=\"files[]\" value=\"{$_GET[files][$i]}\" />\r\n";
 		echo "<b>" . basename ( $file ["name"] ) . "</b>";
 		echo ($i == count ( $_GET ["files"] ) - 1) ? "." : ",&nbsp;";
 	}
@@ -64,15 +64,15 @@ function zip_go() {
 		else { $v_list = $archive->create ( $add_files, PCLZIP_OPT_REMOVE_ALL_PATH); }
 	}
 	if ($v_list == 0) {
-		echo "Error: " . $archive->errorInfo ( true ) . "<br><br>";
+		echo "Error: " . $archive->errorInfo ( true ) . "<br /><br />";
 		return;
 	} else {
-		echo "Archive <b>" . $_POST ["archive"] . "</b> successfully created!<br><br>";
+		echo "Archive <b>" . $_POST ["archive"] . "</b> successfully created!<br /><br />";
 	}
 	if (is_file($_POST['archive'])) {
 		$time = filemtime($_POST['archive']); while (isset($list[$time])) { $time++; }
 		$list[$time] = array("name" => $_POST['archive'], "size" => bytesToKbOrMbOrGb(filesize($_POST['archive'])), "date" => $time);
-		if (!updateListInFile($list)) { echo lang(146)."<br><br>"; }
+		if (!updateListInFile($list)) { echo lang(146)."<br /><br />"; }
 	}
 }
 ?>

@@ -2,12 +2,15 @@
 // You can do some initialization for the template here
 @date_default_timezone_set(date_default_timezone_get());
 ?>
-<!DOCTYPE html public "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
 
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link title="Rapidleech Style" href="templates/plugmod/styles/rl_style_pm.css" rel="stylesheet" type="text/css">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<link title="Rapidleech Style" href="templates/plugmod/styles/rl_style_pm.css" rel="stylesheet" type="text/css" />
 
 <title><?php
 if (!isset($page_title)) {
@@ -31,4 +34,4 @@ pic1.src="templates/plugmod/images/ajax-loading.gif";
 </head>
 
 <body>
-<center><img src="templates/plugmod/images/logo_pm.gif" alt="RapidLeech PlugMod" border="0"></center><br>
+<center><img src="templates/plugmod/images/logo_pm.gif" alt="RapidLeech PlugMod" border="0" /></center><br />

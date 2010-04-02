@@ -120,7 +120,7 @@ $(document).ready(function() {
   $("#opt_login").click(function() { $('#opt_login_0').toggle(); } );
   $("#opt_login_add").click(function() {
     var row = $('#opt_login_table tbody>tr:last').clone(true).insertAfter('#opt_login_table tbody>tr:last');
-    $('td:eq(0)', row).html('<input type="button" value="Remove" onclick="$(this).parent().parent().remove();">');
+    $('td:eq(0)', row).html('<input type="button" value="Remove" onclick="$(this).parent().parent().remove();" />');
     $('td:eq(1)>input,td:eq(2)>input', row).val('');
     return false;
   });
@@ -194,7 +194,7 @@ $(document).ready(function() {
 </head>
 <body>
 <center><img src="<?php echo TEMPLATE_DIR; ?>images/logo_pm.gif" alt="RapidLeech PlugMod" border="0"></center>
-<br>
+<br />
 <noscript><div class="div_error">This page won't work without JavaScript, please enable JavaScript and refresh the page.</div></noscript>
 <?php
 if (isset($_POST['setup_save']) && $_POST['setup_save'] == 1) {
@@ -231,14 +231,14 @@ if (isset($_POST['setup_save']) && $_POST['setup_save'] == 1) {
       $options['users'][$u] = $p;
     }
   }
-  else { echo 'There was a problem with users and passwords<br><br>'; }
+  else { echo 'There was a problem with users and passwords<br /><br />'; }
   
   ob_start(); var_export($options); $opt = ob_get_contents(); ob_end_clean();
   $opt = (strpos($opt, "\r\n") === false ? str_replace(array("\r", "\n"), "\r\n", $opt) : $opt);
   $opt = "<?php\r\n if (!defined('RAPIDLEECH')) { require_once('index.html'); exit; }\r\n\r\n\$options = ".
         $opt.
         "; \r\n\r\nrequire_once('site_checker.php');\r\nrequire_once('accounts.php');\r\n?>";
-  if (!@write_file(CONFIG_DIR."config.php", $opt, 1)) { echo '<div class="div_error">It was not possible to write the configuration<br>Set permissions of "configs" folder to 0777 and try again</div>'; }
+  if (!@write_file(CONFIG_DIR."config.php", $opt, 1)) { echo '<div class="div_error">It was not possible to write the configuration<br />Set permissions of "configs" folder to 0777 and try again</div>'; }
   else { echo '<div class="div_message">Configuration saved! Click <a href="'.$PHP_SELF.'">here</a> to continue to rapidleech</div>'; }
 ?>
 <?php
@@ -257,8 +257,8 @@ else {
       <div class="div_title">General Options</div>
       <div class="div_opt">
         <table class="table_opt">
-          <tr><td>Download Directory</td><td><input type="text" id="opt_download_dir" name="opt_download_dir"></td></tr>
-          <tr><td>Allow users to change<br>download directory</td><td><input type="checkbox" value="1" name="opt_download_dir_is_changeable" id="opt_download_dir_is_changeable"></td></tr>
+          <tr><td>Download Directory</td><td><input type="text" id="opt_download_dir" name="opt_download_dir" /></td></tr>
+          <tr><td>Allow users to change<br />download directory</td><td><input type="checkbox" value="1" name="opt_download_dir_is_changeable" id="opt_download_dir_is_changeable" /></td></tr>
           <tr><td>Auto Delete in minutes</td><td> <select size="1" name="opt_delete_delay" id="opt_delete_delay">
                                                 	<option value="0">Disabled</option>
                                                 	<option value="3600">60</option>
@@ -268,9 +268,9 @@ else {
                                                 	<option value="18000">300</option>
                                                 	<option value="other">Other</option>
                                                   </select></td></tr>
-          <tr><td>File name prefix</td><td><input type="text" id="opt_rename_prefix" name="opt_rename_prefix"></td></tr>
-          <tr><td>File name suffix</td><td><input type="text" id="opt_rename_suffix" name="opt_rename_suffix"></td></tr>
-          <tr><td>Bandwidth saving</td><td><input type="checkbox" value="1" name="opt_bw_save" id="opt_bw_save"></td></tr>
+          <tr><td>File name prefix</td><td><input type="text" id="opt_rename_prefix" name="opt_rename_prefix" /></td></tr>
+          <tr><td>File name suffix</td><td><input type="text" id="opt_rename_suffix" name="opt_rename_suffix" /></td></tr>
+          <tr><td>Bandwidth saving</td><td><input type="checkbox" value="1" name="opt_bw_save" id="opt_bw_save" /></td></tr>
           <tr><td>File size limit in MiB</td><td> <select size="1" name="opt_file_size_limit" id="opt_file_size_limit">
                                                 	<option value="0">Disabled</option>
                                                 	<option value="100">100</option>
@@ -291,13 +291,13 @@ else {
     <div class="div_main">
       <div class="div_title">Authorization mode</div>
       <div class="div_opt">
-        <input type="checkbox" value="1" name="opt_login" id="opt_login"> Enable <b>Authorization mode</b>
+        <input type="checkbox" value="1" name="opt_login" id="opt_login" /> Enable <b>Authorization mode</b>
         <div style="text-align: left;" id="opt_login_0">
           <table id="opt_login_table" class="table_opt">
           <thead>
-            <tr><td><input id="opt_login_add" type="button" value="Add user"></td><td><b>User</b></td><td><b>Password</b></td></tr>
+            <tr><td><input id="opt_login_add" type="button" value="Add user" /></td><td><b>User</b></td><td><b>Password</b></td></tr>
           </thead><tbody>
-            <tr><td>&nbsp;</td><td><input type="text" name="users[]" size="10"></td><td><input type="text" name="passwords[]" size="10"></td></tr>
+            <tr><td>&nbsp;</td><td><input type="text" name="users[]" size="10" /></td><td><input type="text" name="passwords[]" size="10" /></td></tr>
           </tbody></table>
         </div>
       </div>
@@ -341,9 +341,9 @@ $d->close();
           </td>
           <td style="vertical-align: top;">
             <table>
-              <tr><td>Show all files, not<br>only downloaded</td><td><input type="checkbox" value="1" name="opt_show_all" id="opt_show_all"></td></tr>
-              <tr><td>Auto Refresh Server Info</td><td><input type="checkbox" value="1" name="opt_ajax_refresh" id="opt_ajax_refresh"></td></tr>
-              <tr><td>CPU, Memory &amp; Time Info</td><td><input type="checkbox" value="1" name="opt_server_info" id="opt_server_info"></td></tr>
+              <tr><td>Show all files, not<br />only downloaded</td><td><input type="checkbox" value="1" name="opt_show_all" id="opt_show_all" /></td></tr>
+              <tr><td>Auto Refresh Server Info</td><td><input type="checkbox" value="1" name="opt_ajax_refresh" id="opt_ajax_refresh" /></td></tr>
+              <tr><td>CPU, Memory &amp; Time Info</td><td><input type="checkbox" value="1" name="opt_server_info" id="opt_server_info" /></td></tr>
             </table>
           </td>
         </tr></table>
@@ -358,29 +358,29 @@ $d->close();
       <div class="div_title">File Actions Restrictions</div>
       <div class="div_opt" id="opt_actions_table">
         <table class="table_opt">
-          <tr><td>Disable all actions</td><td><input type="checkbox" value="1" name="opt_disable_actions" id="opt_disable_actions"></td></tr>
-          <tr><td>Disable renaming and<br>deleting on all actions</td><td><input type="checkbox" value="1" name="opt_disable_deleting" id="opt_disable_deleting"></td></tr>
+          <tr><td>Disable all actions</td><td><input type="checkbox" value="1" name="opt_disable_actions" id="opt_disable_actions" /></td></tr>
+          <tr><td>Disable renaming and<br />deleting on all actions</td><td><input type="checkbox" value="1" name="opt_disable_deleting" id="opt_disable_deleting" /></td></tr>
           <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
           <tr>
             <td style="vertical-align: top;"><table>
-              <tr><td>Disable delete action</td><td><input type="checkbox" value="1" name="opt_disable_delete" id="opt_disable_delete"></td></tr>
-              <tr><td>Disable rename action</td><td><input type="checkbox" value="1" name="opt_disable_rename" id="opt_disable_rename"></td></tr>
-              <tr><td>Disable massive rename</td><td><input type="checkbox" value="1" name="opt_disable_mass_rename" id="opt_disable_mass_rename"></td></tr>
-              <tr><td>Disable massive email</td><td><input type="checkbox" value="1" name="opt_disable_mass_email" id="opt_disable_mass_email"></td></tr>
-              <tr><td>Disable email</td><td><input type="checkbox" value="1" name="opt_disable_email" id="opt_disable_email"></td></tr>
-              <tr><td>Disable FTP</td><td><input type="checkbox" value="1" name="opt_disable_ftp" id="opt_disable_ftp"></td></tr>
-              <tr><td>Disable upload</td><td><input type="checkbox" value="1" name="opt_disable_upload" id="opt_disable_upload"></td></tr>
+              <tr><td>Disable delete action</td><td><input type="checkbox" value="1" name="opt_disable_delete" id="opt_disable_delete" /></td></tr>
+              <tr><td>Disable rename action</td><td><input type="checkbox" value="1" name="opt_disable_rename" id="opt_disable_rename" /></td></tr>
+              <tr><td>Disable massive rename</td><td><input type="checkbox" value="1" name="opt_disable_mass_rename" id="opt_disable_mass_rename" /></td></tr>
+              <tr><td>Disable massive email</td><td><input type="checkbox" value="1" name="opt_disable_mass_email" id="opt_disable_mass_email" /></td></tr>
+              <tr><td>Disable email</td><td><input type="checkbox" value="1" name="opt_disable_email" id="opt_disable_email" /></td></tr>
+              <tr><td>Disable FTP</td><td><input type="checkbox" value="1" name="opt_disable_ftp" id="opt_disable_ftp" /></td></tr>
+              <tr><td>Disable upload</td><td><input type="checkbox" value="1" name="opt_disable_upload" id="opt_disable_upload" /></td></tr>
             </table></td>
             <td style="vertical-align: top;"><table>
-              <tr><td>Disable merge</td><td><input type="checkbox" value="1" name="opt_disable_merge" id="opt_disable_merge"></td></tr>
-              <tr><td>Disable split</td><td><input type="checkbox" value="1" name="opt_disable_split" id="opt_disable_split"></td></tr>
-              <tr><td>Disable tar</td><td><input type="checkbox" value="1" name="opt_disable_tar" id="opt_disable_tar"></td></tr>
-              <tr><td>Disable zip</td><td><input type="checkbox" value="1" name="opt_disable_zip" id="opt_disable_zip"></td></tr>
-              <tr><td>Disable unzip</td><td><input type="checkbox" value="1" name="opt_disable_unzip" id="opt_disable_unzip"></td></tr>
-              <tr><td>Disable rar</td><td><input type="checkbox" value="1" name="opt_disable_rar" id="opt_disable_rar"></td></tr>
-              <tr><td>Disable unrar</td><td><input type="checkbox" value="1" name="opt_disable_unrar" id="opt_disable_unrar"></td></tr>
-              <tr><td>Disable md5</td><td><input type="checkbox" value="1" name="opt_disable_md5" id="opt_disable_md5"></td></tr>
-              <tr><td>Disable list</td><td><input type="checkbox" value="1" name="opt_disable_list" id="opt_disable_list"></td></tr>
+              <tr><td>Disable merge</td><td><input type="checkbox" value="1" name="opt_disable_merge" id="opt_disable_merge" /></td></tr>
+              <tr><td>Disable split</td><td><input type="checkbox" value="1" name="opt_disable_split" id="opt_disable_split" /></td></tr>
+              <tr><td>Disable tar</td><td><input type="checkbox" value="1" name="opt_disable_tar" id="opt_disable_tar" /></td></tr>
+              <tr><td>Disable zip</td><td><input type="checkbox" value="1" name="opt_disable_zip" id="opt_disable_zip" /></td></tr>
+              <tr><td>Disable unzip</td><td><input type="checkbox" value="1" name="opt_disable_unzip" id="opt_disable_unzip" /></td></tr>
+              <tr><td>Disable rar</td><td><input type="checkbox" value="1" name="opt_disable_rar" id="opt_disable_rar" /></td></tr>
+              <tr><td>Disable unrar</td><td><input type="checkbox" value="1" name="opt_disable_unrar" id="opt_disable_unrar" /></td></tr>
+              <tr><td>Disable md5</td><td><input type="checkbox" value="1" name="opt_disable_md5" id="opt_disable_md5" /></td></tr>
+              <tr><td>Disable list</td><td><input type="checkbox" value="1" name="opt_disable_list" id="opt_disable_list" /></td></tr>
             </table></td>
           </tr>
 
@@ -398,14 +398,14 @@ $d->close();
         <div style="text-align: center; padding-bottom: 10px;">(You don't need to change these unless you know what you are doing)</div>
         <table class="table_opt">
           <tr><td colspan="2" style="text-align: center;">Forbidden file types</td></tr>
-          <tr><td colspan="2" style="text-align: center;"><input size="50" type="text" id="opt_forbidden_filetypes" name="opt_forbidden_filetypes"></td></tr>
-          <tr><td>Block download of forbidden file types</td><td><input type="checkbox" value="1" name="opt_forbidden_filetypes_block" id="opt_forbidden_filetypes_block"></td></tr>
-          <tr id="opt_rename_these_filetypes_to_0"><td>Rename forbidden file types to</td><td><input type="text" size="8" value="" name="opt_rename_these_filetypes_to" id="opt_rename_these_filetypes_to"></tr>
-          <tr><td>Block forbidden file types for file actions</td><td><input type="checkbox" value="1" name="opt_check_these_before_unzipping" id="opt_check_these_before_unzipping"></td></tr>
-          <tr><td>Images via php</td><td><input type="checkbox" value="1" name="opt_images_via_php" id="opt_images_via_php"></td></tr>
-          <tr><td>Redirect passive method</td><td><input type="checkbox" value="1" name="opt_redir" id="opt_redir"></td></tr>
-          <tr><td>No cache</td><td><input type="checkbox" value="1" name="opt_no_cache" id="opt_no_cache"></td></tr>
-          <tr><td>fgc</td><td><input type="text" value="" size="2" name="opt_fgc" id="opt_fgc"></td></tr>
+          <tr><td colspan="2" style="text-align: center;"><input size="50" type="text" id="opt_forbidden_filetypes" name="opt_forbidden_filetypes" /></td></tr>
+          <tr><td>Block download of forbidden file types</td><td><input type="checkbox" value="1" name="opt_forbidden_filetypes_block" id="opt_forbidden_filetypes_block" /></td></tr>
+          <tr id="opt_rename_these_filetypes_to_0"><td>Rename forbidden file types to</td><td><input type="text" size="8" value="" name="opt_rename_these_filetypes_to" id="opt_rename_these_filetypes_to" /></tr>
+          <tr><td>Block forbidden file types for file actions</td><td><input type="checkbox" value="1" name="opt_check_these_before_unzipping" id="opt_check_these_before_unzipping" /></td></tr>
+          <tr><td>Images via php</td><td><input type="checkbox" value="1" name="opt_images_via_php" id="opt_images_via_php" /></td></tr>
+          <tr><td>Redirect passive method</td><td><input type="checkbox" value="1" name="opt_redir" id="opt_redir" /></td></tr>
+          <tr><td>No cache</td><td><input type="checkbox" value="1" name="opt_no_cache" id="opt_no_cache" /></td></tr>
+          <tr><td>fgc</td><td><input type="text" value="" size="2" name="opt_fgc" id="opt_fgc" /></td></tr>
         </table>
       </div>
     </div>
@@ -417,9 +417,9 @@ $d->close();
   <tr>
     <td>
       <div style="text-align: center;">
-        <input type="hidden" value="1" name="setup_save">
-        <input type="button" value="Save Configuration" id="save" name="save" disabled="disabled">
-        <input type="button" value="Reset" id="reset" name="reset" disabled="disabled">
+        <input type="hidden" value="1" name="setup_save" />
+        <input type="button" value="Save Configuration" id="save" name="save" disabled="disabled" />
+        <input type="button" value="Reset" id="reset" name="reset" disabled="disabled" />
       </div>
     </td>
   </tr>

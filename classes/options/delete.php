@@ -6,27 +6,27 @@ function delete() {
 	}
 	else {
 ?>
-<form method="post"><input type="hidden" name="act" value="delete_go">
+<form method="post"><input type="hidden" name="act" value="delete_go" />
 <?php echo lang(104); ?>:
 <?php
 			for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 				$file = $list [$_GET ["files"] [$i]];
 ?>
-	<input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>"> <b><?php echo basename ( $file ["name"] ); ?></b><?php echo $i == count ( $_GET ["files"] ) - 1 ? "." : ",&nbsp"; ?>
+	<input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>" /> <b><?php echo basename ( $file ["name"] ); ?></b><?php echo $i == count ( $_GET ["files"] ) - 1 ? "." : ",&nbsp"; ?>
 <?php
 		}
 ?>
-<br>
+<br />
 <?php echo lang(148); ?>?
-<br>
+<br />
 <table>
 	<tr>
 		<td><input type="submit" name="yes" style="width: 33px; height: 23px"
-			value="<?php echo lang(149); ?>">
+			value="<?php echo lang(149); ?>" />
 		</td>
 		<td>&nbsp;&nbsp;&nbsp;</td>
 		<td><input type="submit" name="no" style="width: 33px; height: 23px"
-			value="<?php echo lang(150); ?>">
+			value="<?php echo lang(150); ?>" />
 		</td>
 	</tr>
 </table>
@@ -43,20 +43,20 @@ function delete_go() {
 			if (file_exists ( $file ["name"] )) {
 				if (@unlink ( $file ["name"] )) {
 					printf(lang(151),$file['name']);
-					echo "<br>";
+					echo "<br />";
 					unset ( $list [$_POST ["files"] [$i]] );
 				} else {
 					printf(lang(152),$file['name']);
-					echo "<br>";
+					echo "<br />";
 				}
 			} else {
 				unset ( $list [$_POST ["files"] [$i]] );
 				printf(lang(145),$file['name']);
-				echo "<br>";
+				echo "<br />";
 			}
 		}
 		if (! updateListInFile ( $list )) {
-			echo lang(146)."<br><br>";
+			echo lang(146)."<br /><br />";
 		}
 	} else {
 		echo('<script type="text/javascript">location.href="'.$PHP_SELF.'?act=files";</script>');

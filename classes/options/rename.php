@@ -6,7 +6,7 @@ function rl_rename() {
   }
   else {
 ?>
-<form method="post"><input type="hidden" name="act" value="rename_go">
+<form method="post"><input type="hidden" name="act" value="rename_go" />
 		<table align="center">
 			<tr>
 				<td>
@@ -15,13 +15,13 @@ function rl_rename() {
 		for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 			$file = $list [$_GET ["files"] [$i]];
 ?>
-<input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>">
+<input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>" />
 <tr>
 	<td align="center"><b><?php echo basename ( $file ["name"] ); ?></b></td>
 </tr>
 <tr>
 	<td><?php echo lang(201); ?>:&nbsp;<input type="text" name="newName[]" size="25"
-		value="<?php echo basename ( $file ["name"] ); ?>"></td>
+		value="<?php echo basename ( $file ["name"] ); ?>" /></td>
 </tr>
 <tr>
 	<td></td>
@@ -29,7 +29,7 @@ function rl_rename() {
 <?php } ?>
                                   </table>
 				</td>
-				<td><input type="submit" value="Rename"></td>
+				<td><input type="submit" value="Rename" /></td>
 			</tr>
 			<tr>
 				<td></td>
@@ -55,25 +55,25 @@ function rename_go() {
 				
 				if (is_array ( $options['forbidden_filetypes'] ) && in_array ( strtolower ( $filetype ), $options['forbidden_filetypes'] )) {
 					printf(lang(82),$filetype);
-					echo "<br><br>";
+					echo "<br /><br />";
 				} else {
 					if (@rename ( $file ["name"], $newName )) {
 						printf(lang(194),$file['name'],basename($newName));
-						echo "<br><br>";
+						echo "<br /><br />";
 						$list [$_POST ["files"] [$i]] ["name"] = $newName;
 					} else {
 						printf(lang(202),$file['name']);
-						echo "<br><br>";
+						echo "<br /><br />";
 					}
 				}
 			} else {
 				printf(lang(145),$file['name']);
-				echo "<br><br>";
+				echo "<br /><br />";
 			}
 		}
 		if ($smthExists) {
 			if (! updateListInFile ( $list )) {
-				echo lang(9)."<br><br>";
+				echo lang(9)."<br /><br />";
 			}
 		}
 	}

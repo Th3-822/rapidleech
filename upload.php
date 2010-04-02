@@ -114,14 +114,14 @@ if ($download_link || $delete_link || $stat_link || $adm_link)
 			*/			
 			
 			echo "\n<table width=100% border=0>";
-			echo ($download_link ? "<tr><td width=100 nowrap align=right><b>".lang(68).":</b><td width=80%><input value='$download_link' class='upstyles-dllink' readonly></tr>" : "");
-			echo ($delete_link ? "<tr><td width=100 nowrap align=right>".lang(69).":<td width=80%><input value='$delete_link' class='upstyles-dellink' readonly></tr>" : "");
-			echo ($stat_link ? "<tr><td width=100 nowrap align=right>".lang(70).":<td width=80%><input value='$stat_link' class='upstyles-statlink' readonly></tr>" : "");
-			echo ($adm_link ? "<tr><td width=100 nowrap align=right>".lang(71).":<td width=80%><input value='$adm_link' class='upstyles-admlink' readonly></tr>": "");
-			echo ($user_id ? "<tr><td width=100 nowrap align=right>".lang(72).":<td width=80%><input value='$user_id' class='upstyles-userid' readonly></tr>": "");
-			echo ($ftp_uplink ? "<tr><td width=100 nowrap align=right>".lang(73).":<td width=80%><input value='$ftp_uplink' class='upstyles-ftpuplink' readonly></tr>": "");
-			echo ($access_pass ? "<tr><td width=100 nowrap align=right>".lang(74).":<td width=80%><input value='$access_pass' class='upstyles-accesspass' readonly></tr>": "");
-			/*echo ($protect ? "<tr><td width=100 nowrap align=right>Protect link:<td width=80%><input value='$protect' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly></tr>": "");*/
+			echo ($download_link ? "<tr><td width=100 nowrap align=right><b>".lang(68).":</b><td width=80%><input value='$download_link' class='upstyles-dllink' readonly /></tr>" : "");
+			echo ($delete_link ? "<tr><td width=100 nowrap align=right>".lang(69).":<td width=80%><input value='$delete_link' class='upstyles-dellink' readonly /></tr>" : "");
+			echo ($stat_link ? "<tr><td width=100 nowrap align=right>".lang(70).":<td width=80%><input value='$stat_link' class='upstyles-statlink' readonly /></tr>" : "");
+			echo ($adm_link ? "<tr><td width=100 nowrap align=right>".lang(71).":<td width=80%><input value='$adm_link' class='upstyles-admlink' readonly /></tr>": "");
+			echo ($user_id ? "<tr><td width=100 nowrap align=right>".lang(72).":<td width=80%><input value='$user_id' class='upstyles-userid' readonly /></tr>": "");
+			echo ($ftp_uplink ? "<tr><td width=100 nowrap align=right>".lang(73).":<td width=80%><input value='$ftp_uplink' class='upstyles-ftpuplink' readonly /></tr>": "");
+			echo ($access_pass ? "<tr><td width=100 nowrap align=right>".lang(74).":<td width=80%><input value='$access_pass' class='upstyles-accesspass' readonly /></tr>": "");
+			/*echo ($protect ? "<tr><td width=100 nowrap align=right>Protect link:<td width=80%><input value='$protect' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly /></tr>": "");*/
 			echo "</table>\n";
 			
 			if(!file_exists(trim($lfile).".upload.html") && !isset($_GET['auul']))

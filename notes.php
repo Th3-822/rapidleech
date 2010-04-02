@@ -6,7 +6,7 @@ define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 // Include other useful functions
 require_once('classes/other.php');
 include(TEMPLATE_DIR.'header.php'); ?>
-<br>
+<br />
 <?php
 
 	if (!file_exists("files/".lang(327).".txt")) {

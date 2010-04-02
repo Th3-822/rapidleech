@@ -23,7 +23,7 @@ function xmail($from, $to, $subj, $text, $filename, $partSize = FALSE, $method =
 	}
 	
 	printf(lang(121),basename ( $filename ));
-	echo "...<br>";
+	echo "...<br />";
 	flush ();
 	sleep ( 1 );
 	for($i = 0; $i < strlen ( $subj ); $i ++) {
@@ -34,7 +34,7 @@ function xmail($from, $to, $subj, $text, $filename, $partSize = FALSE, $method =
 	$un = strtoupper ( uniqid ( time () ) );
 	$head = "From: " . $from . "\n" . "X-Mailer: PHP RapidLeech PlugMod\n" . "Reply-To: " . $from . "\n" . "Mime-Version: 1.0\n" . "Content-Type: multipart/mixed; boundary=\"----------" . $un . "\"\n\n";
 	$zag = "------------" . $un . "\nContent-Type: text/plain; charset=UTF-8\n" . "Content-Transfer-Encoding: 8bit\n\n" . $text . "\n\n" . "------------" . $un . "\n" . "Content-Type: application/octet-stream; name=\"" . basename ( $filename ) . "\"\n" . "Content-Transfer-Encoding: base64\n" . "Content-Disposition: attachment; filename=\"" . basename ( $filename ) . "\"\n\n";
-	echo "<span id=mailPart." . md5 ( basename ( $filename ) ) . "></span><br>";
+	echo "<span id=mailPart." . md5 ( basename ( $filename ) ) . "></span><br />";
 	flush ();
 	if ($partSize) {
 		$partSize = round ( $partSize );
@@ -43,14 +43,14 @@ function xmail($from, $to, $subj, $text, $filename, $partSize = FALSE, $method =
 			$totalParts = ceil ( strlen ( $file ) / $partSize );
 			
 			if ($totalParts == 1) {
-				echo lang(122)."...<br>";
+				echo lang(122)."...<br />";
 				flush ();
 				return mail ( $to, $subj, $zag . $file, $head ) ? TRUE : FALSE;
 			}
 			
 			printf(lang(123),bytesToKbOrMbOrGb ( $partSize ));
-			echo ", ".lang(124)." - RFC 2046...<br>";
-			echo "Total Parts: <b>" . $totalParts . "</b><br>";
+			echo ", ".lang(124)." - RFC 2046...<br />";
+			echo "Total Parts: <b>" . $totalParts . "</b><br />";
 			$mailed = TRUE;
 			echo('<script type="text/javascript">');
 			for($i = 0; $i < $totalParts; $i ++) {
@@ -75,14 +75,14 @@ function xmail($from, $to, $subj, $text, $filename, $partSize = FALSE, $method =
 			$totalParts = ceil ( $fileSize / $partSize );
 			
 			if ($totalParts == 1) {
-				echo lang(126)."...<br>";
+				echo lang(126)."...<br />";
 				flush ();
 				return mail ( $to, $subj, $zag . chunk_split ( base64_encode ( $fileContents ) ), $head ) ? TRUE : FALSE;
 			}
 			
 			printf(lang(123),bytesToKbOrMbOrGb ( $partSize ));
-			echo ", ".lang(124)." - Total Commander...<br>";
-			echo "Total Parts: <b>" . $totalParts . "</b><br>";
+			echo ", ".lang(124)." - Total Commander...<br />";
+			echo "Total Parts: <b>" . $totalParts . "</b><br />";
 			$mailed = TRUE;
 			$fileTmp = $filename;
 			while ( strpos ( $fileTmp, "." ) ) {

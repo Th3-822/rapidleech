@@ -2,26 +2,26 @@
 function rl_mail() {
 	global $options, $list;
 ?>
-<form method="post"><input type="hidden" name="act" value="mail_go">
+<form method="post"><input type="hidden" name="act" value="mail_go" />
 <?php echo lang(104); ?>:
 <?php
 	for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 		$file = $list [($_GET ["files"] [$i])];
 ?>
-                <input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>"> <b><?php echo basename ( $file ["name"] ); ?></b><?php echo $i == count ( $_GET ["files"] ) - 1 ? "." : ",&nbsp"; ?>
+                <input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>" /> <b><?php echo basename ( $file ["name"] ); ?></b><?php echo $i == count ( $_GET ["files"] ) - 1 ? "." : ",&nbsp"; ?>
 <?php
 	}
-?><br>
-<br>
+?><br />
+<br />
 <table align="center">
 	<tr>
 		<td><?php echo lang(164); ?>:&nbsp;<input type="text" name="email"
-			value="<?php echo ($_COOKIE ["email"] ? $_COOKIE ["email"] : ""); ?>">
+			value="<?php echo ($_COOKIE ["email"] ? $_COOKIE ["email"] : ""); ?>" />
 		</td>
-		<td><input type="submit" value="Send"></td>
+		<td><input type="submit" value="Send" /></td>
 	</tr>
 	<tr>
-		<td><input type="checkbox" name="del_ok" <?php echo $options['disable_deleting'] ? "disabled" : "checked";?>>&nbsp;<?php echo lang(165); ?></td>
+		<td><input type="checkbox" name="del_ok" <?php echo $options['disable_deleting'] ? "disabled" : "checked";?> />&nbsp;<?php echo lang(165); ?></td>
 	</tr>
 	<tr>
 		<td></td>
@@ -31,7 +31,7 @@ function rl_mail() {
 			<tr>
 				<td><input id="splitchkbox" type="checkbox" name="split"
 					onClick="javascript:var displ=this.checked?'':'none';document.getElementById('methodtd2').style.display=displ;"
-					<?php echo $_COOKIE ["split"] ? " checked" : ""; ?>>&nbsp;<?php echo lang(142); ?></td>
+					<?php echo $_COOKIE ["split"] ? " checked" : ""; ?> />&nbsp;<?php echo lang(142); ?></td>
 				<td>&nbsp;</td>
 				<td id="methodtd2"
 					<?php echo $_COOKIE ["split"] ? "" : " style=\"display: none;\""; ?>>
@@ -46,7 +46,7 @@ function rl_mail() {
 					</tr>
 					<tr>
 						<td><?php echo lang(143); ?>:&nbsp;<input type="text" name="partSize" size="2"
-							value="<?php echo $_COOKIE ["partSize"] ? $_COOKIE ["partSize"] : 10; ?>">&nbsp;MB
+							value="<?php echo $_COOKIE ["partSize"] ? $_COOKIE ["partSize"] : 10; ?>" />&nbsp;MB
 						</td>
 					</tr>
 				</table>
@@ -63,7 +63,7 @@ function mail_go() {
 	global $list, $options;
 	require_once (CLASS_DIR . "mail.php");
 	if (! checkmail ( $_POST ["email"] )) {
-		echo lang(166)."<br><br>";
+		echo lang(166)."<br /><br />";
 	} else {
 		$_POST ["partSize"] = ((isset ( $_POST ["partSize"] ) & $_POST ["split"] == "on") ? $_POST ["partSize"] * 1024 * 1024 : FALSE);
 		for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {
@@ -80,13 +80,13 @@ function mail_go() {
 						;
 					} else
 						$v_ads = " !";
-					echo "<script type='text/javascript'>mail('File <b>" . basename ( $file ["name"] ) . "</b> it is sent for the address <b>" . $_POST ["email"] . "</b>" . $v_ads . "', '" . md5 ( basename ( $file ["name"] ) ) . "');</script>\r\n<br>";
+					echo "<script type='text/javascript'>mail('File <b>" . basename ( $file ["name"] ) . "</b> it is sent for the address <b>" . $_POST ["email"] . "</b>" . $v_ads . "', '" . md5 ( basename ( $file ["name"] ) ) . "');</script>\r\n<br />";
 				} else {
-					echo lang(12)."<br>";
+					echo lang(12)."<br />";
 				}
 			} else {
 				printf(lang(145),$file['name']);
-				echo "<br><br>";
+				echo "<br /><br />";
 			}
 		}
 	}

@@ -13,8 +13,8 @@ $ftp = new ftp(FALSE, FALSE);
     {
         $ftp->quit();
         $server = $host.':'.$port;
-        $lastError = sprintf(lang(79),$server)."<br>".
-                     "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
+        $lastError = sprintf(lang(79),$server)."<br />".
+                     "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br /><br />";
         return FALSE;
     }
   else
@@ -22,8 +22,8 @@ $ftp = new ftp(FALSE, FALSE);
         if(!$ftp->connect())
           {
               $ftp->quit();
-              $lastError = sprintf(lang(79),$server)."<br>".
-                           "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
+              $lastError = sprintf(lang(79),$server)."<br />".
+                           "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br /><br />";
               return FALSE;
           }
         else
@@ -31,15 +31,15 @@ $ftp = new ftp(FALSE, FALSE);
                 if (!$ftp->login($AUTH["ftp"]["login"], $AUTH["ftp"]["password"]))
                   {
                       $ftp->quit();
-                      $lastError = lang(80)."<br>".
-                                   "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br><br>";
+                      $lastError = lang(80)."<br />".
+                                   "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br /><br />";
                       return FALSE;
                   }
                 else
                   {
                   	echo('<p>');
                   	printf(lang(81),$host);
-                  	echo('<br>');
+                  	echo('<br />');
                       //$ftp->Passive(FALSE);
                       $tmp = explode("/", $url);
                       $ftp_file = array_pop($tmp);
@@ -78,9 +78,9 @@ $ftp = new ftp(FALSE, FALSE);
                             $saveToFile = dirname($saveToFile).PATH_SPLITTER.time()."_".basename($saveToFile);
                         }
 					printf(lang(83),$saveToFile,bytesToKbOrMbOrGb($fileSize));
-                      echo "<br>";
+                      echo "<br />";
                       ?>
-<br>
+<br />
 <table cellspacing="0" cellpadding="0" style="FONT-FAMILY: Tahoma; FONT-SIZE: 11px;">
 <tr>
 <td></td>
@@ -98,7 +98,7 @@ $ftp = new ftp(FALSE, FALSE);
 <td align="right" id="speed">0 KB/s</td>
 </tr>
 </table>
-<br>
+<br />
 <div id="resume" align="center" style="FONT-FAMILY: Tahoma; FONT-SIZE: 11px;"></div>
 <script type="text/javascript" language="javascript">
 function pr(percent, received, speed){
@@ -115,7 +115,7 @@ function pr(percent, received, speed){
 	return true;
 	}
 </script>
-<br>
+<br />
 <?php
                       $FtpTimeStart = getmicrotime();
                       if($ftp->get($ftp_file, $saveToFile))
