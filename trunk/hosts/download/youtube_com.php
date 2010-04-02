@@ -12,7 +12,7 @@ class youtube_com extends DownloadClass
 	public function Download($link)
 	{
 		$this->page = $this->GetPage($link);
-		if (!preg_match('%"fmt_url_map"\:\s"(.+)",\s%Us', $this->page, $fmt_url_map)) html_error('Video link not found.');
+		if (!preg_match('#fmt_url_map=(.+?)&#', $this->page, $fmt_url_map)) html_error('Video link not found.');
 		$fmt_url_maps = preg_split('%,%', urldecode($fmt_url_map[1]));
 		$fmts = array(37,22,35,18,34,6,5,0,17,13);
 		$yt_fmt = $_POST['yt_fmt'];
@@ -69,14 +69,8 @@ class youtube_com extends DownloadClass
 		elseif (preg_match ('%highest%', $yt_fmt)) $ext = '.mp4';
 		else $ext = '.flv';
 
-		/*
-		 * $title = cut_str($this->page, '<title>', '</title>');
-		 * if (!$title) html_error('No video title found! Download halted.');
-		 * $title = preg_replace('#YouTube.*-\s#Us', '', trim($title));
-		 */
-
 		if (!preg_match('#<title>.*YouTube.*-(.*)</title>#Us', $this->page, $title)) html_error('No video title found! Download halted.');
-		if (!$video_id) preg_match ('/"video_id": "([^\"]+)/', $this->page, $video_id);
+		if (!$video_id) preg_match ('#video_id=(.+?)&#', $this->page, $video_id);
 
 		$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode (trim($title[1]))) . (isset ($_POST ['yt_fmt']) && $_POST ['yt_fmt'] !== 'highest' ? '-[' . $video_id[1] . '][f' . $_POST ['yt_fmt'] . ']' : '-[' . $video_id[1] . '][f' . $fmt . ']') . $ext;
 		
@@ -93,5 +87,6 @@ class youtube_com extends DownloadClass
 		}
 	}
 }
-
+//re-written by szal based on original plugin by eqbal
+//updated 02 Apr 2010
 ?>
