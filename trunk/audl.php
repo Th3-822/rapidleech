@@ -32,7 +32,7 @@ if ($options['login'] === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($logged
 	}
 require(TEMPLATE_DIR.'/header.php');
 ?>
-<br>
+<br />
 <center>
 <?php
 if ($_REQUEST["GO"] == "GO") {
@@ -281,7 +281,7 @@ function resetProgress()
 
 <table id="links" class="container" cellspacing="1">
 <thead><tr><td width=80% align="left"><b><?php echo lang(21); ?></b></td><td width=70 align="left"><b><?php echo lang(22); ?></b></td></tr></thead>
-<tfoot><tr id=auto><td colspan=2 align=center><input type=button value='<?php echo lang(29); ?>' onClick=javascript:startauto();></td></tr></tfoot>
+<tfoot><tr id=auto><td colspan=2 align=center><input type=button value='<?php echo lang(29); ?>' onclick='javascript:startauto();' /></td></tr></tfoot>
 <tbody>
 <?php
 		for ($i=0; $i<count($getlinks); $i++)
@@ -328,7 +328,7 @@ function resetProgress()
 <tr> <td width=100% valign=top>
 <div id=listing style="display:block;">
 <table border=0 style="width:710px;">
-<tr><td align="center"><textarea id=links name=links rows=15 cols=60 class="adlinks"></textarea></td></tr><tr><td align="center" valign=top><input type=submit value="<?php echo lang(34); ?>" onClick=javascript:HideAll(); style="width:100px;"></tr>
+<tr><td align="center"><textarea id=links name=links rows=15 cols=60 class="adlinks"></textarea></td></tr><tr><td align="center" valign=top><input type=submit value="<?php echo lang(34); ?>" onclick='javascript:HideAll();' style="width:100px;" /></tr>
 </table>
 </div>
 <div id="options" style="display:none;">
@@ -340,16 +340,16 @@ function resetProgress()
           <table align="center">
             <tr>
               <td>
-                <input type="checkbox" id=useproxy name=useproxy onClick="javascript:var displ=this.checked?'':'none';document.getElementById('proxy').style.display=displ;" <?php echo $_COOKIE["useproxy"] ? " checked" : ""; ?> />&nbsp;<?php echo lang(35); ?>
+                <input type="checkbox" id=useproxy name=useproxy onclick="javascript:var displ=this.checked?'':'none';document.getElementById('proxy').style.display=displ;" <?php echo $_COOKIE["useproxy"] ? " checked" : ""; ?> />&nbsp;<?php echo lang(35); ?>
               </td>
               <td>&nbsp;
 
               </td>
               <td id=proxy<?php echo $_COOKIE["useproxy"] ? "" : " style=\"display: none;\""; ?>>
                 <table border=0>
-                  <tr><td><?php echo lang(36); ?>:</td><td><input name=proxy size=25<?php echo $_COOKIE["proxy"] ? " value=\"".$_COOKIE["proxy"]."\"" : ""; ?>></td></tr>
-                  <tr><td><?php echo lang(37); ?>:</td><td><input name=proxyuser size=25 <?php echo $_COOKIE["proxyuser"] ? " value=\"".$_COOKIE["proxyuser"]."\"" : ""; ?>></td></tr>
-                  <tr><td><?php echo lang(38); ?>:</td><td><input name=proxypass size=25 <?php echo $_COOKIE["proxypass"] ? " value=\"".$_COOKIE["proxypass"]."\"" : ""; ?>></td></tr>
+                  <tr><td><?php echo lang(36); ?>:</td><td><input name='proxy' size='25'<?php echo $_COOKIE["proxy"] ? " value=\"".$_COOKIE["proxy"]."\"" : ""; ?>></td></tr>
+                  <tr><td><?php echo lang(37); ?>:</td><td><input name='proxyuser' size='25' <?php echo $_COOKIE["proxyuser"] ? " value=\"".$_COOKIE["proxyuser"]."\"" : ""; ?> /></td></tr>
+                  <tr><td><?php echo lang(38); ?>:</td><td><input name='proxypass' size='25' <?php echo $_COOKIE["proxypass"] ? " value=\"".$_COOKIE["proxypass"]."\"" : ""; ?> /></td></tr>
                 </table>
               </td>
             </tr>
@@ -359,7 +359,7 @@ function resetProgress()
             </tr>
 			<tr>
 			<td>
-                <input type="checkbox" value="on" name=imageshack_acc id=imageshack_acc <?php if (is_array($imageshack_acc)) print ' checked'; ?>>&nbsp;<?php echo lang(39); ?>
+                <input type="checkbox" value="on" name='imageshack_acc' id='imageshack_acc' <?php if (is_array($imageshack_acc)) print ' checked'; ?> />&nbsp;<?php echo lang(39); ?>
               </td>
 			</tr>
             <?php
@@ -368,13 +368,13 @@ function resetProgress()
             ?>
             <tr>
               <td>
-                <input type="checkbox" name=saveto id=saveto onClick="javascript:var displ=this.checked?'':'none';document.getElementById('path').style.display=displ;" <?php echo $_COOKIE["saveto"] ? " checked" : ""; ?> />&nbsp;<?php echo lang(40); ?>
+                <input type="checkbox" name='saveto' id='saveto' onclick="javascript:var displ=this.checked?'':'none';document.getElementById('path').style.display=displ;" <?php echo $_COOKIE["saveto"] ? " checked" : ""; ?> />&nbsp;<?php echo lang(40); ?>
               </td>
               <td>&nbsp;
 
               </td>
               <td id=path <?php echo $_COOKIE["saveto"] ? "" : " style=\"display: none;\""; ?> test>
-                <?php echo lang(41); ?>:&nbsp;<input name=savedir size=30 value="<?php echo realpath(($_COOKIE["savedir"] ? $_COOKIE["savedir"] : (strstr(realpath("./"), ":") ? addslashes($workpath) : $workpath))) ?>">
+                <?php echo lang(41); ?>:&nbsp;<input name=savedir size=30 value="<?php echo realpath(($_COOKIE["savedir"] ? $_COOKIE["savedir"] : (strstr(realpath("./"), ":") ? addslashes($workpath) : $workpath))) ?>" />
               </td>
             </tr>
             <?php
@@ -382,12 +382,12 @@ function resetProgress()
             ?>
 
 			<tr>
-			<td><input type="checkbox" name="premium_acc" id="premium_acc" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;" <?php if (count($premium_acc) > 0) print ' checked'; ?> />&nbsp;<?php echo lang(42); ?></td>
+			<td><input type="checkbox" name="premium_acc" id="premium_acc" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;" <?php if (count($premium_acc) > 0) print ' checked="checked"'; ?> />&nbsp;<?php echo lang(42); ?></td>
 			<td>&nbsp;</td>
 			<td id="premiumblock" style="display: none;">
 			<table width="150" border="0">
-			<tr><td><?php echo lang(37); ?>:&nbsp;</td><td><input type="text" name="premium_user" id="premium_user" size="15" value=""></td></tr>
-			<tr><td><?php echo lang(38); ?>:&nbsp;</td><td><input type="password" name="premium_pass" id="premium_pass" size="15" value=""></td></tr>
+			<tr><td><?php echo lang(37); ?>:&nbsp;</td><td><input type="text" name="premium_user" id="premium_user" size="15" value="" /></td></tr>
+			<tr><td><?php echo lang(38); ?>:&nbsp;</td><td><input type="password" name="premium_pass" id="premium_pass" size="15" value="" /></td></tr>
 			</table>
 			</td>
 			</tr>
@@ -402,7 +402,7 @@ function resetProgress()
 			<td><small><?php echo lang(218); ?></small></td>
 			<td>
 			<select name="yt_fmt" id="yt_fmt">
-            <option selected value="highest"><?php echo lang(219); ?></option>
+            <option value="highest" selected="selected"><?php echo lang(219); ?></option>
             <option value="0"><?php echo lang(220); ?></option>
             <option value="5"><?php echo lang(221); ?></option>
             <option value="6"><?php echo lang(222); ?></option>

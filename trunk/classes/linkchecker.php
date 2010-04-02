@@ -71,13 +71,13 @@ function check($link, $x, $regex, $pattern='', $replace='') {
 function debug() {
 	echo '<div style="text-align:left; margin:0 auto; width:450px;">';
 	if ( !extension_loaded("curl") )
-		echo lang(117)."<br>";
+		echo lang(117)."<br />";
 	else
-		echo "<b>".lang(118)."</b><br>";
+		echo "<b>".lang(118)."</b><br />";
 	if( PHP_VERSION < 5 ){
-		echo lang(119)."<br>";
+		echo lang(119)."<br />";
 	}
-	echo lang(120)."<br>";
+	echo lang(120)."<br />";
 	echo "</div>";
 }
 ?>

@@ -71,7 +71,7 @@ function insert_location($newlocation) {
 		print "<form action=\"$location\" method=\"post\">" . $nn;
 		foreach ( $list as $l ) {
 			list ( $name, $value ) = explode ( "=", $l );
-			print "<input type=\"hidden\" name=\"$name\" value=\"$value\">" . $nn;
+			print "<input type=\"hidden\" name=\"$name\" value=\"$value\" />" . $nn;
 		}
 		echo ('<script type="text/javascript">void(document.forms[0].submit());</script>');
 		echo ('</form>');
@@ -170,7 +170,7 @@ function html_error($msg, $head = 1) {
 		include(TEMPLATE_DIR.'header.php');
 	}
 	echo ('<div align="center">');
-	echo ('<span class="htmlerror"><b>' . $msg . '</b></span><br><br>');
+	echo ('<span class="htmlerror"><b>' . $msg . '</b></span><br /><br />');
 	echo ('<a href="' . $PHP_SELF . '">'.lang(13).'</a>');
 	echo ('</div>');
 	include(TEMPLATE_DIR.'footer.php');

@@ -5,17 +5,17 @@ if (!defined('RAPIDLEECH')) {
 }
 $all_act_files_exist = false;
 if ((isset($_GET["act"]) || isset($_POST["act"])) && @$_GET["act"] !== 'files') {
-  if ($options["disable_actions"]) { echo lang(328)."<br><br>"; }
+  if ($options["disable_actions"]) { echo lang(328)."<br /><br />"; }
   elseif ($_GET['act'] == 'list') { $all_act_files_exist = true; }
   elseif ((!is_array($_GET['files']) || count($_GET['files']) < 1) && (!is_array($_POST['files']) || count($_POST['files']) < 1)) {
-    echo lang(138)."<br><br>";
+    echo lang(138)."<br /><br />";
   }
   else {
     $all_act_files_exist = true;
     foreach($_GET["files"] as $v) {
       if (!is_file($list[$v]["name"])) {
         $all_act_files_exist = false;
-        echo sprintf(lang(64),'<b>'.htmlentities($list[$v]["name"]).'</b>').'<br>';
+        echo sprintf(lang(64),'<b>'.htmlentities($list[$v]["name"]).'</b>').'<br />';
         break;
       }
     }

@@ -28,9 +28,9 @@ function unrar_setCheckboxes(act, filestounrar) {
 ?>
             <tr align="center">
               <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:6px; background-color:#001825;">
-                <input type="hidden" name="files[<?php echo $i; ?>]" value="<?php echo $_GET["files"][$i]; ?>">
+                <input type="hidden" name="files[<?php echo $i; ?>]" value="<?php echo $_GET["files"][$i]; ?>" />
                 <?php printf(lang(366),htmlentities(basename($file["name"]))); ?>
-                <br>
+                <br />
                 <a href="javascript:unrar_setCheckboxes(1, <?php echo $i;?>);"><?php echo lang(52); ?></a> |
                 <a href="javascript:unrar_setCheckboxes(0, <?php echo $i;?>);"><?php echo lang(53); ?></a> |
                 <a href="javascript:unrar_setCheckboxes(2, <?php echo $i;?>);"><?php echo lang(54); ?></a>
@@ -50,7 +50,7 @@ function unrar_setCheckboxes(act, filestounrar) {
       elseif ($rar_list[0] == 'ERROR') { printf(lang(370),$rar_list[1].' '.$rar_list[2]); }
     }
 ?>
-                <input type="<?php echo ($rar_list['NEEDP'] == true) ? 'password' : 'hidden'; ?>" name="passwords[]" value="<?php echo $_GET['passwords'][$i]; ?>">
+                <input type="<?php echo ($rar_list['NEEDP'] == true) ? 'password' : 'hidden'; ?>" name="passwords[]" value="<?php echo $_GET['passwords'][$i]; ?>" />
                 &nbsp;
               </td>
             </tr>
@@ -62,7 +62,7 @@ function unrar_setCheckboxes(act, filestounrar) {
 ?>
             <tr>
               <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
-                <input type="checkbox" name="filestounrar[<?php echo $i; ?>][]" checked="checked" value="<?php echo base64_encode($rar_key); ?>">
+                <input type="checkbox" name="filestounrar[<?php echo $i; ?>][]" checked="checked" value="<?php echo base64_encode($rar_key); ?>" />
               </td>
               <td style="border-right:1px solid #666; padding:2px; background-color:#001825;"><?php echo $rar_key.' ('.bytesToKbOrMbOrGb($rar_item['size']).')'; ?></td>
             </tr>
@@ -81,8 +81,8 @@ function unrar_setCheckboxes(act, filestounrar) {
       </tr>
       <tr>
         <td align="center">
-          <input type="hidden" name="act" value="<?php echo $rar_passl_needed ? 'unrar' : 'unrar_go'; ?>">
-          <input type="submit" value="<?php echo $rar_passl_needed ? lang(371) : lang(372); ?>">
+          <input type="hidden" name="act" value="<?php echo $rar_passl_needed ? 'unrar' : 'unrar_go'; ?>" />
+          <input type="submit" value="<?php echo $rar_passl_needed ? lang(371) : lang(372); ?>" />
         </td>
       </tr>
       <tr>
@@ -141,7 +141,7 @@ function unrar_go() {
       </td>
     </tr>
   </table>
-  <span id="unrar_finished" style="display:none;"><a href="<?php echo $PHP_SELF."?act=files"; ?>"><?php echo lang(365); ?></a><br><br><br></span>
+  <span id="unrar_finished" style="display:none;"><a href="<?php echo $PHP_SELF."?act=files"; ?>"><?php echo lang(365); ?></a><br /><br /><br /></span>
 <?php
 }
 
@@ -180,7 +180,7 @@ function rar_st(elementid, st){
           $list[$time] = array("name" => $rar_tolist, "size" => bytesToKbOrMbOrGb(filesize($rar_tolist)), "date" => $time);
           if (!updateListInFile($list)) {
 ?>
-<script type="text/javascript">var tmp = document.getElementById('rar_finished'); tmp.innerHTML = "<?php echo lang(9); ?><br><br>" + tmp.innerHTML</script>;
+<script type="text/javascript">var tmp = document.getElementById('rar_finished'); tmp.innerHTML = "<?php echo lang(9); ?><br /><br />" + tmp.innerHTML</script>;
 <?php
           }
         }

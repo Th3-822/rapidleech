@@ -23,7 +23,7 @@ define ( 'IMAGE_DIR', 'images/' );
 define ( 'CLASS_DIR', 'classes/' );
 define ( 'CONFIG_DIR', 'configs/' );
 define ( 'BUILD', '01Apr2010' );
-define ( 'CREDITS', '<a href="http://www.rapidleech.com/" style="text-decoration:none"><b>RapidLeech</b></a>&nbsp;<b style="color:#F09D19">PlugMod (eqbal) rev. ' . $rev_num . '</b> <span style="color:#F09D19">' . $dev_name . '</span><br><small style="color:#239FD9">Credits to Pramode &amp; Checkmate &amp; Kloon</small><br /><p style="text-align:center; margin:0 auto; font-weight:bold"><a href="http://www.rapidleechhost.com/aff.php?aff=001" target="_blank">RapidleechHost Offical Hosting</a></p>' );
+define ( 'CREDITS', '<a href="http://www.rapidleech.com/" style="text-decoration:none"><b>RapidLeech</b></a>&nbsp;<b style="color:#F09D19">PlugMod (eqbal) rev. ' . $rev_num . '</b> <span style="color:#F09D19">' . $dev_name . '</span><br /><small style="color:#239FD9">Credits to Pramode &amp; Checkmate &amp; Kloon</small><br /><p style="text-align:center; margin:0 auto; font-weight:bold"><a href="http://www.rapidleechhost.com/aff.php?aff=001" target="_blank">RapidleechHost Offical Hosting</a></p>' );
 
 require_once(CONFIG_DIR.'setup.php');
 
@@ -178,7 +178,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 		if (isset ( $_GET ["vBulletin_plug"] )) {
 			//print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">$nn";
 			include(TEMPLATE_DIR.'/header.php');
-			//print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\"></center><br><br>$nn";
+			//print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\"></center><br /><br />$nn";
 			require_once (CLASS_DIR . "http.php");
 			require_once (HOST_DIR . "vBulletin_plug.php");
 			exit ();
@@ -187,7 +187,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 				//if ($Url["host"] == $site)
 				if (preg_match ( "/^(.+\.)?" . $site . "$/i", $Url ["host"] )) {
 					//print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">$nn";
-					//print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\"></center><br><br>$nn";
+					//print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\"></center><br /><br />$nn";
 					include(TEMPLATE_DIR.'/header.php');
 					require_once (CLASS_DIR . "http.php");
 					require_once (HOST_DIR . "DownloadClass.php");
@@ -284,7 +284,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 		
 		if ($options['redir'] && $lastError && stristr ( $lastError, "Error! it is redirected to [" )) {
 			$redirectto = trim ( cut_str ( $lastError, "Error! it is redirected to [", "]" ) );
-			print lang(8)." <b>$redirectto</b> ... <br>$nn";
+			print lang(8)." <b>$redirectto</b> ... <br />$nn";
 			$_GET ["referer"] = $_GET ["link"];
 			$_GET ["link"] = $redirectto;
 			$purl = parse_url ( $redirectto );
@@ -323,7 +323,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 		echo renderActions();
 		echo ('</div>');
 		echo ('</form>');
-		echo "<br><a href=\"" . $PHP_SELF . "\">".lang(13)."</a>";
+		echo "<br /><a href=\"" . $PHP_SELF . "\">".lang(13)."</a>";
 		if (isset ( $_GET ["audl"] )) {
 			echo "\r\n<script type='text/javascript'>parent.nextlink();</script>";
 		}

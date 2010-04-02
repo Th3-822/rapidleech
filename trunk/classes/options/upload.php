@@ -55,21 +55,21 @@ function upload() {
 		<td valign="middle">
 			<form action='upload.php' method='get' target='<?php echo $tid?>' onSubmit="return openwinup('<?php echo $tid?>');">
 			<select name='uploaded' id='d_<?php echo $tid;?>'></select><script type='text/javascript'>fill_option('d_<?php echo $tid;?>');</script>
-			<input type="hidden" name="filename" value='<?php echo base64_encode ( $file ["name"] ); ?>'>
-			<input type='submit' value='Upload'>
+			<input type="hidden" name="filename" value='<?php echo base64_encode ( $file ["name"] ); ?>' />
+			<input type='submit' value='Upload' />
 		</td>
 	</tr>
 	<tr>
 		<td colspan="2" align="center">
-			<input type="checkbox" id="useuproxy" name="useuproxy" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('uproxyconfig').style.display=displ;">&nbsp;<?php echo lang(245); ?>
+			<input type="checkbox" id="useuproxy" name="useuproxy" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('uproxyconfig').style.display=displ;" />&nbsp;<?php echo lang(245); ?>
 		<td>
 	</tr>
 	<tr>
 			<td colspan="2" align="center">
 				<table style="display:none;" width="150" border="0" id="uproxyconfig">
-				<tr><td><?php echo lang(246); ?>:&nbsp;</td><td><input type="text" name="uproxy" id="uproxy" size="20">
-				<tr><td><?php echo lang(247); ?>:&nbsp;</td><td><input type="text" name="uproxyuser" id="uproxyuser" size="20"></td></tr>
-				<tr><td><?php echo lang(248); ?>:&nbsp;</td><td><input type="text" name="uproxypass" id="uproxypass" size="20"></td></tr>
+				<tr><td><?php echo lang(246); ?>:&nbsp;</td><td><input type="text" name="uproxy" id="uproxy" size="20" />
+				<tr><td><?php echo lang(247); ?>:&nbsp;</td><td><input type="text" name="uproxyuser" id="uproxyuser" size="20" /></td></tr>
+				<tr><td><?php echo lang(248); ?>:&nbsp;</td><td><input type="text" name="uproxypass" id="uproxypass" size="20" /></td></tr>
 				</table>
 			</td>
 	</tr>

@@ -17,7 +17,7 @@
 <td align="right" id="speed">0 KB/s</td>
 </tr>
 </table>
-<br>
+<br />
 <div id="resume" align="center"></div>
 <script type="text/javascript" language="javascript">
 function pr(percent, received, speed)
@@ -36,4 +36,4 @@ function mail(str, field)
 	return true;
 }
 </script>
-<br>
+<br />

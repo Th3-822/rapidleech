@@ -33,7 +33,7 @@ if ($options['login'] === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($logged
 }
 include(TEMPLATE_DIR.'header.php');
 ?>
-<br>
+<br />
 <center>
 <?php
 	// If the user submit to upload, go into upload page
@@ -182,7 +182,7 @@ unset($Path);
 		{
 ?>
 	<tr>
-		<td><input type=checkbox name="hosts[]" value="<?php echo $upl; ?>"></td>
+		<td><input type="checkbox" name="hosts[]" value="<?php echo $upl; ?>" /></td>
 		<td><?php echo str_replace("_"," ",$upl)." (".($max_file_size[$upl]==false ? "Unlim" : $max_file_size[$upl]."Mb").")"; ?></td>
 	</tr>
 <?php
@@ -217,7 +217,7 @@ if (!$list) {
 		if(file_exists($file["name"])) {
 ?>
 	<tr>
-		<td><input type=checkbox name="files[]" value="<?php echo base64_encode(basename($file["name"])); ?>"></td>
+		<td><input type="checkbox" name="files[]" value="<?php echo base64_encode(basename($file["name"])); ?>" /></td>
 		<td><?php echo basename($file["name"]); ?></td>
 		<td><?php echo $file["size"]; ?></td>
 	</tr>

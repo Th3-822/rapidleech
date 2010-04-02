@@ -156,7 +156,7 @@ function pr(percent, received, speed)
 
 function changeStatus(file, size)
   {
-	document.getElementById("status").innerHTML = 'Uploading File <b>' + file + '</b>, Size <b>' + size + '</b>...<br>';
+	document.getElementById("status").innerHTML = 'Uploading File <b>' + file + '</b>, Size <b>' + size + '</b>...<br />';
 	}
 
 function checkFile(id) {
@@ -304,7 +304,7 @@ function getthedate(){
     if (seconds<=9)    seconds="0"+seconds; 
     
 
-    var cdate="<span style=\"color:#994A1D\">"+php_js_strings[281]+":</span> &nbsp;&nbsp;&nbsp;<span style=\"color:#999\">"+hours+":"+minutes+":"+seconds+" "+dn+"</span><BR>";
+    var cdate="<span style=\"color:#994A1D\">"+php_js_strings[281]+":</span> &nbsp;&nbsp;&nbsp;<span style=\"color:#999\">"+hours+":"+minutes+":"+seconds+" "+dn+"</span><br />";
     if (document.all) 
         document.all.clock.innerHTML=cdate; 
     else if (document.getElementById) 

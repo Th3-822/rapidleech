@@ -23,7 +23,7 @@ function rl_md5() {
 	}
 ?>
 </table>
-<br>
+<br />
 <?php
 }
 ?>

@@ -3,7 +3,7 @@ function unzip() {
 	global $list, $PHP_SELF;
 ?>
 <form method="post" action="<?php echo $PHP_SELF; ?>">
-<input type="hidden" name="act" value="unzip_go">
+<input type="hidden" name="act" value="unzip_go" />
 	<table align="center">
 		<tr>
 			<td>
@@ -17,14 +17,14 @@ function unzip() {
 			$flist = $zip->getList();
 ?>
 					<tr><td align="center">
-						<input type="hidden" name="files[]" value="<?php echo $_GET['files'][$i]; ?>">
+						<input type="hidden" name="files[]" value="<?php echo $_GET['files'][$i]; ?>" />
 						<b><?php echo basename($file['name']); ?></b> (<?php echo count($flist).' '.lang(204); ?>)
 					</td></tr>
 					<tr><td>
 						<div style="overflow-y:scroll; height:150px; padding-left:5px;">
 <?php
 			foreach ($flist as $property) {
-				echo($property['file_name'].'<br>');
+				echo($property['file_name'].'<br />');
 			}
 ?>
 						</div>
@@ -35,7 +35,7 @@ function unzip() {
 ?>
 				</table>
 			</td>
-			<td><input type="submit" name="submit" value="<?php echo lang(205); ?>"></td>
+			<td><input type="submit" name="submit" value="<?php echo lang(205); ?>" /></td>
 		</tr>
 		<tr><td></td></tr>
 	</table>
@@ -69,17 +69,17 @@ function unzip_go() {
 			}
 			if ($file_inside_zip_exists) {
 				echo 'Some file(s) inside <b>'.htmlentities(basename($file["name"])).'</b> already exist on download directory';
-				echo "<br><br>";
+				echo "<br /><br />";
 			}
 			elseif ($forbidden_inside_zip) {
 				printf(lang(181), $zfiletype);
-				echo "<br><br>";
+				echo "<br /><br />";
 			}
 			else {
 				$zip->unzipAll ( $options['download_dir'] );
 				if ($zip->getList () != false) {
 					$any_file_unzippped = true;
-					echo '<b>'.htmlentities(basename($file["name"])).'</b>&nbsp;unzipped successfully<br><br>';
+					echo '<b>'.htmlentities(basename($file["name"])).'</b>&nbsp;unzipped successfully<br /><br />';
 					foreach ($allf as $k => $properties) {
 						$efile = $options['download_dir'].basename($properties['file_name']);
 						if (is_file($efile)) {
@@ -87,10 +87,10 @@ function unzip_go() {
 							$list[$time] = array("name" => $efile, "size" => bytesToKbOrMbOrGb(filesize($efile)), "date" => $time);
 						}
 					}
-					if (!updateListInFile($list)) { echo lang(146)."<br><br>"; }
+					if (!updateListInFile($list)) { echo lang(146)."<br /><br />"; }
 				}
 				else {
-					echo "File <b>".$file["name"]."</b> not found!<br><br>";
+					echo "File <b>".$file["name"]."</b> not found!<br /><br />";
 				}
 			}
 		}

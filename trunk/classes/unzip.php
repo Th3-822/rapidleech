@@ -7,7 +7,7 @@ if(!function_exists('file_put_contents')){
 			fclose($tmp);
 			return true;
 		}
-		echo "<b>file_put_contents:</b> Cannot create file $file<br>";
+		echo "<b>file_put_contents:</b> Cannot create file $file<br />";
 		return false;
 	}
 }
@@ -261,9 +261,9 @@ class dUnzip2{
 	Function debugMsg($level, $string){
 		if($this->debug)
 			if($level == 1)
-				echo "$string<br>";
+				echo "$string<br />";
 			if($level == 2)
-				echo "$string<br>";
+				echo "$string<br />";
 	}
 
 	Function _loadFileListByEOF(&$fh, $stopOnFile=false){

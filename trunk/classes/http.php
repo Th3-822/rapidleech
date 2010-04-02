@@ -156,7 +156,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	if ($saveToFile) {
 		if ($proxy) {
 			echo '<p>'.sprintf(lang(89),$proxyHost,$proxyPort).'<br />';
-			echo "GET: <b>" . $url . "</b>...<br>\n";
+			echo "GET: <b>" . $url . "</b>...<br />\n";
 		} else {
 			echo "<p>";
 			printf(lang(90),$host,$port);
@@ -572,7 +572,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
 	if ($proxy) {
 			echo '<p>'.sprintf(lang(89),$proxyHost,$proxyPort).'<br />';
-			echo "UPLOAD: <b>" . $url . "</b>...<br>\n";
+			echo "UPLOAD: <b>" . $url . "</b>...<br />\n";
 		} else {
 			echo "<p>";
 			printf(lang(90),$host,$port);

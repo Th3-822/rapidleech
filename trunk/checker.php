@@ -82,7 +82,7 @@ if (function_exists('apache_get_version')) {
 }
 ?>
 <center><img src="<?php echo TEMPLATE_DIR; ?>images/logo_pm.gif" alt="RapidLeech PlugMod" border="0"></center>
-<br>
+<br />
 <table border="0" width="100%" align="center">
 	<tr>
 		<td>
@@ -95,18 +95,18 @@ if (function_exists('apache_get_version')) {
 					</tr>
 					<tr>
 						<td align="center" style="font-family: 'Verdana'; font-size: smaller;">
-							<b><?php echo lang(314); ?></b>: <?php echo $fsockopen; ?><br><br>
-							<b><?php echo lang(315); ?></b>: <?php echo $memory_limit; ?><br><br>
-							<b><?php echo lang(316); ?></b>: <?php echo $safemode; ?><br><br>
-							<b><?php echo lang(317); ?></b>: <?php echo $curl; ?><br><br>
-							<b><?php echo lang(318); ?></b>: <?php echo $fopen; ?><br><br>
-							<b><?php echo lang(319); ?><?php echo $phpver; ?></b>: <?php echo $phpverr; ?><br><br>
-							<b><?php echo lang(320); ?></b>: <?php echo $call_time; ?><br><br>
-							<b><?php echo lang(321); ?></b>: <?php echo $passthru; ?><br><br>
-							<b><?php echo lang(322); ?></b>: <?php echo $disk_free_space; ?><br><br>
+							<b><?php echo lang(314); ?></b>: <?php echo $fsockopen; ?><br /><br />
+							<b><?php echo lang(315); ?></b>: <?php echo $memory_limit; ?><br /><br />
+							<b><?php echo lang(316); ?></b>: <?php echo $safemode; ?><br /><br />
+							<b><?php echo lang(317); ?></b>: <?php echo $curl; ?><br /><br />
+							<b><?php echo lang(318); ?></b>: <?php echo $fopen; ?><br /><br />
+							<b><?php echo lang(319); ?><?php echo $phpver; ?></b>: <?php echo $phpverr; ?><br /><br />
+							<b><?php echo lang(320); ?></b>: <?php echo $call_time; ?><br /><br />
+							<b><?php echo lang(321); ?></b>: <?php echo $passthru; ?><br /><br />
+							<b><?php echo lang(322); ?></b>: <?php echo $disk_free_space; ?><br /><br />
 <?php if ($apache_version) {
 ?>
-							<b><?php echo lang(323); ?><?php echo $apache_version; ?></b>: <?php echo $apacver; ?><br><br>
+							<b><?php echo lang(323); ?><?php echo $apache_version; ?></b>: <?php echo $apacver; ?><br /><br />
 <?php
 }?>
 						</td>
