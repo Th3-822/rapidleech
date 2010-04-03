@@ -333,10 +333,10 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		$page = $header;
 	}
 
-	while ( ! feof ( $fp ) ) {
+	do {
 		$data = @fread ( $fp, ($saveToFile ? $chunkSize : 16384) );	// 16384 saw this value in Pear HTTP_Request2 package // (fix - szal) using this actually just causes massive cpu usage for large files, too much data is flushed to the browser!)
-		if ($data == '')
-			break;
+        if ($data == '')
+        break;
 		if ($saveToFile) {
 			$bytesSaved = fwrite ( $fs, $data );
 			if ($bytesSaved > - 1) {
@@ -367,7 +367,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		} else {
 			$page .= $data;
 		}
-	}
+	}while( strlen($data)> 0 );
 	//echo('</script>');
 	
 	if ($saveToFile) {

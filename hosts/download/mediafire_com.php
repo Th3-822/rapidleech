@@ -1,11 +1,13 @@
 <?php
+
+
 if (!defined('RAPIDLEECH'))
 {
 	require_once("index.html");
 	exit;
 }
 
-if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["netload"]["user"] && $premium_acc["netload"]["pass"]))
+if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["mediafire"]["user"] && $premium_acc["mediafire"]["pass"]))
 {
 
 	//////////////////////////////////////////////////////////// START PREMIUM /////////////////////////////////////////////////////////////
@@ -125,8 +127,8 @@ $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Ur
 	     $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, 0, 0, $_GET["proxy"],$pauth);
          is_page($page);
 
-preg_match_all("/;var.+?unescape\(.+?eval/",$page,$matches);
-
+if (preg_match_all("/;var.+?unescape\(.+?eval/",$page,$matches)){
+    
 foreach($matches[0] as $tmp){
     
 $string=DecoMfire($tmp);
@@ -134,6 +136,17 @@ if( strpos( $string ,$frid)!== false ){
 $link=finalize($string,$page);
 break;
 }  
+}
+}else{
+preg_match_all("/if\(.+?<\/a>/",$page,$matches) ;
+foreach($matches[0] as $tmp){    
+
+if( strpos( $tmp ,$frid)!== false ){
+$link=finalize($tmp,$page);
+break;
+}  
+}
+ $link=finalize($tmp,$page);     
 }
 
 $Url = parse_url($link);
@@ -204,7 +217,8 @@ $Href = 'http://'.$hst.'/'.$mpath1.'g/'.$id.'/'.$fl;
 return $Href;
 }
 /*************************\
- WRITTEN BY KAOX 11-mar-10
+ Written by kaox 11-mar-10
+ Fixed    by kaox 03-apr-10
 \*************************/
 
 ?>
