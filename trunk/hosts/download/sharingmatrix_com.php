@@ -61,7 +61,7 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 	
 	if( $_POST['step'] == "1")
 	{
-		
+	@unlink(urldecode($_POST["delete"]));	
 	$Url=parse_url("http://sharingmatrix.com/ajax_scripts/verifier.php");
 	$post=array();
 	$post["?&code"]= $_POST["captcha"];
@@ -136,7 +136,12 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 	
 	$headerend = strpos($page,"JFIF");
 	$pass_img = substr($page,$headerend-6);
-	write_file($download_dir."sharingmatrix_captcha.jpg", $pass_img);
+	     if($options["download_dir"]){
+          $imgfile=$options["download_dir"]."sharingmatrix_captcha.jpg";    
+        }else{
+              $imgfile=download_dir."sharingmatrix_captcha.jpg";
+        } 
+	write_file($imgfile, $pass_img);
 	
 	 			$code = '<form method="post" action="'.$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "").'">'.$nn;
 	 			$code .= '<input type="hidden" name="step" value="1">'.$nn;
@@ -144,8 +149,9 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 				$code .= '<input type="hidden" name="id" value="'.$id.'">'.$nn;
 				$code .= '<input type="hidden" name="filename" value="'.urlencode($link_name).'">'.$nn;
 				$code .= '<input type="hidden" name="cookie" value="'.urlencode($cookie).'">'.$nn;
-	 			$code .= 'Please enter : <img src="'.$download_dir.'sharingmatrix_captcha.jpg?'.rand(1,10000).'"><br><br>'.$nn;
-	 			$code .= '<input type="text" name="captcha"> <input type="submit" value="Download">'.$nn;
+	 			$code .= 'Please enter : <img src="'.$imgfile.'?'.rand(1,10000).'"><br><br>'.$nn;
+	 			$code .= '<input type="text" name="captcha">'.$nn;
+                $code .= '<input type="hidden" name="delete"  value="'.urlencode($imgfile).'"> <input type="submit" value="Download">'.$nn;
 	 			$code .= '</form>';
                 echo ($code);
 	    	 }
