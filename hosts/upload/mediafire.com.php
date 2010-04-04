@@ -1,7 +1,7 @@
 <?php
 
 ####### Free Account Info. ###########
-$mediafire_login = ""; //  Set your username (email)
+$mediafire_login = ""; //  Set you username
 $mediafire_pass = ""; //  Set your password
 ##############################
 
@@ -61,16 +61,17 @@ preg_match("/ukey=[^ ;\r\n]+/",$cookies,$matc);
 $ukey=$matc[0];
 preg_match("/user=[^ ;\r\n]+/",$cookies,$matc);
 $user=$matc[0];
-
-
-			$Url=parse_url("http://www.mediafire.com//basicapi/getfolderkeys.php?".$ukey."&".$user);
+$rnn=rand(10000,99999);
+			$Url=parse_url("http://www.mediafire.com/basicapi/uploaderconfiguration.php?".$rnn);
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), "http://www.mediafire.com/", $cookies, 0, 0, $_GET["proxy"],$pauth);
 			is_page($page);
 
+$track= cut_str ( $page ,'<trackkey>' ,'</trackkey>' );
+$uploadkey= cut_str ( $page ,'<folderkey>' ,'</folderkey>' );
+$MFULConfig = cut_str ( $page ,'<MFULConfig>' ,'</MFULConfig>' );
 
-$uploadkey="uploadkey=".cut_str($page,"<key>","</key>");
-
-						
+$url=parse_url("http://www.mediafire.com/basicapi/doupload.php?track=".$track."&".$ukey."&".$user."&uploadkey=".$uploadkey."&upload=0");
+	
 ?>
 <script>document.getElementById('info').style.display='none';</script>
     
@@ -78,14 +79,10 @@ $uploadkey="uploadkey=".cut_str($page,"<key>","</key>");
 </td></tr>
 <tr><td align=center>
 <?
-
-
 unset($post);
 $post["Upload"]="Submit Query";
-$uploadurl="http://www.mediafire.com//basicapi/doupload.php?".$user."&".$ukey."&".$uploadkey;
-$url=parse_url($uploadurl);
 $upagent = "Shockwave Flash";
-$upfiles = upfile($url["host"], defport($url), $url["path"].($url["query"] ? "?".$url["query"] : ""), 0, 0, $post, $lfile, $lname, "Filedata",0,$upagent);
+$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), 0, $ukey, $post, $lfile, $lname, "Filedata",0,0,0,$upagent);
 
 is_page($upfiles);
 ?>
@@ -96,8 +93,9 @@ is_page($upfiles);
 			if (!$key) html_error("Error retrive final id");
 			$error=true;
 			for ($i=1;$i<12;$i++){
-				sleep(5);
-				$page = geturl("www.mediafire.com",80,"//basicapi/pollupload.php?key=".$key,"http://www.mediafire.com",$cookies);
+				sleep(4);
+				$page = geturl("www.mediafire.com",80,"/basicapi/pollupload.php?key=".$key."&MFULConfig=".$MFULConfig,"http://www.mediafire.com/myfiles.php",$cookies);
+
 				//echo "$i ";
 				if (stristr($page,"<fileerror>13</fileerror>")){
 			
@@ -116,6 +114,10 @@ is_page($upfiles);
 
 			$download_link = 'http://www.mediafire.com/?'.$links_up_file;	
 	}
-// Written by kaox 08/05/09
-//updated by szalinski 26/Aug/09
+
+/*************************\
+ Written by kaox 20-feb-10
+ Updated by szalinski 26-Aug-09
+ Updated by kaox 03-apr-10
+\*************************/
 ?>
