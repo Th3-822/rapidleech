@@ -35,8 +35,8 @@ foreach ($host as $site => $file)
 <br />
 
 <?php
-global $premium_acc;
-if ( !empty ( $premium_acc ) )
+global $premium_acc, $mu_cookie_user_value;
+if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 {
 ?>
 <div class="cell-plugin"><?php echo lang(376); ?></div>
@@ -45,18 +45,18 @@ if ( !empty ( $premium_acc ) )
 		<td height="100%" style="padding:3px;">
 			<div dir="rtl" align="left" style="padding-left:5px;">
 <?php
-			global $premium_acc;
-			foreach ( $premium_acc as $serverName => $value )
+			if ( !empty ( $premium_acc ) )
 			{
-				echo "<span class='plugincollst'>". str_replace( '_', '.', $serverName ) ."</span><br />";
+				foreach ( $premium_acc as $serverName => $value )
+				{
+					echo "<span class='plugincollst'>". str_replace( '_', '.', $serverName ) ."</span><br />";
+				}
 			}
 			
-			global $mu_cookie_user_value;
 			if ( $mu_cookie_user_value )
 			{
 				echo "<span class='plugincollst'>Megaupload</span><br />";
 			}
-			
 ?>
 			</div>
 		</td>
