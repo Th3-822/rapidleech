@@ -50,6 +50,13 @@ if ( !empty ( $premium_acc ) )
 			{
 				echo "<span class='plugincollst'>". str_replace( '_', '.', $serverName ) ."</span><br />";
 			}
+			
+			global $mu_cookie_user_value;
+			if ( $mu_cookie_user_value )
+			{
+				echo "<span class='plugincollst'>Megaupload</span><br />";
+			}
+			
 ?>
 			</div>
 		</td>
