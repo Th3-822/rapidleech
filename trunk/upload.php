@@ -16,13 +16,8 @@ require_once(CONFIG_DIR.'setup.php');
 require_once("classes/other.php");
 define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 
-if ($options['login'] === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logged_user($options['users'])) === false))
-	{
-		header("WWW-Authenticate: Basic realm=\"RAPIDLEECH PLUGMOD\"");
-		header("HTTP/1.0 401 Unauthorized");
-		include('deny.php');
-		exit;
-	}
+login_check();
+
 include("classes/http.php");
 
 if(!defined('CRLF')) define('CRLF',"\r\n");
@@ -86,7 +81,7 @@ else
 
 $fsize = getSize($lfile);
 
-echo '<script type="text/javascript" language="javascript">var orlink="' . basename($_REQUEST['filename']) . ' to ' . $_REQUEST['uploaded'] . '";</script>';
+echo '<script type="text/javascript">var orlink="' . basename($_REQUEST['filename']) . ' to ' . $_REQUEST['uploaded'] . '";</script>';
 
 if (file_exists("hosts/upload/".$_REQUEST['uploaded'].".php")){    
     include_once("hosts/upload/".$_REQUEST['uploaded'].".index.php");
@@ -114,26 +109,26 @@ if ($download_link || $delete_link || $stat_link || $adm_link)
 			*/			
 			
 			echo "\n<table width=100% border=0>";
-			echo ($download_link ? "<tr><td width=100 nowrap align=right><b>".lang(68).":</b><td width=80%><input value='$download_link' class='upstyles-dllink' readonly /></tr>" : "");
-			echo ($delete_link ? "<tr><td width=100 nowrap align=right>".lang(69).":<td width=80%><input value='$delete_link' class='upstyles-dellink' readonly /></tr>" : "");
-			echo ($stat_link ? "<tr><td width=100 nowrap align=right>".lang(70).":<td width=80%><input value='$stat_link' class='upstyles-statlink' readonly /></tr>" : "");
-			echo ($adm_link ? "<tr><td width=100 nowrap align=right>".lang(71).":<td width=80%><input value='$adm_link' class='upstyles-admlink' readonly /></tr>": "");
-			echo ($user_id ? "<tr><td width=100 nowrap align=right>".lang(72).":<td width=80%><input value='$user_id' class='upstyles-userid' readonly /></tr>": "");
-			echo ($ftp_uplink ? "<tr><td width=100 nowrap align=right>".lang(73).":<td width=80%><input value='$ftp_uplink' class='upstyles-ftpuplink' readonly /></tr>": "");
-			echo ($access_pass ? "<tr><td width=100 nowrap align=right>".lang(74).":<td width=80%><input value='$access_pass' class='upstyles-accesspass' readonly /></tr>": "");
-			/*echo ($protect ? "<tr><td width=100 nowrap align=right>Protect link:<td width=80%><input value='$protect' style=\"width: 470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px\" readonly /></tr>": "");*/
+			echo ($download_link ? '<tr><td width="100" nowrap="nowrap" align="right"><b>'.lang(68).':</b><td width="80%"><input value="'.$download_link.'" class="upstyles-dllink" readonly="readonly" /></tr>' : '');
+			echo ($delete_link ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(69).':<td width="80%"><input value="'.$delete_link.'" class="upstyles-dellink" readonly="readonly" /></tr>' : '');
+			echo ($stat_link ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(70).':<td width="80%"><input value="'.$stat_link.'" class="upstyles-statlink" readonly="readonly" /></tr>' : '');
+			echo ($adm_link ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(71).':<td width="80%"><input value="'.$adm_link.'" class="upstyles-admlink" readonly="readonly" /></tr>': '');
+			echo ($user_id ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(72).':<td width="80%"><input value="'.$user_id.'" class="upstyles-userid" readonly="readonly" /></tr>': '');
+			echo ($ftp_uplink ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(73).':<td width="80%"><input value="'.$ftp_uplink.'" class="upstyles-ftpuplink" readonly="readonly" /></tr>': '');
+			echo ($access_pass ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(74).':<td width="80%"><input value="'.$access_pass.'" class="upstyles-accesspass" readonly="readonly" /></tr>': '');
+			/*echo ($protect ? '<tr><td width="100" nowrap="nowrap" align="right">Protect link:<td width="80%"><input value="'.$protect.'" style="width:470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px" readonly /></tr>': '');*/
 			echo "</table>\n";
 			
-			if(!file_exists(trim($lfile).".upload.html") && !isset($_GET['auul']))
+			if(!file_exists(trim($lfile).".upload.html") && !isset($_GET['auul']) && !$options['upload_html_disable'])
 			  {
-				$html_header = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
-								<html xmlns=\"http://www.w3.org/1999/xhtml\">
+				$html_header = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+								<html xmlns="http://www.w3.org/1999/xhtml">
 								<head>
-								<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />
-								<title>".lang(75)."</title>
-								<style type=\"text/css\">
+								<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+								<title>'.lang(75).'</title>
+								<style type="text/css">
 body {
-	font-family: tahoma, arial, \"times New Roman\", georgia, verdana, sans-serif;
+	font-family: tahoma, arial, "times New Roman", georgia, verdana, sans-serif;
 	font-size: 11px;
 	color: #333333;
 	background-color: #EFF0F4;
@@ -164,7 +159,7 @@ body {
 }
 .bluefont {
 	color: #0E078F;
-	font-family: tahoma, arial, \"times New Roman\", georgia, verdana, sans-serif;
+	font-family: tahoma, arial, "times New Roman", georgia, verdana, sans-serif;
 	font-size: 11px;
 }
 hr {
@@ -222,43 +217,27 @@ hr {
 	border-bottom-color: #333333;
 	border-left-color: #333333;
 	font-size: 12px;
-	font-family: Georgia, \"Times New Roman\", Times, serif;
+	font-family: Georgia, "Times New Roman", Times, serif;
 }
 								</style>
 								</head>
 								<body>
-								";
-				$fp = fopen(trim($lfile).".upload.html",'w');
-				fwrite($fp, $html_header);
-				fwrite($fp, sprintf(lang(76),$lname,bytesToKbOrMb($fsize)));
-				fclose($fp);
-			  }
-			$fr = fopen(trim($lfile).".upload.html",'a+');
-			if ($fr)
-				{
-					/*fwrite($fr,date("Y-m-d H:i:s")."\n");
-					fwrite($fr,$lname."  ".bytesToKbOrMb($fsize)."\n");
-					if ($download_link) { fwrite($fr,"download link: $download_link\r\n");}
-					if ($delete_link) { fwrite($fr,"delete link: $delete_link\r\n");}
-					if ($stat_link) { fwrite($fr,"stat link: $stat_link\r\n");}
-					if ($adm_link) { fwrite($fr,"ADM link: $adm_link\r\n");}
-					if ($user_id) {fwrite($fr,"USER ID: $user_id\r\n");}
-					if ($access_pass) {fwrite($fr,"PASSWD: $access_pass\r\n");}
-					if ($ftp_uplink) {fwrite($fr,"ftp upload: $ftp_uplink\r\n");}
-					//if ($protect) {fwrite($fr,"protect link: $protect\r\n");}
-					fwrite($fr,"\n");*/
-					fwrite($fr, "<div class=\"host\"><div class=\"title\"><strong>".$_REQUEST['uploaded']."</strong> - <span class=\"bluefont\">".date("Y-m-d H:i:s")."</span></div>");
-					fwrite($fr, "<div class=\"links\">");
-					if ($download_link) fwrite($fr, "<strong>".lang(68).": <a href=\"".$download_link."\" target=\"_blank\">".$download_link." </a></strong>");
-					if ($delete_link) fwrite($fr, "<br />".lang(69).": <a href=\"".$delete_link."\" target=\"_blank\">".$delete_link." </a>");
-					if ($stat_link) fwrite($fr, "<br />".lang(70).": <a href=\"".$stat_link."\" target=\"_blank\">".$stat_link." </a>");
-					if ($adm_link) fwrite($fr, "<br />".lang(71).": <a href=\"".$adm_link."\" target=\"_blank\">".$adm_link." </a>");
-					if ($user_id) fwrite($fr, "<br />".lang(72).": <a href=\"".$user_id."\" target=\"_blank\">".$user_id." </a>");
-					if ($access_pass) fwrite($fr, "<br />".lang(74).": <a href=\"".$access_pass."\" target=\"_blank\">".$access_pass." </a>");
-					if ($ftp_uplink) fwrite($fr, "<br />".lang(73).": <a href=\"".$ftp_uplink."\" target=\"_blank\">".$ftp_uplink." </a>");
-					fwrite($fr, " </div></div>");
-					fclose($fr);
-				}
+								';
+			write_file(trim($lfile).".upload.html", $html_header.sprintf(lang(76),$lname,bytesToKbOrMb($fsize)), 0);
+			if (!$options['upload_html_disable']) {
+				$html_content = '<div class="host"><div class="title"><strong>'.$_REQUEST['uploaded'].'</strong> - <span class="bluefont">'.date("Y-m-d H:i:s").'</span></div>
+				<div class="links">'.
+				($download_link ? '<strong>'.lang(68).': <a href="'.$download_link.'" target="_blank">'.$download_link.' </a></strong>' : '').
+				($delete_link ? '<br />'.lang(69).': <a href="'.$delete_link.'" target="_blank">'.$delete_link.' </a>' : '').
+				($stat_link ? '<br />'.lang(70).': <a href="'.$stat_link.'" target="_blank">'.$stat_link.' </a>' : '').
+				($adm_link ? '<br />'.lang(71).': <a href="'.$adm_link.'" target="_blank">'.$adm_link.' </a>' : '').
+				($user_id ? '<br />'.lang(72).': <a href="'.$user_id.'" target="_blank">'.$user_id.' </a>' : '').
+				($access_pass ? '<br />'.lang(74).': <a href="'.$access_pass.'" target="_blank">'.$access_pass.' </a>' : '').
+				($ftp_uplink ? '<br />'.lang(73).': <a href="'.$ftp_uplink.'" target="_blank">'.$ftp_uplink.' </a>' : '').
+				'</div></div>';
+				write_file(trim($lfile).".upload.html", $html_content, 0);
+			}
+		}
 	}
 echo $not_done ? "" : '<p><center><b><a href="javascript:window.close();">'.lang(77).'</a></b></center>';
 ?>
@@ -266,20 +245,20 @@ echo $not_done ? "" : '<p><center><b><a href="javascript:window.close();">'.lang
 </html>
 <?php
 if (isset($_GET['auul'])) {
-?><script type='text/javascript' language='javascript'>parent.nextlink<?php echo $_GET['auul']; ?>();</script><?php
+?><script type="text/javascript">parent.nextlink<?php echo $_GET['auul']; ?>();</script><?php
 	// Write links to a file
 	$file = $options['download_dir']."myuploads.txt";	// Obviously it was a mistake not making it a variable earlier
-	$fh = fopen($file, 'a');
-	if (!$_GET['save_style'] && $_GET['save_style'] !== lang(51)) {
-		$dash = "";
-		for ($i=0;$i<=80;$i++) $dash.="=";
-		fwrite($fh,$lname."\r\n".$dash."\r\n".$download_link."\r\n\r\n");
-	} else {
-		$save_style = base64_decode($_GET['save_style']);
-		$save_style = str_replace('{link}',$download_link,$save_style);
-		$save_style = str_replace('{name}',$lname,$save_style);
-		fwrite($fh,$save_style."\r\n");
+	if (!$options['myuploads_disable']) {
+		if (!$_GET['save_style'] && $_GET['save_style'] !== lang(51)) {
+			$dash = "";
+			for ($i=0;$i<=80;$i++) $dash.="=";
+			write_file($file, $lname."\r\n".$dash."\r\n".$download_link."\r\n\r\n", 0);
+		} else {
+			$save_style = base64_decode($_GET['save_style']);
+			$save_style = str_replace('{link}',$download_link,$save_style);
+			$save_style = str_replace('{name}',$lname,$save_style);
+			write_file($file, $save_style."\r\n", 0);
+		}
 	}
-	fclose($fh);
 }
 ?>

@@ -20,17 +20,17 @@ function merge() {
 			if ($usingcrcfile) {
 ?>
 <tr>
-<td><input type="checkbox" name="crc_check" value="1" checked onclick="javascript:var displ=this.checked?'inline':'none';document.getElementById('crc_check_mode').style.display=displ;" />&nbsp;<?php echo lang(170); ?><br />
+<td align="left"><input type="checkbox" name="crc_check" value="1" checked="checked" onclick="javascript:var displ=this.checked?'inline':'none';document.getElementById('crc_check_mode').style.display=displ;" />&nbsp;<?php echo lang(170); ?><br />
 			<span id="crc_check_mode"><?php echo lang(171); ?>:<br />
 <?php
 				if (function_exists ( 'hash_file' )) {
-?><input type="radio" name="crc_mode" value="hash_file" checked />&nbsp;<?php echo lang(172); ?><br />
+?><input type="radio" name="crc_mode" value="hash_file" checked="checked" />&nbsp;<?php echo lang(172); ?><br />
 <?php } ?>
 <input type="radio" name="crc_mode" value="file_read" />&nbsp;<?php echo lang(173); ?><br />
 <input type="radio" name="crc_mode" value="fake"<?php if (! function_exists ( 'hash_file' )) { echo 'checked="checked"'; }?> />&nbsp;<?php echo lang(174); ?></span></td>
 </tr>
 <tr>
-<td><input type="checkbox" name="del_ok" <?php echo $options['disable_deleting'] ? 'disabled' : 'checked'; ?> />&nbsp;<?php echo lang(175); ?></td>
+<td><input type="checkbox" name="del_ok" <?php echo $options['disable_deleting'] ? 'disabled="disabled"' : 'checked="checked"'; ?> />&nbsp;<?php echo lang(175); ?></td>
 </tr>
 <?php
 					} else {
@@ -42,7 +42,7 @@ function merge() {
 					}
 ?>
 <tr>
-<td align="center"><input type="hidden" name="act" value="merge_go"> <input type="submit" value="<?php echo lang(291); ?>" /></td>
+<td align="center"><input type="hidden" name="act" value="merge_go" /> <input type="submit" value="<?php echo lang(291); ?>" /></td>
 </tr>
 </table>
 </form>

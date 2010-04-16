@@ -5,6 +5,7 @@ function unrar() {
   require_once(CLASS_DIR."rar.php");
 ?>
 <script type="text/javascript">
+/* <![CDATA[ */
 function unrar_setCheckboxes(act, filestounrar) {
   var elts = document.getElementsByName('filestounrar['+filestounrar+'][]');
   var elts_cnt = (typeof(elts) != 'undefined') ? elts.length : 0;
@@ -14,6 +15,7 @@ function unrar_setCheckboxes(act, filestounrar) {
     }
   }
 }
+/* ]]> */
 </script>
   <form name="unrar_files" method="post" action="<?php echo $PHP_SELF; ?>">
     <table align="center">
@@ -152,12 +154,13 @@ function unrar_go_go() {
   global $options, $list;
 ?>
 <script type="text/javascript">
+/* <![CDATA[ */
 function rar_st(elementid, st){
   document.getElementById(elementid).innerHTML = st;
   return true;
 }
+/* ]]> */
 </script>
-<script type="text/javascript">switchCell(3);</script>
 <?php
   for($i = 0; $i < count($_GET["files"]); $i++) {
     $file = $list[$_GET["files"][$i]];
@@ -188,7 +191,7 @@ function rar_st(elementid, st){
     }
   }
 ?>
-<script type="text/javascript">document.getElementById('unrar_finished').style.display = 'inline';</script>
+<script type="text/javascript">document.getElementById('unrar_finished').style.display = '';</script>
 <?php
 }
 ?>

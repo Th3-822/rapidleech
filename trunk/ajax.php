@@ -7,6 +7,7 @@ define('CONFIG_DIR', 'configs/');
 require_once(CONFIG_DIR."config.php");
 require_once(CLASS_DIR . 'other.php');
 define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
+$nn = "\r\n";
 // For ajax calls, lets make it use less resource as possible
 switch ($_GET['ajax']) {
 	case 'server_stats':
@@ -54,7 +55,7 @@ switch ($_GET['ajax']) {
 					unset($link[0]);
 					$link = implode($link, "?");
 					if($kl == 1)
-					echo"<div class=\"n\"><a href=\"$link\"><b>$link</b></a></div>\n";
+					echo '<div class="n"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
 					flush();
 				}
 
@@ -63,16 +64,16 @@ switch ($_GET['ajax']) {
 					preg_match('@name="ifram" src="(.+?)"@i', curl($link, $post), $match);
 					$link = $match[1];
 					if($kl == 1)
-					echo"<div class=\"n\"><a href=\"$link\"><b>$link</b></a></div>\n";
+					echo '<div class="n"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
 					flush();
 				}
 
 				if(eregi("^(http)\:\/\/(www\.)?linkbucks\.com\/link\/" , $link)) {
 					$page = curl($link);
-					preg_match("/<a href=\"(.+)\" id=\"aSkipLink\">/" , $page , $match);
+					preg_match('/<a href="(.+)" id="aSkipLink">/' , $page , $match);
 					$link = $match[1];
 					if($kl == 1)
-					echo"<div class=\"n\"><a href=\"$link\"><b>$link</b></a></div>\n";
+					echo '<div class="n"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
 					flush();
 				}
 					
@@ -81,13 +82,13 @@ switch ($_GET['ajax']) {
 					preg_match("/<TITLE>(.+)<\/TITLE>/" , $page , $match);
 					$link = $match[1];
 					if($kl == 1)
-					echo"<div class=\"n\"><a href=\"$link\"><b>$link</b></a></div>\n";
+					echo '<div class="n"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
 					flush();
 				}
 					
 				if(eregi("rapidshare\.com\/users\/" , $link)) {
 					$page = curl($link);
-					preg_match_all("/<a href=\"(.+)\" target=\"_blank\">/" , $page , $match);
+					preg_match_all('/<a href="(.+)" target="_blank">/' , $page , $match);
 					unset($match[1][0]);
 					foreach($match[1] as $link)
 					{
@@ -97,7 +98,7 @@ switch ($_GET['ajax']) {
 							$x++;
 						}
 						if($kl == 1)
-					 echo"<div class=\"n\"><a href=\"$link\"><b>$link</b></a></div>\n";
+					 echo '<div class="n"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
 					 flush();
 					}
 				}
@@ -115,7 +116,7 @@ switch ($_GET['ajax']) {
 					}
 
 					if($x > $maxlinks) {
-						echo "<p style=\"text-align:center\">";
+						echo '<p style="text-align:center">';
 						printf(lang(17),$maxlinks);
 						echo('</p>');
 						include(TEMPLATE_DIR.'/footer.php');
@@ -130,7 +131,7 @@ switch ($_GET['ajax']) {
 			$x--;
 			$plural = ($x == 1) ? "" : lang(19);
 			($options['fgc'] == 0) ? $method = 'cURL' : $method = 'file_get_contents';
-			echo "<p style=\"text-align:center\">";
+			echo '<p style="text-align:center">';
 			printf(lang(18),$x,$plural,$totaltime,$method);
 			echo "</p>";
 		}

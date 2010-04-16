@@ -2,7 +2,7 @@
 function rl_mail() {
 	global $options, $list;
 ?>
-<form method="post"><input type="hidden" name="act" value="mail_go" />
+<form method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act" value="mail_go" />
 <?php echo lang(104); ?>:
 <?php
 	for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
@@ -21,20 +21,19 @@ function rl_mail() {
 		<td><input type="submit" value="Send" /></td>
 	</tr>
 	<tr>
-		<td><input type="checkbox" name="del_ok" <?php echo $options['disable_deleting'] ? "disabled" : "checked";?> />&nbsp;<?php echo lang(165); ?></td>
+		<td><input type="checkbox" name="del_ok"<?php echo $options['disable_deleting'] ? ' disabled="disabled"' : ' checked="checked"';?> />&nbsp;<?php echo lang(165); ?></td>
 	</tr>
 	<tr>
 		<td></td>
 	</tr>
-	<tr>
+	<tr><td>
 		<table>
 			<tr>
-				<td><input id="splitchkbox" type="checkbox" name="split"
-					onClick="javascript:var displ=this.checked?'':'none';document.getElementById('methodtd2').style.display=displ;"
-					<?php echo $_COOKIE ["split"] ? " checked" : ""; ?> />&nbsp;<?php echo lang(142); ?></td>
+				<td><input type="checkbox" name="split"
+					onclick="javascript:var displ=this.checked?'':'none';document.getElementById('methodtd2').style.display=displ;"
+					<?php echo $_COOKIE ["split"] ? ' checked="checked"' : ''; ?> />&nbsp;<?php echo lang(142); ?></td>
 				<td>&nbsp;</td>
-				<td id="methodtd2"
-					<?php echo $_COOKIE ["split"] ? "" : " style=\"display: none;\""; ?>>
+				<td id="methodtd2"<?php echo $_COOKIE ["split"] ? '' : ' style="display: none;"'; ?>>
 				<table>
 					<tr>
 						<td><?php echo lang(124); ?>:&nbsp;<select name="method">
@@ -53,7 +52,7 @@ function rl_mail() {
 				</td>
 			</tr>
 		</table>
-  </tr>
+  </td></tr>
 </table>
 </form>
 <?php
@@ -80,7 +79,7 @@ function mail_go() {
 						;
 					} else
 						$v_ads = " !";
-					echo "<script type='text/javascript'>mail('File <b>" . basename ( $file ["name"] ) . "</b> it is sent for the address <b>" . $_POST ["email"] . "</b>" . $v_ads . "', '" . md5 ( basename ( $file ["name"] ) ) . "');</script>\r\n<br />";
+					echo '<script type="text/javascript">'."<!--\r\nmail('File <b>" . basename ( $file ["name"] ) . "</b> it is sent for the address <b>" . $_POST ["email"] . "</b>" . $v_ads . "', '" . md5 ( basename ( $file ["name"] ) ) . "');//-->\r\n</script>\r\n<br />";
 				} else {
 					echo lang(12)."<br />";
 				}

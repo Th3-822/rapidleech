@@ -349,7 +349,7 @@ $lang[340]	=	'Error detected';
 $lang[341]	=	'click here to expand';
 $lang[342]	=	'You can drag window from here';
 $lang[343]	=	'Can not find "rar"<br />You may need to download it and extract "rar" to "/rar/" directory';
-$lang[344]	=	'Files that will be on the archive:';
+$lang[344]	=	'Files that will be archived:';
 $lang[345]	=	'Archive name:';
 $lang[346]	=	'Options:';
 $lang[347]	=	'Compresion level:';
@@ -383,4 +383,14 @@ $lang[374]	=	'Status:';
 $lang[375]	=	'Select text';
 $lang[376]  =   'Premium Accounts :';
 $lang[377]	=	'37 [Video: MP4 1920×1080 | Audio: AAC 2ch 44.10kHz]';
+$lang[378]	=	'Close window';
+$lang[379]	=	'Files';
+$lang[380]	=	'MD5 change should only be applied to known working formats(i.e. .rar or .zip)<br />Do you want to continue?';
+$lang[381]	=	'MD5 of file <b>%1$s</b> changed';	// %1$s = filename
+$lang[382]	=	'Error changing the MD5 of the file <b>%1$s</b>!';	// %1$s = filename
+$lang[383]	=	'MD5 change';
+$lang[384]	=	'Match text';
+$lang[385]	=	'Match';
+$lang[386]	=	'Ignore case';
+$lang[387]	=	'Put each file on a separated archive';
 ?>

@@ -26,11 +26,8 @@ require_once(HOST_DIR.'download/hosts.php');
 require_once(CLASS_DIR.'http.php');
 
 // If you set password for your rapidleech site, this asks for the password
-if ($options['login'] === true && (!isset($_SERVER['PHP_AUTH_USER']) || ($loggeduser = logged_user($options['users'])) === false)) {
-	header("WWW-Authenticate: Basic realm=\"RAPIDLEECH PLUGMOD\"");
-	header("HTTP/1.0 401 Unauthorized");
-	include('deny.php');
-}
+login_check();
+
 include(TEMPLATE_DIR.'header.php');
 ?>
 <br />
@@ -78,8 +75,8 @@ include(TEMPLATE_DIR.'header.php');
 			if ($i>$openwin) $i = 0;
 		}
 ?>
-<script type="text/javascript" language="javascript">
-
+<script type="text/javascript">
+/* <![CDATA[ */
 <?php
 	for ($i=0;$i<=$openwin;$i++) {
 ?>
@@ -133,13 +130,13 @@ include(TEMPLATE_DIR.'header.php');
 			}
 		}
 ?>
-	
+/* ]]> */
 </script>
 <?php
 	for ($i=0;$i<=$openwin;$i++) {
 		if (( $i+1 )% 2) echo "<br />";
 ?>
-<iframe width="49%" height="300" src="" name="idownload<?php echo $i; ?>" id="idownload<?php echo $i; ?>" border="1" style="float: left;"><?php echo lang(30); ?></iframe>
+<iframe width="49%" height="300" src="" name="idownload<?php echo $i; ?>" id="idownload<?php echo $i; ?>" style="float:left; border:1px solid;"><?php echo lang(30); ?></iframe>
 <?php
 	}
 ?>
@@ -174,7 +171,7 @@ unset($Path);
 		}
 	if (empty($upload_services)) 
 	{
-		echo "<span class='warning'><b>".lang(48)."</b></span>";
+		echo '<span class="warning"><b>'.lang(48).'</b></span>';
 	} else {
 		sort($upload_services); reset($upload_services);
 		$cc=0;
@@ -192,17 +189,17 @@ unset($Path);
 </table>
 </div><br />
 <hr /><br />
-<input type=submit name="submit" value="Upload" /> <?php echo lang(49); ?>: <input type="text" size="2" name="windows" value="4" /><br />
+<input type="submit" name="submit" value="Upload" /> <?php echo lang(49); ?>: <input type="text" size="2" name="windows" value="4" /><br />
 <?php echo lang(50); ?>: <input type="text" size="50" name="save_style" value="<?php echo lang(51); ?>" /><br />
 <a href="javascript:setCheckboxes(1);" class="chkmenu"><?php echo lang(52); ?></a> |
 <a href="javascript:setCheckboxes(0);" class="chkmenu"><?php echo lang(53); ?></a> |
 <a href="javascript:setCheckboxes(2);" class="chkmenu"><?php echo lang(54); ?></a> |
 <a href="files/myuploads.txt" class="chkmenu">myuploads.txt</a>
 <div style="overflow:auto; height:400px; width: 700px;">
-<table cellpadding="3" cellspacing="1" width="100%" class="filelist">
+<table cellpadding="3" cellspacing="1" width="100%" class="filelist" id="table_filelist_au">
 	<tr class="flisttblhdr" valign="bottom">
-		<th></th>
-		<th><?php echo lang(55); ?></th>
+		<th class="sorttable_checkbox">&nbsp;</th>
+		<th class="sorttable_alpha"><?php echo lang(55); ?></th>
 		<th><?php echo lang(56); ?></th>
 	</tr>
 <?php
@@ -226,6 +223,11 @@ if (!$list) {
 	}
 ?>
 </table>
+<?php
+	if ($options['flist_sort']) {
+		echo '<script type="text/javascript">sorttable.makeSortable(document.getElementById("table_filelist_au"));</script>';
+	}
+?>
 <br />
 <?php echo lang(58); ?><br />
 <ol>

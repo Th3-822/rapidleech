@@ -28,7 +28,7 @@ if (!defined('RAPIDLEECH')) {
 ksort($host);
 foreach ($host as $site => $file)
 	{
-	echo "<span class='plugincollst'>".$site."</span><br />";
+	echo '<span class="plugincollst">'.$site.'</span><br />';
 	}
 ?>
 </div>
@@ -49,13 +49,13 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 			{
 				foreach ( $premium_acc as $serverName => $value )
 				{
-					echo "<span class='plugincollst'>". str_replace( '_', '.', $serverName ) ."</span><br />";
+					echo '<span class="plugincollst">'. str_replace( '_', '.', $serverName ) .'</span><br />';
 				}
 			}
 			
 			if ( $mu_cookie_user_value )
 			{
-				echo "<span class='plugincollst'>Megaupload</span><br />";
+				echo '<span class="plugincollst">Megaupload</span><br />';
 			}
 ?>
 			</div>
@@ -92,7 +92,7 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 <tbody>
 <tr>
 <td align="center">
-<form action="<?php echo $PHP_SELF; ?>" method="post">
+<form action="<?php echo $PHP_SELF; ?>" name="transload" method="post"<?php if ($options['new_window']) { echo ' target="_blank"'; } ?>>
 <table class="tab-content" id="tb1" cellspacing="5" width="100%">
 <tbody>
 <tr>
@@ -100,7 +100,9 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 <b><?php echo lang(207); ?>:</b><br />&nbsp;<input type="text" name="link" id="link" size="50" /><br /><br />
 <b><?php echo lang(208); ?>:</b><br />&nbsp;<input type="text" name="referer" id="referer" size="50" />
 </td>
-<td align="center"><input type="submit" value="<?php echo lang(209); ?>" /></td>
+<td align="center">
+<input value="<?php echo lang(209); ?>" type="<?php echo ($options['new_window'] && $options['new_window_js']) ? 'button" onclick="new_transload_window();' : 'submit'; ?>" />
+</td>
 </tr>
 <tr>
 <td align="left"><input type="checkbox" name="user_pass" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('usernpass').style.display=displ;" value="on" />&nbsp;<?php echo lang(210); ?></td>
@@ -119,7 +121,7 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 <textarea name="comment" rows="4" cols="50"></textarea>
 </td>
 </tr>
-<tr><td></td></tr>
+<tr><td>&nbsp;</td></tr>
 <tr>
 <td align="left">
 <small style="color:#55bbff"><?php echo lang(214); ?>:</small><hr />
@@ -128,7 +130,7 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 </tr>
 <tr>
 <td align="left">
-<label><input type="checkbox" name="ytube_mp4" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;" <?php echo isset($_POST['yt_fmt']) ? ' checked' : ''; ?> />&nbsp;<small><?php echo lang(216); ?></small></label>
+<label><input type="checkbox" name="ytube_mp4" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;"<?php echo isset($_POST['yt_fmt']) ? ' checked="checked"' : ''; ?> />&nbsp;<small><?php echo lang(216); ?></small></label>
 <table width="150" border="0" id="ytubeopt" style="display: none;">
 <tr>
 <td colspan="2" style="white-space: nowrap;"><input type="checkbox" name="ytdirect" /><small>&nbsp;<?php echo lang(217); ?></small></td>
@@ -156,7 +158,7 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 </td>
 </tr>
 <tr>
-<td align="left"><label><input type="checkbox" name="imageshack_tor" id="imageshack_tor" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('torpremiumblock').style.display=displ;" <?php if (is_array($imageshack_acc)) print ' checked'; ?> />&nbsp;<small><?php echo lang(229); ?></small></label><table width="150" border="0" id="torpremiumblock" style="display: none;">
+<td align="left"><label><input type="checkbox" name="imageshack_tor" id="imageshack_tor" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('torpremiumblock').style.display=displ;" <?php if (is_array($imageshack_acc)) print ' checked="checked"'; ?> />&nbsp;<small><?php echo lang(229); ?></small></label><table width="150" border="0" id="torpremiumblock" style="display: none;">
 <tr><td><?php echo lang(230); ?>:&nbsp;</td><td><input type="text" name="tor_user" id="tor_user" size="15" value="" /></td></tr>
 <tr><td><?php echo lang(231); ?>:&nbsp;</td><td><input type="password" name="tor_pass" id="tor_pass" size="15" value="" /></td></tr>
 </table>
@@ -164,7 +166,7 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 </tr>
 <tr>
 <td align="left">
-<label><input type="checkbox" name="mu_acc" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('mupremiumblock').style.display=displ;" <?php if ($mu_cookie_user_value) print ' checked'; ?> />&nbsp;<small><?php echo lang(232); ?></small></label>
+<label><input type="checkbox" name="mu_acc" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('mupremiumblock').style.display=displ;" <?php if ($mu_cookie_user_value) print ' checked="checked"'; ?> />&nbsp;<small><?php echo lang(232); ?></small></label>
 <table width="150" border="0" id="mupremiumblock" style="display: none;">
 <tr><td><?php echo lang(233); ?>=</td><td><input type="text" name="mu_cookie" id="mu_cookie" size="25" value="" /></td></tr>
 </table>
@@ -189,24 +191,24 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 <tbody>
 <tr>
 <td align="center">
-<table align="center">
+<table align="center" style="text-align: justify;">
 <tr>
-<td><input type="checkbox" name="domail" id="domail" onclick="javascript:document.getElementById('emailtd').style.display=document.getElementById('splittd').style.display=this.checked?'':'none'; document.getElementById('methodtd').style.display=(document.getElementById('splitchkbox').checked && this.checked)?'':'none';" <?php echo $_COOKIE["domail"] ? " checked='checked'" : ""; ?> />&nbsp;<?php echo lang(237); ?></td>
+<td><input type="checkbox" name="domail" id="domail" onclick="document.getElementById('emailtd').style.display=document.getElementById('splittd').style.display=this.checked?'':'none';document.getElementById('methodtd').style.display=(document.getElementById('splitchkbox').checked ? (this.checked ? '' : 'none') : 'none');"<?php echo $_COOKIE["domail"] ? ' checked="checked"' : ''; ?> />&nbsp;<?php echo lang(237); ?></td>
 <td>&nbsp;</td>
-<td id="emailtd"<?php echo $_COOKIE["domail"] ? "" : " style=\"display: none;\""; ?>><?php echo lang(238); ?>:&nbsp;<input type="text" name="email" id="email"<?php echo $_COOKIE["email"] ? " value=\"".$_COOKIE["email"]."\"" : ""; ?> /></td>
+<td id="emailtd"<?php echo $_COOKIE["domail"] ? '' : ' style="display: none;"'; ?>><?php echo lang(238); ?>:&nbsp;<input type="text" name="email" id="email"<?php echo $_COOKIE["email"] ? ' value="'.$_COOKIE["email"].'"' : ''; ?> /></td>
 </tr>
 <tr>
 <td></td>
 </tr>
-<tr id="splittd"<?php echo $_COOKIE["split"] ? "" : " style=\"display: none;\""; ?>>
+<tr id="splittd"<?php echo $_COOKIE["split"] ? '' : ' style="display: none;"'; ?>>
 <td>
-<input id="splitchkbox" type="checkbox" name="split" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('methodtd').style.display=displ;" <?php echo $_COOKIE["split"] ? " checked" : ""; ?> />&nbsp;<?php echo lang(239); ?>
+<input id="splitchkbox" type="checkbox" name="split" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('methodtd').style.display=displ;"<?php echo $_COOKIE["split"] ? ' checked="checked"' : ''; ?> />&nbsp;<?php echo lang(239); ?>
 </td>
 <td>&nbsp;</td>
-<td id="methodtd"<?php echo $_COOKIE["split"] ? "" : " style=\"display: none;\""; ?>>
+<td id="methodtd"<?php echo $_COOKIE["split"] ? '' : ' style="display: none;"'; ?>>
 <table>
 <tr>
-<td><?php echo lang(240); ?>:&nbsp;<select name="method"><option value="tc"<?php echo $_COOKIE["method"] == "tc" ? " selected" : ""; ?>><?php echo lang(241); ?></option><option value='rfc'<?php echo $_COOKIE["method"] == "rfc" ? " selected=\"selected\"" : ""; ?>><?php echo lang(242); ?></option></select></td>
+<td><?php echo lang(240); ?>:&nbsp;<select name="method"><option value="tc"<?php echo $_COOKIE["method"] == "tc" ? " selected" : ""; ?>><?php echo lang(241); ?></option><option value="rfc"<?php echo $_COOKIE["method"] == "rfc" ? ' selected="selected"' : ''; ?>><?php echo lang(242); ?></option></select></td>
 </tr>
 <tr>
 <td><?php echo lang(243); ?>:&nbsp;<input type="text" name="partSize" size="2" value="<?php echo $_COOKIE["partSize"] ? $_COOKIE["partSize"] : 10; ?>" />&nbsp;<?php echo lang(244); ?></td>
@@ -215,13 +217,13 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 </td>
 </tr>
 <tr>
-<td><input type="checkbox" id="useproxy" name="useproxy" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('proxy').style.display=displ;" <?php echo $_COOKIE["useproxy"] ? " checked" : ""; ?> />&nbsp;<?php echo lang(245); ?></td>
+<td><input type="checkbox" id="useproxy" name="useproxy" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('proxy').style.display=displ;"<?php echo $_COOKIE["useproxy"] ? ' checked="checked"' : ''; ?> />&nbsp;<?php echo lang(245); ?></td>
 <td>&nbsp;</td>
-<td id="proxy"<?php echo $_COOKIE["useproxy"] ? "" : " style=\"display: none;\""; ?>>
+<td id="proxy"<?php echo $_COOKIE["useproxy"] ? '' : ' style="display: none;"'; ?>>
 <table width="150" border="0">
-<tr><td><?php echo lang(246); ?>:&nbsp;</td><td><input type="text" name="proxy" id="proxyproxy" size="20"<?php echo $_COOKIE["proxy"] ? " value=\"".$_COOKIE["proxy"]."\"" : ""; ?> /></td></tr>
-<tr><td><?php echo lang(247); ?>:&nbsp;</td><td><input type="text" name="proxyuser" id="proxyuser" size="20"<?php echo $_COOKIE["proxyuser"] ? " value=\"".$_COOKIE["proxyuser"]."\"" : ""; ?> /></td></tr>
-<tr><td><?php echo lang(248); ?>:&nbsp;</td><td><input type="text" name="proxypass" id="proxypass" size="20"<?php echo $_COOKIE["proxypass"] ? " value=\"".$_COOKIE["proxypass"]."\"" : ""; ?> /></td></tr>
+<tr><td><?php echo lang(246); ?>:&nbsp;</td><td><input type="text" name="proxy" id="proxyproxy" size="20"<?php echo $_COOKIE["proxy"] ? ' value="'.$_COOKIE["proxy"].'"' : ''; ?> /></td></tr>
+<tr><td><?php echo lang(247); ?>:&nbsp;</td><td><input type="text" name="proxyuser" id="proxyuser" size="20"<?php echo $_COOKIE["proxyuser"] ? ' value="'.$_COOKIE["proxyuser"].'"' : ''; ?> /></td></tr>
+<tr><td><?php echo lang(248); ?>:&nbsp;</td><td><input type="text" name="proxypass" id="proxypass" size="20"<?php echo $_COOKIE["proxypass"] ? ' value="'.$_COOKIE["proxypass"].'"' : ''; ?> /></td></tr>
 </table>
 </td>
 </tr>
@@ -229,7 +231,7 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 <td></td>
 </tr>
 <tr>
-<td><input type="checkbox" name="premium_acc" id="premium_acc" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;" <?php if (count($premium_acc) > 0) print ' checked="checked"'; ?> />&nbsp;<?php echo lang(249); ?></td>
+<td><input type="checkbox" name="premium_acc" id="premium_acc" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;"<?php if (count($premium_acc) > 0) print ' checked="checked"'; ?> />&nbsp;<?php echo lang(249); ?></td>
 <td>&nbsp;</td>
 <td id="premiumblock" style="display: none;">
 <table width="150" border="0">
@@ -242,17 +244,17 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 <td></td>
 </tr>
 <tr<?php echo (!$options['download_dir_is_changeable'] ? ' style="display:none;"' : '');?>>
-<td><input type="checkbox" name="saveto" id="saveto" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('path').style.display=displ;" <?php echo $_COOKIE["saveto"] ? " checked" : ""; ?> />&nbsp;<?php echo lang(252); ?></td>
+<td><input type="checkbox" name="saveto" id="saveto" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('path').style.display=displ;"<?php echo $_COOKIE["saveto"] ? ' checked="checked"' : ''; ?> />&nbsp;<?php echo lang(252); ?></td>
 <td>&nbsp;</td>
-<td id="path"<?php echo $_COOKIE["saveto"] ? "" : " style=\"display: none;\""; ?>><?php echo lang(253); ?>:&nbsp;<input type="text" name="path" size="40" value="<?php echo ($_COOKIE["path"] ? $_COOKIE["path"] : (substr($options['download_dir'], 0, 6) != "ftp://" ? realpath(DOWNLOAD_DIR) : $options['download_dir'])); ?>" /></td>
+<td id="path"<?php echo $_COOKIE["saveto"] ? '' : ' style="display: none;"'; ?>><?php echo lang(253); ?>:&nbsp;<input type="text" name="path" size="40" value="<?php echo ($_COOKIE["path"] ? $_COOKIE["path"] : (substr($options['download_dir'], 0, 6) != "ftp://" ? realpath(DOWNLOAD_DIR) : $options['download_dir'])); ?>" /></td>
 </tr>
 <tr>
 <td></td>
 </tr>
 <tr>
-<td><input type="checkbox" name="savesettings" id="savesettings"<?php echo $_COOKIE["savesettings"] ? " checked" : ""; ?> onclick="javascript:var displ=this.checked?'':'none';document.getElementById('clearsettings').style.display=displ;" />&nbsp;<?php echo lang(254); ?></td>
+<td><input type="checkbox" name="savesettings" id="savesettings"<?php echo $_COOKIE["savesettings"] ? ' checked="checked"' : ''; ?> onclick="javascript:var displ=this.checked?'':'none';document.getElementById('clearsettings').style.display=displ;" />&nbsp;<?php echo lang(254); ?></td>
 <td>&nbsp;</td>
-<td id="clearsettings"<?php echo $_COOKIE["savesettings"] ? "" : " style=\"display: none;\""; ?>><a href="javascript:clearSettings();"><?php echo lang(255); ?></a></td>
+<td id="clearsettings"<?php echo $_COOKIE["savesettings"] ? '' : ' style="display: none;"'; ?>><a href="javascript:clearSettings();"><?php echo lang(255); ?></a></td>
 </tr>
 </table>
 </td>
@@ -274,10 +276,11 @@ if($list)
   ?>
 <a href="javascript:setCheckboxes(1);" class="chkmenu"><?php echo lang(256); ?></a> |
 <a href="javascript:setCheckboxes(0);" class="chkmenu"><?php echo lang(257); ?></a> |
-<a href="javascript:setCheckboxes(2);" class="chkmenu"><?php echo lang(258); ?></a>
-<?php if ($options['show_all'] === true)
-  {
-  ?>
+<a href="javascript:setCheckboxes(2);" class="chkmenu"><?php echo lang(258); ?></a> |
+<a href="#" onclick="$('#flist_match_hitems').toggle();$('#flist_match_search').focus();return false;" class="chkmenu"><?php echo lang(384); ?></a>
+<?php
+  if ($options['show_all'] === true) {
+?>
 | <a href="javascript:showAll();"><?php echo lang(259); ?>&#173;
 <script type="text/javascript">
 if(getCookie("showAll") == 1)
@@ -291,21 +294,40 @@ else
 </script></a>
 <?php
   }
-  ?>
+?>
+<span id="flist_match_hitems" style="display:none;padding-top: 20px;"><br /><br />
+<input type="text" size="20" id="flist_match_search" onkeypress="javascript:if(event.keyCode==13){flist_match();}" />
+<input type="button" value="<?php echo lang(385); ?>" onclick="flist_match();" /><input type="checkbox" id="flist_match_ins" checked="checked" /><?php echo lang(386); ?>
+</span>
 <br /><br />
 <form action="<?php echo $PHP_SELF; ?>" name="flist" method="post">
 <?php echo renderActions(); ?>
-<div style="overflow:auto; height:500px; width: 800px;">
-<table cellpadding="3" cellspacing="1" width="100%" class="filelist">
-<thead>
+<div style="position:relative; width:800px; padding:1px 0px 1px 0px;">
+<div style="overflow:auto; height:auto; max-height:450px; width: 800px;">
+
+<table id="table_filelist_h" cellpadding="3" cellspacing="1" class="filelist" align="left" style="position:absolute;left:0px;top:0px;">
+<tbody>
 <tr class="flisttblhdr" valign="bottom">
-<td>
+<td id="file_list_checkbox_title_h">
 &nbsp;
 </td>
 <td>
 <b><?php echo lang(262); ?></b></td>
 <td><b><?php echo lang(263); ?></b></td>
-<!--<td><b>Download Link</b></td>-->
+<td><b><?php echo lang(264); ?></b></td>
+<td><b><?php echo lang(265); ?></b></td>
+</tr>
+</tbody>
+</table>
+<table id="table_filelist" cellpadding="3" cellspacing="1" width="100%" class="filelist" align="left">
+<thead>
+<tr class="flisttblhdr" valign="bottom">
+<td id="file_list_checkbox_title" class="sorttable_checkbox">
+&nbsp;
+</td>
+<td class="sorttable_alpha">
+<b><?php echo lang(262); ?></b></td>
+<td><b><?php echo lang(263); ?></b></td>
 <td><b><?php echo lang(264); ?></b></td>
 <td><b><?php echo lang(265); ?></b></td>
 </tr>
@@ -340,36 +362,33 @@ if($list)
   $filecount = 0;
   foreach($list as $key => $file)
     {
-    if(file_exists($file["name"]))
-       {
-       $total_files++;
-       $total_size+=filesize($file["name"]);
+    if (($size_time = file_data_size_time($file["name"])) === false) { continue; }
+    $total_files++;
+    $total_size+=$size_time[0];
 ?>
-<tr class="flistmouseoff" onmouseover="this.className='flistmouseon'" onmouseout="this.className='flistmouseoff'" align="center" title="<?php echo htmlentities($file["name"]); ?>" onmousedown="checkFile(<?php	echo $filecount;?>); return false;">
+<tr class="flistmouseoff" onmouseover="this.className='flistmouseon'" onmouseout="this.className='flistmouseoff'" align="center" title="<?php echo htmlentities($file["name"]); ?>" onmousedown="checkFile(<?php echo $filecount; ?>); return false;">
 <td><input onmousedown="checkFile(<?php echo $filecount;?>); return false;" id="files<?php echo $filecount; ?>" type="checkbox" name="files[]" value="<?php echo $file["date"]; ?>" /></td>
 <td><?php echo link_for_file($file["name"], FALSE, 'style="font-weight: bold; color: #000;"'); ?></td>
 <td><?php echo $file["size"]; ?></td>
-<!--<td bgcolor="#CF965D"><?php echo $file["link"] ? "<a href=\"".$file["link"]."\" style=\"color: #000;\">".$file["link"]."</a>" : "" ; ?></td>-->
 <td><?php echo $file["comment"] ? str_replace("\\r\\n", "<br />", $file["comment"]) : ""; ?></td>
 <td><?php echo date("d.m.Y H:i:s", $file["date"]) ?></td>
 </tr>
 <?php
-			$filecount ++;
-       }
+    $filecount ++;
     }
 ?>
 </tbody>
 <?php
   if (($total_files > 1) && ($total_size > 0))
     {
-    print "<tbody><tr class='flisttblftr'>$nn<td></td>$nn<td>Total:</td>$nn<td>".bytesToKbOrMbOrGb($total_size)."</td>$nn<td></td>$nn<td><!--</td>$nn<td>--></td>$nn</tr></tbody>";
+    $tmp = '<tbody><tr class="flisttblftr">'.$nn.'<td>&nbsp;</td>'.$nn.'<td>Total:</td>'.$nn.'<td>'.bytesToKbOrMbOrGb($total_size).'</td>'.$nn.'<td>&nbsp;</td>'.$nn.'<td>&nbsp;</td>'.$nn.'</tr></tbody>';
+    echo $tmp.'</table>';
+    echo '<table id="table_filelist_f" cellpadding="3" cellspacing="1" class="filelist" align="left" style="position:absolute;left:0px;bottom:0px;">'.$tmp;
     }
   unset($total_files,$total_size);
-  }
-if($list)
-  {
   ?>
 </table>
+</div>
 </div>
 </form>
 <?php
@@ -379,6 +398,22 @@ if($list)
 </tr>
 </tbody>
 </table>
+<?php
+		if ($options['flist_sort']) {
+?>
+<script type="text/javascript">
+/* <![CDATA[ */
+$(document).ready(function() {
+  sorttable.makeSortable(document.getElementById('table_filelist'));
+  $('#table_filelist_h tr.flisttblhdr td').each(function(id) {
+    $(this).click((function (x) { return function() { $('#table_filelist tr.flisttblhdr td:eq('+x+')').click(); table_filelist_refresh_headers(); }; })(id));
+  });
+});
+/* ]]> */
+</script>
+<?php
+		}
+?>
 <!--Start Lix Checker-->
 <table class="hide-table" id="tb4" cellspacing="5" width="100%">
 <tbody>
@@ -468,7 +503,7 @@ var show2 = 0;
 <div align="center">
 <?php
 if ($options['file_size_limit'] > 0) {
-	print '<span style="color:#FFCC00">'.lang(337).' <b>' . bytesToKbOrMbOrGb ( $options['file_size_limit']*1024*1024 ) . '</b><br /></span>';
+	echo '<span style="color:#FFCC00">'.lang(337).' <b>' . bytesToKbOrMbOrGb ( $options['file_size_limit']*1024*1024 ) . '</b><br /></span>';
 }
 ?>
 

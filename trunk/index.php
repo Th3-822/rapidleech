@@ -73,12 +73,7 @@ purge_files ( $options['delete_delay'] );
 
 register_shutdown_function ( "pause_download" );
 
-if ($options['login'] === true && (! isset ( $_SERVER ['PHP_AUTH_USER'] ) || ($loggeduser = logged_user ( $options['users'] )) === false)) {
-	header ( "WWW-Authenticate: Basic realm=\"RAPIDLEECH PLUGMOD\"" );
-	header ( "HTTP/1.0 401 Unauthorized" );
-	include('deny.php');
-	exit;
-}
+login_check();
 
 foreach ( $_POST as $key => $value ) {
 	$_GET [$key] = $value;
@@ -176,9 +171,9 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 	if ($_GET ["dis_plug"] != "on") {
 		//check Domain-Host
 		if (isset ( $_GET ["vBulletin_plug"] )) {
-			//print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">$nn";
+			//print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />$nn";
 			include(TEMPLATE_DIR.'/header.php');
-			//print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\"></center><br /><br />$nn";
+			//print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\" /></center><br /><br />$nn";
 			require_once (CLASS_DIR . "http.php");
 			require_once (HOST_DIR . "vBulletin_plug.php");
 			exit ();
@@ -186,8 +181,8 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 			foreach ( $host as $site => $file ) {
 				//if ($Url["host"] == $site)
 				if (preg_match ( "/^(.+\.)?" . $site . "$/i", $Url ["host"] )) {
-					//print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">$nn";
-					//print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\"></center><br /><br />$nn";
+					//print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />$nn";
+					//print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\" /></center><br /><br />$nn";
 					include(TEMPLATE_DIR.'/header.php');
 					require_once (CLASS_DIR . "http.php");
 					require_once (HOST_DIR . "DownloadClass.php");
@@ -207,7 +202,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 		}
 	}
 	
-	//print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">$nn</head>$nn<body>$nn";
+	//print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />$nn</head>$nn<body>$nn";
 	include(TEMPLATE_DIR.'/header.php');
 	
 	$Url = parse_url ( $LINK );
@@ -302,7 +297,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 	if ($lastError) {
 		html_error ( $lastError, 0 );
 	} elseif ($file ["bytesReceived"] == $file ["bytesTotal"] || $file ["size"] == "Unknown") {
-		echo "<script type='text/javascript'>pr(100, '" . $file ["size"] . "', '" . $file ["speed"] . "')</script>\r\n";
+		echo '<script type="text/javascript">'."pr(100, '" . $file ["size"] . "', '" . $file ["speed"] . "')</script>\r\n";
 		echo sprintf(lang(10), link_for_file(dirname($pathWithName).'/'.basename($file["file"])), $file ["size"], $file ["time"], $file ["speed"]);
 		$file ['date'] = time ();
 		if (! write_file ( CONFIG_DIR . "files.lst", serialize ( array ("name" => $file ["file"], "size" => $file ["size"], "date" => $file ['date'], "link" => $_GET ["link"], "comment" => str_replace ( "\n", "\\n", str_replace ( "\r", "\\r", $_GET ["comment"] ) ) ) ) . "\r\n", 0 )) {
@@ -323,17 +318,18 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"]) {
 		echo renderActions();
 		echo ('</div>');
 		echo ('</form>');
-		echo "<br /><a href=\"" . $PHP_SELF . "\">".lang(13)."</a>";
+		if ($options['new_window']) { echo '<br /><a href="javascript:window.close();">'.lang(378).'</a>'; }
+		else { echo '<br /><a href="'.$PHP_SELF.'">'.lang(13).'</a>'; }
 		if (isset ( $_GET ["audl"] )) {
-			echo "\r\n<script type='text/javascript'>parent.nextlink();</script>";
+			echo $nn.'<script type="text/javascript">parent.nextlink();</script>';
 		}
 	} else {
 		unlink ( $pathWithName );
-		print lang(14)."<br /><a href=\"javascript:location.reload();\">".lang(15)."</a>";
+		print lang(14).'<br /><a href="javascript:location.reload();">'.lang(15).'</a>';
 		if (isset ( $_GET ["audl"] )) {
-			echo "\r\n<script type='text/javascript'>parent.nextlink();</script>";
+			echo $nn.'<script type="text/javascript">parent.nextlink();</script>';
 		}
-		print "<script type='text/javascript'>location.reload();</script>";
+		echo '<script type="text/javascript">location.reload();</script>';
 	}
 	echo ('</div>');
 	echo ('</body>');

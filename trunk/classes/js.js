@@ -1,9 +1,27 @@
+function new_transload_window() {
+	var tmp = new Date();
+	tmp = tmp.getTime();
+	$('form[name=transload]').attr('target', 'rapidleech_'+tmp);
+	var options = "width=700,height=320,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=no,copyhistory=no";
+	window.open('','rapidleech_'+tmp, options); 
+	window.setTimeout("$('form[name=transload]').submit();", 200); 
+}
+
+function table_filelist_refresh_headers() {
+  $('#table_filelist_h, #table_filelist_f').width($('#table_filelist').width());
+  $('#table_filelist tr.flisttblhdr td').each(function(id) {
+    $('#table_filelist_h tr.flisttblhdr td:eq('+id+')').html($(this).html().replace(/(<span .*?sorttable.*?>|<\/span>)/gi, ''));
+    $('#table_filelist_h tr.flisttblhdr td:eq('+id+'), #table_filelist_f tr.flisttblftr td:eq('+id+')').width($(this).width());
+  });
+}
+
 function switchCell(m)
   {
 		$('#tb1, #tb2, #tb3, #tb4').hide();
 		$('#navcell1, #navcell2, #navcell3, #navcell4').removeClass('selected');
 		$('#navcell' + m).addClass('selected');
 		$('#tb'+ m).fadeIn('slow');
+		if (m == 3) { table_filelist_refresh_headers(); }
   }
 
 function getCookie(name)
@@ -47,29 +65,9 @@ function clearSettings()
   clear("domail"); clear("email"); clear("split"); clear("method");
   clear("partSize"); clear("useproxy"); clear("proxy"); clear("saveto");
   clear("path"); clear("savesettings");
-
-  document.getElementById('domail').checked = false;
-  document.getElementById('splitchkbox').checked = false;
-  document.getElementById('useproxy').checked = false;
-  document.getElementById('premium_acc').checked = false;
-  document.getElementById('saveto').checked = false;
-  document.getElementById('savesettings').checked = false;
-
-  document.getElementById('email').value= "";
-  document.getElementById('proxyproxy').value= "";
-  document.getElementById('proxyuser').value= "";
-  document.getElementById('proxypass').value= "";
-  document.getElementById('premium_user').value= "";
-  document.getElementById('premium_pass').value= "";
-                            
-  document.getElementById('emailtd').style.display = "none";
-  document.getElementById('splittd').style.display = "none";
-  document.getElementById('methodtd').style.display = "none";
-  document.getElementById('proxy').style.display = "none";
-  document.getElementById('premiumblock').style.display = "none";
-  document.getElementById('path').style.display = "none";
-  document.getElementById('clearsettings').style.display = "none";
-  
+  $('#domail, #splitchkbox, #useproxy, #premium_acc, #saveto, #savesettings').attr('checked', false);
+  $('#email, #proxyproxy, #proxyuser, #proxypass, #premium_user, #premium_pass').val('');
+  $('#emailtd, #splittd, #methodtd, #proxy, #premiumblock, #path, #clearsettings').hide();
   document.cookie = "clearsettings = 1;";
   }
 
@@ -77,6 +75,27 @@ function clear(name)
   {
   document.cookie = name + " = " + "; expires=Thu, 01-Jan-70 00:00:01 GMT";
   }
+
+//Match text
+function flist_match() {
+  var text, insensitive, text_regexp; 
+  text = $('#flist_match_search').val();
+  if (text == '') { return false; }
+  insensitive = $('#flist_match_ins').attr('checked');
+  text = '*'+text+'*'; while (text.search(/\*\*/g) != -1) { text = text.replace(/\*\*/g, '*'); }
+  text = text.replace(/\^|\$|\?|\+|\||\(|\{|\[|\\/g, '');
+  text = text.replace(/\./g, '\\.'); text = text.replace(/\*/g, '.*?');
+  text_regexp = new RegExp(text, insensitive ? 'i' : '');
+  $('#table_filelist :checked').attr('checked', false);
+  $('#table_filelist :checkbox').each(function() {
+    if ($(this).parent().next().children().html().match(text_regexp) !== null) { $(this).attr('checked', true); }
+  });
+  if ($('#table_filelist :checked').size() > 0) {
+    $('#file_list_checkbox_title_h').click();
+    if ($('#file_list_checkbox_title').html().search('sorttable_sortrevind') == -1) { $('#file_list_checkbox_title_h').click(); }
+  }
+  return false;
+}
 
 function setCheckboxes(act)
   {
@@ -102,18 +121,6 @@ function showAll()
     document.cookie = "showAll = 1;";
     location.href = location.href.split('?',1)+'?act=files';
     }
-  }
-
-function showAdd()
-  {
-  document.getElementById('add').style.display = show ? 'none' : '';
-  show = show ? 0 : 1;
-  }
-
-function showAdd2()
-  {
-  document.getElementById('add2').style.display = show2 ? 'none' : '';
-  show2 = show2 ? 0 : 1;
   }
 
 function mail(str, field)
@@ -222,7 +229,7 @@ function startLinkCheck() {
 function fc(caption,displaytext) {
 	if(c>0) {
 		document.getElementById("dl").innerHTML = caption + php_js_strings[87].replace('%1$s', c.toFixed(1));
-		c = c - .5;
+		c = c - 0.5;
 		setTimeout("fc('"+caption+"','"+displaytext+"')", 500);
 	} else {
 		document.getElementById("dl").style.display="none";
@@ -290,26 +297,20 @@ function timeDiff(Year, Month, Day, Hour, Minute, Second, dateFormat) {
     runClock(timeDiff, dateFormat);
 }
 
-function getthedate(){ 
-    var mydate=new Date(); 
-    var hours=mydate.getHours(); 
-    var minutes=mydate.getMinutes(); 
-    var seconds=mydate.getSeconds(); 
-    var dn="AM"; 
-    if (hours>=12) dn="PM"; 
-    if (hours>12) hours=hours-12;
-    if (hours==0) hours=12; 
-	if (hours<=9) hours="0"+hours; 
-    if (minutes<=9) minutes="0"+minutes; 
-    if (seconds<=9)    seconds="0"+seconds; 
-    
+function getthedate(){
+    var mydate=new Date();
+    var hours=mydate.getHours();
+    var minutes=mydate.getMinutes();
+    var seconds=mydate.getSeconds();
+    var dn="AM";
+    if (hours>=12) { dn="PM"; }
+    if (hours>12) { hours=hours-12; }
+    if (hours==0) { hours=12; }
+    if (hours<=9) { hours="0"+hours; }
+    if (minutes<=9) { minutes="0"+minutes; }
+    if (seconds<=9) { seconds="0"+seconds; }
 
     var cdate="<span style=\"color:#994A1D\">"+php_js_strings[281]+":</span> &nbsp;&nbsp;&nbsp;<span style=\"color:#999\">"+hours+":"+minutes+":"+seconds+" "+dn+"</span><br />";
-    if (document.all) 
-        document.all.clock.innerHTML=cdate; 
-    else if (document.getElementById) 
-        document.getElementById("clock").innerHTML=cdate; 
-    else 
-        document.write(cdate); 
-	setTimeout("getthedate()",1000); 
+    $('#clock').html(cdate);
+    setTimeout("getthedate()",1000); 
 }

@@ -34,13 +34,25 @@ function create_hosts_file($host_file = "hosts.php") {
 	}
 }
 
-function logged_user($u) {
-	global $_SERVER;
-	foreach ( $u as $user => $pass ) {
-		if ($_SERVER ['PHP_AUTH_USER'] == $user && $_SERVER ['PHP_AUTH_PW'] == $pass)
-			return true;
+function login_check() {
+	global $options;
+	if ($options['login']) {
+		function logged_user($ul) {
+			foreach ($ul as $user => $pass) {
+				if ($_SERVER['PHP_AUTH_USER'] == $user && $_SERVER['PHP_AUTH_PW'] == $pass) { return true; }
+			}
+			return false;
+		}
+		if ($options['login_cgi']) {
+			list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = @explode(':', base64_decode(substr((isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : $_SERVER['REDIRECT_HTTP_AUTHORIZATION']), 6)), 2);      
+		}
+		if (empty($_SERVER['PHP_AUTH_USER']) || !logged_user($options['users'])) {
+			header ( 'WWW-Authenticate: Basic realm="RAPIDLEECH PLUGMOD"' );
+			header ( "HTTP/1.0 401 Unauthorized" );
+			include('deny.php');
+			exit;
+		}
 	}
-	return false;
 }
 
 function is_present($lpage, $mystr, $strerror = "", $head = 0) {
@@ -68,10 +80,10 @@ function insert_location($newlocation) {
 		global $nn;
 		list ( $location, $list ) = explode ( "?", $newlocation );
 		$list = explode ( "&", $list );
-		print "<form action=\"$location\" method=\"post\">" . $nn;
+		print '<form action="'.$location.'" method="post">' . $nn;
 		foreach ( $list as $l ) {
 			list ( $name, $value ) = explode ( "=", $l );
-			print "<input type=\"hidden\" name=\"$name\" value=\"$value\" />" . $nn;
+			print '<input type="hidden" name="'.$name.'" value="'.$value.'" />' . $nn;
 		}
 		echo ('<script type="text/javascript">void(document.forms[0].submit());</script>');
 		echo ('</form>');
@@ -171,7 +183,9 @@ function html_error($msg, $head = 1) {
 	}
 	echo ('<div align="center">');
 	echo ('<span class="htmlerror"><b>' . $msg . '</b></span><br /><br />');
-	echo ('<a href="' . $PHP_SELF . '">'.lang(13).'</a>');
+	if ($options['new_window']) { echo '<a href="javascript:window.close();">'.lang(378).'</a>'; }
+	else { echo '<a href="'.$PHP_SELF.'">'.lang(13).'</a>'; }
+
 	echo ('</div>');
 	include(TEMPLATE_DIR.'footer.php');
 	exit ();
@@ -231,18 +245,36 @@ function _cmp_list_enums($a, $b) {
 	return strcmp ( $a ["name"], $b ["name"] );
 }
 
+function file_data_size_time($file) {
+	global $options;
+	$size = $time = false;
+	if ($options['2gb_fix'] && PHP_INT_SIZE < 5 && file_exists($file) && !is_dir($file) && !is_link($file)) {
+		if (substr(PHP_OS, 0, 3) !== "WIN") {
+			@exec('stat'.(stristr(@php_uname('s'), 'bsd') !== false ? '-f %m ' : ' -c %Y ').escapeshellarg($file), $time, $tmp);
+			if ($tmp == 0) { $time = trim(implode($time)); }
+			@exec('stat'.(stristr(@php_uname('s'), 'bsd') !== false ? '-f %z ' : ' -c %s ').escapeshellarg($file), $size, $tmp);
+			if ($tmp == 0) { $size = trim(implode($size)); }
+		}
+	}
+	elseif (is_file($file)) {
+		$size = filesize($file);
+		$time = filemtime($file);
+	}
+	if ($size === false || $time === false) { return false; }
+	return array($size, $time);
+}
+
 function _create_list() {
 	global $list, $_COOKIE, $options;
 	$glist = array ();
 	if (($options['show_all'] === true) & ($_COOKIE ["showAll"] == 1)) {
 		$dir = dir ( DOWNLOAD_DIR );
 		while ( false !== ($file = $dir->read ()) ) {
-			if ($file != "." && $file != ".." && (! is_array ( $options['forbidden_filetypes'] ) || ! in_array ( strtolower ( strrchr ( $file, "." ) ), $options['forbidden_filetypes'] )) && is_file ( DOWNLOAD_DIR . $file ) && basename ( $file ) != "files.lst") {
+			if (($tmp = file_data_size_time(DOWNLOAD_DIR.$file)) === false) { continue; }; list($size, $time) = $tmp;
+			if ($file != "." && $file != ".." && (! is_array ( $options['forbidden_filetypes'] ) || ! in_array ( strtolower ( strrchr ( $file, "." ) ), $options['forbidden_filetypes'] ))) {
 				$file = DOWNLOAD_DIR . $file;
-				$time = filemtime ( $file );
-				while ( isset ( $glist [$time] ) )
-					$time ++;
-				$glist [$time] = array ("name" => realpath ( $file ), "size" => bytesToKbOrMbOrGb ( filesize ( $file ) ), "date" => $time );
+				while (isset($glist[$time])) { $time ++; }
+				$glist [$time] = array ("name" => realpath($file), "size" => bytesToKbOrMbOrGb($size), "date" => $time );
 			}
 		}
 		$dir->close ();
@@ -444,7 +476,7 @@ function link_for_file($filename, $only_link = FALSE, $style = '') {
 	$basename = htmlentities(basename($filename));
 	$Path = htmlentities($Path).'/'.rawurlencode(basename($filename));
 	if ($only_link) { return 'http://'.urldecode($_SERVER['HTTP_HOST']).$Path; }
-	elseif ($Path === FALSE) { return $basename; }
+	elseif ($Path === FALSE) { return '<span>'.$basename.'</span>'; }
 	else { return '<a href="'.$Path.'"'.($style !== '' ? ' '.$style : '').'>'.$basename.'</a>'; }
 }
 

@@ -6,15 +6,13 @@ function delete() {
 	}
 	else {
 ?>
-<form method="post"><input type="hidden" name="act" value="delete_go" />
-<?php echo lang(104); ?>:
+<form method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act" value="delete_go" />
 <?php
-			for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
-				$file = $list [$_GET ["files"] [$i]];
-?>
-	<input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>" /> <b><?php echo basename ( $file ["name"] ); ?></b><?php echo $i == count ( $_GET ["files"] ) - 1 ? "." : ",&nbsp"; ?>
-<?php
-		}
+	echo lang(count($_GET['files']) > 1 ? 379 : 104).':';
+	foreach ($_GET['files'] as $k => $v) {
+		echo '<input type="hidden" name="files[]" value="'.$v.'" /><br />';
+		echo '<b>'.htmlentities(basename($list[$v]['name'])).'</b>';
+	}
 ?>
 <br />
 <?php echo lang(148); ?>?
@@ -37,7 +35,7 @@ function delete() {
 
 function delete_go() {
 	global $list;
-	if (isset($_POST["yes"]) && !$options['disable_deleting'] && !$options['disable_delete']) {
+	if (isset($_POST["yes"])) {
 		for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {
 			$file = $list [$_POST ["files"] [$i]];
 			if (file_exists ( $file ["name"] )) {

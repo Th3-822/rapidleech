@@ -6,8 +6,8 @@ function rl_rename() {
   }
   else {
 ?>
-<form method="post"><input type="hidden" name="act" value="rename_go" />
-		<table align="center">
+<form method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act" value="rename_go" />
+		<table align="center" style="text-align: left;">
 			<tr>
 				<td>
 				<table>
@@ -15,16 +15,15 @@ function rl_rename() {
 		for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
 			$file = $list [$_GET ["files"] [$i]];
 ?>
-<input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>" />
 <tr>
-	<td align="center"><b><?php echo basename ( $file ["name"] ); ?></b></td>
+	<td align="center"><input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>" /><b><?php echo basename ( $file ["name"] ); ?></b></td>
 </tr>
 <tr>
 	<td><?php echo lang(201); ?>:&nbsp;<input type="text" name="newName[]" size="25"
 		value="<?php echo basename ( $file ["name"] ); ?>" /></td>
 </tr>
 <tr>
-	<td></td>
+	<td>&nbsp;</td>
 </tr>
 <?php } ?>
                                   </table>
