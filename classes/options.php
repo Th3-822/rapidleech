@@ -13,9 +13,16 @@ if ((isset($_GET["act"]) || isset($_POST["act"])) && @$_GET["act"] !== 'files') 
   else {
     $all_act_files_exist = true;
     foreach($_GET["files"] as $v) {
-      if (!is_file($list[$v]["name"])) {
+      $file = $list[$v]['name'];
+      if (!is_file($file)) {
+        if ($options['2gb_fix'] && in_array($_GET['act'], array('delete', 'delete_go')) && file_exists($file) && !is_dir($file) && !is_link($file)) {
+          $size_time = file_data_size_time($file);
+        }
+        else { $size_time = false; }
+      }
+      if ($size_time === false) {
         $all_act_files_exist = false;
-        echo sprintf(lang(64),'<b>'.htmlentities($list[$v]["name"]).'</b>').'<br />';
+        echo sprintf(lang(64),'<b>'.htmlentities($file).'</b>').'<br />';
         break;
       }
     }
@@ -69,6 +76,18 @@ if ($all_act_files_exist) {
 			if ($options['disable_md5']) { break; }
 			require(CLASS_DIR . "options/md5.php");
 			rl_md5();
+			break;
+		
+		case "md5_change" :
+			if ($options['disable_md5_change']) { break; }
+			require(CLASS_DIR . "options/md5change.php");
+			md5_change();
+			break;
+		
+		case "md5_change_go" :
+			if ($options['disable_md5_change']) { break; }
+			require(CLASS_DIR . "options/md5change.php");
+			md5_change_go();
 			break;
 		
 		case "unzip" :

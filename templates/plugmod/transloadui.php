@@ -19,7 +19,8 @@
 </table>
 <br />
 <div id="resume" align="center"></div>
-<script type="text/javascript" language="javascript">
+<script type="text/javascript">
+/* <![CDATA[ */
 function pr(percent, received, speed)
 {
 	document.getElementById("received").innerHTML = '<b>' + received + "<\/b>";
@@ -35,5 +36,6 @@ function mail(str, field)
 	document.getElementById("mailPart." + field).innerHTML = str;
 	return true;
 }
+/* ]]> */
 </script>
 <br />

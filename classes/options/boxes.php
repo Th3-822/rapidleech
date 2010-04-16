@@ -2,7 +2,7 @@
 function boxes() {
 	global $list, $options;
 ?>
-<form method="post"><input type="hidden" name="act" value="boxes_go" />
+<form method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act" value="boxes_go" />
 <?php
 	echo count ( $_GET ["files"] ) . " file" . (count ( $_GET ["files"] ) > 1 ? "s" : "") . ":<br />";
 	for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
@@ -34,15 +34,15 @@ function boxes() {
 			<tr>
 				<td><input id="splitchkbox" type="checkbox" name="split"
 					onclick="javascript:var displ=this.checked?'':'none';document.getElementById('methodtd2').style.display=displ;"
-					<?php echo $_COOKIE ["split"] ? " checked" : ""; ?> />&nbsp;<?php echo lang(142); ?></td>
+					<?php echo $_COOKIE ["split"] ? ' checked="checked"' : ''; ?> />&nbsp;<?php echo lang(142); ?></td>
 				<td>&nbsp;</td>
 				<td id="methodtd2"
-					<?php echo $_COOKIE ["split"] ? "" : " style=\"display: none;\""; ?>>
+					<?php echo $_COOKIE ["split"] ? '' : ' style="display: none;"'; ?>>
 				<table>
 					<tr>
 						<td>Method:&nbsp;<select name="method">
-							<option value="tc" <?php echo $_COOKIE ["method"] == "tc" ? " selected='selected'" : ""; ?>>Total Commander</option>
-							<option value="rfc" <?php echo $_COOKIE ["method"] == "rfc" ? " selected='selected'" : ""; ?>>RFC 2046</option>
+							<option value="tc" <?php echo $_COOKIE ["method"] == "tc" ? ' selected="selected"' : ''; ?>>Total Commander</option>
+							<option value="rfc" <?php echo $_COOKIE ["method"] == "rfc" ? ' selected="selected"' : ''; ?>>RFC 2046</option>
 						</select></td>
 					</tr>
 					<tr>
@@ -85,7 +85,7 @@ function boxes_go() {
 					;
 				} else
 					$v_ads = " !";
-				echo "<script type='text/javascript'>mail('File <b>" . basename ( $file ["name"] ) . "</b> it is sent for the address <b>" . $v_mail . "</b>" . $v_ads . "', '" . md5 ( basename ( $file ["name"] ) ) . "');</script>\r\n<br />";
+				echo '<script type="text/javascript">'."mail('File <b>" . basename ( $file ["name"] ) . "</b> it is sent for the address <b>" . $v_mail . "</b>" . $v_ads . "', '" . md5 ( basename ( $file ["name"] ) ) . "');</script>\r\n<br />";
 			} else {
 				echo lang(12)."<br />";
 			}

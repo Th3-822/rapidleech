@@ -96,7 +96,7 @@ $prozent_belegt = 100 * $belegt / $insgesamt;
 		foreach ( $cpus as $cpu ) {
 			$cpu_string .= "" . $cpu->loadpercentage;
 		}
-		$cpu_string .= '%<br /><img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpu->loadpercentage, "2" ) . '" border="0"><br />';
+		$cpu_string .= '%<br /><img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpu->loadpercentage, "2" ) . '" border="0" /><br />';
 	} elseif ($os == "linux") {
 		function getStat($_statPath) {
 			if (trim ( $_statPath ) == '') {
@@ -148,7 +148,7 @@ $prozent_belegt = 100 * $belegt / $insgesamt;
 			$cpulast = 100 - $cpu ['idle'];
 			$cpu_string .= lang(136).": <span id='cpuload'>" . round ( $cpulast, "0" ) . "</span>%<br />";
 			if (extension_loaded('gd') && function_exists('gd_info')) {
-				$cpu_string .= '<img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpulast, "2" ) . '" border="0" name="cpupercent" id="cpupercent" alt="">';
+				$cpu_string .= '<img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpulast, "2" ) . '" border="0" name="cpupercent" id="cpupercent" alt="" />';
 			}
 			$cpu_string .= '<br />';
 		}

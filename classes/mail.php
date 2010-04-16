@@ -34,7 +34,7 @@ function xmail($from, $to, $subj, $text, $filename, $partSize = FALSE, $method =
 	$un = strtoupper ( uniqid ( time () ) );
 	$head = "From: " . $from . "\n" . "X-Mailer: PHP RapidLeech PlugMod\n" . "Reply-To: " . $from . "\n" . "Mime-Version: 1.0\n" . "Content-Type: multipart/mixed; boundary=\"----------" . $un . "\"\n\n";
 	$zag = "------------" . $un . "\nContent-Type: text/plain; charset=UTF-8\n" . "Content-Transfer-Encoding: 8bit\n\n" . $text . "\n\n" . "------------" . $un . "\n" . "Content-Type: application/octet-stream; name=\"" . basename ( $filename ) . "\"\n" . "Content-Transfer-Encoding: base64\n" . "Content-Disposition: attachment; filename=\"" . basename ( $filename ) . "\"\n\n";
-	echo "<span id=mailPart." . md5 ( basename ( $filename ) ) . "></span><br />";
+	echo '<span id="mailPart.' . md5 ( basename ( $filename ) ) . '"></span><br />';
 	flush ();
 	if ($partSize) {
 		$partSize = round ( $partSize );

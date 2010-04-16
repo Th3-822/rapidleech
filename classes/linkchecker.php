@@ -54,17 +54,17 @@ function check($link, $x, $regex, $pattern='', $replace='') {
 	ob_flush();
 
 	if($_POST['d'] && preg_match('@'.$regex.'@', $page)) {
-		echo "<div class=\"g\"><a href=\"$link\"><b>$link</b></a></div>\n";
+		echo '<div class="g"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
 	} elseif($_POST['d'] && preg_match("@The file you are trying to access is temporarily unavailable.@", $page)) {
-		echo "<div class=\"y\"><a href=\"$link\"><b>$link</b></a></div>\n";
+		echo '<div class="y"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
 	} elseif($_POST['d'] && !preg_match('@'.$regex.'@', $page)) {
-		echo "<div class=\"r\"><a href=\"$link\"><b>$link</b></a></div>\n";
+		echo '<div class="r"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
 	} elseif(!$_POST['d'] && preg_match('@'.$regex.'@', $page)) {
-		echo "<div class=\"g\">$x: ".lang(114).": <a href=\"$link\"><b>$link</b></a></div>\n";
+		echo '<div class="g">'."$x: ".lang(114).': <a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
 	} elseif(!$_POST['d'] && preg_match("The file you are trying to access is temporarily unavailable.", $page)) {
-		echo "<div class=\"y\">$x: ".lang(115).": <a href=\"$link\"><b>$link</b></a></div>\n";
+		echo '<div class="y">'."$x: ".lang(115).': <a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
 	} else {
-		echo "<div class=\"r\">$x: ".lang(116).": <a href=\"$link\"><b>$link</b></a></div>\n";
+		echo '<div class="r">'."$x: ".lang(116).': <a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
 	}
 }
 

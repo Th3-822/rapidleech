@@ -16,8 +16,8 @@ define ('CONFIG_DIR', 'configs/');
 //Default options file
 require_once (CONFIG_DIR.'default.php');
 //Exit setup if config file exists and is complete
-if (is_file(CONFIG_DIR."config.php")) {
-  require_once (CONFIG_DIR . "config.php");  
+if (is_file(CONFIG_DIR.'config.php')) {
+  require_once (CONFIG_DIR.'config.php');  
   if (count($options) == count($default_options)) { return; }
 }
 
@@ -25,11 +25,11 @@ define('TEMPLATE_DIR', 'templates/plugmod/');
 //$options['default_language'] = "en";
 require_once('classes/other.php');
 
-?><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head><title>Rapidleech Setup</title>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link title="Rapidleech Style" href="<?php echo TEMPLATE_DIR; ?>styles/rl_style_pm.css" rel="stylesheet" type="text/css">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link title="Rapidleech Style" href="<?php echo TEMPLATE_DIR; ?>styles/rl_style_pm.css" rel="stylesheet" type="text/css" />
 <?php
 
 if (!isset($_POST['setup_save'])) {
@@ -39,6 +39,7 @@ if (!isset($_POST['setup_save'])) {
 ?>
 <script src="classes/js.js" type="text/javascript"></script>
 <script type="text/javascript">
+/* <![CDATA[ */
 function load_current_config() {
 <?php
 $options = array(); $old_options = false;
@@ -80,6 +81,8 @@ foreach ($options['users'] as $k => $v) {
   else { $('#opt_rename_these_filetypes_to_0').show(); }
   if ($('#opt_login').attr('checked')) { $('#opt_login_0').show(); }
   else { $('#opt_login_0').hide(); }
+  if ($('#opt_new_window').attr('checked')) { $('#opt_new_window_0').show(); }
+  else { $('#opt_new_window_0').hide(); }
 }
 
 function set_element_val(id, value, display) {
@@ -106,6 +109,9 @@ $(document).ready(function() {
   });
   $('#div_main_advanced').click();
 
+  $('#opt_login_cgi').click(function() {
+    if ($(this).attr('checked')) { alert('Verify that main .htaccess is writeable before saving the config so the CGI fix can be applied correctly.'); }
+  });
   $('#opt_disable_actions').click(function() {
     if ($(this).attr('checked')) { $('#opt_actions_table :checkbox:not(#opt_disable_deleting)').each(function() { $(this).attr('checked', 'checked'); }); }
     else { $('#opt_actions_table :checkbox:not(#opt_disable_deleting)').removeAttr('checked'); }
@@ -117,6 +123,7 @@ $(document).ready(function() {
     else { $('#opt_disable_delete, #opt_disable_rename, #opt_disable_mass_rename').removeAttr('checked'); }
   });
   $("#opt_forbidden_filetypes_block").click(function() { $('#opt_rename_these_filetypes_to_0').toggle(); } );
+  $("#opt_new_window").click(function() { $('#opt_new_window_0').toggle(); } );
   $("#opt_login").click(function() { $('#opt_login_0').toggle(); } );
   $("#opt_login_add").click(function() {
     var row = $('#opt_login_table tbody>tr:last').clone(true).insertAfter('#opt_login_table tbody>tr:last');
@@ -140,6 +147,7 @@ $(document).ready(function() {
 
   load_current_config();
 });
+/* ]]> */
 </script>
 <?php
 }
@@ -193,7 +201,7 @@ $(document).ready(function() {
 </style>
 </head>
 <body>
-<center><img src="<?php echo TEMPLATE_DIR; ?>images/logo_pm.gif" alt="RapidLeech PlugMod" border="0"></center>
+<center><img src="<?php echo TEMPLATE_DIR; ?>images/logo_pm.gif" alt="RapidLeech PlugMod" border="0" /></center>
 <br />
 <noscript><div class="div_error">This page won't work without JavaScript, please enable JavaScript and refresh the page.</div></noscript>
 <?php
@@ -219,9 +227,25 @@ if (isset($_POST['setup_save']) && $_POST['setup_save'] == 1) {
   $tmp = (isset($_POST['opt_forbidden_filetypes']) ? stripslashes($_POST['opt_forbidden_filetypes']) : '');
   $tmp = explode(',', $tmp);
   array_walk($tmp, 'array_trim');
-  $tmp = (count($tmp) > 0 ? (strlen(trim($tmp[0])) > 0 ? $tmp : array()) : array());
+  $tmp = (count($tmp) > 0 && strlen(trim($tmp[0])) > 0 ? $tmp : array());
   $options['forbidden_filetypes'] = $tmp;
-  
+
+  $tmp = "\r\n\r\n<IfModule mod_rewrite.c>\r\nRewriteEngine on\r\nRewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]\r\n</IfModule>";
+  $htacess = @file_get_contents('.htaccess');
+  if (empty($htacess)) { echo 'It was not possible to read .htacess file<br /><br />'; }
+  elseif (isset($_POST['opt_login_cgi']) && $_POST['opt_login_cgi']) {
+    if (strpos($htacess, $tmp) === false) { if (!@write_file(".htaccess", $htacess.$tmp, 1)) {
+      echo 'It was not possible to edit .htacess file to enable CGI authorization fix<br /><br />';
+      $options['login_cgi'] = false;
+    }
+    }
+  }
+  else {
+    if (strpos($htacess, $tmp) !== false) { if (!@write_file(".htaccess", str_replace($tmp, '', $htacess))) {
+      echo 'It was not possible to write .htacess file to completely disable CGI authorization fix<br /><br />';
+    } }
+  }
+
   $options['users'] = array();
   if (isset($_POST['users']) && isset($_POST['passwords']) && 
   count($_POST['users']) > 0 && count($_POST['users']) == count($_POST['passwords'])) {
@@ -270,6 +294,7 @@ else {
                                                   </select></td></tr>
           <tr><td>File name prefix</td><td><input type="text" id="opt_rename_prefix" name="opt_rename_prefix" /></td></tr>
           <tr><td>File name suffix</td><td><input type="text" id="opt_rename_suffix" name="opt_rename_suffix" /></td></tr>
+          <tr><td>Replace spaces for<br />underscore in file names</td><td><input type="checkbox" value="1" name="opt_rename_underscore" id="opt_rename_underscore" /></td></tr>
           <tr><td>Bandwidth saving</td><td><input type="checkbox" value="1" name="opt_bw_save" id="opt_bw_save" /></td></tr>
           <tr><td>File size limit in MiB</td><td> <select size="1" name="opt_file_size_limit" id="opt_file_size_limit">
                                                 	<option value="0">Disabled</option>
@@ -280,6 +305,8 @@ else {
                                                 	<option value="1000">1000</option>
                                                 	<option value="other">Other</option>
                                                   </select></td></tr>
+          <tr><td>Disable *.upload.html creation</td><td><input type="checkbox" value="1" name="opt_upload_html_disable" id="opt_upload_html_disable" /></td></tr>
+          <tr><td>Disable myuploads.txt creation</td><td><input type="checkbox" value="1" name="opt_myuploads_disable" id="opt_myuploads_disable" /></td></tr>
         </table>
       </div>
     </div>
@@ -293,11 +320,12 @@ else {
       <div class="div_opt">
         <input type="checkbox" value="1" name="opt_login" id="opt_login" /> Enable <b>Authorization mode</b>
         <div style="text-align: left;" id="opt_login_0">
+          <input type="checkbox" value="1" name="opt_login_cgi" id="opt_login_cgi" /> Enable CGI authorization fix<br />
           <table id="opt_login_table" class="table_opt">
           <thead>
             <tr><td><input id="opt_login_add" type="button" value="Add user" /></td><td><b>User</b></td><td><b>Password</b></td></tr>
           </thead><tbody>
-            <tr><td>&nbsp;</td><td><input type="text" name="users[]" size="10" /></td><td><input type="text" name="passwords[]" size="10" /></td></tr>
+            <tr><td>&nbsp;</td><td><input type="text" name="users[]" size="14" /></td><td><input type="text" name="passwords[]" size="14" /></td></tr>
           </tbody></table>
         </div>
       </div>
@@ -346,6 +374,21 @@ $d->close();
               <tr><td>CPU, Memory &amp; Time Info</td><td><input type="checkbox" value="1" name="opt_server_info" id="opt_server_info" /></td></tr>
             </table>
           </td>
+        </tr><tr>
+          <td style="vertical-align: top;" colspan="2">
+          &nbsp;
+          </td>
+        </tr><tr>
+          <td style="vertical-align: top;">
+            <table>
+              <tr><td>Make file list sortable</td><td><input type="checkbox" value="1" name="opt_flist_sort" id="opt_flist_sort" /></td></tr>
+              <tr><td>Transload files in a new window</td><td><input type="checkbox" value="1" name="opt_new_window" id="opt_new_window" /></td></tr>
+              <tr id="opt_new_window_0"><td>Use javascript window</td><td><input type="checkbox" value="1" name="opt_new_window_js" id="opt_new_window_js" /></td></tr>
+            </table>
+          </td>
+          <td style="vertical-align: top;">
+          &nbsp;
+          </td>
         </tr></table>
       </div>
     </div>
@@ -374,13 +417,17 @@ $d->close();
             <td style="vertical-align: top;"><table>
               <tr><td>Disable merge</td><td><input type="checkbox" value="1" name="opt_disable_merge" id="opt_disable_merge" /></td></tr>
               <tr><td>Disable split</td><td><input type="checkbox" value="1" name="opt_disable_split" id="opt_disable_split" /></td></tr>
+              <tr><td>Disable md5 change</td><td><input type="checkbox" value="1" name="opt_disable_md5_change" id="opt_disable_md5_change" /></td></tr>
+              <tr><td>Disable md5</td><td><input type="checkbox" value="1" name="opt_disable_md5" id="opt_disable_md5" /></td></tr>
+              <tr><td>Disable list</td><td><input type="checkbox" value="1" name="opt_disable_list" id="opt_disable_list" /></td></tr>
+            </table></td>
+            <td style="vertical-align: top;"><table>
+              <tr><td>Disable compression<br />(tar, zip, rar)</td><td><input type="checkbox" value="1" name="opt_disable_archive_compression" id="opt_disable_archive_compression" /></td></tr>
               <tr><td>Disable tar</td><td><input type="checkbox" value="1" name="opt_disable_tar" id="opt_disable_tar" /></td></tr>
               <tr><td>Disable zip</td><td><input type="checkbox" value="1" name="opt_disable_zip" id="opt_disable_zip" /></td></tr>
               <tr><td>Disable unzip</td><td><input type="checkbox" value="1" name="opt_disable_unzip" id="opt_disable_unzip" /></td></tr>
               <tr><td>Disable rar</td><td><input type="checkbox" value="1" name="opt_disable_rar" id="opt_disable_rar" /></td></tr>
               <tr><td>Disable unrar</td><td><input type="checkbox" value="1" name="opt_disable_unrar" id="opt_disable_unrar" /></td></tr>
-              <tr><td>Disable md5</td><td><input type="checkbox" value="1" name="opt_disable_md5" id="opt_disable_md5" /></td></tr>
-              <tr><td>Disable list</td><td><input type="checkbox" value="1" name="opt_disable_list" id="opt_disable_list" /></td></tr>
             </table></td>
           </tr>
 
@@ -397,10 +444,11 @@ $d->close();
       <div class="div_opt" id="opt_advanced_table">
         <div style="text-align: center; padding-bottom: 10px;">(You don't need to change these unless you know what you are doing)</div>
         <table class="table_opt">
+          <tr><td>Try to list files bigger than 2gb<br />(32 bit o.s.)</td><td><input type="checkbox" value="1" name="opt_2gb_fix" id="opt_2gb_fix" /></td></tr>
           <tr><td colspan="2" style="text-align: center;">Forbidden file types</td></tr>
           <tr><td colspan="2" style="text-align: center;"><input size="50" type="text" id="opt_forbidden_filetypes" name="opt_forbidden_filetypes" /></td></tr>
           <tr><td>Block download of forbidden file types</td><td><input type="checkbox" value="1" name="opt_forbidden_filetypes_block" id="opt_forbidden_filetypes_block" /></td></tr>
-          <tr id="opt_rename_these_filetypes_to_0"><td>Rename forbidden file types to</td><td><input type="text" size="8" value="" name="opt_rename_these_filetypes_to" id="opt_rename_these_filetypes_to" /></tr>
+          <tr id="opt_rename_these_filetypes_to_0"><td>Rename forbidden file types to</td><td><input type="text" size="8" value="" name="opt_rename_these_filetypes_to" id="opt_rename_these_filetypes_to" /></td></tr>
           <tr><td>Block forbidden file types for file actions</td><td><input type="checkbox" value="1" name="opt_check_these_before_unzipping" id="opt_check_these_before_unzipping" /></td></tr>
           <tr><td>Images via php</td><td><input type="checkbox" value="1" name="opt_images_via_php" id="opt_images_via_php" /></td></tr>
           <tr><td>Redirect passive method</td><td><input type="checkbox" value="1" name="opt_redir" id="opt_redir" /></td></tr>

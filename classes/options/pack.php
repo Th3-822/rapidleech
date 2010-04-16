@@ -2,7 +2,7 @@
 function rl_pack() {
 	global $list, $options;
 ?>
-<form method="post"><input type="hidden" name="act" value="pack_go" />
+<form method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act" value="pack_go" />
 <?php
 	echo count ( $_GET ["files"] ) . " file" . (count ( $_GET ["files"] ) > 1 ? "s" : "") . ":<br />";
 	for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
@@ -15,9 +15,15 @@ function rl_pack() {
 		<tr>
 			<td><?php echo lang(195); ?>:&nbsp;<input type="text" name="arc_name" size="30" value="" />&nbsp;<b>.</b>&nbsp;
 				<select name="arc_ext">
-				<option value="tar" selected>tar</option>
+				<option value="tar" selected="selected">tar</option>
+<?php
+			if (!$options['disable_archive_compression']) {
+?>
 				<option value="tar.gz">tar.gz</option>
 				<option value="tar.bz">tar.bz</option>
+<?php
+			}
+?>
 				</select>
 			</td>
 			<td><input type="submit" value="Pack" /></td>
@@ -82,12 +88,10 @@ function pack_go() {
 			printf(lang(199),$arc_name);
 			echo "<br />";
 			$stmp = strtolower ( $arc_name );
-			if (strrchr ( $stmp, "tar.gz" ) + 5 == strlen ( $stmp )) {
-				$arc_method = "Tar.gz";
-			} elseif (strrchr ( $stmp, "tar.bz2" ) + 6 == strlen ( $stmp )) {
-				$arc_method = "Tar.bz2";
-			} else {
-				$arc_method = "Tar";
+			$arc_method = "Tar";
+			if (!$options['disable_archive_compression']) {
+				if (strrchr ( $stmp, "tar.gz" ) + 5 == strlen ( $stmp )) { $arc_method = "Tar.gz"; }
+				elseif (strrchr ( $stmp, "tar.bz2" ) + 6 == strlen ( $stmp )) { $arc_method = "Tar.bz2"; }
 			}
 			unset ( $stmp );
 			$time = explode ( " ", microtime () );

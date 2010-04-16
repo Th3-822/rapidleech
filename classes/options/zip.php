@@ -1,8 +1,8 @@
 <?php
 function zip() {
-	global $list;
+	global $list, $options;
 ?>
-<form name="ziplist" method="post"><input type="hidden" name="act" value="zip_go" />
+<form name="ziplist" method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act" value="zip_go" />
 	<table cellspacing="5">
 		<tr>
 			<td align="center"><strong>Adding files to a ZIP archive</strong></td>
@@ -14,7 +14,7 @@ function zip() {
 						<td>Archive Name:&nbsp;<input type="text" name="archive" size="25" value=".zip" /></td>
 					</tr>
 					<tr>
-						<td><input type="checkbox" name="no_compression">&nbsp;Do not use compression</td>
+						<td><input type="checkbox" name="no_compression"<?php echo ($options['disable_archive_compression'] ? ' disabled="disabled"' : ''); ?> />&nbsp;Do not use compression</td>
 					</tr>
 				</table>
 				<table>
@@ -34,6 +34,7 @@ function zip() {
 		echo ($i == count ( $_GET ["files"] ) - 1) ? "." : ",&nbsp;";
 	}
 ?>
+<br /><br />
 </form>
 <?php
 }
@@ -55,7 +56,7 @@ function zip_go() {
 	}
 	require_once (CLASS_DIR . "pclzip.php");
 	$archive = new PclZip ( $_POST ["archive"] );
-	$no_compression = isset($_POST["no_compression"]);
+	$no_compression = ($options['disable_archive_compression'] || isset($_POST["no_compression"]));
 	if (file_exists ( $_POST ["archive"] )) {
 		if ($no_compression) { $v_list = $archive->add ( $add_files, PCLZIP_OPT_REMOVE_ALL_PATH, PCLZIP_OPT_NO_COMPRESSION); }
 		else { $v_list = $archive->add ( $add_files, PCLZIP_OPT_REMOVE_ALL_PATH); }

@@ -14,7 +14,7 @@ $ftp = new ftp(FALSE, FALSE);
         $ftp->quit();
         $server = $host.':'.$port;
         $lastError = sprintf(lang(79),$server)."<br />".
-                     "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br /><br />";
+                     '<a href="javascript:history.back(-1);">'.lang(78).'</a><br /><br />';
         return FALSE;
     }
   else
@@ -23,7 +23,7 @@ $ftp = new ftp(FALSE, FALSE);
           {
               $ftp->quit();
               $lastError = sprintf(lang(79),$server)."<br />".
-                           "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br /><br />";
+                           '<a href="javascript:history.back(-1);">'.lang(78).'</a><br /><br />';
               return FALSE;
           }
         else
@@ -32,7 +32,7 @@ $ftp = new ftp(FALSE, FALSE);
                   {
                       $ftp->quit();
                       $lastError = lang(80)."<br />".
-                                   "<a href=\"javascript:history.back(-1);\">".lang(78)."</a><br /><br />";
+                                   '<a href="javascript:history.back(-1);">'.lang(78).'</a><br /><br />';
                       return FALSE;
                   }
                 else
@@ -58,6 +58,10 @@ $ftp = new ftp(FALSE, FALSE);
 							$ext = strrchr(basename($saveToFile), ".");
 							$before_ext = explode($ext, basename($saveToFile));
 							$File_Name = $before_ext[0].'_'.$options['rename_suffix'].$ext;
+							$saveToFile = dirname($saveToFile).PATH_SPLITTER.$File_Name;
+						}
+						if($options['rename_underscore']){
+							$File_Name = str_replace(' ', '_', basename($saveToFile));
 							$saveToFile = dirname($saveToFile).PATH_SPLITTER.$File_Name;
 						}
                     
@@ -100,7 +104,8 @@ $ftp = new ftp(FALSE, FALSE);
 </table>
 <br />
 <div id="resume" align="center" style="FONT-FAMILY: Tahoma; FONT-SIZE: 11px;"></div>
-<script type="text/javascript" language="javascript">
+<script type="text/javascript">
+/* <![CDATA[ */
 function pr(percent, received, speed){
 	document.getElementById("received").innerHTML = '<b>' + received + '</b>';
 	document.getElementById("percent").innerHTML = '<b>' + percent + '%</b>';
@@ -114,6 +119,7 @@ function pr(percent, received, speed){
 	document.getElementById("mailPart." + field).innerHTML = str;
 	return true;
 	}
+/* ]]> */
 </script>
 <br />
 <?php
@@ -162,7 +168,7 @@ function updateFtpProgress($bytesReceived) {
                 $percent = round($bytesReceived / $FtpBytesTotal * 100, 2);
             }
           $FtpLast = $bytesReceived;
-          echo "<script>pr(".$percent.", '".bytesToKbOrMbOrGb($bytesReceived)."', ".$speed.")</script>\r\n";
+          echo '<script type="text/javascript">pr('.$percent.", '".bytesToKbOrMbOrGb($bytesReceived)."', ".$speed.")</script>\r\n";
       }
 }
 
@@ -308,7 +314,7 @@ $ip=@gethostbyname($host);
         if(!$ip) $ip=$host;
         if(!$dns) $dns=$host;
 if(ip2long($ip) === -1) {
-$this->SendMSG("Wrong host name/address \"".$host."\"");
+$this->SendMSG('Wrong host name/address "'.$host.'"');
 return FALSE;
 }
         $this->_host=$ip;
@@ -316,7 +322,7 @@ return FALSE;
         $this->_port=$port;
         $this->_dataport=$port-1;
 }
-$this->SendMSG("Host \"".$this->_fullhost."(".$this->_host."):".$this->_port."\"");
+$this->SendMSG('Host "'.$this->_fullhost."(".$this->_host."):".$this->_port.'"');
 if($reconnect){
 if($this->_connected) {
 $this->SendMSG("Reconnecting");
@@ -345,10 +351,10 @@ return TRUE;
 function connect() {
     $this->SendMsg('Local OS : '.$this->OS_FullName[$this->OS_local]);
 if(!($this->_ftp_control_sock = $this->_connect($this->_host, $this->_port))) {
-$this->SendMSG("Error : Cannot connect to remote host \"".$this->_fullhost." :".$this->_port."\"");
+$this->SendMSG('Error : Cannot connect to remote host "'.$this->_fullhost." :".$this->_port.'"');
 return FALSE;
 }
-$this->SendMSG("Connected to remote host \"".$this->_fullhost.":".$this->_port."\". Waiting for greeting.");
+$this->SendMSG('Connected to remote host "'.$this->_fullhost.":".$this->_port.'". Waiting for greeting.');
 do {
 if(!$this->_readmsg()) return FALSE;
 if(!$this->_checkCode()) return FALSE;
@@ -507,7 +513,7 @@ if(is_null($localfile)) $localfile=$remotefile;
 if (@file_exists($localfile)) $this->SendMSG("Warning: local file will be overwritten");
 $fp = @fopen($localfile, "wb");
 if (!$fp) {
-$this->PushError("get","can't open local file", "Cannot create \"".$localfile."\"");
+$this->PushError("get","can't open local file", 'Cannot create "'.$localfile.'"');
 return FALSE;
 }
 $pi=pathinfo($remotefile);
@@ -560,12 +566,12 @@ return $out;
 function put($localfile, $remotefile=NULL) {
 if(is_null($remotefile)) $remotefile=$localfile;
 if (!@file_exists($localfile)) {
-$this->PushError("put","can't open local file", "No such file or directory \"".$localfile."\"");
+$this->PushError("put","can't open local file", 'No such file or directory "'.$localfile.'"');
 return FALSE;
 }
 $fp = @fopen($localfile, "rb");
 if (!$fp) {
-$this->PushError("put","can't open local file", "Cannot read file \"".$localfile."\"");
+$this->PushError("put","can't open local file", 'Cannot read file "'.$localfile.'"');
 return FALSE;
 }
 $pi=pathinfo($localfile);

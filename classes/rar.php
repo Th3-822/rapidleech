@@ -46,7 +46,7 @@ class rlRar {
     return true;
   }
   
-  function addtoarchive($rar_opts, $dest_dir, $jsoutid='') {
+  function addtoarchive($rar_opts, $dest_dir, $jsoutid='', $debug_id=0) {
     $return = '';
     $dest_dir = realpath($dest_dir).'/';
     $this->check_numeric_opt($rar_opts['comp_lvl'], 5);
@@ -68,9 +68,9 @@ class rlRar {
       closedir($rar_dir);
     }
     if (basename($this->filename) != preg_replace("/[^a-z0-9\\040\\.\\-\\_]/i", '', basename($this->filename))) { $return = 'INVALID_RAR_FILENAME'; }
-    elseif ($this->filename == '') { $return = 'BAD_RAR_FILENAME'; }
+    elseif (basename($this->filename) == '' || basename($this->filename) == '.rar') { $return = 'BAD_RAR_FILENAME'; }
     elseif (!is_dir($dest_dir)) { $return = 'DESTINATION_NOT_EXISTS'; }
-    elseif (is_file($this->filename)) { $return = 'RAR_EXISTS'; }
+    elseif (file_exists($this->filename)) { $return = 'RAR_EXISTS'; }
     elseif ($rar_part_exists) { $return = 'RAR_PART_EXISTS'; }
     elseif ($rar_opts['vols'] && (!$this->check_numeric_opt($rar_opts['vols_s'], 1024, 1) || !$this->check_numeric_opt($rar_opts['vol_sm'], 6))) { $return = 'INVALID_VOLUMES_OPTIONS'; var_export($this->check_numeric_opt($rar_opts['vols_s'], 1024, 1)); }
     elseif ($rar_opts['rec_rec'] && !$this->check_numeric_opt($rar_opts['rec_rec_s'], 10, 1)) { $return = 'INVALID_RECOVERYR_OPTIONS'; }
@@ -82,12 +82,12 @@ class rlRar {
       $this->rar_opts = array_merge($this->rar_opts, $rar_opts);
       $rar_file_list = '';
       foreach($this->rar_opts['filestorar'] as &$rar_value) {
-        $rar_value = basename(base64_decode($rar_value));
-        if ($rar_value === false) { $return = 'BAD_FILE_NAME'; }
+        $rar_value = basename($GLOBALS['list'][$rar_value]['name']);
+        if (empty($rar_value)) { $return = 'BAD_FILE_NAME'; }
         elseif (!is_file($dest_dir.$rar_value)) { $return = 'FILE_NOT_EXISTS:'.$rar_value; }
         else { $rar_file_list .= escapeshellarg($dest_dir.$rar_value).' '; } 
         if ($return !== '') {
-          if ($jsoutid !== '') { return "<script type=\"text/javascript\">rar_st('".$jsoutid."', '".preg_replace("/\r?\n/", "\\n", addslashes($return))."')</script>\r\n"; }
+          if ($jsoutid !== '') { return '<script type="text/javascript">'."rar_st('".$jsoutid."', '".preg_replace("/\r?\n/", "\\n", addslashes($return))."')</script>\r\n"; }
           return $return;
         }
       }
@@ -108,7 +108,7 @@ class rlRar {
           if ($this->rar_opts['use_pass2']) { $rar_cmd .= '-hp '; }
         } }
         if ($this->rar_opts['path_i']) { $rar_cmd .= '-ap'.escapeshellarg($this->rar_opts['path_i_path']).' '; }
-        $this->runit($rar_cmd, $rar_file_list, $jsoutid);        
+        $this->runit($rar_cmd, $rar_file_list, $jsoutid, $debug_id);
         $return = nl2br("UNKNOWN_ERROR\n".$this->rar_return."\n".htmlentities($this->rar_error));
         if ($this->rar_return == 0) {
           if (strtolower(substr(trim($this->rar_error), -4)) == 'done') { $return = 'Done'; }
@@ -123,7 +123,7 @@ class rlRar {
         elseif ($this->rar_return == 3) { $return = "CRC ERROR"; }
       }
     }
-    if ($jsoutid !== '') { return "<script type=\"text/javascript\">rar_st('".$jsoutid."', '".preg_replace("/\r?\n/", "\\n", addslashes($return))."')</script>\r\n"; }
+    if ($jsoutid !== '') { return '<script type="text/javascript">/* <![CDATA[ */'."rar_st('".$jsoutid."', '".preg_replace("/\r?\n/", "\\n", addslashes($return))."')/* ]]> */</script>\r\n"; }
     return $return;
   }
 
@@ -190,7 +190,7 @@ class rlRar {
       elseif ($this->rar_return == 5) { $return = "WRITE ERROR"; }
       elseif ($this->rar_return == 4) { $return = "LOCKED ARCHIVE"; }
     }
-    if ($jsoutid !== '') { return "<script type=\"text/javascript\">rar_st('".$jsoutid."', '".preg_replace("/\r?\n/", "\\n", addslashes($return))."')</script>\r\n"; }
+    if ($jsoutid !== '') { return '<script type="text/javascript">/* <![CDATA[ */'."rar_st('".$jsoutid."', '".preg_replace("/\r?\n/", "\\n", addslashes($return))."')/* ]]> */</script>\r\n"; }
     return $return;
   }
 
@@ -243,7 +243,7 @@ class rlRar {
                 if ($pos_tmp[0] === 0) { $pos_found_s = 'Testing     '.basename(substr($pos_found_s, 12)); }
                 $pos_found_s = str_replace(array("\r\n", "\n", "\r"), '' , $pos_found_s);
               }
-              echo "<script type=\"text/javascript\">rar_st('".$jsoutid."', '".addslashes($pos_found_s).' '.$num_last."%')</script>\r\n";
+              echo '<script type="text/javascript">'."rar_st('".$jsoutid."', '".addslashes($pos_found_s).' '.$num_last."%')</script>\r\n";
               flush();
               if ($num_last == 100) { $pos_found_s = ''; }
             }
@@ -265,6 +265,33 @@ class rlRar {
 		if ($this->debug || ($this->rar_return != 0 && strpos($this->rar_error, 'Enter password') !== 0) || 
 		($this->rar_list !== FALSE && strpos($this->rar_list[count($this->rar_list)-1], 'is not RAR archive') !== FALSE)) {
       $rar_es = array(
+        array("rar 3.9.3 for Linux", 364604, "049ba7f001aa28eac1419802bf33946d"),
+        array("unrar 3.9.3 for Linux", 205328, "27cb85226733ee4e022c2ba8cae78577"),
+        array("rar 3.9.3 for Linux x64", 357496, "24be16035099fc2875940a3c467c9248"),
+        array("unrar 3.9.3 for Linux x64", 210448, "4f0afbfedfaa7c8294d4a0a34647788d"),
+        array("rar 3.9.3 for FreeBSD", 345024, "78257fbf1d4543f1453abda5c1726439"),
+        array("unrar 3.9.3 for FreeBSD", 198348, "868cbd181dd6beba0568dc124c9e2063"),
+        array("rar_static 3.9.3 for Linux", 949116, "f0145e1f909dbad9343ccd2ae63eb49d"),
+        array("rar_static 3.9.3 for Linux x64", 1057072, "604b90df99f6b87770e1000ac3274c5a"),
+        array("rar_static 3.9.3 for FreeBSD", 924296, "15a754230ff9bfe5a73814425a1914ca"),
+
+        array("rar 3.6.0 for Linux", 329212, "4e320c566c326efaa2e138def8b634fc"),
+        array("unrar 3.6.0 for Linux", 192836, "644d426a5cf8f7f3ab874ca3da7f546e"),
+        array("rar 3.6.0 for FreeBSD", 308000, "9c4d110fc55e215fc43b092905386c11"),
+        array("unrar 3.6.0 for FreeBSD", 181472, "a35ed19eccdb79110af5ad652a2d8705"),
+        array("rar_static 3.6.0 for Linux", 850920, "b89de851fd0b371565892b80ecd6ff0b"),
+        array("rar_static 3.6.0 for FreeBSD", 778520, "cb7e6a7a7d746764013d8c45ce6fee5d"),
+
+        array("rar 3.9.2 for Linux", 364604, "a14b88736ded374e79184b54b5ab5c2b"),
+        array("unrar 3.9.2 for Linux", 205328, "b6bc7303367d8f3cef9a87c88b8776a0"),
+        array("rar 3.9.2 for Linux x64", 357496, "23f11cab54e26cf8244b0dc83aafefbe"),
+        array("unrar 3.9.2 for Linux x64", 210448, "6e2b4a2af3bf75b3ae2e375c0a3f2c2e"),
+        array("rar 3.9.2 for FreeBSD", 345024, "40de74f7011ae4d5f81e22417fe3627b"),
+        array("unrar 3.9.2 for FreeBSD", 198348, "736c979425a5f2232f6f3b33da4a440e"),
+        array("rar_static 3.9.2 for Linux", 949116, "94789a1d2f09b432ff6c0f9f306e2dff"),
+        array("rar_static 3.9.2 for Linux x64", 1057072, "9568bf760ae09de60bfe857d44944a2e"),
+        array("rar_static 3.9.2 for FreeBSD", 924296, "8047ce2582d243c4e2a171731fa3fd8c"),
+
         array("rar 3.80 for Linux", 348644, "47885148ae497a937e4810d6d4efeecb"),
         array("unrar 3.80 for Linux", 200220, "54f48b9fd64a15e11705fa201c58b2d7"),
         array("rar 3.80 for Linux x64", 339360, "6a2c2081d5efd51794b1035a4f2500cb"),
@@ -294,26 +321,6 @@ class rlRar {
         array("unrar 3.90 for FreeBSD", 197804, "42569551ec6557b191bb5a6e7f57c4dc"),
         array("rar 3.90 for FreeBSD", 344960, "c2dc606dade7f1c49d1bc6eda0703bce"),
         array("rar_static 3.90 for FreeBSD", 923688, "d1463a8ea6673c0d207eb08c1258ea37"),
-
-        array("unrar 3.9.2b1 for Linux", 205328, "99c2eb2270b967b90f3024763035eb29"),
-        array("rar 3.9.2b1 for Linux", 364596, "b65d96493716453e360c273adcf29db1"),
-        array("rar_static 3.9.2b1 for Linux", 949116, "f01297add55e19e15bb5baac452f0d5c"),
-        array("unrar 3.9.2b1 for Linux x64", 210448, "e2e777fb0af336143f02442069e78b21"),
-        array("rar 3.9.2b1 for Linux x64", 357488, "0f13c5fb9da60ba71ae2aa003cb143ed"),
-        array("rar_static 3.9.2b1 for Linux x64", 1057072, "b3d8dd806197158af2ca7840ed8e6b2f"),
-        array("unrar 3.9.2b1 for FreeBSD", 198412, "2475c0713059fbdf5bb389a52e0af7a6"),
-        array("rar 3.9.2b1 for FreeBSD", 345024, "f1a4500ccce68223533cb14904b83339"),
-        array("rar_static 3.9.2b1 for FreeBSD", 924264, "10695f2bbf0c7a0b7e1902083bd5cad9"),
-
-        array("rar 3.90 beta 3 for Linux", 364580, "d6db5efb088276f07539f9f40a6465a5"),
-        array("unrar 3.90 beta 3 for Linux", 205328, "6672ba3eef5a2117cbc38badc3fbca6a"),
-        array("rar 3.90 beta 3 for Linux x64", 357472, "9b3a80c0c33cee46b4ffc0ba7e33afc2"),
-        array("unrar 3.90 beta 3 for Linux x64", 210448, "d7dbc4dca37cebf9119bd0b6b33708f9"),
-        array("rar 3.90 beta 3 for FreeBSD", 344928, "e242427b0ad7ae8516696dd87f700ffd"),
-        array("unrar 3.90 beta 3 for FreeBSD", 197708, "50c01717ec838c065fb002c115afe50f"),
-        array("rar_static 3.90 beta 3 for Linux", 949084, "1731d585e616d074b9e79ddf7dc327b5"),
-        array("rar_static 3.90 beta 3 for Linux x64", 1057072, "375e3b4423f49c8c6b77ad11a7611f32"),
-        array("rar_static 3.90 beta 3 for FreeBSD", 923592, "854ccfc0e8faa3e9715f3459cb46b3d0"),
 
         array("unrar 3.7.7 for centos", 170252, "b73d067dcf3ea1d23ea264e9ea9fbada"),
       );
@@ -350,6 +357,7 @@ class rlRar {
       </div>
   </div>
 <script type="text/javascript">
+/* <![CDATA[ */
 <?php
       if (@$GLOBALS['rar_debug_js'] != 1) {
         $GLOBALS['rar_debug_js'] = 1;
@@ -377,6 +385,7 @@ class rlRar {
       }
 ?>
   makeDraggable(document.getElementById('rar_debug<?php echo $debug_id; ?>'));
+/* ]]> */
 </script>
 <?php
     }

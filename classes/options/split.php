@@ -35,24 +35,24 @@ function rl_split() {
 ?>
 					<tr>
 						<td><input type="checkbox" name="del_ok"
-							<?php echo $options['disable_deleting'] ? 'disabled' : 'checked'; ?> />&nbsp;<?php echo lang(203); ?></td>
+							<?php echo $options['disable_deleting'] ? 'disabled="disabled"' : 'checked="checked"'; ?> />&nbsp;<?php echo lang(203); ?></td>
 					</tr>
 					<tr>
-						<td>CRC32 generation mode:<br />
+						<td align="left">CRC32 generation mode:<br />
 <?php
 		if (function_exists ( 'hash_file' )) {
 ?><input type="radio" name="crc_mode[<?php echo $i; ?>]"
-							value="hash_file" checked />&nbsp;Use hash_file (Recommended)<br />
+							value="hash_file" checked="checked" />&nbsp;Use hash_file (Recommended)<br />
 <?php
 		}
 ?>
 						<input type="radio"
-							name="crc_mode[<?php echo $i; ?>]" value="file_read" />&nbsp;Read	file to memory<br />
+							name="crc_mode[<?php echo $i; ?>]" value="file_read" />&nbsp;Read file to memory<br />
 						<input type="radio" name="crc_mode[<?php echo $i; ?>]"
 							value="fake"
 <?php
 			if (! function_exists ( 'hash_file' )) {
-				echo 'checked';
+				echo ' checked="checked"';
 			}
 ?> />&nbsp;Fake
 						crc</td>

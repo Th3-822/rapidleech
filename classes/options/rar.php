@@ -6,7 +6,7 @@ function rar() {
   else {
 ?>
   <form name="rar_files" method="post" action="<?php echo $PHP_SELF; ?>">
-    <table align="center">
+    <table align="center" style="text-align: left;">
       <tr>
         <td>
           <table>
@@ -22,7 +22,7 @@ function rar() {
             <tr>
               <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
                 <input type="hidden" name="files[<?php echo $i; ?>]" value="<?php echo $_GET["files"][$i]; ?>" />
-                <input type="hidden" name="rar_opts[filestorar][<?php echo $i; ?>]" value="<?php echo base64_encode(basename($file["name"])); ?>" />
+                <input type="hidden" name="rar_opts[filestorar][<?php echo $i; ?>]" value="<?php echo $_GET["files"][$i]; ?>" />
                 <?php echo basename($file["name"]); ?>
               </td>
               <td style="border-right:1px solid #666; padding:2px; background-color:#001825;">
@@ -39,7 +39,7 @@ function rar() {
             </tr>
             <tr>
               <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:6px; background-color:#001825;">
-                <input onKeyUp="javascript:this.value=this.value.replace(/[^a-z0-9\ \.\-\_]/gi,'_');" type="text" size="60" name="rar_opts[rarfilename]" value="<?php echo count($_GET["files"]) == 1 ? preg_replace("/[^a-z0-9\\040\\.\\-\\_]/i", '_', basename($file["name"])) : '' ; ?>" />.rar
+                <input onkeyup="javascript:this.value=this.value.replace(/[^a-z0-9\ \.\-\_]/gi,'_');" type="text" size="60" name="rar_opts[rarfilename]" value="<?php echo count($_GET["files"]) == 1 ? preg_replace("/[^a-z0-9\\040\\.\\-\\_]/i", '_', basename($file["name"])) : '' ; ?>" />.rar
               </td>
             </tr>
             <tr>
@@ -51,23 +51,29 @@ function rar() {
               <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
                 <?php echo lang(347); ?>
                 <select name="rar_opts[comp_lvl]">
-                	<option value="0" selected><?php echo lang(348); ?></option>
-                	<option value="1"><?php echo lang(349); ?></option>
-                	<option value="2"><?php echo lang(350); ?></option>
-                	<option value="3"><?php echo lang(351); ?></option>
-                	<option value="4"><?php echo lang(352); ?></option>
-                	<option value="5"><?php echo lang(353); ?></option>
+                  <option value="0" selected="selected"><?php echo lang(348); ?></option>
+<?php
+      if (!$options['disable_archive_compression']) {
+?>
+                  <option value="1"><?php echo lang(349); ?></option>
+                  <option value="2"><?php echo lang(350); ?></option>
+                  <option value="3"><?php echo lang(351); ?></option>
+                  <option value="4"><?php echo lang(352); ?></option>
+                  <option value="5"><?php echo lang(353); ?></option>
+<?php
+      }
+?>
                 </select>
               </td>
               <td style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
                 <input type="checkbox" name="rar_opts[vols]" value="1" onclick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_vols').style.display=displ;var fc=document.getElementsByName('rar_opts[vols_s]')[0]; fc.focus(); fc.selectionStart = 0; fc.selectionEnd = fc.value.length;" /><?php echo lang(354); ?>
                 <span id="rar_opts_vols" style="display:none">
                   <br />Size: <input type="text" size="3" name="rar_opts[vols_s]" value="1" />&nbsp;
-                  <select name="rar_opts[vols_sm]" >
+                  <select name="rar_opts[vols_sm]">
                   	<option value="0">bytes</option>
                   	<option value="1">kilobytes(*1024)</option>
                   	<option value="2">Kilobytes(*1000)</option>
-                  	<option value="3" selected>megabytes(*1024)</option>
+                  	<option value="3" selected="selected">megabytes(*1024)</option>
                   	<option value="4">Megabytes(*1000)</option>
                   	<option value="5">gigabytes(*1024)</option>
                   	<option value="6">Gigabytes(*1000)</option>
@@ -87,7 +93,7 @@ function rar() {
               <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
                 <input type="checkbox" name="rar_opts[rec_rec]" value="1" onclick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_rec_rec').style.display=displ; var fc=document.getElementsByName('rar_opts[rec_rec_s]')[0]; fc.focus(); fc.selectionStart = 0; fc.selectionEnd = fc.value.length;" /><?php echo lang(357); ?>
                 <span id="rar_opts_rec_rec" style="display:none">
-                  <br />From 1 to 10: <input type="text" size="3" name="rar_opts[rec_rec_s]" value="1">%
+                  <br />From 1 to 10: <input type="text" size="3" name="rar_opts[rec_rec_s]" value="1" />%
                 </span>
               </td>
               <td style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
@@ -107,6 +113,14 @@ function rar() {
               <td style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
                 <input type="checkbox" name="rar_opts[path_i]" value="1" onclick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_path_i').style.display=displ;document.getElementsByName('rar_opts[path_i_path]')[0].focus();" /><?php echo lang(361); ?>
                 <span id="rar_opts_path_i" style="display:none;"><br /><input type="text" size="15" name="rar_opts[path_i_path]" value="" /></span>
+              </td>
+            </tr>
+            <tr>
+              <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
+                <input type="checkbox" name="rar_opts[separated]" value="1" /><?php echo lang(387); ?>
+              </td>
+              <td style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
+                &nbsp;
               </td>
             </tr>
             <tr>
@@ -137,33 +151,44 @@ function rar() {
 
 
 
-
-
 function rar_go() {
-  global $PHP_SELF;
+  global $PHP_SELF, $list;
   require_once(CLASS_DIR."rar.php");
 ?>
-  <table align="center">
+  <table align="center" style="text-align: left;">
     <tr>
       <td>
-        <table>
 <?php
-  $_GET['rar_opts']['rarfilename'] = trim(basename(stripslashes($_GET['rar_opts']['rarfilename'])));
-  if (substr(strtolower($_GET['rar_opts']['rarfilename']), -4) != '.rar') { $_GET['rar_opts']['rarfilename'] .= '.rar'; }
+  if ($_GET['rar_opts']['separated']) {
+    foreach ($_GET['rar_opts']['filestorar'] as $k => $v) { if (empty($list[$v])) { unset($_GET['rar_opts']['filestorar'][$k]); } }
+    $am = count($_GET['rar_opts']['filestorar']);
+  }
+  else {
+    $_GET['rar_opts']['rarfilename'] = trim(basename(stripslashes($_GET['rar_opts']['rarfilename'])));
+    if (substr(strtolower($_GET['rar_opts']['rarfilename']), -4) != '.rar') { $_GET['rar_opts']['rarfilename'] .= '.rar'; }
+    $am = 1;
+  }
+
+  for($i = 0; $i < $am; $i++) {
+    if ($_GET['rar_opts']['separated']) { $name = htmlentities(basename($list[$_GET['rar_opts']['filestorar'][$i]]['name']).'.rar'); }
 ?>
+        <table align="center">
           <tr>
             <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:6px; background-color:#001825;">
-              <?php printf(lang(363),$_GET['rar_opts']['rarfilename']); ?>
+              <?php printf(lang(363), ($_GET['rar_opts']['separated'] ? $name : $_GET['rar_opts']['rarfilename'])); ?>
             </td>
           </tr>
           <tr>
             <td style="border-left:1px solid #666; padding:2px; background-color:#001825;"><?php echo lang(374); ?></td>
-            <td id="rar_status" style="border-right:1px solid #666; padding:2px; background-color:#001825;"><?php echo lang(364); ?></td>
+            <td id="rar_status<?php echo $i; ?>" style="border-right:1px solid #666; padding:2px; background-color:#001825;"><?php echo lang(364); ?></td>
           </tr>
           <tr>
             <td colspan="2" style="border-top:1px solid #666;">&nbsp;</td>
           </tr>
         </table>
+<?php
+  }
+?>
       </td>
     </tr>
     <tr>
@@ -177,72 +202,82 @@ function rar_go() {
 
 
 
-
 function rar_go_go() {
   global $options, $list;
 ?>
 <script type="text/javascript">
+/* <![CDATA[ */
 function rar_st(elementid, st){
   document.getElementById(elementid).innerHTML = st;
   return true;
 }
+/* ]]> */
 </script>
-<script type="text/javascript">switchCell(3);</script>
 <?php
   flush();
   require_once(CLASS_DIR."rar.php");
-  $rar = new rlRar(stripslashes($_GET['rar_opts']['rarfilename']), $options['check_these_before_unzipping'] ? $options['forbidden_filetypes'] : array('.xxx'));
-  if ($rar->rar_return !== 'rar') {
+
+  if ($options['disable_deleting']) { $_GET['rar_opts']['delete'] = 0; }
+  if ($options['disable_archive_compression']) { $_GET['rar_opts']['comp_lvl'] = 0; }
+
+  if ($_GET['rar_opts']['separated']) { $am = count($_GET['rar_opts']['filestorar']); }
+  else { $am = 1; }
+  for($i = 0; $i < $am; $i++) {
+    $name = ($_GET['rar_opts']['separated']) ? basename($list[$_GET['rar_opts']['filestorar'][$i]]['name']).'.rar' : $_GET['rar_opts']['rarfilename'];
+    $rar = new rlRar($name, $options['check_these_before_unzipping'] ? $options['forbidden_filetypes'] : array('.xxx'));
+    if ($rar->rar_return !== 'rar') {
 ?>
-<script type="text/javascript">rar_st('rar_status', '<?php echo lang(343); ?>');</script>
+<script type="text/javascript">rar_st('rar_status<?php echo $i; ?>', '<?php echo lang(343); ?>');</script>
 <?php 
-  }
-  else {
-    if ($options['disable_deleting']) { $_GET['rar_opts']['delete'] = 0; }
-    $rar_result = $rar->addtoarchive($_GET['rar_opts'], $options['download_dir'], 'rar_status');
-    echo $rar_result;
-    if (strpos($rar_result, ", 'Done')") !== false) {
-      _create_list();
-      clearstatcache();
-      if ($_GET['rar_opts']['delete'] == true) {
-        foreach ($_GET['rar_opts']['filestorar'] as $rar_tounlist) {
-          $rar_tounlist = basename(base64_decode($rar_tounlist));
-          if ($rar_tounlist === false) { continue; }
-          $rar_tounlist = realpath($options['download_dir']).'/'.$rar_tounlist;
-          if (is_file($rar_tounlist)) { continue; }
-          foreach ($list as $list_key => $list_item) {
-            if ($list_item["name"] === $rar_tounlist) { unset($list[$list_key]); }
+    }
+    else {
+      $rar_opts_tmp = $_GET['rar_opts'];
+      if ($_GET['rar_opts']['separated']) { $rar_opts_tmp['filestorar'] = array($_GET['rar_opts']['filestorar'][$i]); }
+      $rar_result = $rar->addtoarchive($rar_opts_tmp, $options['download_dir'], 'rar_status'.$i, $i);
+      echo $rar_result;
+      if (strpos($rar_result, ", 'Done')") !== false) {
+        _create_list();
+        clearstatcache();
+        if ($_GET['rar_opts']['delete'] == true) {
+          foreach ($_GET['rar_opts']['filestorar'] as $rar_tounlist) {
+            $rar_tounlist = basename($list[$rar_tounlist]['name']);
+            if (empty($rar_tounlist)) { continue; }
+            $rar_tounlist = realpath($options['download_dir']).'/'.$rar_tounlist;
+            if (is_file($rar_tounlist)) { continue; }
+            foreach ($list as $list_key => $list_item) {
+              if ($list_item['name'] === $rar_tounlist) { unset($list[$list_key]); }
+            }
           }
         }
-      }
-      $rar_tolist = realpath($options['download_dir']).'/'.basename($rar->filename);
-      if ($_GET['rar_opts']['vols'] && !is_file($rar_tolist)) {
-        if (substr(strtolower($rar_tolist), -4) == '.rar') { $rar_tolist = substr($rar_tolist, 0, -4); }
-        $tmp = basename(strtolower($rar_tolist)).'.part';
-        $rar_dir = opendir(realpath($options['download_dir']).'/');
-        while (false !== ($rar_f_dd = readdir($rar_dir))) {
-          $rar_f_dd_ = basename(strtolower($rar_f_dd));
-          if ($tmp == substr($rar_f_dd_, 0, strlen($tmp)) && is_numeric(substr($rar_f_dd_, strlen($tmp), -4))) {
-            $rar_f_dd = realpath($options['download_dir']).'/'.basename($rar_f_dd);
-            $time = filemtime($rar_f_dd); while (isset($list[$time])) { $time++; }
-            $list[$time] = array("name" => $rar_f_dd, "size" => bytesToKbOrMbOrGb(filesize($rar_f_dd)), "date" => $time);
+        $rar_tolist = realpath($options['download_dir']).'/'.basename($rar->filename);
+        if ($_GET['rar_opts']['vols'] && !is_file($rar_tolist)) {
+          if (substr(strtolower($rar_tolist), -4) == '.rar') { $rar_tolist = substr($rar_tolist, 0, -4); }
+          $tmp = basename(strtolower($rar_tolist)).'.part';
+          $rar_dir = opendir(realpath($options['download_dir']).'/');
+          while (false !== ($rar_f_dd = readdir($rar_dir))) {
+            $rar_f_dd_ = basename(strtolower($rar_f_dd));
+            if ($tmp == substr($rar_f_dd_, 0, strlen($tmp)) && is_numeric(substr($rar_f_dd_, strlen($tmp), -4))) {
+              $rar_f_dd = realpath($options['download_dir']).'/'.basename($rar_f_dd);
+              $time = filemtime($rar_f_dd); while (isset($list[$time])) { $time++; }
+              $list[$time] = array("name" => $rar_f_dd, "size" => bytesToKbOrMbOrGb(filesize($rar_f_dd)), "date" => $time);
+            }
           }
+          closedir($rar_dir);
         }
-        closedir($rar_dir);
-      }
-      elseif (is_file($rar_tolist)) {
-        $time = filemtime($rar_tolist); while (isset($list[$time])) { $time++; }
-        $list[$time] = array("name" => $rar_tolist, "size" => bytesToKbOrMbOrGb(filesize($rar_tolist)), "date" => $time);
-      }
-      if (!updateListInFile($list)) {
+        elseif (is_file($rar_tolist)) {
+          $time = filemtime($rar_tolist); while (isset($list[$time])) { $time++; }
+          $list[$time] = array("name" => $rar_tolist, "size" => bytesToKbOrMbOrGb(filesize($rar_tolist)), "date" => $time);
+        }
+        if (!updateListInFile($list)) {
 ?>
 <script type="text/javascript">var tmp = document.getElementById('rar_finished'); tmp.innerHTML = "<?php echo lang(9); ?><br /><br />" + tmp.innerHTML</script>;
 <?php
+        }
       }
     }
-?>
-<script type="text/javascript">document.getElementById('rar_finished').style.display = 'inline';</script>
-<?php
   }
+?>
+<script type="text/javascript">document.getElementById('rar_finished').style.display = '';</script>
+<?php
 }
 ?>

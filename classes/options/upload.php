@@ -11,7 +11,7 @@ function upload() {
 		}
 	}
 	if (empty ( $upload_services )) {
-		echo "<span class='warning'><b>".lang(48)."</b></span>";
+		echo '<span class="warning"><b>'.lang(48)."</b></span>";
 	} else {
 		sort ( $upload_services );
 		reset ( $upload_services );
@@ -21,6 +21,7 @@ function upload() {
 		}
 ?>
 <script type="text/javascript">
+/* <![CDATA[ */
 	var upservice = new Array();
 
 	function fill_option(id)
@@ -43,6 +44,7 @@ function upload() {
 			win.focus();
 			return true;
 		}
+/* ]]> */
 </script>
 <table align="center" border="0">
 <?php
@@ -51,30 +53,26 @@ function upload() {
 					$tid = md5 ( time () . "_file" . $_GET ["files"] [$i] );
 ?>
 	<tr>
-		<td><?php echo "<b>" . basename ( $file ["name"] ) . "</b>  , " . $file ["size"]; ?></td>
-		<td valign="middle">
-			<form action='upload.php' method='get' target='<?php echo $tid?>' onSubmit="return openwinup('<?php echo $tid?>');">
-			<select name='uploaded' id='d_<?php echo $tid;?>'></select><script type='text/javascript'>fill_option('d_<?php echo $tid;?>');</script>
-			<input type="hidden" name="filename" value='<?php echo base64_encode ( $file ["name"] ); ?>' />
-			<input type='submit' value='Upload' />
+		<td valign="top"><?php echo "<b>" . basename ( $file ["name"] ) . "</b>  , " . $file ["size"]; ?></td>
+		<td valign="top" align="left">
+			<form action="upload.php" method="get" target="<?php echo $tid?>" onsubmit="return openwinup('<?php echo $tid?>');" style="padding-bottom: 6px;">
+			<select name="uploaded" id="d_<?php echo $tid;?>"></select><script type="text/javascript">fill_option('d_<?php echo $tid;?>');</script>
+			<input type="hidden" name="filename" value="<?php echo base64_encode ( $file ["name"] ); ?>" />
+			<input type="submit" value="Upload" />
+			<br /><input type="checkbox" name="useuproxy" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('uproxyconfig<?php echo $i; ?>').style.display=displ;" />&nbsp;<?php echo lang(245); ?>
+				<br /><table style="display:none;" width="150" border="0" id="uproxyconfig<?php echo $i; ?>">
+				<tr><td><?php echo lang(246); ?>:&nbsp;</td><td><input type="text" name="uproxy" size="20" /></td></tr>
+				<tr><td><?php echo lang(247); ?>:&nbsp;</td><td><input type="text" name="uproxyuser" size="20" /></td></tr>
+				<tr><td><?php echo lang(248); ?>:&nbsp;</td><td><input type="text" name="uproxypass" size="20" /></td></tr>
+				</table>
+				</form>
 		</td>
 	</tr>
-	<tr>
-		<td colspan="2" align="center">
-			<input type="checkbox" id="useuproxy" name="useuproxy" onClick="javascript:var displ=this.checked?'':'none';document.getElementById('uproxyconfig').style.display=displ;" />&nbsp;<?php echo lang(245); ?>
-		<td>
-	</tr>
-	<tr>
-			<td colspan="2" align="center">
-				<table style="display:none;" width="150" border="0" id="uproxyconfig">
-				<tr><td><?php echo lang(246); ?>:&nbsp;</td><td><input type="text" name="uproxy" id="uproxy" size="20" />
-				<tr><td><?php echo lang(247); ?>:&nbsp;</td><td><input type="text" name="uproxyuser" id="uproxyuser" size="20" /></td></tr>
-				<tr><td><?php echo lang(248); ?>:&nbsp;</td><td><input type="text" name="uproxypass" id="uproxypass" size="20" /></td></tr>
-				</table>
-			</td>
-	</tr>
+<!--	<tr>
+			<td colspan="2" align="center">&nbsp;</td>
+	</tr>-->
 <?php } ?>
-										</form></table><br />
+</table><br />
 <?php
 	}
 }

@@ -22,6 +22,7 @@ function renderActions() {
 	if (!$options['disable_split']) $return .= '<option value="split">'.lang(290).'</option>';
 	if (!$options['disable_merge']) $return .= '<option value="merge">'.lang(291).'</option>';
 	if (!$options['disable_md5']) $return .= '<option value="md5">'.lang(292).'</option>';
+	if (!$options['disable_md5_change']) $return .= '<option value="md5_change">'.lang(383).'</option>';
 	if ((file_exists ( CLASS_DIR . "pear.php" ) || file_exists ( CLASS_DIR . "tar.php" )) && !$options['disable_tar'])
 		$return .= '<option value="pack">'.lang(293).'</option>';
 	if (file_exists ( CLASS_DIR . "pclzip.php" ) && !$options['disable_zip'])

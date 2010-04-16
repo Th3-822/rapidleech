@@ -174,7 +174,7 @@ $lang[166]	=	'Dirección de E-mail no válida';
 $lang[167]	=	'¡Por favor selecciona solamente el archivo .crc o .001!';
 $lang[168]	=	'¡Por favor selecciona el archivo .crc!';
 $lang[169]	=	'¡Por favor selecciona el archivo .crc o .001!';
-$lang[170]	=	'Realizar verificación de CRC? (recomendado)';
+$lang[170]	=	'¿Realizar verificación de CRC? (recomendado)';
 $lang[171]	=	'Modo de verificación CRC32';
 $lang[172]	=	'Usar hash_file (Recomendado)';
 $lang[173]	=	'Leer archivo a la memoria';
@@ -348,7 +348,7 @@ $lang[340]	=	'Error detectado';
 $lang[341]	=	'click aquí para expandir';
 $lang[342]	=	'Puedes arrastrar la ventana desde aquí';
 $lang[343]	=	'No se encuentra "rar"<br />Puede que necesites bajarlo y extraer "rar" al directorio "/rar/"';
-$lang[344]	=	'Ficheros que estarán dentro del archivo:';
+$lang[344]	=	'Ficheros que serán archivados:';
 $lang[345]	=	'Nombre del archivo:';
 $lang[346]	=	'Opciones:';
 $lang[347]	=	'Nivel de compresión:';
@@ -380,6 +380,16 @@ $lang[372]	=	'Descomprimir ficheros seleccionados';
 $lang[373]	=	'<b>Extrayendo ficheros desde %1$s</b>:';
 $lang[374]	=	'Estado:';
 $lang[375]	=	'Seleccionar texto';
-$lang[376]  =   'Cuentas Premium :';
+$lang[376]	=	'Cuentas Premium :';
 $lang[377]	=	'37 [Video: MP4 1920×1080 | Audio: AAC 2ch 44.10kHz]';
+$lang[378]	=	'Cerrar ventana';
+$lang[379]	=	'Archivos';
+$lang[380]	=	'El cambio de MD5 solo debeser aplicado a formatos conocidos que funcionen con él(p.e. .rar o .zip)<br />¿Deseas continuar?';
+$lang[381]	=	'MD5 del archivo <b>%1$s</b> cambiado';	// %1$s = filename
+$lang[382]	=	'Error cambiando el MD5 del archivo <b>%1$s</b>!';	// %1$s = filename
+$lang[383]	=	'Cambio de MD5';
+$lang[384]	=	'Coincidir texto';
+$lang[385]	=	'Coincidir';
+$lang[386]	=	'Ignorar mayúsculas y minúsculas';
+$lang[387]	=	'Colocar cada fichero en archivos separados';
 ?>
