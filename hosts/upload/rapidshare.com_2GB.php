@@ -2,28 +2,38 @@
 
 //If you don't submit form logins when uploading, and these values are set, these default values will be used. For auto-upload, you must set these values here.
 //If you do set logins here, make sure also to set your account type properly (premium or collector) with the $zone variable below.
+//According to RSM (for XP), only **Rapidshare Premium** account is allowed to upload files > 200MB up to 2GB, whereas Collector accounts can only upload up to 200MB.
 
 $site_login = '';
 $site_pass = '';
-$zone = 'prem';		//prem|col
+$zone = 'prem';		//prem|col - max filesize 200MB for collector, see RSM (Rapidshare Manager)
+$carrier = 'l3';	//which upload carrier to use depending on your location, usually 'l3' (Level3) is most suitable
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 if (!($_REQUEST['action'] == 'COMMENCEUPLOAD') && !isset($_REQUEST['auul']))
 {
-	echo <<<EOF
-		<div id=login width=100% align=center>Login to Site</div>
-		<table border=0 style="width:350px;" cellspacing=0 align=center>
-		<form method=post>
-			<input type=hidden name=action value='COMMENCEUPLOAD' />
-			<tr><td nowrap>&nbsp;Username*</td><td>&nbsp;<input type=text name=my_login value='' style="width:160px;" />&nbsp;</td></tr>
-			<tr><td nowrap>&nbsp;Password*</td><td>&nbsp;<input type=password name=my_pass value='' style="width:160px;" />&nbsp;</td></tr>
-			<tr><td nowrap>&nbsp;Account Type*</td><td>&nbsp;<select style="width:160px;" name='zone'><option value='prem'/>Premium</option><option value='col'/>Collector</option></td></tr>
-			<tr><td colspan=2 align=center><input type=submit value='Upload'></td></tr>
-			<tr><td align='center' colspan='2'><small>Submit the form without logins to use default values stored in rapidshare.com_2GB.php file</small></td></tr>
+	echo <<<HTML
+		<div id='login' width='100%' align='center'>Enter your Rapidshare Login Details</div><br />
+		<table border='0' style="width:350px;" cellspacing='0' align='center'>
+		<form action='' method='post'>
+			<input type='hidden' name='action' value='COMMENCEUPLOAD' />
+			<tr><td nowrap>&nbsp;Username*</td><td>&nbsp;<input type='text' name='my_login' value='' style="width:160px;" />&nbsp;</td></tr>
+			<tr><td nowrap>&nbsp;Password*</td><td>&nbsp;<input type='password' name='my_pass' value='' style="width:160px;" />&nbsp;</td></tr>
+			<tr><td nowrap>&nbsp;Upload Carrier</td><td>&nbsp;
+			<select style="width:160px;" name='carrier'>
+					<option value='l3'/>Level 3 (default)</option>
+					<option value='tl'/>Telia</option>
+					<option value='tl2'/>Telia2</option>
+					<option value='cg'/>Cogent</option>
+			</select>
+			</td></tr>
+			<tr><td nowrap>&nbsp;Account Type*</td><td>&nbsp;<select style="width:160px;" name='zone'><option value='prem'/>Premium</option><option value='col'/>Collector</option></select></td></tr>
+			<tr><td colspan='2' align='center'><input type='submit' value='Upload' onclick='$(this).fade();'></td></tr>
+			<tr><td align='center' colspan='2'><small>Submit the form without logins to use default values stored in rapidshare.com_2GB.php</small></td></tr>
 		</form>
 		</table>
-EOF;
+HTML;
 exit;
 }
 else
@@ -35,6 +45,7 @@ else
 			$_REQUEST['my_login'] = $site_login;
 			$_REQUEST['my_pass'] = $site_pass;
 			$_REQUEST['zone'] = $zone;
+			$_REQUEST['carrier'] = $carrier;
 			$_REQUEST['action'] = 'COMMENCEUPLOAD';
 			echo "<center><b>Use Default login/pass...</b></center>\n";
 		}
@@ -46,15 +57,10 @@ else
 	}
 }
 
-echo "<script>document.getElementById('login').style.display='none';</script>";
-
 try
 {
 	//initiate the RS uploader class
-	$rs = new RS($lfile);
-
-	//did the user set their account type?
-	if ($_REQUEST['zone']) $rs->zone = $_REQUEST['zone'];
+	$rs = new RS($lfile, $_REQUEST['zone'], $_REQUEST['carrier']);
 
 	//upload the file
 	$rs->upload();
@@ -71,46 +77,46 @@ catch (Exception $e)
 class RS
 {
 	/////Only change the values below if you know what you are doing, or if you want to experiment!
-	var $file;	// the full path to the file we want to upload
-	var $filename;	// extracted from $this->file ( see getfilesize() )
-	var $zone = 'prem';	// set to 'prem' or 'col' depending on your account type. Use premium account-type by default. You should do this from the same area as where you set your login and pass above!
-	var $login;
-	var $password;
-	var $uploadpath = 'l3';	// depending on your [server|pc] location you can change this to any of the carriers rs.com uses such as 'cg' or others
-	var $uploadserver;	// This is the next upload server number e.g. 530. Don't confuse with $uploadpath!
-	var $fulluploadserver = array();	// an array resulting from a parse_url of the combined details above
-	var $fsize;	// the size of the file we're uploading
-	var $wantchunksize = 1000000;	// you might want to leave this as default! (rapidshare don't allow anything below this anyway, but you could try increasing it if you have very large files to upload)
-	var $contentheader;
-	var $boundary = '---------------------632865735RS4EVER5675865';
-	var $useragent = 'RAPIDSHARE MANAGER Application Version: NOT INSTALLED VERSION STARTED';
-	var $resumed = 0;
-	var $complete = 0;
-	var $replacefileid;
-	var $replacekillcode;
-	var $fileid;
-	var $killcode;
-	var $download_link;
-	var $delete_link;
-
-
-	function __construct($filename)
+	public $file;	// the full path to the file we want to upload
+	public $zone = 'prem';	// set to 'prem' or 'col' depending on your account type. Use premium account-type by default. You should do this from the same area as where you set your login and pass above!
+	public $uploadpath = 'l3';	// depending on your [server|pc] location you can change this to any of the carriers rs.com uses such as 'cg' or others
+	public $download_link;
+	public $delete_link;
+	private $filename;	// extracted from $this->file ( see getfilesize() )
+	private $login;
+	private $password;
+	private $uploadserver;	// This is the next upload server number e.g. 530. Don't confuse with $uploadpath!
+	private $fulluploadserver = array();	// an array resulting from a parse_url of the combined details above
+	private $fsize;	// the size of the file we're uploading
+	private $wantchunksize = 1000000;	// you might want to leave this as default! (rapidshare don't allow anything below this anyway, but you could try increasing it if you have very large files to upload)
+	private $contentheader;
+	private $boundary = '---------------------632865735RS4EVER5675865';
+	private $useragent = 'RAPIDSHARE MANAGER Application Version: NOT INSTALLED VERSION STARTED';
+	private $resumed = 0;
+	private $complete = 0;
+	private $fileid;
+	private $killcode;
+	
+	public function __construct($file,$zone,$carrier)
 	{
 		$this->login = trim($_REQUEST['my_login']);
 		$this->password = trim($_REQUEST['my_pass']);
-		$this->getfilesize($filename);
+		if ($zone) $this->zone = $zone;
+		if ($carrier) $this->uploadpath = $carrier;
+		$this->getfilesize($file);
 		$this->getuploadserver();
 	}
 
-	function getfilesize($filename)
+	private function getfilesize($file)
 	{
-		$this->file = realpath($filename);
+		$this->file = realpath($file);
 		if (!($this->fsize = filesize($this->file))) throw new Exception('Filesize not obtained - upload halted.'); //("File $this->file is empty or does not exist!\r\n");
+		if (($this->fsize > 200*pow(1024, 2)) && $this->zone == 'col') throw new Exception('FILE TOO BIG - Only premium accounts can upload files over 200MB in size');
 		$this->filename = basename($this->file);
-		echo "Filesize: " . $this->fsize;
+		echo "<center><b>Total Filesize (bytes): " . $this->fsize . '</b></center>';
 	}
 
-	function getuploadserver()
+	private function getuploadserver()
 	{
 		if (!($data = file_get_contents('http://rapidshare.com/cgi-bin/rsapi.cgi?sub=nextuploadserver_v1'))) throw new Exception("Unable to get next upload server!");
 		if (!preg_match('/(\d+)/', $data, $uploadserver)) throw new Exception("Uploadserver invalid? Internal error!");
@@ -118,7 +124,7 @@ class RS
 		$this->fulluploadserver = parse_url('http://rs' . $this->uploadserver . $this->uploadpath . '.rapidshare.com');
 	}
 
-	function upload()
+	public function upload()
 	{
 		require (TEMPLATE_DIR . '/uploadui.php');
 		$timeStart = getmicrotime();
@@ -145,7 +151,7 @@ class RS
 				$this->complete = 1;
 			}
 
-			print "Upload chunk is $chunksize bytes starting at $cursize...<br />";
+			//echo "Upload chunk is $chunksize bytes starting at $cursize...<br />";
 
 			$this->contentheader = "$this->boundary\r\nContent-Disposition: form-data; name=\"rsapi_v1\"\r\n\r\n1\r\n";
 
@@ -191,15 +197,14 @@ class RS
 			fwrite($socket, $contenttail);
 			fflush($socket);
 
-			//$result = '';
-			//while(!feof($socket)) $result .= fgets($socket, 256);
-			//file_put_contents('rsresult.log', $result, FILE_APPEND);
+			$result = '';
+			while(!feof($socket)) $result .= fgets($socket, 16384);
+			//file_put_contents('rsresult.log', $result . "\r\n\r\n", FILE_APPEND);
+
+			if (preg_match('#(ERROR: .+)#', $result, $errmat)) throw new Exception($errmat[1]);
 
 			if (!$this->resumed)
 			{
-				$result = '';
-				while(!feof($socket)) $result .= fgets($socket, 128);
-				if (!$result) throw new Exception("Ooops! Did not receive any valid rapidshare server results? Upload halted.");
 				preg_match('#/files/(\d+)/#', $result, $fileid);
 				preg_match('#killcode=(\d+)\r?\n#', $result, $killcode);
 				preg_match('%http://rapidshare\.com/((?!killcode).)+html%i', $result, $flink);
@@ -220,5 +225,5 @@ class RS
 }
 
 //created by szalinski 2009
-//latest update 05 Mar 2010 r5 beta
+//latest update 16 Apr 2010 r7 beta
 ?>
