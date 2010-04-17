@@ -248,17 +248,17 @@ function _cmp_list_enums($a, $b) {
 function file_data_size_time($file) {
 	global $options;
 	$size = $time = false;
-	if ($options['2gb_fix'] && PHP_INT_SIZE < 5 && file_exists($file) && !is_dir($file) && !is_link($file)) {
+	if (is_file($file)) {
+		$size = @filesize($file);
+		$time = @filemtime($file);
+	}
+	if ($size === false && $options['2gb_fix'] && file_exists($file) && !is_dir($file) && !is_link($file)) {
 		if (substr(PHP_OS, 0, 3) !== "WIN") {
 			@exec('stat'.(stristr(@php_uname('s'), 'bsd') !== false ? '-f %m ' : ' -c %Y ').escapeshellarg($file), $time, $tmp);
 			if ($tmp == 0) { $time = trim(implode($time)); }
 			@exec('stat'.(stristr(@php_uname('s'), 'bsd') !== false ? '-f %z ' : ' -c %s ').escapeshellarg($file), $size, $tmp);
 			if ($tmp == 0) { $size = trim(implode($size)); }
 		}
-	}
-	elseif (is_file($file)) {
-		$size = filesize($file);
-		$time = filemtime($file);
 	}
 	if ($size === false || $time === false) { return false; }
 	return array($size, $time);
