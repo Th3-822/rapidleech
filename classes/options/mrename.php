@@ -1,20 +1,16 @@
 <?php
 function mrename() {
-	global $list, $options;
-	if ($options['disable_deleting'] || $options['disable_disable_mass_rename']) {
-		echo lang(147);
-	}
-	else {
+	global $list, $PHP_SELF;
 ?>
 <form method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act" value="mrename_go" />
 <?php echo lang(104); ?>:
 <?php
-		for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
-			$file = $list [$_GET ["files"] [$i]];
+	for($i = 0; $i < count ( $_GET ["files"] ); $i ++) {
+		$file = $list [$_GET ["files"] [$i]];
 ?>
 <input type="hidden" name="files[]" value="<?php echo $_GET ["files"] [$i]; ?>" /> <b><?php echo basename ( $file ["name"] ); ?></b><?php echo $i == count ( $_GET ["files"] ) - 1 ? "." : ",&nbsp;"; ?>
 <?php
-		}
+	}
 ?>
 <table>
 <tr>
@@ -25,12 +21,11 @@ function mrename() {
 </table>
 </form>
 <?php
-	}
 }
 
 function mrename_go() {
-	global $list, $options;
-	if ($_POST ["yes"] && !$options['disable_deleting'] && !$options['disable_mass_rename'] && @trim ( $_POST ['extension'] )) {
+	global $list, $options, $PHP_SELF;
+	if ($_POST ["yes"] && @trim($_POST['extension'])) {
 		$_POST ['extension'] = @trim ( $_POST ['extension'] );
 		
 		while ( $_POST ['extension'] [0] == '.' )

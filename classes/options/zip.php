@@ -1,6 +1,6 @@
 <?php
 function zip() {
-	global $list, $options;
+	global $list, $options, $PHP_SELF;
 ?>
 <form name="ziplist" method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act" value="zip_go" />
 	<table cellspacing="5">
@@ -14,7 +14,7 @@ function zip() {
 						<td>Archive Name:&nbsp;<input type="text" name="archive" size="25" value=".zip" /></td>
 					</tr>
 					<tr>
-						<td><input type="checkbox" name="no_compression"<?php echo ($options['disable_archive_compression'] ? ' disabled="disabled"' : ''); ?> />&nbsp;Do not use compression</td>
+						<td><input type="checkbox" name="no_compression"<?php echo ($options['disable_archive_compression'] ? ' disabled="disabled" checked="checked"' : ''); ?> />&nbsp;Do not use compression</td>
 					</tr>
 				</table>
 				<table>

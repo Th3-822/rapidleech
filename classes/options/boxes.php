@@ -1,6 +1,6 @@
 <?php
 function boxes() {
-	global $list, $options;
+	global $list, $options, $PHP_SELF;
 ?>
 <form method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act" value="boxes_go" />
 <?php

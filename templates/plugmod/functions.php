@@ -35,11 +35,9 @@ function renderActions() {
 			if (@file_exists(ROOT_DIR.'/rar/rar') || @file_exists(ROOT_DIR.'/rar/unrar')) { $return .= '<option value="unrar">'.lang(339).'</option>'; }
 		}
 	}
-	if (!$options['disable_deleting']) {
-		if (!$options['disable_rename']) $return .= '<option value="rename">'.lang(296).'</option>';
-		if (!$options['disable_mass_rename']) $return .= '<option value="mrename">'.lang(297).'</option>';
-		if (!$options['disable_delete']) $return .= '<option value="delete">'.lang(298).'</option>';
-	}
+	if (!$options['disable_rename']) $return .= '<option value="rename">'.lang(296).'</option>';
+	if (!$options['disable_mass_rename']) $return .= '<option value="mrename">'.lang(297).'</option>';
+	if (!$options['disable_delete']) $return .= '<option value="delete">'.lang(298).'</option>';
 	if (!$options['disable_list']) $return .= '<option value="list">'.lang(299).'</option>';
 	$return .= '</select>';
 	return $return;
