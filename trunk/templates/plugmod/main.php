@@ -304,29 +304,24 @@ else
 <?php echo renderActions(); ?>
 <div style="position:relative; width:800px; padding:1px 0px 1px 0px;">
 <div style="overflow:auto; height:auto; max-height:450px; width: 800px;">
-
+<?php if ($options['flist_h_fixed']) { ?>
 <table id="table_filelist_h" cellpadding="3" cellspacing="1" class="filelist" align="left" style="position:absolute;left:0px;top:0px;">
 <tbody>
 <tr class="flisttblhdr" valign="bottom">
-<td id="file_list_checkbox_title_h">
-&nbsp;
-</td>
-<td>
-<b><?php echo lang(262); ?></b></td>
+<td id="file_list_checkbox_title_h">&nbsp;</td>
+<td><b><?php echo lang(262); ?></b></td>
 <td><b><?php echo lang(263); ?></b></td>
 <td><b><?php echo lang(264); ?></b></td>
 <td><b><?php echo lang(265); ?></b></td>
 </tr>
 </tbody>
 </table>
+<?php } ?>
 <table id="table_filelist" cellpadding="3" cellspacing="1" width="100%" class="filelist" align="left">
 <thead>
 <tr class="flisttblhdr" valign="bottom">
-<td id="file_list_checkbox_title" class="sorttable_checkbox">
-&nbsp;
-</td>
-<td class="sorttable_alpha">
-<b><?php echo lang(262); ?></b></td>
+<td id="file_list_checkbox_title" class="sorttable_checkbox">&nbsp;</td>
+<td class="sorttable_alpha"><b><?php echo lang(262); ?></b></td>
 <td><b><?php echo lang(263); ?></b></td>
 <td><b><?php echo lang(264); ?></b></td>
 <td><b><?php echo lang(265); ?></b></td>
@@ -379,12 +374,13 @@ if($list)
 ?>
 </tbody>
 <?php
-  if (($total_files > 1) && ($total_size > 0))
-    {
+  if (($total_files > 1) && ($total_size > 0)) {
     $tmp = '<tbody><tr class="flisttblftr">'.$nn.'<td>&nbsp;</td>'.$nn.'<td>Total:</td>'.$nn.'<td>'.bytesToKbOrMbOrGb($total_size).'</td>'.$nn.'<td>&nbsp;</td>'.$nn.'<td>&nbsp;</td>'.$nn.'</tr></tbody>';
-    echo $tmp.'</table>';
-    echo '<table id="table_filelist_f" cellpadding="3" cellspacing="1" class="filelist" align="left" style="position:absolute;left:0px;bottom:0px;">'.$tmp;
+    echo $tmp;
+    if ($options['flist_h_fixed']) {
+      echo '</table><table id="table_filelist_f" cellpadding="3" cellspacing="1" class="filelist" align="left" style="position:absolute;left:0px;bottom:0px;">'.$tmp;
     }
+  }
   unset($total_files,$total_size);
   ?>
 </table>
@@ -398,22 +394,20 @@ if($list)
 </tr>
 </tbody>
 </table>
-<?php
-		if ($options['flist_sort']) {
-?>
 <script type="text/javascript">
 /* <![CDATA[ */
 $(document).ready(function() {
+<?php if ($options['flist_sort']) { ?>
   sorttable.makeSortable(document.getElementById('table_filelist'));
+<?php } if ($options['flist_h_fixed']) { ?>
   $('#table_filelist_h tr.flisttblhdr td').each(function(id) {
     $(this).click((function (x) { return function() { $('#table_filelist tr.flisttblhdr td:eq('+x+')').click(); table_filelist_refresh_headers(); }; })(id));
   });
+<?php } ?>
 });
 /* ]]> */
 </script>
-<?php
-		}
-?>
+
 <!--Start Lix Checker-->
 <table class="hide-table" id="tb4" cellspacing="5" width="100%">
 <tbody>

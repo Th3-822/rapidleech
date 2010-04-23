@@ -5,6 +5,9 @@ require_once(CONFIG_DIR.'setup.php');
 define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 // Include other useful functions
 require_once('classes/other.php');
+
+login_check();
+
 include(TEMPLATE_DIR.'header.php'); ?>
 <br />
 <?php
@@ -22,8 +25,8 @@ include(TEMPLATE_DIR.'header.php'); ?>
 	$content = file_get_contents("files/".lang(327).".txt");
 ?>
 <div align="center">
-<form method="post">
-<textarea class="notes" name="notes"><?php echo $content; ?></textarea>
+<form method="post" action="<?php @echo (!$PHP_SELF ? $_SERVER["PHP_SELF"] : $PHP_SELF); ?>">
+<textarea class="notes" name="notes" rows="1" cols="1"><?php echo $content; ?></textarea>
 <br /><input type="submit" name="submit" value="<?php echo lang(326); ?>" />
 </form>
 </div>

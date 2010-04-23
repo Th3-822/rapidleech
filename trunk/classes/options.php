@@ -37,13 +37,13 @@ if ($all_act_files_exist) {
 			break;
 		
 		case "delete" :
-			if ($options['disable_delete'] || $options['disable_deleting']) { break; }
+			if ($options['disable_delete']) { break; }
 			require(CLASS_DIR . "options/delete.php");
 			delete();
 			break;
 		
 		case "delete_go" :
-			if ($options['disable_delete'] || $options['disable_deleting']) { break; }
+			if ($options['disable_delete']) { break; }
 			require(CLASS_DIR . "options/delete.php");
 			delete_go();
 			break;
@@ -127,26 +127,26 @@ if ($all_act_files_exist) {
 			break;
 		
 		case "rename" :
-			if ($options['disable_rename'] || $options['disable_deleting']) { break; }
+			if ($options['disable_rename']) { break; }
 			require(CLASS_DIR . "options/rename.php");
 			rl_rename();
 			break;
 		
 		case "rename_go" :
-			if ($options['disable_rename'] || $options['disable_deleting']) { break; }
+			if ($options['disable_rename']) { break; }
 			require(CLASS_DIR . "options/rename.php");
 			rename_go();
 			break;
 		
 		//MassRename
 		case "mrename" :
-			if ($options['disable_mass_rename'] || $options['disable_deleting']) { break; }
+			if ($options['disable_mass_rename']) { break; }
 			require(CLASS_DIR . "options/mrename.php");
 			mrename();
 			break;
 		
 		case "mrename_go" :
-			if ($options['disable_mass_rename'] || $options['disable_deleting']) { break; }
+			if ($options['disable_mass_rename']) { break; }
 			require(CLASS_DIR . "options/mrename.php");
 			mrename_go();
 			break;

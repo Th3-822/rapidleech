@@ -61,7 +61,7 @@ $ftp = new ftp(FALSE, FALSE);
 							$saveToFile = dirname($saveToFile).PATH_SPLITTER.$File_Name;
 						}
 						if($options['rename_underscore']){
-							$File_Name = str_replace(' ', '_', basename($saveToFile));
+							$File_Name = str_replace(array(' ', '%20'), '_', basename($saveToFile));
 							$saveToFile = dirname($saveToFile).PATH_SPLITTER.$File_Name;
 						}
                     

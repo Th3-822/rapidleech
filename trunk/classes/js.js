@@ -8,11 +8,21 @@ function new_transload_window() {
 }
 
 function table_filelist_refresh_headers() {
-  $('#table_filelist_h, #table_filelist_f').width($('#table_filelist').width());
-  $('#table_filelist tr.flisttblhdr td').each(function(id) {
-    $('#table_filelist_h tr.flisttblhdr td:eq('+id+')').html($(this).html().replace(/(<span .*?sorttable.*?>|<\/span>)/gi, ''));
-    $('#table_filelist_h tr.flisttblhdr td:eq('+id+'), #table_filelist_f tr.flisttblftr td:eq('+id+')').width($(this).width());
-  });
+  if ($.browser.msie == true) {
+    if ($('#table_filelist').parent().height() > 450) { $('#table_filelist').parent().height(450); }
+    $('#table_filelist_h, #table_filelist_f').width($('#table_filelist').width());
+    $('#table_filelist tr.flisttblhdr td').each(function(id) {
+      $('#table_filelist_h tr.flisttblhdr td:eq('+id+')').html($(this).html().replace(/(<span .*?sorttable.*?>|<\/span>)/gi, ''));
+      $('#table_filelist_h tr.flisttblhdr td:eq('+id+'), #table_filelist_f tr.flisttblftr td:eq('+id+')').width($(this).width());
+    });
+  }
+  else {
+    $('#table_filelist_h, #table_filelist_f').css('width', $('#table_filelist').css('width'));
+    $('#table_filelist tr.flisttblhdr td').each(function(id) {
+      $('#table_filelist_h tr.flisttblhdr td:eq('+id+')').html($(this).html().replace(/(<span .*?sorttable.*?>|<\/span>)/gi, ''));
+      $('#table_filelist_h tr.flisttblhdr td:eq('+id+'), #table_filelist_f tr.flisttblftr td:eq('+id+')').css('width', $(this).css('width'));
+    });
+  }
 }
 
 function switchCell(m)
@@ -21,7 +31,7 @@ function switchCell(m)
 		$('#navcell1, #navcell2, #navcell3, #navcell4').removeClass('selected');
 		$('#navcell' + m).addClass('selected');
 		$('#tb'+ m).fadeIn('slow');
-		if (m == 3) { table_filelist_refresh_headers(); }
+		if (m == 3 && $('#table_filelist_h').length != 0) { table_filelist_refresh_headers(); }
   }
 
 function getCookie(name)
@@ -78,7 +88,7 @@ function clear(name)
 
 //Match text
 function flist_match() {
-  var text, insensitive, text_regexp; 
+  var text, insensitive, text_regexp, e_to_click; 
   text = $('#flist_match_search').val();
   if (text == '') { return false; }
   insensitive = $('#flist_match_ins').attr('checked');
@@ -91,8 +101,10 @@ function flist_match() {
     if ($(this).parent().next().children().html().match(text_regexp) !== null) { $(this).attr('checked', true); }
   });
   if ($('#table_filelist :checked').size() > 0) {
-    $('#file_list_checkbox_title_h').click();
-    if ($('#file_list_checkbox_title').html().search('sorttable_sortrevind') == -1) { $('#file_list_checkbox_title_h').click(); }
+    e_to_click = ($('#file_list_checkbox_title_h').length != 0) ? $('#file_list_checkbox_title_h') : $('#file_list_checkbox_title') ;
+    e_to_click.click();
+    if ($('#file_list_checkbox_title').html().search('sorttable_sortrevind') == -1) { e_to_click.click(); }
+    $('#table_filelist').parent().animate({scrollTop: '0'});
   }
   return false;
 }

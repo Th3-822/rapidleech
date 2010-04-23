@@ -1,6 +1,6 @@
 <?php
 function rl_mail() {
-	global $options, $list;
+	global $options, $list, $PHP_SELF;
 ?>
 <form method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act" value="mail_go" />
 <?php echo lang(104); ?>:

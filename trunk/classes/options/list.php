@@ -1,6 +1,6 @@
 <?php
 function rl_list() {
-	global $list;
+	global $list, $options;
 	if ($list) {
 ?>
 <table><tr><td>

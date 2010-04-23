@@ -1,6 +1,6 @@
 <?php
 function md5_change() {
-	global $list;
+	global $list, $PHP_SELF;
 ?>
 <form method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act" value="md5_change_go" />
 <?php
@@ -24,7 +24,7 @@ function md5_change() {
 }
 
 function md5_change_go() {
-	global $list;
+	global $list, $PHP_SELF;
 	if (isset($_POST['yes'])) {
 		foreach ($_POST['files'] as $k => $v) {
 			$name = $list[$v]['name'];

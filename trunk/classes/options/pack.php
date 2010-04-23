@@ -1,6 +1,6 @@
 <?php
 function rl_pack() {
-	global $list, $options;
+	global $list, $options, $PHP_SELF;
 ?>
 <form method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act" value="pack_go" />
 <?php

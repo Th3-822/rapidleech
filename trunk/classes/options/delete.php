@@ -1,10 +1,6 @@
 <?php
 function delete() {
-	global $list, $options;
-	if ($options['disable_deleting'] || $options['disable_delete']) {
-		echo lang(147);
-	}
-	else {
+	global $list, $PHP_SELF;
 ?>
 <form method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act" value="delete_go" />
 <?php
@@ -30,11 +26,10 @@ function delete() {
 </table>
 </form>
 <?php
-	}
 }
 
 function delete_go() {
-	global $list;
+	global $list, $PHP_SELF;
 	if (isset($_POST["yes"])) {
 		for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {
 			$file = $list [$_POST ["files"] [$i]];

@@ -118,9 +118,9 @@ $(document).ready(function() {
   });
   $('#opt_disable_deleting').click(function() {
     if ($(this).attr('checked')) {
-      $('#opt_disable_delete, #opt_disable_rename, #opt_disable_mass_rename').attr('checked', 'checked');
+      $('#opt_disable_delete').attr('checked', 'checked');
     }
-    else { $('#opt_disable_delete, #opt_disable_rename, #opt_disable_mass_rename').removeAttr('checked'); }
+    else { $('#opt_disable_delete').removeAttr('checked'); }
   });
   $("#opt_forbidden_filetypes_block").click(function() { $('#opt_rename_these_filetypes_to_0').toggle(); } );
   $("#opt_new_window").click(function() { $('#opt_new_window_0').toggle(); } );
@@ -263,7 +263,10 @@ if (isset($_POST['setup_save']) && $_POST['setup_save'] == 1) {
         $opt.
         "; \r\n\r\nrequire_once('site_checker.php');\r\nrequire_once('accounts.php');\r\n?>";
   if (!@write_file(CONFIG_DIR."config.php", $opt, 1)) { echo '<div class="div_error">It was not possible to write the configuration<br />Set permissions of "configs" folder to 0777 and try again</div>'; }
-  else { echo '<div class="div_message">Configuration saved! Click <a href="'.$PHP_SELF.'">here</a> to continue to rapidleech</div>'; }
+  else {
+    if (is_file(CONFIG_DIR.'config_old.php')) { if (@!unlink(CONFIG_DIR.'config_old.php') && is_file(CONFIG_DIR.'config_old.php')) { '<div class="div_message">It was not possible to delete the old configuration.<br />Manually delete "configs/config_old.php"</div><br />'; } }
+    echo '<div class="div_message">Configuration saved! Click <a href="'.$PHP_SELF.'">here</a> to continue to rapidleech</div>';
+  }
 ?>
 <?php
 }
@@ -382,6 +385,11 @@ $d->close();
           <td style="vertical-align: top;">
             <table>
               <tr><td>Make file list sortable</td><td><input type="checkbox" value="1" name="opt_flist_sort" id="opt_flist_sort" /></td></tr>
+              <tr><td>Fixed file list header<br />(May not work in all browsers)</td><td><input type="checkbox" value="1" name="opt_flist_h_fixed" id="opt_flist_h_fixed" /></td></tr>
+            </table>
+          </td>
+          <td style="vertical-align: top;">
+            <table>
               <tr><td>Transload files in a new window</td><td><input type="checkbox" value="1" name="opt_new_window" id="opt_new_window" /></td></tr>
               <tr id="opt_new_window_0"><td>Use javascript window</td><td><input type="checkbox" value="1" name="opt_new_window_js" id="opt_new_window_js" /></td></tr>
             </table>
@@ -402,7 +410,7 @@ $d->close();
       <div class="div_opt" id="opt_actions_table">
         <table class="table_opt">
           <tr><td>Disable all actions</td><td><input type="checkbox" value="1" name="opt_disable_actions" id="opt_disable_actions" /></td></tr>
-          <tr><td>Disable renaming and<br />deleting on all actions</td><td><input type="checkbox" value="1" name="opt_disable_deleting" id="opt_disable_deleting" /></td></tr>
+          <tr><td>Disable deleting on all actions(except delete)</td><td><input type="checkbox" value="1" name="opt_disable_deleting" id="opt_disable_deleting" /></td></tr>
           <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
           <tr>
             <td style="vertical-align: top;"><table>

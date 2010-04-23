@@ -2,7 +2,7 @@
 function rl_split() {
 	global $PHP_SELF, $list, $options;
 ?>
-<form method="post"	action="<?php echo $PHP_SELF; ?>">
+<form method="post" action="<?php echo $PHP_SELF; ?>">
 <input type="hidden" name="act" value="split_go" />
 		<table align="center">
 			<tr>
