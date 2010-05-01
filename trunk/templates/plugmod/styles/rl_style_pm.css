@@ -347,11 +347,177 @@ th {
 }
 
 
+/* RAR.php */
+
+.rar-table
+{
+text-align: left;
+}
+
+.rar-main-td
+{
+border-right:1px solid #666;
+border-left:1px solid #666;
+border-top:1px solid #666;
+padding:6px;
+background-color:#001825;
+}
+
+.rar-rb-td
+{
+border-right:1px solid #666;
+padding:2px;
+background-color:#001825;
+}
+
+.rar-options-left-td
+{
+border-left:1px solid #666;
+padding:2px;
+background-color:#001825;
+}
+
+.rar-options-right-td
+{
+border-right:1px solid #666;
+border-left:1px solid #666;
+padding:2px;
+background-color:#001825;
+}
+
+.rar-space-td
+{
+border-top:1px solid #666;
+}
+
+
+/* UNRAR.php */
+.unrar-main-td
+{
+border-right:1px solid #666;
+border-left:1px solid #666;
+border-top:1px solid #666;
+padding:6px;
+background-color:#001825;
+}
+
+.unrar-main2-td
+{
+border-right:1px solid #666;
+border-left:1px solid #666;
+padding:2px;
+background-color:#001825;
+}
+
+.unrar-lb-td
+{
+border-left:1px solid #666;
+padding:2px;
+background-color:#001825;
+}
+
+.unrar-rb-td
+{
+border-right:1px solid #666;
+padding:2px;
+background-color:#001825;
+}
+
+.unrar-options
+{
+border-right:1px solid #666;
+border-left:1px solid #666;
+border-top:1px solid #666;
+padding:2px;
+background-color:#001825;
+}
+
+.unrar-space-td
+{
+border-top:1px solid #666;
+}
+
+
+/* NOTES.php */
 .notes
 {
 	width: 70%;
 	height: 300px;
 }
+
+/* Credits */
+.rl-link
+{
+text-decoration:none;
+}
+
+.rev-dev
+{
+color:#F09D19;
+}
+
+.small-credits
+{
+color:#239FD9;
+}
+
+.rapidleechhost
+{
+text-align:center;
+margin:0 auto;
+font-weight:bold;
+}
+
+/////* Server Space and CPU */////
+.ss-cpu-table
+{
+border-collapse: separate;
+border-spacing: 2px 2px;
+}
+
+/* Server Space */
+.ss-td-style
+{
+color:#CCCCCC;
+}
+
+.ss-span-style
+{
+color:#FF8700
+}
+
+/* CPU */
+.cpu-td
+{
+color:#CCCCCC;
+width:200px;
+}
+
+.cpu-span
+{
+color:#FF8700;
+}
+
+.cpu-clock-st-text
+{
+color:#FF8700;
+}
+
+.cpu-clock-st-time
+{
+color:#999;
+}
+
+.cpu-clock-lt-text
+{
+color:#994A1D;
+}
+
+.cpu-clock-lt-time
+{
+color:#999;
+}
+
 
 /* audl.php */
 .container

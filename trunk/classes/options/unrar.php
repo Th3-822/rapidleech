@@ -29,7 +29,7 @@ function unrar_setCheckboxes(act, filestounrar) {
     $file = $list[$_GET["files"][$i]];
 ?>
             <tr align="center">
-              <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:6px; background-color:#001825;">
+              <td colspan="2" class="unrar-main-td">
                 <input type="hidden" name="files[<?php echo $i; ?>]" value="<?php echo $_GET["files"][$i]; ?>" />
                 <?php printf(lang(366),htmlentities(basename($file["name"]))); ?>
                 <br />
@@ -39,7 +39,7 @@ function unrar_setCheckboxes(act, filestounrar) {
               </td>
             </tr>
             <tr>
-              <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
+              <td colspan="2" class="unrar-main2-td">
                 &nbsp;
 <?php
     unset ($rar);
@@ -63,17 +63,17 @@ function unrar_setCheckboxes(act, filestounrar) {
       foreach($rar_list as $rar_key => $rar_item) {
 ?>
             <tr>
-              <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
+              <td class="unrar-lb-td">
                 <input type="checkbox" name="filestounrar[<?php echo $i; ?>][]" checked="checked" value="<?php echo base64_encode($rar_key); ?>" />
               </td>
-              <td style="border-right:1px solid #666; padding:2px; background-color:#001825;"><?php echo $rar_key.' ('.bytesToKbOrMbOrGb($rar_item['size']).')'; ?></td>
+              <td class="unrar-rb-td"><?php echo $rar_key.' ('.bytesToKbOrMbOrGb($rar_item['size']).')'; ?></td>
             </tr>
 <?php
       }
     }
 ?>
             <tr>
-              <td colspan="2" style="border-top:1px solid #666;">&nbsp;</td>
+              <td colspan="2" class="unrar-space-td">&nbsp;</td>
             </tr>
 <?php
   }
@@ -119,7 +119,7 @@ function unrar_go() {
     foreach ($_GET['filestounrar'][$i] as $rar_item) {
 ?>
           <tr>
-            <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
+            <td class="unrar-lb-td">
 <?php
       echo link_for_file(realpath($options['download_dir']).'/'.basename(base64_decode($rar_item)));
 ?>
@@ -130,7 +130,7 @@ function unrar_go() {
     }
 ?>
           <tr>
-            <td colspan="2" style="border-top:1px solid #666;">&nbsp;</td>
+            <td colspan="2" class="unrar-space-td">&nbsp;</td>
           </tr>
 <?php
   }

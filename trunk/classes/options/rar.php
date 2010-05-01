@@ -6,12 +6,12 @@ function rar() {
   else {
 ?>
   <form name="rar_files" method="post" action="<?php echo $PHP_SELF; ?>">
-    <table align="center" style="text-align: left;">
+    <table align="center" class="rar-table">
       <tr>
         <td>
           <table>
             <tr>
-              <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:6px; background-color:#001825;">
+              <td colspan="2" class="rar-main-td">
                 <b><?php echo lang(344); ?></b>
               </td>
             </tr>
@@ -20,12 +20,12 @@ function rar() {
       $file = $list[$_GET["files"][$i]];
 ?>
             <tr>
-              <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
+              <td class="rar-options-left-td">
                 <input type="hidden" name="files[<?php echo $i; ?>]" value="<?php echo $_GET["files"][$i]; ?>" />
                 <input type="hidden" name="rar_opts[filestorar][<?php echo $i; ?>]" value="<?php echo $_GET["files"][$i]; ?>" />
                 <?php echo basename($file["name"]); ?>
               </td>
-              <td style="border-right:1px solid #666; padding:2px; background-color:#001825;">
+              <td class="rar-rb-td">
                 <?php echo $file["size"]; ?>
               </td>
             </tr>
@@ -33,22 +33,22 @@ function rar() {
     }
 ?>
             <tr>
-              <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:6px; background-color:#001825;">
+              <td colspan="2" class="rar-main-td">
                 <b><?php echo lang(345); ?></b>
               </td>
             </tr>
             <tr>
-              <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:6px; background-color:#001825;">
+              <td colspan="2" class="rar-main-td">
                 <input onkeyup="javascript:this.value=this.value.replace(/[^a-z0-9\ \.\-\_]/gi,'_');" type="text" size="60" name="rar_opts[rarfilename]" value="<?php echo count($_GET["files"]) == 1 ? preg_replace("/[^a-z0-9\\040\\.\\-\\_]/i", '_', basename($file["name"])) : '' ; ?>" />.rar
               </td>
             </tr>
             <tr>
-              <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:6px; background-color:#001825;">
+              <td colspan="2" class="rar-main-td">
                 <b><?php echo lang(346); ?></b>
               </td>
             </tr>
             <tr>
-              <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
+              <td class="rar-options-left-td">
                 <?php echo lang(347); ?>
                 <select name="rar_opts[comp_lvl]">
                   <option value="0" selected="selected"><?php echo lang(348); ?></option>
@@ -65,7 +65,7 @@ function rar() {
 ?>
                 </select>
               </td>
-              <td style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
+              <td class="rar-options-right-td">
                 <input type="checkbox" name="rar_opts[vols]" value="1" onclick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_vols').style.display=displ;var fc=document.getElementsByName('rar_opts[vols_s]')[0]; fc.focus(); fc.selectionStart = 0; fc.selectionEnd = fc.value.length;" /><?php echo lang(354); ?>
                 <span id="rar_opts_vols" style="display:none">
                   <br />Size: <input type="text" size="3" name="rar_opts[vols_s]" value="1" />&nbsp;
@@ -82,26 +82,26 @@ function rar() {
               </td>
             </tr>
             <tr>
-              <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
+              <td class="rar-options-left-td">
                 <input type="checkbox" name="rar_opts[delete]" value="1"<?php echo ($options['disable_deleting'] ? ' disabled="disabled"' : '');?> /><?php echo lang(355); ?>
               </td>
-              <td style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
+              <td class="rar-options-right-td">
                 <input type="checkbox" name="rar_opts[solid]" value="1" /><?php echo lang(356); ?>
               </td>
             </tr>
             <tr>
-              <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
+              <td class="rar-options-left-td">
                 <input type="checkbox" name="rar_opts[rec_rec]" value="1" onclick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_rec_rec').style.display=displ; var fc=document.getElementsByName('rar_opts[rec_rec_s]')[0]; fc.focus(); fc.selectionStart = 0; fc.selectionEnd = fc.value.length;" /><?php echo lang(357); ?>
                 <span id="rar_opts_rec_rec" style="display:none">
                   <br />From 1 to 10: <input type="text" size="3" name="rar_opts[rec_rec_s]" value="1" />%
                 </span>
               </td>
-              <td style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
+              <td class="rar-options-right-td">
                 <input type="checkbox" name="rar_opts[test]" value="1" /><?php echo lang(358); ?>
               </td>
             </tr>
             <tr>
-              <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
+              <td class="rar-options-left-td">
                 <input type="checkbox" name="rar_opts[use_pass1]" value="1" onclick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_pass').style.display=displ;document.getElementsByName('rar_opts[pass]')[0].focus();" /><?php echo lang(359); ?>
                 <span id="rar_opts_pass" style="display:none">
                   <br />
@@ -110,26 +110,26 @@ function rar() {
                   <input type="checkbox" name="rar_opts[use_pass2]" value="1" /><?php echo lang(360); ?>
                 </span>
               </td>
-              <td style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
+              <td class="rar-options-right-td">
                 <input type="checkbox" name="rar_opts[path_i]" value="1" onclick="javascript:var displ=this.checked?'inline':'none';document.getElementById('rar_opts_path_i').style.display=displ;document.getElementsByName('rar_opts[path_i_path]')[0].focus();" /><?php echo lang(361); ?>
                 <span id="rar_opts_path_i" style="display:none;"><br /><input type="text" size="15" name="rar_opts[path_i_path]" value="" /></span>
               </td>
             </tr>
             <tr>
-              <td style="border-left:1px solid #666; padding:2px; background-color:#001825;">
+              <td class="rar-options-left-td">
                 <input type="checkbox" name="rar_opts[separated]" value="1" /><?php echo lang(387); ?>
               </td>
-              <td style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
+              <td class="rar-options-right-td">
                 &nbsp;
               </td>
             </tr>
             <tr>
-              <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; padding:2px; background-color:#001825;">
+              <td colspan="2" class="rar-options-right-td">
                 &nbsp;
               </td>
             </tr>
             <tr>
-              <td colspan="2" style="border-top:1px solid #666;">&nbsp;</td>
+              <td colspan="2" class="rar-space-td">&nbsp;</td>
             </tr>
           </table>
         </td>
@@ -174,16 +174,16 @@ function rar_go() {
 ?>
         <table align="center">
           <tr>
-            <td colspan="2" style="border-right:1px solid #666; border-left:1px solid #666; border-top:1px solid #666; padding:6px; background-color:#001825;">
+            <td colspan="2" class="rar-main-td">
               <?php printf(lang(363), ($_GET['rar_opts']['separated'] ? $name : $_GET['rar_opts']['rarfilename'])); ?>
             </td>
           </tr>
           <tr>
-            <td style="border-left:1px solid #666; padding:2px; background-color:#001825;"><?php echo lang(374); ?></td>
-            <td id="rar_status<?php echo $i; ?>" style="border-right:1px solid #666; padding:2px; background-color:#001825;"><?php echo lang(364); ?></td>
+            <td class="rar-options-left-td"><?php echo lang(374); ?></td>
+            <td id="rar_status<?php echo $i; ?>" class="rar-rb-td"><?php echo lang(364); ?></td>
           </tr>
           <tr>
-            <td colspan="2" style="border-top:1px solid #666;">&nbsp;</td>
+            <td colspan="2" class="rar-space-td">&nbsp;</td>
           </tr>
         </table>
 <?php

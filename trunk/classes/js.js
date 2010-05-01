@@ -322,7 +322,7 @@ function getthedate(){
     if (minutes<=9) { minutes="0"+minutes; }
     if (seconds<=9) { seconds="0"+seconds; }
 
-    var cdate="<span style=\"color:#994A1D\">"+php_js_strings[281]+":</span> &nbsp;&nbsp;&nbsp;<span style=\"color:#999\">"+hours+":"+minutes+":"+seconds+" "+dn+"</span><br />";
+    var cdate="<span class=\"cpu-clock-lt-text\">"+php_js_strings[281]+":</span> &nbsp;&nbsp;&nbsp;<span class=\"cpu-clock-lt-time\">"+hours+":"+minutes+":"+seconds+" "+dn+"</span><br />";
     $('#clock').html(cdate);
     setTimeout("getthedate()",1000); 
 }
