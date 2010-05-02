@@ -49,7 +49,7 @@ class DownloadClass {
 	 * @param string $auth In format username:password
 	 * @param array $params This parameter allows you to add extra _GET values to be passed on
 	 */
-	public function RedirectDownload($link, $FileName, $cookie = 0, $post = 0, $referer = 0, $auth = "", $params = array()) {
+	public function RedirectDownload($link, $FileName, $cookie = 0, $post = 0, $referer = 0, $force_name = 0, $auth = "", $params = array() ) {
 		global $pauth;
 		if (!$referer) {
 			global $Referer;
@@ -85,6 +85,12 @@ class DownloadClass {
 			($_POST ["uploadlater"] ? "&uploadlater=".$_POST["uploadlater"]."&uploadtohost=".urlencode($_POST['uploadtohost']) : "").
 			($_POST ['autoclose'] ? "&autoclose=1" : "").
 			(isset($_GET["audl"]) ? "&audl=doum" : "") . $addon;
+			
+		if ( $force_name )
+		{
+			$loc = $loc . "&force_name=" . urlencode ( $force_name );
+		}
+			
 		insert_location ( $loc );
 	}
 	

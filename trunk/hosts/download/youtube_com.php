@@ -83,7 +83,7 @@ class youtube_com extends DownloadClass
 		{
 			// Add the force_name this way:
 			$params = array ('force_name' => $FileName);
-			$this->RedirectDownload ($furl, $FileName, $cookies, 0, $refmatch [1], "", $params);
+			$this->RedirectDownload ($furl, $FileName, $cookies, 0, $refmatch [1], 0, "", $params);
 		}
 	}
 }
