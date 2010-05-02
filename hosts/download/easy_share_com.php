@@ -53,7 +53,7 @@ class easy_share_com extends DownloadClass
 		$post ["captcha"] = "";
 		$post ["id"] = $id;
 		
-		$this->RedirectDownload( $Href, $FileName, $cookies, $post, $Referer, $pauth );
+		$this->RedirectDownload( $Href, $FileName, $cookies, $post, $Referer, 0, $pauth );
 		exit ();
 	}
 	
@@ -99,7 +99,7 @@ class easy_share_com extends DownloadClass
 		
 		$cookie = $cook . "; " . $this->BiscottiDiKaox ( $page );
 	
-		$this->RedirectDownload( $Href, $FileName, $cookie, 0, $Referer, $pauth );
+		$this->RedirectDownload( $Href, $FileName, $cookie, 0, $Referer, 0, $pauth );
 		exit ();
 	}
 	
