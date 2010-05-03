@@ -3,7 +3,7 @@ if (!defined('RAPIDLEECH')) {
   require('../deny.php');
   exit;
 }
-// Arquivo para o idioma Português-BR
+// Arquivo para o idioma Portugu�s-BR
 // You should always use this file as a template for translating
 
 $lang[1]	=	'Acesso negado';
@@ -342,55 +342,55 @@ $lang[333]	=	'Plugins';
 $lang[334]	=	'Auto Baixar';
 $lang[335]	=	'Auto Enviar';
 $lang[336]	=	'Tamanho do arquivo &eacute; limitado a ';
-$lang[337]	=	'Limite de tamanho do arquivo: ';
+$lang[337]	=	'Tamanho limite do arquivo: ';
 $lang[338]	=	'Rar Files';
 $lang[339]	=	'Unrar Files';
-$lang[340]	=	'Error detected';
-$lang[341]	=	'click here to expand';
-$lang[342]	=	'You can drag window from here';
-$lang[343]	=	'Can not find "rar"<br />You may need to download it and extract "rar" to "/rar/" directory';
-$lang[344]	=	'Files that will be archived:';
-$lang[345]	=	'Archive name:';
-$lang[346]	=	'Options:';
-$lang[347]	=	'Compresion level:';
-$lang[348]	=	'Store';
-$lang[349]	=	'Fastest';
-$lang[350]	=	'Fast';
+$lang[340]	=	'Erro detectado';
+$lang[341]	=	'Clique aqui para ampliar';
+$lang[342]	=	'Voc&ecirc; pode arrastar a janela daqui';
+$lang[343]	=	'N&atilde;o &eacute; poss&iacute;vel encontrar &quot;rar&quot;<br />Voc&ecirc; pode precisar fazer o download e extrair &quot;rar&quot; para o diret&oacute;rio &quot;/rar/&quot;';
+$lang[344]	=	'Os arquivos que ser&atilde;o arquivados:';
+$lang[345]	=	'Nome do arquivo:';
+$lang[346]	=	'Op&ccedil;&otilde;es:';
+$lang[347]	=	'N&iacute;vel de compress&atilde;o:';
+$lang[348]	=	'Armazenar';
+$lang[349]	=	'Mais r&aacute;pido';
+$lang[350]	=	'R&aacute;pido';
 $lang[351]	=	'Normal';
-$lang[352]	=	'Good';
-$lang[353]	=	'Best';
-$lang[354]	=	'Create volumes';
-$lang[355]	=	'Delete files after archiving';
-$lang[356]	=	'Create solid archive';
-$lang[357]	=	'Create recovery record';
-$lang[358]	=	'Test archive after compression';
-$lang[359]	=	'Use password';
-$lang[360]	=	'Encrypt file names';
-$lang[361]	=	'Set path inside archive';
+$lang[352]	=	'Bom';
+$lang[353]	=	'&Oacute;timo';
+$lang[354]	=	'Criar volumes';
+$lang[355]	=	'Excluir arquivos ap&oacute;s arquivamento';
+$lang[356]	=	'Criar arquivo s&oacute;lido';
+$lang[357]	=	'Criar um registro de recupera&ccedil;&atilde;o';
+$lang[358]	=	'Teste de arquivo ap&oacute;s a compress&atilde;o';
+$lang[359]	=	'Use a senha';
+$lang[360]	=	'Criptografar os nomes de arquivo';
+$lang[361]	=	'Definir o caminho dentro de arquivo';
 $lang[362]	=	'Rar';
-$lang[363]	=	'Creating archive: <b>%1$s</b>';
-$lang[364]	=	'Waiting...';
-$lang[365]	=	'Go back to file list';
-$lang[366]	=	'<b>Files from %1$s</b>:';
-$lang[367]	=	'Can not find "unrar"';
-$lang[368]	=	'Pasword needed to list files:';
-$lang[369]	=	'Pasword needed to extract files:';
-$lang[370]	=	'Error:%1$s';
-$lang[371]	=	'Try to list again';
-$lang[372]	=	'Unrar selected';
-$lang[373]	=	'<b>Extracting files from %1$s</b>:';
+$lang[363]	=	'Cria&ccedil;&atilde;o do arquivo: <b>%1$s</b>';
+$lang[364]	=	'Aguarde...';
+$lang[365]	=	'Voltar para a lista de arquivos';
+$lang[366]	=	'<b>Arquivos de %1$s</b>:';
+$lang[367]	=	'N&atilde;o &eacute; poss&iacute;vel encontrar "unrar"';
+$lang[368]	=	'Senha necess&aacute;ria para listar os arquivos:';
+$lang[369]	=	'Senha necess&aacute;ria para extrair os arquivos:';
+$lang[370]	=	'Erro:%1$s';
+$lang[371]	=	'Tente novamente listar';
+$lang[372]	=	'Unrar selecionados';
+$lang[373]	=	'<b>Extraindo arquivos de %1$s</b>:';
 $lang[374]	=	'Status:';
-$lang[375]	=	'Select text';
+$lang[375]	=	'Selecione o texto';
 $lang[376]  =   'Contas Premium :';
-$lang[377]	=	'37 [Video: MP4 1920×1080 | Audio: AAC 2ch 44.10kHz]';
-$lang[378]	=	'Close window';
-$lang[379]	=	'Files';
-$lang[380]	=	'MD5 change should only be applied to known working formats(i.e. .rar or .zip)<br />Do you want to continue?';
-$lang[381]	=	'MD5 of file <b>%1$s</b> changed';	// %1$s = filename
-$lang[382]	=	'Error changing the MD5 of the file <b>%1$s</b>!';	// %1$s = filename
-$lang[383]	=	'MD5 change';
+$lang[377]	=	'37 [V&iacute;deo: MP4 1920×1080 | &Aacute;udio: AAC 2ch 44.10kHz]';
+$lang[378]	=	'Fechar a janela';
+$lang[379]	=	'Arquivos';
+$lang[380]	=	'Mudan&ccedil;a de MD5 deve ser aplicado apenas para os formatos conhecidos de trabalho (ie. rar ou. zip)<br />Voc&ecirc; quer continuar?';
+$lang[381]	=	'MD5 do arquivo <b>%1$s</b> alterado';	// %1$s = filename
+$lang[382]	=	'Erro ao alterar o MD5 do arquivo <b>%1$s</b>!';	// %1$s = filename
+$lang[383]	=	'MD5 mudan&ccedil;a';
 $lang[384]	=	'Match text';
 $lang[385]	=	'Match';
-$lang[386]	=	'Ignore case';
-$lang[387]	=	'Put each file on a separated archive';
+$lang[386]	=	'Ignore caso';
+$lang[387]	=	'Coloque cada arquivo em um arquivo separado';
 ?>
