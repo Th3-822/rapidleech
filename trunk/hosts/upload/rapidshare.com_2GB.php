@@ -187,7 +187,7 @@ class RS
 			$bufferlen = strlen($buffer);
 			$cursize += $bufferlen;
 			$sentbytes = fwrite($socket, "$buffer");
-			echo "Bytes written: $sentbytes<br />";
+			//echo "Bytes written: $sentbytes<br />";
 			$time = getmicrotime () - $timeStart;
 			$chunkTime = $time - $lastChunkTime;
 			$chunkTime = $chunkTime ? $chunkTime : 1;
