@@ -14,6 +14,7 @@ class youtube_com extends DownloadClass
 		$this->page = $this->GetPage($link);
 		if (!preg_match('#fmt_url_map=(.+?)&#', $this->page, $fmt_url_map)) html_error('Video link not found.');
 		$fmt_url_maps = preg_split('%,%', urldecode($fmt_url_map[1]));
+		//var_dump($fmt_url_maps); exit;
 		$fmts = array(37,22,35,18,34,6,5,0,17,13);
 		$yt_fmt = $_POST['yt_fmt'];
 
@@ -83,10 +84,10 @@ class youtube_com extends DownloadClass
 		{
 			// Add the force_name this way:
 			$params = array ('force_name' => $FileName);
-			$this->RedirectDownload ($furl, $FileName, $cookies, 0, $refmatch [1], 0, "", $params);
+			$this->RedirectDownload (urldecode($furl), $FileName, $cookies, 0, $refmatch [1], 0, "", $params);
 		}
 	}
 }
 //re-written by szal based on original plugin by eqbal
-//updated 02 Apr 2010
+//updated 09 May 2010
 ?>
