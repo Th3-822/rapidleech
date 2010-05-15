@@ -98,27 +98,88 @@ class DownloadClass {
 		insert_timer ( $countDown, "Waiting link timelock" );
 	}
 	
-	public function EnterCaptcha($captchaImg, $inputs) {
-		echo('<form name="dl" action="'.$_SERVER['PHP_SELF'].'" method="post">');
-		foreach ($inputs as $name => $input) {
-			echo('<input type="hidden" name="'.$name.'" id="'.$name.'" value="'.$input.'" />');
-		}
-		echo('<h4>'.lang(301).' <img src="'.$captchaImg.'" /> '.lang(302).': <input type="text" name="captcha" size="5" />&nbsp;&nbsp;<input type="submit" onclick="return check();" value="Transload File" /></h4>');
-		echo('<script type="text/javascript">');
-		echo('function check() {');
-		echo('var captcha=document.dl.captcha.value;');
-		echo('if (captcha == "") { window.alert("You didn\'t enter the image verification code"); return false; }');
-		echo('else { return true; }');
-		echo('}');
-		echo('</script>');
-		echo('</form>');
-		echo('</body>');
-		echo('</html>');
+	/**
+	 * Use this function to create Captcha display form
+	 * 
+	 * @param string $captchaImg                    The link of the captcha image or downloaded captcha image on server
+	 * @param array $inputs                             Key Value pairs for html form input elements ( these elements will be hidden form elements )
+	 * @param string $captchaSize                   The size of captcha text box
+	 */
+	public function EnterCaptcha( $captchaImg, $inputs, $captchaSize = '5' ) 
+	{
+		$defaultParam_array = array();
+		$defaultParam_array["comment"] = $_GET ["comment"];
+		$defaultParam_array["email"] = $_GET ["email"];
+		$defaultParam_array["partSize"] = $_GET ["partSize"];
+		$defaultParam_array["method"] = $_GET ["method"];
+		$defaultParam_array["proxy"] = $_GET ["proxy"];
+		$defaultParam_array["proxyuser"] = $_GET ["proxyuser"];
+		$defaultParam_array["proxypass"] = $_GET ["proxypass"];
+		$defaultParam_array["path"] = $_GET ["path"];			
+		
+		$this->EnterCaptchaDefault( $captchaImg, $inputs, $captchaSize, $defaultParam_array );
 	}
 	
+	/**
+	 * Use this function to create Captcha display form
+	 * 
+	 * @param string $captchaImg                    The link of the captcha image or downloaded captcha image on server
+	 * @param array $inputs                             Key Value pairs for html form input elements ( these elements will be hidden form elements )
+	 * @param string $captchaSize                   The size of captcha text box
+	 * @param array $defaultParam_array         Default Key Value pairs like proxy, method, email etc
+	 */
+	public function EnterCaptchaDefault( $captchaImg, $inputs, $captchaSize = '5', $defaultParam_array = array() ) {
+		echo "\n";
+		echo('<form name="dl" action="'.$_SERVER['PHP_SELF'].'" method="post">');
+		echo "\n";
+		
+		foreach ( $inputs as $name => $input ) 
+		{
+			echo('<input type="hidden" name="'.$name.'" id="'.$name.'" value="'.$input.'" />');
+			echo "\n";
+		}
+		
+		if ( !empty( $defaultParam_array ) )
+		{
+			foreach ( $defaultParam_array as $name => $input ) 
+			{
+				echo('<input type="hidden" name="'.$name.'" id="'.$name.'" value="'.$input.'" />');
+				echo "\n";
+			}	
+		}
+		
+		echo('<h4>'.lang(301).' <img src="'.$captchaImg.'" /> '.lang(302).': <input type="text" name="captcha" size="' . $captchaSize . '" />&nbsp;&nbsp;');
+		echo "\n";
+		echo( '<input type="submit" onclick="return check();" value="Enter Captcha" /></h4>');
+		echo "\n";
+		echo('<script type="text/javascript">');
+		echo "\n";
+		echo('function check() {');
+		echo "\n";
+		echo('var captcha=document.dl.captcha.value;');
+		echo "\n";
+		echo('if (captcha == "") { window.alert("You didn\'t enter the image verification code"); return false; }');
+		echo "\n";
+		echo('else { return true; }');
+		echo "\n";
+		echo('}');
+		echo "\n";
+		echo('</script>');
+		echo "\n";
+		echo('</form>');
+		echo "\n";
+		echo('</body>');
+		echo "\n";
+		echo('</html>');
+	}
+
 	public function changeMesg($mesg) {
 		echo('<script>document.getElementById(\'mesg\').innerHTML=\''.stripslashes($mesg).'\';</script>');
 	}
 }
 
+/**********************************************************	
+Added support of force_name in RedirectDownload function by Raj Malhotra on 02 May 2010
+Fixed  EnterCaptcha function ( Re-Write )  by Raj Malhotra on 16 May 2010
+**********************************************************/
 ?>
