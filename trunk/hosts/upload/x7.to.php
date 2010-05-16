@@ -38,7 +38,7 @@ function generate($len){
 <script>document.getElementById('info').style.display='none';</script>
 <?
 	$upagent = "Shockwave Flash";
-	$upfiles = upfile($url["host"], defport($url), $url["path"].($url["query"] ? "?".$url["query"] : ""), 0, 0, $upost, $lfile, $lname, "Filedata",0,$upagent);
+	$upfiles = upfile( $url["host"], defport($url), $url["path"].($url["query"] ? "?".$url["query"] : ""), 0, 0, $upost, $lfile, $lname, "Filedata", "", 0, 0, $upagent );
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
 <?
@@ -46,6 +46,9 @@ function generate($len){
 	$access_pass = $code;
 	$download_link= "http://x7.to/".ltrim($ddl);
 	
-// Made by Baking 19/12/2009 07:39
-// Upgraded by Baking 25/12/2009 12:30
+/**************************************************\  
+Made by Baking 19/12/2009 07:39
+Upgraded by Baking 25/12/2009 12:30
+Fixed by Raj Malhotra 16 May 2010 => Fixed Couldn't connect to Shockwave Flash at port 80
+\**************************************************/
 ?>
