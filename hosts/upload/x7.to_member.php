@@ -98,7 +98,7 @@ if ($continue_up)
 <script>document.getElementById('info').style.display='none';</script>
 <?
 	$upagent = "Shockwave Flash";
-	$upfiles = upfile($url["host"], defport($url), $url["path"].($url["query"] ? "?".$url["query"] : ""), 0, 0, $upost, $lfile, $lname, "Filedata",0,$upagent);
+$upfiles = upfile( $url["host"], defport($url), $url["path"].($url["query"] ? "?".$url["query"] : ""), 0, 0, $upost, $lfile, $lname, "Filedata", "", 0, 0, $upagent );
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
 <?
@@ -113,4 +113,5 @@ if ($continue_up)
 // Made by Baking 20/11/2009 13:03
 // Upgraded by Baking 25/12/2009 12:30
 // Member by Baking 25/12/2009 13:06
+// Fixed by PALOOO 18/05/2010 05:08
 ?>
