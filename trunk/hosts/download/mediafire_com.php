@@ -1,6 +1,5 @@
 <?php
 
-
 if (!defined('RAPIDLEECH'))
 {
 	require_once("index.html");
@@ -52,7 +51,7 @@ is_page($page);
         $Href="http://www.mediafire.com".$Href;
         }
     $Url = parse_url($Href);
-    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
+    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
     is_page($page);
                    }
         }
@@ -93,7 +92,7 @@ $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Ur
         if($options["download_dir"]){
           $imgfile=$options["download_dir"]."mediafire_captcha.jpg";    
         }else{
-              $imgfile=download_dir."mediafire_captcha.jpg";
+              $imgfile=$download_dir."mediafire_captcha.jpg";
         } 
         if (file_exists($imgfile)){ unlink($imgfile);} 
         write_file($imgfile, $pass_img);
@@ -118,8 +117,11 @@ $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Ur
         $string=DecoMfire($ev);
          
          $fid = cut_str (";".$string ,';' ,'(' );
-		 $snap = cut_str ( $page ,$fid ,'io.style' );
-		 $frid = cut_str ( $snap ,"io=document.getElementById('" ,"'" );
+	//	 $snap = cut_str ( $page ,$fid ,'io.style' );
+         $snap = cut_str ( $page ,$fid ,';}} ' );   
+         $snap=DecoMfire($snap);
+         $frid =  cut_str ( $snap ,'document.getElementById("' ,'"' ); 
+	//	 $frid = cut_str ( $snap ,"io=document.getElementById('" ,"'" );
 		 $meta1= cut_str ( $string ,"('" ,"')" );
 		 $dat=explode("','",$meta1);
 		 
@@ -130,28 +132,26 @@ $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Ur
 	     $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, 0, 0, $_GET["proxy"],$pauth);
          is_page($page);
 
-if (preg_match_all("/;var.+?unescape\(.+?eval/",$page,$matches)){
-    
-foreach($matches[0] as $tmp){
-    
-$string=DecoMfire($tmp);
-if( strpos( $string ,$frid)!== false ){
-$link=finalize($string,$page);
-break;
-}  
+$try1=cut_str($page,$frid,'">');
+if ($try1){
+    preg_match('/;\w+?=unescape\(.+?eval\(/i', $page, $result);
+    $vall=DecoMfire($result[0]);   
+    $link=finalize($try1,$vall);    
+} else{
+   
+preg_match_all('/;\w+?=unescape\(.+?eval\(/i', $page, $result, PREG_PATTERN_ORDER); 
+foreach ( $result[0] as $tmp){ 
+$string=DecoMfire($tmp,true);
+$all.=$string;
 }
-}else{
-preg_match_all("/if\(.+?<\/a>/",$page,$matches) ;
-foreach($matches[0] as $tmp){    
-
-if( strpos( $tmp ,$frid)!== false ){
-$link=finalize($tmp,$page);
-break;
-}  
-}
- $link=finalize($tmp,$page);     
+$metadata=cut_str($all,$frid,'">');
+$link=finalize($metadata,$all);  
+    
 }
 
+if(!$link){
+    html_error("Download link fail. Please reattempt.");
+}
 $Url = parse_url($link);
 $FileName = basename($link);
 
@@ -178,9 +178,13 @@ insert_location ( $loc );
 //////////////////////////////////////////////////////////// END FREE ///////////////////////////////////////////////////////////////
 
 
-function DecoMfire ($string){
+function DecoMfire ($string,$adding=false){
 do{
 $snap = cut_str ( $string ,'unescape(' ,';eval' );
+ if ($adding){
+$otherSN .= cut_str ( ">>>".$string ,">>>",'unescape('  );
+$otherDR .= cut_str ( $string.">>>" ,';eval', '>>>');  
+ }
 $cont = cut_str ( $snap ,"i<" ,";" );
 if(!is_numeric($cont)){
 $cont = cut_str ( $string ,$cont."=" ,";" );  
@@ -201,27 +205,32 @@ $string=$tmp;
 }
 $tmp="";
 }while(strpos( $string ,"eval(")!== false);
-return $string;
+return $otherSN.$string.$otherDR;
 }
 
-function Finalize ($string,$page){
-$vall = cut_str ( $string ,"'/' +" ,"+'g/'" );
-$hst =  cut_str ( $string ,"http://\" + '" ,"'" ); 
-$id =   cut_str ( $string ,"g/' + '" ,"'" ); 
-$fl =   cut_str ( $string ,$id."' + '/" ,"\"" ); 
+
+function Finalize ($metalink,$vars){
+$vall = cut_str ( $metalink ,'" +' ,'+ "' );
+$hst =  cut_str ( $metalink ,'http://' ,'/' ); 
+$id =   cut_str ( $metalink ,'"g/' ,"/" );
+if($vall && $hst && $id){
+$fl =   cut_str ( $metalink ,$id.'/' ,'\\' ); 
 $temps = explode("+",$vall);
 foreach ($temps as $temp)
 {
     if (empty($temp)) continue;
-    preg_match('/'.trim($temp).' ?= ?\'(.*?)\';/', $page, $temp2);
+    preg_match('/'.trim($temp).' ?= ?\'(.*?)\';/', $vars, $temp2);
     $mpath1.= $temp2[1];
 }
 $Href = 'http://'.$hst.'/'.$mpath1.'g/'.$id.'/'.$fl;
 return $Href;
+}else{
+    return false;
+}
 }
 /*************************\
  Written by kaox 11-mar-10
- Fixed    by kaox 03-apr-10
+ Fixed    by kaox 18-may-10
 \*************************/
 
 ?>
