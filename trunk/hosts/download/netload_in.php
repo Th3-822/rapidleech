@@ -5,11 +5,11 @@ if (!defined('RAPIDLEECH'))
   exit;
   }
 
-if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["netload"]["user"] && $premium_acc["netload"]["pass"]))
+if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["netload_in"]["user"] && $premium_acc["netload_in"]["pass"]))
   {
 	$post = array();
-	$post["txtuser"] = $_GET["premium_user"] ? $_GET["premium_user"] : $premium_acc["netload"]["user"];
-	$post["txtpass"] = $_GET["premium_pass"] ? $_GET["premium_pass"] : $premium_acc["netload"]["pass"];
+	$post["txtuser"] = $_GET["premium_user"] ? $_GET["premium_user"] : $premium_acc["netload_in"]["user"];
+	$post["txtpass"] = $_GET["premium_pass"] ? $_GET["premium_pass"] : $premium_acc["netload_in"]["pass"];
 	$post["txtcheck"] = "login";
 	$post["txtlogin"] = "";
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, "/", 0, 0, $post, 0, $_GET["proxy"],$pauth);
@@ -51,7 +51,7 @@ if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pas
 //	$Href = $org_link[1];
 	$Url = parse_url($Href);
 	$FileName = !$FileName ? basename($Url["path"]) : $FileName;
-	insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($link).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+	insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($link).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=1".($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
   }
 else
   {
@@ -152,4 +152,5 @@ if($nl == "ok"){
 	print	"<input name=\"Submit\" value=\"Submit\" type=\"submit\"></form>";
 }
   }
+//updated 05-jun-2010 for standard auth system (szal)
 ?>

@@ -11,7 +11,7 @@ class rapidshare_com extends DownloadClass
 	{
 		global $premium_acc;
 		if (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) ||
-			($_REQUEST ["premium_acc"] == "on" && $premium_acc ["rs_com"]))
+			($_REQUEST ["premium_acc"] == "on" && $premium_acc ["rapidshare_com"]))
 		{
 			$this->DownloadPremium($link);
 		}
@@ -177,9 +177,9 @@ class rapidshare_com extends DownloadClass
 		$FileName = basename ( trim ( cut_str ( $page, '<form action="', '"' ) ) );
 		$Url = parse_url($link);
 		! $FileName ? $FileName = basename ( $Url ["path"] ) : "";
-		if (isset ( $premium_acc ["rs_com"] ['user'] ) || $_REQUEST["premium_user"] && $_REQUEST['premium_pass'])
+		if (isset ( $premium_acc ["rapidshare_com"] ['user'] ) || ($_REQUEST["premium_user"] && $_REQUEST['premium_pass']))
 		{
-			$auth = $_REQUEST ["premium_user"] ? base64_encode ( $_REQUEST ["premium_user"] . ":" . $_REQUEST ["premium_pass"] ) : base64_encode ( $premium_acc ["rs_com"] ["user"] . ":" . $premium_acc ["rs_com"] ["pass"] );
+			$auth = $_REQUEST ["premium_user"] ? base64_encode ( $_REQUEST ["premium_user"] . ":" . $_REQUEST ["premium_pass"] ) : base64_encode ( $premium_acc ["rapidshare_com"] ["user"] . ":" . $premium_acc ["rapidshare_com"] ["pass"] );
 			$page = $this->GetPage($link,0,0,0,$auth);
 			is_present ( $page, "password is incorrect" );
 			is_present ( $page, "Account not found" );
@@ -189,7 +189,7 @@ class rapidshare_com extends DownloadClass
 				$Href = trim ( cut_str ( $page, "Location:", "\n" ) );
 				$Url = parse_url ( $Href );
 
-				$this->RedirectDownload($Href,$FileName, 0, 0, 0, 0, $auth);
+				$this->RedirectDownload($Href,$FileName, 0, 0, 0, 0, 1);
 			}
 			else
 			{
@@ -216,7 +216,7 @@ class rapidshare_com extends DownloadClass
 					$Url = parse_url ( $Href );
 
 					$success = 1;
-					$this->RedirectDownload($Href,$FileName, 0, 0, 0, 0, $auth);
+					$this->RedirectDownload($Href,$FileName, 0, 0, 0, 0, 1);
 					break;
 				}
 			}
@@ -229,4 +229,5 @@ class rapidshare_com extends DownloadClass
 }
 // updated by rajmalhotra  on 17 Dec 09 :  added some error messages
 // Fixed by rajmalhotra  on 28 Dec 09
+//updated 05-jun-2010 for standard auth system (szal)
 ?>
