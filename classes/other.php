@@ -485,4 +485,39 @@ function lang($id) {
 	include('languages/'.basename($options['default_language']).'.php');
 	return $lang[$id];
 }
+
+#need to keep premium account cookies safe!
+function hideCookie($string, $secretkey)
+{
+	require 'class.pcrypt.php';
+
+	/*
+	MODE: MODE_ECB or MODE_CBC
+	ALGO: BLOWFISH
+	KEY:  Your secret key :) (max lenght: 56)
+	*/
+	$crypt = new pcrypt(MODE_CBC, "BLOWFISH", "$secretkey");
+
+	// to encrypt
+	$ciphertext = $crypt->encrypt($string);
+
+	return $ciphertext;
+}
+
+function showCookie($string, $secretkey)
+{
+	require 'class.pcrypt.php';
+
+	/*
+	MODE: MODE_ECB or MODE_CBC
+	ALGO: BLOWFISH
+	KEY:  Your secret key :) (max lenght: 56)
+	*/
+	$crypt = new pcrypt(MODE_CBC, "BLOWFISH", "$secretkey");
+
+	// to decrypt
+	$decrypted  = $crypt->decrypt($string);
+
+	return $decrypted;
+}
 ?>

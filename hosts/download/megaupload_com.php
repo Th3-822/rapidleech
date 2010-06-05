@@ -30,7 +30,7 @@ class megaupload_com extends DownloadClass {
 		}
 		if (isset($_REQUEST['premium_acc'])) {
 			if (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) ||
-				($_REQUEST ["premium_acc"] == "on" && $premium_acc ["megaupload"] ["user"] && $premium_acc ["megaupload"] ["pass"] ||
+				($_REQUEST ["premium_acc"] == "on" && $premium_acc ["megaupload_com"] ["user"] && $premium_acc ["megaupload_com"] ["pass"] ||
 				$_REQUEST ["mu_acc"] == "on" && $_REQUEST ["mu_cookie"]) || $_REQUEST ["mu_acc"] == "on" && $mu_cookie_user_value) {
 				$this->DownloadPremium($link);
 			} else {
@@ -182,7 +182,7 @@ class megaupload_com extends DownloadClass {
 		}
 	}
 	private function DownloadPremium($link) {
-		global $Referer, $premium_acc, $mu_cookie_user_value;
+		global $Referer, $premium_acc, $mu_cookie_user_value, $secretkey;
 		if ($_GET['step'] == 1) {
                 $post ["filepassword"] = $_GET ['filepassword'];
                 $this->GetPage($link,0,$post,$Referer);
@@ -191,8 +191,8 @@ class megaupload_com extends DownloadClass {
                 $post ['login'] = 1;
                 $post ['redir'] = 1;
                 
-                $post ["username"] = $_GET ["premium_user"] ? $_GET ["premium_user"] : $premium_acc ["megaupload"] ["user"];
-                $post ["password"] = $_GET ["premium_pass"] ? $_GET ["premium_pass"] : $premium_acc ["megaupload"] ["pass"];
+                $post ["username"] = $_GET ["premium_user"] ? $_GET ["premium_user"] : $premium_acc ["megaupload_com"] ["user"];
+                $post ["password"] = $_GET ["premium_pass"] ? $_GET ["premium_pass"] : $premium_acc ["megaupload_com"] ["pass"];
                 $page = $this->GetPage('http://www.megaupload.com/?c=login',0,$post);
                 
                 $premium_cookie = trim ( cut_str ( $page, "Set-Cookie:", ";" ) );
@@ -216,19 +216,22 @@ class megaupload_com extends DownloadClass {
                         html_error("You should insert link with format: http://www.megaupload.com/?d=xxxxxxxx|password");
                 }
         }
+
+		//don't send raw cookie, encrypt it first
+		$hidepremiumcookie = hideCookie($premium_cookie, $secretkey);
         
         if (stristr ( $page, "Location:" )) {
                 $Href = trim ( cut_str ( $page, "Location: ", "\n" ) );
                 $Url = parse_url ( html_entity_decode($Href, ENT_QUOTES, 'UTF-8') );
-                $FileName = basename ( $Url ["path"] );                
-                $this->RedirectDownload($Href,$FileName,$premium_cookie);
+                $FileName = basename ( $Url ["path"] );
+                $this->RedirectDownload($Href,$FileName,$hidepremiumcookie);
                 
         } elseif ($page = cut_str ( $page, 'downloadlink">', '</div>' )) {
                 $Href = cut_str ( $page, 'href="', '"' );
                 $Referer = $link;
                 $Url = parse_url ( html_entity_decode($Href, ENT_QUOTES, 'UTF-8') );
                 $FileName = basename ( $Url ["path"] );                
-                $this->RedirectDownload($Href,$FileName,$premium_cookie);
+                $this->RedirectDownload($Href,$FileName,$hidepremiumcookie);
         } else {
                 html_error ( "Download link not found", 0 );
         }
@@ -237,4 +240,5 @@ class megaupload_com extends DownloadClass {
 
 // Updated by rajmalhotra on 10 Jan 2010 MegaUpload captcha is downloaded on server, then display
 // Fixed by rajmalhotra on 20 Jan 2010 Fixed for Download link not found in happy hour
+// Updated 05-June-2010 for cookie encryption (szal)
 ?>
