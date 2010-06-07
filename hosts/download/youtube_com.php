@@ -74,7 +74,7 @@ class youtube_com extends DownloadClass
 		if (!$video_id) preg_match ('#video_id=(.+?)&#', $this->page, $video_id);
 
 		$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode (trim($title[1]))) . (isset ($_POST ['yt_fmt']) && $_POST ['yt_fmt'] !== 'highest' ? '-[' . $video_id[1] . '][f' . $_POST ['yt_fmt'] . ']' : '-[' . $video_id[1] . '][f' . $fmt . ']') . $ext;
-		
+
 		if ($_POST ['ytdirect'] == 'on')
 		{
 			echo "<br /><br /><h4><a style='color:yellow' href='" . urldecode($furl) . "'>Click here or copy the link to your download manager to download</a></h4>";
@@ -83,11 +83,11 @@ class youtube_com extends DownloadClass
 		else
 		{
 			// Add the force_name this way:
-			$params = array ('force_name' => $FileName);
-			$this->RedirectDownload (urldecode($furl), $FileName, $cookies, 0, $refmatch [1], 0, "", $params);
+			//$params = array ('force_name' => $FileName);
+			$this->RedirectDownload (urldecode($furl), $FileName, $cookies, 0, $refmatch [1], $FileName);
 		}
 	}
 }
 //re-written by szal based on original plugin by eqbal
-//updated 09 May 2010
+//updated 07 June 2010
 ?>
