@@ -216,22 +216,19 @@ class megaupload_com extends DownloadClass {
                         html_error("You should insert link with format: http://www.megaupload.com/?d=xxxxxxxx|password");
                 }
         }
-
-		//don't send raw cookie, encrypt it first
-		$hidepremiumcookie = hideCookie($premium_cookie, $secretkey);
         
         if (stristr ( $page, "Location:" )) {
                 $Href = trim ( cut_str ( $page, "Location: ", "\n" ) );
                 $Url = parse_url ( html_entity_decode($Href, ENT_QUOTES, 'UTF-8') );
                 $FileName = basename ( $Url ["path"] );
-                $this->RedirectDownload($Href,$FileName,$hidepremiumcookie);
+                $this->RedirectDownload($Href,$FileName,$premium_cookie);
                 
         } elseif ($page = cut_str ( $page, 'downloadlink">', '</div>' )) {
                 $Href = cut_str ( $page, 'href="', '"' );
                 $Referer = $link;
                 $Url = parse_url ( html_entity_decode($Href, ENT_QUOTES, 'UTF-8') );
-                $FileName = basename ( $Url ["path"] );                
-                $this->RedirectDownload($Href,$FileName,$hidepremiumcookie);
+                $FileName = basename ( $Url ["path"] );
+                $this->RedirectDownload($Href,$FileName,$premium_cookie);
         } else {
                 html_error ( "Download link not found", 0 );
         }
@@ -240,5 +237,5 @@ class megaupload_com extends DownloadClass {
 
 // Updated by rajmalhotra on 10 Jan 2010 MegaUpload captcha is downloaded on server, then display
 // Fixed by rajmalhotra on 20 Jan 2010 Fixed for Download link not found in happy hour
-// Updated 05-June-2010 for cookie encryption (szal)
+// Updated 08-June-2010 for cookie encryption (szal)
 ?>

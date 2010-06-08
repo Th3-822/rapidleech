@@ -80,7 +80,7 @@ class DownloadClass {
 			"&link=" . urlencode ( $link ) . ($_GET ["add_comment"] == "on" ? "&comment=" . 
 			urlencode ( $_GET ["comment"] ) : "") . $auth . ($pauth ? "&pauth=$pauth" : "") . 
 			($_GET ["uploadlater"] ? "&uploadlater=".$_GET["uploadlater"]."&uploadtohost=".$_GET['uploadtohost'] : "") .
-			"&cookie=" . urlencode($cookie) .
+			"&cookie=" . ($cookie ? hideCookie(urlencode($cookie)) : 0) .
 			"&post=" . urlencode ( serialize ( $post ) ) .
 			($_POST ["uploadlater"] ? "&uploadlater=".$_POST["uploadlater"]."&uploadtohost=".urlencode($_POST['uploadtohost']) : "").
 			($_POST ['autoclose'] ? "&autoclose=1" : "").

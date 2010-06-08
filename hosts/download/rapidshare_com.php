@@ -198,12 +198,12 @@ class rapidshare_com extends DownloadClass
 		}
 		else
 		{
-			$totalpremium = count ( $premium_acc ["rs_com"] );
+			$totalpremium = count ( $premium_acc ["rapidshare_com"] );
 			$success = 0;
 			for($i = 0; $i < $totalpremium; $i++)
 			{
-				$acc = $premium_acc ["rs_com"] [$i] ['user'];
-				$pass = $premium_acc ["rs_com"] [$i] ['pass'];
+				$acc = $premium_acc ["rapidshare_com"] [$i] ['user'];
+				$pass = $premium_acc ["rapidshare_com"] [$i] ['pass'];
 				$auth = base64_encode ( $acc . ":" . $pass );
 				$page = $this->GetPage($link,0,0,0,$auth);
 				if (stristr($page,"Account found, but password is incorrect")) continue;
@@ -229,5 +229,5 @@ class rapidshare_com extends DownloadClass
 }
 // updated by rajmalhotra  on 17 Dec 09 :  added some error messages
 // Fixed by rajmalhotra  on 28 Dec 09
-//updated 05-jun-2010 for standard auth system (szal)
+//updated 08-jun-2010 for standard auth system (szal)
 ?>

@@ -487,8 +487,9 @@ function lang($id) {
 }
 
 #need to keep premium account cookies safe!
-function hideCookie($string, $secretkey)
+function hideCookie($string)
 {
+	global $secretkey;
 	require 'class.pcrypt.php';
 
 	/*
@@ -504,10 +505,11 @@ function hideCookie($string, $secretkey)
 	return $ciphertext;
 }
 
-function showCookie($string, $secretkey)
+function showCookie($string)
 {
+	global $secretkey;
 	require 'class.pcrypt.php';
-
+	
 	/*
 	MODE: MODE_ECB or MODE_CBC
 	ALGO: BLOWFISH
