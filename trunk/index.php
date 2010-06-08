@@ -5,7 +5,7 @@ set_time_limit (0);
 ini_alter ("memory_limit", "1024M");
 ob_end_clean ();
 ob_implicit_flush (true);
-ignore_user_abort (1);
+ignore_user_abort (true);
 clearstatcache ();
 error_reporting (6135);
 $nn = "\r\n";
@@ -21,7 +21,7 @@ define ('HOST_DIR', 'hosts/');
 define ('IMAGE_DIR', 'images/');
 define ('CLASS_DIR', 'classes/');
 define ('CONFIG_DIR', 'configs/');
-define ('BUILD', '01Apr2010');
+define ('BUILD', '08Jun2010');
 define ('CREDITS', '<a href="http://www.rapidleech.com/" class="rl-link"><b>RapidLeech</b></a>&nbsp;<b class="rev-dev">PlugMod (eqbal) rev. ' . $rev_num . '</b> <span class="rev-dev">' . $dev_name . '</span><br><small class="small-credits">Credits to Pramode &amp; Checkmate &amp; Kloon</small><br /><p class="rapidleechhost"><a href="http://www.rapidleechhost.com/aff.php?aff=001" target="_blank">RapidleechHost Offical Hosting</a></p>');
 
 require_once(CONFIG_DIR . 'setup.php');
@@ -279,7 +279,7 @@ else
 		$_GET ["link"] = urldecode (trim ($_GET ["link"]));
 
 		$_GET ["post"] = $_GET ["post"] ? unserialize (stripslashes (urldecode (trim ($_GET ["post"])))) : 0;
-		$_GET ["cookie"] = $_GET ["cookie"] ? showCookie(urldecode(trim($_GET["cookie"])), $secretkey) : 0;
+		$_GET ["cookie"] = $_GET ["cookie"] ? showCookie(urldecode(trim($_GET["cookie"]))) : "";
 		// $resume_from = $_GET["resume"] ? intval(urldecode(trim($_GET["resume"]))) : 0;
 		// if ($_GET["resume"]) {unset($_GET["resume"]);}
 		$redirectto = "";
@@ -288,7 +288,7 @@ else
 
 		if ($_GET['auth'] == 1)
 		{
-			if (!preg_match("|^(?:.+\.)?(.+\..+)$|i", $_GET ["host"], $hostmatch)) html_error('No valid hostname found!');
+			if (!preg_match("|^(?:.+\.)?(.+\..+)$|i", $_GET ["host"], $hostmatch)) html_error('No valid hostname found for authorisation!');
 			$hostmatch = str_replace('.', '_', $hostmatch[1]);
 			if ($premium_acc ["$hostmatch"] && $premium_acc ["$hostmatch"] ["user"] && $premium_acc ["$hostmatch"] ["pass"])
 			{
