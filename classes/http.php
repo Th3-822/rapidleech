@@ -250,17 +250,22 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			}
 			return FALSE;
 		}
-		$ContentDisposition = trim ( cut_str ( $header, "Content-Disposition:", "\n" ) ) . "\n";
-			
-			if ($force_name) {
-				$FileName = $force_name;
-				$saveToFile = dirname ( $saveToFile ) . PATH_SPLITTER . $FileName;
-			} else {
+
+		if ($force_name)
+		{
+			$FileName = $force_name;
+			$saveToFile = dirname ( $saveToFile ) . PATH_SPLITTER . $FileName;
+		}
+		else
+		{
+			$ContentDisposition = trim ( cut_str ( $header, "Content-Disposition:", "\n" ) ) . "\n";
+			if ($ContentDisposition && stripos ( $ContentDisposition, "filename=" ) !== false)
+			{
 				$FileName = trim ( trim ( trim ( trim ( trim ( cut_str ( $ContentDisposition, "filename=", "\n" ) ), "=" ), "?" ), ";" ), '"' );
-				if (strpos($FileName,"/")) $FileName = basename($FileName);
+				if (strpos($FileName,"/") !== false) $FileName = basename($FileName);
 				$saveToFile = dirname ( $saveToFile ) . PATH_SPLITTER . $FileName;
 			}
-		
+		}		
 		
 		if (! empty ( $options['rename_prefix'] )) {
 			$File_Name = $options['rename_prefix'] . '_' . basename ( $saveToFile );
