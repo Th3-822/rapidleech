@@ -216,7 +216,7 @@ class rapidshare_com extends DownloadClass
 					$Url = parse_url ( $Href );
 
 					$success = 1;
-					$this->RedirectDownload($Href,$FileName, 0, 0, 0, 0, 1);
+					$this->RedirectDownload($Href,$FileName, 0, 0, 0, 0, encrypt($auth));
 					break;
 				}
 			}
