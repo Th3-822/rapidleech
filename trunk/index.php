@@ -286,7 +286,7 @@ else
 
 		$pauth = urldecode (trim ($_GET ["pauth"]));
 
-		if ($_GET['auth'] === 1)
+		if ($_GET['auth'] == 1)
 		{
 			if (!preg_match("|^(?:.+\.)?(.+\..+)$|i", $_GET ["host"], $hostmatch)) html_error('No valid hostname found for authorisation!');
 			$hostmatch = str_replace('.', '_', $hostmatch[1]);

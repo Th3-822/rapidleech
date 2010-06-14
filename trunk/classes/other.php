@@ -491,7 +491,7 @@ function encrypt($string)
 {
 	global $secretkey;
 	if (!$secretkey) return html_error('Value for $secretkey is empty, please create a random one (56 chars max) in accounts.php!');
-	require 'class.pcrypt.php';
+	require_once 'class.pcrypt.php';
 
 	/*
 	MODE: MODE_ECB or MODE_CBC
@@ -510,7 +510,7 @@ function decrypt($string)
 {
 	global $secretkey;
 	if (!$secretkey) return html_error('Value for $secretkey is empty, please create a random one (56 chars max) in accounts.php!');
-	require 'class.pcrypt.php';
+	require_once 'class.pcrypt.php';
 	
 	/*
 	MODE: MODE_ECB or MODE_CBC
