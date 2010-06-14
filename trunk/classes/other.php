@@ -487,9 +487,10 @@ function lang($id) {
 }
 
 #need to keep premium account cookies safe!
-function hideCookie($string)
+function encrypt($string)
 {
 	global $secretkey;
+	if (!$secretkey) return html_error('Value for $secretkey is empty, please create a random one (56 chars max) in accounts.php!');
 	require 'class.pcrypt.php';
 
 	/*
@@ -505,9 +506,10 @@ function hideCookie($string)
 	return $ciphertext;
 }
 
-function showCookie($string)
+function decrypt($string)
 {
 	global $secretkey;
+	if (!$secretkey) return html_error('Value for $secretkey is empty, please create a random one (56 chars max) in accounts.php!');
 	require 'class.pcrypt.php';
 	
 	/*

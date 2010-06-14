@@ -279,14 +279,14 @@ else
 		$_GET ["link"] = urldecode (trim ($_GET ["link"]));
 
 		$_GET ["post"] = $_GET ["post"] ? unserialize (stripslashes (urldecode (trim ($_GET ["post"])))) : 0;
-		$_GET ["cookie"] = $_GET ["cookie"] ? showCookie(urldecode(trim($_GET["cookie"]))) : "";
+		$_GET ["cookie"] = $_GET ["cookie"] ? decrypt(urldecode(trim($_GET["cookie"]))) : "";
 		// $resume_from = $_GET["resume"] ? intval(urldecode(trim($_GET["resume"]))) : 0;
 		// if ($_GET["resume"]) {unset($_GET["resume"]);}
 		$redirectto = "";
 
 		$pauth = urldecode (trim ($_GET ["pauth"]));
 
-		if ($_GET['auth'] == 1)
+		if ($_GET['auth'] === 1)
 		{
 			if (!preg_match("|^(?:.+\.)?(.+\..+)$|i", $_GET ["host"], $hostmatch)) html_error('No valid hostname found for authorisation!');
 			$hostmatch = str_replace('.', '_', $hostmatch[1]);
@@ -294,6 +294,11 @@ else
 			{
 				$auth = base64_encode ( $premium_acc ["$hostmatch"] ["user"] . ":" . $premium_acc ["$hostmatch"] ["pass"] );
 			}
+			else html_error('No useable premium account found for this download - please set one in accounts.php');
+		}
+		else
+		{
+			$auth = decrypt(urldecode(trim($_GET['auth'])));
 		}
 
 		if ($_GET ["auth"])

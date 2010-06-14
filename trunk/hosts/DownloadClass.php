@@ -80,7 +80,7 @@ class DownloadClass {
 			"&link=" . urlencode ( $link ) . ($_GET ["add_comment"] == "on" ? "&comment=" . 
 			urlencode ( $_GET ["comment"] ) : "") . $auth . ($pauth ? "&pauth=$pauth" : "") . 
 			($_GET ["uploadlater"] ? "&uploadlater=".$_GET["uploadlater"]."&uploadtohost=".$_GET['uploadtohost'] : "") .
-			"&cookie=" . ($cookie ? hideCookie(urlencode($cookie)) : 0) .
+			"&cookie=" . ($cookie ? encrypt(urlencode($cookie)) : 0) .
 			"&post=" . urlencode ( serialize ( $post ) ) .
 			($_POST ["uploadlater"] ? "&uploadlater=".$_POST["uploadlater"]."&uploadtohost=".urlencode($_POST['uploadtohost']) : "").
 			($_POST ['autoclose'] ? "&autoclose=1" : "").
@@ -181,5 +181,6 @@ class DownloadClass {
 /**********************************************************	
 Added support of force_name in RedirectDownload function by Raj Malhotra on 02 May 2010
 Fixed  EnterCaptcha function ( Re-Write )  by Raj Malhotra on 16 May 2010
+Added auto-encryption system (szal) 14 June 2010
 **********************************************************/
 ?>

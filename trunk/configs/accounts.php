@@ -1,7 +1,7 @@
 <?php
 if (!defined('RAPIDLEECH')) { require_once("index.html"); exit; }
-
 $premium_acc = array();
+
 ### Remove '//' from the beginning and enter your username and password for enable premium account ###
 //$premium_acc["rapidshare_com"] = array('user' => 'your username', 'pass' => 'your password');
 // For multiple rapidshare premium accounts only - if you are using multiple accounts below, comment out the line above
@@ -39,6 +39,8 @@ $premium_acc = array();
 ###Auto Download Premium Account###
 //$premium_acc["au_dl"] = array('user' => 'your username', 'pass' => 'your password'); # Remove '//' from the beginning and enter your username and password for rapidshare.de premium account
 
-#secret key for cookie encrpytion (make up a random one to protect your premium cookies, max length: 56). THE STRING ENTERED BELOW IS ONLY AN EXAMPLE, YOU MUST USE YOUR OWN OR YOUR PREMIUM COOKIES COULD BE DECODED!
-$secretkey = 'UijSY5wjP1Ii';
+#Secret key for cookie encryption
+#Make up a random one to protect your premium cookies (max length: 56). Example: $secretkey = 'UijSY5wjP1Ii'; - DO NOT use this example $secretkey, or your premium accounts/cookies could be stolen!!
+#IF THIS IS NOT SET BEFORE YOU USE PREMIUM SERVICES, YOU WILL BE WARNED BY THE RAPIDLEECH SCRIPT. OTHERWISE YOUR PREMIUM ACCOUNTS AND/OR COOKIES COULD BE COMPROMISED!
+$secretkey = '';
 ?>
