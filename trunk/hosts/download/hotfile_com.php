@@ -30,7 +30,8 @@ if (($_REQUEST["premium_acc"] == "on" && $_REQUEST["premium_user"] && $_REQUEST[
 	$redir = trim($newlink);
 	$Url = parse_url($redir);
 	$FileName = basename($Url["path"]);
-	insert_location ("$PHP_SELF?filename=" . urlencode ($FileName) . "&force_name=" . urlencode($FileName) . "&host=" . $Url ["host"] . "&path=" . urlencode ($Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "")) . "&referer=" . urlencode ($Referer) . "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&link=" . urlencode ($LINK) . ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ($_GET ["comment"]) : "") . "&auth=1" . ($pauth ? "&pauth=$pauth" : "") . (isset($_GET["audl"]) ? "&audl=doum" : ""));
+	$sendauth = ($_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) ? encrypt($auth) : 1;
+	insert_location ("$PHP_SELF?filename=" . urlencode ($FileName) . "&force_name=" . urlencode($FileName) . "&host=" . $Url ["host"] . "&path=" . urlencode ($Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "")) . "&referer=" . urlencode ($Referer) . "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&link=" . urlencode ($LINK) . ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ($_GET ["comment"]) : "") . "&auth=$sendauth" . ($pauth ? "&pauth=$pauth" : "") . (isset($_GET["audl"]) ? "&audl=doum" : ""));
 	// ////////////////////////////////////////////////////////// END PREMIUM ///////////////////////////////////////////////////////////////
 }
 else

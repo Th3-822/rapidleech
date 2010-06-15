@@ -188,8 +188,9 @@ class rapidshare_com extends DownloadClass
 			{
 				$Href = trim ( cut_str ( $page, "Location:", "\n" ) );
 				$Url = parse_url ( $Href );
-
-				$this->RedirectDownload($Href,$FileName, 0, 0, 0, 0, 1);
+				
+				$sendauth = ($_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) ? encrypt($auth) : 1;
+				$this->RedirectDownload($Href,$FileName, 0, 0, 0, 0, $sendauth);
 			}
 			else
 			{

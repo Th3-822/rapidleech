@@ -182,7 +182,7 @@ class megaupload_com extends DownloadClass {
 		}
 	}
 	private function DownloadPremium($link) {
-		global $Referer, $premium_acc, $mu_cookie_user_value, $secretkey;
+		global $Referer, $premium_acc, $mu_cookie_user_value;
 		if ($_GET['step'] == 1) {
                 $post ["filepassword"] = $_GET ['filepassword'];
                 $this->GetPage($link,0,$post,$Referer);
