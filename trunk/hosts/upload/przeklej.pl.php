@@ -1,4 +1,4 @@
-<?php 
+<?php
 ####### Free Account Info. ###########
 $przeklej_username=""; //  Set you username
 $przeklej_password=""; //  Set your password
@@ -12,7 +12,7 @@ if ($przeklej_username & $przeklej_password){
 	$_REQUEST['action'] = "FORM";
 	echo "<b><center>Use Default login/pass.</center></b>\n";
 }
-if ($_REQUEST['action'] == "FORM")  
+if ($_REQUEST['action'] == "FORM")
     $continue_up=true;
 else{
 ?>
@@ -37,10 +37,10 @@ if ($continue_up)
 </td></tr>
 <tr><td align=center>
 <div id=info width=100% align=center>Retrive upload ID</div>
-<?			
+<?
             $usr=$_REQUEST['my_login'];
             $pass=$_REQUEST['my_pass'];
-            $referrer="http://www.przeklej.pl/"; 
+            $referrer="http://www.przeklej.pl/";
             $Url = parse_url("http://www.przeklej.pl/loguj");
 			$post['login[login]'] = $usr;
 			$post['login[pass]'] = $pass;
@@ -49,7 +49,7 @@ if ($continue_up)
 			$cookie =GetCookies($page);
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referrer, $cookie, 0, 0, $_GET["proxy"],$pauth);
 			is_page($page);
-            is_notpresent($page,$usr."</strong>!","Not logged in. Check your login details in przeklej.pl.php");	
+            is_notpresent($page,$usr,"Not logged in. Check your login details in przeklej.pl.php");
             $url_action="http://www.przeklej.pl/simple_upload" ;
 			$Url = parse_url($url_action);
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referrer, $cookie, 0, 0, $_GET["proxy"],$pauth);
@@ -64,14 +64,14 @@ if ($continue_up)
 			</tr>
 			<tr>
 				<td align=center>
-<?php		
+<?php
 			$url = parse_url("http://www.przeklej.pl/dodaj_plik_form");
 			$upagent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1";
 			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""),$referrer, $cookie, $fpost, $lfile, $lname, "plik[plik]");
 
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
-<?php 	
+<?php
 
 
 
@@ -93,11 +93,11 @@ if ($continue_up)
 			is_page($page);
 		//	is_notpresent($page,"Files Uploaded","Error upload file",0);
 			$download_link="http://www.przeklej.pl/".cut_str($page, 'url=', '"');
-			
+
 			}
 
-/*************************\  
+/*************************\
 Written by kaox 14-jun-2009
-Fixed by kaox 10-apr-2010
+Update by kaox 19-jul-2010
 \*************************/
 ?>
