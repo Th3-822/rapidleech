@@ -326,7 +326,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			$fileSize = bytesToKbOrMbOrGb ( $bytesTotal );
 		}
 		$chunkSize = GetChunkSize ( $bytesTotal );
-		echo(lang(104).' <b>'.$saveToFile.'</b>, '.lang(56).' <b>'.$fileSize.'</b>...<br />');
+		echo(lang(104).' <b>'.basename($saveToFile).'</b>, '.lang(56).' <b>'.$fileSize.'</b>...<br />');
 		
 		//$scriptStarted = false;
 		require (TEMPLATE_DIR . '/transloadui.php');
