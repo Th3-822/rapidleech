@@ -5,7 +5,7 @@ if (!defined('RAPIDLEECH')) {
 }
 // The Farsi language file
 // You should always use this file as a template for translating
-// By WebAlfa.Ir Translate Team
+// By WebAlfa.Net Translate Team
 
 $lang[1]	=	'دسترسي امكان پذير نميباشد';
 $lang[2]	=	'سرور دسترسي شما را محدود كرده است';
@@ -344,54 +344,54 @@ $lang[334]	=	'انتقال خودکار';
 $lang[335]	=	'آپلود خودکار';
 $lang[336]	=	'سایز فایل محدود است ، در ';
 $lang[337]	=	'محدوده حجم فایل : ';
-$lang[338]	=	'Rar Files';
-$lang[339]	=	'Unrar Files';
-$lang[340]	=	'Error detected';
-$lang[341]	=	'click here to expand';
-$lang[342]	=	'You can drag window from here';
+$lang[338]	=	'Rar فایلها';
+$lang[339]	=	'Unrar فایلها';
+$lang[340]	=	'خطا شناسایی شد';
+$lang[341]	=	'اینجا را کلیک کنید برای گسترش';
+$lang[342]	=	'شما می توانید پنجره را از اینجا بکشید';
 $lang[343]	=	'Can not find "rar"<br />You may need to download it and extract "rar" to "/rar/" directory';
-$lang[344]	=	'Files that will be on the archive:';
-$lang[345]	=	'Archive name:';
-$lang[346]	=	'Options:';
-$lang[347]	=	'Compresion level:';
-$lang[348]	=	'Store';
-$lang[349]	=	'Fastest';
-$lang[350]	=	'Fast';
-$lang[351]	=	'Normal';
-$lang[352]	=	'Good';
-$lang[353]	=	'Best';
-$lang[354]	=	'Create volumes';
-$lang[355]	=	'Delete files after archiving';
-$lang[356]	=	'Create solid archive';
-$lang[357]	=	'Create recovery record';
-$lang[358]	=	'Test archive after compression';
-$lang[359]	=	'Use password';
-$lang[360]	=	'Encrypt file names';
-$lang[361]	=	'Set path inside archive';
+$lang[344]	=	'فایل های کد در فایل فشرده قرار میگیرند :';
+$lang[345]	=	'نام فایل فشرده';
+$lang[346]	=	'تنظیمات:';
+$lang[347]	=	'سطح فشرده سازی :';
+$lang[348]	=	'ذخيره کردن';
+$lang[349]	=	'حیلی سریع';
+$lang[350]	=	'سریع';
+$lang[351]	=	'معمولی';
+$lang[352]	=	'خوب';
+$lang[353]	=	'عالی';
+$lang[354]	=	'ایجاد جلد';
+$lang[355]	=	'حذف فایل ها بعد از ساخت فایل فشرده';
+$lang[356]	=	'ایجاد فایل جامد';
+$lang[357]	=	'ایجاد رکورد بازیابی';
+$lang[358]	=	'تست بعد از فشرده سازی';
+$lang[359]	=	'استفاده از کلمه عبور';
+$lang[360]	=	'رمزگذاری نام فایل';
+$lang[361]	=	'مسیر تنظیم در داخل فایل';
 $lang[362]	=	'Rar';
-$lang[363]	=	'Creating archive: <b>%1$s</b>';
-$lang[364]	=	'Waiting...';
-$lang[365]	=	'Go back to file list';
-$lang[366]	=	'<b>Files from %1$s</b>:';
-$lang[367]	=	'Can not find "unrar"';
-$lang[368]	=	'Pasword needed to list files:';
-$lang[369]	=	'Pasword needed to extract files:';
-$lang[370]	=	'Error:%1$s';
-$lang[371]	=	'Try to list again';
-$lang[372]	=	'Unrar selected';
-$lang[373]	=	'<b>Extracting files from %1$s</b>:';
-$lang[374]	=	'Status:';
-$lang[375]	=	'Select text';
-$lang[376]  =   'Premium Accounts :';
+$lang[363]	=	'ساخت فایل فشرده: <b>%1$s</b>';
+$lang[364]	=	'صبر کنید ...';
+$lang[365]	=	'برگشت به لیست فایلها';
+$lang[366]	=	'<b>فایل ها از %1$s</b>:';
+$lang[367]	=	'unrar پیدا نشد ';
+$lang[368]	=	'کلمه عبور برای لیست فایل ها :';
+$lang[369]	=	'کلمه عبور برای استخراج فایل ها :';
+$lang[370]	=	'خطا:%1$s';
+$lang[371]	=	'سعی دوباره برای لیست کردن فایلها';
+$lang[372]	=	'Unrar انتخاب شده .';
+$lang[373]	=	'<b>اسخراج فایل ها از %1$s</b>:';
+$lang[374]	=	'وضعیت:';
+$lang[375]	=	'انتخاب متن :';
+$lang[376]  =   'حساب های Premium :';
 $lang[377]	=	'37 [Video: MP4 1920×1080 | Audio: AAC 2ch 44.10kHz]';
-$lang[378]	=	'Close window';
-$lang[379]	=	'Files';
-$lang[380]	=	'MD5 change should only be applied to known working formats(i.e. .rar or .zip)<br />Do you want to continue?';
-$lang[381]	=	'MD5 of file <b>%1$s</b> changed';	// %1$s = filename
-$lang[382]	=	'Error changing the MD5 of the file <b>%1$s</b>!';	// %1$s = filename
-$lang[383]	=	'MD5 change';
-$lang[384]	=	'Match text';
-$lang[385]	=	'Match';
-$lang[386]	=	'Ignore case';
-$lang[387]	=	'Put each file on a separated archive';
+$lang[378]	=	'بستن پنجره';
+$lang[379]	=	'فایل ها';
+$lang[380]	=	'تغییر MD5 فقط بر روی پسوندهای شناخته شده انجام پذیر است (i.e. .rar or .zip)<br /> آیا میخواهید ادامه بدهید ؟';
+$lang[381]	=	'MD5 of file <b>%1$s</b> تغییر یافت';	// %1$s = filename
+$lang[382]	=	'خطا در تغییر MD5 فایل <b>%1$s</b>!';	// %1$s = filename
+$lang[383]	=	'تغییر MD5';
+$lang[384]	=	'تطابق متن';
+$lang[385]	=	'تطابق';
+$lang[386]	=	'موارد چشمپوشی';
+$lang[387]	=	'قرار هر فایل را در یک آرشیو جدا';
 ?>
