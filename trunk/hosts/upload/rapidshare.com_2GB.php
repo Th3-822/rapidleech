@@ -29,7 +29,7 @@ if (!($_REQUEST['action'] == 'COMMENCEUPLOAD') && !isset($_REQUEST['auul']))
 			</select>
 			</td></tr>
 			<tr><td nowrap>&nbsp;Account Type*</td><td>&nbsp;<select style="width:160px;" name='zone'><option value='prem'/>Premium</option><option value='col'/>Collector</option></select></td></tr>
-			<tr><td colspan='2' align='center'><input type='submit' value='Upload' onclick='$(this).fade();'></td></tr>
+			<tr><td colspan='2' align='center'><input type='submit' value='Upload' onclick='$(this).fadeOut();'></td></tr>
 			<tr><td align='center' colspan='2'><small>Submit the form without logins to use default values stored in rapidshare.com_2GB.php</small></td></tr>
 		</form>
 		</table>
@@ -207,7 +207,7 @@ class RS
 			{
 				preg_match('#/files/(\d+)/#', $result, $fileid);
 				preg_match('#killcode=(\d+)\r?\n#', $result, $killcode);
-				preg_match('%http://rapidshare\.com/((?!killcode).)+html%i', $result, $flink);
+				preg_match('%http://rapidshare\.com/((?!killcode).)+$%mi', $result, $flink);
 				preg_match('%http://rapidshare\.com/.*killcode.*%i', $result, $dlink);
 				$this->download_link = trim($flink[0]);
 				$this->delete_link = trim($dlink[0]);

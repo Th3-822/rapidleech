@@ -439,7 +439,7 @@ function sslcurl($link, $post = 0, $cookie = 0, $refer = 0)
 
 // This new function requires less line and actually reduces filesize :P
 // Besides, using less globals means more variables available for us to use
-function formpostdata($post) {
+function formpostdata($post=array()) {
 	$postdata = "";
 	foreach ( $post as $k => $v ) {
 		$postdata .= "$k=$v&";

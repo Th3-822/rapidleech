@@ -1,3 +1,5 @@
+if (top.location != self.location) {top.location = self.location.href}
+
 function new_transload_window() {
 	var tmp = new Date();
 	tmp = tmp.getTime();
