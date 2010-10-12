@@ -43,24 +43,21 @@ if ($continue_up)
 EOF;
 	
 	if (empty($_REQUEST['my_login']) || empty($_REQUEST['my_pass'])) html_error('No user and pass given', 0);
-	
 
+	
 
 	//////////////////////////	EDIT FROM HERE DOWN	///////////////////////////////////////
 	$Url = parse_url("http://www.youtube.com/login?next=/");
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://www.youtube.com/", $cookie, 0, 0, $_GET["proxy"], $pauth);
 	is_page($page);
 	$cookies = GetCookies($page);
-
-	if (preg_match('%ocation: (.+)\r\n%', $page, $redir))
-	{
-		$geturl = rtrim($redir["1"]);
-	}
+	if (!preg_match('%ocation: (.+)\r\n%', $page, $redir)) html_error ('No login location found.');
+	$geturl = rtrim($redir["1"]);
 
 	$contents = sslcurl($geturl, 0, $cookies);
 	$cookie_GALX = GetCookies($contents);
 	
-	$post_url = "https://www.google.com/accounts/ServiceLoginAuth?service=youtube";
+	$post_url = "https://www.google.com/accounts/ServiceLoginAuth";
 	$post = array();
 	$post['ltmpl'] = 'sso';
 	$post['continue'] = urldecode('http%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26nomobiletemp%3D1%26hl%3Den_US%26next%3D%252F');
@@ -77,7 +74,7 @@ EOF;
 	$post['signIn'] = 'Sign+in';
 	$post['asts'] = '';
 
-	$contents = sslcurl($post_url, $post, $cookie_GALX, $geturl);
+	$contents = sslcurl($post_url, $post, $cookie_GALX, $geturl);	
 	if (!preg_match('%ocation: (.+)\r\n%', $contents, $redir) and !preg_match('%url=&#39;(.+)&#39;%', $contents, $redir)) html_error('Error - logins incorrect');
 	$redirect = html_entity_decode($redir[1]);
 	
@@ -113,25 +110,132 @@ EOF;
 		$page = geturl('www.youtube.com', 80, '/', $redirect, $utube_login_cookie, 0, 0, $_GET["proxy"], $pauth);
 		is_page($page);
 	}
-		
-	$url = 'http://www.youtube.com/my_videos_upload';
-	$Url = parse_url($url);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), $url, $utube_login_cookie, 0, 0, $_GET["proxy"], $pauth);
+	
+	$Url = 'http://upload.youtube.com/my_videos_upload';
+	$Url = parse_url($Url);
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, $utube_login_cookie, 0, 0, $_GET["proxy"], $pauth);
 	is_page($page);
 	is_notpresent($page, $_REQUEST['my_login'], 'Error logging in.');
 	
-	$action_url = 'http://upload.youtube.com/my_videos_post';
+	$uploadkey = cut_str($page, "'uploadKey': '", "',");
+
+	$Urlpost = Array
+	(
+		'protocolVersion' => "0.8",
+		'createSessionRequest' => Array
+			(
+				'fields' => Array
+					(
+						Array
+							(
+								'external' => Array
+									(
+										'name' => 'file',
+										'filename' => $lname,
+										'formPost' => new stdClass(),
+										'size' => filesize($lfile)
+									)
+							),
+
+						Array
+							(
+								'inlined' => Array
+									(
+										'name' => 'return_address',
+										'content' => 'upload.youtube.com',
+										'contentType' => 'text/plain'
+									)
+							),
+
+					   Array
+							(
+								'inlined' => Array
+									(
+										'name' => 'upload_key',
+										'content' => $uploadkey,
+										'contentType' => 'text/plain'
+									)
+							),
+
+					   Array
+							(
+								'inlined' => Array
+									(
+										'name' => 'action_postvideo',
+										'content' => "1",
+										'contentType' => 'text/plain'
+									)
+							),
+
+						Array
+							(
+								'inlined' => Array
+									(
+										'name' => 'live_thumbnail_id',
+										'content' => 'uexBkOjf326Y1286907488.27.0',
+										'contentType' => 'text/plain'
+									)
+							),
+
+						Array
+							(
+								'inlined' => Array
+									(
+										'name' => 'parent_video_id',
+										'content' => '',
+										'contentType' => 'text/plain'
+									)
+							),
+
+						Array
+							(
+								'inlined' => Array
+									(
+									   'name' => 'allow_offweb',
+									   'content' => "True",
+										'contentType' => 'text/plain'
+									)
+							),
+
+						Array
+							(
+								'inlined' => Array
+									(
+										'name' => 'uploader_type',
+										'content' => 'Web_XHR',
+										'contentType' => 'text/plain'
+									)
+							),
+					),
+			),
+		'clientId' => 'scotty xhr non-resumable'
+	);
+
+	$Urlpost_json = json_encode($Urlpost);
+	$Urlpost_json = str_replace('\\', '', $Urlpost_json);
+	
+	$Url = 'http://upload.youtube.com/upload/rupio';	
+	$ch = curl_init($Url);
+	curl_setopt($ch, CURLOPT_HEADER, 0);
+	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U;Windows NT 5.1; de;rv:1.8.0.1)\r\nGecko/20060111\r\nFirefox/1.5.0.1');
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_POST, 1);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $Urlpost_json);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-GUploader-Client-Info: clientId:scotty xhr non-resumable', 'Content-Type: application/x-www-form-urlencoded;charset=utf-8'));
+	curl_setopt($ch, CURLOPT_REFERER, 'http://upload.youtube.com/my_videos_upload');
+	curl_setopt($ch, CURLOPT_COOKIE, $utube_login_cookie) ;
+	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+	$page = curl_exec($ch);
+	curl_close($ch);
+
+	$page = json_decode($page, true);
+	$action_url = $page['sessionStatus']['externalFieldTransfers'][0]['formPostInfo']['url'];
+	if (!$action_url) html_error('Upload URL not found, halted.');
 	$Url = parse_url($action_url);
-	$upload_cookie = $utube_login_cookie . '; ' . $cookie_GALX;
-	$return_address = cut_str($page, '<input type="hidden" name="return_address" value="', '">');
-	$upload_key = cut_str($page, '<input type="hidden" name="upload_key" value="', '">');
-	$session_token = cut_str($page, "\t\tgXSRF_token = '", "';");
+	$upload_cookie = $utube_login_cookie . '; ' . 'enabledapps.uploader=0';
 	$post = array();
-	$post['uploader_type'] = 'Web_HTML';
-	$post['return_address'] = $return_address;
-	$post['upload_key'] = $upload_key;
-	$post['action_postvideo'] = '1';
-	$post['session_token'] = $session_token;
+	$post['Filename'] = $lfile;
+	$post['Upload'] = 'Submit Query';
 
 	echo <<<EOF
 	<script>document.getElementById('login').style.display='none';</script>
@@ -140,14 +244,14 @@ EOF;
 	<tr><td align=center>
 EOF;
 	
-	$upfiles = upfile($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 'http://www.youtube.com/my_videos_upload?nobeta', $upload_cookie, $post, $lfile, $lname, "field_uploadfile");
+	$upfiles = upfile($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 'http://upload.youtube.com/my_videos_upload', $upload_cookie, $post, $lfile, $lname, "Filedata");
 	is_page($upfiles);
-	if (!preg_match("%ocation: .+&video_id=(.+)\r\n%", $upfiles, $video_id)) html_error('Couldn\'t find the video ID - perhaps the upload failed?');
-	$download_link = 'http://www.youtube.com/watch?v=' . $video_id[1];
+	$video_id = cut_str($upfiles, '{"video_id":"', '",') or html_error('Couldn\'t find the video ID - perhaps the upload failed?');
+	$download_link = 'http://www.youtube.com/watch?v=' . $video_id;
 	echo "<script>document.getElementById('progressblock').style.display='none';</script>";
 }
 
 //sslcurl function moved to http.php
 // written by kaox 26/05/09
-//updated by szalinski 21-sep-2009
+//updated by szalinski 12-Oct-2010
 ?>
