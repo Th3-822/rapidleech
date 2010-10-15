@@ -19,16 +19,22 @@ $premium_acc = array();
 //$premium_acc["uploaded_to"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["depositfiles"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["easyshare"] = array('user' => 'your username', 'pass' => 'your password');
-//$premium_acc["btaccel"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["torrific_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["hotfile_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["ifile_it"] = array('user' => 'your username', 'pass' => 'your password');
-//$premium_acc["sharingmatrix"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["filesonic_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["uploading"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["letitbit"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["turbobit"] = array('pass' => 'your password');
 //$premium_acc["storage"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["x7"] = array('user' => 'your username', 'pass' => 'your password');
-//$premium_acc["bigandfree_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["megaporn_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["fileserve_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["ugotfile_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["freakshare_net"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["oron_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["shareflare_net"] = array('pass' => 'your password');
+//$premium_acc["movshare_net"] = array('user' => 'your username', 'pass' => 'your password');
 
 ### Megaupload cookie ###
 //$mu_cookie_user_value = '';  // like: b658b369856766f621ca292fac113a5c, that contains username&pass of premium account
