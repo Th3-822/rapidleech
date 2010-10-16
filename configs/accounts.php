@@ -39,6 +39,9 @@ $premium_acc = array();
 ### Megaupload cookie ###
 //$mu_cookie_user_value = '';  // like: b658b369856766f621ca292fac113a5c, that contains username&pass of premium account
 
+### Megaporn cookie ###
+//$megaporn_cookie_user_value = '';  // like: b658b369856766f621ca292fac113a5c, that contains username&pass of premium account and can be shared to others, because it's an encrypted value.
+
 ### Imageshack Torrent Account ###
 //$imageshack_acc = array('user' => 'your username', 'pass' => 'your password');
 
