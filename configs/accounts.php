@@ -35,6 +35,7 @@ $premium_acc = array();
 //$premium_acc["oron_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["shareflare_net"] = array('pass' => 'your password');
 //$premium_acc["movshare_net"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["vip_file_com"] = array('pass' => 'your password');
 
 ### Megaupload cookie ###
 //$mu_cookie_user_value = '';  // like: b658b369856766f621ca292fac113a5c, that contains username&pass of premium account
