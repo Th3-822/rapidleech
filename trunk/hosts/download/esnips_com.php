@@ -1,4 +1,9 @@
 <?php
+/**********************esnips.com****************************\
+esnips.com Download Plugin
+Written by Raj Malhotra on 04 Dec 2009
+\**********************esnips.com****************************/
+
 if (! defined ( 'RAPIDLEECH' ))
 {
 	require_once ("index.html");
@@ -44,5 +49,8 @@ class esnips_com extends DownloadClass
 	}
 }
 
-// Created by rajmalhotra on 04 Dec 09	
+/**********************esnips.com****************************\
+esnips.com Download Plugin
+Written by Raj Malhotra on 04 Dec 2009
+\**********************esnips.com****************************/
 ?>
