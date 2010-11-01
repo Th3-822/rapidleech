@@ -31,11 +31,14 @@ $premium_acc = array();
 //$premium_acc["megaporn_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["fileserve_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["ugotfile_com"] = array('user' => 'your username', 'pass' => 'your password');
-//$premium_acc["freakshare_net"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["freakshare_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["oron_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["shareflare_net"] = array('pass' => 'your password');
 //$premium_acc["movshare_net"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["vip_file_com"] = array('pass' => 'your password');
+//$premium_acc["enterupload_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["kickload_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["veehd_com"] = array('user' => 'your username', 'pass' => 'your password');
 
 ### Megaupload cookie ###
 //$mu_cookie_user_value = '';  // like: b658b369856766f621ca292fac113a5c, that contains username&pass of premium account
