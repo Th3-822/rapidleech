@@ -4,6 +4,7 @@ torrific.com Download Plugin
 Written by kaox
 Re-Written by Raj Malhotra on 16 May 2010
 Fixed by Raj Malhotra on 19 Oct 2010
+Updated by Raj Malhotra on 07 Nov 2010
 \**********************torrific.com****************************/
 
 if (! defined ( 'RAPIDLEECH' ))
@@ -51,7 +52,8 @@ class torrific_com extends DownloadClass
 		
 		$page = $this->GetPage( $link, $cookies );
 		is_present( $page, 'problem occurred', 'Sorry, a problem occurred. The original source of the torrent file cannot be loaded. Please find another source for this torrent, or try again later if you think this might just be a temporary problem.' );
-				
+		is_present( $page, 'your torrent has not yet been queued', 'Your torrent has not yet been queued, Kindly fetch this torrent first..' );
+		
 		$frmfiles = cut_str( $page,'<table id="files"', '</table>' );
 		//preg_match_all('%http://.+/get\?[^\'"]+%i',$frmfiles,$files) ;
 		//preg_match_all( '%http://u01\.btaccel\.com/[^\'"]+%i', $frmfiles, $files ) ;
@@ -230,5 +232,6 @@ torrific.com Download Plugin
 Written by kaox
 Re-Written by Raj Malhotra on 16 May 2010
 Fixed by Raj Malhotra on 19 Oct 2010
+Updated by Raj Malhotra on 07 Nov 2010
 \**********************torrific.com****************************/
 ?>
