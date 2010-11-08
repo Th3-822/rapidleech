@@ -1,64 +1,114 @@
 <?php
 /**********************torrific.com****************************\
 torrific.com Download Plugin
-Written by kaox
-Re-Written by Raj Malhotra on 16 May 2010
+Written by Raj Malhotra on 16 May 2010
 Fixed by Raj Malhotra on 19 Oct 2010
 Updated by Raj Malhotra on 07 Nov 2010
+Updated by Raj Malhotra on 08 Nov 2010
 \**********************torrific.com****************************/
+
+/******** If you don't have torrific login, then you can use this account ********\
+Email : mssakib11@gmail.com
+Password : qwert
+Put this account in accounts.php
+\******** If you don't have torrific login, then you can use this account ********/
+
 
 if (! defined ( 'RAPIDLEECH' ))
 {
-    require_once ("index.html");
-    exit ();
+	require_once ("index.html");
+	exit ();
 }
 
 class torrific_com extends DownloadClass
 {
-	####### Free Account Info. ###########
-	private $torrific_login = "mssakib11@gmail.com";                      //  Set your username
-	private $torrific_pass = "qwert";                                     //  Set your password
-	##############################
-
 	public function Download( $link )
-	{		
-		$isPresent = strpos( $link, "http://torrific.com/dl/" );
+	{
+		global $premium_acc;
+		
+		//$isPresent = strpos( $link, "http://torrific.com/dl/" );
+		$isPresent = strpos( $link, "step=1" );
 		if( !( $isPresent === false ) )
 		{
 			$this->DownloadFree( $link );
 		}
+		elseif ( ( $_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"] ) ||
+			( $_REQUEST ["premium_acc"] == "on" && $premium_acc ["torrific_com"] ["user"] && $premium_acc ["torrific_com"] ["pass"] ) )	
+		{
+			$this->displayLinks( $link );
+		}
 		else
 		{
-			$this->displayLinks($link);
+			$this->downloadNotSupported( $link );
 		}
 	}
-
+	
 	private function displayLinks( $link )
 	{
 		$GetUser = parse_url( $link );
 
 		$user = $GetUser['user'];
-		$pass = $GetUser['pass'];
+		$password = $GetUser['pass'];
 				
 		if ( isset ( $user ) && isset ( $pass ) )
 		{
-			$this->torrific_login = trim( $user );
-			$this->torrific_pass = trim( $pass );
-			
 			$link = $GetUser['scheme'] . "://" . $GetUser['host'] .$GetUser['path'];
 		}
+		else
+		{
+			global $premium_acc;
+				
+			$user = $_REQUEST ["premium_user"] ? $_REQUEST ["premium_user"] : $premium_acc ["torrific_com"] ["user"];
+			$password = $_REQUEST ["premium_pass"] ? $_REQUEST ["premium_pass"] : $premium_acc ["torrific_com"] ["pass"];
+		}
 		
-		$cookies = $this->login( $this->torrific_login, $this->torrific_pass );
-		
+		// login
+		$cookies = $this->login( $user, $password );
+		// end login
+				
 		$page = $this->GetPage( $link, $cookies );
+		$new_cookie = GetCookies( $page );
+		$cookies = $cookies . "; " . $new_cookie;
+
+		if ( !( strpos( $page, 'torrent has not yet been queued' ) === false ) )
+		{
+			// Torrent is not fetched. Fetching it first.
+			echo "Torrent is not fetched. Fetching it first.";
+			$Href = "http://torrific.com/queue/";
+			
+			$queueForm  = trim ( cut_str ( $page , 'action="/queue/"', '</form>' ) );
+			$csrfmiddlewaretoken  = trim ( cut_str ( $queueForm , "csrfmiddlewaretoken' value='", "'" ) );
+			$url  = trim ( cut_str ( $queueForm , 'url" value="', '"' ) );
+			
+			$post = array();
+			$post['csrfmiddlewaretoken'] = $csrfmiddlewaretoken;
+			$post['url'] = $url;
+			$post[''] = "fetch";
+						
+			$page = $this->GetPage( $Href, $cookies, $post );
+			
+			if ( preg_match('/Location: *(.+)/i', $page, $newredir ) )
+			{
+				$Href = trim ( $newredir [1] );
+				$page = $this->GetPage( $Href, $cookies );
+			}
+		}
+		
 		is_present( $page, 'problem occurred', 'Sorry, a problem occurred. The original source of the torrent file cannot be loaded. Please find another source for this torrent, or try again later if you think this might just be a temporary problem.' );
-		is_present( $page, 'your torrent has not yet been queued', 'Your torrent has not yet been queued, Kindly fetch this torrent first..' );
+		is_present( $page, 'torrent was removed', 'Sorry, this torrent was removed.' );
+		is_present( $page, 'torrent is downloading', 'Your torrent is downloading. Please wait till it get finished.' );
+		is_present( $page, 'torrent was added to the queue', 'Sorry, this torrent was in queue, please wait till it gets completed.' );
+		
+		if ( strpos( $page, '<table id="files"' ) === false )
+		{
+			html_error ("Unable to fetch the download links. Please check your download link!", 0 );
+		}
 		
 		$frmfiles = cut_str( $page,'<table id="files"', '</table>' );
 		//preg_match_all('%http://.+/get\?[^\'"]+%i',$frmfiles,$files) ;
-		//preg_match_all( '%http://u01\.btaccel\.com/[^\'"]+%i', $frmfiles, $files ) ;
-		//preg_match_all( '%http://u01\.btaccel\.com/[^\"]+%i', $frmfiles, $files ) ;
-		preg_match_all( '%\/dl\/[^\"]+%i', $frmfiles, $files ) ;
+		//preg_match_all( '%http://u01\.btaccel\.com/[^\'"]+%i', $frmfiles, $files );
+		preg_match_all( '%http://u01\.btaccel\.com/[^\"]+%i', $frmfiles, $files ) ;
+		preg_match_all( '%\/dl\/[^\"]+%i', $frmfiles, $filesNew ) ;
 		
 		$cc=1 ;
 		echo "\n";
@@ -75,11 +125,28 @@ class torrific_com extends DownloadClass
 				$FileName = urldecode( $FileName );
 			
 				//$file = $tmp . "?step=1&cookies=".urlencode ( $cookies );
-				$file = "http://torrific.com" . $tmp;
+				$file = $tmp . "?isHostChanged=true&step=1&cookies=".urlencode ( $cookies );
+				$file = str_replace( 'btaccel' , 'torrific', $file );
+				//$file = "http://torrific.com" . $tmp;
 					
-				echo "<tr><td><input type=checkbox id=cs$cc ></td><td><input type=\"hidden\" id=\"lin$cc\" value=\"$file\" ></td><td id=link$cc >$FileName</td></tr>";
+				echo "<tr><td><input type=checkbox id=cs$cc ></td><td><input type='hidden' id=\"lin$cc\" value=\"$file\" ></td><td id=link$cc >$FileName</td></tr>";
 				$cc++;
-		}	
+		}
+		
+		foreach( $filesNew[0] as $tmp )
+		{
+				$FileName = "";         
+				$Url = parse_url ( $tmp );
+				$FileName = ! $FileName ? basename ( $Url ["path"] ) : $FileName;
+				$FileName = urldecode( $FileName );
+			
+				//$file = $tmp . "?step=1&cookies=".urlencode ( $cookies );
+				$file = "http://torrific.com" . $tmp . "?isHostChanged=false&step=1&cookies=" . urlencode ( $cookies );
+					
+				echo "<tr><td><input type=checkbox id=cs$cc ></td><td><input type='hidden' id=\"lin$cc\" value=\"$file\" ></td><td id=link$cc >$FileName</td></tr>";
+				$cc++;
+		}
+		
 ?>
                 <tr>
 					<td>
@@ -164,17 +231,31 @@ class torrific_com extends DownloadClass
         
 	private function DownloadFree( $link )
 	{
-		$page = $this->GetPage( $link );
+		$cookie = trim ( cut_str ( $link, "cookies=", "\r\n" ) );
+		$cookie = urldecode( $cookie );
+
+		$Href = "http" . trim ( cut_str ( $link, "http", "?" ) );
+		$isHostChanged = trim ( cut_str ( $link, "isHostChanged=", "&" ) );
 		
-		if ( preg_match('/Location: *(.+)/i', $page, $newredir ) )
+		if( $isHostChanged == true )
 		{
-			$Href = trim ( $newredir [1] );
+			$Href = str_replace( 'torrific', 'btaccel' , $Href );
 		}
 		else
 		{
-			html_error ("Cannot get download link!", 0 );
-		}
+			//$page = $this->GetPage( $link );
+			$page = $this->GetPage( $Href, $cookie );
 			
+			if ( preg_match('/Location: *(.+)/i', $page, $newredir ) )
+			{
+				$Href = trim ( $newredir [1] );
+			}
+			else
+			{
+				html_error ("Cannot get download link!", 0 );
+			}
+		}
+					
 		$Url = parse_url( $Href );
 
 		$FileName = "";         
@@ -182,15 +263,13 @@ class torrific_com extends DownloadClass
 		$FileName = urldecode( $FileName );
 		$FileName = str_replace( "'", "_", $FileName ); 
 		
-		$this->RedirectDownload( $Href, $FileName );
+		$this->RedirectDownload( $Href, $FileName, $cookie );
 		exit ();
-		
-		/*
-		//$cookie = trim ( cut_str ( $link, "cookies=", "\r\n" ) );
-		//$cookie = urldecode( $cookie );
-
-		//$Href = "http" . trim ( cut_str ( $link, "http", "?" ) );
-		*/
+	}
+	
+	private function downloadNotSupported( $link )
+	{
+		html_error( "Login/Pass not inserted. To download files you must be a member or premium user.", 0 );
 	}
 	
 	private function login( $user, $password )
@@ -229,9 +308,9 @@ class torrific_com extends DownloadClass
 
 /**********************torrific.com****************************\
 torrific.com Download Plugin
-Written by kaox
-Re-Written by Raj Malhotra on 16 May 2010
+Written by Raj Malhotra on 16 May 2010
 Fixed by Raj Malhotra on 19 Oct 2010
 Updated by Raj Malhotra on 07 Nov 2010
+Updated by Raj Malhotra on 08 Nov 2010
 \**********************torrific.com****************************/
 ?>
