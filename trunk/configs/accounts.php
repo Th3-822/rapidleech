@@ -24,8 +24,6 @@ $premium_acc["torrific_com"] = array('user' => 'mssakib11@gmail.com', 'pass' => 
 //$premium_acc["ifile_it"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["filesonic_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["uploading"] = array('user' => 'your username', 'pass' => 'your password');
-//$premium_acc["letitbit"] = array('user' => 'your username', 'pass' => 'your password');
-//$premium_acc["turbobit"] = array('pass' => 'your password');
 //$premium_acc["storage"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["x7"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["megaporn_com"] = array('user' => 'your username', 'pass' => 'your password');
@@ -33,12 +31,14 @@ $premium_acc["torrific_com"] = array('user' => 'mssakib11@gmail.com', 'pass' => 
 //$premium_acc["ugotfile_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["freakshare_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["oron_com"] = array('user' => 'your username', 'pass' => 'your password');
-//$premium_acc["shareflare_net"] = array('pass' => 'your password');
 //$premium_acc["movshare_net"] = array('user' => 'your username', 'pass' => 'your password');
-//$premium_acc["vip_file_com"] = array('pass' => 'your password');
 //$premium_acc["enterupload_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["kickload_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["veehd_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["letitbit_net"] = array('pass' => 'your password');
+//$premium_acc["vip_file_com"] = array('pass' => 'your password');
+//$premium_acc["shareflare_net"] = array('pass' => 'your password');
+//$premium_acc["turbobit"] = array('pass' => 'your password');
 
 ### Megaupload cookie ###
 //$mu_cookie_user_value = '';  // like: b658b369856766f621ca292fac113a5c, that contains username&pass of premium account
