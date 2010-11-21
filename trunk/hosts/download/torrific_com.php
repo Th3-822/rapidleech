@@ -5,6 +5,7 @@ Written by Raj Malhotra on 16 May 2010
 Fixed by Raj Malhotra on 19 Oct 2010
 Updated by Raj Malhotra on 07 Nov 2010
 Updated by Raj Malhotra on 08 Nov 2010
+Fixed and Updated by Raj Malhotra on 20 Nov 2010
 \**********************torrific.com****************************/
 
 /******** If you don't have torrific login, then you can use this account ********\
@@ -106,8 +107,8 @@ class torrific_com extends DownloadClass
 		
 		$frmfiles = cut_str( $page,'<table id="files"', '</table>' );
 		//preg_match_all('%http://.+/get\?[^\'"]+%i',$frmfiles,$files) ;
-		//preg_match_all( '%http://u01\.btaccel\.com/[^\'"]+%i', $frmfiles, $files );
-		preg_match_all( '%http://u01\.btaccel\.com/[^\"]+%i', $frmfiles, $files ) ;
+		//preg_match_all( '%http://u01\.btaccel\.com/[^\"]+%i', $frmfiles, $files ) ;
+		preg_match_all( '%http://u\d{2}\.btaccel\.com/[^\"]+%i', $frmfiles, $files ) ;
 		preg_match_all( '%\/dl\/[^\"]+%i', $frmfiles, $filesNew ) ;
 		
 		$cc=1 ;
@@ -116,37 +117,40 @@ class torrific_com extends DownloadClass
 <table border="1" align="center" cellspacing="5" cellpadding="5">
         <form id="tavola">
 <?php
-        
+        $isLinkFound = false;
 		foreach( $files[0] as $tmp )
 		{
-				$FileName = "";         
-				$Url = parse_url ( $tmp );
-				$FileName = ! $FileName ? basename ( $Url ["path"] ) : $FileName;
-				$FileName = urldecode( $FileName );
-			
-				//$file = $tmp . "?step=1&cookies=".urlencode ( $cookies );
-				$file = $tmp . "?isHostChanged=true&step=1&cookies=".urlencode ( $cookies );
-				$file = str_replace( 'btaccel' , 'torrific', $file );
-				//$file = "http://torrific.com" . $tmp;
-					
-				echo "<tr><td><input type=checkbox id=cs$cc ></td><td><input type='hidden' id=\"lin$cc\" value=\"$file\" ></td><td id=link$cc >$FileName</td></tr>";
-				$cc++;
+			$isLinkFound = true;
+			$FileName = "";         
+			$Url = parse_url ( $tmp );
+			$FileName = ! $FileName ? basename ( $Url ["path"] ) : $FileName;
+			$FileName = urldecode( $FileName );
+	
+			$file = $tmp . "?isHostChanged=true&step=1&cookies=".urlencode ( $cookies );
+			$file = str_replace( 'btaccel' , 'torrific', $file );
+
+			echo "<tr><td><input type=checkbox id=cs$cc ></td><td><input type='hidden' id=\"lin$cc\" value=\"$file\" ></td><td id=link$cc >$FileName</td></tr>";
+			$cc++;
 		}
 		
 		foreach( $filesNew[0] as $tmp )
 		{
-				$FileName = "";         
-				$Url = parse_url ( $tmp );
-				$FileName = ! $FileName ? basename ( $Url ["path"] ) : $FileName;
-				$FileName = urldecode( $FileName );
+			$isLinkFound = true;
+			$FileName = "";
+			$Url = parse_url ( $tmp );
+			$FileName = ! $FileName ? basename ( $Url ["path"] ) : $FileName;
+			$FileName = urldecode( $FileName );
+
+			$file = "http://torrific.com" . $tmp . "?isHostChanged=false&step=1&cookies=" . urlencode ( $cookies );
 			
-				//$file = $tmp . "?step=1&cookies=".urlencode ( $cookies );
-				$file = "http://torrific.com" . $tmp . "?isHostChanged=false&step=1&cookies=" . urlencode ( $cookies );
-					
-				echo "<tr><td><input type=checkbox id=cs$cc ></td><td><input type='hidden' id=\"lin$cc\" value=\"$file\" ></td><td id=link$cc >$FileName</td></tr>";
-				$cc++;
+			echo "<tr><td><input type=checkbox id=cs$cc ></td><td><input type='hidden' id=\"lin$cc\" value=\"$file\" ></td><td id=link$cc >$FileName</td></tr>";
+			$cc++;
 		}
 		
+		if ( !( $isLinkFound ) )
+		{
+			html_error ("Plugin needs to be updated!", 0 );
+		}
 ?>
                 <tr>
 					<td>
@@ -154,8 +158,8 @@ class torrific_com extends DownloadClass
 					</td>
 					<td>
 					</td>
-					<td align=center>
-						<input type=button onclick='selt(<?php echo $cc-1 ?>)' value='Step1 select and click' />
+					<td align="center">
+						<input type="button" onclick='selt(<?php echo $cc-1 ?>)' value='Step1 select and click' />
 					</td>
                 </tr>
         </form>
@@ -312,5 +316,6 @@ Written by Raj Malhotra on 16 May 2010
 Fixed by Raj Malhotra on 19 Oct 2010
 Updated by Raj Malhotra on 07 Nov 2010
 Updated by Raj Malhotra on 08 Nov 2010
+Fixed and Updated by Raj Malhotra on 20 Nov 2010
 \**********************torrific.com****************************/
 ?>
