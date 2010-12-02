@@ -14,7 +14,7 @@ $premium_acc = array();
 //$premium_acc["megashares"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["vBulletin_acc"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["uploaded_to"] = array('user' => 'your username', 'pass' => 'your password');
-//$premium_acc["filefactory"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["filefactory_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["sendspace"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["uploaded_to"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["depositfiles"] = array('user' => 'your username', 'pass' => 'your password');
