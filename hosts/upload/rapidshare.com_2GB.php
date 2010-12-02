@@ -1,12 +1,11 @@
 <?php
 
-//If you don't submit form logins when uploading, and these values are set, these default values will be used. For auto-upload, you must set these values here.
-//If you do set logins here, make sure also to set your account type properly (premium or collector) with the $zone variable below.
-//According to RSM (for XP), only **Rapidshare Premium** account is allowed to upload files > 200MB up to 2GB, whereas Collector accounts can only upload up to 200MB.
+//If you don't submit form logins when uploading, and these values are set, these default values will be used, otherwise the values you enter to the form will override what's set here
+//For auto-upload, you MUST set these values here
+//According to RSM2, only **Rapidshare Premium** account is allowed to upload files > 500MB (up to 2GB), whereas non-premium accounts can only upload up to 500MB (even with RSM2)
 
 $site_login = '';
 $site_pass = '';
-$zone = 'prem';		//prem|col - max filesize 200MB for collector, see RSM (Rapidshare Manager)
 $carrier = 'l3';	//which upload carrier to use depending on your location, usually 'l3' (Level3) is most suitable
 
 
@@ -28,7 +27,6 @@ if (!($_REQUEST['action'] == 'COMMENCEUPLOAD') && !isset($_REQUEST['auul']))
 					<option value='cg'/>Cogent</option>
 			</select>
 			</td></tr>
-			<tr><td nowrap>&nbsp;Account Type*</td><td>&nbsp;<select style="width:160px;" name='zone'><option value='prem'/>Premium</option><option value='col'/>Collector</option></select></td></tr>
 			<tr><td colspan='2' align='center'><input type='submit' value='Upload' onclick='$(this).fadeOut();'></td></tr>
 			<tr><td align='center' colspan='2'><small>Submit the form without logins to use default values stored in rapidshare.com_2GB.php</small></td></tr>
 		</form>
@@ -40,11 +38,10 @@ else
 {
 	if (empty($_REQUEST['my_login']) || empty($_REQUEST['my_pass']))
 	{
-		if ($site_login && $site_pass && $zone)
+		if ($site_login && $site_pass)
 		{
 			$_REQUEST['my_login'] = $site_login;
 			$_REQUEST['my_pass'] = $site_pass;
-			$_REQUEST['zone'] = $zone;
 			$_REQUEST['carrier'] = $carrier;
 			$_REQUEST['action'] = 'COMMENCEUPLOAD';
 			echo "<center><b>Use Default login/pass...</b></center>\n";
@@ -60,7 +57,7 @@ else
 try
 {
 	//initiate the RS uploader class
-	$rs = new RS($lfile, $_REQUEST['zone'], $_REQUEST['carrier']);
+	$rs = new RS($lfile, $_REQUEST['carrier']);
 
 	//upload the file
 	$rs->upload();
@@ -78,7 +75,6 @@ class RS
 {
 	/////Only change the values below if you know what you are doing, or if you want to experiment!
 	public $file;	// the full path to the file we want to upload
-	public $zone = 'prem';	// set to 'prem' or 'col' depending on your account type. Use premium account-type by default. You should do this from the same area as where you set your login and pass above!
 	public $uploadpath = 'l3';	// depending on your [server|pc] location you can change this to any of the carriers rs.com uses such as 'cg' or others
 	public $download_link;
 	public $delete_link;
@@ -97,11 +93,10 @@ class RS
 	private $fileid;
 	private $killcode;
 	
-	public function __construct($file,$zone,$carrier)
+	public function __construct($file, $carrier)
 	{
 		$this->login = trim($_REQUEST['my_login']);
 		$this->password = trim($_REQUEST['my_pass']);
-		if ($zone) $this->zone = $zone;
 		if ($carrier) $this->uploadpath = $carrier;
 		$this->getfilesize($file);
 		$this->getuploadserver();
@@ -111,7 +106,7 @@ class RS
 	{
 		$this->file = realpath($file);
 		if (!($this->fsize = filesize($this->file))) throw new Exception('Filesize not obtained - upload halted.'); //("File $this->file is empty or does not exist!\r\n");
-		if (($this->fsize > 200*pow(1024, 2)) && $this->zone == 'col') throw new Exception('FILE TOO BIG - Only premium accounts can upload files over 200MB in size');
+		#if (($this->fsize > 500*pow(1024, 2)) && $this->zone == 'col') throw new Exception('FILE TOO BIG - Only premium accounts can upload files over 500MB in size');
 		$this->filename = basename($this->file);
 		echo "<center><b>Total Filesize (bytes): " . $this->fsize . '</b></center>';
 	}
@@ -162,15 +157,9 @@ class RS
 				if ($this->complete) $this->contentheader .= "$this->boundary\r\nContent-Disposition: form-data; name=\"complete\"\r\n\r\n1\r\n";
 			}
 
-			if (!$this->resumed && $this->zone == "prem" && $this->login && $this->password)
+			if (!$this->resumed && $this->login && $this->password)
 			{
 				$this->contentheader .= "$this->boundary\r\nContent-Disposition: form-data; name=\"login\"\r\n\r\n$this->login\r\n";
-				$this->contentheader .= "$this->boundary\r\nContent-Disposition: form-data; name=\"password\"\r\n\r\n$this->password\r\n";
-			}
-
-			if (!$this->resumed && $this->zone == "col" && $this->login && $this->password)
-			{
-				$this->contentheader .= "$this->boundary\r\nContent-Disposition: form-data; name=\"freeaccountid\"\r\n\r\n$this->login\r\n";
 				$this->contentheader .= "$this->boundary\r\nContent-Disposition: form-data; name=\"password\"\r\n\r\n$this->password\r\n";
 			}
 
@@ -179,7 +168,7 @@ class RS
 			$this->contentheader .= "$this->boundary\r\nContent-Disposition: form-data; name=\"filecontent\"; filename=\"$this->filename\"\r\n\r\n";
 			$contenttail = "\r\n$this->boundary--\r\n";
 			$contentlength = strlen($this->contentheader) + $chunksize + strlen($contenttail);
-			$header = 'POST /cgi-bin/' . ($this->resumed ? 'uploadresume.cgi' : 'upload.cgi') . " HTTP/1.1\r\nContent-Type: multipart/form-data; boundary=$this->boundary\r\nContent-Length: $contentlength\r\nUser-Agent: $this->useragent\r\n\r\n";
+			$header = 'POST /cgi-bin/' . ($this->resumed ? 'uploadresume.cgi' : 'upload.cgi') . " HTTP/1.1\r\nHost: {$this->fulluploadserver[host]}\r\nContent-Type: multipart/form-data; boundary={$this->boundary}\r\nContent-Length: $contentlength\r\nUser-Agent: {$this->useragent}\r\n\r\n";
 
 			if (!($socket = fsockopen($rsip, 80, $errno, $errstr, 30))) throw new Exception("Unable to open socket: $errstr");
 			fwrite($socket, "$header$this->contentheader");
@@ -224,6 +213,6 @@ class RS
 	}
 }
 
-//created by szalinski 2009
-//latest update 16 Apr 2010 r7 beta
+//created by rapidleech 2009
+//latest update 26 November 2010 r8 beta
 ?>
