@@ -1,129 +1,121 @@
 <?php
-# Edit by VietPublic, http://www.tuoitrevnnet.com"
-# RapidLeech Updated List : http://vietpublic.spaces.live.com
-##########################################
-$mega_login = ""; // login
-$mega_pass = ""; // password
-$mega_desc="Uploaded from rapidleech";  // Descriptions default
-##########################################
-$not_done = true;
-$continue_up = false;
-$cook = "";
-if ($mega_login & $mega_pass) {
-	$_REQUEST ['my_login'] = $mega_login;
-	$_REQUEST ['my_pass'] = $mega_pass;
-	$_REQUEST ['action'] = "FORM";
-	echo "<b><center>Use Default Megaupload.com login/pass.</center></b>\n";
+/****************** megaupload.com ****************************\
+megaupload.com Member + Premium Upload Plugin
+WRITTEN by VinhNhaTrang on 1 Dec 2010
+Updated by Raj Malhotra on 3 Dec 2010
+\****************** megaupload.com ****************************/
+
+#################### Account Info. ####################
+$mega_login = ""; 								// login
+$mega_pass = ""; 								// password
+#######################################################
+
+$not_done=true;
+$continue_up=false;
+if ($mega_login && $mega_pass)
+{
+	$_REQUEST['my_login'] = $mega_login;
+	$_REQUEST['my_pass'] = $mega_pass;
+	$_REQUEST['action'] = "FORM";
+	echo "<b><center>Use Default login/pass.</center></b>\n";
 }
 
-if ($_REQUEST ['action'] == "FORM")
-	$continue_up = true; else {
+if ($_REQUEST['action'] == "FORM")
+    $continue_up=true;
+else
+{
+?>
+	<table border="1" style="width: 540px;" cellspacing="0" align="center" >
+		<form method="post">
+			<input type="hidden" name="action" value='FORM' />
+		
+			<tr>
+			  <td colspan="4" align="center" height="25px" ><b> Enter Member or Premium Account </b> </td>
+			</tr>
+			<tr>
+				<td nowrap>&nbsp;Username*</td>
+				<td>&nbsp;<input type="text" name="my_login" value='' style="width: 160px;" />&nbsp;</td>
+				<td nowrap>&nbsp;Password*</td>
+				<td>&nbsp;<input type="password" name="my_pass" value='' style="width: 160px;" />&nbsp;</td>
+			</tr>
+			<tr>
+				<td colspan="4" align="center">&nbsp;<b>You can set it as default in megaupload.com_premium.php</b>&nbsp;</td>
+			</tr>
+			<tr>
+				<td colspan="4" align="center">
+					<input type="submit" value='Login' />
+				</td>
+			</tr>
+		</form>
+	</table>
+<?php
+}
+
+if ($continue_up)
+{
+	$not_done=false;
 	?>
-<table border=1 style="width: 540px;" cellspacing=0 align=center>
-	<form method=post><input type=hidden name=action value='FORM' />
-	
-	<tr >
-	  <td colspan=4 align=center height=25px ><b>	Enter Free or Premium Account</b> </td>
-	</tr>
-	<tr>
-		<td nowrap>&nbsp;Login		
-		<td>&nbsp;<input name=my_login value='' style="width: 160px;" />&nbsp;		
-		<td nowrap>&nbsp;Password		
-		<td>&nbsp;<input type=password name=my_pass value='' style="width: 160px;" />&nbsp;	
-	</tr>	
-	<tr>
-		<td nowrap colspan=0>&nbsp;Description		
-		<td colspan=3>&nbsp;<input name=message value='<?php print $mega_desc; ?>' style="width: 428px;" />&nbsp;			
-	</tr>
-	<tr><td colspan=4 align=center><input type=submit value='Upload' /></tr>	
-</table>
-</form>
-<?php
-}
-
-if ($continue_up) {
-	$lang = "l=en"; // ���������� ����    
-	$not_done = false;
-	if (empty ( $_REQUEST ['my_login'] ) || empty ( $_REQUEST ['my_pass'] )) {
-		echo "<b><center>Empty login/pass Megaupload.com. Use <span style='color:red'>FREE</span> Megaupload Account.</center></b>\n";
-		$mem = false;
-	} else {
-		?>
-<div id=login width=100% align=center>Login to Megaupload.com</div>
-<?php
-		$mem = true;
+	<table width="600" align="center">
+	</td></tr>
+	<tr><td align="center">
+	<div id="login" width="100%" align="center">Login to Megaupload.com</div>
+	<?php
 		$post = array();
-  $post['login'] = 1;
-  $post['redir'] = 1;
-  
-  $post["username"] = $_REQUEST ['my_login'] ? $_REQUEST ['my_login'] : $premium_acc["megaupload"]["user"];
-  $post["password"] = $_REQUEST ['my_pass'] ? $_REQUEST ['my_pass'] : $premium_acc["megaupload"]["pass"];
-  $Url = parse_url("http://megaupload.com/?c=login");
-  $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url['path'], 'http://megaupload.com/?c=login', 0, $post, 0, $_GET["proxy"]);
-		is_page ( $page );
-		//print_r($page); exit;
-		if (strpos ( $page, "Invalid nickname" )) {
-			echo "<b><center>Error login to Megaupload.com. Use <span style='color:red'>FREE</span> Megaupload Account.</center></b>\n";
-		} else {
-			$cook = GetCookies ( $page );
-			//$cook .= "; " . $lang;
-		}
+		$post['login'] = '1';
+		$post['username'] = trim($_REQUEST['my_login']);
+		$post['password'] = trim($_REQUEST['my_pass']);
+		$page = geturl("megaupload.com", 80, "/?c=account", 0, 0, $post, 0, $_GET["proxy"], $pauth);
+		is_page($page);
+		is_present($page, 'Username and password do not match. Please try again!', 'Error logging in - are your logins correct!');
+		$cookie = GetCookies($page);
+		$page = geturl("megaupload.com", 80, "/", "http://www.megaupload.com/", $cookie, 0, 0, "");
+		is_page($page);
+			
+	?>
+	<script>document.getElementById('login').style.display='none';</script>
+	<div id="info" width="100%" align="center">Retrive upload ID</div>
+	<?php 		
+		$server = cut_str($page, 'flashvars.server = "','";');
+		$s = rndNum(6);
+		$rand = rndNum(21);                  
+		$ID= '0'.time().$rand;
+		$upload_form = $server."upload_done.php?UPLOAD_IDENTIFIER=$ID&user=undefined&s=$s";
+		$url = parse_url($upload_form);
+	?>
+
+	<?php 	
+		$fpost = array();
+		$fpost["Filename"] = $lname;
+		$fpost["message"] = 'LeechViet';
+		$fpost["trafficurl"] = 'undefined';
+		$fpost["user"] = 'undefined';
+		$fpost["hotlink"] = '0';
+		$fpost["Upload"] = 'Submit Query';		
+		$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), "http://www.megaupload.com/",$cookie, $fpost, $lfile, $lname, "Filedata");
+	?>
+
+	<script>document.getElementById('progressblock').style.display='none';</script>
+	<?php 	
+		is_page($upfiles);
+		insert_timer( 5, "Wait for Redirect Download Link.","",true );
+		preg_match('/downloadurl *= *\'(.*?)\'/i', $upfiles, $dllink);
+		$download_link = $dllink[1];		
+}
+
+function rndNum($lg)
+{
+	$str="0123456789"; 
+	for ($i=1;$i<=$lg;$i++)
+	{
+		$st=rand(1,9);
+		$pnt.=substr($str,$st,1);
 	}
-	?>
-<script>document.getElementById('login').style.display='none';</script>
+	return $pnt;
+}
 
-
-<table width=600 align=center>
-	</td>
-	</tr>
-	<tr>
-		<td align=center>
-
-		<div id=info width=100% align=center>Retrieve upload ID</div>
-<?php
-	//$page = geturl ("megaupload.com", 80, "/", 'http://megaupload.com/?c=login', $cook, 0, 0, $_GET['proxy']);
-	//is_page ( $page );
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, 'http://megaupload.com');
-	curl_setopt($ch, CURLOPT_HEADER, 1);
-	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U;Windows NT 5.1; de;rv:1.8.0.1)\r\nGecko/20060111\r\nFirefox/1.5.0.1');
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_REFERER, 'http://megaupload.com/?c=login');
-	curl_setopt($ch, CURLOPT_COOKIE, $cook);
-	curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-	$page = curl_exec($ch);
-?>
-	<script>document.getElementById('info').style.innerHTML='Connected to megaupload, retrieving form...';</script>
-<?php
-	unset ( $post );
-	preg_match('/="multipart\/form-data" action="(.*)" target="uploadframe"/',$page,$temp);
-	$url_action = $temp[1];
-	$sessionid = cut_str ( $page, 'name="sessionid" value="', '"' );
-	//$UPLOAD_IDENTIFIER = cut_str ( $page, 'name="UPLOAD_IDENTIFIER" value="', '"' );
-	
-	//if (! $url_action || ! $sessionid || ! $UPLOAD_IDENTIFIER) {
-	//	html_error ( "Error retrive upload id" . pre ( $page ) );
-	//}
-	
-	//$post ["sessionid"] = $sessionid;
-	//$post ["UPLOAD_IDENTIFIER"] = $UPLOAD_IDENTIFIER;
-	//$post ["accept"] = 1;	
-	$post ["multimessage_0"] = $_REQUEST ['message'];	
-	$post ['trafficurl'] = "http://";
-	
-	$url = parse_url ( $url_action );
-?>
-	<script type="text/javascript">document.getElementById('info').style.innerHTML='Uploading...';</script>
-<?php
-	$upfiles = upfile ( $url ["host"], $url ["port"] ? $url ["port"] : 80, $url ["path"] . ($url ["query"] ? "?" . $url ["query"] : ""), "http://www.megaupload.com/", $cook, $post, $lfile, $lname, "multifile_0", "", $proxy, $pauth);
-	?>
-<script type="text/javascript">document.getElementById('progressblock').style.display='none';</script>
-<?php
-	is_page ( $upfiles );
-	//is_notpresent ( $upfiles, "downloadurl = '", "File not upload" );
-	preg_match ( '/\'(http:.*)\'/' ,$upfiles, $temp);
-	$download_link = $temp[1];
-	
-	//$download_link = cut_str ( $upfiles, "downloadurl = '", "'" );
-    }
+/****************** megaupload.com ****************************\
+megaupload.com Member + Premium Upload Plugin
+WRITTEN by VinhNhaTrang on 1 Dec 2010
+Updated by Raj Malhotra on 3 Dec 2010
+\****************** megaupload.com ****************************/
 ?>
