@@ -1,236 +1,106 @@
 <?php
-
 if (!defined('RAPIDLEECH'))
+  {
+  require_once("index.html");
+  exit;
+  }
+
+function str_conv($str_or)
 {
-	require_once("index.html");
-	exit;
+	if (!preg_match("/unescape\([^\)]([^\)]+)[^\)]\);\w+=([0-9]+);[^\{^]+charCodeAt\(.\)([0-9\^]+)?/", $str_or, $match)) return $str_or;
+	$str_de = urldecode($match[1]);
+	$match[3] = $match[3] ? $match[3] : "";
+	for ($i = 0; $i < $match[2]; $i++){
+		$c = ord(substr($str_de, $i, 1));
+		eval ("\$c = \$c".$match[3].";");
+		$str_re .= chr($c);
+	}
+	$str_re = str_replace($match[0], $str_re, $str_or);
+	if (preg_match("/unescape\([^\)]([^\)]+)[^\)]\).+charCodeAt\(.\)([0-9\^]+)/", $str_re, $dummy))
+		$str_re = str_conv($str_re);
+	return $str_re;
 }
 
-if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["mediafire"]["user"] && $premium_acc["mediafire"]["pass"]))
-{
-
-	//////////////////////////////////////////////////////////// START PREMIUM /////////////////////////////////////////////////////////////
-
-
-
-	//////////////////////////////////////////////////////////// END PREMIUM ///////////////////////////////////////////////////////////////
-
-}
-else
-{
-	//////////////////////////////////////////////////////////// START FREE /////////////////////////////////////////////////////////////
- if($_POST["step"]){
-$cookie=$_POST["cookie"];
-$post["recaptcha_challenge_field"]=$_POST["ch"];
-$post['recaptcha_response_field']=urlencode($_POST['captcha']);
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, $post, 0, $_GET["proxy"],$pauth);
+$Url["path"] = str_replace("download.php", "", $Url["path"]);
+$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0,  $_GET["password"] ? array("downloadp" => $_GET["password"]) : 0, 0, $_GET["proxy"],$pauth);
 is_page($page);
+$cookie = cut_str($page, 'Set-Cookie: ',' ');
+
+if (strstr($LINK,"?sharekey=")){
+	preg_match ("/src=\"([^\"]+=_shared)\"/", $page, $matches);
+	if (!$matches[1]) html_error('Error');
+	$page = geturl($Url["host"], 80, $matches[1], 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
+	is_page($page);
+	preg_match_all("/=Array\((\'\w{10,12})\'/i",$page,$matches);
+	if (count($matches[1]) == 0)  html_error('Error get link');
+	$Href=str_replace("'","http://www.mediafire.com/?",$matches[1]);
+	if (!is_file("audl.php")) html_error('audl.php not found');
+	echo "<form action=\"audl.php?GO=GO\" method=post>\n";
+	echo "<input type=hidden name=links value='".implode("\r\n",$Href)."'>\n";
+	foreach (array ("useproxy","proxy","proxyuser","proxypass") as $v)
+		echo "<input type=hidden name=$v value=".$_GET[$v].">\n";
+	echo "<script language=\"JavaScript\">void(document.forms[0].submit());</script>\n</form>\n";
+	flush();
+	exit();
 }
 
-    
-    
-    
- if($_POST["passfile"])
-{
-    $post=array();
-    $post["downloadp"]=$_POST["downloadp"];
-    $cookie=$_POST["cookie"];
-    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, $post, 0, $_GET["proxy"],$pauth);
-    is_page($page);
-}else{
-
-        $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
-        is_page($page);
-        $cookie = GetCookies($page); 
-         if(preg_match('/Location: (.*)/i', $page, $redir))
-    {
-        preg_match('/Location:.*error/i', $page) ? html_error("The Link is Invalid or the File is Deleted.", 0) : '';
-        $Href = trim($redir[1]);
-        if( strpos( $Href ,"http://mediafire.com")!== false ){
-        }else{
-        $Href="http://www.mediafire.com".$Href;
-        }
-    $Url = parse_url($Href);
-    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
-    is_page($page);
-                   }
-        }
-    $ev = cut_str($page, "Eo(); ", "; ").";"; 
-    if(preg_match("/dh\('(.*)'\)/i", $ev, $pass)){
-
-    echo("<div style=\"text-align: center\"><br><br>");
-
-    if($pass[1])
-    {
-        echo ("<div style=\"text-align: center\">The password  '".$pass[1]."'  is INVALID please correct the error.</div>");
-    }else
-    {
-        echo ("<div style=\"text-align: center\">The file is password protect, please enter the password</div>");
-    }
-    $code = '<div style="text-align: center"><form method="post" action="'.$PHP_SELF.'">'.$nn;
-    $code .= '<input type="text" name="downloadp"> <input type="submit" value="Send password">'.$nn;
-    $code .= '<input type="hidden" name="cookie" value="'.$cookie.'">'.$nn;
-    $code .= '<input type="hidden" name="passfile" value="true">'.$nn;
-    $code .= '<input type="hidden" name="link" value="'.urlencode($LINK).'">'.$nn;
-    $code .= '</form></div>';
-    echo $code;
-    die;
-    }
-    
-    if( strpos( $page ,"GetCaptcha('")!== false ){
-$Url=parse_url("http://api.recaptcha.net/challenge?k=6LextQUAAAAAALlQv0DSHOYxqF3DftRZxA5yebEe");
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
-        is_page($page);
-        is_present($page,"Expired session", "Expired session . Go to main page and reattempt", 0);
-        
-        $cook = GetCookies($page);
-        $ch = cut_str ( $page ,"challenge : '" ,"'" );
-        $Url=parse_url("http://api.recaptcha.net/image?c=".$ch);
-        $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cook, 0, 0, $_GET["proxy"],$pauth);
-        $headerend = strpos($page,"\r\n\r\n");
-        $pass_img = substr($page,$headerend+4);
-        if($options["download_dir"]){
-          $imgfile=$options["download_dir"]."mediafire_captcha.jpg";    
-        }else{
-              $imgfile=$download_dir."mediafire_captcha.jpg";
-        } 
-        if (file_exists($imgfile)){ unlink($imgfile);} 
-        write_file($imgfile, $pass_img);
-
-        $post['recaptcha_challenge_field']=$ch;
-
-        $code = '<form method="post" action="'.$PHP_SELF.'">'.$nn;
-        $code .= '<input type="hidden" name="step" value="1">'.$nn;
-        $code .= '<input type="hidden" name="link" value="'.urlencode($LINK).'">'.$nn;
-        $code .= '<input type="hidden" name="ch" value="'.$ch.'">'.$nn;
-        $code .= '<input type="hidden" name="cookie" value="'.$cookie.'">'.$nn;
-        $code .= 'Please enter : <img src="'.$imgfile.'?'.rand(1,10000).'"><br><br>'.$nn;
-        $code .= '<input type="text" name="captcha"> <input type="submit" value="Download">'.$nn;
-        $code .= '</form>';
-        echo ($code) ;
-        die;
-
-        }
-     
-     
-        
-        $string=DecoMfire($ev);
-         
-         $fid = cut_str (";".$string ,';' ,'(' );
-	//	 $snap = cut_str ( $page ,$fid ,'io.style' );
-         $snap = cut_str ( $page ,$fid ,';}} ' );   
-         $snap=DecoMfire($snap);
-         $frid =  cut_str ( $snap ,'document.getElementById("' ,'"' ); 
-	//	 $frid = cut_str ( $snap ,"io=document.getElementById('" ,"'" );
-		 $meta1= cut_str ( $string ,"('" ,"')" );
-		 $dat=explode("','",$meta1);
-		 
-         $startLink="http://www.mediafire.com/dynamic/download.php?qk=".$dat[0]."&pk=".$dat[1]."&r=".$dat[2];
-    
-         $Url=parse_url($startLink);
-
-	     $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, 0, 0, $_GET["proxy"],$pauth);
-         is_page($page);
-
-$try1=cut_str($page,$frid,'">');
-if ($try1){
-    preg_match('/;\w+?=unescape\(.+?eval\(/i', $page, $result);
-    $vall=DecoMfire($result[0]);   
-    $link=finalize($try1,$vall);    
-} else{
-   
-preg_match_all('/;\w+?=unescape\(.+?eval\(/i', $page, $result, PREG_PATTERN_ORDER); 
-foreach ( $result[0] as $tmp){ 
-$string=DecoMfire($tmp,true);
-$all.=$string;
+if ($location = trim(cut_str($page, "Location: ", "\n"))){
+	if (strstr($location, "http://download")){
+		$Href = $location;
+		$Url = parse_url($Href);
+		$FileName = !$FileName ? basename($Url["path"]) : $FileName;
+		
+		insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+		die;
+	}
+	if (strstr($location, "error.php?")) html_error('Invalid or Deleted File');
+	$page = geturl($Url["host"], defport($Url), $location, $cookie, 0, 0, 0, $_GET["proxy"],$pauth);
+	if ($tmp = cut_str($page, 'Set-Cookie: ',' ')) $cookie = $tmp;
+	$Referer = "http://www.mediafire.com$location";
 }
-$metadata=cut_str($all,$frid,'">');
-$link=finalize($metadata,$all);  
-    
+else $Referer = $LINK;
+
+if (stristr ( $page, "Eo();  dh('')" )) {
+	print "<form name=\"dl\" action=\"$PHP_SELF\" method=\"post\">\n";
+	print "<input type=\"hidden\" name=\"link\" value=\"" . urlencode ( $LINK ) . "\">\n<input type=\"hidden\" name=\"referer\" value=\"" . urlencode ( $Referer ) . "\">";
+	print "<input type=\"hidden\" name=\"comment\" id=\"comment\" value=\"" . $_GET ["comment"] . "\">\n<input type=\"hidden\" name=\"email\" id=\"email\" value=\"" . $_GET ["email"] . "\">\n<input type=\"hidden\" name=\"partSize\" id=\"partSize\" value=\"" . $_GET ["partSize"] . "\">\n<input type=\"hidden\" name=\"method\" id=\"method\" value=\"" . $_GET ["method"] . "\">\n";
+	print "<input type=\"hidden\" name=\"proxy\" id=\"proxy\" value=\"" . $_GET ["proxy"] . "\">\n<input type=\"hidden\" name=\"proxyuser\" id=\"proxyuser\" value=\"" . $_GET ["proxyuser"] . "\">\n<input type=\"hidden\" name=\"proxypass\" id=\"proxypass\" value=\"" . $_GET ["proxypass"] . "\">\n<input type=\"hidden\" name=\"path\" id=\"path\" value=\"" . $_GET ["path"] . "\">\n";
+	print "<h4>Enter password here: <input type=\"text\" name=\"password\" size=\"13\">&nbsp;&nbsp;<input type=\"submit\" onclick=\"return check()\" value=\"Download File\"></h4>\n";
+	print "<script language=\"JavaScript\">" . $nn . "function check() {" . $nn . "var imagecode=document.dl.imagestring.value;" . $nn . 'if (imagecode == "") { window.alert("You didn\'t enter the image verification code"); return false; }' . $nn . 'else { return true; }' . $nn . '}' . $nn . '</script>' . $nn;
+	print "</form>\n</body>\n</html>";
+	exit ();
 }
 
-if(!$link){
-    html_error("Download link fail. Please reattempt.");
-}
-$Url = parse_url($link);
-$FileName = basename($link);
+list ($pagea, $pageb) = explode("default:DoShow", $page, 2);
+$pageb = str_conv($pageb);
+$pageb = stripslashes(str_replace(" ", "", $pageb));
 
-$loc = "$PHP_SELF?filename=" . $FileName . 
-    "&force_name=".$FileName .
-    "&host=" . $Url ["host"] . 
-    "&port=" . $Url ["port"] . 
-    "&path=" . urlencode ( $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "") ) . 
-    "&referer=" . urlencode ( $Referer ) . 
-    "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . 
-    "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . 
-    "&method=" . $_GET ["method"] . 
-    "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . 
-    "&saveto=" . $_GET ["path"] . 
-    "&link=" . urlencode ( $LINK ) . 
-               ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ( $_GET ["comment"] ) : "") .
-                $auth . 
-               ($pauth ? "&pauth=$pauth" : "") .
-    (isset($_GET["audl"]) ? "&audl=doum" : "") .     
-    "&cookie=" . urlencode($cookie) ;
-insert_location ( $loc );
+if (!preg_match("/=\W?(\w+)[\('\"]+(\w+)[,'\"]+(\w+)([,'\"]+(\w+))?['\"]+\)/", $pageb, $eb)) html_error('Error 1');
+$pages = explode("function", $pagea);
+foreach ($pages as $v){
+	$v = str_conv($v);
+	if (strstr($v, $eb[1]."(")) break;
+}
+if (!preg_match("|getElementById\(.([0-9a-f]{32}).|", $v, $match)) html_error('Error 2');
+if (!$eb[5]){
+	$pages = explode("\n", $pagea);
+	preg_match("|\w+=\W?(\w+)|", str_replace(" ", "", array_pop($pages)), $match_b);
+	$eb[5] = $match_b[1];
 }
 
-//////////////////////////////////////////////////////////// END FREE ///////////////////////////////////////////////////////////////
+$page = geturl($Url["host"], 80, "/dynamic/download.php?qk=".$eb[2]."&pk1=".$eb[3]."&r=".$eb[5], $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
+is_page($page);
 
+$page = str_conv($page);
+$page = stripslashes(str_replace(" ", "", $page));
+$v = cut_str($page, $match[1],'}');
+if (!preg_match("|http:[^\"']+(.\+(\w+)\+.)[^\"']+|", $v, $link_match)) html_error('Error get download link');
+if (!preg_match("/".$link_match[2]."=.([\w]+)/", $page, $match)) html_error('Error 3');
+$Href = str_replace($link_match[1], $match[1], $link_match[0]);
+$Url = parse_url($Href);
+$FileName = !$FileName ? basename($Url["path"]) : $FileName;
 
-function DecoMfire ($string,$adding=false){
-do{
-$snap = cut_str ( $string ,'unescape(' ,';eval' );
- if ($adding){
-$otherSN .= cut_str ( ">>>".$string ,">>>",'unescape('  );
-$otherDR .= cut_str ( $string.">>>" ,';eval', '>>>');  
- }
-$cont = cut_str ( $snap ,"i<" ,";" );
-if(!is_numeric($cont)){
-$cont = cut_str ( $string ,$cont."=" ,";" );  
-}
-$data = cut_str ( $snap.";" ,"'" ,";" );
-$el = cut_str ( $snap ,"charCodeAt(i)^" ,")" ); 
-$elev=explode("^",$el); 
-$udec = urldecode($data);
-for($i=0;$i<$cont;$i++){
-$op=substr($udec,$i,1);
-$op2=ord($op);
-foreach($elev as $ee){
-$op2=$op2^$ee;
-}  
-//$op2=ord($op)^$el;
-$tmp.=chr($op2);
-$string=$tmp;
-}
-$tmp="";
-}while(strpos( $string ,"eval(")!== false);
-return $otherSN.$string.$otherDR;
-}
+insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
 
-
-function Finalize ($metalink,$vars){
-$vall = cut_str ( $metalink ,'" +' ,'+ "' );
-$hst =  cut_str ( $metalink ,'http://' ,'/' ); 
-$id =   cut_str ( $metalink ,'"g/' ,"/" );
-if($vall && $hst && $id){
-$fl =   cut_str ( $metalink ,$id.'/' ,'\\' ); 
-$temps = explode("+",$vall);
-foreach ($temps as $temp)
-{
-    if (empty($temp)) continue;
-    preg_match('/'.trim($temp).' ?= ?\'(.*?)\';/', $vars, $temp2);
-    $mpath1.= $temp2[1];
-}
-$Href = 'http://'.$hst.'/'.$mpath1.'g/'.$id.'/'.$fl;
-return $Href;
-}else{
-    return false;
-}
-}
-/*************************\
- Written by kaox 11-mar-10
- Fixed    by kaox 18-may-10
-\*************************/
-
+// written by okoze
 ?>
