@@ -36,6 +36,7 @@ $premium_acc["torrific_com"] = array('user' => 'mssakib11@gmail.com', 'pass' => 
 //$premium_acc["kickload_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["veehd_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["hellshare_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["bitshare_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["letitbit_net"] = array('pass' => 'your password');
 //$premium_acc["vip_file_com"] = array('pass' => 'your password');
 //$premium_acc["shareflare_net"] = array('pass' => 'your password');
