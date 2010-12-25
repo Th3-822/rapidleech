@@ -1,4 +1,16 @@
-//if (top.location != self.location) {top.location = self.location.href}
+// Frame Buster
+if ( top != self )
+{
+	try {
+		if ( top.location.host != self.location.host )
+		{
+			top.location = self.location;
+		}
+	} catch( err )
+	{
+		top.location = self.location;
+	}
+}
 
 function new_transload_window() {
 	var tmp = new Date();
