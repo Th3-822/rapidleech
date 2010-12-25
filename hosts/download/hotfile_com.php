@@ -1,15 +1,14 @@
 <?php
 
 if (!defined('RAPIDLEECH'))
-  {
-  require_once("index.html");
-  exit;
-  }
+{
+	require_once("index.html");
+	exit;
+}
 
-if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["hotfile"]["user"] && $premium_acc["hotfile"]["pass"]))
-    {
-    
-
+if ( ( $_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"] ) ||
+		( $_REQUEST ["premium_acc"] == "on" && $premium_acc ["hotfile_com"] ["user"] && $premium_acc ["hotfile_com"] ["pass"] ) )	
+	{
 	$in=parse_url("http://hotfile.com/login.php");
 	$post=array();
 	$post["returnto"]="/";
