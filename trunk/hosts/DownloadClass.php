@@ -94,6 +94,41 @@ class DownloadClass {
 		insert_location ( $loc );
 	}
 	
+	/**
+	 * Use this function to move your multiples links array to auto downloader
+	 * 
+	 * @param array $link_array     normal array containing all download links
+	 */
+	public function moveToAutoDownloader( $link_array )
+	{
+		global $nn;
+		if ( count( $link_array ) == 0 )
+		{
+			html_error( 'Error getting links from folder.' );
+		}
+		
+		if (! is_file( "audl.php" ) )
+		{
+			html_error ( 'audl.php not found' );
+		}
+		
+		$links = "";
+		foreach( $link_array as $key => $value )
+		{
+			$links .= $value . $nn;
+		}
+		
+		echo "<form action='audl.php?GO=GO' method='post' >\n";
+		echo "<input type='hidden' name='links' value='" . $links . "'>\n";
+		$key_array = array ( "useproxy", "proxy", "proxyuser", "proxypass" );
+		foreach ( $key_array as $v )
+			echo "<input type='hidden' name='" . $v . "' value='" . $_GET [$v] . "' >\n";
+		echo "<script language='JavaScript'>void(document.forms[0].submit());</script>\n";
+		echo "</form>\n";
+		flush();
+		exit();
+	}
+	
 	public function CountDown($countDown) {
 		insert_timer ( $countDown, "Waiting link timelock" );
 	}
