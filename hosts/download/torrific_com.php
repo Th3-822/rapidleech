@@ -6,14 +6,10 @@ Fixed by Raj Malhotra on 19 Oct 2010
 Updated by Raj Malhotra on 07 Nov 2010
 Updated by Raj Malhotra on 08 Nov 2010
 Fixed and Updated by Raj Malhotra on 20 Nov 2010
+Updated by Raj Malhotra on 5 Jan
 \**********************torrific.com****************************/
 
-/******** If you don't have torrific login, then you can use this account ********\
-Email : mssakib11@gmail.com
-Password : qwert
-Put this account in accounts.php
-\******** If you don't have torrific login, then you can use this account ********/
-
+//Put the account details in accounts.php file
 
 if (! defined ( 'RAPIDLEECH' ))
 {
@@ -317,5 +313,6 @@ Fixed by Raj Malhotra on 19 Oct 2010
 Updated by Raj Malhotra on 07 Nov 2010
 Updated by Raj Malhotra on 08 Nov 2010
 Fixed and Updated by Raj Malhotra on 20 Nov 2010
+Updated by Raj Malhotra on 5 Jan
 \**********************torrific.com****************************/
 ?>
