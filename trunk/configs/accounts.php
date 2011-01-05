@@ -19,7 +19,7 @@ $premium_acc = array();
 //$premium_acc["uploaded_to"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["depositfiles"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["easyshare"] = array('user' => 'your username', 'pass' => 'your password');
-$premium_acc["torrific_com"] = array('user' => 'mssakib11@gmail.com', 'pass' => 'qwert');
+//$premium_acc["torrific_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["hotfile_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["ifile_it"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["filesonic_com"] = array('user' => 'your username', 'pass' => 'your password');
