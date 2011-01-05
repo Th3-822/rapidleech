@@ -6,7 +6,7 @@ Fixed by Raj Malhotra on 19 Oct 2010
 Updated by Raj Malhotra on 07 Nov 2010
 Updated by Raj Malhotra on 08 Nov 2010
 Fixed and Updated by Raj Malhotra on 20 Nov 2010
-Updated by Raj Malhotra on 5 Jan
+Updated by Raj Malhotra on 5 Jan 2011
 \**********************torrific.com****************************/
 
 //Put the account details in accounts.php file
@@ -313,6 +313,6 @@ Fixed by Raj Malhotra on 19 Oct 2010
 Updated by Raj Malhotra on 07 Nov 2010
 Updated by Raj Malhotra on 08 Nov 2010
 Fixed and Updated by Raj Malhotra on 20 Nov 2010
-Updated by Raj Malhotra on 5 Jan
+Updated by Raj Malhotra on 5 Jan 2011
 \**********************torrific.com****************************/
 ?>
