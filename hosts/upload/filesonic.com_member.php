@@ -1,18 +1,140 @@
 <?php
 
+
 ####### Account Info. ###########
-$filesonic_login = ""; 					//Set your filesonic.com user
-$filesonic_pass = ""; 					//Set your filesonic.com password
+$filesonic_login = "";                   //Set your filesonic.com user
+$filesonic_pass = "";                    //Set your filesonic.com password
 ##############################
+
+/**
+ * FileSonic Logged-In User Upload
+ *
+ * This class is using the FileSonic API to process uploads.
+ *
+ * @author MathieuB (Filesonic Developer)
+ * @version 1.0
+ *
+ */
 
 $not_done=true;
 $continue_up=false;
+
+
 if ($filesonic_login && $filesonic_pass){
-	$_REQUEST['my_login'] = $filesonic_login;
-	$_REQUEST['my_pass'] = $filesonic_pass;
-	$_REQUEST['action'] = "FORM";
-	echo "<b><center>Use Default login/pass.</center></b>\n";
+    $_REQUEST['my_login'] = $filesonic_login;
+    $_REQUEST['my_pass'] = $filesonic_pass;
+    $_REQUEST['action'] = "FORM";
+    echo "<b><center>Use Default login/pass.</center></b>\n";
+} else if (isset($premium_acc) && isset($premium_acc["filesonic_com"]['user']) && $premium_acc["filesonic_com"]['user'] != '' && $premium_acc["filesonic_com"]['pass'] != '') {
+    $_REQUEST['my_login'] = $premium_acc["filesonic_com"]['user'];
+    $_REQUEST['my_pass'] = $premium_acc["filesonic_com"]['pass'];
+    $_REQUEST['action'] = "FORM";
+    echo "<b><center>Use Default login/pass.</center></b>\n";
 }
+
+class FileSonic {
+	var $_username = null;
+	var $_password = null;
+	var $_uploadUrl = null;
+	var $_uploadMaxFilesize = null;
+
+	function __construct($username = null, $password = null) {
+        if (!is_null($username)) $this->_username = $username;
+        if (!is_null($password)) $this->_password = $password;
+	}
+
+	function getUploadUrl() {
+		try {
+	        $page = geturl("api.filesonic.com", 80, '/upload?method=getUploadUrl&format=json&u=' . $this->_username . '&p=' . $this->_password, 0, 0, 0, 0, $_GET["proxy"], $pauth);
+	        $response = explode("\n", $page);
+	        $body = '';
+	        foreach($response AS $content) {
+	        	$content = trim($content);
+	        	if (isset($isBody) && $isBody <=1 ) { $isBody++; }
+	        	if ($content == '') {
+	        		$isBody = 0;
+	        	}
+	        	if ($content == '0') {
+	        		break;
+	        	}
+	        	if ($isBody == 2) $body = $content;
+	        }
+
+		    $apiResponse = json_decode($body, true);
+		    if (!$apiResponse || !isset($apiResponse['FSApi_Upload']) || !isset($apiResponse['FSApi_Upload']['getUploadUrl']) || !isset($apiResponse['FSApi_Upload']['getUploadUrl']['status'])) {
+		        throw new Exception("Unable to get upload server, unknow API response. Debugging: " . $page);
+		    }
+
+		    if ($apiResponse['FSApi_Upload']['getUploadUrl']['status'] == 'failed') {
+		    	$msg = '';
+		    	foreach($apiResponse['FSApi_Upload']['getUploadUrl']['errors'] AS $type => $errors) {
+		    		switch($type) {
+		    			case 'FSApi_Auth_Exception':
+                            $msg .= "Please verify your Username and Password\n";
+		    				break;
+		    			default:
+                        $msg .= $errors . "\n";
+		    		}
+		    	}
+	            throw new Exception("Failed to get upload server with message: " . $msg);
+		    }
+
+		    $this->_uploadUrl = $apiResponse['FSApi_Upload']['getUploadUrl']['response']['url'];
+		    $this->_uploadMaxFilesize = $apiResponse['FSApi_Upload']['getUploadUrl']['response']['url'];
+
+            return $this->_uploadUrl;
+		} catch (Exception $e) {
+			echo '<pre>' . $e->getMessage() . '</pre>';
+			exit;
+		}
+	}
+
+	function uploadFile($lfile, $lname) {
+        try {
+	        $uploadUrl = $this->getUploadUrl();
+	        $url = parse_url($uploadUrl);
+
+	        $page = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), 'http://www.filesonic.com/', false, array(), $lfile, $lname, "files[]", null, null, null, "RapidLeech");
+
+            $response = explode("\n", $page);
+            $body = '';
+            $isBody = false;
+            foreach($response AS $content) {
+                $content = trim($content);
+                if ($content == '') {
+                    $isBody = true;
+                }
+                if ($isBody == true) $body .= $content;
+            }
+
+            $apiResponse = json_decode($body, true);
+
+            if (!$apiResponse || !isset($apiResponse['FSApi_Upload']) || !isset($apiResponse['FSApi_Upload']['postFile']) || !isset($apiResponse['FSApi_Upload']['postFile']['status'])) {
+                throw new Exception("Unable to get upload server, unknow API response. Debugging: " . $page);
+            }
+
+            if ($apiResponse['FSApi_Upload']['postFile']['status'] == 'failed') {
+                $msg = '';
+                foreach($apiResponse['FSApi_Upload']['postFile']['errors'] AS $type => $errors) {
+                    switch($type) {
+                        case 'FSApi_Upload_Exception':
+                            $msg .= "Upload Link expired\n";
+                            break;
+                        default:
+                        $msg .= $errors . "\n";
+                    }
+                }
+                throw new Exception("Failed to get upload server with message: " . $msg);
+            }
+
+            return $apiResponse['FSApi_Upload']['postFile']['response']['files'];
+        } catch (Exception $e) {
+            echo '<pre>' . $e->getMessage() . '</pre>';
+            exit;
+        }
+	}
+}
+
 if ($_REQUEST['action'] == "FORM")
     $continue_up=true;
 else{
@@ -23,11 +145,12 @@ else{
 <tr><td nowrap>&nbsp;Email*<td>&nbsp;<input type=text name=my_login value='' style="width:160px;" />&nbsp;</tr>
 <tr><td nowrap>&nbsp;Password*<td>&nbsp;<input type=password name=my_pass value='' style="width:160px;" />&nbsp;</tr>
 <tr><td colspan=2 align=center><input type=submit value='Upload' /></tr>
-<tr><td colspan=2 align=center><small>*You can set it as default in <b><?php echo $page_upload["filesonic.com"]; ?></b></small></tr>
+<tr><td colspan=2 align=center><small>*You can set it as default in <b><?php echo __FILE__; ?></b></small></tr>
 </table>
 </form>
 
 <?php
+    exit;
 	}
 
 if ($continue_up)
@@ -37,63 +160,17 @@ if ($continue_up)
 <table width=600 align=center>
 </td></tr>
 <tr><td align=center>
-<div id=login width=100% align=center>Login to FileSonic.com</div>
-<?php 
-			$page = geturl("www.filesonic.com", 80, "/", 0, 0, 0, 0, $_GET["proxy"], $pauth);
-			is_page($page);			
-			$cookie = GetCookies($page);
-
-			$postlog = array();
-			$postlog['email']  = $_REQUEST['my_login'];
-			$postlog['password'] = $_REQUEST['my_pass'];
-			$postlog['rememberMe'] = '1';
-			
-			$Url=parse_url('http://www.filesonic.com/user/login');
-			$page = geturl($Url["host"], $url["port"] ? $url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 'http://www.filesonic.com/', $cookie, $postlog, 0, $_GET["proxy"], $pauth);
-			is_page($page);		
-			$cookie = GetCookies($page);
-			
-			is_notpresent($cookie, 'nickname=', 'Error logging in - are your logins correct?');
-			$page = geturl("www.filesonic.com", 80, "/", 'http://www.filesonic.com/dashboard', $cookie, 0, 0, $_GET["proxy"], $pauth);
-			is_page($page);	
-	
-		
-			
-?>
-<script>document.getElementById('login').style.display='none';</script>
-<div id=info width=100% align=center>Retrive test</div>
+<div id=info width=100% align=center>Upload Process</div>
 <script>document.getElementById('info').style.display='none';</script>
-<?php 		
-			$sess_id = cut_str($cookie,'PHPSESSID=',';');
-			$upload_url = cut_str($page,'class="webUpload" action="','" method="post" enctype="multipart/form-data">');
-			$upload_id = rand(1300000000000, 2000000000000);
-			$upload_id = $upload_id *(-1); 
-			$upload_id2 = rand(10000, 99999);
-			$post = array();
-			$post['filename'] = $lname;
-			$post[''] = '';
-			$post['uploadFiles'] = '';
-			$post['callbackUrl'] = 'http://www.filesonic.com/upload-completed/:linkId/:uploadProgressId/:error';
-			$url = parse_url($upload_url.'/?X-Progress-ID=upload_'.$upload_id.'_'.$sess_id.'_'.$upload_id2.' ');
-			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), 'http://www.filesonic.com/', $cookie, $post, $lfile, $lname, "upload");
+<?php
+    $filesonic = new FileSonic($_REQUEST['my_login'], $_REQUEST['my_pass']);
+    $files = $filesonic->uploadFile($lfile, $lname);
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
-<?php 	
-			is_page($upfiles);
-			$link = cut_str($upfiles,'Location:','\n');
-			$link2 = explode('/', $link);
-			if(!empty($link))
-			{
-				if($link2[4] != '0' AND !empty($link2[4]))
-				{
-					$download_link = 'http://www.filesonic.com/file/'.substr($link2[4], 1).'/'.$lname;
-		  		}
-		  		else
-		  		{
-		      			html_error("Unable to upload");
-		    		}
-			}
-			else{html_error("Upload failed");}
+<?php
+	    foreach($files AS $file) {
+	    	$download_link = $file['url'];
+	    }
+
 	}
-	//Create by pirat4
 ?>

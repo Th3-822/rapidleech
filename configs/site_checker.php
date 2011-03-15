@@ -4,6 +4,7 @@ if (!defined('RAPIDLEECH')) { require_once("index.html"); exit; }
 ### Here is a list of checkable links ###
 // Only update here if needed so we can synchronize it with templates
 $sites = array(
+	array('name' => 'FileSonic.com', 'link' => '^http://(www\.)?filesonic\.[^/]+/file/[a-z]?[0-9]+', 'regex' => 'File size:'),
 	array('name' => 'Rapidshare.com', 'link' => 'rapidshare\.com/files/', 'regex' => '(FILE DOWNLOAD|This file is larger than 200 Megabyte)'),
 	array('name' => 'Megashares.com', 'link' => 'megashares\.com/\?d01=', 'regex' => 'Click here to download'),
 	array('name' => 'Megaupload.com', 'link' => 'megaupload\.com/([a-z]{2}/)?\?d=', 'regex' => '(Filename:)|(All download slots assigned to your country)'),
