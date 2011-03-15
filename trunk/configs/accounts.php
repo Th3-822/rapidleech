@@ -3,6 +3,7 @@ if (!defined('RAPIDLEECH')) { require_once("index.html"); exit; }
 $premium_acc = array();
 
 ### Remove '//' from the beginning and enter your username and password for enable premium account ###
+//$premium_acc["filesonic_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["rapidshare_com"] = array('user' => 'your username', 'pass' => 'your password');
 // For multiple rapidshare premium accounts only - if you are using multiple accounts below, comment out the line above
 //$premium_acc["rapidshare_com"] = array(array('user' => 'your username1', 'pass' => 'your password1'),array('user' => 'your username2', 'pass' => 'your password2'),array('user' => 'your username3', 'pass' => 'your password3'));
