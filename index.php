@@ -247,7 +247,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"])
 		html_error(sprintf(lang(7), $mydomain, $myip));
 	}
 
-	$auth = ($Url ["user"] && $Url ["pass"]) ? "&auth=" . base64_encode ($Url ["user"] . ":" . $Url ["pass"]) : "";
+	$auth = ($Url ["user"] && $Url ["pass"]) ? "&auth=" . urlencode (encrypt (base64_encode ($Url ["user"] . ":" . $Url ["pass"]))) : ""; 
 
 	if (isset ($_GET ['cookieuse']))
 	{
@@ -261,7 +261,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"])
 		}
 	}
 
-	insert_location ("$PHP_SELF?filename=" . urlencode ($FileName) . "&host=" . $Url ["host"] . "&port=" . $Url ["port"] . "&path=" . urlencode ($Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "")) . "&referer=" . urlencode ($Referer) . "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&method=" . $_GET ["method"] . "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&link=" . urlencode ($LINK) . ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ($_GET ["comment"]) : "") . $auth . ($pauth ? "&pauth=$pauth" : "") . (isset ($_GET ["audl"]) ? "&audl=doum" : "") . "&cookie=" . urlencode ($_GET ['cookie']));
+	insert_location ("$PHP_SELF?filename=" . urlencode ($FileName) . "&host=" . $Url ["host"] . "&port=" . $Url ["port"] . "&path=" . urlencode ($Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "")) . "&referer=" . urlencode ($Referer) . "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&method=" . $_GET ["method"] . "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&link=" . urlencode ($LINK) . ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ($_GET ["comment"]) : "") . $auth . ($pauth ? "&pauth=$pauth" : "") . (isset ($_GET ["audl"]) ? "&audl=doum" : "") . "&cookie=" . urlencode (encrypt ($_GET ['cookie'])));
 }
 else
 {
