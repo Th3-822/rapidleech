@@ -1,6 +1,16 @@
 Rapidleech PlugMod (by eqbal)
 /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 
+Rev. 42 - 19 Mar 2011
+[PLUGIN] Added some newly made plugins(Baking, kaox, Raj Malhotra)
+[PLUGIN] Removed some died sites plugins(Raj Malhotra)
+[FIX]Little security fix ,to file downloaded RL not show more the full file path
+[SECURITY] WARNING: Bug found due to the insert_location() function (download system) which reveals premium cookies and base_64 encoded auth-strings to end user(s). The premium accounts of rapidleech servers providing premium-account downloads to public, are in danger of having their premium accounts compromised! Private rapidleech servers are safe for now, but are strongly encouraged to upgrade
+[SECURITY] Standard auth system for premium accounts is put in place, any premium plugins not adhering to the new standard will either be compromised, or won't work with the new system. Premium account data using base64 authorisation are no longer passed via the insert_location function, instead they are retrieved internally
+[SECURITY] New premium cookie encryption system implemented (due to the complexity of cookie system and to keep load on 3rd-party servers to a minimum, cookies are encrypted instead, and then decrypted when needed)
+[SECURITY] New $secretkey in accounts.php, which is used for cookie encryption. A standard key is included, but you must create your own random string, max 56 characters in length
+[SECURITY] Rapidshare, Hotfile, Megaupload, Netload premium system updated. Other filehost premium plugins will need to be updated, if needed (this includes paid-for plugins also)
+
 Rev. 41 - 28 June 2009
 [PLUGIN] Added some newly made plugins (Baking, kaox)
 [SECURITY] Replaced megaupload download plugin for password protected files, to prevent premium cookie leak (thanhquanky)
