@@ -12,9 +12,8 @@ class youtube_com extends DownloadClass
 	public function Download($link)
 	{
 		$this->page = $this->GetPage($link);
-		if (!preg_match('#fmt_url_map=(.+?)&#', $this->page, $fmt_url_map)) html_error('Video link not found.');
-		$fmt_url_maps = preg_split('%,%', urldecode($fmt_url_map[1]));
-		//var_dump($fmt_url_maps); exit;
+		if (!preg_match('#fmt_url_map=(.+?);#', $this->page, $fmt_url_map)) html_error('Video link not found.');
+		$fmt_url_maps = preg_split('%,%', urldecode(str_replace('\u0026amp','', $fmt_url_map[1])));
 		$fmts = array(37,22,35,18,34,6,5,0,17,13);
 		$yt_fmt = $_POST['yt_fmt'];
 
@@ -25,7 +24,7 @@ class youtube_com extends DownloadClass
 				$furlmap = preg_split('%\|%', $fmtlist);
 				$fmturlmaps[$furlmap[0]] = $furlmap[1];
 			}
-
+			
 			//look for and download the highest quality we can find?
 			if ($yt_fmt == 'highest')
 			{
@@ -69,11 +68,15 @@ class youtube_com extends DownloadClass
 		elseif (preg_match ('%13|17%', $yt_fmt)) $ext = '.3gp';
 		elseif (preg_match ('%highest%', $yt_fmt)) $ext = '.mp4';
 		else $ext = '.flv';
+		
+		if (!preg_match('#<title>\s*YouTube[\s\-]+(.*?)\s*</title>#', $this->page, $title)) html_error('No video title found! Download halted.');
+		if (!$video_id)
+		{
+			preg_match ('#video_id=(.+?);#', $this->page, $video_id);
+			$video_id = str_replace('\u0026amp', '', $video_id[1]);
+		}
 
-		if (!preg_match('#<title>.*YouTube.*-(.*)</title>#Us', $this->page, $title)) html_error('No video title found! Download halted.');
-		if (!$video_id) preg_match ('#video_id=(.+?)&#', $this->page, $video_id);
-
-		$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode (trim($title[1]))) . (isset ($_POST ['yt_fmt']) && $_POST ['yt_fmt'] !== 'highest' ? '-[' . $video_id[1] . '][f' . $_POST ['yt_fmt'] . ']' : '-[' . $video_id[1] . '][f' . $fmt . ']') . $ext;
+		$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode (trim($title[1]))) . (isset ($_POST ['yt_fmt']) && $_POST ['yt_fmt'] !== 'highest' ? '-[' . $video_id . '][f' . $_POST ['yt_fmt'] . ']' : '-[' . $video_id . '][f' . $fmt . ']') . $ext;
 
 		if ($_POST ['ytdirect'] == 'on')
 		{
