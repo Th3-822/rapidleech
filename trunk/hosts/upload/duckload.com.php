@@ -39,80 +39,54 @@ if ($continue_up)
 <tr><td align=center>
 <div id=info width=100% align=center>Retrive upload ID</div>
 <?php
+            $rnd=time().rand(100,999);
             $usr=$_REQUEST['my_login'];
             $pass=$_REQUEST['my_pass'];
-            $referrer="http://duckload.com/account.html"; 
-            $Url = parse_url("http://duckload.com/index.php?Modul=Login");
-			$post['yl_name'] = $usr;
-			$post['yl_pw'] = $pass;
-			$post['yl_submit'] = "Login";
+            $referrer="http://www.duckload.com/Members/Login"; 
+            $Url = parse_url("http://www.duckload.com/api/public/login&user=$usr&pw=$pass&fmt=json&source=TOPNAV&callback=jsonp$rnd");
+            $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referrer, 0, 0, 0, $_GET["proxy"],$pauth);
+	    is_page($page);
 
-            $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referrer, 0, $post, 0, $_GET["proxy"],$pauth);
-			is_page($page); 
-    preg_match('/Set-Cookie: (.*);/U',$page,$tmp);
-    $cook .= $tmp[1];		
-            
-            $referrer="http://duckload.com/index.html";
-              
-			$Url = parse_url("http://duckload.com/member/&auth=true");
-			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referrer, $cook, 0, 0, $_GET["proxy"],$pauth);
-			is_page($page);
-            is_notpresent($page,$usr,"Not logged in. Check your login details in duckload.com.php");            
+            is_present($page,"You have entered an incorrect password!");  
+            is_present($page,"This account does not exist!"); 
+
             $cookie =GetCookies($page);
-	        $cookie =$cook ."; ".GetCookies($page);
-            $Url = parse_url($referrer);
-            $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referrer, $cookie, 0, 0, $_GET["proxy"],$pauth);
+            $Url = parse_url("http://www.duckload.com/Members/");
+            $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), "http://www.duckload.com/Members/Login", $cookie, 0, 0, $_GET["proxy"],$pauth);
             is_page($page) ;
-            for($i=0; $i<32; $i++){
-            $id .= base_convert(floor(rand(0, 15)), 10, 16);}
-			$url_action=cut_str($page, 'action="', '"')."?X-Progress-ID=".$id;
-			$fpost['MAX_FILE_SIZE'] = "9589934592";
-
-			
+           
+            preg_match('%<form action="(.*)" onsubmit="%i', $page, $match);
+            $url_action = $match[1];  
+            $ID = cut_str($url_action, "Progress-ID=","\r");
+            $MAX_FILE_SIZE = cut_str($page, 'name="MAX_FILE_SIZE" value="','" />');
+            $uid = cut_str($page, 'name="uid" value="','" />');
 	?>
 <script>document.getElementById('info').style.display='none';</script>
-
-		<table width=600 align=center>
-			</td>
-			</tr>
-			<tr>
-				<td align=center>
+<table width=600 align=center>
+</td>
+</tr>
+<tr>
+<td align=center>
 <?php		
-			
+			$fpost = array(
+			'MAX_FILE_SIZE' => $MAX_FILE_SIZE,
+                        'uid'          => $uid);
 			$url = parse_url($url_action);
-			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""),$referrer, 0, $fpost, $lfile, $lname, "file[]");
+			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""),"http://www.duckload.com/Members/", $cookie, $fpost, $lfile, $lname, "file1");
 
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
 <?php 	
-
-			$act=cut_str($upfiles,"action='","'");
-			$dat=cut_str($upfiles,"POST'><textarea name=","/textarea></Form>");
-			preg_match_all('/\'.+?</',$dat,$datas);
-			$post=array();
-			foreach ($datas[0] as $data){
-			$tmp=str_replace(">","=",$data);
-			$quer=str_replace("<","",$tmp);
-            $tquer=explode("'",$quer);
-			$post[$tquer[1]] = str_replace("=","",$tquer[2]);
-			}	
-			$Url=parse_url($act);
-			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referrer, $cookie, $post, 0, $_GET["proxy"],$pauth);
+                        $Url=parse_url("http://www.duckload.com/api/links.php?id=$ID");
+			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), "http://www.duckload.com/", $cookie, 0, 0, $_GET["proxy"],$pauth);
 			is_page($page);
-			is_notpresent($page,"Upload Erfolgreich","Error upload file",0);
+                       
+                        preg_match('/<input type="text" name="dllink" class="config_input" style="width:90%" value="(.*)"/i', $page, $match);
+                        $download_link = $match[1];
+                        if (!$match[1]) html_error('Error getting return url');
+                        preg_match('/<input type="text" name="dellink" class="config_input" style="width:90%" value="(.*)"/i', $page, $match);
+                        $delete_link = $match[1];;		
+}
 			
-			preg_match('/http:\/\/duckload\.com\/download\/[^"\']+/i', $page, $down);
-			preg_match('/http:\/\/duckload\.com\/divx\/[^"\']+/i', $page, $divx);
-			preg_match('/http:\/\/duckload\.com\/delete\/[^"\']+/i', $page, $del);
-			
-			
-			$download_link=$down[0];
-			$stat_link=$divx[0];
-			$delete_link=$del[0];
-			}			
-
-
-/*************************\  
-written by kaox 28/06/2009
-\*************************/
+//written by VinhNhaTrang 27/11/2010
 ?>

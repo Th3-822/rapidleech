@@ -91,8 +91,8 @@ if ($continue_up)
 <?
 	$Url=parse_url('http://www.cinshare.com/upload/getLinks/'.$ID);
 	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 'http://www.cinshare.com/', 0, 0, 0, $_GET["proxy"],$pauth);
-	$ddl=cut_str($page,'value="http://www.cinshare.com/files/get/','"');
-	$download_link= "http://www.cinshare.com/files/get/".$ddl;
+	$ddl=cut_str($page,'value="http://www.cinshare.com/videos/watch/','"');
+	$download_link= "http://www.cinshare.com/videos/watch/".$ddl;
 	$delete_link= "http://www.cinshare.com/files/delete/".$ID;
 	}
 // Made by Baking 30/07/2009 16:55

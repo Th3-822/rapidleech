@@ -12,6 +12,14 @@ class youtube_com extends DownloadClass
 	public function Download($link)
 	{
 		$this->page = $this->GetPage($link);
+		if (preg_match('#^HTTP/1.(0|1) 404 Not Found#i', $this->page)) {
+				is_present($this->page, "The video you have requested is not available.");
+				is_present($this->page, "This video contains content from", "This video has content with copyright and it's blocked in this server's country.");
+				html_error('404 Page Not Found');
+		}				
+		if (preg_match('#Location: http://(www.)?youtube.com/das_captcha#', $this->page) || $_GET["step"]) {
+				$this->captcha($link);
+		}
 		if (!preg_match('#fmt_url_map=(.+?);#', $this->page, $fmt_url_map)) html_error('Video link not found.');
 		$fmt_url_maps = preg_split('%,%', urldecode(str_replace('\u0026amp','', $fmt_url_map[1])));
 		$fmts = array(37,22,35,18,34,6,5,0,17,13);
@@ -90,7 +98,44 @@ class youtube_com extends DownloadClass
 			$this->RedirectDownload (urldecode($furl), $FileName, $cookies, 0, $refmatch [1], $FileName);
 		}
 	}
+	private function captcha($link) {
+		$url = "http://www.youtube.com/das_captcha?next=" . urlencode($link);
+		if ($_GET["step"] == 1) {
+			$post['challenge_enc'] = $_POST['challenge_enc'];
+			$post['next'] = $_POST['next'];
+			$post['response'] = $_POST['captcha'];
+			$post['action_verify'] = $_POST['action_verify'];
+			$post['submit'] = $_POST['submit'];
+			$post['session_token'] = $_POST['session_token'];
+			$cookie = urldecode($_POST['cookie']);
+
+			$page = $this->GetPage($url, $cookie, $post, $url);
+			is_present($page, "The verification code was invalid", "The verification code was invalid or has timed out, please try again.");
+			is_present($page, "\r\n\r\nAuthorization Error.", "Error sending captcha.");
+			is_notpresent($page, "Set-Cookie: goojf=", "Cannot get captcha cookie.");
+
+			$this->page = $this->GetPage($link, GetCookies($page));
+		} else {
+			global $Referer;
+			$page = $this->GetPage($url);
+
+			$data['challenge_enc'] = urlencode(cut_str($page, 'name="challenge_enc" value="', '"'));
+			$data['next'] = urlencode(cut_str($page, 'name="next" value="', '"'));
+			$data['action_verify'] = urlencode(cut_str($page, 'name="action_verify" value="', '"'));
+			$data['submit'] = urlencode(cut_str($page, 'type="submit" name="submit" value="', '"'));
+			$data['session_token'] = urlencode(cut_str($page, "'XSRF_TOKEN': '", "'"));
+			$data['step'] = 1;
+			$data['link'] = urlencode($link);
+			$data['cookie'] = urlencode(GetCookies($page));
+			$data['referer'] = urlencode($Referer);
+
+			$this->EnterCaptcha("http://www.youtube.com" . cut_str($page, 'img name="verificationImg" src="', '"'), $data, 20);
+			exit;
+		}
+	}
 }
 //re-written by szal based on original plugin by eqbal
 //updated 07 June 2010
+// [29-03-2011]  Added support for captcha. - Th3-822
+// [27-04-2011]  Added error message - Th3-822
 ?>

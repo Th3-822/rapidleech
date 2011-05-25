@@ -35,16 +35,16 @@ function delete_go() {
 			$file = $list [$_POST ["files"] [$i]];
 			if (file_exists ( $file ["name"] )) {
 				if (@unlink ( $file ["name"] )) {
-					printf(lang(151),$file['name']);
+					printf(lang(151),basename($file['name']));
 					echo "<br />";
 					unset ( $list [$_POST ["files"] [$i]] );
 				} else {
-					printf(lang(152),$file['name']);
+					printf(lang(152),basename($file['name']));
 					echo "<br />";
 				}
 			} else {
 				unset ( $list [$_POST ["files"] [$i]] );
-				printf(lang(145),$file['name']);
+				printf(lang(145),basename($file['name']));
 				echo "<br />";
 			}
 		}

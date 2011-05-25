@@ -348,6 +348,7 @@ else
 			$_GET ["host"] = ($purl ["host"]) ? $purl ["host"] : $_GET ["host"];
 			$_GET ["path"] = $purl ["path"] . ($purl ["query"] ? "?" . $purl ["query"] : "");
 			$_GET ['port'] = $purl ['port'] ? $purl ['port'] : 80;
+			$_GET ['cookie']=$_GET ["cookie"] ? urldecode(encrypt(trim($_GET["cookie"]))) : "";
 			$lastError = "";
 		}
 	}

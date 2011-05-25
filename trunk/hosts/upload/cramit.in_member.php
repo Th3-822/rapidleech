@@ -65,8 +65,6 @@ if ($continue_up)
 	$uid += floor(rand() * 10);
 	$post['upload_type']= 'file';
 	$post['sess_id']= $xfss;
-	$post['file_0_descr']=$_REQUEST['descript'];
-	$post['file_0_public']='1';
 	$post['link_rcpt']='';
 	$post['link_pass']='';
 	$post['tos']='1';
@@ -91,7 +89,7 @@ if ($continue_up)
 	$Url=parse_url($ref);
 	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $uurl, $cookies, $gpost, 0, $_GET["proxy"],$pauth);
 	
-	$ddl=cut_str($page,'<td colspan=2><a href="','"');
+	$ddl=cut_str($page,'<td colspan=3><a href="','"><span');
 	$del=cut_str($page,'killcode=','"');
 	
 	$download_link=$ddl;
@@ -99,4 +97,5 @@ if ($continue_up)
 	}
 // Made by cramit.in 09/05/2010 01:20
 // Member upload plugin Made by duartecon 09/05/2010 10:06
+// Fixed By Slider324 22/02/11 6:28 
 ?>

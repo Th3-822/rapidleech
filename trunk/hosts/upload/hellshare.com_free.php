@@ -6,11 +6,7 @@ else{
 <table border=0 style="width:270px;" cellspacing=0 align=center>
 <form method=post>
 <input type=hidden name=action value='FORM' />
-<tr><td nowrap>&nbsp;Login*<td>&nbsp;<input type=text name=login value='' style="width:160px;" />&nbsp;</tr>
-<tr><td nowrap>&nbsp;Password*<td>&nbsp;<input type=password name=password value='' style="width:160px;" />&nbsp;</tr>
-<tr><td nowrap>&nbsp;Description<td>&nbsp;<textarea name="description_0" style="width:160px;"></textarea>&nbsp;</tr>
 <tr><td nowrap>&nbsp;Dealer ID<td>&nbsp;<input type=updealer_id name=updealer_id value='' style="width:160px;" />&nbsp;</tr>
-<tr><td nowrap>&nbsp;Private File<td>&nbsp;<input id="input_initinfo_private_file_0" name="private_file_0" type="checkbox" value="1" />
 </table>
 <center><input type=submit value='Upload' /></center></tr>
 </form>
@@ -27,7 +23,7 @@ if ($continue_up)
 <div id=info width=100% align=center>Retrive upload ID</div>
 <tr><td align=center>
 <?php
-	$ref = 'http://www.en.hellshare.com/';
+	$ref = 'http://www.hellshare.com/';
 	$Url=parse_url($ref);
 	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $ref, 0, 0, 0, $_GET["proxy"],$pauth);
 	is_page($page);
@@ -52,7 +48,7 @@ if ($continue_up)
 	$post['submit']=' Upload! ';
 	
 	$url=parse_url($upfrm);
-	$ref='http://www.en.hellshare.com/';
+	$ref='http://www.hellshare.com/';
 ?>
 <script>document.getElementById('info').style.display='none';</script>
 <?
@@ -70,19 +66,18 @@ if ($continue_up)
 	is_page($page);
 
 	$up2 = cut_str($page,"self.location='hs_upload_process_pro.php?tmp_sid=","'");
-	$Url = parse_url("http://www.en.hellshare.com/hs_upload_process_pro.php?tmp_sid=".$up2);
+	$Url = parse_url("http://www.hellshare.com/hs_upload_process_pro.php?tmp_sid=".$up2);
 	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $ref, $cookies, 0, 0, $_GET["proxy"],$pauth);
 	is_page($page);
 
 	$fileid = cut_str($page,"getElementById('fileinfo-fileid-0').value=\"",'"');
-	$ddl= 'http://download.en.hellshare.com/'.cut_str($page,'<a href="http://download.en.hellshare.com/','"');
-	$del= 'http://www.en.hellshare.com/'.cut_str($page,'/maintenance/',"'");
+	$ddl= 'http://download.hellshare.com/'.cut_str($page,'<a href="http://download.hellshare.com/','"');
+	$del= 'http://www.hellshare.com/maintenance/'.cut_str($page,'/maintenance/',"'");
 
 	$download_link = $ddl;
 	$delete_link = $del;
 	
 	Echo "To edit your file informations go <a href=\"$del\">HERE</a>";
 }
-// Made by Baking 12/11/2009 21:20
-// Member upload plugin by Baking 12/11/2009 21:27
+// Made by Certik 13/02/2011 18:00
 ?>

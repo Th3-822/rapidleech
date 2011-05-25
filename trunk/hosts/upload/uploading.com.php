@@ -1,118 +1,87 @@
 <?php
-if($_POST["upc"]=="ok"){
-}else{
-//********* Login ************
-$_POST["login"]="";// username
-$_POST["pwd"]="";  // password
-//****************************
+
+####### Account Info. ###########
+$uploading_com_login = "xxxxxx"; //Set you username : email
+$uploading_com_pass = "xxxxxx"; //Set your password
+##############################
+
+$not_done=true;
+$continue_up=false;
+if ($uploading_com_login & $uploading_com_pass){
+	$_REQUEST['my_login'] = $uploading_com_login;
+	$_REQUEST['my_pass'] = $uploading_com_pass;
+	$_REQUEST['action'] = "FORM";
+	echo "<b><center>Use Default login/pass.</center></b>\n";
 }
-if(!$_POST["login"] || !$_POST["pwd"])
-{
+if ($_REQUEST['action'] == "FORM")
+    $continue_up=true;
+else{
 ?>
-      <table border=1 style="width: 540px;" cellspacing=0 align=center>
-    <form method=post> 
-    
-    <tr >
-      <td colspan=4 align=center height=25px ><b>Enter Premium Account</b> </td>
-    </tr>
-    <tr>
-        <td nowrap>&nbsp;E-Mail        
-        <td>&nbsp;<input name=login value='' style="width: 160px;" />&nbsp;        
-        <td nowrap>&nbsp;Password        
-        <td>&nbsp;<input type=password name=pwd value='' style="width: 160px;" />&nbsp;    
-    </tr>    
-            <input type=hidden  name=upc value='ok' />
-    <tr><td colspan=4 align=center><input type=submit value='Upload' /></tr>    
+<table border=0 style="width:270px;" cellspacing=0 align=center>
+<form method=post>
+<input type=hidden name=action value='FORM' />
+<tr><td nowrap>&nbsp;Email*<td>&nbsp;<input type=text name=my_login value='' style="width:160px;" />&nbsp;</tr>
+<tr><td nowrap>&nbsp;Password*<td>&nbsp;<input type=password name=my_pass value='' style="width:160px;" />&nbsp;</tr>
+<tr><td colspan=2 align=center><input type=submit value='Upload' /></tr>
+<tr><td colspan=2 align=center><small>*You can set it as default in <b><?php echo $page_upload["uploading.com_premium"]; ?></b></small></tr>
 </table>
 </form>
-    
+
 <?php
-}
-else
-{
+	}
 
-    echo "<div id=login width=100% align=center>Login to uploading.com</div>";
-   
-    $post=array();
-    $post["email"]=$_POST["login"]; 
-    $post["password"]=$_POST["pwd"];
-	$post["remember"]="on";
-     
-    $page = geturl("uploading.com", 80, "/general/login_form/", 0, 0, $post, 0 );
-    $cookies=GetCookies($page);
-    $page = geturl("uploading.com", 80, "/", "http://uploading.com/login_form/", $cookies);
-    is_notpresent($page, "top_user_panel", "Login failed<br>Wrong login/password?");
-    
-    echo
-<<<HTML
-    <script>document.getElementById('login').style.display='none';</script>
-    <table width=600 align=center>
-    </td></tr>
-    <tr><td align=center>
-HTML;
+if ($continue_up)
+	{
+		$not_done=false;
+?>
+<table width=600 align=center>
+</td></tr>
+<tr><td align=center>
+<div id=login width=100% align=center>Login to Uploading.com</div>
+<?php 
+                        $post=array();
+	                $post['email'] = $_REQUEST['my_login'];
+                        $post['password'] = $_REQUEST['my_pass'];
+                        $post["remember"]="on";
+                        $page = geturl("uploading.com", 80, "/general/login_form/", 0, 0, $post, 0 );
+                        $cookie=GetCookies($page);
+                        $page = geturl("uploading.com", 80, "/", "http://uploading.com/login_form/", $cookie);
+                        is_page($page);
+                        is_notpresent($page, "top_user_panel", "Login failed<br>Wrong login/password?");
+?>
+<script>document.getElementById('login').style.display='none';</script>
+<div id=info width=100% align=center>Retrive upload ID</div>
+<?php 
+			preg_match("/upload_url: '(.*)'/", $page, $upurl);
+                        $upurl = trim($upurl[1]);
+                        preg_match("/SID: '(.*)'/", $page, $SID);
+                        $SID = trim($SID[1]);
+                        $url=parse_url($upurl);
+?>
+<?php 	
 
-
-/*
-    preg_match('/action=.+(http:\/\/[^"]+).+multipart\/form-data/', $page, $preg) or html_error("Upload url not found");
-	
-    $url = parse_url($preg[1] ."?X-Progress-ID=". $id); 
-	
-    $url = parse_url($preg[1]);
-
-
-    $id = "";
-    for($i=0; $i<32; $i++)
-    {
-        $id .= base_convert(floor(rand(0, 15)), 10, 16);
-    } 
-*/	
-
-
-
-	$post = array
-        (
-            progress_id    => $id,
-            description => "",
-            share_email    => "",
-            pass => ""
-        );
-		
-    echo
-<<<HTML
-    <script>document.getElementById('progressblock').style.display='none';</script>
-HTML;
-
-$uid=str_replace('.','',microtime(1)).'0';
-
-unset($post);
-$post["action"]="get_link";
-$Url=parse_url("http://uploading.com/files/upload/?JsHttpRequest=".$uid."-xml");
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), "http://uploading.com/", $cookies, $post, 0, $_GET["proxy"],$pauth);
-is_page($page);
-
-$uplink= stripslashes(cut_str ( $page ,'upload_link": "' ,'"' ));
-$url=parse_url($uplink);
-
-$page = upfile($url["host"], defport($url), $url["path"].($url["query"] ? "?".$url["query"] : ""), "http://www.uploading.com/", $cookies, $post, $lfile, $lname, "file");
-    
-    $ddl=cut_str($page,'parent.location="','"');
-    $Url=parse_url($ddl);
-
-    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], $Referer, $cookies, $post, 0, $_GET["proxy"],$pauth);
-    is_page($page);
-
-    preg_match('/http:\/\/uploading\.com\/files\/\w{7,9}\/[^\'"]+/i', $page, $preg) or html_error("Upload error");
-    preg_match('/http:\/\/uploading\.com\/files\/edit\/[^\'"]+/i', $page, $pregd);
-    $download_link = $preg[0];
-    $delete_link = $pregd[0];
-    echo "<h3><font color='green'>File successfully uploaded to your account</font></h3>";    
-}
-
-/*************************\  
-WRITTEN by kaox 07/05/09
-UPDATE  by kaox 14/10/09
-UPDATE by Pasolvon 11/01/10
+                        $post = array();
+			$post["Filename"] = $lname;
+			$post["SID"] = $SID;
+			$post["label_id"] = '0';
+			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), "http://www.uploading.com/",$cookie, $post, $lfile, $lname, "file");
+			
+?>
+<script>document.getElementById('progressblock').style.display='none';</script>
+<?php 	
+			is_page($upfiles);
+                        $path_done =cut_str($upfiles,'answer":"','"');
+                        $done_url = "http://uploading.com/files/done/$path_done";
+                        $Url=parse_url($done_url);
+                        $page = geturl($Url["host"], $url["port"] ? $url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), "http://uploading.com/files/upload/", $cookie, 0, 0, $_GET["proxy"], $pauth);
+			is_page($page);
+			preg_match('/http:\/\/uploading\.com\/files\/\w{7,9}\/[^\'"]+/i', $page, $preg) or html_error("Upload error");
+                        preg_match('/http:\/\/uploading\.com\/files\/edit\/[^\'"]+/i', $page, $pregd);
+                        $download_link = $preg[0];
+                        $delete_link = $pregd[0];
+                        echo "<h3><font color='green'>File successfully uploaded to your account</font></h3>";  
+	}
+/*************************\
+WRITTEN by VinhNhaTrang 29/10/2010
 \*************************/
-
-
 ?>

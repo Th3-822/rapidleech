@@ -34,18 +34,18 @@ if ($continue_up)
 <table width=600 align=center>
 </td></tr>
 <tr><td align=center>
-<div id=login width=100% align=center>Login to freakshare.net</div>
+<div id=login width=100% align=center>Login to freakshare.com</div>
 <?php
 			$post['user'] = $_REQUEST['login'];
 			$post['pass'] = $_REQUEST['password'];
 			$post['submit'] = "Login" ;
-			$page = geturl("freakshare.net", 80, "/login.html", 'http://freakshare.net/', 0, $post, 0, $_GET["proxy"], $pauth);
+			$page = geturl("freakshare.com", 80, "/login.html", 'http://freakshare.com/', 0, $post, 0, $_GET["proxy"], $pauth);
 			is_page($page);
 			is_notpresent($page, 'Set-Cookie: login=', 'Error logging in - are your logins correct? First');
 			preg_match_all('/Set-Cookie: (.*);/U',$page,$temp);
 			$cookie = $temp[1];
 			$cookies = implode('; ',$cookie);
-			$page = geturl("freakshare.net", 80, "/", "http://freakshare.net/", $cookies, 0, 0, "");
+			$page = geturl("freakshare.com", 80, "/", "http://freakshare.com/", $cookies, 0, 0, "");
 			is_page($page);
 			is_notpresent($page, "<td>".$_REQUEST['login']."</td>", 'Error logging in - are your logins correct?Second');
 ?>
@@ -53,7 +53,7 @@ if ($continue_up)
 <div id=info width=100% align=center>Retrive upload ID</div>
 <?php
 
-	$ref='http://freakshare.net/';
+	$ref='http://freakshare.com/';
 	$Url=parse_url($ref);
 	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $cookies, 0, 0, 0, $_GET["proxy"],$pauth);
 	is_page($page);
@@ -80,7 +80,7 @@ if ($continue_up)
 	$id = time().'+'.(rand() * 1000000);
 	$json = cut_str($page,'$.getJSON("' ,'"').$id;
 	$Url=parse_url($json);
-	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 'http://freakshare.net/', $cookies, 0, 0, $_GET["proxy"],$pauth);
+	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 'http://freakshare.com/', $cookies, 0, 0, $_GET["proxy"],$pauth);
 
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
@@ -88,14 +88,17 @@ if ($continue_up)
 
 	$locat=trim(cut_str($upfiles,'Location: ',"\n"));
 	$Url=parse_url($locat);
-	$page = geturl($Url["host"],  80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 'http://freakshare.net/', $cookies, 0, 0, $_GET["proxy"],$pauth);
+	$page = geturl($Url["host"],  80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 'http://freakshare.com/', $cookies, 0, 0, $_GET["proxy"],$pauth);
 	is_page($page);		
 	
-	$ddl=cut_str($page,'<td><input type="text" value="','"');
-	$del=cut_str($page,'http://freakshare.net/delete/','"');
-	$download_link=$ddl;
-	$delete_link= 'http://freakshare.net/delete/'.$del;
+	$ddl=cut_str($page,'http://freakshare.com/files/','"');
+	$del=cut_str($page,'http://freakshare.com/delete/','"');
+	$download_link='http://freakshare.com/files/'.$ddl;
+	$delete_link= 'http://freakshare.com/delete/'.$del;
 }	
+
 // Made by Baking 17/09/2009 14:16
 // Big thanks to Szalinski :)
+// Fixed by Darkra 23/01/2011
+
 ?>

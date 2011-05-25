@@ -83,7 +83,7 @@ class bitshare_com extends DownloadClass {
         $post["ajaxid"] = $ajaxid;
         $page = $this->GetPage($UrlPost, $Cookies, $post, $link);
         if (!preg_match('#(http://.*)#', $page, $dlink)) {
-            html_error("Error 1x01- Plugin is out of date");
+            html_error("Error 0x10- Plugin is out of date");
         }
         $this->RedirectDownload(trim($dlink[1]), "FileName", $Cookies, 0, $link);
         exit;
@@ -103,10 +103,26 @@ class bitshare_com extends DownloadClass {
         $page = $this->GetPage($link, $cookies, 0, "http://bitshare.com");
         is_present($page, "Error - File not available", "Error - File not available");
         if (preg_match("#Location: (.*)#", $page, $temp)) {
-            $this->RedirectDownload(trim($temp[1]), "FileName");
         } else {
-            html_error("Error 3x01: Plugin is out of Date");
+            if (!preg_match('#http:\/\/.+files-ajax.+\w#', $page,$UrlPost)){
+                html_error("Error 1x01: Plugin is out of date");
+            }
+            if (!preg_match('#ajaxdl = "(.*)"#', $page,$ajaxid)){
+                html_error("Error 1x02: Plugin is out of date");
+            }
+            unset($post);
+            $post['request']="generateID";
+            $post['ajaxid']=$ajaxid[1];
+            $page=$this->GetPage($UrlPost[0], $cookies, $post, $link);
+            unset($post);
+            $post['request']="getDownloadURL";
+            $post['ajaxid']=$ajaxid[1];
+            $page=$this->GetPage($UrlPost[0],$cookies,$post,$link);
+            if (!preg_match("/(http:\/\/.*\w)/", $page,$temp)){
+                html_error("Error 1x03: Plugin is out of date");
+            }
         }
+        $this->RedirectDownload(trim($temp[1]), "FileName");
         exit();
     }
 }

@@ -1,132 +1,140 @@
 <?php
 
-if (!defined('RAPIDLEECH'))
-  {
-  require_once("index.html");
-  exit;
-  }
-
-	
-if (($_GET["premium_acc"] == "on" && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["turbobit"]["pass"]))
-{
-    $page = geturl("turbobit.net",80, "/", 0, 0, 0, 0, $_GET["proxy"],$pauth);
-    preg_match_all('/Set-Cookie: (.*);/U',$page,$temp);
-    $cookie = $temp[1][2]."; ".$temp[1][1];  
-    $lang=parse_url("http://turbobit.net/en");
-    $page = geturl($lang["host"], $lang["port"] ? $lang["port"] : 80, $lang["path"].($lang["query"] ? "?".$lang["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
-	$post = Array();
-	$post["code"] = ($_GET["premium_pass"] ? $_GET["premium_pass"] : $premium_acc["turbobit"]["pass"]);
-	$Url = parse_url("http://turbobit.net/payments/getaccess/"); 
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, $post, 0, $_GET["proxy"],$pauth);
-	//file_put_contents("turbobit_1.txt", $page);
-	is_page($page);
-	is_notpresent($page, "Turbo-access granted", "Invalid password");
-
-	$Url = parse_url($LINK);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, 0, 0, $_GET["proxy"],$pauth);
-	//file_put_contents("turbobit_2.txt", $page);
-	is_page($page);
-	//is_present($page, "The file you are looking for is not available", "The file has been deleted");
-	
-	$dsrg=cut_str($page,'<div class="download-file">','Download file');
-	$durl=cut_str($dsrg,'href="','"');
-    
-	$Url = parse_url("http://turbobit.net".$durl);
-    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, 0, 0, $_GET["proxy"],$pauth);
-    $locat=cut_str ($page ,"Location: ","\r"); 
-	$FileName=cut_str($locat,'name=','&'); 
-	$Url=parse_url($locat);
-	
-	insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+if (!defined('RAPIDLEECH')) {
+    require_once("index.html");
+    exit;
 }
-else
-{
-$tbit = $_POST['tbit']; 
-if($tbit == "ok"){
-	$post = array();
-	$post["captcha_response"] = $_POST["captcha_response"];
-	$cookie = $_POST["cookie"];
-	$Referer = $_POST["referer"];
-    $link= $_POST["link"];  
 
-	
-	
-	$Url = parse_url($link);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, $post, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-    $wtime=cut_str($page,'limit: ',','); 
-    if (!$wtime) html_error ("The captcha code inserted not match",0); 
-	insert_timer($wtime, "<b>Timer :</b>");
-    $Url["path"]=str_replace("free","timeout",$Url["path"]);
+class turbobit_net extends DownloadClass {
 
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-	
-	preg_match('/http:\/\/[^"\']+/i', $page, $go);
-	$Url = parse_url(trim($go[0]));
-	$FileName=cut_str($go[0],'name=','&');
-
-insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
-
-}else{
-     $page = geturl("turbobit.net",80, "/", 0, 0, 0, 0, $_GET["proxy"],$pauth);
-    preg_match_all('/Set-Cookie: (.*);/U',$page,$temp);
-    $cookie = $temp[1][2]."; ".$temp[1][1];
-    $lang=parse_url("http://turbobit.net/en");
-    $page = geturl($lang["host"], $lang["port"] ? $lang["port"] : 80, $lang["path"].($lang["query"] ? "?".$lang["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
-    $temp= str_replace("/","/download/free/",$Url["path"]);
-    $tmp =explode(".",$temp);
-    $Url["path"]=$tmp[0];
-    $link=  "http://".$Url["host"].$Url["path"];
-	$referer="http://".$Url["host"].$temp;
-    
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-    if (strpos($page,"The limit of connection was succeeded for your IP")){
-            $wtime=cut_str($page,'limit: ',',');
-        
-            insert_timer($wtime, "<b>The limit of connection was succeeded for your IP Wait:</b>");  
+    public function Download($link) {
+        global $premium_acc, $options;
+        if (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc ["turbobit_net"] ["user"] && $premium_acc ["turbobit_net"] ["pass"])) {
+            $this->DownloadPremium($link);
+        } elseif ($_POST['step'] == "1") {
+            $this->DownloadFree($link);
+        } else {
+            $this->Retrieve($link);
+        }
     }
-	$img_link=cut_str($page,'Captcha" src="','"');
-	
-	
-	 
-	  if ($img_link){
-          
-      // $capimg = $PHP_SELF."?image=".urlencode($img_link)."&referer=".urlencode($referer)."&cookie=".urlencode($cookie);       
-        $Url = parse_url($img_link); 
-        $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
-        $headerend = strpos($page,"PNG");
-        $imgfile = substr($page,$headerend-1);
-        $capimg= $options['download_dir']."turbobit_captcha.png" ;
-      
-        if (file_exists($capimg)) unlink($capimg) ;
-        
-        write_file($capimg, $imgfile);
-        $capimg .= "?id=".rand(10000, 100000) ;
-          
-      }else{
-	  html_error("Link image not found",0);
-	  }
-	
- 
 
+    private function Retrieve($link) {
+        global $options;
+        $page = $this->GetPage($link);
+        preg_match_all('#Set-Cookie: ([^;]+)#', $page, $tmp);
+        $TmpCookies = $tmp[1][2];
+        $Cookies = $tmp[1][1] . "; " . $tmp[1][2];
+		if (!preg_match('#class="free\W\w+" href="([^"]+)#',$page,$tmp)){
+			html_error("Plugin is out of date");
+		}
+        $flink = "http://turbobit.net" . $tmp[1];
+        $page = $this->GetPage($flink, $Cookies, 0, $link);
+        preg_match_all('#Set-Cookie: ([^;]+)#', $page, $tmp);
+        $Cookies = $TmpCookies . "; " . $tmp[1][1];
+        if (preg_match('#(\d+)</span> seconds#', $page,$count)){
+            html_error("You have reached the limit of connections,try downloading again after ".$count[1]." seconds");
+        }
+        if (!preg_match("#value = '(.*)' name = 'captcha_type'#", $page, $captcha_type)) {
+			html_error("Error 0x02:Plugin is out of date");
+        }
+        if (!preg_match("#value = '(.*)' name = 'captcha_subtype'#", $page, $captcha_subtype)) {
+            html_error("Error 0x03: Plugin is out of date");
+        }
+        $data = array();
+        $data['step'] = "1";
+        $data['link'] = urlencode($link);
+        $data['Cookies'] = $Cookies;
+        $data['flink'] = $flink;
+        $data['captcha_type'] = $captcha_type[1];
+        $data['captcha_subtype'] = $captcha_subtype[1];
+        if (!preg_match('#http.+/captcha/[^"]+#', $page, $img)) {
+            if (strpos($page, "http://api.recaptcha.net/noscript?k=6LcTGLoSAAAAAHCWY9TTIrQfjUlxu6kZlTYP50_c")) {
+                $page = $this->GetPage("http://www.google.com/recaptcha/api/challenge?k=6LcTGLoSAAAAAHCWY9TTIrQfjUlxu6kZlTYP50_c");
+                $ch = cut_str($page, "challenge : '", "'");
+                $data["recaptcha_challenge_field"] = $ch;
+                $img = "http://www.google.com/recaptcha/api/image?c=" . $ch;
+                $page = $this->GetPage($img);
+                $headerend = strpos($page, "\r\n\r\n");
+                $pass_img = substr($page, $headerend + 4);
+                write_file($options['download_dir'] . "turbobit_captcha.jpg", $pass_img);
+                $img_src = $options['download_dir'] . "turbobit_captcha.jpg";
+            }else
+                html_error("Error 0x03: Plugin is out of date");
+        } else {
+            $page = $this->GetPage($img[0], $Cookies, 0, $flink);
+            $headerend = strpos($page, "\r\n\r\n");
+            $pass_img = (substr($page, $headerend + 4));
+            if (preg_match("#\w{4}\r\n#", $pass_img)){
+                $t=strpos($pass_img, "P");
+                $pass_img=ltrim(substr($pass_img, $t-2),"\r\n");
+            }
+            write_file($options['download_dir'] . "turbobit_captcha.png", $pass_img);
+            $img_src = $options['download_dir'] . "turbobit_captcha.png";           
+        }
+        $this->EnterCaptcha($img_src, $data, '10');
+        exit;
+    }
 
-	print 	"<form method=\"post\" action=\"".$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "")."\">$nn";
-	print	"<b>Please enter code:</b><br>$nn";
-	print	"<img src=\"$capimg\">$nn";
-	print	"<input name=\"referer\" value=\"$referer\" type=\"hidden\">$nn";
-    print    "<input name=\"link\" value=\"$link\" type=\"hidden\">$nn"; 
-	print	"<input name=\"cookie\" value=\"$cookie\" type=\"hidden\">$nn";
-	print	"<input name=\"tbit\" value=\"ok\" type=\"hidden\">$nn";
-	print	"<input name=\"captcha_response\" type=\"text\" >";
-	print	"<input name=\"Submit\" value=\"Submit\" type=\"submit\"></form>";
+    private function DownloadFree($link) {
+        $post = array();
+        if (!empty ($_POST["recaptcha_challenge_field"]))
+        {   $post['recaptcha_challenge_field']=$_POST["recaptcha_challenge_field"];
+            $post['recaptcha_response_field']=$_POST['captcha'];
+        } else {
+            $post['captcha_response'] = urlencode($_POST['captcha']);
+        }
+        $post['captcha_type'] = $_POST['captcha_type'];
+        $post['captcha_subtype'] = $_POST['captcha_subtype'];
+        $Cookies = $_POST['Cookies'];
+        $flink = $_POST['flink'];
+        $page = $this->GetPage($flink, $Cookies, $post, $flink);
+        is_present($page, "Incorrect, try again!", "Incorrect Captcha");
+        if (!strpos($page, "limit: 60")) {
+            html_error("Error 0x11: Plugin is out of date");
+        }
+        insert_timer(60);
+        $rlink=str_replace("/free/", "/timeout/", $flink);
+        $page=$this->GetPage($rlink, $Cookies, 0, $flink);
+        if (!preg_match("#/download/[^']+#", $page,$tmp)){
+            echo "<pre>";var_dump(nl2br(htmlentities($page)));echo "</pre>";
+            html_error("Error 0x12: Plugin is out of date");
+        }
+        $dlink="http://turbobit.net".$tmp[0];
+        $page=$this->GetPage($dlink, $Cookies, 0, $rlink);
+        if (!preg_match("#Location: (.*)#", $page,$rlink)){
+            html_error("Error 0x13: Plugin is out of date");
+        }
+        $this->RedirectDownload(trim($rlink[1]), "turbobit", 0, 0, $dlink);
+        exit;
+    }
+    private function DownloadPremium($link){
+		global $premium_acc;
+        $post=array();
+        $post["user[login]"]= $_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc ["turbobit_net"] ["user"];
+        $post["user[pass]"]= $_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc ["turbobit_net"] ["pass"];
+        $post["user[memory]"]="on";
+        $post["user[submit]"]="Login";
+        $page=$this->GetPage("http://turbobit.net/user/login", 0, $post, $link);
+        preg_match_all("#Set-Cookie: ([^;]+)#", $page, $tmp);
+        $Cookies=$tmp[1][1]."; ".$tmp[1][3]."; ".$tmp[1][4];
+        $page=$this->GetPage($link,$Cookies,0,$link);
+        $Cookies=$tmp[1][3]."; ".$tmp[1][4];
+        preg_match_all("#Set-Cookie: ([^;]+)#", $page, $tmp);
+        $Cookies.="; ".$tmp[1][1];
+        if (preg_match("#http.+download/redirect[^']+#", $page, $tmp)){
+            $page=$this->GetPage($tmp[0], $Cookies, 0, $link);
+            if (!(preg_match("#Location: (.+)#", $page,$dlink))){
+                html_error("Error 1x02: Plugin is out of date");
+            }
+            $this->RedirectDownload(trim($dlink[1]), "turbobit", $Cookies, 0, $link);
+        }else{
+            html_error("Error 1x01: Plugin is out of date");
+        }
+        exit;
+    }
+
 }
-}
-
-/*************************\  
-written by kaox 18/09/2009
-update by kaox 31-dec-2009
-\*************************/
- 
+/*
+ * -- by vdhdevil --
+ */
 ?>

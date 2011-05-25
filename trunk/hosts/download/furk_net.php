@@ -25,7 +25,7 @@ class furk_net extends DownloadClass
 		$Href = trim($redir[1]);
 		
 		$random_furk = cut_str($page,'<input type="hidden" name="rand" value="','" />');
-		$countd = cut_str($page,'<input class="button-large" type="submit" value="Free Download (wait ','s)"');
+		$countd = cut_str($page,'startFreeDownload(',');');
 	
 		insert_timer($countd, "Waiting link timelock");
 	
@@ -39,5 +39,6 @@ class furk_net extends DownloadClass
 		exit ();
 	}
 }
-// Created by rajmalhotra on 05 Dec 09	
+// Created by rajmalhotra on 05 Dec 09
+// Fixed countdown by Th3-822 on 31 Dec 10
 ?>
