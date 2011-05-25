@@ -49,11 +49,11 @@ if ($continue_up)
 <script>document.getElementById('login').style.display='none';</script>
 <div id=info width=100% align=center>Retrive upload ID</div>
 <?php 
-			preg_match('/location *= *"(.*?)"/i', $page, $redir1);
+			preg_match('/Location: ([^\r|\n]+)/i', $page, $redir1);
 			$redir = $redir1[1];
 			$Url = parse_url($redir);
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
-			preg_match('/Location: *(.*)/i', $page, $fmanager);
+			preg_match('/Location: ([^\?|\r|\n]+)/i', $page, $fmanager);
 			$fmanager = $fmanager[1];
 			$Url = parse_url($fmanager);
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
@@ -76,12 +76,15 @@ if ($continue_up)
 			$dl_page = "http://www.4shared.com/account/changedir.jsp?sId=".$sid[1];
 			$Url = parse_url($dl_page);
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
-			$ext_uppedname = strrchr($lname, ".");
-			$uppedname = explode($ext_uppedname, $lname);
-			if(preg_match('%<a href="(http.*/'.$uppedname[0].'.*\.html)%', $page, $flink)){
-			$download_link = $flink[1];
+			preg_match('%id="uploadedFileId" value="(\d+)"%i', $upfiles, $fid);
+
+			if(preg_match('@id="ml_file_'.$fid[1].'"[\r|\n|\s]+href="/account/([^"|\?]+)@i', $page, $flink)){
+				$download_link = "http://www.4shared.com/" . $flink[1];
 			}else{
 				html_error("Finished, Go to your account to see Download-URL.", 0);
 			}
 	}
+
+//[03-Abr-2011]  Fixed redirections & regexp for get download_link. - Th3-822
+
 ?>

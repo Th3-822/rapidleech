@@ -18,11 +18,13 @@ $cookie=GetCookies($page);
 }
 
 ?>
-<script>document.getElementById('info').style.display='none';</script>
+
 <?
 
-$upladid=cut_str($page,"var uploadId = '","'");
-$nsv=cut_str($page,"var server = '","'");
+$upladid=cut_str($page,"type=\"hidden\" name=\"uploadId\" value=\"","\"/>");
+$nsv=cut_str($page,"enctype=\"multipart/form-data\" action=\"http://www",".zippyshare.com");
+
+echo "<br>uploadId: {$uploadid} & nsv: {$nsv} <br>";
 
 $url =parse_url("http://www".$nsv.".zippyshare.com/upload?uploadId=".$upladid);
 
@@ -39,7 +41,7 @@ $upfiles = upfile($url["host"], defport($url), $url["path"].($url["query"] ? "?"
 
 is_page($upfiles);
 
-$download_link = cut_str($upfiles, '[url=', ']');
+$download_link = cut_str($upfiles, 'onclick="this.select();" value="', '"');
 
 if (!$download_link)
 {
@@ -48,6 +50,8 @@ html_error("Error getting download link",0);
 
 /*************************\  
 written by kaox 12-sep-2009
+fix by zbig992 @ 15 July 2010
+fix by rapidleaks.com @ 1 DEC 2010
 \*************************/
 
 ?>

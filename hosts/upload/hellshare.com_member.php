@@ -1,5 +1,5 @@
-<?
-####### Free Account Info. ###########
+<?php
+####### Account Info. ###########
 $hellshare_login = "";
 $hellshare_pass = "";
 ##############################
@@ -7,25 +7,24 @@ $hellshare_pass = "";
 $not_done=true;
 $continue_up=false;
 if ($hellshare_login & $hellshare_pass){
-	$_REQUEST['login'] = $hellshare_login;
-	$_REQUEST['password'] = $hellshare_pass;
+	$_REQUEST['bin_login'] = $hellshare_login;
+	$_REQUEST['bin_pass'] = $hellshare_pass;
 	$_REQUEST['action'] = "FORM";
-	echo "<b><center>Use Default login/pass.</center></b>\n";
+	echo "<b><center>Let it empty for free user</center></b>\n";
 }
 if ($_REQUEST['action'] == "FORM")
     $continue_up=true;
 else{
 ?>
-<table border=0 style="width:270px;" cellspacing=0 align=center>
+<table border=1 style="width:270px;" cellspacing=0 align=center>
 <form method=post>
-<input type=hidden name=action value='FORM' />
-<tr><td nowrap>&nbsp;Login*<td>&nbsp;<input type=text name=login value='' style="width:160px;" />&nbsp;</tr>
-<tr><td nowrap>&nbsp;Password*<td>&nbsp;<input type=password name=password value='' style="width:160px;" />&nbsp;</tr>
-<tr><td nowrap>&nbsp;Description<td>&nbsp;<textarea name="description_0" style="width:160px;"></textarea>&nbsp;</tr>
-<tr><td nowrap>&nbsp;Dealer ID<td>&nbsp;<input type=updealer_id name=updealer_id value='' style="width:160px;" />&nbsp;</tr>
-<tr><td nowrap>&nbsp;Private File<td>&nbsp;<input id="input_initinfo_private_file_0" name="private_file_0" type="checkbox" value="1" />
+<input type=hidden name=action value='FORM'><input type=hidden value=uploaded value'<?php $_REQUEST[uploaded]?>'>
+<input type=hidden name=filename value='<?php echo base64_encode($_REQUEST[filename]); ?>'>
+<tr><td nowrap>&nbsp;Login<td>&nbsp;<input name=bin_login value='' style="width:160px;">&nbsp;</tr>
+<tr><td nowrap>&nbsp;Password<td>&nbsp;<input name=bin_pass value='' style="width:160px;">&nbsp;</tr>
+<tr><td colspan=2 align=center>Let it empty for free user</tr>
+<tr><td colspan=2 align=center><input type=submit value='Upload'></tr>
 </table>
-<center><input type=submit value='Upload' /></center></tr>
 </form>
 <?php
 }
@@ -34,91 +33,69 @@ if ($continue_up)
 	{
 		$not_done=false;
 ?>
-<table width=600 align=center>
-</td></tr>
-<tr><td align=center>
-<div id=login width=100% align=center>Login to hellshare.com</div>
+<table width=600 align=center> 
+</td></tr> 
+<tr><td align=center> 
+<div id=login width=100% align=center></div> 
 <?php
-
-			$ref = 'http://www.en.hellshare.com/';
-
-			$post['lgnb17_lg'] = $_REQUEST['login'];
-			$post['lgnb17_psw'] = $_REQUEST['password'];
-			$post['lgnb17_psw_holder'] ="";
-			$post['lgnb17_sbm'] = "Log In";
-			$post['DownloadRedirect'] = $_REQUEST['password'];
+			$Url=parse_url('http://www.hellshare.com/login?do=loginForm-submit');
+			if ($_REQUEST['action'] == "FORM")
+			{
+				$post["username"]=$_REQUEST['bin_login'];
+				$post["password"]=$_REQUEST['bin_pass'];
+				$post["login"]="Log+in";
 			
-			$Url=parse_url($ref);
-			$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $ref, 0, $post, 0, $_GET["proxy"],$pauth);
-			is_page($page);
-			is_notpresent($page, 'profile', 'Error logging in - are your logins correct?');
-
-			preg_match_all('/Set-Cookie: (.*);/U',$page,$temp);
-			$cookie = $temp[1];
-			$cookies = implode(';',$cookie);
-			
-			$Url=parse_url('http://www.en.hellshare.com/profile?lgnb17_m=1');
-			$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $ref, $cookies, 0, 0, $_GET["proxy"],$pauth);
-			is_page($page);
-			is_notpresent($page, '<h2>'.$_REQUEST['login'].'</h2>', 'Error logging in - are your logins correct? Second');
-?>
-<script>document.getElementById('login').style.display='none';</script>
-<div id=info width=100% align=center>Retrive upload ID</div>
-<?php
-	$Url=parse_url($ref);
-	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $ref, $cookies, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-	
-	$tfn = cut_str($page,'this_file_num" value="','"');
-	$eur = cut_str($page,'embedded_upload_results" value="','"');
-	$rau = cut_str($page,'rau" value="','"');
-	$upfrm = cut_str($page,'file_upload_action_path = "','"');
-	$refup = "http://".cut_str($upfrm,'http://','/');
-	
-	preg_match_all('/Set-Cookie: (.*);/U',$page,$temp);
-	$cookie = $temp[1];
-	$cookies = implode(';',$cookie);
-	
-	$post['this_file_num']=$tfn;
-	$post['embedded_upload_results']=$eur;
-	$post['upload_file_folder_0']= "0";
-	$post['updealer_id_0']= $_REQUEST['updealer_id'];
-	$post['rau']= $rau;
-	$post['description_0']=$lname;
-	$post['private_file_0']= $_REQUEST['private_file_0'];
-	$post['submit']=' Upload! ';
-	
-	$url=parse_url($upfrm);
-	$ref='http://www.en.hellshare.com/';
+			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://www.hellshare.com/", 0, $post, 0, $_GET["proxy"], $pauth);
+			$cookie1 = "PHPSESSID=".cut_str($page,'Set-Cookie: PHPSESSID=',";")."; ";
+			$cookie2 = "nette-browser=".cut_str($page,'Set-Cookie: nette-browser=',";");
+			$cookies = "$cookie1$cookie2";
+			}	
 ?>
 <script>document.getElementById('info').style.display='none';</script>
-<?
-
-	$upfiles=upfile($url["host"],defport($url), $url["path"].($url["query"] ? "?".$url["query"] : ""),$refup, $cookies, $post, $lfile, $lname, "upfile_0");
-
+<div id=info width=100% align=center>Retrive upload ID</div> 
+<?php
+			$Url=parse_url('http://www.hellshare.com/');
+			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://www.hellshare.com/", $cookies, 0, 0, $_GET["proxy"], $pauth);
+			
+			$action_path = cut_str($page,'target="form_upload_0_iframe" method="post" action="','"');
+			
+			/**
+			preg_match('#([0-9]+)\/([a-z0-9]+)#', $action_path, $rnd);
+			$rndid = '<script type="text/javascript">
+			var ranNum= Math.random();
+			document.write (ranNum)</script>';
+			$Url= 'http://www.hellshare.com/uu_ini_status_pro.php?tmp_sid='.$rnd[1].'/'.$rnd[2].'&start_time='.time().'&total_upload_size='.filesize($lfile).'&rnd_id='.$rndid.'';
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $Url);
+			curl_setopt($ch, CURLOPT_HEADER, 1);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $lfile);
+			curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:2.0) Gecko/20100101 Firefox/4.0');
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*\/*;q=0.8', 'Accept-Language: de-de,de;q=0.8,en-us;q=0.5,en;q=0.3', 'Accept-Encoding: gzip, deflate', 'Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7', 'Connection: keep-alive', 'Content-Type: application/x-www-form-urlencoded'));
+			curl_setopt($ch, CURLOPT_REFERER, 'http://www.hellshare.com/');
+			curl_setopt($ch, CURLOPT_COOKIE, $cookies);
+			$data = curl_exec($ch);
+			curl_close($ch);
+			*/
+			
+			$url=parse_url($action_path);
+			$fpost["this_file_num"] = "0";
+			$fpost["embedded_upload_results"] = "1";
+			$fpost["upload_file_folder_0"] = "0";
+			$fpost["updealer_id_0"] = "";
+			$fpost["rau"] = "www.hellshare.com";
+			$fpost["description_0"] = "";
+			$upfiles=upfile($url["host"], $url["port"] ? $url["port"] : 80, $url["path"] . ($url["query"] ? "?" . $url["query"] : ""), "http://www.hellshare.com/", 0, $fpost, $lfile, $lname, "upfile_0");
+			preg_match('#http:\/\/www\.hellshare\.com\/uu_finished_pro\.php\?rnd_id=([A-Za-z0-9]+)\&tmp_sid=([0-9]+)\/([a-z0-9]+)#', $upfiles, $infolink);
+			$Url=parse_url('http://www.hellshare.com/hs_upload_process_pro.php?tmp_sid='.$infolink[2].'/'.$infolink[3].'');
+			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://www.hellshare.com/", $cookies, 0, 0, $_GET["proxy"], $pauth);
+			preg_match('#target="_top">(http:\/\/download\.hellshare\.com\/.+)<\/a>#', $page, $dllink);
+			
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
-<?
-	is_page($upfiles);
-	$locat=trim(cut_str($upfiles,'Location:',"\n"));
-	unset($post);
-	$Url=parse_url($locat);
-	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $ref, $cookies, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-
-	$up2 = cut_str($page,"self.location='hs_upload_process_pro.php?tmp_sid=","'");
-	$Url = parse_url("http://www.en.hellshare.com/hs_upload_process_pro.php?tmp_sid=".$up2);
-	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $ref, $cookies, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-
-	$fileid = cut_str($page,"getElementById('fileinfo-fileid-0').value=\"",'"');
-	$ddl= 'http://download.en.hellshare.com/'.cut_str($page,'<a href="http://download.en.hellshare.com/','"');
-	$del= 'http://www.en.hellshare.com/'.cut_str($page,'/maintenance/',"'");
-
-	$download_link = $ddl;
-	$delete_link = $del;
-	
-	Echo "To edit your file informations go <a href=\"$del\">HERE</a>";
-}
-// Made by Baking 12/11/2009 21:27
+<?php
+			$download_link=$dllink[1];
+}       
 ?>

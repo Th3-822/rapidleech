@@ -9,13 +9,14 @@ class d2shared_com extends DownloadClass
 	public function Download( $link ) 
 	{
 		$page = $this->GetPage($link);
-		is_present( $page, "file link that you requested is not valid", "The file link that you requested is not valid. Please contact link publisher or try to make a search", "0" );
+		is_present( $page, "file link that you requested is not valid", "The file link that you requested is not valid. Please contact link publisher or try to make a search" );
+		is_present( $page, "File download limit has been exceeded.", "Free download limit has been exceeded. Try again later." );
 		$cookie = GetCookies($page);
-		
+
 		if ($_GET ["step"] == "1") {
 			$post = Array();
 			$post["userPass2"] = $_POST['userPass2'];
-			$cookie = $_POST['cookie'];
+			$cookie = urldecode($_POST['cookie']);
 			$page = $this->GetPage($link,$cookie,$post,$link);
 			is_present($page, "enter password to access this file", "The password you have entered is not valid.");
 		} elseif (stristr($page, 'enter password to access this file')) {
@@ -40,25 +41,13 @@ class d2shared_com extends DownloadClass
 
 		$this->getCountDown($page);
 		$FileName = trim(cut_str($page, 'name="Description" content="', ' download free at 2shared.'));
-		
-		// Get data
-		preg_match ("/var em='(.*)';/", $page, $c);
-		$em = $c[1];
-		
-		preg_match ("/var key='(.*)';/", $page, $c);
-		$key = $c[1];
-		
-		if (!stristr($page, "retrieveLink.jsp?id='+key") && stripos($page, 'decode(key)') !== false) {
-			// Decode 'key'
-			$key = $this->decode_key($key, $em); //I'm starting to believe they are changing the key only to make crash this plugin.
-		}
-		
+
 		// Retrieve download link
-		$page = $this->GetPage("http://www.2shared.com/pageDownload1/retrieveLink.jsp?id=" . $key, $cookie);
-
-
-		preg_match ('/dc(\d+)\.2shared\.com\/download(\d)\/(.*)/', $page, $L);
-		$dllink = "http://dc" . $L[1] . ".2shared.com/download" . $L[2] . "/" . $L[3];
+		if (preg_match ('/dc(\d+)\.2shared\.com\/download\/([^\'|\"|\<]+)/i', $page, $L)) {
+			$dllink = "http://dc" . $L[1] . ".2shared.com/download/" . $L[2];
+		} else {
+			html_error("Download-link not found.");
+		}
 
 		$this->RedirectDownload($dllink, $FileName, $cookie);
 	}
@@ -71,22 +60,13 @@ class d2shared_com extends DownloadClass
 			$this->CountDown($countDown);
 		}
 	}
-
-	private function decode_key($key, $em) {
-		$decoded = "";
-		for ($x = 0; $x < strlen($key); $x++) {
-			$char = ord($key[$x]) - 48;
-			$decoded .= $em[$char];
-		}
-		return $decoded;
-	}
 }
 
 /********************************************************
 Fixed by Raj Malhotra on 10 April 2010 => Fix Reloading to main page when link does not exists.
 
 Fixed by Th3-822 on 30 October 2010 => Fixed & Added support for password protected files.
-Fixed by Th3-822 on 05 November 2010 => Fixed (2shared added a key for download + cookie needed)
-Fixed by Th3-822 on 13 November 2010 => Fixed (The 'key' is annoying).
+Fixed by Th3-822 on 25 December 2010 => Fixed: 2shared changed it's system (Again... Now shows dlink in same page)
+Fixed by Th3-822 on 06 March 2011 => Changed regex for new dlink format & Added error msg for download limit.
 *********************************************************/
 ?>
