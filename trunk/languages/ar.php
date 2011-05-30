@@ -225,19 +225,19 @@ $lang[216]	=	'اختر صيغة الفيديو التي تريد تحميلها 
 $lang[217]	=	'الرابط المباشر';
 $lang[218]	=	'اختر الصيغة';
 $lang[219]	=	'للحصول على اعلى جودة';
-$lang[220]	=	'17 [فيديو: 3GP 176x144 | Audio: AAC 2ch 44.10kHz]';
+$lang[220]	=	'17 [فيديو: 3GP 176x144 | صوت: AAC 2ch 44.10kHz]';
 
 
-$lang[221]	=	'5 [فيديو: FLV 400x240 | Audio: MP3 1ch 22.05kHz]';
-$lang[222]	=	'34 [فيديو: FLV 640x360 | Audio: AAC 2ch 44.10kHz]';
-$lang[223]	=	'35 [فيديو: FLV 854x480 | Audio: AAC 2ch 44.10kHz]';
-$lang[224]	=	'43 [فيديو: WebM 640x360 | Audio: Vorbis 2ch 44.10kHz]';
+$lang[221]	=	'5 [فيديو: FLV 400x240 | صوت: MP3 1ch 22.05kHz]';
+$lang[222]	=	'34 [فيديو: FLV 640x360 | صوت: AAC 2ch 44.10kHz]';
+$lang[223]	=	'35 [فيديو: FLV 854x480 | صوت: AAC 2ch 44.10kHz]';
+$lang[224]	=	'43 [فيديو: WebM 640x360 | صوت: Vorbis 2ch 44.10kHz]';
 
 
-$lang[225]	=	'45 [فيديو: WebM 1280x720 | Audio: Vorbis 2ch 44.10kHz]';
-$lang[226]	=	'18 [فيديو: MP4 480x360 | Audio: AAC 2ch 44.10kHz]';
-$lang[227]	=	'22 [فيديو: MP4 1280x720 | Audio: AAC 2ch 44.10kHz]';
-$lang[228]	=	'37 [فيديو: MP4 1920×1080 | Audio: AAC 2ch 44.10kHz]';
+$lang[225]	=	'45 [فيديو: WebM 1280x720 | صوت: Vorbis 2ch 44.10kHz]';
+$lang[226]	=	'18 [فيديو: MP4 480x360 | صوت: AAC 2ch 44.10kHz]';
+$lang[227]	=	'22 [فيديو: MP4 1280x720 | صوت: AAC 2ch 44.10kHz]';
+$lang[228]	=	'37 [فيديو: MP4 1920×1080 | صوت: AAC 2ch 44.10kHz]';
 $lang[229]	=	'لتحميل التورنت من ImageShack';
 $lang[230]	=	'اسم المستخدم';
 $lang[231]	=	'كلمة المرور';
@@ -386,7 +386,7 @@ $lang[373]	=	'<b>Extracting files from %1$s</b>:';
 $lang[374]	=	'Status:';
 $lang[375]	=	'Select text';
 $lang[376]  =   'قسط الحسابات :'; 
-$lang[377]	=	'38 [فيديو: MP4 4096×3072 | Audio: AAC 2ch 44.10kHz]';
+$lang[377]	=	'38 [فيديو: MP4 4096×3072 | صوت: AAC 2ch 44.10kHz]';
 $lang[378]	=	'Close window';
 $lang[379]	=	'Files';
 $lang[380]	=	'MD5 change should only be applied to known working formats(i.e. .rar or .zip)<br />Do you want to continue?';
