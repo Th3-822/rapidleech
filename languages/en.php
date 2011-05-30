@@ -6,7 +6,6 @@ if (!defined('RAPIDLEECH')) {
 // The English language file
 // You should always use this file as a template for translating
 
-
 $lang[1]	=	'Access Denied';
 $lang[2]	=	'The server has refused to fulfill your request';
 $lang[3]	=	'You didn\'t enter a valid e-mail address';
@@ -382,7 +381,7 @@ $lang[372]	=	'Unrar selected';
 $lang[373]	=	'<b>Extracting files from %1$s</b>:';
 $lang[374]	=	'Status:';
 $lang[375]	=	'Select text';
-$lang[376]  =   'Premium Accounts :';
+$lang[376]      =       'Premium Accounts :';
 $lang[377]	=	'38 [Video: MP4 4096×3072 | Audio: AAC 2ch 44.10kHz]';
 $lang[378]	=	'Close window';
 $lang[379]	=	'Files';
@@ -395,7 +394,3 @@ $lang[385]	=	'Match';
 $lang[386]	=	'Ignore case';
 $lang[387]	=	'Put each file on a separated archive';
 ?>
-
-
-
-
