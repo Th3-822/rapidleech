@@ -12,16 +12,9 @@ class youtube_com extends DownloadClass
 	public function Download($link)
 	{
 		$this->page = $this->GetPage($link);
-		if (preg_match('#^HTTP/1.(0|1) 404 Not Found#i', $this->page)) {
-				is_present($this->page, "The video you have requested is not available.");
-				is_present($this->page, "This video contains content from", "This video has content with copyright and it's blocked in this server's country.");
-				html_error('404 Page Not Found');
-		}				
-		if (preg_match('#Location: http://(www.)?youtube.com/das_captcha#', $this->page) || $_GET["step"]) {
-				$this->captcha($link);
-		}
-		if (!preg_match('#fmt_url_map=(.+?);#', $this->page, $fmt_url_map)) html_error('Video link not found.');
-		$fmt_url_maps = preg_split('%,%', urldecode(str_replace('\u0026amp','', $fmt_url_map[1])));
+		if (!preg_match('#fmt_url_map=(.+?)&#', $this->page, $fmt_url_map)) html_error('Video link not found.');
+		$fmt_url_maps = preg_split('%,%', urldecode($fmt_url_map[1]));
+		//var_dump($fmt_url_maps); exit;
 		$fmts = array(37,22,35,18,34,6,5,0,17,13);
 		$yt_fmt = $_POST['yt_fmt'];
 
@@ -32,7 +25,7 @@ class youtube_com extends DownloadClass
 				$furlmap = preg_split('%\|%', $fmtlist);
 				$fmturlmaps[$furlmap[0]] = $furlmap[1];
 			}
-			
+
 			//look for and download the highest quality we can find?
 			if ($yt_fmt == 'highest')
 			{
@@ -76,15 +69,11 @@ class youtube_com extends DownloadClass
 		elseif (preg_match ('%13|17%', $yt_fmt)) $ext = '.3gp';
 		elseif (preg_match ('%highest%', $yt_fmt)) $ext = '.mp4';
 		else $ext = '.flv';
-		
-		if (!preg_match('#<title>\s*YouTube[\s\-]+(.*?)\s*</title>#', $this->page, $title)) html_error('No video title found! Download halted.');
-		if (!$video_id)
-		{
-			preg_match ('#video_id=(.+?);#', $this->page, $video_id);
-			$video_id = str_replace('\u0026amp', '', $video_id[1]);
-		}
 
-		$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode (trim($title[1]))) . (isset ($_POST ['yt_fmt']) && $_POST ['yt_fmt'] !== 'highest' ? '-[' . $video_id . '][f' . $_POST ['yt_fmt'] . ']' : '-[' . $video_id . '][f' . $fmt . ']') . $ext;
+		if (!preg_match('#<title>.*YouTube.*-(.*)</title>#Us', $this->page, $title)) html_error('No video title found! Download halted.');
+		if (!$video_id) preg_match ('#video_id=(.+?)&#', $this->page, $video_id);
+
+		$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode (trim($title[1]))) . (isset ($_POST ['yt_fmt']) && $_POST ['yt_fmt'] !== 'highest' ? '-[' . $video_id[1] . '][f' . $_POST ['yt_fmt'] . ']' : '-[' . $video_id[1] . '][f' . $fmt . ']') . $ext;
 
 		if ($_POST ['ytdirect'] == 'on')
 		{
@@ -98,44 +87,7 @@ class youtube_com extends DownloadClass
 			$this->RedirectDownload (urldecode($furl), $FileName, $cookies, 0, $refmatch [1], $FileName);
 		}
 	}
-	private function captcha($link) {
-		$url = "http://www.youtube.com/das_captcha?next=" . urlencode($link);
-		if ($_GET["step"] == 1) {
-			$post['challenge_enc'] = $_POST['challenge_enc'];
-			$post['next'] = $_POST['next'];
-			$post['response'] = $_POST['captcha'];
-			$post['action_verify'] = $_POST['action_verify'];
-			$post['submit'] = $_POST['submit'];
-			$post['session_token'] = $_POST['session_token'];
-			$cookie = urldecode($_POST['cookie']);
-
-			$page = $this->GetPage($url, $cookie, $post, $url);
-			is_present($page, "The verification code was invalid", "The verification code was invalid or has timed out, please try again.");
-			is_present($page, "\r\n\r\nAuthorization Error.", "Error sending captcha.");
-			is_notpresent($page, "Set-Cookie: goojf=", "Cannot get captcha cookie.");
-
-			$this->page = $this->GetPage($link, GetCookies($page));
-		} else {
-			global $Referer;
-			$page = $this->GetPage($url);
-
-			$data['challenge_enc'] = urlencode(cut_str($page, 'name="challenge_enc" value="', '"'));
-			$data['next'] = urlencode(cut_str($page, 'name="next" value="', '"'));
-			$data['action_verify'] = urlencode(cut_str($page, 'name="action_verify" value="', '"'));
-			$data['submit'] = urlencode(cut_str($page, 'type="submit" name="submit" value="', '"'));
-			$data['session_token'] = urlencode(cut_str($page, "'XSRF_TOKEN': '", "'"));
-			$data['step'] = 1;
-			$data['link'] = urlencode($link);
-			$data['cookie'] = urlencode(GetCookies($page));
-			$data['referer'] = urlencode($Referer);
-
-			$this->EnterCaptcha("http://www.youtube.com" . cut_str($page, 'img name="verificationImg" src="', '"'), $data, 20);
-			exit;
-		}
-	}
 }
 //re-written by szal based on original plugin by eqbal
 //updated 07 June 2010
-// [29-03-2011]  Added support for captcha. - Th3-822
-// [27-04-2011]  Added error message - Th3-822
 ?>

@@ -1,241 +1,230 @@
 <?php
 
-if (!defined('RAPIDLEECH')) {
-	require_once ("index.html");
-	exit();
+if (!defined('RAPIDLEECH'))
+{
+	require_once("index.html");
+	exit;
 }
 
-class hotfile_com extends DownloadClass {
-	public function Download($link) {
-		global $premium_acc;
+if ( ( $_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"] ) ||
+		( $_REQUEST ["premium_acc"] == "on" && $premium_acc ["hotfile_com"] ["user"] && $premium_acc ["hotfile_com"] ["pass"] ) )	
+	{
+	$in=parse_url("http://hotfile.com/login.php");
+	$post=array();
+	$post["returnto"]="/";
+	$post["user"]=$_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc["hotfile"]["user"]  ;
+	$post["pass"]=$_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc["hotfile"]["pass"];
+	$page = geturl($in["host"], $in["port"] ? $in["port"] : 80, $in["path"].($in["query"] ? "?".$in["query"] : ""), "http://hotfile.com/", 0, $post, 0, $_GET["proxy"],$pauth);    
+	preg_match('/auth=\w{64}/i', $page, $ook);
+	$cook = $ook[0];
 
-		if (!$_GET["step"]) { // Check link
-			if (preg_match("/hotfile\.com\/dl\/(\d+\/\w+)\/(.+)?/i", $link, $l)) {
-				$link = "http://hotfile.com/dl/{$l[1]}/{$l[2]}";
-			} else {
-				html_error("Error: Malformed link?. Please check the download link.");
-			}
-			$page = $this->GetPage($link);
-			is_present($page, "<td>This file is either removed due", "Error: This file is either removed due to copyright claim or is deleted by the uploader.");
-			if (stristr($page, "\r\nContent-Length: 0\r\n")) {
-				is_notpresent($page, "\r\nLocation:", "Error: Invalid link. Please check the download link.");
-				// Check if file has enabled Hot/Direct linking.
-				if (!preg_match("/(s\d+)\.hotfile\.com\/get\/(\w+\/\w+\/\w+\/\w+\/\w+)\/([^\r|\n]+)/i", $page, $l)) {
-					html_error("Error: Invalid link. Please check the download link.");
-				}
-				$dllink = "http://{$l[1]}.hotfile.com/get/{$l[2]}/{$l[3]}";
+	$in =parse_url("http://hotfile.com/?cookiecheck=1");
+	$page = geturl($in["host"], $in["port"] ? $in["port"] : 80, $in["path"].($in["query"] ? "?".$in["query"] : ""), "http://hotfile.com/", $cook, 0, 0, $_GET["proxy"],$pauth);    
 
-				$filename = parse_url($dllink);
-				$filename = urldecode(basename($filename["path"]));
-				return $this->RedirectDownload($dllink, $filename, GetCookies($page));
-			}
-			unset($page);
-		}
+	is_present($page,"Bad username", "Bad username/password combination.");
+	is_present($page,"Upgrade to Premium", "Account has been found. Account no Premium");
 
-		if (($_REQUEST["cookieuse"] == "on" && preg_match("/auth\s?=\s?(\w{64})/i", $_REQUEST["cookie"], $c)) || ($_REQUEST["premium_acc"] == "on" && $premium_acc["hotfile_com"]["cookie"])) {
-			$cookie = (empty($c[1]) ? $premium_acc["hotfile_com"]["cookie"] : $c[1]);
-			$this->DownloadPremium($link, $cookie);
-		} elseif (($_REQUEST["premium_acc"] == "on" && $_REQUEST["premium_user"] && $_REQUEST["premium_pass"]) ||
-			($_REQUEST["premium_acc"] == "on" && $premium_acc["hotfile_com"]["user"] && $premium_acc["hotfile_com"]["pass"])) {
-			$this->DownloadPremium($link);
-		} else {
-			$this->DownloadFree($link);
-		}
-	}
-	private function DownloadFree($link) {
-		global $Referer;
-		$page = $this->GetPage($link);
-		if ($_GET["step"] != "1") {
-			if (!preg_match_all('/timerend=d\.getTime\(\)\+(\d+)/i', $page, $t)) {
-				html_error("Error getting timer.");
-			}
-			$t = $t[1];
-			$hl = ($t[1] > 0 ? $t[1]/1000 : 0);
-
-			if ($hl > 0) {
-				?>	<p><center><span id="dl" class="htmlerror"><b>ERROR: Please enable JavaScript.</b></span><br /><span id="dl2">Please wait</span></center></p>
-	<form action="<?php echo $PHP_SELF; ?>" name="hfwait" method="post">
-	<input type="hidden" name="link" value="<?php echo urlencode($link); ?>">
-	<input type="hidden" name="referer" value="<?php echo urlencode($Referer); ?>">
-	<input type="hidden" name="comment" value="<?php echo urlencode($_GET ["comment"]); ?>">
-	<input type="hidden" name="step" value="2">
-	<script type="text/javascript">
-		var c = <?php echo $hl; ?>;
-		var c2 = 0;
-		var dl = document.getElementById("dl");
-		var a2 = document.getElementById("dl2");
-		fc();
-		fc2();
-		function fc() {
-			if (c > 0) {
-				if (c > 180) {
-					dl.innerHTML = "You reached your hourly traffic limit. Please wait <b>"+ Math.round(c/60) +"</b> minutes...";
-				} else {
-					dl.innerHTML = "You reached your hourly traffic limit. Please wait <b>"+c+"</b> seconds...";
-				}
-				c = c - 1;
-				setTimeout("fc()", 1000);
-			} else {
-				dl.style.display="none";
-				void(document.forms.hfwait.submit());
-			}
-		}
-		function fc2() {
-			if (c > 180) {
-				if (c2 <= 20) {
-					a2.innerHTML = a2.innerHTML+".";
-					c2 = c2 + 1;
-				} else {
-					c2 = 10;
-					a2.innerHTML = "";
-				}
-				setTimeout("fc2()", 100);
-			} else {
-				dl2.style.display="none";
-			}
-		}
-	</script>
-	</form></body></html><?php
-				exit;
-			} else {
-				insert_timer($t[0]/1000, "Waiting captcha/link timelock:");
-			}
-			$post['action'] = cut_str($page, "action value=", ">");
-			$post['tm'] = cut_str($page, "tm value=", ">");
-			$post['tmhash'] = cut_str($page, "tmhash value=", ">");
-			$post['wait'] = cut_str($page, "wait value=", ">");
-			$post['waithash'] = cut_str($page, "waithash value=", ">");
-			$post['upidhash'] = cut_str($page, "upidhash value=", ">");
-
-			$page = $this->GetPage($link, 0, $post);
-		}
-
-		$lfound = (stristr($page, "hotfile.com/get/") ? true : false);
-		$cfound = (stristr($page, "api.recaptcha.net/challenge?k=") ? true : false);
-
-		if($_GET["step"] == "1" && !$lfound) {
-			//Send captcha
-			$post['action'] = $_POST['action'];
-			$post['recaptcha_challenge_field'] = $_POST['challenge'];
-			$post['recaptcha_response_field'] = $_POST['captcha'];
-			$post['recaptcha_shortencode_field'] = $_POST['shortencode'];
-
-			$page = $this->GetPage($link, 0, $post);
-			is_present($page, "Wrong Code. Please try again.", "Error: Entered CAPTCHA was incorrect.");
-			is_notpresent($page, 'hotfile.com/get/', 'Error: Download-link not found [2].');
-		} elseif (!$lfound && $cfound) {
-			//Get captcha
-			$pid = cut_str($page, 'recaptcha.net/challenge?k=', '"');;
-			$page = $this->GetPage("http://www.google.com/recaptcha/api/challenge?k=" . $pid);
-			if (preg_match('/challenge \: \'([^\']+)/i', $page, $ch)) {
-				$challenge = $ch[1];
-			} else {
-				html_error("Error getting CAPTCHA data.");
-			}
-
-			$data['challenge'] = $challenge;
-			$data['shortencode'] = 'undefined';
-			$data['action'] = 'checkcaptcha';
-			$data['step'] = '1';
-			$data['link'] = urlencode($link);
-			$data['referer'] = urlencode($Referer);
-
-			//Download captcha img.
-			$page = $this->GetPage("http://www.google.com/recaptcha/api/image?c=" . $challenge);
-			$capt_img = substr($page, strpos($page, "\r\n\r\n") + 4);
-			$imgfile = DOWNLOAD_DIR . "hotfile_captcha.jpg";
-
-			if (file_exists($imgfile)) {
-				unlink($imgfile);
-			}
-			if (! write_file($imgfile, $capt_img)) {
-				html_error("Error getting CAPTCHA image.", 0);
-			}
-
-			$this->EnterCaptcha($imgfile, $data, 20);
-			exit;
-		} elseif (!$lfound) {
-			html_error("Error getting CAPTCHA");
-		}
-
-		if (preg_match('/\/get\/(\d+\/\w+\/\w+)\/([^\'|\"]+)/i', $page, $dl)) {
-			$cookie = GetCookies($page);
-			$page = $this->GetPage("http://hotfile.com/get/{$dl[1]}/{$dl[2]}", $cookie);
-		} else {
-			html_error("Error: Download-link not found.");
-		}
-
-		is_notpresent($page, "\r\nLocation:", "Error: Direct link not found.");
-
-		if (!preg_match("/(s\d+)\.hotfile\.com\/get\/(\w+\/\w+\/\w+\/\w+\/\w+)\/([^\r|\n]+)/i", $page, $l)) {
-			html_error("Error: Direct link not found [2].");
-		}
-		$dllink = "http://{$l[1]}.hotfile.com/get/{$l[2]}/{$l[3]}";
-
-		$filename = parse_url($dllink);
-		$filename = urldecode(basename($filename["path"]));
-		$this->RedirectDownload($dllink, $filename, $cookie);
+	$findpre=strpos($page,'Premium until:');
+	if(false===$findpre){
+	html_error("Login Failed , Bad username/password combination.",0);
 	}
 
-	private function DownloadPremium($link, $cookie = false) {
-		$cookie = $this->login($cookie);
-		$page = $this->GetPage($link, $cookie);
-
-		if (stristr($page, "\r\nContent-Length: 0\r\n")) {
-			is_notpresent($page, "\r\nLocation:", "Error: Direct link not found.");
-		} elseif (preg_match('/\/get\/(\d+\/\w+\/\w+)\/([^\'|\"]+)/i', $page, $dl)) {
-			$page = $this->GetPage("http://hotfile.com/get/{$dl[1]}/{$dl[2]}", $cookie);
-		} else {
-			is_notpresent($page, '<span>Premium</span>', "Error: The account isn't premium?.");
-			html_error("Error: Download-link not found.");
-		}
-		$cookie = $cookie . "; " . GetCookies($page);
-
-		if (!preg_match("/(s\d+)\.hotfile\.com\/get\/(\w+\/\w+\/\w+\/\w+\/\w+)\/([^\r|\n]+)/i", $page, $l)) {
-			html_error("Error: Direct link not found [2].");
-		}
-		$dllink = "http://{$l[1]}.hotfile.com/get/{$l[2]}/{$l[3]}";
-
-		$filename = parse_url($dllink);
-		$filename = urldecode(basename($filename["path"]));
-		$this->RedirectDownload($dllink, $filename, $cookie);
+	$Url =parse_url($Referer);
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], $Referer, $cook, 0, 0, $_GET["proxy"],$pauth); 
+	is_present($page,"\r\nfailed\r\n","Your IP blocked by hotfile.com","0");
+	is_present($page,"File not found","File not found, the file is not present or bad link","0");
+	is_present($page,"due to copyright","This file is either removed due to copyright claim or is deleted by the uploader.","0");
+	$findpre=strpos($page,'Set-Cookie: ip=');
+	if(false===$findpre){
+	html_error("Your IP blocked by hotfile.com",0);
 	}
 
-	private function login($authc = false) {
-		global $premium_acc;
-		
-		if (!$authc) {
-			$user = ($_REQUEST["premium_user"] ? $_REQUEST["premium_user"] : $premium_acc["hotfile_com"]["user"]);
-			$pass = ($_REQUEST["premium_pass"] ? $_REQUEST["premium_pass"] : $premium_acc["hotfile_com"]["pass"]);
-			if (empty($user) || empty($pass)) {
-				html_error("Login Failed: Username or Password is empty. Please check login data.");
-			}
 
-			$postURL = "http://hotfile.com/login.php";
-			$post["returnto"] = "/";
-			$post["user"] = $user;
-			$post["pass"] = $pass;
-			$page = $this->GetPage($postURL, 0, $post, 'http://hotfile.com/');
-			$cookie = GetCookies($page);
-
-			is_notpresent($page, "Location: /?cookiecheck=1", "Login failed: Username or Password is incorrect.");
-			is_notpresent($cookie, "auth=", "Login Failed: Cannot get cookie.");
-		} elseif (strlen($authc) == 64) {
-			$cookie = "auth=" . $authc;
-		} else {
-			html_error("[Cookie] Invalid cookie (" . strlen($authc) . " != 64).");
-		}
-
-		$page = $this->GetPage("http://hotfile.com/?cookiecheck=1", $cookie);
-		is_present($page, '<span>Free</span>', "Login Failed: The account isn't premium.");
-		is_present($page, '/howtocookies.html', "Error: Login Failed.");
-		is_present($page, '/login.php', "[Cookie] Invalid cookie.");
-
-		return $cookie;
+	preg_match('/^HTTP\/1\.0|1 ([0-9]+) .*/',$page,$status);
+	if ($status[1] == 200) {
+ 	preg_match('/http:\/\/.+get\/[^\'"]+/i', $page, $loca);   
+	$Href = rtrim($loca[0]);  
+	} else{
+	preg_match('/Location:.+?\\r/i', $page, $loca);
+	$redir = rtrim($loca[0]);
+	preg_match('/http:.+/i', $redir, $loca);
+	$Href = rtrim($loca[0]);
 	}
+  
+	$Url =parse_url($Href);
+	$FileName = basename($Url["path"]);
+
+insert_location ( "$PHP_SELF?filename=" . urlencode ( $FileName ) ."&force_name=".urlencode($FileName)."&host=" . $Url ["host"] . "&path=" . urlencode ( $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "") ) . "&referer=" . urlencode ( $Referer ) . "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&cookie=" . urlencode ( $cookie ) . "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&method=POST&link=" . urlencode ( $LINK ) . ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ( $_GET ["comment"] ) : "") . "&auth=" . $auth . ($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : "") );
+
+    
+}else{
+
+$hf = $_POST['hf'];
+if($hf == "ok"){
+    $post=unserialize(urldecode($_POST['post']));
+    $post["action"] = "checkcaptcha";
+    $post["recaptcha_response_field"] = $_POST["captcha"];
+    $Referer = $_POST["link"];
+    
+
+    $Url = parse_url($Referer);
+    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, $post, 0, $_GET["proxy"],$pauth);
+    is_page($page);
+
+    
+    preg_match('/\/\d+\/\w+\/\w+\/[^\'"]+/i', $page, $down);      
+    $LINK="http://hotfile.com/get".$down[0];     
+     if ($down[0]==""){
+     $dsource = cut_str($page,'<h3','</h3');
+     $ddw = cut_str($dsource,'href="','"');
+     $LINK=$ddw;
+     }
+     
+    if (!stristr($page,"REGULAR DOWNLOAD")){
+
+     $Url =parse_url($LINK);
+     $FileName = basename($Url["path"]);
+     $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], $Referer, 0, 0, 0, $_GET["proxy"],$pauth); 
+     preg_match('/Location: *(.+)/', $page, $redir);
+     if (strpos($redir[1],"http://")===false) {html_error("Server problem. Please try again after",0);}
+     $redirect=rtrim($redir[1]);
+     $Url = parse_url($redirect);
+     insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+	 exit;
+     }
+     
 }
+	if($hf == "ok"){echo  ("<center><font color=red><b>Wrong captcha .Please re-enter</b></font></center>");}  
+    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
+    
+    is_present($page,"File not found","File not found, the file is not present or bad link","0");
+    is_present($page,"due to copyright","This file is either removed due to copyright claim or is deleted by the uploader.","0");
+    is_present($page,"You are currently downloading","You are currently downloading. Only one connection with server allow for free users","0");
+    
+   preg_match_all('/timerend=d\.getTime\(\)\+(\d+)/i', $page, $arraytime); 
+  $wtime=$arraytime[1][1]/1000;    
+      if ($wtime > 0 ) {
+      $dowait = true;
 
-//[06-Feb-2011]  Plugin rewritten & added cookie support by Th3-822.
-//[13-Feb-2011]  Removed old code & Fixed captcha in free download. - Th3-822
+
+	?>
+<p><center><div id="dl"><h4>ERROR: Please enable JavaScript.</h4></div></center></p>
+<form action="index.php" method="post">
+<input type="hidden" name="link" value="<?php echo $LINK; ?>">
+<script language="JavaScript">
+var c = <?php echo $wtime; ?>;
+fc();
+function fc() {
+	if(c>0) {
+		document.getElementById("dl").innerHTML = "You reached your hourly traffic limit. Please wait <b>" + c + "</b> seconds...";
+		c = c - 1;
+		setTimeout("fc()", 1000);
+		}
+	else {
+		document.getElementById("dl").style.display="none";
+		void(document.forms[0].submit());
+		}
+	}
+</script>
+</form></body></html>
+<?php
+exit;
+
+
+  } 
+      $action=cut_str($page,"action value=",">");
+      $tm=cut_str($page,"tm value=",">");
+      $tmhash=cut_str($page,"tmhash value=",">");
+      $wait=cut_str($page,"wait value=",">");
+      $waithash=cut_str($page,"waithash value=",">");
+      $post=array();
+      $post["action"] =$action;
+      $post["tm"] = $tm;
+      $post["tmhash"] = $tmhash;
+      $post["wait"] = $wait;
+      $post["waithash"] = $waithash;
+  
+      $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], $Referer, 0, $post, 0, $_GET["proxy"],$pauth);  
+      preg_match('/\/\d+\/\w+\/\w+\/[^\'"]+/i', $page, $down);      
+      $LINK="http://hotfile.com/get".$down[0];
+      
+    
+     if ($down[0]==""){
+     $dsource = cut_str($page,'<h3','</h3');
+     $ddw = cut_str($dsource,'href="','"');
+     $LINK=$ddw;
+
+     }
+     
+     
+  if ($down[0]=="") {
+        $nofinish=true;
+        
+        $Url=parse_url("http://api.recaptcha.net/noscript?k=6LfRJwkAAAAAAGmA3mAiAcAsRsWvfkBijaZWEvkD");
+        
+        $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
+        is_page($page);
+        is_present($page,"Expired session", "Expired session . Go to main page and reattempt", 0);
+        
+	if(preg_match('/Location: *(.+)/i', $page, $redir )){
+	$newreca = trim( $redir[1] );
+
+	$Url = parse_url( $newreca );
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"], $pauth);
+	is_page($page);
+
+		$ch = cut_str ( $page ,'src="image?c=' ,'"' );
+
+	}
+        if($ch){	
+		$Url=parse_url("http://www.google.com/recaptcha/api/image?c=".$ch);
+		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
+
+        $headerend = strpos($page,"\r\n\r\n");
+        $pass_img = substr($page,$headerend+4);
+        $imgfile = $options['download_dir']."hotfile_captcha.jpg";
+        
+        
+       if (file_exists($imgfile)){ unlink($imgfile);} 
+        write_file($imgfile, $pass_img);
+        }else{
+        html_error("Error get captcha", 0);
+        }
+        unset($post);
+        $post['recaptcha_challenge_field']=$ch;
+        
+	$code = '<center>';
+	$code.= "<form method=\"post\" action=\"".$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "")."\">$nn";
+	$code.= "<h4>Type the two words:<br><img src=\"$imgfile\"> <br>here:<input name=\"captcha\" type=\"text\" >$nn";
+	$code.= "<input name=\"link\" value=\"$Referer\" type=\"hidden\">$nn";
+	$code.= '<input type="hidden" name="post" value="'.urlencode(serialize($post)).'">'.$nn;
+	$code.= "<input name=\"hf\" value=\"ok\" type=\"hidden\">$nn";
+	$code.= "<br><input name=\"Submit\" value=\"Submit\" type=\"submit\"></h4>";
+
+	$code.= "</form></center>";
+	$js_code = "".$nn;
+	
+	if (!$wait)
+		{
+		print $code.$nn.$nn.$js_code."$nn</body>$nn</html>";
+		}
+	else
+		{
+		insert_new_timer($wait, rawurlencode($code), "You will download as a Free User.", $js_code);
+		}
+
+}
+if (!$nofinish){
+	$Url = parse_url($LINK);
+	$FileName = basename($Url["path"]);
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], $Referer, 0, 0, 0, $_GET["proxy"],$pauth); 
+	preg_match('/Location: *(.+)/i', $page, $redir);
+	if (strpos($redir[1],"http://")===false) {html_error("Server problem. Please try again after",0);}
+	$redirect=rtrim($redir[1]);
+	$Url = parse_url($redirect);
+    insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+}
+  }
+  
 
 ?>

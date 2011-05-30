@@ -6,181 +6,192 @@ if (!defined('RAPIDLEECH'))
     exit;
 }
 
-class letitbit_net extends DownloadClass {
-     public function Download($link) {
-         global $premium_acc;
-            if ( ($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc ["letitbit_net"] ["pass"] ) ) {
-		$this->DownloadPremium($link);
-            } else {
-                $this->DownloadFree($link);
-            }
-	}
+if (($_GET ["premium_acc"] == "on"  && $_GET ["premium_pass"]) || ($_GET ["premium_acc"] == "on" && $premium_acc ["letitbit"] ["pass"])) {
 
-    private function DownloadFree($link) {
-        global $Referer;
+ $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, 0, 0, 0, $_GET["proxy"],$pauth);
+    is_page($page);
+    is_present($page, "The requested file was not found");
+    is_present($page, "Gesuchte Datei wurde nicht gefunden", "The requested file was not found");
+    is_present($page, "Запрашиваемый файл не найден", "The requested file was not found");
 
-            $page = $this->GetPage($link);
-            is_present($page, "File not found", "The requested file was not found");
-            is_present($page, "Gesuchte Datei wurde nicht gefunden", "The requested file was not found");
-            is_present($page, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ", "The requested file was not found");
-            $cookie = GetCookies($page);
-            $Urlact = "http://letitbit.net".cut_str ( $page, 'id="ifree_form" action="' ,'" ');
-            $uid5 = cut_str($page, 'name="uid5" value="','"');
-            $uid = cut_str($page, 'name="uid" value="','"');
-            $name = cut_str($page, 'name="name" value="','"');
-            $pin = cut_str($page, 'name="pin" value="','"');
-            $realuid = cut_str($page, 'name="realuid" value="','"');
-            $realname = cut_str($page, 'name="realname" value="','"');
-            $host = cut_str($page, 'name="host" value="','"');
-            $ssserver = cut_str($page, 'name="ssserver" value="','"');
-            $sssize = cut_str($page, 'name="sssize" value="','"');
-            $lsarrserverra = cut_str($page, 'name="lsarrserverra" value="','"');
-            $dir = cut_str($page, 'name="dir" value="','"');
-            $optiondir = cut_str($page, 'name="optiondir" value="','"');
-            $pin_wm = cut_str($page, 'name="pin_wm" value="','"');
-            $md5crypt = cut_str($page, 'name="md5crypt" value="','"');
-            $realuid_free = cut_str($page, 'name="realuid_free" value="','"');
-            $post = array ();
-            $post['uid5'] = $uid5;
-            $post['uid'] = $uid;
-            $post['name'] = $name;
-            $post['pin'] = $pin;
-            $post['realuid'] = $realuid;
-            $post['realname'] = $realname;
-            $post['host'] = $host;
-            $post['ssserver'] = $ssserver;
-            $post['sssize'] = $sssize;
-            $post['dir'] = $dir;
-            $post['optiondir'] = $optiondir;
-            $post['lsarrserverra']= $lsarrserverra;
-            $post['pin_wm']= $pin_wm;
-            $post['md5crypt'] = $md5crypt;
-            $post['realuid_free'] = $realuid_free;
-            $post['pin_wm_tarif'] = "default";
-            $post['submit_way_selection2'] = "Regular download";
-            $Url = parse_url($Urlact);
-            $page = $this->GetPage($Urlact, $cookie, $post, $link);
-            $t=explode(";", GetCookies($page));
-            $cookie .=";". $t[0].";".$t[2];
-            preg_match('%<form action="(.*)" method="post" id="dvifree">%', $page, $UT);
-            $Urlact = $UT[1];
-            $ac_http_referer = cut_str($page, 'name="ac_http_referer" value="','"');
-            $rand = cut_str($page, 'name="rand" value="','"');
-            unset($post);
-            $post['uid5'] = $uid5;
-            $post['uid'] = $uid;
-            $post['name'] = $name;
-            $post['pin'] = $pin;
-            $post['realuid'] = $realuid;
-            $post['realname'] = $realname;
-            $post['host'] = $host;
-            $post['ssserver'] = $ssserver;
-            $post['sssize'] = $sssize;
-            $post['dir'] = "";
-            $post['optiondir'] = "";
-            $post['lsarrserverra'] = $lsarrserverra;
-            $post['pin_wm'] = $pin_wm;
-            $post['md5crypt'] = $md5crypt;
-            $post['realuid_free'] = $realuid_free;
-            $post['pin_wm_tarif'] = "default";
-            $post['submit_way_selection2'] = "Regular download";
-            $post['ac_http_referer'] = $ac_http_referer;
-            $post['links_sent'] = "1";
-            $post['rand'] = $rand;
-            $Url = parse_url($Urlact);
-            $page = $this->GetPage($Urlact, $cookie, $post, $link);
-            if(preg_match ( '%Wait for Your turn: <br/><span id="seconds" style="font-size:18px">(.*)</span>%', $page, $wait )){
-                $this->CountDown($wait[1]);
-            } else {
-                preg_match ( '/seconds = ([0-9]+);/', $page, $wait);
-                $this->CountDown($wait[1]);
-            }
-            preg_match("/ajax_check_url = '(.+)';/", $page, $temp);
-            $tlink = $temp[1];
-            $Url = parse_url($tlink);
-            $page = $this->GetPage($tlink, $cookie, $post, $link);
-            if (!preg_match('/http:(.*)/', $page, $dlink)) {
-                html_error ( "The file is temporarily unavailable for download. Please try a little bit later");
-            }
-            $dwn = urldecode(trim($dlink[0]));
-            $Url = parse_url($dwn);
-            $Filename = basename ($Url['path']);
-            $this->RedirectDownload($dwn, $Filename, $cookie, 0, $tlink, $Filename);
-            exit();
+    $cookie=biscottiDiKaox($page);
+    $PreForm = cut_str ( $page ,'password here:' ,'</form>' );
+
+    $uid5 = cut_str($PreForm,'uid5" value="','"');
+    $uid = cut_str($PreForm,'uid" value="','"');
+    $name = cut_str($PreForm,'name="name" value="','"');
+    $pin = cut_str($PreForm,'pin" value="','"');
+    $realuid = cut_str($PreForm,'realuid" value="','"');
+    $realname = cut_str($PreForm,'realname" value="','"');
+    $host = cut_str($PreForm,'host" value="','"');
+    $ssserver = cut_str($PreForm,'ssserver" value="','"');
+    $sssize = cut_str($PreForm,'sssize" value="','"');
+
+    $UrlAct="http://letitbit.net/sms/check2.php";
+    $post['pass']=$_GET ["premium_pass"] ? $_GET ["premium_pass"] : $premium_acc ["letitbit"] ["pass"];
+    $post['uid5']=$uid5;
+    $post['uid']=$uid;
+    $post['name']=$name;
+    $post['pin']=$pin;
+    $post['realuid']=$realuid;
+    $post['realname']=$realname;
+    $post['host']=$host;
+    $post['ssserver']=$ssserver;
+    $post['sssize']=$sssize;
+    $post['optiondir']='';
+    $Url=parse_url($UrlAct);
+
+$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, $post, 0, $_GET["proxy"],$pauth);
+    is_page($page);
+    $dlink=slice($page,"Download Master","</table>",3);
+    $dwnl=slice($dlink,"<a href='","'",1);
+    $Url = parse_url($dwnl);
+    $FileName = basename($dwnl);
+insert_location("index.php?filename=".urlencode($FileName)."&force_name=".urlencode($FileName)."&host=".$Url["host"]."&port=".$Url["port"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&cookie=".urlencode($cookie)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+
+
+}else{
+if ($_POST['step'] == 1) {
+
+    $UrlAct="http://letitbit.net/download3.php";
+    $post = unserialize(urldecode($_POST["post"]));
+	$post['uid2']=$post['uid'];
+    $post['cap']=$_POST["captcha"];
+    $cookie = urldecode($_POST['cookie']);
+    $Url = parse_url($UrlAct);
+    $Referer = "http://letitbit.net/download4.php";
+
+    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, $post, 0, $_GET["proxy"],$pauth);
+
+    is_page($page);
+
+    if(preg_match('/http:\/\/\w{2}\.[^"\']+/', $page, $nextPageArray))
+    {
+        $nextPage = $nextPageArray[0];
+		$Url=parse_url($nextPage);
+		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $UrlAct, $cookie, 0, 0, $_GET["proxy"],$pauth);
+		 $wait = cut_str ( $page ,'y = ' ,';' );
+        $act2 = cut_str ( $page ,'window.location.href="' ,'"' );
+        $Url=parse_url($act2);
+		insert_timer($wait);
+		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $act, $cookie, 0, 0, $_GET["proxy"],$pauth);
     }
+    else
+    {
+        html_error("Could not find frame.", 0);
+    }
+    $snap = cut_str ( $page ,'id="links' ,'</div>' );
+    $dwn= cut_str ( $snap ,'href="' ,'"' );
+    $Url = parse_url($dwn);
+    $FileName = basename($Url["path"]);
     
-    private function DownloadPremium($link) {
-        global $premium_acc;
+insert_location("index.php?filename=".urlencode($FileName)."&force_name=".urlencode($FileName)."&host=".$Url["host"]."&port=".$Url["port"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&cookie=".urlencode($cookie)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
 
-            $page = $this->GetPage($link);
-            is_present($page, "File not found", "The requested file was not found");
-            is_present($page, "Gesuchte Datei wurde nicht gefunden", "The requested file was not found");
-            is_present($page, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ", "The requested file was not found");
-            $cookie = GetCookies($page);
+} else {
+    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"],$pauth);
+    is_page($page);
 
-            $post = array();
-            $post['way_selection'] = "1";
-            $post['submit_way_selection1'] = "HIGH Speed Download";
-            $page = $this->GetPage($link, $cookie, $post, $link);
-            $Urlact = "http://letitbit.net".cut_str ( $page ,'<form action="' ,'"' ); //I REALLY HATE THIS PART
-            $Url = parse_url($Urlact);
-            $uid5 = cut_str($page, 'name="uid5" value="','"');
-            $uid = cut_str($page, 'name="uid" value="','"');
-            $name = cut_str($page, 'name="name" value="','"');
-            $pin = cut_str($page, 'name="pin" value="','"');
-            $realuid = cut_str($page, 'name="realuid" value="','"');
-            $realname = cut_str($page, 'name="realname" value="','"');
-            $host = cut_str($page, 'name="host" value="','"');
-            $ssserver = cut_str($page, 'name="ssserver" value="','"');
-            $sssize = cut_str($page, 'name="sssize" value="','"');
-            $lsarrserverra = cut_str($page, 'name="lsarrserverra" value="','"');
-            $pin_wm = cut_str($page, 'name="pin_wm" value="','"');
-            $md5crypt = cut_str($page, 'name="md5crypt" value="','"');
-            $realuid_free = cut_str($page, 'name="realuid_free" value="','"');
-            $pass = $_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["letitbit_net"] ["pass"];
-            unset($post);
-            $post['uid5'] = $uid5;
-            $post['uid'] = $uid;
-            $post['name'] = $name;
-            $post['pin'] = $pin;
-            $post['realuid'] = $realuid;
-            $post['realname'] = $realname;
-            $post['host'] = $host;
-            $post['ssserver'] = $ssserver;
-            $post['sssize'] = $sssize;
-            $post['dir'] = "";
-            $post['optiondir'] = "";
-            $post['lsarrserverra'] = $lsarrserverra;
-            $post['pin_wm'] = $pin_wm;
-            $post['md5crypt'] = $md5crypt;
-            $post['realuid_free'] = $realuid_free;
-            $post['pin_wm_tarif'] = "default";
-            $post['pass'] = $pass;
-            $post['submit_paypal'] = "Download file";
-            $page = $this->GetPage($Urlact, $cookie, $post, $link);
-            $t=explode(";", GetCookies($page));
-            $cookie .=";". $t[0].";".$t[2];
-            $preform = cut_str($page, '<iframe', '</iframe>');
-            if (!$preform) {
-                html_error("Error : Please check ur premium code");
-            }
-            $tlink = cut_str($preform, 'src="','"');
-            $page = $this->GetPage($tlink, $cookie, 0, $Urlact);
-            if (!preg_match('%href="(.*)" style="font-size:16px; text-align:center;"%', $page, $dl)) {
-                html_error("Error: Download link not found!");
-            }
-            $dlink = urldecode(trim($dl[1]));
-            $Url = parse_url($dlink);
-            $FileName = basename($Url['path']);
-            $this->RedirectDownload($dlink, $FileName, $cookie, 0, $tlink, $FileName);
-            exit();
+    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, 0, 0, 0, $_GET["proxy"],$pauth);
+    is_page($page);
+    is_present($page, "The requested file was not found");
+    is_present($page, "Gesuchte Datei wurde nicht gefunden", "The requested file was not found");
+    is_present($page, "Запрашиваемый файл не найден", "The requested file was not found");
+
+    $cookie=biscottiDiKaox($page);
+    $FreeForm = cut_str ( $page ,'id="dvifree">' ,'</form>' );
+
+	$act = "http://".cut_str ( $page ,'form action="http://' ,'"' );
+    $uid = slice($FreeForm,'name="uid" value="','"',2);
+    $md5crypt = cut_str($FreeForm,'="md5crypt" value="','"');
+   // $uid2 = cut_str($FreeForm,'name="uid2" value="','"');
+    $uid5 = cut_str($FreeForm,'name="uid5" value="','"');
+    $name = cut_str($FreeForm,'name="name" value="','"');
+    $pin = cut_str($FreeForm,' name="pin" value="','"');
+    $realuid = cut_str($FreeForm,'e="realuid" value="','"');
+    $realname = cut_str($FreeForm,'="realname" value="','"');
+    $host = cut_str($FreeForm,'name="host" value="','"');
+    $ssserver = cut_str($FreeForm,'="ssserver" value="','"');
+    $sssize = cut_str($FreeForm,'me="sssize" value="','"');
+
+
+    $post['uid']=$uid;
+    $post['md5crypt']=$md5crypt;
+    $post['frameset']='Download file';
+  //  $post['uid2']=$uid2;
+    $post['uid5']=$uid5;
+ //   $post['uid']=$uid2;
+    $post['name']=$name;
+    $post['pin']=$pin;
+    $post['realuid']=$realuid;
+    $post['realname']=$realname;
+    $post['host']=$host;
+    $post['ssserver']=$ssserver;
+    $post['sssize']=$sssize;
+    $post['optiondir']='';
+    $post['fix']='1';
+
+	$Url=parse_url($act);
+ $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, $post, 0, $_GET["proxy"],$pauth);
+	$cookie.= " ".GetCookies($page);
+	
+if (stristr($page,"cap.php?"))
+    {
+    $imagecode = cut_str($page,"<img src='http://letitbit.net/cap.php?jpg=","'");
+    $img = 'http://letitbit.net/cap.php?jpg='.$imagecode;
+    $Url = parse_url($img);
+    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, 0, 0, $_GET["proxy"],$pauth);
+
+    $headerend = strpos($page,"\r\n\r\n");
+    $pass_img = substr($page,$headerend+9);
+    write_file($options['download_dir']."letitbit_captcha.jpg", $pass_img);
+
+    $code = '<form method="post" action="'.$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "").'">'.$nn;
+    $code .= '<input type="hidden" name="link" value="'.urlencode($LINK).'">'.$nn;
+    $code .= '<input type="hidden" name="post" value="'.urlencode(serialize($post)).'">'.$nn;
+    $code .= '<input type="hidden" name="step" value="1">'.$nn;
+    $code .= '<input type="hidden" name="cookie" value="'.urlencode($cookie).'">'.$nn;
+    $code .= 'Please enter : <img src="'.$options['download_dir'].'letitbit_captcha.jpg?'.rand(1,10000).'"><br><br>'.$nn;
+    $code .= '<input type="text" name="captcha"> <input type="submit" value="Download">'.$nn;
+    $code .= '</form>';
+    echo $code;
+
     }
-}
+  else
+    {
+    html_error("Image code not found", 0);
+    }
 
+}
+}
+function biscottiDiKaox($content)
+ {
+     preg_match_all("/Set-Cookie: (.*)\n/",$content,$matches);
+     foreach ($matches[1] as $coll) {
+     $bis0=split(";",$coll);
+     $bis1=$bis0[0]."; ";
+     $bis2=split("=",$bis1);
+     $cek=" ".$bis2[0]."="; 
+     if(strpos($bis1,"=deleted") || strpos($bis1,$cek.";")) {
+     }else{
+    if  (substr_count($bis,$cek)>0)
+    {$patrn=" ".$bis2[0]."=[^ ]+";
+    $bis=preg_replace("/$patrn/"," ".$bis1,$bis);     
+    } else {$bis.=$bis1;}}}  
+    $bis=str_replace("  "," ",$bis);     
+    return rtrim($bis);
+ }
+ // tweaked cutstr with pluresearch functionality
+function slice($str, $left, $right,$cont=1)
+    {
+    for($iii=1;$iii<=$cont;$iii++){
+    $str = substr ( stristr ( $str, $left ), strlen ( $left ) );
+    }
+    $leftLen = strlen ( stristr ( $str, $right ) );
+    $leftLen = $leftLen ? - ($leftLen) : strlen ( $str );
+    $str = substr ( $str, 0, $leftLen );
+    return $str;
+}
 /*************************\
- WRITTEN BY VinhNhaTrang 15-11-2010
- Fix the premium code by code by vdhdevil
- Fix the free download code by vdhdevil & Ruud v.Tony 25-3-2011
- Updated the premium code by Ruud v.Tony 19-5-2011
+ WRITTEN BY KAOX 05-dec-09
 \*************************/
 ?>

@@ -1,12 +1,4 @@
 <?php
-# Plugin: 	Megavideo Upload plugin
-# Release:	2010.12.1
-# Fix by:	thangbom40000 @Share4u.vn
-# ---------------------------------------
-$mega_login = ""; // login
-$mega_pass = ""; // password
-$mega_desc = "Uploaded from rapidleech";  // Descriptions default
-# ---------------------------------------
 $not_done=true;
 $continue_up=false;
 if ($_REQUEST['action'] == "FORM")
@@ -21,14 +13,6 @@ else{
 <tr><td nowrap>&nbsp;Title*<td>&nbsp;<input name="title" style="width:160px;" maxlength="60">&nbsp;</tr>
 <tr><td nowrap>&nbsp;Description*<td>&nbsp;<textarea name="description" style="width:160px;"></textarea>&nbsp;</tr>
 <tr><td nowrap>&nbsp;Tags*<td>&nbsp;<input name="tags" style="width:160px;" maxlength="120">&nbsp;</tr>
-<tr><td nowrap>&nbsp;Language*<td>&nbsp;<select name="language" class="up_sel1" id="language">
-	  <option selected="" value="1">English</option>
-	  <option value="2">Spanish</option>
-	  <option value="3">Japanese</option>
-	  <option value="4">German</option>
-	  <option value="5">Chinese</option>
-	  <option value="6">French</option>
-	</select></tr>
 <tr><td nowrap><td><small>Enter one or more tags, separated by spaces.</small></tr>
 <tr><td nowrap><td><b>Select one category that best describe your video*:</b></tr>
 <tr><td nowrap><td><select name="channel" id="channel">
@@ -61,60 +45,56 @@ if ($continue_up)
 </td></tr>
 <tr><td align=center>
 <div id=login width=100% align=center>Login to Megavideo.com</div>
-<?php
-		$mega_login =  $_REQUEST ['my_login'] ? $_REQUEST ['my_login'] : $premium_acc["megavideo"]["user"];
-		$mega_pass = $_REQUEST ['my_pass'] ? $_REQUEST ['my_pass'] : $premium_acc["megavideo"]["pass"];
-		$mega_desc = $_REQUEST ['message'];
-		
-		$post = array();
-		$post["login"] = 1;
-		$post["redir"] = 1;
-		$post["username"] = $mega_login;
-		$post["password"] = $mega_pass;
-		
-		$login_url = 'http://www.megavideo.com/?c=login';
-		$Url = parse_url($login_url);		
-		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, $post, 0, $_GET["proxy"],$pauth);
-		is_page($page);
-		
-		is_present($page, 'Username and password do not match. Please try again!', 'Username and password do not match. Please try again!');
-		
-		$cookie = GetCookies($page);
+<?php 
+	        $post['nickname'] = $_REQUEST['my_login'];
+            $post['password'] = $_REQUEST['my_pass'];
+			$post['action'] = "login";
+			$post['cnext'] = 'upload';
+			$post['snext'] = '';
+			$post['touser'] = '';
+			$post['user'] = '';
+			
+			$login_url = 'http://www.megavideo.com/?s=signup&cnext=upload&snext=';
+			$Url = parse_url($login_url);		
+            $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, $post, 0, $_GET["proxy"],$pauth);
+			is_page($page);
+			
+			$cookie = GetCookies($page);
+			//preg_match('/user=(.*?);/i', $cookies, $cook);
+			//$cookie = 'user='.$cook[1];
 ?>
 <script>document.getElementById('login').style.display='none';</script>
 <div id=info width=100% align=center>Retrive upload ID</div>
 <?php 
-		$url_id = 'http://www.megavideo.com/?c=upload';
-		$ipost['language'] = $_REQUEST['language'];
-		$ipost['title'] = $_REQUEST['title'];
-		$ipost['description'] = $_REQUEST['description'];
-		$ipost['tags'] = $_REQUEST['tags'];
-		$ipost['channel'] = $_REQUEST['channel'];
-		$Url = parse_url($url_id);
-		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $login_url, $cookie, $ipost, 0, $_GET["proxy"],$pauth);
-		is_page($page);
-		//Get server url
-		preg_match('/action="(.*?)"\s*id="uploadfrm"/i', $page, $upurl);			
-		$url_action = $upurl[1];
-		$fpost['file'] = $lname;
-		$fpost['action'] = 'submit';
-		$fpost['language'] = $_REQUEST['language'];
-		$fpost['title'] = $_REQUEST['title'];
-		$fpost['message'] = $_REQUEST['description'];
-		$fpost['tags'] = $_REQUEST['tags'];
-		$fpost['channels'] = $_REQUEST['channel'].';';
-		$fpost['private'] = '0';
+			$url_id = 'http://www.megavideo.com/?c=upload';
+			$ipost['action'] = 'step2';
+			$ipost['language'] = '1';
+			$ipost['title'] = $_REQUEST['title'];
+			$ipost['description'] = $_REQUEST['description'];
+			$ipost['tags'] = $_REQUEST['tags'];
+			$ipost['channel'] = $_REQUEST['channel'];
+			$Url = parse_url($url_id);
+			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $login_url, $cookie, $ipost, 0, $_GET["proxy"],$pauth);
+			is_page($page);
+			preg_match('/action="(.*?)"\s*id="uploadfrm"/i', $page, $upurl);			
+			$url_action = $upurl[1];
+			$fpost['language'] = '1';
+			$fpost['title'] = $_REQUEST['title'];
+			$fpost['message'] = $_REQUEST['description'];
+			$fpost['tags'] = $_REQUEST['tags'];
+			$fpost['channels'] = $_REQUEST['channel'].';';
+			$fpost['private'] = '0';
 ?>
 <script>document.getElementById('info').style.display='none';</script>
 <?php 		
-		$url = parse_url($url_action);
-		
-		$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""),"http://www.megavideo.com/?c=upload", $cookie, $fpost, $lfile, $lname, "file");
+			$url = parse_url($url_action);
+			
+			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""),"http://www.megavideo.com/?c=upload", $cookie, $fpost, $lfile, $lname, "file");
 ?>
 <script>document.getElementById('progressblock').style.display='none';</script>
 <?php 	
-		is_page($upfiles);
-		preg_match('/downloadurl = *\'(.*)\';/i', $upfiles, $flink);
-		$download_link = $flink[1];
+			is_page($upfiles);
+			preg_match('/downloadurl = *\'(.*)\';/i', $upfiles, $flink);
+			$download_link = $flink[1];
 	}
 ?>

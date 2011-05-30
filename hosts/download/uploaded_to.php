@@ -1,85 +1,89 @@
 <?php
-
-if (!defined('RAPIDLEECH')) {
-    require_once ("index.html");
-    exit ();
+if (! defined ( 'RAPIDLEECH' ))
+{
+	require_once ("index.html");
+	exit ();
 }
 
-class uploaded_to extends DownloadClass {
+class uploaded_to extends DownloadClass 
+{
+	public function Download($link) 
+	{
+		global $premium_acc;
+		
+		if ( ($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) ||
+			($_REQUEST ["premium_acc"] == "on" && $premium_acc ["uploaded_to"] ["user"] && $premium_acc ["uploaded_to"] ["pass"] ) )
+		{
+			$this->DownloadPremium($link);
+		}
+		else
+		{
+			$this->DownloadFree($link);
+		}
+	}
+	
+	private function DownloadFree( $link )
+	{
+		$page = $this->GetPage( $link );
+		
+		is_present($page, "Location: /?view=error_fileremoved", "File not found");
+		is_present($page, "Location: /?view=error_traffic_exceeded_free", "Download limit exceeded");
+		is_present($page, "http://images.uploaded.to/key.gif", "This file is password protected");
 
-    public function Download($link) {
-        global $premium_acc, $options;
-        if (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc ["uploaded_to"] ["user"] && $premium_acc ["uploaded_to"] ["pass"])) {
-            $this->DownloadPremium($link);
-        } elseif ($_POST['step'] == "1") {
-            $this->DownloadFree($link);
-        } else {
-            $this->Retrieve($link);
-        }
-    }
+		if (preg_match('/(http.+dl\?id=[0-9a-zA-Z]+)/', $page, $dllink))
+		{
+			$dlink = trim ( $dllink[1] );
+		}
+		else
+		{
+			html_error("Download link not found", 0);
+		}
+		
+		$FileName = "none";
+		
+		$this->RedirectDownload( $dlink, $FileName );
+		exit ();	
+	}
+	
+	private function DownloadPremium( $link )
+	{
+		global $premium_acc, $Referer;
+			
+		$post = array();
+		$post["email"] = $_REQUEST["premium_user"] ? $_REQUEST["premium_user"] : $premium_acc["uploaded_to"]["user"];
+		$post["password"] = $_REQUEST["premium_pass"] ? $_REQUEST["premium_pass"] : $premium_acc["uploaded_to"]["pass"];
+		
+		$page = $this->GetPage( 'http://uploaded.to/login', 0, $post );
+		
+		if( strpos($page,"Login failed") )
+		{
+			html_error("Login Failed , Bad username/password combination.",0);
+		}
+		
+		$cook = GetCookies( $page );
+		
+		$id = trim( substr( $link, 24, 6 ) );
+		$newHref = "http://uploaded.to/file/".$id."/?redirect";
+		
+		$post = array();
+		$page = $this->GetPage( $newHref, $cook, $post, $Referer );
+			
+		preg_match ( '/Location: (.*)/', $page, $newredir );
+		$Href = trim ( $newredir [1] );
+		if ( strpos( $Href, "view=error_fileremoved" ) )
+		{ 
+			html_error( "Error getting Download Link", 0 );
+		}
+		
+		$Url = parse_url($Href);
+		$FileName = !$FileName ? basename($Url["path"]) : $FileName;
+		
+		$this->RedirectDownload( $Href, $FileName, $cook );
+		exit ();	
+	}
+}	
 
-    private function Retrieve($link) {
-        global $options;
-        $page = $this->GetPage($link);
-        $Cookies = GetCookies($page);
-        is_present($page, "/404", "File not found");
-        if (!preg_match('#(\d+)</span> seconds#', $page, $count)) {
-            html_error("Error 0x01: Plugin is out of date");
-        }
-        insert_timer($count[1]);
-        $page = $this->GetPage("http://www.google.com/recaptcha/api/challenge?k=6Lcqz78SAAAAAPgsTYF3UlGf2QFQCNuPMenuyHF3");
-        $ch = cut_str($page, "challenge : '", "'");
-        $img = "http://www.google.com/recaptcha/api/image?c=" . $ch;
-        $page = $this->GetPage($img);
-        $headerend = strpos($page, "\r\n\r\n");
-        $pass_img = substr($page, $headerend + 4);
-        write_file($options['download_dir'] . "uploaded_captcha.jpg", $pass_img);
-        $data = array();
-        $data["recaptcha_challenge_field"] = $ch;
-        $data["step"] = "1";
-        $data["link"] = $link;
-        $data["Cookies"] = $Cookies;
-        $this->EnterCaptcha($options['download_dir'] . "uploaded_captcha.jpg", $data, "10");
-        exit;
-    }
-
-    private function DownloadFree($link) {
-        $Cookies = $_POST["Cookies"];
-        $post = array();
-        $post["recaptcha_challenge_field"] = $_POST["recaptcha_challenge_field"];
-        $post["recaptcha_response_field"] = $_POST["captcha"];
-        $tmplink = str_replace("/file/", "/io/ticket/captcha/", $link);
-        is_present($page, 'err:"limit-dl"', "You've reached your Free account limit");
-        $page = $this->GetPage($tmplink, $Cookies, $post, $link);
-        if (!preg_match("#http://.+/dl/[^']+#", $page, $dlink)) {
-            html_error("Error 0x02: Plugin is out of date");
-        }
-        $this->RedirectDownload(trim($dlink[0]), "uploaded", $Cookies, 0, $link);
-        exit;
-    }
-
-    private function DownloadPremium($link) {
-        global $premium_acc;
-        $post = array();
-        $post["id"] = $_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc ["uploaded_to"] ["user"];
-        $post["pw"] = $_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["uploaded_to"] ["pass"];
-        $page = $this->GetPage("http://uploaded.to/io/login", 0, $post, $link);
-        $Cookies = GetCookies($page);
-        $page = $this->GetPage($link, $Cookies, 0, $link);
-		is_present($page, "/404", "File not found");
-		is_present($page,"Traffic exhausted","Premium account is out of Bandwidth");
-        if (!preg_match('#http://.+/dl?[^\r"]+#', $page, $dlink)) {
-            html_error("Error 1x01: Plugin is out of date");
-        }
-        $this->RedirectDownload(trim($dlink[0]), "uploaded", $Cookies, 0, $link);
-        exit;
-    }
-
-}
-
-/*
- * by vdhdevil 15-March-2011
- * Updated 01-May-2011
- * 
- */
+/**************************************************\  
+Fixed premium account support and Converted in OOPs architecture by rajmalhotra 07 Feb 2010
+\**************************************************/
 ?>

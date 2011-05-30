@@ -361,7 +361,7 @@ if($list)
     $total_files++;
     $total_size+=$size_time[0];
 ?>
-<tr class="flistmouseoff" onmouseover="this.className='flistmouseon'" onmouseout="this.className='flistmouseoff'" align="center" title="<?php echo htmlentities(basename($file["name"])); ?>" onmousedown="checkFile(<?php echo $filecount; ?>); return false;">
+<tr class="flistmouseoff" onmouseover="this.className='flistmouseon'" onmouseout="this.className='flistmouseoff'" align="center" title="<?php echo htmlentities($file["name"]); ?>" onmousedown="checkFile(<?php echo $filecount; ?>); return false;">
 <td><input onmousedown="checkFile(<?php echo $filecount;?>); return false;" id="files<?php echo $filecount; ?>" type="checkbox" name="files[]" value="<?php echo $file["date"]; ?>" /></td>
 <td><?php echo link_for_file($file["name"], FALSE, 'style="font-weight: bold; color: #000;"'); ?></td>
 <td><?php echo $file["size"]; ?></td>

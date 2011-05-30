@@ -68,10 +68,9 @@ if ($continue_up)
 <?php 	
 			is_page($upfiles);
 
-      preg_match('/File1\.1=([^\r|\n]+)/i', $upfiles, $flink);
-      preg_match('/File1\.2=([^\r|\n]+)/i', $upfiles, $dlink);
-      $download_link = trim($flink[1]);
-      $delete_link = trim($dlink[1]);
-
+			preg_match('%http://rapidshare\.com/((?!killcode).)+html%i', $upfiles, $flink);
+			preg_match('%http://rapidshare\.com/.*killcode.*%i', $upfiles, $dlink);
+			$download_link = trim($flink[0]);
+			$delete_link = trim($dlink[0]);
 	}
 ?>

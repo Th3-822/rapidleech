@@ -1,15 +1,17 @@
 <?php 
-###Youtube Login Details ## Add your youtube logins here##you need create account youtube : http://www.youtube.com/create_account with your account gmail.com
-$youtube_login = ''; //Set your Email gmail.com
-$youtube_pass = '';  //Set your password gmail.com
-##############################
+// #Youtube Login Details## Add your youtube logins here
+$site_login = '';
+$site_pass = '';
 
+
+
+/////////////////////////////////////////////////
 $not_done = true;
 $continue_up = false;
-if ($youtube_login && $youtube_pass)
+if ($site_login && $site_pass)
 {
-	$_REQUEST['my_login'] = $youtube_login;
-	$_REQUEST['my_pass'] = $youtube_pass;
+	$_REQUEST['my_login'] = $site_login;
+	$_REQUEST['my_pass'] = $site_pass;
 	$_REQUEST['action'] = "FORM";
 	echo "<b><center>Use Default login/pass.</center></b>\n";
 }
@@ -23,7 +25,7 @@ else
 <table border=0 style="width:350px;" cellspacing=0 align=center>
 	<form method=post>
 		<input type=hidden name=action value='FORM' />
-		<tr><td nowrap>&nbsp;User*</td><td>&nbsp;<input type=text name=my_login value='' style="width:160px;" />&nbsp;</td></tr>
+		<tr><td nowrap>&nbsp;Username*</td><td>&nbsp;<input type=text name=my_login value='' style="width:160px;" />&nbsp;</td></tr>
 		<tr><td nowrap>&nbsp;Password*</td><td>&nbsp;<input type=password name=my_pass value='' style="width:160px;" />&nbsp;</td></tr>
 		<tr><td colspan=2 align=center><input type=submit value='Upload'></td></tr>
 	</form>
@@ -37,57 +39,58 @@ if ($continue_up)
 
 	echo <<<EOF
 	<table width=600 align=center></td></tr><tr><td align=center>
-	<div id=login width=100% align=center>Login to YouTube.com</div>
+	<div id=login width=100% align=center>Login to Site</div>
 EOF;
 	
 	if (empty($_REQUEST['my_login']) || empty($_REQUEST['my_pass'])) html_error('No user and pass given', 0);
 
-        $page = geturl("www.youtube.com", 80, "/","http://www.youtube.com/" ,0, 0, 0);
-        is_page($page);
-        $cookie = GetCookies($page);
-        preg_match('%<a class="end" href="(.*)">Sign In%', $page, $login);
-        $page = curl($login[1], 0, $cookie);
-        is_page($page);
-        $cookie = GetCookies($page);
-        $link_login = cut_str ( $page ,'action="' ,'" method="post"');
-        $uilel = trim(cut_str($page,'name="uilel" id="uilel"','" />'));
-        $uilel = str_replace('value="', '',$uilel);
-        $dsh = trim(cut_str($page,'name="dsh" id="dsh"','" />'));
-        $dsh = str_replace('value="', '',$dsh);
-        $GALX = trim(cut_str($page,'name="GALX"','" />'));
-        $GALX = str_replace('value="', '',$GALX);
-        $post = array();
-	$post['uilel'] = $uilel;
-	$post['dsh'] = $dsh;
-	$post['timeStmp'] = '' ;
-	$post['secTok'] = '';
-	$post['GALX'] = $GALX;
+	
+
+	//////////////////////////	EDIT FROM HERE DOWN	///////////////////////////////////////
+	$Url = parse_url("http://www.youtube.com/login?next=/");
+	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://www.youtube.com/", $cookie, 0, 0, $_GET["proxy"], $pauth);
+	is_page($page);
+	$cookies = GetCookies($page);
+	if (!preg_match('%ocation: (.+)\r\n%', $page, $redir)) html_error ('No login location found.');
+	$geturl = rtrim($redir["1"]);
+
+	$contents = sslcurl($geturl, 0, $cookies);
+	$cookie_GALX = GetCookies($contents);
+	
+	$post_url = "https://www.google.com/accounts/ServiceLoginAuth";
+	$post = array();
+	$post['ltmpl'] = 'sso';
+	$post['continue'] = urldecode('http%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26nomobiletemp%3D1%26hl%3Den_US%26next%3D%252F');
+	$post['service'] = 'youtube';
+	$post['uilel'] = '3';
+	$post['ltmpl'] = 'sso';
+	$post['hl'] = 'en_US' ;
+	$post['ltmpl'] = 'sso';
+	$post['GALX'] = substr($cookie_GALX, 38);
 	$post['Email'] = trim($_REQUEST['my_login']);
 	$post['Passwd'] = trim($_REQUEST['my_pass']);
 	$post['PersistentCookie'] = 'yes';
 	$post['rmShown'] = '1';
 	$post['signIn'] = 'Sign+in';
 	$post['asts'] = '';
-        $page = curl($link_login, $post, $cookie);
-        is_page($page);
-        is_present($page, 'The username or password you entered is incorrect.', 'The username or password you entered is incorrect.');
-        $cookie = GetCookies($page);
-        preg_match('%ocation: (.+)\r\n%', $page, $redir); 
-	$redirect = html_entity_decode($redir[1]);
 
+	$contents = sslcurl($post_url, $post, $cookie_GALX, $geturl);	
+	if (!preg_match('%ocation: (.+)\r\n%', $contents, $redir) and !preg_match('%url=&#39;(.+)&#39;%', $contents, $redir)) html_error('Error - logins incorrect');
+	$redirect = html_entity_decode($redir[1]);
+	
 	if (preg_match('%^https://www.google.com/accounts/CheckCookie%', $redirect)) $google = true; else $google = false;
 	
 	if ($google === true)
 	{
-		$gcookies = preg_replace('%LSID=EXPIRED; %U', '', GetCookies($page));
+		$gcookies = preg_replace('%LSID=EXPIRED; %U', '', GetCookies($contents));
 		$Url = parse_url($redirect);
-		$page = curl($redirect, 0, $gcookies);
+		$page = sslcurl($redirect, 0, $gcookies, urldecode($geturl));
 		$lsid = preg_replace('%LSID=EXPIRED; %U', '', GetCookies($page));
 		$gredir = html_entity_decode(cut_str($page, '<meta http-equiv="refresh" content="0; url=&#39;', '&#39;">'));
 		$Url = parse_url($gredir);
 		if (stripos($gredir, 'accounts/SetSID?'))
 		{
-			$page = curl($gredir, 0, $lsid);
+			$page = sslcurl($gredir, 0, $lsid);
 			preg_match('%ocation: (.+)\r\n%', $page, $redir3);
 			$lcookies = GetCookies($page);
 			$Url = parse_url($redir3[1]);
@@ -112,6 +115,8 @@ EOF;
 	$Url = parse_url($Url);
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, $utube_login_cookie, 0, 0, $_GET["proxy"], $pauth);
 	is_page($page);
+	is_notpresent($page, $_REQUEST['my_login'], 'Error logging in.');
+	
 	$uploadkey = cut_str($page, "'uploadKey': '", "',");
 
 	$Urlpost = Array
@@ -216,7 +221,7 @@ EOF;
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 	curl_setopt($ch, CURLOPT_POST, 1);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $Urlpost_json);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-GUploader-Client-Info: clientId: mechanism=scotty xhr non-resumable', 'Content-Type: application/x-www-form-urlencoded;charset=utf-8'));
+	curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-GUploader-Client-Info: clientId:scotty xhr non-resumable', 'Content-Type: application/x-www-form-urlencoded;charset=utf-8'));
 	curl_setopt($ch, CURLOPT_REFERER, 'http://upload.youtube.com/my_videos_upload');
 	curl_setopt($ch, CURLOPT_COOKIE, $utube_login_cookie) ;
 	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
@@ -245,30 +250,8 @@ EOF;
 	$download_link = 'http://www.youtube.com/watch?v=' . $video_id;
 	echo "<script>document.getElementById('progressblock').style.display='none';</script>";
 }
-function curl($link, $post = 0, $cookie = 0, $refer = 0)
-{
-	$mm = !empty($post) ? 1 : 0;
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $link);
-	curl_setopt($ch, CURLOPT_HEADER, 1);
-	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U;Windows NT 5.1; de;rv:1.8.0.1)\r\nGecko/20060111\r\nFirefox/1.5.0.1');
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	if ($mm == 1)
-	{
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, formpostdata($post));
-	}
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-	curl_setopt($ch, CURLOPT_REFERER, $refer);
-	curl_setopt($ch, CURLOPT_COOKIE, $cookie) ;
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
-	$contents .= curl_exec($ch);
-	curl_close($ch);
-	return $contents;
-}
+
 //sslcurl function moved to http.php
 // written by kaox 26/05/09
 //updated by szalinski 12-Oct-2010
-//updated by VinhNhaTrang 21/12/2010
 ?>
