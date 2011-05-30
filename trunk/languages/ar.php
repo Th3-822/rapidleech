@@ -225,15 +225,19 @@ $lang[216]	=	'اختر صيغة الفيديو التي تريد تحميلها 
 $lang[217]	=	'الرابط المباشر';
 $lang[218]	=	'اختر الصيغة';
 $lang[219]	=	'للحصول على اعلى جودة';
-$lang[220]	=	'0 [فيديو: FLV H263 251kbps 320x180 @ 29.896fps | صوت: MP3 64kbps 1ch @ 22.05kHz]';
-$lang[221]	=	'5 [فيديو: FLV H263 251kbps 320x180 @ 29.885fps | صوت: MP3 64kbps 1ch @ 22.05kHz]';
-$lang[222]	=	'6 [فيديو: FLV H263 892kbps 480x270 @ 29.887fps | صوت: MP3 96kbps 1ch @ 44.10kHz]';
-$lang[223]	=	'13 [فيديو: 3GP H263 77kbps 176x144 @ 15.000fps | صوت: AMR 13kbps 1ch @ 8.000kHz]';
-$lang[224]	=	'17 [فيديو: 3GP XVID 55kbps 176x144 @ 12.000fps | صوت: AAC 29kbps 1ch @ 22.05kHz]';
-$lang[225]	=	'18 [فيديو: MP4 H264 505kbps 480x270 @ 29.886fps | صوت: AAC 125kbps 2ch @ 44.10kHz]';
-$lang[226]	=	'22 [فيديو: MP4 H264 2001kbps 1280x720 @ 29.918fps | صوت: AAC 198kbps 2ch @ 44.10kHz]';
-$lang[227]	=	'34 [فيديو: FLV H264 256kbps 320x180 @ 29.906fps | صوت: AAC 62kbps 2ch @ 22.05kHz]';
-$lang[228]	=	'35 [فيديو: FLV H264 831kbps 640x360 @ 29.942fps | صوت: AAC 107kbps 2ch @ 44.10kHz]';
+$lang[220]	=	'17 [فيديو: 3GP 176x144 | Audio: AAC 2ch 44.10kHz]';
+
+
+$lang[221]	=	'5 [فيديو: FLV 400x240 | Audio: MP3 1ch 22.05kHz]';
+$lang[222]	=	'34 [فيديو: FLV 640x360 | Audio: AAC 2ch 44.10kHz]';
+$lang[223]	=	'35 [فيديو: FLV 854x480 | Audio: AAC 2ch 44.10kHz]';
+$lang[224]	=	'43 [فيديو: WebM 640x360 | Audio: Vorbis 2ch 44.10kHz]';
+
+
+$lang[225]	=	'45 [فيديو: WebM 1280x720 | Audio: Vorbis 2ch 44.10kHz]';
+$lang[226]	=	'18 [فيديو: MP4 480x360 | Audio: AAC 2ch 44.10kHz]';
+$lang[227]	=	'22 [فيديو: MP4 1280x720 | Audio: AAC 2ch 44.10kHz]';
+$lang[228]	=	'37 [فيديو: MP4 1920×1080 | Audio: AAC 2ch 44.10kHz]';
 $lang[229]	=	'لتحميل التورنت من ImageShack';
 $lang[230]	=	'اسم المستخدم';
 $lang[231]	=	'كلمة المرور';
@@ -382,7 +386,7 @@ $lang[373]	=	'<b>Extracting files from %1$s</b>:';
 $lang[374]	=	'Status:';
 $lang[375]	=	'Select text';
 $lang[376]  =   'قسط الحسابات :'; 
-$lang[377]	=	'37 [Video: MP4 1920×1080 | Audio: AAC 2ch 44.10kHz]';
+$lang[377]	=	'38 [فيديو: MP4 4096×3072 | Audio: AAC 2ch 44.10kHz]';
 $lang[378]	=	'Close window';
 $lang[379]	=	'Files';
 $lang[380]	=	'MD5 change should only be applied to known working formats(i.e. .rar or .zip)<br />Do you want to continue?';

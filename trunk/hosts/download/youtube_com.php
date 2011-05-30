@@ -5,6 +5,7 @@ if (! defined ('RAPIDLEECH'))
 	exit ();
 }
 
+
 class youtube_com extends DownloadClass
 {
 	private $page;
@@ -22,8 +23,9 @@ class youtube_com extends DownloadClass
 		}
 		if (!preg_match('#fmt_url_map=(.+?);#', $this->page, $fmt_url_map)) html_error('Video link not found.');
 		$fmt_url_maps = preg_split('%,%', urldecode(str_replace('\u0026amp','', $fmt_url_map[1])));
-		$fmts = array(37,22,35,18,34,6,5,0,17,13);
+		$fmts = array(38,37,22,18,45,43,35,34,5,17);
 		$yt_fmt = $_POST['yt_fmt'];
+
 
 		if ($_POST['ytube_mp4'] == 'on')
 		{
@@ -71,9 +73,11 @@ class youtube_com extends DownloadClass
 			$furl = $fmturlmaps[0][1];
 		}
 
-		if (preg_match ('%0|5|6|34|35%', $yt_fmt)) $ext = '.flv';
-		elseif (preg_match ('%18|22|37%', $yt_fmt)) $ext = '.mp4';
-		elseif (preg_match ('%13|17%', $yt_fmt)) $ext = '.3gp';
+
+		if (preg_match ('%5|34|35%', $yt_fmt)) $ext = '.flv';
+		elseif (preg_match ('%17%', $yt_fmt)) $ext = '.3gp';
+                elseif (preg_match ('%18|22|37|38%', $yt_fmt)) $ext = '.mp4';
+                elseif (preg_match ('%43|45%', $yt_fmt)) $ext = '.webm';
 		elseif (preg_match ('%highest%', $yt_fmt)) $ext = '.mp4';
 		else $ext = '.flv';
 		
@@ -84,7 +88,9 @@ class youtube_com extends DownloadClass
 			$video_id = str_replace('\u0026amp', '', $video_id[1]);
 		}
 
+
 		$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode (trim($title[1]))) . (isset ($_POST ['yt_fmt']) && $_POST ['yt_fmt'] !== 'highest' ? '-[' . $video_id . '][f' . $_POST ['yt_fmt'] . ']' : '-[' . $video_id . '][f' . $fmt . ']') . $ext;
+
 
 		if ($_POST ['ytdirect'] == 'on')
 		{
@@ -109,15 +115,18 @@ class youtube_com extends DownloadClass
 			$post['session_token'] = $_POST['session_token'];
 			$cookie = urldecode($_POST['cookie']);
 
+
 			$page = $this->GetPage($url, $cookie, $post, $url);
 			is_present($page, "The verification code was invalid", "The verification code was invalid or has timed out, please try again.");
 			is_present($page, "\r\n\r\nAuthorization Error.", "Error sending captcha.");
 			is_notpresent($page, "Set-Cookie: goojf=", "Cannot get captcha cookie.");
 
+
 			$this->page = $this->GetPage($link, GetCookies($page));
 		} else {
 			global $Referer;
 			$page = $this->GetPage($url);
+
 
 			$data['challenge_enc'] = urlencode(cut_str($page, 'name="challenge_enc" value="', '"'));
 			$data['next'] = urlencode(cut_str($page, 'name="next" value="', '"'));
@@ -128,6 +137,7 @@ class youtube_com extends DownloadClass
 			$data['link'] = urlencode($link);
 			$data['cookie'] = urlencode(GetCookies($page));
 			$data['referer'] = urlencode($Referer);
+
 
 			$this->EnterCaptcha("http://www.youtube.com" . cut_str($page, 'img name="verificationImg" src="', '"'), $data, 20);
 			exit;

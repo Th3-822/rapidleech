@@ -11,7 +11,7 @@ error_reporting (6135);
 $nn = "\r\n";
 $fromaddr = "RapidLeech";
 $dev_name = 'Final';
-$rev_num = '42';
+$rev_num = '43';
 $plusrar_v = '4.1';
 $PHP_SELF = ! $PHP_SELF ? $_SERVER ["PHP_SELF"] : $PHP_SELF;
 define ('RAPIDLEECH', 'yes');
@@ -21,7 +21,7 @@ define ('HOST_DIR', 'hosts/');
 define ('IMAGE_DIR', 'images/');
 define ('CLASS_DIR', 'classes/');
 define ('CONFIG_DIR', 'configs/');
-define ('BUILD', '08Jun2010');
+define ('BUILD', '30May2011');
 define ('CREDITS', '<a href="http://www.rapidleech.com/" class="rl-link"><b>RapidLeech</b></a>&nbsp;<b class="rev-dev">PlugMod (eqbal) rev. ' . $rev_num . '</b> <span class="rev-dev">' . $dev_name . '</span><br><small class="small-credits">Credits to Pramode &amp; Checkmate &amp; Kloon</small><br /><p class="rapidleechhost"><a href="http://www.rapidleechhost.com/aff.php?aff=001" target="_blank">RapidleechHost Offical Hosting</a></p>');
 
 require_once(CONFIG_DIR . 'setup.php');
