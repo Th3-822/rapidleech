@@ -1,0 +1,548 @@
+hr {
+	height: 1px;
+	border-top-width: 0px;
+	border-right-width: 0px;
+	border-left-width: 0px;
+	padding: 0px;
+	margin-top: 1px;
+	margin-right: 0px;
+	margin-bottom: 2px;
+	margin-left: 0px;
+	border-bottom-width: 0px;
+	background-color: #4A4A4A;
+	color: #4A4A4A;
+}
+
+img { border: 0; }
+
+body {
+	font-family: "Segoe UI", Tahoma, sans-serif;
+	font-size: 11px;
+	color: #FFFFFF;
+	background-color: #010e17;
+	background-image: url(../images/background_pm.gif);
+	background-attachment: fixed;
+	background-repeat: repeat-x;
+	background-position: left top;
+	margin: 0px;
+	padding: 0px;
+}
+
+tr { font-family: "Segoe UI", Tahoma; font-size: 11px; line-height: 14.5px; color: #FFFFFF; }
+input { font-family: "Segoe UI", Tahoma; font-size: 11px; }
+select { font-family: "Segoe UI", Tahoma; font-size: 11px; }
+textarea { font-family: "Segoe UI", Tahoma; font-size: 11.5px; }
+a { color: #55aaff; }
+color { color: #FFFFFF; }
+
+/*.show-table {display: block;}*/
+
+.hide-table {display: none;}
+
+.filelist a {
+	text-decoration:none;
+}
+.filelist a:hover {
+	text-decoration:underline;
+}
+.title {
+	font-size: 18px;
+	font-weight: bold;
+}
+.g {
+	text-align:center;
+	color:#00FF00;
+}
+.y {
+	text-align:center;
+	color:#FFFF00;
+}
+.r {
+	text-align:center;
+	color:#FF0000;
+}
+.n {
+	text-align:center;
+	color:blue;
+}
+.style1 {
+	font-size: 12px;
+	font-weight: bold;
+}
+.style2 {font-weight: bold}
+
+.linkchecker-load{filter:alpha(opacity=20);-moz-opacity:0.2;opacity:0.2;}
+
+.font-black {
+	color:#000;
+}
+
+.font-blue {
+	color:#05F;
+}
+
+.caption {
+	font-family: Tahoma;
+	font-size: 11px;
+}
+
+th {
+	border-left: 1px solid white;
+}
+
+/*
+** All previous inline-style classes **
+*/
+
+/*any printed warnings */
+.warning
+{
+	color:#FF6600;
+}
+
+/* any printed error messages */
+.htmlerror
+{
+	color: #fffa1e;
+	background-color: #1e90ff;
+	padding: 3px;
+	line-height: 25px;
+	border: thin solid #ffffff;
+}
+
+/*the file checkbox menu */
+.chkmenu
+{
+	color: #99C9E6;
+}
+
+/* the files list table header */
+.flisttblhdr
+{
+	background-color: #4B433B;
+	text-align: center;
+	color: white;
+}
+
+.flisttblftr
+{
+	background-color: #4B433B;
+	color: white;
+	text-align: center;
+}
+
+.ftpprogress
+{
+	background-color:#FFFFFF;
+	margin:1px;
+	width:0%;
+	height:8px;
+}
+
+/* checker.php styles */
+.checkerp
+{
+	color: #008000;
+}
+
+.checkerf
+{
+	color: #FF0000;
+}
+
+/* upstyles are for the *.upload.html files link styles */
+.upstyles-dllink
+{
+	width: 470px;
+	border: 2px solid #55AAFF;
+	background-color: #FFFFFF;
+	padding: 3px;
+}
+
+.upstyles-dellink
+{
+	width: 470px;
+	border: 1px solid #55AAFF;
+	background-color: #FFFFFF;
+	padding:3px;
+}
+
+.upstyles-statlink
+{
+	width: 470px;
+	border: 1px solid #55AAFF;
+	background-color: #FFFFFF;
+	padding:3px;
+}
+
+.upstyles-admlink
+{
+	width: 470px;
+	border: 1px solid #55AAFF;
+	background-color: #FFFFFF;
+	padding:3px;
+}
+
+.upstyles-userid
+{
+	width: 470px;
+	border: 1px solid #55AAFF;
+	background-color: #FFFFFF;
+	padding:3px;
+}
+
+.upstyles-ftpuplink
+{
+	width: 470px;
+	border: 1px solid #55AAFF;
+	background-color: #FFFFFF;
+	padding:3px;
+}
+
+.upstyles-accesspass
+{
+	width: 470px;
+	border: 1px solid #55AAFF;
+	background-color: #FFFFFF;
+	padding:3px;
+}
+
+
+
+/* main.php */
+.plugincolhd
+{
+	background-color:#657B87;
+	color:#eee;
+	padding:1px;
+	width:102px;
+	margin:1px auto 2px 1px;
+}
+
+.plugincollst
+{
+	color: #ccc;
+}
+
+.flistmouseon
+{
+	background-color: #F5A249;
+	color: black;
+}
+
+.flistmouseoff
+{
+	background-color: #D49659;
+	color: black;
+}
+
+.workswith
+{
+	text-align:center;
+	padding:3px;
+	color:#dedede;
+	margin:0 auto;
+	width:450px;
+	font-size:9px;
+	height:50px;
+	overflow:auto;
+	border:1px solid #666;
+}
+
+.autodel
+{
+	color:#FFCC00;
+}
+
+.cell-plugin
+{
+	height: 27px;
+	width: 109px;
+	font-family: "Tahoma";
+	font-size: 10px;
+	color: #FFC500;
+	text-align: center;
+	line-height: 27px;
+	background: url(../images/button_bg2.gif);
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.button-auto
+{
+	height: 23px;
+	width: 105px;
+	margin-bottom: 1px;
+	margin-top: 1px;
+	font-family: "Tahoma";
+	font-size: 10px;
+	color: #FFAD00;
+	text-align: center;
+	border: 0px solid;
+	background: #17668C url(../images/button_bg3.gif);
+	background-position: center;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+
+/* The progressbar for upload and download, including the outer div holder */
+.progressouter
+{
+	border:1px solid #FFFFFF; width:300px; height:10px;
+}
+
+.progressdown
+{
+	background-color:#FFFFFF;
+	width:0%;
+	height:8px;
+	margin: 1px;
+}
+
+.progressup
+{
+	background-color:#FFFFFF;
+	width:0%;
+	height:8px;
+	margin: 1px;
+}
+
+/* The "new-and-improved" tabs xD */
+
+.selected
+{
+	background-color: #85cbeb !important;
+}
+
+.cell-nav
+{
+	height: 31px;
+	width: 119px;
+	font-family: "Tahoma";
+	font-size: 10px;
+	color: #FFC500;
+	text-align: center;
+	background: #17668C url(../images/button_bg1.gif);
+	background-position: center;
+	background-repeat: no-repeat;
+	cursor: pointer;
+}
+
+/* MD5.php */
+.md5table
+{
+	font-family: monospace;
+	color: #FFA300;
+}
+
+.md5table th
+{
+	 background-color: #243E4A;
+	 border: none;
+}
+
+.md5table td
+{
+	background-color: #2B3C43;
+}
+
+
+/* RAR.php */
+
+.rar-table
+{
+text-align: left;
+}
+
+.rar-main-td
+{
+border-right:1px solid #666;
+border-left:1px solid #666;
+border-top:1px solid #666;
+padding:6px;
+background-color:#001825;
+}
+
+.rar-rb-td
+{
+border-right:1px solid #666;
+padding:2px;
+background-color:#001825;
+}
+
+.rar-options-left-td
+{
+border-left:1px solid #666;
+padding:2px;
+background-color:#001825;
+}
+
+.rar-options-right-td
+{
+border-right:1px solid #666;
+border-left:1px solid #666;
+padding:2px;
+background-color:#001825;
+}
+
+.rar-space-td
+{
+border-top:1px solid #666;
+}
+
+
+/* UNRAR.php */
+.unrar-main-td
+{
+border-right:1px solid #666;
+border-left:1px solid #666;
+border-top:1px solid #666;
+padding:6px;
+background-color:#001825;
+}
+
+.unrar-main2-td
+{
+border-right:1px solid #666;
+border-left:1px solid #666;
+padding:2px;
+background-color:#001825;
+}
+
+.unrar-lb-td
+{
+border-left:1px solid #666;
+padding:2px;
+background-color:#001825;
+}
+
+.unrar-rb-td
+{
+border-right:1px solid #666;
+padding:2px;
+background-color:#001825;
+}
+
+.unrar-options
+{
+border-right:1px solid #666;
+border-left:1px solid #666;
+border-top:1px solid #666;
+padding:2px;
+background-color:#001825;
+}
+
+.unrar-space-td
+{
+border-top:1px solid #666;
+}
+
+
+/* NOTES.php */
+.notes
+{
+	width: 70%;
+	height: 300px;
+}
+
+/* Credits */
+.rl-link
+{
+text-decoration:none;
+}
+
+.rev-dev
+{
+color:#F09D19;
+}
+
+.small-credits
+{
+color:#239FD9;
+}
+
+.rapidleechhost
+{
+text-align:center;
+margin:0 auto;
+font-weight:bold;
+}
+
+/////* Server Space and CPU */////
+.ss-cpu-table
+{
+border-collapse: separate;
+border-spacing: 2px 2px;
+}
+
+/* Server Space */
+.ss-td-style
+{
+color:#CCCCCC;
+}
+
+.ss-span-style
+{
+color:#FF8700
+}
+
+/* CPU */
+.cpu-td
+{
+color:#CCCCCC;
+width:200px;
+}
+
+.cpu-span
+{
+color:#FF8700;
+}
+
+.cpu-clock-st-text
+{
+color:#FF8700;
+}
+
+.cpu-clock-st-time
+{
+color:#999;
+}
+
+.cpu-clock-lt-text
+{
+color:#994A1D;
+}
+
+.cpu-clock-lt-time
+{
+color:#999;
+}
+
+
+/* audl.php */
+.container
+{
+	border:1px solid #666;
+	width: 90%;
+	background-color: #001825;
+}
+
+.adlinks
+{
+	width:600px;
+	height:400px;
+	border:1px solid #002E43;
+}
+
+/* Transfer UIs (User interfaces) */
+.transloadui
+{
+	font-family: Tahoma;
+	font-size: 11px;
+}
+
+.uploadui
+{
+	font-family: Tahoma;
+	font-size: 11px;
+}
