@@ -25,5 +25,6 @@ $sites = array(
 	array('name' => 'Turbobit.net', 'link' => '^http://(www\.)?turbobit\.net/\w+((\.html)|(/.+\.html))', 'regex' => 'File description:', 'options' => array('cookie' => 'user_lang=en')),
 	array('name' => '2shared.com', 'link' => '^http://(www\.)?2shared\.com/file/\w+/.+\.html', 'regex' => '(File size:)|(Please enter password)'),
 	array('name' => 'Badongo.com', 'link' => '^http://(www\.)?badongo\.com/file/\d+', 'regex' => '\'file_fileinfo\'', 'options' => array('cookie' => 'badongoL=en'))
+	array('name' => 'Wupload.com', 'link' => '^http://(www\.)?wupload\.[^/]+/file/[a-z]?[0-9]+', 'regex' => 'Filename:'),
 );
 ?>

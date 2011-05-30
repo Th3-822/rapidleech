@@ -44,6 +44,7 @@ $premium_acc = array();
 //$premium_acc["duckload_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["turbobit_net"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["4shared_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["wupload"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["letitbit_net"] = array('pass' => 'your password');
 //$premium_acc["vip_file_com"] = array('pass' => 'your password');
 //$premium_acc["shareflare_net"] = array('pass' => 'your password');
