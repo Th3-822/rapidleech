@@ -16,56 +16,131 @@ $debug = 1; // change it to one to enable it.
 set_time_limit(120);
 $maxlinks = 300;
 $lcver = 301;
-$options['fgc'] = (extension_loaded("curl") ? 0 : 1);
+if ($options['fgc'] != 1 && !extension_loaded("curl")) $options['fgc'] = 1;
+//$options['fgc'] = 1;
+
 //Lets use this as a function to visit the site.
-function curl($link, $post='0') {
+function curl($link, $post = 0, $cook = 0, $follow = 1, $refer = 0, $header = 1) {
 	global $options;
+	if ($follow && ($follow > 9 || $follow < 1)) $follow = 1;
+	if ($post && is_array($post)) {
+			$POST = "";
+			foreach ($post as $k => $v) {
+				$POST .= "$k=$v&";
+			}
+			$post = substr($POST, 0, -1);
+			unset($POST);
+	}
+
 	if($options['fgc'] == 1) {
-		file_get_contents($link);
+		// Using file_get_contents.
+		$opt = array(
+			'method' => ($post != 0) ? "POST" : "GET",
+			'content' => ($post != 0) ? $post : '',
+			'max_redirects' => (!$follow) ?  1 : $follow+1,
+			'header' => "Accept-language: en\r\n" .
+			($refer ? "Referer: $refer\r\n" : "") .
+			($cook ? "Cookie: $cook\r\n" : "") .
+			"User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.6) Gecko/20050317 Firefox/1.0.2\r\n"
+		);
+
+		$context = stream_context_create(array('http' => $opt));
+		$page = @file_get_contents($link, false, $context);
+
+		if ($header != 0) {
+			$headers = implode("\r\n", $http_response_header);
+			$page = $headers . "\r\n\r\n" . $page;
+		}
 	} else {
+		// Using cURL.
 		$ch = curl_init($link);
-		curl_setopt($ch, CURLOPT_HEADER, 0);
-		if(preg_match("@megashares\.com@" , $link)) {
-			curl_setopt($ch, CURLOPT_COOKIE, 1);
+		curl_setopt($ch, CURLOPT_HEADER, $header);
+		if($cook) {
+			curl_setopt($ch, CURLOPT_COOKIE, $cook);
 			curl_setopt($ch, CURLOPT_COOKIEJAR, "1");
 			curl_setopt($ch, CURLOPT_COOKIEFILE, "1");
 		}
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		if($follow) {
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+			curl_setopt($ch, CURLOPT_MAXREDIRS, $follow+1);
+		}
+		curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.6) Gecko/20050317 Firefox/1.0.2");
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+		if ($refer) curl_setopt($ch, CURLOPT_REFERER, $refer);
 		if($post != '0') {
 			curl_setopt($ch, CURLOPT_POST, 1);
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
 		}
 		$page = curl_exec($ch);
+		$errz = curl_errno($ch);
+		$errz2 = curl_error($ch);
+		$info = curl_getinfo($ch);
 		curl_close($ch);
-		return($page);
-	}
-
+	}/*
+		echo '<textarea rows="15" cols="170" readonly="readonly">Request (cURL): ' . htmlentities($link) . "\n";
+		if ($refer) echo "Referer: " . htmlentities($refer) . "\n";
+		if ($cook) echo "Cookie: " . htmlentities($cook) . "\n";
+		if ($errz != 0)  echo "cURL($errz): $errz2\n";
+		if ($post) {
+			echo "POST: ";var_dump($post);echo "\n";
+		}
+		echo "\n" . htmlentities($page) . "</textarea><br />\n";//*/
+	return($page);
 }
 
 
-function check($link, $x, $regex, $pattern='', $replace='') {
+function check($link, $x, $regex, $pattern='', $replace='', $opt = '') {
 	if(!empty($pattern)) {
 		$link = preg_replace($pattern, $replace, $link);
 	}
-	$page = curl($link);
-	$link = htmlentities($link, ENT_QUOTES);
-	flush();
-	ob_flush();
-
-	if($_POST['d'] && preg_match('@'.$regex.'@', $page)) {
-		echo '<div class="g"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
-	} elseif($_POST['d'] && preg_match("@The file you are trying to access is temporarily unavailable.@", $page)) {
-		echo '<div class="y"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
-	} elseif($_POST['d'] && !preg_match('@'.$regex.'@', $page)) {
-		echo '<div class="r"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
-	} elseif(!$_POST['d'] && preg_match('@'.$regex.'@', $page)) {
-		echo '<div class="g">'."$x: ".lang(114).': <a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
-	} elseif(!$_POST['d'] && preg_match("The file you are trying to access is temporarily unavailable.", $page)) {
-		echo '<div class="y">'."$x: ".lang(115).': <a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
-	} else {
-		echo '<div class="r">'."$x: ".lang(116).': <a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
+	$cook = 0;
+	$fol = 1;
+	$head = 1;
+	if(!empty($opt)) {
+		if (array_key_exists('cookie', $opt) && $opt['cookie'] != false) {
+			$cook = $opt['cookie'];
+		}
+		if (array_key_exists('follow', $opt)) {
+			$fol = $opt['follow'];
+		}
+		if (array_key_exists('referer', $opt) && $opt['referer'] != false) {
+			$ref = $opt['referer'];
+		}
+		if (array_key_exists('header', $opt)) {
+			$head = ($opt['header']) ? 1 : 0;
+		}
 	}
+	$page = curl($link, 0, $cook, $fol, $ref, $head);
+	$link = htmlentities($link, ENT_QUOTES);
+
+	if(preg_match('@'.$regex.'@i', $page)) {
+		$ret = '<a class="g" title="'.lang(114).'" href="'.$link.'"><b>'.$link.'</b></a>';
+		if (!$_POST['d']) {
+			$ret = "$x: ".lang(114).": " . $ret;
+		}
+		$cl = 'g';
+		$chk = 'green';
+	} elseif(preg_match("@The file you are trying to access is temporarily unavailable.@i", $page) || empty($page)) {
+		$ret = '<a class="y" title="'.lang(115).'" href="'.$link.'"><b>'.$link.'</b></a>';
+		if (!$_POST['d']) {
+			$ret = "$x: ".lang(115).": " . $ret;
+		}
+		$cl = 'y';
+		$chk = 'yellow';
+	} else {
+		$ret = '<a class="r" title="'.lang(116).'" href="'.$link.'"><b>'.$link.'</b></a>';
+		if (!$_POST['d']) {
+			$ret = "$x: ".lang(116).": " . $ret;
+		}
+		$cl = 'r';
+		$chk = 'red';
+	}
+
+	$ret = "<div class='$cl' style='text-align:left;'>" . $ret . "</div>\n";
+
+	return array($ret, $chk);
 }
 
 function debug() {

@@ -33,97 +33,152 @@ switch ($_GET['ajax']) {
 			debug();
 			else
 			echo lang(16);
-			if ($_POST['k'] == 1) {
-				$kl = 1;
-				$l = 0;
-			}
 		}
 		if (isset($_POST['submit'])) {
 			$alllinks = $_POST['links'];
 			$alllinks = explode(" ", $alllinks);
 			$alllinks = implode("\n", $alllinks);
 			$alllinks = explode("\n", $alllinks);
-			$l = 1;
+
 			$x = 1;
+			$l = ($_POST['k'] == 1) ? 0 : 1;
 
 			$alllinks = array_unique($alllinks); //removes duplicates
+			echo "<div id='listlinks'>\n";
 			foreach($alllinks as $link) {
 				if (empty($link)) continue;
 				$link = trim($link);
-				if(eregi("^(http)\:\/\/(www\.)?anonym\.to\/\?", $link)){
+				$Checked = $skip = $Kl = false;
+				if(preg_match("/^(http)\:\/\/(www\.)?anonym\.to\/\?/i", $link)){
 					$link = explode("?", $link);
 					unset($link[0]);
 					$link = implode($link, "?");
-					if($kl == 1)
-					echo '<div class="n"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
-					flush();
+					$Kl = 'anonym.to';
 				}
 
-				if(eregi("^(http)\:\/\/(www\.)?lix\.in\/", $link)){
-					$post = 'tiny='.trim(substr(strstr($link, 'n/'), 2)).'&submit=continue';
-					preg_match('@name="ifram" src="(.+?)"@i', curl($link, $post), $match);
-					$link = $match[1];
-					if($kl == 1)
-					echo '<div class="n"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
-					flush();
-				}
-
-				if(eregi("^(http)\:\/\/(www\.)?linkbucks\.com\/link\/" , $link)) {
-					$page = curl($link);
-					preg_match('/<a href="(.+)" id="aSkipLink">/' , $page , $match);
-					$link = $match[1];
-					if($kl == 1)
-					echo '<div class="n"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
-					flush();
-				}
-					
-				if(eregi("usercash\.com" , $link)) {
-					$page = curl($link);
-					preg_match("/<TITLE>(.+)<\/TITLE>/" , $page , $match);
-					$link = $match[1];
-					if($kl == 1)
-					echo '<div class="n"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
-					flush();
-				}
-					
-				if(eregi("rapidshare\.com\/users\/" , $link)) {
-					$page = curl($link);
-					preg_match_all('/<a href="(.+)" target="_blank">/' , $page , $match);
-					unset($match[1][0]);
-					foreach($match[1] as $link)
-					{
-						if($l == 1)
-						{
-							check(trim($link), $x, "You would like to download the following file::" );
-							$x++;
+				if(preg_match('/^http:\/\/(www\.)?((adf\.ly)|((9|u)\.bb))\/((\d+\/.+)|([^\/|\r|\n]+))/i', $link, $m)){
+					$page = curl($m[0]);
+					if (!preg_match("/window\.location = '(https?:[^']+)'/i", $page, $match)) {
+						if (!preg_match("/self\.location = '(https?:[^']+)'/i", $page, $match)) {
+							preg_match("/var url = '(https?:[^']+)'/i", $page, $match);
 						}
-						if($kl == 1)
-					 echo '<div class="n"><a href="'.$link.'"><b>'.$link.'</b></a></div>'.$nn;
-					 flush();
+					}
+					if (!empty($match[1]) && $match[1] != $link) {
+						$link = $match[1];
+						$Kl = 'adf.ly';
 					}
 				}
-					
-				if($l == 1) {
+
+				if(preg_match('/^http:\/\/(www\.)?zpag\.es\/\w+/i', $link, $m)){
+					$page = curl($m[0]);
+					preg_match('/window\.location = "(https?:[^"]+)"/i', $page, $match);
+					if (!empty($match[1]) && $match[1] != $link) {
+						$link = $match[1];
+						$Kl = 'zpag.es';
+					}
+				}
+
+				if(preg_match('/^http:\/\/(www\.)?lnk\.co\/\w+/i', $link, $m)){
+					$page = curl($m[0],0,0,0);
+					if (!preg_match('/id=\'linkurl\' href="(https?:[^"]+)"/i', $page, $match)) {
+						if (!preg_match("/id='urlholder' value='(https?:[^']+)'/i", $page, $match)) {
+							preg_match("/Location: (https?:.+)/i", $page, $match);
+						}
+					}
+					if (!empty($match[1]) && $match[1] != $link) {
+						$link = $match[1];
+						$Kl = 'lnk.co';
+					}
+				}
+
+				if(preg_match('/^http:\/\/(\w+\.)?linkbucks\.com\/?(link\/[^\/|\r|\n]+)?/i' , $link, $m)) {
+					$page = curl($m[0],0,0,0);
+					if (!preg_match("/(?:(?:Linkbucks)|(?:Lbjs)).TargetUrl = '(https?:[^']+)'/i" , $page , $match)) {
+						if (!preg_match('/<iframe id="content" src="(https?:[^"]+)"/i' , $page , $match)) {
+							preg_match("/Location: (https?:.+)/i", $page, $match);
+						}
+					}
+					if (!empty($match[1]) && $match[1] != $link) {
+						$link = $match[1];
+						$Kl = 'linkbucks.com';
+					}
+				}
+
+				if(preg_match('@^http://((\d+\.)|(\w+\.))?((rsmonkey\.com)|((\w+\.)?canhaz\.it))(/\d+)?@i', $link, $m)){
+					$page = curl($m[0]);
+					preg_match("/top\.location\.replace\('(https?:[^']+)'\)/i", $page, $match);
+					if (!empty($match[1]) && $match[1] != $link) {
+						$link = $match[1];
+						$Kl = 'rsmonkey.com';
+					}
+				}
+
+				if(preg_match('@^http://(?:www\.)?((?:linksafe\.me)|(?:safelinking\.net))/d/([^/|\W]+(?:/[^/|\r|\n]+)?)/?@i', $link, $m)){
+					$page = curl($m[0],0,0,0);
+					if (!preg_match('/Location: (https?:.+)/i', $page, $match)) {
+						preg_match('/window\.location="(https?:[^"]+)"/i', $page, $match);
+					}
+					if (!empty($match[1]) && $match[1] != $m[0]) {
+						$link = $match[1];
+						$Kl = $m[1];
+					} else $link = $m[0]." - ERROR.";
+				}
+
+				if(preg_match('@^http://(?:www\.)?multiupload\.com/(\w{2}_)?\w+@i', $link, $m)){
+					$page = curl($m[0],0,0,0);
+					if (stristr($page, "the link you have clicked is not available")) {
+						$link = $m[0]." - Not found.";
+						$skip = true;
+					}
+					if (empty($m[1]) && !$skip) {
+						if (preg_match_all('@(http://(?:www\.)?multiupload\.com/(?:\w{2}_\w+))</a@i', $page, $match)) {
+							foreach ($match[1] as $link) {
+								echo "<a class='n' style='text-align:left;' title='Removed folder: multiupload.com'><b>$link</b></a><br />\n";
+								$Checked = true;
+								CountandCheck($x);
+							}
+						}
+						else $link = $m[0]." - ERROR.";
+					} elseif (!$skip) {
+						preg_match('/Location: (https?:.+)/i', $page, $match);
+						if (!empty($match[1]) && $match[1] != $m[0]) {
+							$link = $match[1];
+							$Kl = 'multiupload.com';
+						} else $link = $m[0]." - ERROR.";
+					}
+				}
+
+				if($l == 1 && !$skip) {
 					foreach($sites as $site) {
 						if(preg_match('@'.$site['link'].'@i', $link)) {
 							$pattern = '';
 							$replace = '';
 							if (isset($site['pattern'])) $pattern = $site['pattern'];
 							if (isset($site['replace'])) $replace = $site['replace'];
-							check(trim($link), $x, $site['regex'], $pattern, $replace);
-							$x++;
+							$opt = '';
+							if (array_key_exists('options', $site) && is_array($site['options'])) {
+								$opt = $site['options'];
+							}
+							$chk = check(trim($link), $x, $site['regex'], $pattern, $replace, $opt);
+							echo $chk[0];
+							flush();ob_flush();
+							$Checked = true;
+							CountandCheck($x);
 						}
 					}
+				}
 
-					if($x > $maxlinks) {
-						echo '<p style="text-align:center">';
-						printf(lang(17),$maxlinks);
-						echo('</p>');
-						include(TEMPLATE_DIR.'/footer.php');
-						exit();
-					}
+				if(!$Checked && $Kl != false) {
+					echo "<a class='n' style='text-align:left;' title='Removed: $Kl'><b>$link</b></a><br />\n";
+					CountandCheck($x);
+					flush();
+				} elseif(!$Checked && $l == 1 && !$_POST['d']) {
+					echo "<a class='y' style='text-align:left;' title='Unknown Link'><b>$link&nbsp;???</b></a><br />\n";
+					//CountandCheck($x); //Count?
+					flush();
 				}
 			}
+			echo "</div>\n";
 			$time = explode(" ", microtime());
 			$time = $time[1] + $time[0];
 			$endtime = $time;
@@ -136,6 +191,18 @@ switch ($_GET['ajax']) {
 			echo "</p>";
 		}
 		break;
+}
+
+function CountandCheck(&$x) {
+	global $maxlinks;
+	$x++;
+	if($x > $maxlinks) {
+		echo '<p style="text-align:center; color: red; background-color: #fec; padding: 3px; border: 2px solid $FFAA00; line-height: 25px">';
+		printf(lang(17),$maxlinks);
+		echo("</p></div>\n");
+		include(TEMPLATE_DIR.'/footer.php');
+		exit();
+	}
 }
 
 function array_to_json( $array ){

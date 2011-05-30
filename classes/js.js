@@ -231,7 +231,9 @@ function startLinkCheck() {
 		type: "POST",
 		url: 'ajax.php?ajax=linkcheck',
 		data: ({submit: "Check Links",
-			links: $('#links').val()}),
+			links: $('#links').val(),
+			k: ($('#chk_k').is(':checked')) ? 1 : 0,
+			d: ($('#chk_d').is(':checked')) ? 1 : 0}),
 		beforeSend: function() {
 			$('#linkchecker-results').hide();
 			$('#loading').show();

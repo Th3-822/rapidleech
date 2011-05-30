@@ -1,4 +1,8 @@
-<?php 
+<?php
+ob_start();
+include('youtube.com.include.php');
+ob_end_clean();
+
 ###Youtube Login Details ## Add your youtube logins here##you need create account youtube : http://www.youtube.com/create_account with your account gmail.com
 $youtube_login = ''; //Set your Email gmail.com
 $youtube_pass = '';  //Set your password gmail.com
@@ -74,8 +78,7 @@ EOF;
         $cookie = GetCookies($page);
         preg_match('%ocation: (.+)\r\n%', $page, $redir); 
 	$redirect = html_entity_decode($redir[1]);
-
-	if (preg_match('%^https://www.google.com/accounts/CheckCookie%', $redirect)) $google = true; else $google = false;
+	if (preg_match('%^https:\/\/www\.google.com\/accounts\/CheckCookie%', $redirect)) $google = true; else $google = false;
 	
 	if ($google === true)
 	{
@@ -113,7 +116,7 @@ EOF;
 	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, $utube_login_cookie, 0, 0, $_GET["proxy"], $pauth);
 	is_page($page);
 	$uploadkey = cut_str($page, "'uploadKey': '", "',");
-
+	
 	$Urlpost = Array
 	(
 		'protocolVersion' => "0.8",
@@ -205,11 +208,11 @@ EOF;
 			),
 		'clientId' => 'scotty xhr non-resumable'
 	);
-
+	
 	$Urlpost_json = json_encode($Urlpost);
 	$Urlpost_json = str_replace('\\', '', $Urlpost_json);
 	
-	$Url = 'http://upload.youtube.com/upload/rupio';	
+	$Url = 'http://upload.youtube.com/upload/rupio';
 	$ch = curl_init($Url);
 	curl_setopt($ch, CURLOPT_HEADER, 0);
 	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U;Windows NT 5.1; de;rv:1.8.0.1)\r\nGecko/20060111\r\nFirefox/1.5.0.1');
@@ -222,10 +225,9 @@ EOF;
 	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
 	$page = curl_exec($ch);
 	curl_close($ch);
-
-	$page = json_decode($page, true);
-	$action_url = $page['sessionStatus']['externalFieldTransfers'][0]['formPostInfo']['url'];
-	if (!$action_url) html_error('Upload URL not found, halted.');
+	$action_url2 = cut_str($page, '"upload_id":"', '"}');
+	$action_url = "http://upload.youtube.com/upload/rupio?upload_id=" . $action_url2 . "&file_id=000";
+	if (!$action_url2) html_error('Upload URL not found, halted.');
 	$Url = parse_url($action_url);
 	$upload_cookie = $utube_login_cookie . '; ' . 'enabledapps.uploader=0';
 	$post = array();

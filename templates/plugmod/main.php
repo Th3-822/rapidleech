@@ -435,8 +435,8 @@ Rapidshare.com Folders | Usercash.com</div><br />
 <form action="ajax.php?ajax=linkcheck" method="post" id="linkchecker" onsubmit="return startLinkCheck();">
 <textarea rows="10" cols="87" name="links" id="links"></textarea><br /><br />
 <div style="text-align:center; margin:0 auto; width:450px;"><a href="<?php echo $PHP_SELF.'?debug=1' ?>" style="color:#3B5A6F"><b><?php echo lang(269); ?></b></a></div><br />
-<?php echo lang(270); ?>: <input type="checkbox" value="d" name="d" />
-<?php echo lang(271); ?>: <input type ="checkbox" value ="1" name="k" /><br /><br />
+<?php echo lang(270); ?>: <input type="checkbox" value="1" name="d" id="chk_d" />
+<?php echo lang(271); ?>: <input type="checkbox" value="1" name="k" id="chk_k" /><br /><br />
 <input type="submit" id="submit" value="<?php echo lang(272); ?>" name="submit" />
 </form>
 </div>
