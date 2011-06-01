@@ -10,7 +10,7 @@ clearstatcache ();
 error_reporting (6135);
 $nn = "\r\n";
 $fromaddr = "RapidLeech";
-$dev_name = 'Final';
+$dev_name = 'Development Stage';
 $rev_num = '43';
 $plusrar_v = '4.1';
 $PHP_SELF = ! $PHP_SELF ? $_SERVER ["PHP_SELF"] : $PHP_SELF;
