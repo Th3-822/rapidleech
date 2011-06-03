@@ -26,5 +26,9 @@ $sites = array(
 	array('name' => '2shared.com', 'link' => '^http://(www\.)?2shared\.com/file/\w+/.+\.html', 'regex' => '(File size:)|(Please enter password)'),
 	array('name' => 'Badongo.com', 'link' => '^http://(www\.)?badongo\.com/file/\d+', 'regex' => '\'file_fileinfo\'', 'options' => array('cookie' => 'badongoL=en')),
 	array('name' => 'Wupload.com', 'link' => '^http://(www\.)?wupload\.[^/]+/file/[a-z]?[0-9]+', 'regex' => 'Filename:'),
+	array('name' => 'Oron.com', 'link' => "^http://(www\.)?oron\.com\/", 'regex' => "fname", 'pattern' => '/File\ssize\:\s*([^<]+)/'),
+	array('name' => 'Shareflare.net', 'link' => "^http://(www\.)?shareflare\.net\/download\/", 'regex' => "file-desc", 'pattern' => '/Size\:\s*([^<]+)/'),
+	array('name' => 'Bitshare.com', 'link' => "^http://(www\.)?bitshare\.com\/", 'regex' => "downloadbutton", 'pattern' => '/<h1>[^-]+.\s*([^<]+)/'),
+	array('name' => 'Enterupload.com', 'link' => "^http://(www\.)?enterupload\.com\/", 'regex' => "file_download", 'pattern' => '/>File\s*size\:[^\d]+([^<]+)/'),
 );
 ?>

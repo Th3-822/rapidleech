@@ -22,18 +22,24 @@ class filesonic_com extends DownloadClass {
 	public function Download($link) {
 		global $premium_acc;
 
-		$user = '';
-		$pass = '';
+		$user = $pass = '';
+
+
 		if ($_REQUEST['iuser'] != '' && $_REQUEST['ipass'] != '') {
 			$user = $_REQUEST['iuser'];
 			$pass = $_REQUEST['ipass'];
-		} else if (isset($premium_acc["filesonic_com"]['user']) && $premium_acc["filesonic_com"]['user'] != '' && $premium_acc["filesonic_com"]['pass'] != '') {
-            $user = $premium_acc["filesonic_com"]['user'];
-            $pass = $premium_acc["filesonic_com"]['pass'];
-        } else if ($_REQUEST['premium_user'] != '' && $_REQUEST['premium_pass'] != '') {
-            $user = $_REQUEST['premium_user'];
-            $pass = $_REQUEST['premium_pass'];
-        }
+
+
+
+		} else if ($_REQUEST['premium_user'] != '' && $_REQUEST['premium_pass'] != '') {
+			$user = $_REQUEST['premium_user'];
+			$pass = $_REQUEST['premium_pass'];
+		} else if ($premium_acc["filesonic_com"]['user'] && $premium_acc["filesonic_com"]['pass']) {
+			$user = $premium_acc["filesonic_com"]['user'];
+			$pass = $premium_acc["filesonic_com"]['pass'];
+		} else {
+			html_error('This download plugin only support Premium user.');
+		}
 
         try {
         	$regex = '|/file/(([a-z][0-9]+/)?[0-9]+)(/.*)?$|';
@@ -51,7 +57,7 @@ class filesonic_com extends DownloadClass {
 		      'ids' => $id
 		    );
 
-		    $page = geturl("api.filesonic.com", 80, '/link?method=getDownloadLink', 0, 0, $post, 0, $_GET["proxy"], $pauth);
+			$page = $this->GetPage("http://api.filesonic.com/link?method=getDownloadLink", 0, $post);
             $response = explode("\n", $page);
             $body = '';
             foreach($response AS $content) {
@@ -93,13 +99,15 @@ class filesonic_com extends DownloadClass {
             	throw new Exception("Unable to download this file: " . $download['status']);
             }
 
-            $Url = parse_url($download['url']);
-            $loc = "{$_SERVER['PHP_SELF']}?filename=" . urlencode($download['filename']) . "&host=" . $Url ["host"] . "&port=" . $Url ["port"] . "&path=" .
-		    urlencode ( $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "") ) .
-		    "&referer=&email=&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . "&method=" . $_GET ["method"] .
-		    "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] .
-		    "&link=&comment=&cookie=&post=";
-		    insert_location ( $loc );
+			$this->RedirectDownload($download['url'], $download['filename']);
+			exit();
+
+
+
+
+
+
+
         } catch (Exception $e) {
         	html_error ($e->getMessage());
         }
@@ -152,4 +160,9 @@ class filesonic_co_nz extends filesonic_com {}
 class filesonic_me extends filesonic_com {}
 class filesonic_nl extends filesonic_com {}
 class filesonic_tv extends filesonic_com {}
+
+/* Edited by Th3-822:
+Changed geturl() & insert_location() for GetPage() & RedirectDownload(). (Using RedirectDownload should be a easy fix for the audl problem.) 
+Little edit in login's if() & Added a error msj for login isn't found. ('Use premium account' or audl login won't work if it's a FSC login defined in accounts.)
+*/
  ?>
