@@ -12,9 +12,7 @@ class zippyshare_com extends DownloadClass {
         is_present($page, "File does not exist on this server", "File does not exist on this server");
         $cookies = GetCookies($page);
         $FileName = trim(cut_str($page, 'addthis:title=""','"'));
-        if (empty($FileName)) {
-          $FileName = trim(cut_str($page, '<title>Zippyshare.com - ','</title>'));
-        }        
+        if (empty($FileName)) $FileName = trim(cut_str($page, '<title>Zippyshare.com - ','</title>'));
         if (preg_match_all("#var (\w) = (\d+);#", $page, $temp)){
             $a=$temp[2][0];
             $b=$temp[2][1];
