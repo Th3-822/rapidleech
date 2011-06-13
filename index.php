@@ -18,7 +18,6 @@ define ('RAPIDLEECH', 'yes');
 define ('ROOT_DIR', realpath ("./"));
 define ('PATH_SPLITTER', (strstr (ROOT_DIR, "\\") ? "\\" : "/"));
 define ('HOST_DIR', 'hosts/');
-define ('IMAGE_DIR', 'images/');
 define ('CLASS_DIR', 'classes/');
 define ('CONFIG_DIR', 'configs/');
 define ('BUILD', '30May2011');
@@ -32,6 +31,8 @@ if (substr ($options['download_dir'], - 1) != '/')
 define ('DOWNLOAD_DIR', (substr ($options['download_dir'], 0, 6) == "ftp://" ? '' : $options['download_dir']));
 
 define ('TEMPLATE_DIR', 'templates/' . $options['template_used'] . '/');
+define ('IMAGE_DIR', TEMPLATE_DIR . 'images/');
+
 
 if ($options['no_cache'])
 {
@@ -203,7 +204,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"])
 			include(TEMPLATE_DIR . '/header.php'); 
 			// print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\" /></center><br /><br />$nn";
 			require_once (CLASS_DIR . "http.php");
-			require_once (HOST_DIR . "vBulletin_plug.php");
+			require_once (HOST_DIR . "download/vBulletin_plug.php");
 			exit ();
 		}
 		else

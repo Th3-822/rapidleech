@@ -5,7 +5,6 @@ $id=1;
 // We define some constants here, essential for some parts in rapidleech
 define('RAPIDLEECH', 'yes');
 define('HOST_DIR', 'hosts/');
-define('IMAGE_DIR', 'images/');
 define('CLASS_DIR', 'classes/');
 define('CONFIG_DIR', 'configs/');
 // Some configuration
@@ -20,6 +19,8 @@ clearstatcache();	// Clear caches created by PHP
 require_once(CONFIG_DIR.'setup.php');	// Reads the configuration file, so we can pick up any accounts needed to use
 define('DOWNLOAD_DIR', (substr($options['download_dir'], 0, 6) == "ftp://" ? '' : $options['download_dir']));	// Set the download directory constant
 define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
+define('IMAGE_DIR', TEMPLATE_DIR . 'images/');
+
 // Include other useful functions
 require_once('classes/other.php');
 require_once(HOST_DIR.'download/hosts.php');

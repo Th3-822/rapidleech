@@ -8,10 +8,13 @@ if (!defined('RAPIDLEECH')) {
 class duckload_com extends DownloadClass {
 
     public function Download($link) {
-        global $premium_acc;
-        if (strpos($link, "/dl/")) {
-            $link = str_replace("/dl/", "/download/", $link);
-        }
+        global $premium_acc;       
+        $link = str_replace("/dl/", "/download/", $link);
+		$link = str_replace("http://duckload.com","http://www.duckload.com",$link);
+		if (strpos($link,"/divx/")){
+			$link = str_replace("/divx/","/play/",$link);
+			$link = str_replace(".html","",$link);
+			}
         if (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc ["duckload_com"] ["user"] && $premium_acc ["duckload_com"] ["pass"])) {
             $this->DownloadPremium($link);
         } else if (strpos($link, "/play/")) {
@@ -22,9 +25,10 @@ class duckload_com extends DownloadClass {
     }
 
     private function DownloadFreeVid($link) {
-        $page = $this->GetPage($link);
+        $Cookies="dl_set_lang = en";
+		$page = $this->GetPage($link,$Cookies);
         is_present($page, "File not found", "File not found");
-        $Cookies = GetCookies($page);
+        $Cookies .= "; ".GetCookies($page);
         if (!preg_match("#Free Stream \((\d+)\)#", $page, $count)) {
             html_error("Error 0x11: Plugin is out of date");
         }
@@ -49,9 +53,11 @@ class duckload_com extends DownloadClass {
     }
 
     private function DownloadFree($link) {
-        $page = $this->GetPage($link);
+		$Cookies="dl_set_lang = en";
+        $page = $this->GetPage($link,$Cookies);
         is_present($page, "File not found", "File not found");
-        $Cookies = GetCookies($page);
+		is_present($page, "Database Maintenance - try again later","Database Maintenance - try again later");
+        $Cookies .="; ". GetCookies($page);
         if (!preg_match("#Free Download.+\((\d+)\)#", $page, $count)) {
             html_error("Error 0x01: Plugin is out of date");
         }
@@ -99,7 +105,9 @@ class duckload_com extends DownloadClass {
         is_present($page, "You have entered an incorrect password", "Login Failed , Bad username/password combination");
         $Cookies = GetCookies($page);
         $page = $this->GetPage($link, $Cookies);
-        is_present($page, "File not found", "File not found");
+		is_present($page, "Critical Error, please try again later","Duckload 's System get error, please try again later");
+        is_present($page, "Database Maintenance - try again later","Database Maintenance - try again later");
+		is_present($page, "File not found", "File not found");
         if (!preg_match('#Location: (.+)#', $page, $dlink)) {
             if (!preg_match('#<form action="([^"]+)"#', $page, $dlink)) {
                 if (!preg_match("#http://.+ddl=1#", $page, $temp)) {
@@ -116,11 +124,10 @@ class duckload_com extends DownloadClass {
         $this->RedirectDownload(trim($dlink[1]), $FileName, $Cookies, 0, $link, $FileName);
         exit;
     }
-
 }
 
 /*
  * Created by vdhdevil 30-Dec-2010
- * Updated 15-Feb: fixed free download
+ * Updated June-6: fixed free download
  */
 ?>
