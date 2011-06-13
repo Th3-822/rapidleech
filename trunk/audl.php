@@ -10,7 +10,6 @@ ignore_user_abort(1);
 clearstatcache();
 $PHP_SELF = !$PHP_SELF ? $_SERVER["PHP_SELF"] : $PHP_SELF;
 define('HOST_DIR', 'hosts/');
-define('IMAGE_DIR', 'images/');
 define('CLASS_DIR', 'classes/');
 define('CONFIG_DIR', 'configs/');
 define('RAPIDLEECH', 'yes');
@@ -22,6 +21,7 @@ define('DOWNLOAD_DIR', (substr($options['download_dir'], 0, 6) == "ftp://" ? '' 
 $nn = "\r\n";
 require_once("classes/other.php");
 define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
+define('IMAGE_DIR', TEMPLATE_DIR . 'images/');
 
 login_check();
 

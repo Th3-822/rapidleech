@@ -1,48 +1,57 @@
-<table width=600 align=center>
+<table style="width:600px;margin:auto;">
 </td></tr>
-<tr><td align=center>
-<div id=info width=100% align=center>Retrive upload ID</div>
-<?
-	$ref='http://oron.com/';
-	$Url=parse_url($ref);
-	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-	$upfrm = cut_str($page,'form-data" action="','"');
-	$uid = $i=0; while($i<12){ $i++;}
-	$uid += floor(rand() * 10);
-	$post['upload_type']="file";
-	$post['sess_id']="";
-	$post['ut']="file";
-	$post['link_rcpt']="";
-	$post['link_pass']='';
-	$post['tos']='1';
-	$post['submit']=' Upload! ';
-	$uurl=$upfrm.$uid.'&js_on=1&utype=anon&upload_type=file';
-	$url=parse_url($upfrm.$uid.'&js_on=1&utype=anon&upload_type=file');
-?>
-<script>document.getElementById('info').style.display='none';</script>
-<?
+<tr><td align="center">
+<div id="info" style="width:100%;text-align:center;">Retrive upload ID</div>
+<?php
+	$cookie = 'lang=english';
+	$page = geturl("oron.com", 80, "/", 'http://oron.com/login', $cookie, 0, 0, $_GET["proxy"], $pauth);is_page($page);
+	if (!preg_match('@action="((http://\w+\.oron\.com/)upload/(\d+))/?"@i',$page, $up)) html_error('Error: Cannot find upload server.', 0);
 
-	$upfiles=upfile($url["host"],defport($url), $url["path"].($url["query"] ? "?".$url["query"] : ""),$ref, 0, $post, $lfile, $lname, "file_0");
+	$uid = '';$i = 0;
+	while($i < 12) {
+		$uid .= rand(0,9);
+		$i++;
+	}
+
+	$post = array();
+	$post['upload_type'] = "file";
+	$post['srv_id'] = $up[3];
+	$post['sess_id'] = "";
+	$post['srv_tmp_url'] = $up[2];
+	$post['ut'] = "file";
+	$post['link_rcpt'] = "";
+	$post['link_pass'] = "";
+	$post['tos'] = 1;
+	$post['submit_btn'] = " Upload! ";
+
+	$up_url = "{$up[1]}/?X-Progress-ID=$uid";
+?>
+<script type="text/javascript">document.getElementById('info').style.display='none';</script>
+<?php
+
+	$url=parse_url($up_url);
+	$upfiles=upfile($url["host"],defport($url), $url["path"].($url["query"] ? "?".$url["query"] : ""),$ref, $cookie, $post, $lfile, $lname, "file_0");
 
 ?>
-<script>document.getElementById('progressblock').style.display='none';</script>
-<?
+<script type="text/javascript">document.getElementById('progressblock').style.display='none';</script>
+<?php
 	is_page($upfiles);
-	$locat=cut_str($upfiles,"name='fn'>","<");
-	unset($post);
-	$gpost['fn'] = "$locat" ;
-	$gpost['st'] = "OK" ;
-	$gpost['op'] = "upload_result" ;
-	$Url=parse_url($ref);
-	$page = geturl($Url["host"], defport($Url), $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $ref, 0, $gpost, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-	$ddl=cut_str($page,'" class="btitle">','</a></td>');
-	$del=cut_str($page,$lname.'.html?killcode=','"');
-	//echo $page;
-	$download_link=$ddl;
-	$delete_link= $ddl.'?killcode='.$del;
-	
-	
-// Made by Baking 10/07/2009 14:04
+
+	$post = array();
+	$post['op'] = "upload_result";
+	$post['fn'] = cut_str($upfiles,"'fn' value='","'");
+	$post['st'] = "OK";
+
+	$page = geturl("oron.com", 80, "/", $up_url, $cookie, $post, 0, $_GET["proxy"], $pauth);is_page($page);
+
+	if (preg_match('@(http://oron\.com/\w+/.*\.html)\?killcode=\w+@i', $page, $lnk)) {
+		$download_link = $lnk[1];
+		$delete_link = $lnk[0];
+	} else {
+		html_error("Download link not found.", 0);
+	}
+
+//[11-6-2011] Rewritten by Th3-822
+//[11-6-2011] Edited for non member upload. (Based in member plugin) -Th3-822
+
 ?>

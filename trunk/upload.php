@@ -1,6 +1,5 @@
 <?php
 define('RAPIDLEECH', 'yes');
-define('IMAGE_DIR', 'images/');
 define('CONFIG_DIR', 'configs/');
 define('HOST_DIR', 'hosts/');
 error_reporting(0);
@@ -15,6 +14,7 @@ $nn = "\r\n";
 require_once(CONFIG_DIR.'setup.php');
 require_once("classes/other.php");
 define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
+define('IMAGE_DIR', TEMPLATE_DIR . 'images/');
 
 login_check();
 
