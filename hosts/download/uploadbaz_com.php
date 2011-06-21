@@ -33,7 +33,7 @@ class uploadbaz_com extends DownloadClass {
         $post['down_direct'] = "1";
         $page = $this->GetPage($link, 0, $post, $link);
 
-        if (!preg_match('/(http:\/\/s\d+\.uploadbaz\.com\/\w+\/([0-9])\/.+)"/', $page, $dl)) {
+        if (!preg_match('/(http:\/\/.+uploadbaz\.com\/\w+\/([0-9])\/.+)"/', $page, $dl)) {
             html_error("Error: Download link not found!");
         }
         $Url=parse_url($dl[1]);
