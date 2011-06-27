@@ -38,7 +38,7 @@ if ($continue_up)
 <div id=login width=100% align=center>Login to Bitshare.com</div>
 <?php 
                         $post['user'] = $_REQUEST['my_login'];
-			$post['pass'] = $_REQUEST['my_pass'];
+			$post['password'] = $_REQUEST['my_pass'];
                         $post['submit'] = "Login";
 			$page = geturl("bitshare.com", 80, "/login.html", "http://bitshare.com/", 0, $post, 0, $_GET["proxy"], $pauth);
 			is_page($page);
