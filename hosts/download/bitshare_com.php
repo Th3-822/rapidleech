@@ -94,7 +94,7 @@ class bitshare_com extends DownloadClass {
         $urllogin = "http://bitshare.com/login.html";
         $post = array();
         $post["user"] = $_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc ["bitshare_com"] ["user"];
-        $post["pass"] = $_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["bitshare_com"] ["pass"];
+        $post["password"] = $_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["bitshare_com"] ["pass"];
         $post["rememberlogin"] = "";
         $post["submit"] = "Login";
         $page = $this->GetPage($urllogin, 0, $post, "http://bitshare.com");
@@ -122,7 +122,7 @@ class bitshare_com extends DownloadClass {
                 html_error("Error 1x03: Plugin is out of date");
             }
         }
-        $this->RedirectDownload(trim($temp[1]), "FileName");
+        $this->RedirectDownload(trim($temp[1]), "Bitshare");
         exit();
     }
 }
