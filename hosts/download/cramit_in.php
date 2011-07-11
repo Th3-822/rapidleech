@@ -39,8 +39,9 @@ class cramit_in extends DownloadClass {
             $post['referer'] = $link;
             $post['method_free'] = "FREE DOWNLOAD";
             $page = $this->GetPage($link, 0, $post, $link);
-            if (preg_match('#You have to wait <span class=green>(\d+) minutes, (\d+) seconds</span> before your next download#', $page, $msg)) {
-                html_error($msg[0]);
+            if (stristr($page, 'class="err"')) {
+                $errmsg = cut_str($page, 'class="err">', '<br>');
+                html_error($errmsg);
             }
             $rand = cut_str($page,'name="rand" value="','"');
             if (strpos ($page, "Password :") && !isset($password)) {
@@ -55,7 +56,7 @@ class cramit_in extends DownloadClass {
                 exit();
             }
             if (strpos($page, "Enter the code below:")) {
-                preg_match('#(http:\/\/static\d+\.cramit\.in\/.+captchas\/[^"]+)">#', $page, $temp);
+                preg_match('#(http:\/\/.+captchas\/[^"]+)">#', $page, $temp);
 
                 $data = array();
                 $data['step'] = '1';
@@ -103,4 +104,5 @@ class cramit_in extends DownloadClass {
 //Cramit.in Free Download Plugin by Ruud v.Tony 2-4-2011
 //Updated 11-5-2011 to support password protected files by help vdhdevil
 //Fixed for site layout change by Ruud v.Tony 24-06-2011
+//Update for the captcha failure n the error message 06-07-2011
 ?>

@@ -37,17 +37,13 @@ class rapidshare_com extends DownloadClass {
 		$URl = parse_url(trim($link));
 		if (preg_match("/!download\|([^\|]+)\|(\d+)\|([^\|]+)/i", $URl["fragment"], $m)) $link = "https://rapidshare.com/files/{$m[2]}/{$m[3]}";
 		$page = $this->GetPageS($link);
-		$this->Check_Limit($page);
 
 		is_present($page, "ERROR: Filename invalid.", "Filename invalid. Please check the download link.");
 		is_present($page, "ERROR: File ID invalid.", "File ID invalid. Please check the download link.");
 		is_present($page, "ERROR: Unassigned file limit of 10 downloads reached.", "Unassigned file limit of 10 downloads reached.");
 		is_present($page, "ERROR: Server under repair.", "Server under repair. Please try again later");
 
-		if ($linkb = $this->ReLocation($page, 0)) {
-			$page = $this->GetPageS($linkb);
-		}
-		$this->Check_Limit($page);
+		if ($linkb = $this->ReLocation($page, 0)) $page = $this->GetPageS($linkb);
 		if (!preg_match("/!download\|([^\|]+)\|(\d+)\|([^\|]+)/i", $page, $m)) html_error("Cannot check link");
 		$this->fileid = $m[2];
 		$this->filename = $m[3];
@@ -70,8 +66,6 @@ class rapidshare_com extends DownloadClass {
 		foreach ($errors as $err => $errn) {
 			is_present($page, $err, $rserrors[$errn]);
 		}
-
-		$this->Check_Limit($page);
 		unset($page);
 
 		if (($_REQUEST["cookieuse"] == "on" && preg_match("/enc\s?=\s?(\w+)/i", $_REQUEST["cookie"], $c)) || ($_REQUEST["premium_acc"] == "on" && $premium_acc["rapidshare_com"]["cookie"])) {
@@ -95,7 +89,6 @@ class rapidshare_com extends DownloadClass {
 	private function DownloadFree($link) {
 		global $Referer;
 		$page = $this->GetPageS($this->apiurl."?sub=download&fileid={$this->fileid}&filename={$this->filename}&try=1");
-		$this->Check_Limit($page);
 
 		is_present($page, "ERROR: This file is too big to download it for free.", "This file is too big to download it for free.");
 		is_present($page, "ERROR: You need RapidPro to download more files from your IP address.", "Too many parallel downloads from your IP address.");
@@ -172,8 +165,6 @@ class rapidshare_com extends DownloadClass {
 		else $cookie = 0;
 
 		$page = $this->GetPageS("https://rapidshare.com/files/{$this->fileid}/{$this->filename}", $cookie, 0, 0, ($sendauth) ? base64_encode("$user:$pass") : '');
-		$this->Check_Limit($page);
-
 		if (!stristr($page, "Location:")) html_error("Cannot use premium account", 0);
 
 		$Href = $this->ReLocation($page);
@@ -184,42 +175,21 @@ class rapidshare_com extends DownloadClass {
 		$cookie = "enc=$cookie;";
 
 		$page = $this->GetPageS("https://rapidshare.com/files/{$this->fileid}/{$this->filename}", $cookie);
-		$this->Check_Limit($page);
-
 		if (!stristr($page, "Location:")) html_error("Cannot use premium account", 0);
 
 		$Href = $this->ReLocation($page);
 		$this->RedirectDownload($Href, $this->filename, $cookie);
 	}
-	private function Check_Limit($page, $ret = false) {
-		list($header, $page) = explode("\r\n\r\n", $page, 2);
-		// X-APICPU: 0/10000
-		if (preg_match("/X-APICPU: (\d+)\/(\d+)/i", $header, $x)) {
-			$api_used = $x[1];
-			$api_remaining = $x[2];
-			$api_min = ($x[2]*15)/100; //15%
-			$api_max = $api_remaining - $api_min;
-			if ($api_used >= $api_max) {
-				$this->changeMesg("Warning: Too much Rapidshare APICPU usage. ($api_used of $api_remaining - Limit:$api_max)");
-				html_error("RS-API Limit reached. Wait 5 minutes or more and try again.");
-			}
-		} else {
-			html_error("Cannot check RS-API Limit.");
-		}
-
-		if ($ret != false) {
-			return $page;
-		}
-	}
 	private function ChkAccInfo($cookie, $user='', $pass='', $pA=false) {
 		if ($cookie != "login") {
-			$page = $this->Check_Limit($this->GetPageS($this->apiurl."?sub=getaccountdetails&cookie=$cookie"), 1);
+			$page = $this->GetPageS($this->apiurl."?sub=getaccountdetails&cookie=$cookie");
 			$t1 = 'Cookie';$t2 = 'cookie';
 		} elseif (!empty($user) && !empty($pass)) {
-			$page = $this->Check_Limit($this->GetPageS($this->apiurl."?sub=getaccountdetails&withcookie=1&login=$user&password=$pass"), 1);
+			$page = $this->GetPageS($this->apiurl."?sub=getaccountdetails&withcookie=1&login=$user&password=$pass");
 			$t1 = 'Error';$t2 = 'login details';
 		} else html_error("Login failed. User/Password empty.");
 
+		is_present($page, "ERROR: IP blocked.", "[ERROR] Rapidshare has locked your IP. (Too many failed logins sended)");
 		is_present($page, "ERROR: Login failed. Login data invalid.",
 			"[$t1] Invalid $t2.");
 		is_present($page, "ERROR: Login failed. Password incorrect or account not found.",
@@ -231,6 +201,7 @@ class rapidshare_com extends DownloadClass {
 		is_present($page, "ERROR: Login failed.",
 			"[$t1] Login failed. Invalid $t2?");
 
+		$page = substr($page, strpos($page, "\r\n\r\n") + 4);
 		$arr1 = explode("\n", $page);
 		$info = array();
 		foreach ($arr1 as $key => $val) {
@@ -321,5 +292,6 @@ class rapidshare_com extends DownloadClass {
 //[21-APR-11]  Fixed $post in cURL function. (Oops, but isn't used by the plugin)... - Th3-822
 //[29-MAY-11]  Premium: Removed support for multi RS logins (Isn't needed now) & changed the login process using 'ChkAccInfo'. Free: Changed countdown, added new function. And plugin checked. - Th3-822
 //[01-JUN-11]  Premium: Fixed error in login. - Th3-822
+//[10-JUL-11]  Check_Limit() function isn't needed now, removed & Thinking about delete the old fixes info (Too long for read. :D ). - Th3-822
 
 ?>
