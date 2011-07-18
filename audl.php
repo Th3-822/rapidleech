@@ -134,7 +134,7 @@ function resetProgress()
           $_GET["referer"] = $_GET["referer"] ? urldecode(trim($_GET["referer"])) : 0;
           $_GET["link"] = urldecode(trim($_GET["link"]));
           $_GET["post"] = $_GET["post"] ? unserialize(stripslashes(urldecode(trim($_GET["post"])))) : 0;
-          $_GET["cookie"] = $_GET["cookie"] ? urldecode(trim($_GET["cookie"])) : 0;
+          $_GET["cookie"] = $_GET["cookie"] ? decrypt(urldecode(trim($_GET["cookie"]))) : "";
 
           $redirectto = "";
 
@@ -213,6 +213,9 @@ function resetProgress()
       $start_link.='&premium_acc=on&premium_user='.urlencode($_POST['premium_user']).'&premium_pass='.urlencode($_POST['premium_pass']);
     } elseif (isset($_POST['premium_acc'])) {
       $start_link .= '&premium_acc=on';
+    }
+    if (isset($_POST['cookieuse'])) {
+      $start_link.='&cookie='.urlencode(($_POST['cookie']));
     }
 
 ?>
@@ -384,6 +387,15 @@ function resetProgress()
                             <tr><td><?php echo lang(37); ?>:&nbsp;</td><td><input type="text" name="premium_user" id="premium_user" size="15" value="" /></td></tr>
                             <tr><td><?php echo lang(38); ?>:&nbsp;</td><td><input type="password" name="premium_pass" id="premium_pass" size="15" value="" /></td></tr>
                           </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><input type="checkbox" name="cookieuse" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('cookieblock').style.display=displ;" />&nbsp;<?php echo lang(235); ?></td>
+                          <td>&nbsp;</td>
+                          <td id="cookieblock" style="display: none;">
+                            <table width="150" border="0">
+                              <tr><td><?php echo lang(236); ?>;</td><td><input type="text" name="cookie" id="cookie" size="25" value="" /></td></tr>
+                            </table>
                         </td>
                       </tr>
                       <tr>
