@@ -93,7 +93,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	global $nn, $lastError, $PHP_SELF, $AUTH, $IS_FTP, $FtpBytesTotal, $FtpBytesReceived, $FtpTimeStart, $FtpChunkSize, $Resume, $bytesReceived, $fs, $force_name, $options;
 	$scheme .= "://";
 	
-	if (($post !== 0) && ($scheme == "http://")) {
+	if (($post !== 0) && ($scheme == "http://" || $scheme == "https://")) {
 		$method = "POST";
 		$postdata = formpostdata ( $post );
 		$length = strlen ( $postdata );

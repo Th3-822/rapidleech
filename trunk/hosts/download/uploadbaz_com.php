@@ -9,6 +9,7 @@ class uploadbaz_com extends DownloadClass {
     public function Download($link) {
         $page = $this->GetPage($link);
         is_present($page, "File Not Found", "File Not Found");
+        is_present($page, "maintenance mode", "This server is in maintenance mode. Retry in a few minute.");
         
         $id = cut_str($page, 'name="id" value="','"');
         $FileName = cut_str($page, 'name="fname" value="','"');
@@ -30,13 +31,12 @@ class uploadbaz_com extends DownloadClass {
         $post['referer'] = $link;
         $post['method_free'] = "Free Download";
         $post['method_premium'] = "";
-        $post['down_direct'] = "1";
+        $post['down_script'] = "1";
         $page = $this->GetPage($link, 0, $post, $link);
-
-        if (!preg_match('/(http:\/\/.+uploadbaz\.com\/\w+\/([0-9])\/.+)"/', $page, $dl)) {
+        if (!preg_match('/Location: (.*)/i', $page, $dl)) {
             html_error("Error: Download link not found!");
         }
-        $Url=parse_url($dl[1]);
+        $Url = parse_url($dl[1]);
         if (!$FileName) $FileName=basename($Url['path']);
         $this->RedirectDownload($dl[1], $FileName, 0, 0, $link);
         exit();

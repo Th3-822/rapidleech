@@ -1,276 +1,206 @@
 <?php
-ob_start();
-include(CLASS_DIR . 'json.php');
-ob_end_clean();
 
-###Youtube Login Details ## Add your youtube logins here##you need create account youtube : http://www.youtube.com/create_account with your account gmail.com
-$youtube_login = ''; //Set your Email gmail.com
-$youtube_pass = '';  //Set your password gmail.com
+// Youtube Developer Key. NEEDED TO WORK...
+$YT_Developer_Key = "";
+// Get your Developer Key @ http://code.google.com/apis/youtube/dashboard/gwt/index.html
+
+####### Account Info. ###########
+$upload_acc['youtube_com']['user'] = ""; //Set your username/email
+$upload_acc['youtube_com']['pass'] = ""; //Set your password
 ##############################
 
+if (empty($YT_Developer_Key)) html_error("Developer Key is empty, please set yours @ {$page_upload["youtube.com"]}.", 0);
+if (!preg_match("@\.(mp4|flv|mpe?g|mkv|wmv|mov|3gp|avi)$@i", $lname, $fext)) echo "<p style='color:red;text-align:center;font-weight:bold;'>This file format doesn't looks like a video file allowed by youtube.</p>\n";
+if (!extension_loaded('openssl')) html_error("Need OpenSSL enabled to use this plugin.");
 $not_done = true;
-$continue_up = false;
-if ($youtube_login && $youtube_pass)
-{
-	$_REQUEST['my_login'] = $youtube_login;
-	$_REQUEST['my_pass'] = $youtube_pass;
-	$_REQUEST['action'] = "FORM";
-	echo "<b><center>Use Default login/pass.</center></b>\n";
-}
-if ($_REQUEST['action'] == "FORM")
-{
-	$continue_up = true;
-}
-else
-{
-	echo <<<EOF
-<table border=0 style="width:350px;" cellspacing=0 align=center>
-	<form method=post>
-		<input type=hidden name=action value='FORM' />
-		<tr><td nowrap>&nbsp;User*</td><td>&nbsp;<input type=text name=my_login value='' style="width:160px;" />&nbsp;</td></tr>
-		<tr><td nowrap>&nbsp;Password*</td><td>&nbsp;<input type=password name=my_pass value='' style="width:160px;" />&nbsp;</td></tr>
-		<tr><td colspan=2 align=center><input type=submit value='Upload'></td></tr>
-	</form>
-</table>
-EOF;
+$continue_up = $login = false;
+$categories = array('People' => 'People & Blogs', 'Film' => 'Film & Animation', 'Autos' => 'Autos & Vehicles', 'Music' => 'Music', 'Animals' => 'Pets & Animals', 'Sports' => 'Sports', 'Travel' => 'Travel & Events', 'Games' => 'Gaming', 'Comedy' => 'Comedy', 'News' => 'News & Politics', 'Entertainment' => 'Entertainment', 'Education' => 'Education', 'Howto' => 'Howto & Style', 'Nonprofit' => 'Nonprofits & Activism', 'Tech' => 'Science & Technology');
+
+if ($upload_acc['youtube_com']['user'] && $upload_acc['youtube_com']['pass']) {
+	$_REQUEST['up_login'] = $upload_acc['youtube_com']['user'];
+	$_REQUEST['up_pass'] = $upload_acc['youtube_com']['pass'];
+	//$_REQUEST['action'] = "FORM";
+	$login = true;
+	echo "<p style='text-align:center;font-weight:bold;'>Using Default Login and Pass.</p>\n";
 }
 
-if ($continue_up)
-{
+if ($_REQUEST['action'] == "FORM") $continue_up=true;
+else {
+	echo "<table border='0' style='width:270px;' cellspacing='0' align='center'>
+	<form method='POST'>
+	<input type='hidden' name='action' value='FORM' />";
+	if (!$login) echo "<tr><td style='white-space:nowrap;'>&nbsp;Login*</td><td>&nbsp;<input type='text' name='up_login' value='' style='width:160px;' /></td></tr>
+	<tr><td style='white-space:nowrap;'>&nbsp;Password*</td><td>&nbsp;<input type='password' name='up_pass' value='' style='width:160px;' /></td></tr>\n";
+	echo "<tr><td colspan='2' align='center'><br />Video options<br /><br /></td></tr>
+	<tr><td style='white-space:nowrap;'>Title:</td><td>&nbsp;<input type='text' name='up_title' value='$lname' style='width:160px;' /></td></tr>
+	<tr><td style='white-space:nowrap;'>Category:</td><td>&nbsp;<select name='up_category' style='width:160px;height:20px;'>\n";
+	foreach($categories as $n => $v) echo "\t<option value='$n'>$v</option>\n";
+	echo "</select></td></tr>\n";
+	echo "<tr><td colspan='2' align='center'><br /><input type='submit' value='Upload' /></td></tr>\n";
+	if (!$login) echo "<tr><td colspan='2' align='center'><small>*You can set it as default in <b>{$page_upload["youtube.com"]}</b></small></td></tr>\n";
+	echo "</table>\n</form>\n";
+	echo "<script type='text/javascript'>self.resizeTo(700,420);</script>\n"; //Resize upload window
+}
+
+if ($continue_up) {
 	$not_done = false;
+	// Login
+	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='login' width='100%' align='center'>Validating login</div>\n";
 
-	echo <<<EOF
-	<table width=600 align=center></td></tr><tr><td align=center>
-	<div id=login width=100% align=center>Login to YouTube.com</div>
-EOF;
-	
-	if (empty($_REQUEST['my_login']) || empty($_REQUEST['my_pass'])) html_error('No user and pass given', 0);
+	if (empty($_REQUEST['up_login']) || empty($_REQUEST['up_pass'])) html_error("Login or pass empty.", 0);
 
-        $page = geturl("www.youtube.com", 80, "/","http://www.youtube.com/" ,0, 0, 0);
-        is_page($page);
-        $cookie = GetCookies($page);
-        preg_match('%<a class="end" href="(.*)">Sign In%', $page, $login);
-        $page = curl($login[1], 0, $cookie);
-        is_page($page);
-        $cookie = GetCookies($page);
-        $link_login = cut_str ( $page ,'action="' ,'" method="post"');
-        $uilel = trim(cut_str($page,'name="uilel" id="uilel"','" />'));
-        $uilel = str_replace('value="', '',$uilel);
-        $dsh = trim(cut_str($page,'name="dsh" id="dsh"','" />'));
-        $dsh = str_replace('value="', '',$dsh);
-        $GALX = trim(cut_str($page,'name="GALX"','" />'));
-        $GALX = str_replace('value="', '',$GALX);
-        $post = array();
-	$post['uilel'] = $uilel;
-	$post['dsh'] = $dsh;
-	$post['timeStmp'] = '' ;
-	$post['secTok'] = '';
-	$post['GALX'] = $GALX;
-	$post['Email'] = trim($_REQUEST['my_login']);
-	$post['Passwd'] = trim($_REQUEST['my_pass']);
-	$post['PersistentCookie'] = 'yes';
-	$post['rmShown'] = '1';
-	$post['signIn'] = 'Sign+in';
-	$post['asts'] = '';
-        $page = curl($link_login, $post, $cookie);
-        is_page($page);
-        is_present($page, 'The username or password you entered is incorrect.', 'The username or password you entered is incorrect.');
-        $cookie = GetCookies($page);
-        preg_match('%ocation: (.+)\r\n%', $page, $redir); 
-	$redirect = html_entity_decode($redir[1]);
-	if (preg_match('%^https:\/\/www\.google.com\/accounts\/CheckCookie%', $redirect)) $google = true; else $google = false;
-	
-	if ($google === true)
-	{
-		$gcookies = preg_replace('%LSID=EXPIRED; %U', '', GetCookies($page));
-		$Url = parse_url($redirect);
-		$page = curl($redirect, 0, $gcookies);
-		$lsid = preg_replace('%LSID=EXPIRED; %U', '', GetCookies($page));
-		$gredir = html_entity_decode(cut_str($page, '<meta http-equiv="refresh" content="0; url=&#39;', '&#39;">'));
-		$Url = parse_url($gredir);
-		if (stripos($gredir, 'accounts/SetSID?'))
-		{
-			$page = curl($gredir, 0, $lsid);
-			preg_match('%ocation: (.+)\r\n%', $page, $redir3);
-			$lcookies = GetCookies($page);
-			$Url = parse_url($redir3[1]);
-		}
-		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, $gcookies, 0, 0, $_GET["proxy"], $pauth);
-		is_page($page);
-		$ytcookies = GetCookies($page);
-		$utube_login_cookie = $lcookies . '; ' . $ytcookies;
-	}
-	else
-	{
-		$Url = parse_url($redirect);
-		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, $cookies, 0, 0, $_GET["proxy"], $pauth);
-		is_page($page);
-		$cookie_LOGIN_INFO = GetCookies($page);
-		$utube_login_cookie = $cookies . '; ' . $cookie_LOGIN_INFO;
-		$page = geturl('www.youtube.com', 80, '/', $redirect, $utube_login_cookie, 0, 0, $_GET["proxy"], $pauth);
-		is_page($page);
-	}
-	
-	$Url = 'http://upload.youtube.com/my_videos_upload';
-	$Url = parse_url($Url);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, $utube_login_cookie, 0, 0, $_GET["proxy"], $pauth);
-	is_page($page);
-	$uploadkey = cut_str($page, "'uploadKey': '", "',");
-	
-	$Urlpost = Array
-	(
-		'protocolVersion' => "0.8",
-		'createSessionRequest' => Array
-			(
-				'fields' => Array
-					(
-						Array
-							(
-								'external' => Array
-									(
-										'name' => 'file',
-										'filename' => $lname,
-										'formPost' => new stdClass(),
-										'size' => filesize($lfile)
-									)
-							),
-
-						Array
-							(
-								'inlined' => Array
-									(
-										'name' => 'return_address',
-										'content' => 'upload.youtube.com',
-										'contentType' => 'text/plain'
-									)
-							),
-
-					   Array
-							(
-								'inlined' => Array
-									(
-										'name' => 'upload_key',
-										'content' => $uploadkey,
-										'contentType' => 'text/plain'
-									)
-							),
-
-					   Array
-							(
-								'inlined' => Array
-									(
-										'name' => 'action_postvideo',
-										'content' => "1",
-										'contentType' => 'text/plain'
-									)
-							),
-
-						Array
-							(
-								'inlined' => Array
-									(
-										'name' => 'live_thumbnail_id',
-										'content' => 'uexBkOjf326Y1286907488.27.0',
-										'contentType' => 'text/plain'
-									)
-							),
-
-						Array
-							(
-								'inlined' => Array
-									(
-										'name' => 'parent_video_id',
-										'content' => '',
-										'contentType' => 'text/plain'
-									)
-							),
-
-						Array
-							(
-								'inlined' => Array
-									(
-									   'name' => 'allow_offweb',
-									   'content' => "True",
-										'contentType' => 'text/plain'
-									)
-							),
-
-						Array
-							(
-								'inlined' => Array
-									(
-										'name' => 'uploader_type',
-										'content' => 'Web_XHR',
-										'contentType' => 'text/plain'
-									)
-							),
-					),
-			),
-		'clientId' => 'scotty xhr non-resumable'
-	);
-	
-	$Urlpost_json = json_encode($Urlpost);
-	$Urlpost_json = str_replace('\\', '', $Urlpost_json);
-	
-	$Url = 'http://upload.youtube.com/upload/rupio';
-	$ch = curl_init($Url);
-	curl_setopt($ch, CURLOPT_HEADER, 0);
-	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U;Windows NT 5.1; de;rv:1.8.0.1)\r\nGecko/20060111\r\nFirefox/1.5.0.1');
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $Urlpost_json);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-GUploader-Client-Info: clientId: mechanism=scotty xhr non-resumable', 'Content-Type: application/x-www-form-urlencoded;charset=utf-8'));
-	curl_setopt($ch, CURLOPT_REFERER, 'http://upload.youtube.com/my_videos_upload');
-	curl_setopt($ch, CURLOPT_COOKIE, $utube_login_cookie) ;
-	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
-	$page = curl_exec($ch);
-	curl_close($ch);
-	$action_url2 = cut_str($page, '"upload_id":"', '"}');
-	$action_url = "http://upload.youtube.com/upload/rupio?upload_id=" . $action_url2 . "&file_id=000";
-	if (!$action_url2) html_error('Upload URL not found, halted.');
-	$Url = parse_url($action_url);
-	$upload_cookie = $utube_login_cookie . '; ' . 'enabledapps.uploader=0';
 	$post = array();
-	$post['Filename'] = $lfile;
-	$post['Upload'] = 'Submit Query';
+	$post["Email"] = urlencode($_REQUEST['up_login']);
+	$post["Passwd"] = urlencode($_REQUEST['up_pass']);
+	$post["service"] = 'youtube';
 
-	echo <<<EOF
-	<script>document.getElementById('login').style.display='none';</script>
-	<table width=600 align=center>
-	</td></tr>
-	<tr><td align=center>
-EOF;
-	
-	$upfiles = upfile($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 'http://upload.youtube.com/my_videos_upload', $upload_cookie, $post, $lfile, $lname, "Filedata");
+	$page = geturl ("www.google.com", 80, '/accounts/ClientLogin', "https://www.google.com/accounts/ClientLogin", 0, $post, 0, 0, 0, 0, 'https');is_page($page);
+	is_present($page, "Error=BadAuthentication", "Login Failed: The login/password entered are incorrect.");
+	is_present($page, "Error=NotVerified", "Login Failed: The account has not been verified.");
+	is_present($page, "Error=TermsNotAgreed", "Login Failed: The account has not agreed to terms.");
+	is_present($page, "Error=CaptchaRequired", "Login Failed: Need CAPTCHA. (Not supported yet)... Or check you login and try again.");
+	is_present($page, "Error=Unknown", "Login Failed.");
+	is_present($page, "Error=AccountDeleted", "Login Failed: The user account has been deleted.");
+	is_present($page, "Error=AccountDisabled", "Login Failed: The user account has been disabled.");
+	is_present($page, "Error=ServiceDisabled", "Login Failed: The user's access to the specified service has been disabled.");
+	is_present($page, "Error=ServiceUnavailable", "Login Failed: Service is not available; try again later.");
+
+	if (!preg_match('@Auth=([^\r|\n]+)@i', $page, $auth)) html_error("Login Failed: Auth token not found.", 0);
+
+	// Preparing upload
+	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Preparing upload</div>\n";
+
+	$vtitle = $_REQUEST['up_title'] ? trim($_REQUEST['up_title']) : $lname;
+	if (array_key_exists($_REQUEST['up_category'], $categories)) $vcategory = $_REQUEST['up_category'];
+	else $vcategory = "People";
+
+	$xml = "<?xml version='1.0'?>\r\n<entry xmlns='http://www.w3.org/2005/Atom' xmlns:media='http://search.yahoo.com/mrss/' xmlns:yt='http://gdata.youtube.com/schemas/2007'>\r\n";
+	$xml .= "  <media:group>\r\n";
+	$xml .= "    <yt:incomplete/>\r\n";
+	$xml .= "    <media:title type='plain'>$vtitle</media:title>";
+	$xml .= "    <media:description type='plain'>Uploaded with rapidleech.</media:description>";
+	// @<atom:category term='([^']+)' label='([^']+)'[^>]+><yt:assignable/>@i
+	$xml .= "    <media:category scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>$vcategory</media:category>\r\n";
+	$xml .= "  </media:group>\r\n";
+	$xml .= "</entry>";
+
+	// Uploading
+	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
+
+	// UploadToYoutube($host, $port, $url, $dkey, $uauth, $XMLReq, $file, $filename)
+	$upfiles = UploadToYoutube("uploads.gdata.youtube.com", 80, "/feeds/api/users/default/uploads", $YT_Developer_Key, $auth[1], $xml, $lfile, $lname);
+
+	// Upload Finished
+	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>";
+
 	is_page($upfiles);
-	$video_id = cut_str($upfiles, '{"video_id":"', '",') or html_error('Couldn\'t find the video ID - perhaps the upload failed?');
-	$download_link = 'http://www.youtube.com/watch?v=' . $video_id;
-	echo "<script>document.getElementById('progressblock').style.display='none';</script>";
+
+	if (preg_match('@<error>(.*)</error>@i', $upfiles, $err)) html_error("Error: (".htmlenties($err[1], ENT_QUOTES).") .", 0);
+	if (!preg_match('@<yt:videoid>([^<]+)</yt:videoid>@i', $upfiles, $vid)) html_error("Error: Video ID not found.", 0);
+
+	echo "<p style='text-align:center;font-weight:bold;'>Please check your video in your <a href='http://www.youtube.com/my_videos'>youtube page</a> for details/errors.<br />The '".lang(71)."' link is for go to 'edit video' page.</p>\n";
+	$download_link = "http://www.youtube.com/watch?v=".$vid[1];
+	$adm_link = "http://www.youtube.com/my_videos_edit?ns=1&video_id={$vid[1]}&next=%2Fmy_videos";
 }
-function curl($link, $post = 0, $cookie = 0, $refer = 0)
-{
-	$mm = !empty($post) ? 1 : 0;
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $link);
-	curl_setopt($ch, CURLOPT_HEADER, 1);
-	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U;Windows NT 5.1; de;rv:1.8.0.1)\r\nGecko/20060111\r\nFirefox/1.5.0.1');
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	if ($mm == 1)
-	{
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, formpostdata($post));
+
+// upfile function edited for YT upload.
+function UploadToYoutube($host, $port, $url, $dkey, $uauth, $XMLReq, $file, $filename) {
+	global $nn, $lastError, $sleep_time, $sleep_count;
+
+	if (!is_readable($file)) {
+		$lastError = sprintf(lang(65),$file);
+		return FALSE;
 	}
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-	curl_setopt($ch, CURLOPT_REFERER, $refer);
-	curl_setopt($ch, CURLOPT_COOKIE, $cookie) ;
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
-	$contents .= curl_exec($ch);
-	curl_close($ch);
-	return $contents;
+
+	$fileSize = getSize($file);
+	$bound = "--------" . md5(microtime());
+	$saveToFile = 0;
+
+	$postdata .= "--" . $bound . $nn;
+	$postdata .= 'Content-Type: application/atom+xml; charset=UTF-8' . $nn . $nn;
+	$postdata .= $XMLReq . $nn;
+	$postdata .= "--" . $bound . $nn;
+	$postdata .= "Content-Type: application/octet-stream" . $nn . $nn;
+
+	$zapros = "POST " . str_replace ( " ", "%20", $url ) . " HTTP/1.1{$nn}Host: $host{$nn}Authorization: GoogleLogin auth=$uauth{$nn}GData-Version: 2{$nn}X-GData-Key: key=$dkey{$nn}Slug: $filename{$nn}Content-Type: multipart/related; boundary=$bound{$nn}Content-Length: " . (strlen($postdata) + strlen($nn . "--$bound--$nn") + $fileSize) . "{$nn}Connection: Close$nn$nn$postdata";
+	$errno = 0; $errstr = "";
+	$fp = @stream_socket_client("$host:$port", $errno, $errstr, 120, STREAM_CLIENT_CONNECT);
+
+	if (!$fp) html_error(sprintf(lang(88),$host,$port));
+	if ($errno || $errstr) {
+		$lastError = $errstr;
+		return false;
+	}
+
+	echo "<p>";
+	printf(lang(90),$host,$port);
+	echo "</p>";
+
+	echo(lang(104).' <b>'.$filename.'</b>, '.lang(56).' <b>'.bytesToKbOrMb($fileSize).'</b>...<br />');
+	global $id;
+	$id = md5(time() * rand( 0, 10 ));
+	require(TEMPLATE_DIR . '/uploadui.php');
+	flush();
+
+	$timeStart = getmicrotime();
+	$chunkSize = GetChunkSize($fileSize);
+
+	fputs($fp, $zapros);
+	fflush($fp);
+
+	$fs = fopen($file, 'r');
+
+	$local_sleep = $sleep_count;
+	while ( ! feof ( $fs ) ) {
+		$data = fread ( $fs, $chunkSize );
+		if ($data === false) {
+			fclose($fs);
+			fclose($fp);
+			html_error (lang(112));
+		}
+
+		if (($sleep_count !== false) && ($sleep_time !== false) && is_numeric($sleep_time) && is_numeric($sleep_count) && ($sleep_count > 0) && ($sleep_time > 0)) {
+			$local_sleep --;
+			if ($local_sleep == 0) {
+				usleep($sleep_time);
+				$local_sleep = $sleep_count;
+			}
+		}
+
+		$sendbyte = fputs($fp, $data);
+		fflush($fp);
+
+		if ($sendbyte === false) {
+			fclose($fs);
+			fclose($fp);
+			html_error(lang(113));
+		}
+
+		$totalsend += $sendbyte;
+
+		$time = getmicrotime() - $timeStart;
+		$chunkTime = $time - $lastChunkTime;
+		$chunkTime = $chunkTime ? $chunkTime : 1;
+		$lastChunkTime = $time;
+		$speed = round($sendbyte / 1024 / $chunkTime, 2);
+		$percent = round($totalsend / $fileSize * 100, 2);
+		echo '<script type="text/javascript">pr('."'"  . $percent . "', '" . bytesToKbOrMb ( $totalsend ) . "', '" . $speed . "');</script>\n";
+		flush();
+	}
+	fclose ($fs);
+	fputs ($fp, $nn . "--" . $bound . "--" . $nn);
+	fflush ($fp);
+	while (!feof($fp)) {
+		$data = fgets($fp, 16384);
+		if ($data === false) {
+			break;
+		}
+		$page .= $data;
+	}
+	fclose ($fp);
+	return $page;
 }
-//sslcurl function moved to http.php
-// written by kaox 26/05/09
-//updated by szalinski 12-Oct-2010
-//updated by VinhNhaTrang 21/12/2010
+
+//[15-7-2011]  Written by Th3-822.
+
 ?>
