@@ -54,50 +54,9 @@ class hotfile_com extends DownloadClass {
 			$hl = ($t[1] > 0 ? $t[1]/1000 : 0);
 
 			if ($hl > 0) {
-				?>	<p><center><span id="dl" class="htmlerror"><b>ERROR: Please enable JavaScript.</b></span><br /><span id="dl2">Please wait</span></center></p>
-	<form action="<?php echo $PHP_SELF; ?>" name="hfwait" method="post">
-	<input type="hidden" name="link" value="<?php echo urlencode($link); ?>">
-	<input type="hidden" name="referer" value="<?php echo urlencode($Referer); ?>">
-	<input type="hidden" name="comment" value="<?php echo urlencode($_GET ["comment"]); ?>">
-	<input type="hidden" name="step" value="2">
-	<script type="text/javascript">
-		var c = <?php echo $hl; ?>;
-		var c2 = 0;
-		var dl = document.getElementById("dl");
-		var a2 = document.getElementById("dl2");
-		fc();
-		fc2();
-		function fc() {
-			if (c > 0) {
-				if (c > 180) {
-					dl.innerHTML = "You reached your hourly traffic limit. Please wait <b>"+ Math.round(c/60) +"</b> minutes...";
-				} else {
-					dl.innerHTML = "You reached your hourly traffic limit. Please wait <b>"+c+"</b> seconds...";
-				}
-				c = c - 1;
-				setTimeout("fc()", 1000);
-			} else {
-				dl.style.display="none";
-				void(document.forms.hfwait.submit());
-			}
-		}
-		function fc2() {
-			if (c > 180) {
-				if (c2 <= 20) {
-					a2.innerHTML = a2.innerHTML+".";
-					c2 = c2 + 1;
-				} else {
-					c2 = 10;
-					a2.innerHTML = "";
-				}
-				setTimeout("fc2()", 100);
-			} else {
-				dl2.style.display="none";
-			}
-		}
-	</script>
-	</form></body></html><?php
-				exit;
+				$data = $this->DefaultParamArr($link);
+				$data['step'] = '2';
+				$this->JSCountdown($hl, $data, 'You reached your hourly traffic limit');
 			} else {
 				insert_timer(($t[0]/1000)+1, "Waiting captcha/link timelock:");
 			}
@@ -140,7 +99,7 @@ class hotfile_com extends DownloadClass {
 			is_notpresent($page, 'hotfile.com/get/', 'Error: Download-link not found [2].');
 		} elseif (!$lfound && $cfound) {
 			//Get captcha
-			$pid = cut_str($page, 'recaptcha.net/challenge?k=', '"');;
+			$pid = cut_str($page, 'recaptcha.net/challenge?k=', '"');
 			$page = $this->GetPage("http://www.google.com/recaptcha/api/challenge?k=" . $pid);
 			if (preg_match('/challenge \: \'([^\']+)/i', $page, $ch)) {
 				$challenge = $ch[1];
@@ -148,12 +107,11 @@ class hotfile_com extends DownloadClass {
 				html_error("Error getting CAPTCHA data.");
 			}
 
+			$data = $this->DefaultParamArr($link);
 			$data['challenge'] = $challenge;
 			$data['shortencode'] = 'undefined';
 			$data['action'] = 'checkcaptcha';
 			$data['step'] = '1';
-			$data['link'] = urlencode($link);
-			$data['referer'] = urlencode($Referer);
 
 			//Download captcha img.
 			$page = $this->GetPage("http://www.google.com/recaptcha/api/image?c=" . $challenge);
@@ -191,6 +149,34 @@ class hotfile_com extends DownloadClass {
 		$filename = parse_url($dllink);
 		$filename = urldecode(basename($filename["path"]));
 		$this->RedirectDownload($dllink, $filename, $cookie);
+	}
+
+	private function JSCountdown($secs, $post = 0, $text='Waiting link timelock') {
+		global $PHP_SELF;
+		echo "<p><center><span id='dl' class='htmlerror'><b>ERROR: Please enable JavaScript. (Countdown)</b></span><br /><span id='dl2'>Please wait</span></center></p>\n";
+		echo "<form action='$PHP_SELF' name='cdwait' method='POST'>\n";
+		if ($post) {
+			foreach ($post as $name => $input) {
+				echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
+			}
+		}?>	<script type="text/javascript">
+		var c = <?php echo $secs; ?>;var text = "<?php echo $text; ?>";var c2 = 0;var dl = document.getElementById("dl");var a2 = document.getElementById("dl2");fc();fc2();
+		function fc() {
+			if (c > 0) {
+				if (c > 120) {
+					dl.innerHTML = text+". Please wait <b>"+ Math.round(c/60) +"</b> minutes...";
+				} else {
+					dl.innerHTML = text+". Please wait <b>"+c+"</b> seconds...";
+				}
+				c = c - 1;
+				setTimeout("fc()", 1000);
+			} else {
+				dl.style.display="none";
+				void(<?php if ($post) echo 'document.forms.cdwait.submit()';else echo 'location.reload()'; ?>);
+			}
+		}
+		function fc2(){if(c>120){if(c2<=20){a2.innerHTML=a2.innerHTML+".";c2=c2+1}else{c2=10;a2.innerHTML=""}setTimeout("fc2()",100)}else{dl2.style.display="none"}}<?php echo "</script></form></body></html>";
+		exit;
 	}
 
 	private function DownloadPremium($link, $cookie = false) {
@@ -255,5 +241,5 @@ class hotfile_com extends DownloadClass {
 //[06-Feb-2011]  Plugin rewritten & added cookie support by Th3-822.
 //[13-Feb-2011]  Removed old code & Fixed captcha in free download. - Th3-822
 //[15-May-2011]  Added 3 error msg; 1 edited & Fixed error in 'hfwait' form & Added 1 seg to free dl Timelock & Added code to try again if captcha isn't found. - Th3-822
-
+//[11-Jul-2011]  Using a function for the countdown & Added code for use DefaultParamArr(). -Th3-822
 ?>

@@ -1,5 +1,4 @@
 <?php
-
 if (!defined('RAPIDLEECH')) {
     require_once ("index.html");
     exit ();
@@ -53,13 +52,11 @@ class bitshare_com extends DownloadClass {
         $randnum = rand(10000, 100000);
         $img_data = explode("\r\n\r\n", $page);
         $header_img = $img_data[0];
-        $data = array();
+        $data = $this->DefaultParamArr($link, $Cookies);
         $data["request"] = "validateCaptcha";
         $data["ajaxid"] = $ajaxdl;
         $data["recaptcha_challenge_field"] = $ch;
-        $data['link'] = urlencode($link);
         $data['step'] = '1';
-        $data['cookie'] = urlencode($Cookies);
         $data['urlpost']=urlencode(trim($UrlPost[1]));
         $this->EnterCaptcha($options['download_dir'] . "bitshare_captcha.jpg", $data, 20);
         exit;

@@ -63,11 +63,9 @@ class megashare_com extends DownloadClass {
 			foreach ($post as $k => $v) {
 				$POST .= "$k=$v&";
 			}
+			$data = $this->DefaultParamArr($link, $cookie);
 			$data['post'] = urlencode(substr($POST, 0, -1));
 			$data['step'] = 1;
-			$data['link'] = urlencode($link);
-			$data['referer'] = urlencode($Referer);
-			$data['cookie'] = urlencode($cookie);
 
 			//Download captcha img.
 			$page = $this->GetPage("http://www.megashare.com/".cut_str($form, 'id="1zcimg" src="', '"'), $cookie);

@@ -39,9 +39,8 @@ class turbobit_net extends DownloadClass {
         if (!preg_match("#value = '(.*)' name = 'captcha_subtype'#", $page, $captcha_subtype)) {
             html_error("Error 0x03: Plugin is out of date");
         }
-        $data = array();
+        $data = $this->DefaultParamArr($link);
         $data['step'] = "1";
-        $data['link'] = $link;
         $data['Cookies'] = $Cookies;
         $data['flink'] = $flink;
         $data['captcha_type'] = $captcha_type[1];

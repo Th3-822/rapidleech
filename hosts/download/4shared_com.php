@@ -48,7 +48,7 @@ class d4shared_com extends DownloadClass {
 	}
 
 	private function CheckForPass($page, $link, $predl=false, $pA=false) {
-		global $Referer, $PHP_SELF;
+		global $PHP_SELF;
 		if ($_GET["step"] == "1") {
 			$post = array();
 			$post["userPass2"] = $_POST['userPass2'];
@@ -58,18 +58,13 @@ class d4shared_com extends DownloadClass {
 			$this->cookie = $this->cookie."; ".GetCookies($page);
 			return $page;
 		} elseif (stristr($page, 'Please enter a password to access this file')) {
-			echo "\n" . '<center><form name="dl_password" action="' . $PHP_SELF . '" method="post" >' . "\n";
-			echo '<input type="hidden" name="link" value="' . urlencode($link) . '" />' . "\n";
-			echo '<input type="hidden" name="referer" value="' . urlencode($Referer) . '" />' . "\n";
-			echo '<input type="hidden" name="step" value="1" />' . "\n";
-
-			$defdata = array("comment" => $_GET ["comment"], "email" => $_GET ["email"], "partSize" => $_GET ["partSize"], "method" => $_GET ["method"], "proxy" => $_GET ["proxy"], "proxyuser" => $_GET ["proxyuser"], "proxypass" => $_GET ["proxypass"], "path" => $_GET ["path"]);
-			foreach ($defdata as $name => $val) {
-				echo "<input type='hidden' name='$name' id='$name' value='$val' />\n";
-			}
-			echo '<input type="hidden" name="dsid" value="' . trim(cut_str($page, 'name="dsid" value="', '"')) . '" />' . "\n";
+			$data = $this->DefaultParamArr($link, $cookie);
+			$data['step'] = 1;
+			$data['dsid'] = trim(cut_str($page, 'name="dsid" value="', '"'));
+			echo "\n<form name='dl_password' action='$PHP_SELF' method='post'>\n";
+			foreach ($data as $name => $value) echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
 			if ($predl) echo '<br /><input type="checkbox" name="premium_acc" id="premium_acc" onclick="javascript:var displ=this.checked?\'\':\'none\';document.getElementById(\'premiumblock\').style.display=displ;" '.(!$pA?'checked="checked"':'').' />&nbsp;'.lang(249).'<br /><div id="premiumblock" style="display: none;"><br /><table width="150" border="0"><tr><td>'.lang(250).':&nbsp;</td><td><input type="text" name="premium_user" id="premium_user" size="15" value="" /></td></tr><tr><td>'.lang(251).':&nbsp;</td><td><input type="password" name="premium_pass" id="premium_pass" size="15" value="" /></td></tr></table></div><br />';
-			echo '<h4>Enter password here: <input type="text" name="userPass2" id="filepass" size="13" />&nbsp;&nbsp;<input type="submit" onclick="return check()" value="Download File" /></h4>' . "\n";
+			echo "<h4>Enter password here: <input type='text' name='userPass2' id='filepass' size='13' />&nbsp;&nbsp;<input type='submit' onclick='return check()' value='Download File' /></h4>\n";
 			echo "<script type='text/javascript'>\nfunction check() {\nvar pass=document.getElementById('filepass');\nif (pass.value == '') { window.alert('You didn\'t enter the password'); return false; }\nelse { return true; }\n}\n</script>\n";
 			echo "\n</form></center>\n</body>\n</html>";
 			exit;

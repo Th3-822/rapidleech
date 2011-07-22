@@ -15,8 +15,6 @@ class fileover_net extends DownloadClass {
 	}
 
 	private function Prepare_Free($link) {
-		global $Referer;
-
 		$page = $this->GetPage($link);
 		$cookie = GetCookies($page);
 		is_present($page, "Location: /deleted/", 'Error: File not found.');
@@ -31,7 +29,7 @@ class fileover_net extends DownloadClass {
 		$page = $this->GetPage("http://fileover.net/ax/timepoll.flo?file={$lid[1]}&hash={$lhs[1]}", $cookie);
 		if (!preg_match('@/challenge\?k=([^"|\']+)(?:"|\')@i', $page, $rpid)) html_error('Error: Captcha not found.');
 
-		$data = array('link' => urlencode($link), 'referer' => urlencode($Referer), 'cookie' => urlencode($cookie));
+		$data = $this->DefaultParamArr($link, $cookie);
 		$data['step'] = '1';
 		$data['fo_file'] = $lid[1];
 		$data['fo_hash'] = $lhs[1];

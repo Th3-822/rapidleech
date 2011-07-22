@@ -48,12 +48,10 @@ class filehook_com extends DownloadClass {
             if (stristr($page, "Enter code below:")) {
                 preg_match('#(http://filehook.com/captchas/.+)"#', $page, $temp);
                 
-                $data = array();
+                $data = $this->DefaultParamArr($link, 0, $link);
                 $data['step'] = '1';
-                $data['link'] = $link;
                 $data['id'] = $id;
                 $data['rand'] = $rand;
-                $data['referer'] = urlencode($link);
                 $this->EnterCaptcha($temp[1], $data, 10);
                 exit();
             }

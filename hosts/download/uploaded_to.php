@@ -34,10 +34,9 @@ class uploaded_to extends DownloadClass {
         $headerend = strpos($page, "\r\n\r\n");
         $pass_img = substr($page, $headerend + 4);
         write_file($options['download_dir'] . "uploaded_captcha.jpg", $pass_img);
-        $data = array();
+        $data = $this->DefaultParamArr($link);
         $data["recaptcha_challenge_field"] = $ch;
         $data["step"] = "1";
-        $data["link"] = $link;
         $data["Cookies"] = $Cookies;
         $this->EnterCaptcha($options['download_dir'] . "uploaded_captcha.jpg", $data, "10");
         exit;

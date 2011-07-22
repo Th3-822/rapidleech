@@ -15,7 +15,6 @@ class filedino_com extends DownloadClass {
     }
 
     private function Retrieve($link) {
-        global $Referer;
             $page = $this->GetPage($link);
             is_present($page, "The file was removed by administrator", "The file was removed by administrator");
 
@@ -50,12 +49,10 @@ class filedino_com extends DownloadClass {
                 }
                 write_file($imgfile, $capt_img);
 
-                $data = array();
+                $data = $this->DefaultParamArr($link, 0, $link);
                 $data['step'] = "1";
-                $data['link'] = $link;
                 $data['id'] = $id;
                 $data['rand'] = $rand;
-                $data['referer'] = urlencode($link);
                 $data['recaptcha_challenge_field'] = $ch;
                 $this->EnterCaptcha($imgfile, $data, 20);
                 exit();

@@ -37,12 +37,10 @@ class azsharing_com extends DownloadClass {
         }
         $rand = cut_str($page, 'name="rand" value="','"');
         $temp = cut_str($page, '<img alt="captcha" src="','" />');
-        $data = array();
+        $data = $this->DefaultParamArr($link, 0, $link);
         $data['step'] = "1";
-        $data['link'] = $link;
         $data['id'] = $id;
         $data['rand'] = $rand;
-        $data['referer'] = $link;
         $this->EnterCaptcha($temp, $data);
         exit;
     }
@@ -52,11 +50,12 @@ class azsharing_com extends DownloadClass {
         $post['op'] = "download2";
         $post['id'] = $_POST['id'];
         $post['rand'] = $_POST['rand'];
-        $post['referer'] = $link;
+        $post['referer'] = $_POST['referer'];
         $post['method_free'] = "Free Download";
         $post['method_premium'] = "";
         $post['code'] = $_POST['captcha'];
         $post['down_direct'] = "1";
+		$link = $_POST['link'];
         $page = $this->GetPage($link, 0, $post, $link);
         if (!preg_match('#http://www\d+[^"]+#', $page, $dl)) {
             html_error("Error, Download link not found");

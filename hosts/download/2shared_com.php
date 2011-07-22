@@ -8,6 +8,7 @@ class d2shared_com extends DownloadClass
 {
 	public function Download( $link ) 
 	{
+		global $PHP_SELF;
 		$page = $this->GetPage($link);
 		is_present( $page, "file link that you requested is not valid", "The file link that you requested is not valid. Please contact link publisher or try to make a search" );
 		is_present( $page, "File download limit has been exceeded.", "Free download limit has been exceeded. Try again later." );
@@ -20,20 +21,11 @@ class d2shared_com extends DownloadClass
 			$page = $this->GetPage($link,$cookie,$post,$link);
 			is_present($page, "enter password to access this file", "The password you have entered is not valid.");
 		} elseif (stristr($page, 'enter password to access this file')) {
-			echo "\n" . '<form name="dl_password" action="' . $PHP_SELF . '" method="post" >' . "\n";
-			echo '<input type="hidden" name="link" value="' . urlencode ($link) . '" />' . "\n";
-			echo '<input type="hidden" name="referer" value="' . urlencode ($Referer) . '" />' . "\n";
-			echo '<input type="hidden" name="cookie" value="' . urlencode ($cookie) . '" />' . "\n";
-			echo '<input type="hidden" name="step" value="1" />' . "\n";
-			echo '<input type="hidden" name="comment" id="comment" value="' . $_GET ["comment"] . '" />' . "\n";
-			echo '<input type="hidden" name="email" id="email" value="' . $_GET ["email"] . '" />' . "\n";
-			echo '<input type="hidden" name="partSize" id="partSize" value="' . $_GET ["partSize"] . '" />' . "\n";
-			echo '<input type="hidden" name="method" id="method" value="' . $_GET ["method"] . '" />' . "\n";
-			echo '<input type="hidden" name="proxy" id="proxy" value="' . $_GET ["proxy"] . '" />' . "\n";
-			echo '<input type="hidden" name="proxyuser" id="proxyuser" value="' . $_GET ["proxyuser"] . '" />' . "\n";
-			echo '<input type="hidden" name="proxypass" id="proxypass" value="' . $_GET ["proxypass"] . '" />' . "\n";
-			echo '<input type="hidden" name="path" id="path" value="' . $_GET ["path"] . '" />' . "\n";
-			echo '<h4>Enter password here: <input type="text" name="userPass2" id="filepass" size="13" />&nbsp;&nbsp;<input type="submit" onclick="return check()" value="Download File" /></h4>' . "\n";
+			$data = $this->DefaultParamArr($link, $cookie);
+			$data['step'] = 1;
+			echo "\n<form name='dl_password' action='$PHP_SELF' method='post'>\n";
+			foreach ($data as $name => $value) echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
+			echo "<h4>Enter password here: <input type='text' name='userPass2' id='filepass' size='13' />&nbsp;&nbsp;<input type='submit' onclick='return check()' value='Download File' /></h4>\n";
 			echo "<script language='JavaScript'>\nfunction check() {\nvar pass=document.getElementById('filepass');\nif (pass.value == '') { window.alert('You didn\'t enter the password'); return false; }\nelse { return true; }\n}\n</script>\n";
 			echo "</form>\n</body>\n</html>";
 			exit;

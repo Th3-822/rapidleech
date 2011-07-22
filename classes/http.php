@@ -122,8 +122,8 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	
 	if ($proxy) {
 		list ( $proxyHost, $proxyPort ) = explode ( ":", $proxy );
-		$url = $scheme . $host . ":" . $port . $url;
-		$host = $host . ":" . $port;
+		$host = $host . ($port != 80 && $port != 443 ? ":" . $port : "");
+		$url = $scheme . $host . $url;
 	}
 	
 	if ($scheme != "ssl://") {
