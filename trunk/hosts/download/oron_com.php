@@ -56,7 +56,7 @@ class oron_com extends DownloadClass {
     }
 
     private function Retrieve($link) {
-        global $Referer, $options;
+        global $options;
         $page = $this->GetPage($link);
         is_present($page,"403 Forbidden","Oron banned this server");
         is_present($page, "File Not Found", "File Not Found", 0);
@@ -83,9 +83,8 @@ class oron_com extends DownloadClass {
         $headerend = strpos($page, "\r\n\r\n");
         $pass_img = substr($page, $headerend + 4);
         write_file($options['download_dir'] . "oron_captcha.jpg", $pass_img);
-        $data = array();
+        $data = $this->DefaultParamArr($link);
         $data['step'] = 1;
-        $data['link'] = urlencode($link);
         $data['id'] = $id;
         $data['rand'] = $rand;
         $data['recaptcha_challenge_field'] = $ch;

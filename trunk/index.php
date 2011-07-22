@@ -3,7 +3,7 @@ error_reporting (0);
 // ini_set('display_errors', 0);
 set_time_limit (0);
 ini_alter ("memory_limit", "1024M");
-ob_end_clean ();
+@ob_end_clean ();
 ob_implicit_flush (true);
 ignore_user_abort (true);
 clearstatcache ();
@@ -243,7 +243,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"])
 	$FileName = basename ($Url ["path"]);
 	$mydomain = $_SERVER['SERVER_NAME'];
 	$myip = $_SERVER['SERVER_ADDR'];
-	if (!$options['bw_save'] && preg_match("/($mydomain|$myip)/i", $Url["host"]))
+	if ($options['bw_save'] && preg_match("/($mydomain|$myip)/i", $Url["host"]))
 	{
 		html_error(sprintf(lang(7), $mydomain, $myip));
 	}

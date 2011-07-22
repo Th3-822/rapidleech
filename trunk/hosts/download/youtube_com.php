@@ -15,6 +15,7 @@ class youtube_com extends DownloadClass
 		$this->page = $this->GetPage($link);
 		if (preg_match('#^HTTP/1.(0|1) 404 Not Found#i', $this->page)) {
 				is_present($this->page, "The video you have requested is not available.");
+				is_present($this->page, "This video has been removed by the user.");
 				is_present($this->page, "This video contains content from", "This video has content with copyright and it's blocked in this server's country.");
 				html_error('404 Page Not Found');
 		}				
@@ -76,8 +77,8 @@ class youtube_com extends DownloadClass
 
 		if (preg_match ('%5|34|35%', $yt_fmt)) $ext = '.flv';
 		elseif (preg_match ('%17%', $yt_fmt)) $ext = '.3gp';
-                elseif (preg_match ('%18|22|37|38%', $yt_fmt)) $ext = '.mp4';
-                elseif (preg_match ('%43|45%', $yt_fmt)) $ext = '.webm';
+		elseif (preg_match ('%18|22|37|38%', $yt_fmt)) $ext = '.mp4';
+		elseif (preg_match ('%43|45%', $yt_fmt)) $ext = '.webm';
 		elseif (preg_match ('%highest%', $yt_fmt)) $ext = '.mp4';
 		else $ext = '.flv';
 		
@@ -128,17 +129,13 @@ class youtube_com extends DownloadClass
 			$page = $this->GetPage($url);
 
 
+			$data = $this->DefaultParamArr($link, GetCookies($page));
 			$data['challenge_enc'] = urlencode(cut_str($page, 'name="challenge_enc" value="', '"'));
 			$data['next'] = urlencode(cut_str($page, 'name="next" value="', '"'));
 			$data['action_verify'] = urlencode(cut_str($page, 'name="action_verify" value="', '"'));
 			$data['submit'] = urlencode(cut_str($page, 'type="submit" name="submit" value="', '"'));
 			$data['session_token'] = urlencode(cut_str($page, "'XSRF_TOKEN': '", "'"));
 			$data['step'] = 1;
-			$data['link'] = urlencode($link);
-			$data['cookie'] = urlencode(GetCookies($page));
-			$data['referer'] = urlencode($Referer);
-
-
 			$this->EnterCaptcha("http://www.youtube.com" . cut_str($page, 'img name="verificationImg" src="', '"'), $data, 20);
 			exit;
 		}

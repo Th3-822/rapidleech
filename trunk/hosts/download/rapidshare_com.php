@@ -87,7 +87,6 @@ class rapidshare_com extends DownloadClass {
 		}
 	}
 	private function DownloadFree($link) {
-		global $Referer;
 		$page = $this->GetPageS($this->apiurl."?sub=download&fileid={$this->fileid}&filename={$this->filename}&try=1");
 
 		is_present($page, "ERROR: This file is too big to download it for free.", "This file is too big to download it for free.");
@@ -109,9 +108,8 @@ class rapidshare_com extends DownloadClass {
 			$dlauth = $details[1];
 			$countdown = $details[2];
 
-			$data = array('rs_host' => urlencode($host), 'rs_fileid' => $this->fileid,
-				'rs_filename' => urlencode($this->filename), 'rs_dlauth' => urlencode($dlauth),
-				'link' => urlencode($link), 'referer' => urlencode($Referer), 'rs_freedl' => 'ok');
+			$data = array_merge($this->DefaultParamArr($link), array('rs_host' => urlencode($host), 'rs_fileid' => $this->fileid,
+				'rs_filename' => urlencode($this->filename), 'rs_dlauth' => urlencode($dlauth), 'rs_freedl' => 'ok'));
 			$this->JSCountdown($countdown, $data);
 		} else {
 			html_error("Download link not found.");

@@ -23,7 +23,7 @@ class cramit_in extends DownloadClass {
     }
 
     private function PrepareFree($link, $password) {
-        global $Referer;
+        global $PHP_SELF;
             $page = $this->GetPage($link);
             is_present($page, "File Not Found", "The file expired");
 
@@ -58,12 +58,10 @@ class cramit_in extends DownloadClass {
             if (strpos($page, "Enter the code below:")) {
                 preg_match('#(http:\/\/.+captchas\/[^"]+)">#', $page, $temp);
 
-                $data = array();
+                $data = $this->DefaultParamArr($link, 0, $link);
                 $data['step'] = '1';
-                $data['link'] = $link;
                 $data['id'] = $id;
                 $data['rand'] = $rand;
-                $data['referer'] = urlencode($link);
                 $data['password'] = $password;
                 $this->EnterCaptcha($temp[1], $data, 20);
                 exit();

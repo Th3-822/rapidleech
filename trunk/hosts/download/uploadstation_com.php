@@ -99,17 +99,14 @@ class uploadstation_com extends DownloadClass {
 	}
 
 	private function showCaptcha() {
-		global $Referer;
 		if (!preg_match("/reCAPTCHA_publickey='([^\']+)/i", $this->page, $A)) {
 			html_error("Error: CAPTCHA not found. [F4]");
 		}
 		$pid = $A[1];
 
+		$data = $this->DefaultParamArr($this->link, $this->cookie);
 		$data['recaptcha_shortencode_field'] = cut_str($this->page,'name="recaptcha_shortencode_field" value="','"');;
 		$data['step'] = '1';
-		$data['link'] = urlencode($this->link);
-		$data['referer'] = urlencode($Referer);
-		$data['cookie'] = urlencode($this->cookie);
 
 		$this->Show_reCaptcha($pid, $data);
 	}

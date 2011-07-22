@@ -140,30 +140,7 @@ class DownloadClass {
 	 * @param array $inputs                             Key Value pairs for html form input elements ( these elements will be hidden form elements )
 	 * @param string $captchaSize                   The size of captcha text box
 	 */
-	public function EnterCaptcha( $captchaImg, $inputs, $captchaSize = '5' ) 
-	{
-		$defaultParam_array = array();
-		$defaultParam_array["comment"] = $_GET ["comment"];
-		$defaultParam_array["email"] = $_GET ["email"];
-		$defaultParam_array["partSize"] = $_GET ["partSize"];
-		$defaultParam_array["method"] = $_GET ["method"];
-		$defaultParam_array["proxy"] = $_GET ["proxy"];
-		$defaultParam_array["proxyuser"] = $_GET ["proxyuser"];
-		$defaultParam_array["proxypass"] = $_GET ["proxypass"];
-		$defaultParam_array["path"] = $_GET ["path"];			
-		
-		$this->EnterCaptchaDefault( $captchaImg, $inputs, $captchaSize, $defaultParam_array );
-	}
-	
-	/**
-	 * Use this function to create Captcha display form
-	 * 
-	 * @param string $captchaImg                    The link of the captcha image or downloaded captcha image on server
-	 * @param array $inputs                             Key Value pairs for html form input elements ( these elements will be hidden form elements )
-	 * @param string $captchaSize                   The size of captcha text box
-	 * @param array $defaultParam_array         Default Key Value pairs like proxy, method, email etc
-	 */
-	public function EnterCaptchaDefault( $captchaImg, $inputs, $captchaSize = '5', $defaultParam_array = array() ) {
+	public function EnterCaptcha( $captchaImg, $inputs, $captchaSize = '5' ) {
 		echo "\n";
 		echo('<form name="dl" action="'.$_SERVER['PHP_SELF'].'" method="post">');
 		echo "\n";
@@ -172,15 +149,6 @@ class DownloadClass {
 		{
 			echo('<input type="hidden" name="'.$name.'" id="'.$name.'" value="'.$input.'" />');
 			echo "\n";
-		}
-		
-		if ( !empty( $defaultParam_array ) )
-		{
-			foreach ( $defaultParam_array as $name => $input ) 
-			{
-				echo('<input type="hidden" name="'.$name.'" id="'.$name.'" value="'.$input.'" />');
-				echo "\n";
-			}	
 		}
 		
 		echo('<h4>'.lang(301).' <img src="'.$captchaImg.'" /> '.lang(302).': <input type="text" name="captcha" size="' . $captchaSize . '" />&nbsp;&nbsp;');
@@ -208,6 +176,38 @@ class DownloadClass {
 		echo('</html>');
 	}
 
+	/**
+	 * This function will return a array with the Default Key Value pairs including proxy, method, email, etc.
+	 * 
+	 * @param string $link -> Adds the link value to the array url encoded if you need it.
+	 * @param string $cookie -> Adds the cookie value to the array url encoded if you need it.
+	 * @param string $referer -> Adds the referer value to the array url encoded if you need it. If isn't set, it will load $Referer value. (Set as 0 or false for don't add it in the array.)
+	 */
+	public function DefaultParamArr($link = 0, $cookie = 0, $referer = 1) {
+		if ($referer == 1) {
+			global $Referer;
+			$referer = $Referer;
+		}
+
+		$DParam = array();
+		if ($link) $DParam['link'] = urlencode($link);
+		if ($cookie) $DParam['cookie'] = urlencode($cookie);
+		if ($referer) $DParam['referer'] = urlencode($referer);
+		$DParam["comment"] = $_GET ["comment"];
+		$DParam["email"] = $_GET ["email"];
+		$DParam["partSize"] = $_GET ["partSize"];
+		$DParam["method"] = $_GET ["method"];
+		if ($_GET ["useproxy"]) {
+			$DParam["useproxy"] = $_GET ["useproxy"];
+			$DParam["proxy"] = $_GET ["proxy"];
+			$DParam["proxyuser"] = $_GET ["proxyuser"];
+			$DParam["proxypass"] = $_GET ["proxypass"];
+		}
+		$DParam["path"] = $_GET ["path"];
+		if (isset($_GET["audl"])) $DParam["audl"] = "doum";
+		return $DParam;
+	}
+	
 	public function changeMesg($mesg) {
 		echo('<script>document.getElementById(\'mesg\').innerHTML=\''.stripslashes($mesg).'\';</script>');
 	}

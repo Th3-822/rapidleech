@@ -46,12 +46,11 @@ class extabit_com extends DownloadClass {
         $t = strpos($pass_img, "GIF87");
         $pass_img = ltrim(substr($pass_img, $t - 2), "\r\n");
         write_file($options['download_dir'] . "extabit.gif", $pass_img);
-        $data = array();
-        $data['link'] = $link;
+        $data = $this->DefaultParamArr($link);
 		$data['act']=$act;
         $data['step'] = "1";
         $data['Cookies'] = $Cookies;
-        $this->EnterCaptchaDefault($options['download_dir'] . "extabit.gif", $data, 15);
+        $this->EnterCaptcha($options['download_dir'] . "extabit.gif", $data, 15);
         exit();
     }
 

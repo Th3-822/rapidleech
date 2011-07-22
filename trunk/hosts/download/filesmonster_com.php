@@ -55,9 +55,8 @@ class filesmonster_com extends DownloadClass {
             }
             write_file($imgfile, $capt_img);
 
-            $data = array();
+            $data = $this->DefaultParamArr($link);
             $data['step'] = "1";
-            $data['link'] = $link;
             $data['recaptcha_challenge_field'] = $ch;
             $this->EnterCaptcha($imgfile, $data, 20);
             exit();

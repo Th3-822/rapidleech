@@ -48,13 +48,10 @@ class easy_share_com extends DownloadClass {
         $headerend = strpos($page, "\r\n\r\n");
         $pass_img = substr($page, $headerend + 4);
         write_file($options['download_dir'] . "easyshare_captcha.jpg", $pass_img);
-        $data = array();
-        $data['link'] = $linkpost;
-        $data['referer'] = $referer;
+        $data = $this->DefaultParamArr($linkpost, $cookie, $referer);
         $data['challenge'] = $challenge;
         $data['valid'] = $valid;
         $data['easy_share'] = "ok";
-        $data['cookie'] = $cookie;
         $data['FileName'] = $FileName;
         $this->EnterCaptcha($options['download_dir'] . "easyshare_captcha.jpg", $data, 5);
     }

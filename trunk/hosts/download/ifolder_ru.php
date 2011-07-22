@@ -48,9 +48,7 @@ class ifolder_ru extends DownloadClass {
 			$page = $this->GetPage($frame);
 			is_notpresent($page, "/random/images/?session=", "CAPTCHA not found.");
 
-			$data['link'] = urlencode($link);
-			$data['referer'] = urlencode($Referer);
-			$data['cookie'] = urlencode($cookie);
+			$data = $this->DefaultParamArr($link, $cookie);
 			$data['session'] = urlencode($sesid);
 			$data['ints_session'] = urlencode(cut_str($page, 'tag.value = "', '"'));
 			$data['xtravar'] = urlencode(substr(cut_str($page, "var s= '", "';"),cut_str($page,'.substring(',')')));
