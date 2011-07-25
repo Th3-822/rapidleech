@@ -29,7 +29,7 @@ class filedude_com extends DownloadClass {
         $data = $this->DefaultParamArr($link, 0, $link);
         $data['step'] = '1';
         $data['session'] = $session;
-		$data['fraction'] = urlencode("http://www.filedude.com" . $fraction);
+        $data['fraction'] = urlencode("http://www.filedude.com" . $fraction);
         $this->EnterCaptcha($temp[1], $data);
         echo $code;
     }

@@ -70,7 +70,6 @@ class filedino_com extends DownloadClass {
         $post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
         $post['recaptcha_response_field'] = $_POST['captcha'];
         $post['down_script'] = "1";
-        $link = $_POST['link'];
         $page = $this->GetPage($link, 0, $post, $link);
         if (strpos($page, 'Wrong captcha')) {
             return $this->Retrieve($link);
