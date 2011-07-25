@@ -67,7 +67,6 @@ class filehook_com extends DownloadClass {
         $post['method_premium'] = "";
         $post['code'] = $_POST['captcha'];
         $post['down_script'] = "1";
-        $link = $_POST['link'];
         $page = $this->GetPage($link, 0, $post, $link);
         if (strpos($page, "Wrong captcha")) {
             return $this->Retrieve($link);

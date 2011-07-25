@@ -67,7 +67,6 @@ class filesmonster_com extends DownloadClass {
         $post = array();
         $post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
         $post['recaptcha_response_field'] = $_POST['captcha'];
-        $link = $_POST['link'];
         $page = $this->GetPage($link, 0, $post, $link);
         if (stristr($page, "Please wait")) {
             preg_match("%<span id='sec'>(\d+)</span>%", $page, $wait);

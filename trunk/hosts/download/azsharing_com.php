@@ -55,7 +55,6 @@ class azsharing_com extends DownloadClass {
         $post['method_premium'] = "";
         $post['code'] = $_POST['captcha'];
         $post['down_direct'] = "1";
-		$link = $_POST['link'];
         $page = $this->GetPage($link, 0, $post, $link);
         if (!preg_match('#http://www\d+[^"]+#', $page, $dl)) {
             html_error("Error, Download link not found");

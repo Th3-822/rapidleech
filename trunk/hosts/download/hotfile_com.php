@@ -44,7 +44,6 @@ class hotfile_com extends DownloadClass {
 		}
 	}
 	private function DownloadFree($link) {
-		global $Referer, $PHP_SELF;
 		$page = $this->GetPage($link);
 		if ($_GET["step"] != "1") {
 			if (!preg_match_all('/timerend=d\.getTime\(\)\+(\d+)/i', $page, $t)) {
