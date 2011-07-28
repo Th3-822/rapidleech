@@ -243,7 +243,7 @@ if (! $_GET ["filename"] || ! $_GET ["host"] || ! $_GET ["path"])
 	$FileName = basename ($Url ["path"]);
 	$mydomain = $_SERVER['SERVER_NAME'];
 	$myip = $_SERVER['SERVER_ADDR'];
-	if ($options['bw_save'] && preg_match("/($mydomain|$myip)/i", $Url["host"]))
+	if (!$options['bw_save'] && preg_match("/($mydomain|$myip)/i", $Url["host"]))
 	{
 		html_error(sprintf(lang(7), $mydomain, $myip));
 	}

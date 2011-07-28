@@ -22,13 +22,13 @@ class enterupload_com extends DownloadClass {
         is_present($page, "File Not Found","File Not Found");
 
         $id = cut_str($page, 'name="id" value="','"');
-        $fname = cut_str($page, 'name="fname" value="','"');
+        $FileName = cut_str($page, 'name="fname" value="','"');
 
         $post = array ();
         $post['op'] = "download1";
         $post['usr_login'] = "";
         $post['id'] = $id;
-        $post['fname']= $fname;
+        $post['fname']= $FileName;
         $post['referer'] = "";
         $post['method_free']= "Free Download";
         $page = $this->GetPage($link, 0, $post, $link);
@@ -55,7 +55,7 @@ class enterupload_com extends DownloadClass {
 
         $dlink = trim($dl[1]);
         $Url=parse_url($dlink);
-        $FileName=basename($Url['path']);
+        if (!$FileName) $FileName=basename($Url['path']);
         $this->RedirectDownload($dlink, $FileName, 0, 0, $link);
         exit();
     }

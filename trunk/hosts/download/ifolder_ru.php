@@ -67,3 +67,4 @@ class ifolder_ru extends DownloadClass {
 }
 
 //[24-4-2011]  Rewritten by Th3-822 (Free download only).
+?>

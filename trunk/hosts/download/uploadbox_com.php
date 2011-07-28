@@ -55,3 +55,4 @@ if ($_POST['ub'] == 'ok') {
 	print	"<input name=\"enter\" type=\"text\" >";
 	print	"<input name=\"Submit\" value=\"Submit\" type=\"submit\"></form>";
 }
+?>
