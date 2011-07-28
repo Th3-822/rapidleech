@@ -103,3 +103,4 @@ class wupload_com extends DownloadClass {
 		}
 	}
 }
+?>

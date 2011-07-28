@@ -28,14 +28,14 @@ class cramit_in extends DownloadClass {
             is_present($page, "File Not Found", "The file expired");
 
             $id = cut_str($page, 'name="id" value="','"');
-            $FileName = cut_str($page, 'name="fname" value="','"');
+            $fname = cut_str($page, 'name="fname" value="','"');
 
             $post = array();
             $post['rand_input'] = "";
             $post['op'] = "download1";
             $post['usr_login'] = "";
             $post['id'] = $id;
-            $post['fname'] = $FileName;
+            $post['fname'] = $fname;
             $post['referer'] = $link;
             $post['method_free'] = "FREE DOWNLOAD";
             $page = $this->GetPage($link, 0, $post, $link);
@@ -63,7 +63,6 @@ class cramit_in extends DownloadClass {
                 $data['id'] = $id;
                 $data['rand'] = $rand;
                 $data['password'] = $password;
-                $data['filename'] = $FileName;
                 $this->EnterCaptcha($temp[1], $data, 20);
                 exit();
             }
@@ -80,23 +79,22 @@ class cramit_in extends DownloadClass {
         $post['code'] = $_POST['captcha'];
         $post['down_direct'] = "1";
         $post['password'] = $_POST['password'];
-        $FileName = $_POST['filename'];
         $page = $this->GetPage($link, 0, $post, $link);
         if (strpos($page, "Wrong password") || strpos($page, "Wrong captcha")) {
             return $this->PrepareFree($link, $password);
         }
-        if (!preg_match('/(http:\/\/cramit\.in\/file_download\/\w+\/\w+\/free\/[^"]+)"/', $page, $match)) {
-            html_error("Error 1: Redirect location cant be found!");
+        if (!preg_match('/(http:\/\/cramit\.in\/file_download\/[^\/]+\/\w+\/free\/[^\/]+\/[^\/]+)"/', $page, $match)) {
+            html_error("Error1 : Redirect location cant be found!");
         }
         $tlink = trim($match[1]);
         $page = $this->GetPage($tlink, 0, 0, $link);
-        if (!stristr($page, 'Location:')) {
-            html_error("Error 2: Download link cant be found!");
+        if (!preg_match('/Location: (.+)/i', $page, $dl)) {
+            html_error("Error2 : Download link cant be found!");
         }
-        $dlink = trim(cut_str( $page, "Location: ", "\n" ));
+        $dlink = trim($dl[1]);
         $Url = parse_url($dlink);
-        if (!$FileName) $FileName = basename($Url['path']);
-        $this->RedirectDownload($dlink, $Filename, 0, 0, $link);
+        $FileName = basename($dlink);
+        $this->RedirectDownload($dlink, $FileName, 0, 0, $link);
         exit;
     }
 

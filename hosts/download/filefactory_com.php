@@ -181,6 +181,4 @@ class filefactory_com extends DownloadClass {
 
 //[26-Nov-2010] Written by Th3-822.
 //[ 20-Feb-2011 ] Fixed regex for redirect & Fixed errors in filename & Changed captcha funtion for show reCaptcha. - Th3-822
-
-
 ?>
