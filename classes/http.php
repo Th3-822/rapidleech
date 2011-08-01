@@ -89,7 +89,7 @@ function is_page($lpage) {
 	}
 }
 
-function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveToFile = 0, $proxy = 0, $pauth = 0, $auth = 0, $scheme = "http", $resume_from = 0) {
+function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveToFile = 0, $proxy = 0, $pauth = 0, $auth = 0, $scheme = "http", $resume_from = 0, $XMLRequest=0) {
 	global $nn, $lastError, $PHP_SELF, $AUTH, $IS_FTP, $FtpBytesTotal, $FtpBytesReceived, $FtpTimeStart, $FtpChunkSize, $Resume, $bytesReceived, $fs, $force_name, $options;
 	$scheme .= "://";
 	
@@ -133,7 +133,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	$http_auth = ($auth) ? "Authorization: Basic " . $auth . $nn : "";
 	$proxyauth = ($pauth) ? "Proxy-Authorization: Basic " . $pauth . $nn : "";
 
-	$request = $method . " " . str_replace ( " ", "%20", $url ) . " HTTP/1.1" . $nn . "Host: " . $host . $nn . "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.14) Gecko/20080404 Firefox/2.0.0.14" . $nn . "Accept: */*" . $nn . "Accept-Language: en-us;q=0.7,en;q=0.3" . $nn . "Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7" . $nn . "Pragma: no-cache" . $nn . "Cache-Control: no-cache" . $nn . ($Resume ["use"] === TRUE ? "Range: bytes=" . $Resume ["from"] . "-" . $nn : "") . $http_auth . $proxyauth . $referer . $cookies . "Connection: Close" . $nn . $content_tl . $nn . $postdata;
+	$request = $method . " " . str_replace ( " ", "%20", $url ) . " HTTP/1.1" . $nn . "Host: " . $host . $nn . "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.14) Gecko/20080404 Firefox/2.0.0.14" . $nn . "Accept: */*" . $nn . "Accept-Language: en-us;q=0.7,en;q=0.3" . $nn . "Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7" . $nn . "Pragma: no-cache" . $nn . "Cache-Control: no-cache" . $nn . ($Resume ["use"] === TRUE ? "Range: bytes=" . $Resume ["from"] . "-" . $nn : "") . $http_auth . $proxyauth . $referer .($XMLRequest ? "X-Requested-With: XMLHttpRequest" . $nn : ""). $cookies . "Connection: Close" . $nn . $content_tl . $nn . $postdata;
 	
 	$errno = 0;
 	$errstr = "";

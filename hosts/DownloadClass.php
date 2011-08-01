@@ -26,14 +26,14 @@ class DownloadClass {
 	 * @param string $referer The referer of the page, it might be the value you are missing if you can't get plugin to work
 	 * @param string $auth Page authentication, unneeded in most circumstances
 	 */
-	public function GetPage($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0) {
+	public function GetPage($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $XMLRequest=0) {
 		global $pauth;
 		if (!$referer) {
 			global $Referer;
 			$referer = $Referer;
 		}
 		$Url = parse_url(trim($link));
-		$page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : ""), $referer, $cookie, $post, 0, $_GET ["proxy"], $pauth, $auth, $Url ["scheme"] );
+		$page = geturl ( $Url ["host"], $Url ["port"] ? $Url ["port"] : 80, $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : ""), $referer, $cookie, $post, 0, $_GET ["proxy"], $pauth, $auth, $Url ["scheme"], 0, $XMLRequest );
 		is_page ( $page );
 		return $page;
 	}
@@ -217,5 +217,8 @@ class DownloadClass {
 Added support of force_name in RedirectDownload function by Raj Malhotra on 02 May 2010
 Fixed  EnterCaptcha function ( Re-Write )  by Raj Malhotra on 16 May 2010
 Added auto-encryption system (szal) 14 June 2010
+Added GetPage support function for https connection by Th3-882 21 April 2011
+Added GetPage support function for xml request by vdhdevil 9 July 2011
+Tweaked DefaultParamArr code by Th3-882 22 July 2011
 **********************************************************/
 ?>

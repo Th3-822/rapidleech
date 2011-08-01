@@ -91,9 +91,10 @@ class turbobit_net extends DownloadClass {
             html_error("Error 0x11: Plugin is out of date");
         }
         insert_timer(60);
-        $tmp = cut_str($page, '$("#timeoutBox").load("', '"');
+        preg_match("#var maxTimeout = (\d+)#",$page,$tmp);
+        $tmp = cut_str($page, '$("#timeoutBox").load("', '"').$tmp[1]."/";
         $rlink = "http://turbobit.net" . $tmp;
-        $page = $this->GetPage($rlink, $Cookies, 0, $link,0,1);
+        $page = $this->GetPage($rlink, $Cookies, 0, $flink,0,1);
         if (!preg_match("#/download/[^']+#", $page, $tmp)) {
             html_error("Error 0x12: Plugin is out of date");
         }
