@@ -12,7 +12,8 @@ class movshare_net extends DownloadClass {
 		is_present($page, "The file is being transfered", 'Video is temporarily unavailable.');
 
 		if (!preg_match('@"/share\.php\?id=(\w+)\&title=([^"]+)"@i', $page, $fname)) html_error('Error: Video data not found.');
-		if (!preg_match('@type="video/divx" src="([^\'|\"|\r|\n|<|>]+)@i', $page, $downl)) html_error('Error: Download link not found.');
+		//@type="video/divx" src="([^\'|\"|\r|\n|<|>]+)@i
+		if (!preg_match('@=(?:"|\')(http://[^/|\'|\"|\r|\n]+/dl/\w+/\w+/([^\'|\"|\r|\n|<|>]+))(?:"|\')@i', $page, $downl)) html_error('Error: Download link not found.');
 
 		if(!preg_match('@\.[^\.]+$@i', basename($downl[1]), $ext)) $ext = array('.avi');
 		$fname = str_replace(Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode(trim($fname[2]))) . " [{$fname[1]}]" . $ext[0];
@@ -21,5 +22,6 @@ class movshare_net extends DownloadClass {
 }
 
 //[29-7-2011]  Written by Th3-822.
+//[01-8-2011]  Fixed regexp...
 
 ?>

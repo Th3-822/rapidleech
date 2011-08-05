@@ -71,6 +71,12 @@ if (!function_exists('disk_free_space')) {
 	$disk_free_space = '<span class="checkerp">'.lang(308).'</span>';
 }
 
+if (!extension_loaded('openssl')) {
+    $ssl = '<span class="checkerf">'.lang(309).'</span>';
+} else {
+    $ssl = '<span class="checkerp">'.lang(308).'</span>';
+}
+
 if (function_exists('apache_get_version')) {
 	$apache_version = apache_get_version();
 	preg_match('/Apache\/([0-9])\./U',$apache_version,$apacver);
@@ -104,6 +110,7 @@ if (function_exists('apache_get_version')) {
 							<b><?php echo lang(320); ?></b>: <?php echo $call_time; ?><br /><br />
 							<b><?php echo lang(321); ?></b>: <?php echo $passthru; ?><br /><br />
 							<b><?php echo lang(322); ?></b>: <?php echo $disk_free_space; ?><br /><br />
+							<b><?php echo lang(388); ?></b>: <?php echo $ssl; ?><br /><br />
 <?php if ($apache_version) {
 ?>
 							<b><?php echo lang(323); ?><?php echo $apache_version; ?></b>: <?php echo $apacver; ?><br /><br />

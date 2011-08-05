@@ -394,4 +394,5 @@ $lang[384]	=	'Metni Eşleştir';
 $lang[385]	=	'Eşleştir';
 $lang[386]	=	'Durumu Gözardı Et';
 $lang[387]	=	'Her Dosyayı Ayrı Bir Arşive koy';
+$lang[388]	=	'Openssl';
 ?>

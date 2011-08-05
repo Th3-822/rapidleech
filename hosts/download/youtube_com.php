@@ -19,11 +19,12 @@ class youtube_com extends DownloadClass
 				is_present($this->page, "This video contains content from", "This video has content with copyright and it's blocked in this server's country.");
 				html_error('404 Page Not Found');
 		}				
-		if (preg_match('#Location: http://(www.)?youtube.com/das_captcha#', $this->page) || $_GET["step"]) {
+		if (preg_match('#Location: http://(www.)?youtube.com/das_captcha#i', $this->page) || $_GET["step"]) {
 				$this->captcha($link);
 		}
-		if (!preg_match('#fmt_url_map=(.+?);#', $this->page, $fmt_url_map)) html_error('Video link not found.');
-		$fmt_url_maps = preg_split('%,%', urldecode(str_replace('\u0026amp','', $fmt_url_map[1])));
+		if (!preg_match('#fmt_stream_map=(.+?)(&|(\\\u0026))#', $this->page, $fmt_url_map)) html_error('Video link not found.');
+		$fmt_url_maps = explode(',', urldecode($fmt_url_map[1]));
+
 		$fmts = array(38,37,22,18,45,43,35,34,5,17);
 		$yt_fmt = $_POST['yt_fmt'];
 
@@ -32,8 +33,10 @@ class youtube_com extends DownloadClass
 		{
 			foreach ($fmt_url_maps as $fmtlist)
 			{
-				$furlmap = preg_split('%\|%', $fmtlist);
-				$fmturlmaps[$furlmap[0]] = $furlmap[1];
+				$furlmap = explode(';', urldecode($fmtlist), 2);
+				$furlmap[1] = substr($furlmap[1], - 2);
+
+				$fmturlmaps[$furlmap[1]] = $furlmap[0];
 			}
 			
 			//look for and download the highest quality we can find?
@@ -67,14 +70,17 @@ class youtube_com extends DownloadClass
 		{
 			foreach ($fmt_url_maps as $fmtlist)
 			{
-				$furlmap = preg_split('%\|%', $fmtlist);
+				$furlmap = explode(';', urldecode($fmtlist), 2);
+				$furlmap[1] = substr($furlmap[1], - 2);
+
 				$fmturlmaps[] = $furlmap;
 			}
-			$fmt = $fmturlmaps[0][0];
-			$furl = $fmturlmaps[0][1];
+			$fmt = $fmturlmaps[0][1];
+			$furl = $fmturlmaps[0][0];
 		}
 
-
+		$furl = str_replace('url=', '', $furl);
+		
 		if (preg_match ('%5|34|35%', $yt_fmt)) $ext = '.flv';
 		elseif (preg_match ('%17%', $yt_fmt)) $ext = '.3gp';
 		elseif (preg_match ('%18|22|37|38%', $yt_fmt)) $ext = '.mp4';
@@ -82,16 +88,17 @@ class youtube_com extends DownloadClass
 		elseif (preg_match ('%highest%', $yt_fmt)) $ext = '.mp4';
 		else $ext = '.flv';
 		
-		if (!preg_match('#<title>\s*YouTube[\s\-]+(.*?)\s*</title>#', $this->page, $title)) html_error('No video title found! Download halted.');
-		if (!$video_id)
-		{
-			preg_match ('#video_id=(.+?);#', $this->page, $video_id);
-			$video_id = str_replace('\u0026amp', '', $video_id[1]);
+		if (!preg_match('#<title>.*YouTube.*-(.*)</title>#Us', $this->page, $title)) html_error('No video title found! Download halted.');
+
+
+		if (!$video_id) preg_match ('/video_id=(.+?)(&|(\\\u0026))/', $this->page, $video_id);
+
+		$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode (trim($title[1]))) . (isset ($_POST ['yt_fmt']) && $_POST ['yt_fmt'] !== 'highest' ? '-[' . $video_id[1] . '][f' . $_POST ['yt_fmt'] . ']' : '-[' . $video_id[1] . '][f' . $fmt . ']') . $ext;
+
+		if (stristr($furl, '|')) {
+			$u_arr = explode('|', $furl);
+			$furl = preg_replace('#://([^/]+)#', "://".$u_arr[2], $u_arr[0]);
 		}
-
-
-		$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode (trim($title[1]))) . (isset ($_POST ['yt_fmt']) && $_POST ['yt_fmt'] !== 'highest' ? '-[' . $video_id . '][f' . $_POST ['yt_fmt'] . ']' : '-[' . $video_id . '][f' . $fmt . ']') . $ext;
-
 
 		if ($_POST ['ytdirect'] == 'on')
 		{
@@ -125,7 +132,6 @@ class youtube_com extends DownloadClass
 
 			$this->page = $this->GetPage($link, GetCookies($page));
 		} else {
-			global $Referer;
 			$page = $this->GetPage($url);
 
 
@@ -143,6 +149,8 @@ class youtube_com extends DownloadClass
 }
 //re-written by szal based on original plugin by eqbal
 //updated 07 June 2010
+// [28-03-2011]  Fixed (!$video_id) regex. - Th3-822
 // [29-03-2011]  Added support for captcha. - Th3-822
-// [27-04-2011]  Added error message - Th3-822
+// [02-04-2011]  Fixed redirect error. [26-04-2011]  Added error msgs.  - Th3-822
+// [04-8-2011]  Fast fix for recent change in fmt_stream_map content. - Th3-822
 ?>

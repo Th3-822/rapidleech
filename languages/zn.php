@@ -3,394 +3,395 @@ if (!defined('RAPIDLEECH')) {
   require('../deny.php');
   exit;
 }
-// The Chinese language file
+// The Simplified Chinese language file
 // These words has been html entitied to prevent wrong encodings
 
-$lang[1]	=	'&#35775;&#38382;&#31105;&#27490;';
-$lang[2]	=	'&#20282;&#26381;&#22120;&#25298;&#32477;&#28385;&#36275;&#24744;&#30340;&#35201;&#27714;&#12290;';
-$lang[3]	=	'&#35831;&#36755;&#20837;&#27491;&#30830;&#30340;&#30005;&#37038;&#22320;&#22336;&#12290;';
-$lang[4]	=	'Size of parts are not numeric';
-$lang[5]	=	'Unknown URL Type, <span class="font-black">Only Use <span class="font-blue">http</span> or <span class="font-blue">https</span> or <span class="font-blue">ftp</span> Protocol</span>';
-$lang[6]	=	'Path is not specified for saving this file';
-$lang[7]	=	'You are not allowed to leech from <span class="font-black">%1$s (%2$s)</span>';	// %1$s = host name %2$s = host ip
-$lang[8]	=	'Redirecting to:';
-$lang[9]	=	'Couldn\'t update the files list';
-$lang[10]	=	'File <b>%1$s</b> (<b>%2$s</b>) Saved!<br />Time: <b>%3$s</b><br />Average Speed: <b>%4$s KB/s</b><br />';	// %1$s = filename %2$s = filesize %3$s = time of download %4$s = speed
-$lang[11]	=	'<script>mail("File was sent to this address<b>%1$s</b>.", "%2$s");</script>';	// %1$s = E-mail address %2$s = filename
-$lang[12]	=	'Error sending file!';
-$lang[13]	=	'Go back to main';
-$lang[14]	=	'Connection lost, file deleted.';
-$lang[15]	=	'Reload';
-$lang[16]	=	'Please change the debug mode to <b>1</b>';
-$lang[17]	=	'Maximum No (%1$s) Of links have been reached.';	// %1$s = Number of maximum links
-$lang[18]	=	'%1$s Link%2$s checked in %3$s seconds. (Method: <b>%4$s</b>)';	// %1$s = Number of links %2$s = Plural form %3$s = seconds %4$s = method for checking links
-$lang[19]	=	's';	// End of a plural
-$lang[20]	=	'Bad proxy server address';
-$lang[21]	=	'Link';
-$lang[22]	=	'Status';
-$lang[23]	=	'Waiting';
-$lang[24]	=	'Invalid URL';
-$lang[25]	=	'Preparing';
-$lang[26]	=	'Started';
-$lang[27]	=	'Connection lost';
-$lang[28]	=	'Finished';
-$lang[29]	=	'Start auto Transload';
-$lang[30]	=	'Frames not supported, update your browser';
-$lang[31]	=	'Add links';
-$lang[32]	=	'Links';
-$lang[33]	=	'Options';
-$lang[34]	=	'Transload files';
-$lang[35]	=	'Use Proxy Settings';
-$lang[36]	=	'Proxy';
-$lang[37]	=	'UserName';
-$lang[38]	=	'Password';
-$lang[39]	=	'Use Imageshack Account';
-$lang[40]	=	'Save To';
-$lang[41]	=	'Path';
-$lang[42]	=	'Use Premium Account';
-$lang[43]	=	'Run Server Side';
-$lang[44]	=	'Delay Time';
-$lang[45]	=	'Delay (in seconds)';
-$lang[46]	=	'No files or hosts selected for upload';
-$lang[47]	=	'Select Hosts to Upload';
-$lang[48]	=	'No Supported Upload Services!';
-$lang[49]	=	'Upload windows';
-$lang[50]	=	'Link save format';
-$lang[51]	=	'Default';
-$lang[52]	=	'Check All';
-$lang[53]	=	'Un-Check All';
-$lang[54]	=	'Invert Selection';
-$lang[55]	=	'Name';
-$lang[56]	=	'Size';
-$lang[57]	=	'No files found';
-$lang[58]	=	'Legend for link saving format: (case sensitive)';
-$lang[59]	=	'The link for the download';
-$lang[60]	=	'The name of the file';
-$lang[61]	=	'Default link style';
-$lang[62]	=	'Anything besides the ones stated above will be treated as string, you are unable to do multi line format now, a new line will be inserted for each link.';
-$lang[63]	=	'Uploading file %1$s to %2$s';	// %1$s = filename %2$s = file host name
-$lang[64]	=	'File %1$s does not exist.';	// %1$s = filename
-$lang[65]	=	'File %1$s is not readable by script.';	// %1$s = filename
-$lang[66]	=	'Filesize too big to upload to host.';
-$lang[67]	=	'Upload service not allowed';
-$lang[68]	=	'Download-Link';
-$lang[69]	=	'Delete-Link';
-$lang[70]	=	'Stat-Link';
-$lang[71]	=	'Admin-Link';
-$lang[72]	=	'USER-ID';
-$lang[73]	=	'FTP upload';
-$lang[74]	=	'Password';
-$lang[75]	=	'Rapidleech PlugMod - Upload Links';
-$lang[76]	=	'<div class="linktitle">Upload Links for <strong>%1$s</strong> - <span class="bluefont">Size: <strong>%2$s</strong></span></div>';	// %1$s = file name %2$s = file size
-$lang[77]	=	'DONE';
-$lang[78]	=	'Go Back';
-$lang[79]	=	'Couldn\'t establish connection with the server %1$s.';		// %1$s = FTP server name
-$lang[80]	=	'Incorrect username and/or password.';
-$lang[81]	=	'Connected to: <b>%1$s</b>...';	// %1$s = FTP server name
-$lang[82]	=	'The filetype %1$s is forbidden to be downloaded';	// %1$s = File type
-$lang[83]	=	'File <b>%1$s</b>, Size <b>%2$s</b>...';	// %1$s = file name %2$s = file size
-$lang[84]	=	'Error retriving the link';
-$lang[85]	=	'Text passed as counter is string!';
-$lang[86]	=	'ERROR: Please enable JavaScript.';
-$lang[87]	=	'Please wait <b>%1$s</b> seconds...';	// %1$s = number of seconds
-$lang[88]	=	'Couldn\'t connect to %1$s at port %2$s';	// %1$s = host name %2$s = port
-$lang[89]	=	'Connected to proxy: <b>%1$s</b> at port <b>%2$s</b>...';	// %1$s = Proxy host %2$s = Proxy port
-$lang[90]	=	'Connected to: <b>%1$s</b> at port <b>%2$s</b>...';	// %1$s = host %2$s = port
-$lang[91]	=	'No header received';
-$lang[92]	=	'You are forbidden to access the page!';
-$lang[93]	=	'The page was not found!';
-$lang[94]	=	'The page was either forbidden or not found!';
-$lang[95]	=	'Error! it is redirected to [%1$s]';	// %1$s = redirected address
-$lang[96]	=	'This site requires authorization. For the indication of username and password of access it is necessary to use similar url:<br />http://<b>login:password@</b>www.site.com/file.exe';
-$lang[97]	=	'Resume limit exceeded';
-$lang[98]	=	'This server doesn\'t support resume';
-$lang[99]	=	'Download';
-$lang[100]	=	'This premium account is already in use with another ip.';
-$lang[101]	=	'File %1$s cannot be saved in directory %2$s';	// %1$s = file name %2$s = directory name
-$lang[102]	=	'Try to chmod the folder to 777.';
-$lang[103]	=	'Try again';
-$lang[104]	=	'File';
-$lang[105]	=	'It is not possible to carry out a record in the file %1$s';	// %1$s = file name
-$lang[106]	=	'Invalid URL or unknown error occured';
-$lang[107]	=	'You have reached the limit for Free users.';
-$lang[108]	=	'The download session has expired';
-$lang[109]	=	'Wrong access code.';
-$lang[110]	=	'You have entered a wrong code too many times';
-$lang[111]	=	'Download limit exceeded';
-$lang[112]	=	'Error READ Data';
-$lang[113]	=	'Error SEND Data';
-$lang[114]	=	'Active';
-$lang[115]	=	'Unavailable';
-$lang[116]	=	'Dead';
-$lang[117]	=	'You need to load/activate the cURL extension (http://www.php.net/cURL) or you can set \'fgc\' => 1 in config.php.';
-$lang[118]	=	'cURL is enabled';
-$lang[119]	=	'PHP version 5 is recommended although it is not obligatory';
-$lang[120]	=	'Check if your safe mode is turned off as the script cannot work with safe mode on';
-$lang[121]	=	'Sending file <b>%1$s</b>';	// %1$s = filename
-$lang[122]	=	'No need spliting, Send single mail';
-$lang[123]	=	'Spliting into %1$s part size';	// %1$s = part size
-$lang[124]	=	'Method';
-$lang[125]	=	'Sending part <b>%1$s</b>';	//%1$s = part number
-$lang[126]	=	'No need spliting, Send single mail';
-$lang[127]	=	'No host file found';
-$lang[128]	=	'Cannot create hosts file';
-$lang[129]	=	'hours';	// Plural
-$lang[130]	=	'hour';
-$lang[131]	=	'minutes';	// Plural
-$lang[132]	=	'minute';
-$lang[133]	=	'seconds';	// Plural
-$lang[134]	=	'second';
-$lang[135]	=	'getCpuUsage(): couldn\'t access STAT path or STAT file invalid';
-$lang[136]	=	'CPU Load';
-$lang[137]	=	'An error occured';
-$lang[138]	=	'Select at least one file.';
-$lang[139]	=	'Emails';
-$lang[140]	=	'Send';
-$lang[141]	=	'Delete successful submits';
-$lang[142]	=	'Split by Parts';
-$lang[143]	=	'Parts Size';
-$lang[144]	=	'<b>%1$s</b> - Invalid E-mail Address.';	// %1$s = email address
-$lang[145]	=	'File <b>%1$s</b> is not found!';	// %1$s = filename
-$lang[146]	=	'Couldn\'t update files list!';
-$lang[147]	=	'File deletion is disabled';
-$lang[148]	=	'Delete files';
-$lang[149]	=	'Yes';
-$lang[150]	=	'No';
-$lang[151]	=	'File <b>%1$s</b> Deleted';	// %1$s = filename
-$lang[152]	=	'Error deleting the file <b>%1$s</b>!';	// %1$s = filename
-$lang[153]	=	'Host';
-$lang[154]	=	'Port';
-$lang[155]	=	'Directory';
-$lang[156]	=	'Delete source file after successful upload';
-$lang[157]	=	'Save FTP data';
-$lang[158]	=	'Delete FTP data';
-$lang[159]	=	'Cannot locate the folder <b>%1$s</b>';	// %1$s = directory name
-$lang[160]	=	'File %1$s successfully uploaded!';	// %1$s = filename
-$lang[161]	=	'Time';
-$lang[162]	=	'Average speed';
-$lang[163]	=	'Couldn\'t upload the file <b>%1$s</b>!';	// %1$s = filename
-$lang[164]	=	'Email';
-$lang[165]	=	'Delete	successful submits';
-$lang[166]	=	'Invalid E-mail Address';
-$lang[167]	=	'Please select only the .crc or .001 file!';
-$lang[168]	=	'Please select the .crc file!';
-$lang[169]	=	'Please select the .crc or .001 file!';
-$lang[170]	=	'Perform a CRC check? (recommended)';
-$lang[171]	=	'CRC32 check mode';
-$lang[172]	=	'Use hash_file (Recommended)';
-$lang[173]	=	'Read file to memory';
-$lang[174]	=	'Fake crc';
-$lang[175]	=	'Delete source file after successful merge';
-$lang[176]	=	'Notice';
-$lang[177]	=	'The file size and crc32 won\'t be check';
-$lang[178]	=	'Can\'t read the .crc file!';
-$lang[179]	=	'Error, Output file already exists <b>%1$s</b>';	// %1$s = filename
-$lang[180]	=	'Error, missing or incomplete parts';
-$lang[181]	=	'Error, The filetype %1$s is forbidden';	// Filetype
-$lang[182]	=	'It is not possible to open destination file <b>%1$s</b>';	// %1$s = filename
-$lang[183]	=	'Error writing the file <b>%1$s</b>!';	// %1$s = filename
-$lang[184]	=	'CRC32 checksum doesn\'t match!';
-$lang[185]	=	'File <b>%1$s</b> successfully merged';	// %1$s = filename
-$lang[186]	=	'deleted';
-$lang[187]	=	'not deleted';
-$lang[188]	=	'Add extension';
-$lang[189]	=	'without';
-$lang[190]	=	'to';
-$lang[191]	=	'Rename?';
-$lang[192]	=	'Cancel';
-$lang[193]	=	'Error renaming file <b>%1$s</b>';	// %1$s = filename
-$lang[194]	=	'File <b>%1$s</b> has been renamed to <b>%2$s</b>';	// %1$s = original filename %2$s = renamed filename
-$lang[195]	=	'Archive Name';
-$lang[196]	=	'Please enter an archive name!';
-$lang[197]	=	'Error the archive has not been created.';
-$lang[198]	=	'File %1$s was packed';	// %1$s = filename
-$lang[199]	=	'Packed in archive <b>%1$s</b>';	// %1$s = filename
-$lang[200]	=	'Error, the archive is empty.';
-$lang[201]	=	'New name';
-$lang[202]	=	'Couldn\'t rename the file <b>%1$s</b>!';	// %1$s = filename
-$lang[203]	=	'Delete source file after successful split';
-$lang[204]	=	'files and folders';
-$lang[205]	=	'Unzip';
-$lang[206]	=	'YouTube Video Format Selector';
-$lang[207]	=	'Link to Transload';
-$lang[208]	=	'Referrer';
-$lang[209]	=	'Transload File';
-$lang[210]	=	'User &amp; Pass (HTTP/FTP)';
-$lang[211]	=	'User';
-$lang[212]	=	'Pass';
-$lang[213]	=	'Add Comments';
-$lang[214]	=	'PluginOptions';
-$lang[215]	=	'Disable All Plugins';
-$lang[216]	=	'YouTube Video Format Selector';
-$lang[217]	=	'Direct Link';
+$lang[1]	=	'拒绝访问';
+$lang[2]	=	'服务器拒绝执行您的请求';
+$lang[3]	=	'您没有输入一个有效的e-mail地址';
+$lang[4]	=	'分段大小不是数字';
+$lang[5]	=	'未知URL类型，<span class="font-black">只使用<span class="font-blue">http</span> 或 <span class="font-blue">https</span> 或 <span class="font-blue">ftp</span> 协议</span>';
+$lang[6]	=	'未指定保存此文件路径';
+$lang[7]	=	'你不被允许从<span class="font-black">%1$s (%2$s)</span> 上下载内容 ';	// %1$s = host name %2$s = host ip
+$lang[8]	=	'重定向到';
+$lang[9]	=	'无法更新的文件列表';
+$lang[10]	=	'文件<b>%1$s</b> (<b>%2$s</b>) 以保存！<br />用时： <b>%3$s</b><br />平均速度： <b>%4$s KB/s</b><br /> ';	// %1$s = filename %2$s = filesize %3$s = time of download %4$s = speed
+$lang[11]	=	'<script>mail("文件将被发送到地址<b>%1$s</b>。", "%2$s");</script> ';	// %1$s = E-mail address %2$s = filename
+$lang[12]	=	'发送文件时出错！';
+$lang[13]	=	'回到主页';
+$lang[14]	=	'连接丢失，文件已删除。';
+$lang[15]	=	'重新加载';
+$lang[16]	=	'请更改调试模式到 <b>1</b>';
+$lang[17]	=	'已达到最大连接数（%1$s）。 ';	// %1$s = Number of maximum links
+$lang[18]	=	'%1$s 链接%2$s 被检测到，用时 %3$s 秒。（方法：<b>%4$s</b>） ';	// %1$s = Number of links %2$s = Plural form %3$s = seconds %4$s = method for checking links
+$lang[19]	=	'';	// End of a plural
+$lang[20]	=	'错误的代理服务器地址';
+$lang[21]	=	'链接';
+$lang[22]	=	'状态';
+$lang[23]	=	'请稍候';
+$lang[24]	=	'错误的URL地址';
+$lang[25]	=	'准备';
+$lang[26]	=	'已启动';
+$lang[27]	=	'连接丢失';
+$lang[28]	=	'已完成';
+$lang[29]	=	'启动自动Transload';
+$lang[30]	=	'不支持框架，请更新你的浏览器';
+$lang[31]	=	'添加链接';
+$lang[32]	=	'链接';
+$lang[33]	=	'选项';
+$lang[34]	=	'Transload文件';
+$lang[35]	=	'使用代理设置';
+$lang[36]	=	'代理';
+$lang[37]	=	'用戶名';
+$lang[38]	=	'密码';
+$lang[39]	=	'使用Imageshack帐户';
+$lang[40]	=	'保存到';
+$lang[41]	=	'路径';
+$lang[42]	=	'使用高级帐户';
+$lang[43]	=	'在服务器端运行';
+$lang[44]	=	'延迟时间';
+$lang[45]	=	'延迟（秒）';
+$lang[46]	=	'没有选择上传的文件或主机';
+$lang[47]	=	'选择要上传的主机';
+$lang[48]	=	'不被支持的上传服务！';
+$lang[49]	=	'上传窗口';
+$lang[50]	=	'链接保存格式';
+$lang[51]	=	'默认';
+$lang[52]	=	'全部选中';
+$lang[53]	=	'取消全部选中';
+$lang[54]	=	'反向选择';
+$lang[55]	=	'名称';
+$lang[56]	=	'大小';
+$lang[57]	=	'没有发现文件';
+$lang[58]	=	'链接保存格式示例：（区分大小写）';
+$lang[59]	=	'下载链接';
+$lang[60]	=	'文件的名称';
+$lang[61]	=	'默认链接样式';
+$lang[62]	=	'除了上面以外的任何东西都将被视为字符串，你现在无法使用多行格式，新行将被插入到每个链接。';
+$lang[63]	=	'上传文件 %1$s 到 %2$s ';	// %1$s = filename %2$s = file host name
+$lang[64]	=	'文件 %1$s 不存在。 ';	// %1$s = filename
+$lang[65]	=	'文件 %1$s 不可以用脚本读取。 ';	// %1$s = filename
+$lang[66]	=	'上传到主机的文件过大。';
+$lang[67]	=	'上传服务不被允许';
+$lang[68]	=	'下载链接';
+$lang[69]	=	'删除链接';
+$lang[70]	=	'状态链接';
+$lang[71]	=	'管理员链接';
+$lang[72]	=	'用户名';
+$lang[73]	=	'FTP上传';
+$lang[74]	=	'密码';
+$lang[75]	=	'Rapidleech PlugMod - 上传链接';
+$lang[76]	=	'<div class="linktitle">上传链接 <strong>%1$s</strong> - <span class="bluefont">大小： <strong>%2$s</strong></span></div> ';	// %1$s = file name %2$s = file size
+$lang[77]	=	'完成';
+$lang[78]	=	'后退';
+$lang[79]	=	'无法建立与服务器%1$s 的连接。 ';		// %1$s = FTP server name
+$lang[80]	=	'错误的用户名和/或密码。';
+$lang[81]	=	'已连接到： <b>%1$s</b>... ';	// %1$s = FTP server name
+$lang[82]	=	'文件类型 %1$s 是禁止下载的 ';	// %1$s = File type
+$lang[83]	=	'文件 <b>%1$s</b>，大小 <b>%2$s</b>... ';	// %1$s = file name %2$s = file size
+$lang[84]	=	'检索链接时出错';
+$lang[85]	=	'文本作为计数器字符串传递！';
+$lang[86]	=	'错误：请启用JavaScript。';
+$lang[87]	=	'请等待 <b>%1$s</b> 秒... ';	// %1$s = number of seconds
+$lang[88]	=	'无法连接到 %1$s 端口 %2$s ';	// %1$s = host name %2$s = port
+$lang[89]	=	'连接到代理： <b>%1$s</b> 端口 <b>%2$s</b>... ';	// %1$s = Proxy host %2$s = Proxy port
+$lang[90]	=	'已连接到： <b>%1$s</b> 端口 <b>%2$s</b>... ';	// %1$s = host %2$s = port
+$lang[91]	=	'没有收到标题';
+$lang[92]	=	'你被禁止访问页面！';
+$lang[93]	=	'该网页未找到！';
+$lang[94]	=	'页面被禁止访问或没有找到！';
+$lang[95]	=	'错误！它被重定向到 [%1$s] ';	// %1$s = redirected address
+$lang[96]	=	'这个网站需要授权。要指定访问的用户和密码需要使用类似以下格式的URL：<br />http:';
+$lang[97]	=	'恢复超出限制';
+$lang[98]	=	'此服务器不支持恢复';
+$lang[99]	=	'下载';
+$lang[100]	=	'白金帐号已用于另一个IP。';
+$lang[101]	=	'不能保存文件 %1$s 到目录 %2$s 中 ';	// %1$s = file name %2$s = directory name
+$lang[102]	=	'尝试用chmod更改文件夹到777权限。';
+$lang[103]	=	'重试';
+$lang[104]	=	'文件';
+$lang[105]	=	'不能完成记录到文件 %1$s ';	// %1$s = file name
+$lang[106]	=	'无效的网址或发生未知错误';
+$lang[107]	=	'您已经达到了免费用户的限制。';
+$lang[108]	=	'下载会话已过期';
+$lang[109]	=	'错误的访问密钥';
+$lang[110]	=	'你输入了错误的密钥的次数太多了';
+$lang[111]	=	'超出下载限制';
+$lang[112]	=	'读取数据错误';
+$lang[113]	=	'发送数据错误';
+$lang[114]	=	'活动';
+$lang[115]	=	'不可用';
+$lang[116]	=	'失效';
+$lang[117]	=	'你需要加载/激活 cURL 扩展(http:';
+$lang[118]	=	'cURL启用';
+$lang[119]	=	'推荐使用PHP version 5 但这不是强制的';
+$lang[120]	=	'检查如果你的安全模式是关闭状态下，脚本将不能使用安全模式';
+$lang[121]	=	'发送文件<b>%1$s</b> ';	// %1$s = filename
+$lang[122]	=	'不需要分割，发送单个邮件';
+$lang[123]	=	'按 %1$s 大小进行分割 ';	// %1$s = part size
+$lang[124]	=	'方法';
+$lang[125]	=	'发送部分 <b>%1$s</b> ';	//%1$s = part number
+$lang[126]	=	'不需要分割，发送单个邮件';
+$lang[127]	=	'没有发现主机文件';
+$lang[128]	=	'无法创建主机文件';
+$lang[129]	=	'时 ';	// Plural
+$lang[130]	=	'时';
+$lang[131]	=	'分 ';	// Plural
+$lang[132]	=	'分';
+$lang[133]	=	'秒 ';	// Plural
+$lang[134]	=	'秒';
+$lang[135]	=	'getCpuUsage(): 无法访问STAT路径或STAT文件错误';
+$lang[136]	=	'CPU负载';
+$lang[137]	=	'发生错误';
+$lang[138]	=	'至少选择一个文件。';
+$lang[139]	=	'电子邮件';
+$lang[140]	=	'发送';
+$lang[141]	=	'删除成功提交';
+$lang[142]	=	'按分段分割';
+$lang[143]	=	'分段大小';
+$lang[144]	=	'<b>%1$s</b> - 无效的E-mail地址。 ';	// %1$s = email address
+$lang[145]	=	'未找到文件 <b>%1$s</b> ！';	// %1$s = filename
+$lang[146]	=	'无法更新文件列表！';
+$lang[147]	=	'禁用文件删除';
+$lang[148]	=	'删除文件';
+$lang[149]	=	'是';
+$lang[150]	=	'否';
+$lang[151]	=	'文件<b>%1$s</b> 已删除 ';	// %1$s = filename
+$lang[152]	=	'删除文件 <b>%1$s</b> 时遇到错误！ ';	// %1$s = filename
+$lang[153]	=	'主机';
+$lang[154]	=	'端口';
+$lang[155]	=	'文件夹';
+$lang[156]	=	'上传成功后删除源文件';
+$lang[157]	=	'保存FTP数据';
+$lang[158]	=	'删除FTP数据';
+$lang[159]	=	'无法找到文件夹 <b>%1$s</b> ';	// %1$s = directory name
+$lang[160]	=	'成功上传文件 %1$s ！';	// %1$s = filename
+$lang[161]	=	'时间';
+$lang[162]	=	'平均时速';
+$lang[163]	=	'无法上传文件 <b>%1$s</b>！ ';	// %1$s = filename
+$lang[164]	=	'电子邮件';
+$lang[165]	=	'删除成功提交';
+$lang[166]	=	'错误的电子邮件地址';
+$lang[167]	=	'请只选择 .crc 或 .001 文件！';
+$lang[168]	=	'请选择 .crc 文件！';
+$lang[169]	=	'请选择 .crc 或 .001 文件！';
+$lang[170]	=	'执行CRC校验？（推荐）';
+$lang[171]	=	'CRC32校验模式';
+$lang[172]	=	'使用 哈希文件（推荐）';
+$lang[173]	=	'读文件到内存';
+$lang[174]	=	'假CRC';
+$lang[175]	=	'成功合并后删除源文件';
+$lang[176]	=	'公告';
+$lang[177]	=	'不会检查此文件的大小和CRC32';
+$lang[178]	=	'无法读取 .CRC 文件！';
+$lang[179]	=	'错误，输出文件已经存在 <b>%1$s</b> ';	// %1$s = filename
+$lang[180]	=	'错误，缺失或不完整的分段';
+$lang[181]	=	'错误，文件类型 %1$s 是禁止的 ';	// Filetype
+$lang[182]	=	'目标文件 <b>%1$s</b> 是不可能打开的 ';	// %1$s = filename
+$lang[183]	=	'写入文件 <b>%1$s</b> 错误！';	// %1$s = filename
+$lang[184]	=	'CRC32校验不匹配！';
+$lang[185]	=	'成功合并文件 <b>%1$s</b> ';	// %1$s = filename
+$lang[186]	=	'删除';
+$lang[187]	=	'未删除';
+$lang[188]	=	'添加扩展';
+$lang[189]	=	'不包括';
+$lang[190]	=	'到';
+$lang[191]	=	'重命名？';
+$lang[192]	=	'取消';
+$lang[193]	=	'重命名文件 <b>%1$s</b> 错误 ';	// %1$s = filename
+$lang[194]	=	'文件 <b>%1$s</b> 已更名为 <b>%2$s</b> ';	// %1$s = original filename %2$s = renamed filename
+$lang[195]	=	'存档名称';
+$lang[196]	=	'请输入存档名称！';
+$lang[197]	=	'错误 存档没有创建。';
+$lang[198]	=	'文件 %1$s 是一个打包 ';	// %1$s = filename
+$lang[199]	=	'打包在存档 <b>%1$s</b> 里 ';	// %1$s = filename
+$lang[200]	=	'错误，存档是空的。';
+$lang[201]	=	'新名称';
+$lang[202]	=	'无法重命名文件 <b>%1$s</b>！';	// %1$s = filename
+$lang[203]	=	'成功分割后删除源文件';
+$lang[204]	=	'文件和文件夹';
+$lang[205]	=	'解压';
+$lang[206]	=	'YouTube 视频格式选择器';
+$lang[207]	=	'链接到Transload';
+$lang[208]	=	'引用';
+$lang[209]	=	'Transload文件';
+$lang[210]	=	'用户名 &amp; 密码 (HTTP/FTP)';
+$lang[211]	=	'用户';
+$lang[212]	=	'密码';
+$lang[213]	=	'添加注释';
+$lang[214]	=	'插件选项';
+$lang[215]	=	'禁用所有插件';
+$lang[216]	=	'YouTube 视频格式选择器';
+$lang[217]	=	'直接链接';
 $lang[218]	=	'&amp;fmt=';
-$lang[219]	=	'Auto-get the highest quality format available';
-$lang[220]	=	'17 [Video: 3GP 176x144 | Audio: AAC 2ch 44.10kHz]';
-$lang[221]	=	'5 [Video: FLV 400x240 | Audio: MP3 1ch 22.05kHz]';
-$lang[222]	=	'34 [Video: FLV 640x360 | Audio: AAC 2ch 44.10kHz]';
-$lang[223]	=	'35 [Video: FLV 854x480 | Audio: AAC 2ch 44.10kHz]';
-$lang[224]	=	'43 [Video: WebM 640x360 | Audio: Vorbis 2ch 44.10kHz]';
-$lang[225]	=	'45 [Video: WebM 1280x720 | Audio: Vorbis 2ch 44.10kHz]';
-$lang[226]	=	'18 [Video: MP4 480x360 | Audio: AAC 2ch 44.10kHz]';
-$lang[227]	=	'22 [Video: MP4 1280x720 | Audio: AAC 2ch 44.10kHz]';
-$lang[228]	=	'37 [Video: MP4 1920×1080 | Audio: AAC 2ch 44.10kHz]';
-$lang[229]	=	'ImageShack&reg; TorrentService';
-$lang[230]	=	'Username';
-$lang[231]	=	'Password';
-$lang[232]	=	'Megaupload.com Cookie Value';
-$lang[233]	=	'user';
-$lang[234]	=	'Use vBulletin Plugin';
-$lang[235]	=	'Additional Cookie Value';
+$lang[219]	=	'自动获取可用的最高质量格式';
+$lang[220]	=	'17 [视频： 3GP 176x144 | 音频： AAC 2ch 44.10kHz]';
+$lang[221]	=	'5 [视频： FLV 400x240 | 音频： MP3 1ch 22.05kHz]';
+$lang[222]	=	'34 [视频： FLV 640x360 | 音频： AAC 2ch 44.10kHz]';
+$lang[223]	=	'35 [视频： FLV 854x480 | 音频： AAC 2ch 44.10kHz]';
+$lang[224]	=	'43 [视频： WebM 640x360 | 音频： Vorbis 2ch 44.10kHz]';
+$lang[225]	=	'45 [视频： WebM 1280x720 | 音频： Vorbis 2ch 44.10kHz]';
+$lang[226]	=	'18 [视频： MP4 480x360 | 音频： AAC 2ch 44.10kHz]';
+$lang[227]	=	'22 [视频： MP4 1280x720 | 音频： AAC 2ch 44.10kHz]';
+$lang[228]	=	'37 [视频： MP4 1920×1080 | 音频： AAC 2ch 44.10kHz]';
+$lang[229]	=	'ImageShack&reg; Torrent 服务';
+$lang[230]	=	'用户名';
+$lang[231]	=	'密码';
+$lang[232]	=	'Megaupload.com Cookie 值';
+$lang[233]	=	'用户';
+$lang[234]	=	'使用 vBulletin 插件';
+$lang[235]	=	'附加Cookie值';
 $lang[236]	=	'Key=Value';
-$lang[237]	=	'Send File to Email';
-$lang[238]	=	'Email';
-$lang[239]	=	'Split Files';
-$lang[240]	=	'Method';
+$lang[237]	=	'发送文件到电子邮件';
+$lang[238]	=	'电子邮件';
+$lang[239]	=	'分割文件';
+$lang[240]	=	'方法';
 $lang[241]	=	'Total Commander';
 $lang[242]	=	'RFC 2046';
-$lang[243]	=	'Parts Size';
+$lang[243]	=	'分段大小';
 $lang[244]	=	'MB';
-$lang[245]	=	'Use Proxy Settings';
-$lang[246]	=	'Proxy';
-$lang[247]	=	'Username';
-$lang[248]	=	'Password';
-$lang[249]	=	'Use Premium Account';
-$lang[250]	=	'Username';
-$lang[251]	=	'Password';
-$lang[252]	=	'Save To';
-$lang[253]	=	'Path';
-$lang[254]	=	'Save Settings';
-$lang[255]	=	'Clear Current Settings';
-$lang[256]	=	'Check All';
-$lang[257]	=	'Un-Check All';
-$lang[258]	=	'Invert Selection';
-$lang[259]	=	'Show';
-$lang[260]	=	'Downloaded';
-$lang[261]	=	'Everything';
-$lang[262]	=	'Name';
-$lang[263]	=	'Size';
-$lang[264]	=	'Comments';
-$lang[265]	=	'Date';
-$lang[266]	=	'No files found';
-$lang[267]	=	'Works With';
-$lang[268]	=	'Kills';
-$lang[269]	=	'Debug Mode';
-$lang[270]	=	'Display Links Only';
-$lang[271]	=	'Kill Links Only';
-$lang[272]	=	'Check Links';
-$lang[273]	=	'Loading...';
-$lang[274]	=	'Processing, please wait...';
-$lang[275]	=	'Server Space';
-$lang[276]	=	'In Use';
-$lang[277]	=	'Free Space';
-$lang[278]	=	'Disk Space';
+$lang[245]	=	'使用代理设置';
+$lang[246]	=	'代理';
+$lang[247]	=	'用户名';
+$lang[248]	=	'密码';
+$lang[249]	=	'使用高级帐户';
+$lang[250]	=	'用户名';
+$lang[251]	=	'密码';
+$lang[252]	=	'保存到';
+$lang[253]	=	'路径';
+$lang[254]	=	'保存设置';
+$lang[255]	=	'清除当前设置';
+$lang[256]	=	'全部选中';
+$lang[257]	=	'取消全部选中';
+$lang[258]	=	'反向选择';
+$lang[259]	=	'显示';
+$lang[260]	=	'下载';
+$lang[261]	=	'所有';
+$lang[262]	=	'名称';
+$lang[263]	=	'大小';
+$lang[264]	=	'注释';
+$lang[265]	=	'日期';
+$lang[266]	=	'没有发现文件';
+$lang[267]	=	'支持以下网站';
+$lang[268]	=	'排除以下支持';
+$lang[269]	=	'调试模式';
+$lang[270]	=	'只显示链接';
+$lang[271]	=	'只显示删除链接';
+$lang[272]	=	'检查链接';
+$lang[273]	=	'载入中...';
+$lang[274]	=	'处理中，请稍候...';
+$lang[275]	=	'服务器空间';
+$lang[276]	=	'在使用';
+$lang[277]	=	'剩余空间';
+$lang[278]	=	'磁盘空间';
 $lang[279]	=	'CPU';
-$lang[280]	=	'Server Time';
-$lang[281]	=	'Local Time';
-$lang[282]	=	'Auto-Delete';
-$lang[283]	=	'Hours After Transload';
-$lang[284]	=	'Minutes After Transload';
-$lang[285]	=	'Action';
-$lang[286]	=	'Upload';
-$lang[287]	=	'FTP File';
-$lang[288]	=	'E-Mail';
-$lang[289]	=	'Mass E-mail';
-$lang[290]	=	'Split Files';
-$lang[291]	=	'Merge Files';
-$lang[292]	=	'MD5 Hash';
-$lang[293]	=	'Pack Files';
-$lang[294]	=	'ZIP Files';
-$lang[295]	=	'Unzip Files';
-$lang[296]	=	'Rename';
-$lang[297]	=	'Mass Rename';
-$lang[298]	=	'Delete';
-$lang[299]	=	'List Links';
-$lang[300]	=	'Retrieving download page';
-$lang[301]	=	'Enter';
-$lang[302]	=	'here';
-$lang[303]	=	'Download File';
-$lang[304]	=	'configs/files.lst is not writable, please make sure it is chmod to 777';
-$lang[305]	=	'&nbsp;is selected as your download path and it is not writable. Please chmod it to 777';
-$lang[306]	=	'Merging File';
-$lang[307]	=	'Waiting';
-$lang[308]	=	'Passed';
-$lang[309]	=	'Failed';
-$lang[310]	=	'You might see warnings without this turned on';
-$lang[311]	=	'You might not be able to turn on Server Info';
-$lang[312]	=	'Your server might not be able to support files more than 2 GB';
-$lang[313]	=	'Rapidleech Checker Script';
+$lang[280]	=	'服务器时间';
+$lang[281]	=	'本地时间';
+$lang[282]	=	'自动删除';
+$lang[283]	=	'小时后Transload';
+$lang[284]	=	'分钟后 Transload';
+$lang[285]	=	'动作';
+$lang[286]	=	'上传';
+$lang[287]	=	'FTP文件';
+$lang[288]	=	'电子邮件';
+$lang[289]	=	'大量电子邮件';
+$lang[290]	=	'分割文件';
+$lang[291]	=	'合并文件';
+$lang[292]	=	'MD5哈希';
+$lang[293]	=	'包文件';
+$lang[294]	=	'制作ZIP文件';
+$lang[295]	=	'解压Zip文件';
+$lang[296]	=	'重命名';
+$lang[297]	=	'批量重命名';
+$lang[298]	=	'删除';
+$lang[299]	=	'链接列表';
+$lang[300]	=	'检索下载页面';
+$lang[301]	=	'输入';
+$lang[302]	=	'这里';
+$lang[303]	=	'下载文件';
+$lang[304]	=	'configs/files.lst 无法写入，请确认chmod 权限到 777';
+$lang[305]	=	'&nbsp; 选的的下载路径无法写入。请CHMOD到777';
+$lang[306]	=	'合并文件';
+$lang[307]	=	'请稍候';
+$lang[308]	=	'通过';
+$lang[309]	=	'失败';
+$lang[310]	=	'没有开启这个你可能会收到警告';
+$lang[311]	=	'您可能无法查看服务器的信息';
+$lang[312]	=	'你的服务器可能不支持超过2G的文件';
+$lang[313]	=	'Rapidleech检查脚本';
 $lang[314]	=	'fsockopen';
 $lang[315]	=	'memory_limit';
 $lang[316]	=	'safe_mode';
 $lang[317]	=	'cURL';
 $lang[318]	=	'allow_url_fopen';
-$lang[319]	=	'PHP Version - ';
+$lang[319]	=	'PHP版本 -';
 $lang[320]	=	'allow_call_time_pass_reference';
 $lang[321]	=	'passthru';
-$lang[322]	=	'Disk Space Functions';
-$lang[323]	=	'Apache Version - ';
-$lang[324]	=	'Wrong proxy address entered';
-$lang[325]	=	'File successfully saved!';
-$lang[326]	=	'Save Notes';
+$lang[322]	=	'磁盘空间功能';
+$lang[323]	=	'Apache版本 -';
+$lang[324]	=	'输入代理地址错误';
+$lang[325]	=	'文件保存成功！';
+$lang[326]	=	'保存笔记';
 $lang[327]	=	'Notes';
-$lang[328]	=	'Actions Disabled';
-$lang[329]	=	'Main Window';
-$lang[330]	=	'Settings';
-$lang[331]	=	'Server Files';
-$lang[332]	=	'Link Checker';
-$lang[333]	=	'Plugins';
-$lang[334]	=	'Auto Transload';
-$lang[335]	=	'Auto Upload';
-$lang[336]	=	'File size is limited at ';
-$lang[337]	=	'File Size Limit: ';
-$lang[338]	=	'Rar Files';
-$lang[339]	=	'Unrar Files';
-$lang[340]	=	'Error detected';
-$lang[341]	=	'click here to expand';
-$lang[342]	=	'You can drag window from here';
-$lang[343]	=	'Can not find "rar"<br />You may need to download it and extract "rar" to "/rar/" directory';
-$lang[344]	=	'Files that will be archived:';
-$lang[345]	=	'Archive name:';
-$lang[346]	=	'Options:';
-$lang[347]	=	'Compresion level:';
-$lang[348]	=	'Store';
-$lang[349]	=	'Fastest';
-$lang[350]	=	'Fast';
-$lang[351]	=	'Normal';
-$lang[352]	=	'Good';
-$lang[353]	=	'Best';
-$lang[354]	=	'Create volumes';
-$lang[355]	=	'Delete files after archiving';
-$lang[356]	=	'Create solid archive';
-$lang[357]	=	'Create recovery record';
-$lang[358]	=	'Test archive after compression';
-$lang[359]	=	'Use password';
-$lang[360]	=	'Encrypt file names';
-$lang[361]	=	'Set path inside archive';
-$lang[362]	=	'Rar';
-$lang[363]	=	'Creating archive: <b>%1$s</b>';
-$lang[364]	=	'Waiting...';
-$lang[365]	=	'Go back to file list';
-$lang[366]	=	'<b>Files from %1$s</b>:';
-$lang[367]	=	'Can not find "unrar"';
-$lang[368]	=	'Pasword needed to list files:';
-$lang[369]	=	'Pasword needed to extract files:';
-$lang[370]	=	'Error:%1$s';
-$lang[371]	=	'Try to list again';
-$lang[372]	=	'Unrar selected';
-$lang[373]	=	'<b>Extracting files from %1$s</b>:';
-$lang[374]	=	'Status:';
-$lang[375]	=	'Select text';
-$lang[376]  =   'Premium Accounts :';
-$lang[377]	=	'38 [Video: MP4 4096×3072 | Audio: AAC 2ch 44.10kHz]';
-$lang[378]	=	'Close window';
-$lang[379]	=	'Files';
-$lang[380]	=	'MD5 change should only be applied to known working formats(i.e. .rar or .zip)<br />Do you want to continue?';
-$lang[381]	=	'MD5 of file <b>%1$s</b> changed';	// %1$s = filename
-$lang[382]	=	'Error changing the MD5 of the file <b>%1$s</b>!';	// %1$s = filename
-$lang[383]	=	'MD5 change';
-$lang[384]	=	'Match text';
-$lang[385]	=	'Match';
-$lang[386]	=	'Ignore case';
-$lang[387]	=	'Put each file on a separated archive';
+$lang[328]	=	'禁止动作';
+$lang[329]	=	'主窗口';
+$lang[330]	=	'设置';
+$lang[331]	=	'服务器文件';
+$lang[332]	=	'链接检查器';
+$lang[333]	=	'插件';
+$lang[334]	=	'自动Transload';
+$lang[335]	=	'自动上传';
+$lang[336]	=	'文件大小是有限制的在';
+$lang[337]	=	'文件大小限制：';
+$lang[338]	=	'制作RAR文件';
+$lang[339]	=	'解压RAR文件';
+$lang[340]	=	'检测到错误';
+$lang[341]	=	'点击这里展开';
+$lang[342]	=	'你可以从这里拖动窗口';
+$lang[343]	=	'无法找到"rar"<br /> 你需要下载“RAR”并解压它到"/rar/" 文件夹下';
+$lang[344]	=	'文件将会被存档：';
+$lang[345]	=	'存档名称:';
+$lang[346]	=	'选项：';
+$lang[347]	=	'压缩等级：';
+$lang[348]	=	'储存';
+$lang[349]	=	'最快';
+$lang[350]	=	'快速';
+$lang[351]	=	'标准';
+$lang[352]	=	'较好';
+$lang[353]	=	'最好';
+$lang[354]	=	'创建卷';
+$lang[355]	=	'存档后删除文件';
+$lang[356]	=	'创建固实存档';
+$lang[357]	=	'创建恢复记录';
+$lang[358]	=	'压缩完后测试存档';
+$lang[359]	=	'使用密码';
+$lang[360]	=	'加密文件名';
+$lang[361]	=	'设置存档内部路径';
+$lang[362]	=	'RAR';
+$lang[363]	=	'创建存档： <b>%1$s</b>';
+$lang[364]	=	'请稍候';
+$lang[365]	=	'返回到文件列表';
+$lang[366]	=	'<b>从文件 %1$s</b>：';
+$lang[367]	=	'无法找到 “unrar”';
+$lang[368]	=	'显示文件列表需要密码：';
+$lang[369]	=	'解压文件需要密码：';
+$lang[370]	=	'错误：%1$s';
+$lang[371]	=	'再次尝试显示列表';
+$lang[372]	=	'选择非rar';
+$lang[373]	=	'<b>解压缩文件 %1$s</b>：';
+$lang[374]	=	'状态：';
+$lang[375]	=	'选择文本';
+$lang[376]  =   '高级帐户：';
+$lang[377]	=	'38 [视频： MP4 4096×3072 | 音频： AAC 2ch 44.10kHz]';
+$lang[378]	=	'关闭窗口';
+$lang[379]	=	'文件';
+$lang[380]	=	'MD5 更改只能应用于已知可操作格式（如 .rar 或 .zip）上，<br />你要继续吗？';
+$lang[381]	=	'文件 <b>%1$s</b> 的MD5已更改 ';	// %1$s = filename
+$lang[382]	=	'更改文件 <b>%1$s</b> 的MD5出错！ ';	// %1$s = filename
+$lang[383]	=	'MD5更改';
+$lang[384]	=	'按文本匹配';
+$lang[385]	=	'匹配';
+$lang[386]	=	'忽略大小写';
+$lang[387]	=	'每个文件放在一个单独的存档中';
+$lang[388]	=	'Openssl';
 ?>

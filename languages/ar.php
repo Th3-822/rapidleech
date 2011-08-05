@@ -393,4 +393,5 @@ $lang[384]	=	'Match text';
 $lang[385]	=	'Match';
 $lang[386]	=	'Ignore case';
 $lang[387]	=	'Put each file on a separated archive';
+$lang[388]	=	'Openssl';
 ?>
