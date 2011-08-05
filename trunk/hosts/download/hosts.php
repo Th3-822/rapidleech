@@ -6,10 +6,8 @@ while (false !== ($entry = $d->read())) {
 		$hostname = str_replace('_','.',$hostname);
 		if ($hostname == 'easy.share.com') $hostname = 'easy-share.com';
 		if ($hostname == 'share.online.biz') $hostname = 'share-online.biz';
-		if ($hostname == 'generic.minifilehost') continue;
-		if ($hostname == 'youtube.com(1)') continue;
-		if ($hostname == 'vBulletin.plug') continue;
-		if ($hostname == 'hosts') continue;
+		if ($hostname == 'cash.file.net') $hostname = 'cash-file.net';
+		if ($hostname == 'generic.minifilehost' || $hostname == 'youtube.com(1)' || $hostname == 'vBulletin.plug' || $hostname == 'hosts') continue;
 		$host[$hostname] = $entry;
    }
 }
