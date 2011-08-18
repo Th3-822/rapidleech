@@ -308,11 +308,11 @@ function checkmail($mail) {
 /* Fixed Shell exploit by: icedog */
 function fixfilename($fname, $fpach = '') {
 	$f_name = basename ( $fname );
-	$f_dir = dirname ( eregi_replace ( "\.\./", "", $fname ) );
+	$f_dir = dirname ( preg_replace ( "@\.\./@i", "", $fname ) );
 	$f_dir = ($f_dir == '.') ? '' : $f_dir;
-	$f_dir = eregi_replace ( "\.\./", "", $f_dir );
-	$fpach = eregi_replace ( "\.\./", "", $fpach );
-	$f_name = eregi_replace ( "\.(php|hta|pl|cgi|sph)", ".xxx", $f_name );
+	$f_dir = preg_replace ( "@\.\./@i", "", $f_dir );
+	$fpach = preg_replace ( "@\.\./@i", "", $fpach );
+	$f_name = preg_replace ( "@\.(php|hta|pl|cgi|sph)@i", ".xxx", $f_name );
 	$ret = ($fpach) ? $fpach . DIRECTORY_SEPARATOR . $f_name : ($f_dir ? $f_dir . DIRECTORY_SEPARATOR : '') . $f_name;
 	return $ret;
 }

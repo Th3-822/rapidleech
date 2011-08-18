@@ -19,7 +19,7 @@ class filefat_com extends DownloadClass {
 
     private function Retrieve($link) {
         $page = $this->GetPage($link);
-        is_present($page, "File Not Found", "File Not Found");
+        is_present($page, "The file you were looking for could not be found", "File Not Found");
 
         $id = cut_str($page, 'name="id" value="','"');
         $FileName = cut_str($page, 'name="fname" value="','"');
@@ -88,11 +88,42 @@ class filefat_com extends DownloadClass {
     }
 
     private function Premium($link) {
-        html_error("Not supported now!");
+        global $premium_acc, $Referer;
+            $post = array();
+            $post['op'] = "login";
+            $post['redirect'] = urlencode('http://http://filefat.com/');
+            $post['login'] = $_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc ["filefat"] ["user"];
+            $post['password'] = $_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["filefat"] ["pass"];
+            $post['x'] = rand(0,88);
+            $post['y'] = rand(0,16);
+            $page = $this->GetPage('http://www.filefat.com/login.html', 0, $post, 'http://www.filefat.com/');
+            is_present($page, 'Incorrect', 'Incorrect Login or Password');
+            $cookie = GetCookies($page);
+
+            $page = $this->GetPage($link, $cookie);
+            is_present($page, 'The file you were looking for could not be found', 'File not found');
+
+            unset($post);
+            $post['op'] = "download2";
+            $post['id'] = cut_str($page, 'name="id" value="','"');
+            $post['rand'] = cut_str($page, 'name="rand" value="','"');
+            $post['referer'] = $link;
+            $post['method_free'] = "";
+            $post['method_premium'] = "1";
+            $post['down_direct'] = "1";
+            $page = $this->GetPage($link, $cookie, $post, $link);
+            if (!preg_match('/http:\/\/livia\.castlegem\.co\.uk\/files\/[0-9]\/[^\"]+/', $page, $dl)) {
+                html_error('Error: Download link not found!');
+            }
+            $Url = parse_url($dl[0]);
+            $FileName = basename($Url['path']);
+            $this->RedirectDownload($dl[0], $FileName, $cookie, 0, $link);
+            exit();
     }
 }
 
 /*
  * Filefat free download plugin by Ruud v.Tony 25-07-2011
+ * Updated to support premium 09-08-2011
  */
 ?>

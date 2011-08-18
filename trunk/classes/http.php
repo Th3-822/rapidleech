@@ -14,12 +14,12 @@ if (! defined ( 'RAPIDLEECH' )) {
  */
 function insert_timer($countd, $caption = "", $timeouttext = "", $hide = false) {
 	global $disable_timer;
-	
+
 	if ($disable_timer === true)
 		return true;
 	if (! $countd || ! is_numeric ( $countd ))
 		return false;
-	
+
 	$timerid = rand ( 1000, time () );
 	echo ('<div align="center">');
 	echo ('<span id="global' . $timerid . '">');
@@ -43,13 +43,13 @@ function insert_timer($countd, $caption = "", $timeouttext = "", $hide = false) 
 		sleep ( 1 );
 	}
 	flush ();
-	
+
 	if ($hide === true) {
 		echo ('<script type="text/javascript">$("#global' . $timerid . '").css("display","none");</script>');
 		flush ();
 		return true;
 	}
-	
+
 	if ($timeouttext) {
 		echo ('<script type="text/javascript">$("#global' . $timerid . '").html("' . $timeouttext . '");</script>');
 		flush ();
@@ -92,7 +92,7 @@ function is_page($lpage) {
 function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveToFile = 0, $proxy = 0, $pauth = 0, $auth = 0, $scheme = "http", $resume_from = 0, $XMLRequest=0) {
 	global $nn, $lastError, $PHP_SELF, $AUTH, $IS_FTP, $FtpBytesTotal, $FtpBytesReceived, $FtpTimeStart, $FtpChunkSize, $Resume, $bytesReceived, $fs, $force_name, $options;
 	$scheme .= "://";
-	
+
 	if (($post !== 0) && ($scheme == "http://" || $scheme == "https://")) {
 		$method = "POST";
 		$postdata = formpostdata ( $post );
@@ -103,38 +103,36 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		$postdata = "";
 		$content_tl = "";
 	}
-	
+
 	if ($cookie) {
 		if (is_array ( $cookie )) {
-			for($i = 0; $i < count ( $cookie ); $i ++) {
-				$cookies .= "Cookie: " . $cookie [$i] . $nn;
-			}
+			$cookies = "Cookie: " . CookiesToStr ( $cookie ) . $nn;
 		} else {
 			$cookies = "Cookie: " . $cookie . $nn;
 		}
 	}
 	$referer = $referer ? "Referer: " . $referer . $nn : "";
-	
+
 	if ($scheme == "https://") {
 		$scheme = "ssl://";
 		$port = 443;
 	}
-	
+
 	if ($proxy) {
 		list ( $proxyHost, $proxyPort ) = explode ( ":", $proxy );
 		$host = $host . ($port != 80 && $port != 443 ? ":" . $port : "");
 		$url = $scheme . $host . $url;
 	}
-	
+
 	if ($scheme != "ssl://") {
 		$scheme = "";
 	}
-	
+
 	$http_auth = ($auth) ? "Authorization: Basic " . $auth . $nn : "";
 	$proxyauth = ($pauth) ? "Proxy-Authorization: Basic " . $pauth . $nn : "";
 
 	$request = $method . " " . str_replace ( " ", "%20", $url ) . " HTTP/1.1" . $nn . "Host: " . $host . $nn . "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.14) Gecko/20080404 Firefox/2.0.0.14" . $nn . "Accept: */*" . $nn . "Accept-Language: en-us;q=0.7,en;q=0.3" . $nn . "Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7" . $nn . "Pragma: no-cache" . $nn . "Cache-Control: no-cache" . $nn . ($Resume ["use"] === TRUE ? "Range: bytes=" . $Resume ["from"] . "-" . $nn : "") . $http_auth . $proxyauth . $referer .($XMLRequest ? "X-Requested-With: XMLHttpRequest" . $nn : ""). $cookies . "Connection: Close" . $nn . $content_tl . $nn . $postdata;
-	
+
 	$errno = 0;
 	$errstr = "";
 	$hosts = ($proxyHost ? $scheme . $proxyHost : $scheme . $host) . ':' . ($proxyPort ? $proxyPort : $port);
@@ -147,12 +145,12 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		$dis_port = $proxyPort ? $proxyPort : $port;
 		html_error ( sprintf ( lang ( 88 ), $dis_host, $dis_port ) );
 	}
-	
+
 	if ($errno || $errstr) {
 		$lastError = $errstr;
 		return false;
 	}
-	
+
 	if ($saveToFile) {
 		if ($proxy) {
 			echo '<p>'.sprintf(lang(89),$proxyHost,$proxyPort).'<br />';
@@ -163,27 +161,27 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			echo "</p>";
 		}
 	}
-	
+
 	#########################################################################
 	fputs ( $fp, $request );
 	fflush ( $fp );
 	$timeStart = getmicrotime ();
-	
+
 	// Rewrote the get header function according to the proxy script
 	// Also made sure it goes faster and I think 8192 is the best value for retrieving headers
 	// Oops.. The previous function hooked up everything and now I'm returning it back to normal
 	do {
 		$header .= fgets ( $fp, 16384 );
 	} while ( strpos ( $header, $nn . $nn ) === false );
-	
+
 	#########################################################################
-	
+
 
 	if (! $header) {
 		$lastError = lang(91);
 		return false;
 	}
-	
+
 	$responsecode = "";
 	preg_match ( '/^HTTP\/1\.0|1 ([0-9]+) .*/', $header, $responsecode );
 	if (($responsecode [1] == 404 || $responsecode [1] == 403) && $saveToFile) {
@@ -198,13 +196,13 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		}
 		return false;
 	}
-	
-	
+
+
 
 	if ($saveToFile) {
 		//$bytesTotal = intval ( trim ( cut_str ( $header, "Content-Length:", "\n" ) ) );
 		$bytesTotal = trim ( cut_str ( $header, "Content-Length:", "\n" ) );
-		
+
 		global $options;
 		if ($options['file_size_limit'] > 0) {
 			if ($bytesTotal > $options['file_size_limit']*1024*1024) {
@@ -265,8 +263,8 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				if (strpos($FileName,"/") !== false) $FileName = basename($FileName);
 				$saveToFile = dirname ( $saveToFile ) . PATH_SPLITTER . $FileName;
 			}
-		}		
-		
+		}
+
 		if (! empty ( $options['rename_prefix'] )) {
 			$File_Name = $options['rename_prefix'] . '_' . basename ( $saveToFile );
 			$saveToFile = dirname ( $saveToFile ) . PATH_SPLITTER . $File_Name;
@@ -291,7 +289,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				$saveToFile = str_replace ( $filetype, $options['rename_these_filetypes_to'], $saveToFile );
 			}
 		}
-		
+
 		if (@file_exists ( $saveToFile ) && $options['bw_save']) {
 			html_error ( lang(99).': '.link_for_file($saveToFile), 0 );
 		}
@@ -314,9 +312,9 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 					return FALSE;
 				}
 			}
-		
+
 		}
-		
+
 		flock ( $fs, LOCK_EX );
 		if ($Resume ["use"] === TRUE && stristr ( $header, "Content-Range:" )) {
 			list ( $temp, $Resume ["range"] ) = explode ( " ", trim ( cut_str ( $header, "Content-Range:", "\n" ) ) );
@@ -327,7 +325,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		}
 		$chunkSize = GetChunkSize ( $bytesTotal );
 		echo(lang(104).' <b>'.basename($saveToFile).'</b>, '.lang(56).' <b>'.$fileSize.'</b>...<br />');
-		
+
 		//$scriptStarted = false;
 		require (TEMPLATE_DIR . '/transloadui.php');
 		if ($Resume ["use"] === TRUE) {
@@ -377,7 +375,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		}
 	}while( strlen($data)> 0 );
 	//echo('</script>');
-	
+
 	if ($saveToFile) {
 		flock ( $fs, LOCK_UN );
 		fclose ( $fs );
@@ -449,6 +447,16 @@ function formpostdata($post=array()) {
 	return $postdata;
 }
 
+function CookiesToStr($cookie=array()) {
+	$cookies = "";
+	foreach ($cookie as $k => $v) {
+		$cookies .= "$k=$v;";
+	}
+	// Remove the last ';'
+	$cookies = substr($cookies, 0, -1);
+	return $cookies;
+}
+
 function GetCookies($content) {
 	// The U option will make sure that it matches the first character
 	// So that it won't grab other information about cookie such as expire, domain and etc
@@ -456,6 +464,17 @@ function GetCookies($content) {
 	$cookie = $temp [1];
 	$cook = implode ( '; ', $cookie );
 	return $cook;
+}
+
+function GetCookiesArr($content, $del=true, $dval='deleted') {
+	preg_match_all ('/Set-Cookie: (.*)(;|\r\n)/U', $content, $temp);
+	$cookie = array();
+	foreach ($temp[1] as $v) {
+		$v = explode('=', $v, 2);
+		$cookie[$v[0]] = $v[1];
+		if ($del && $v[1] == $dval) unset($cookie[$v[0]]);
+	}
+	return $cookie;
 }
 
 function GetChunkSize($fsize) {
@@ -504,17 +523,17 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 	$scheme = "http://";
 	$bound = "--------" . md5(microtime());
 	$saveToFile = 0;
-	
+
 	foreach ( $post as $key => $value ) {
 		$postdata .= "--" . $bound . $nn;
 		$postdata .= 'Content-Disposition: form-data; name="'.$key.'"' . $nn . $nn;
 		$postdata .= $value . $nn;
 	}
-	
+
 	$fileSize = getSize ( $file );
-	
+
 	$fieldname = $fieldname ? $fieldname : file . md5 ( $filename );
-	
+
 	if (! is_readable ( $file )) {
 		$lastError = sprintf(lang(65),$file);
 		return FALSE;
@@ -524,24 +543,21 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		$postdata .= 'Content-Disposition: form-data; name="'.$field2name.'"; filename=""' . $nn;
 		$postdata .= "Content-Type: application/octet-stream" . $nn . $nn;
 	}
-	
+
 	$postdata .= "--" . $bound . $nn;
 	$postdata .= 'Content-Disposition: form-data; name="'.$fieldname.'"; filename="'.$filename.'"' . $nn;
 	$postdata .= "Content-Type: application/octet-stream" . $nn . $nn;
-	
-	$cookies = "";
-	
+
+
 	if ($cookie) {
 		if (is_array ( $cookie )) {
-			for($h = 0; $h < count ( $cookie ); $h ++) {
-				$cookies .= "Cookie: " . trim ( $cookie [$h] ) . $nn;
-			}
+			$cookies = "Cookie: " . CookiesToStr ( $cookie ) . $nn;
 		} else {
 			$cookies = "Cookie: " . trim ( $cookie ) . $nn;
 		}
 	}
 	$referer = $referer ? "Referer: " . $referer . $nn : "";
-	
+
 	if ($scheme == "https://") {
 		$scheme = "ssl://";
 		$port = 443;
@@ -572,7 +588,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		$dis_port = $proxyPort ? $proxyPort : $port;
 		html_error ( sprintf ( lang ( 88 ), $dis_host, $dis_port ) );
 	}
-	
+
 	if ($errno || $errstr) {
 		$lastError = $errstr;
 		return false;
@@ -586,23 +602,23 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 			printf(lang(90),$host,$port);
 			echo "</p>";
 		}
-	
+
 	echo(lang(104).' <b>'.$filename.'</b>, '.lang(56).' <b>'.bytesToKbOrMb ( $fileSize ).'</b>...<br />');
 	global $id;
 	$id = md5 ( time () * rand ( 0, 10 ) );
 	require (TEMPLATE_DIR . '/uploadui.php');
 	flush ();
-	
+
 	$timeStart = getmicrotime ();
-	
+
 	//$chunkSize = 16384;		// Use this value no matter what (using this actually just causes massive cpu usage for large files, too much data is flushed to the browser!)
 	$chunkSize = GetChunkSize ( $fileSize );
-	
+
 	fputs ( $fp, $zapros );
 	fflush ( $fp );
 
 	$fs = fopen ( $file, 'r' );
-	
+
 	$local_sleep = $sleep_count;
 	//echo('<script type="text/javascript">');
 	while ( ! feof ( $fs ) ) {
@@ -612,7 +628,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 			fclose ( $fp );
 			html_error ( lang(112) );
 		}
-		
+
 		if (($sleep_count !== false) && ($sleep_time !== false) && is_numeric ( $sleep_time ) && is_numeric ( $sleep_count ) && ($sleep_count > 0) && ($sleep_time > 0)) {
 			$local_sleep --;
 			if ($local_sleep == 0) {
@@ -620,18 +636,18 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 				$local_sleep = $sleep_count;
 			}
 		}
-		
+
 		$sendbyte = fputs ( $fp, $data );
 		fflush ( $fp );
-		
+
 		if ($sendbyte === false) {
 			fclose ( $fs );
 			fclose ( $fp );
 			html_error ( lang(113) );
 		}
-		
+
 		$totalsend += $sendbyte;
-		
+
 		$time = getmicrotime () - $timeStart;
 		$chunkTime = $time - $lastChunkTime;
 		$chunkTime = $chunkTime ? $chunkTime : 1;
@@ -643,10 +659,10 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 	}
 	//echo('</script>');
 	fclose ( $fs );
-	
+
 	fputs ( $fp, $nn . "--" . $bound . "--" . $nn );
 	fflush ( $fp );
-	
+
 	while ( ! feof ( $fp ) ) {
 		$data = fgets ( $fp, 16384 );
 		if ($data === false) {
@@ -654,9 +670,9 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		}
 		$page .= $data;
 	}
-	
+
 	fclose ( $fp );
-	
+
 	return $page;
 }
 ?>

@@ -57,6 +57,9 @@ class DownloadClass {
 		}
 		$Url = parse_url($link);
 		//if (substr($auth,0,6) != "&auth=") $auth = "&auth=" . $auth;
+		if (is_array($cookie)) {
+			$cookie = CookiesToStr($cookie);
+		}
 		if (!is_array($params)) {
 			// Some problems with the plugin, quit it
 			html_error('Plugin problem! Please report, error: "The parameter passed must be an array"');

@@ -337,9 +337,9 @@ else
 			$file = geturl ($_GET ["host"], $_GET ["port"], $_GET ["path"], $_GET ["referer"], $_GET ["cookie"], $_GET ["post"], $pathWithName, $_GET ["proxy"], $pauth, $auth, $ftp ["scheme"]);
 		}
 
-		if ($options['redir'] && $lastError && stristr ($lastError, "Error! it is redirected to ["))
+		if ($options['redir'] && $lastError && stristr ($lastError, substr(lang(95), 0, strpos(lang(95), '%1$s'))))
 		{
-			$redirectto = trim (cut_str ($lastError, "Error! it is redirected to [", "]"));
+			$redirectto = trim (cut_str ($lastError, substr(lang(95), 0, strpos(lang(95), '%1$s')), "]"));
 			print lang(8) . " <b>$redirectto</b> ... <br />$nn";
 			$_GET ["referer"] = $_GET ["link"];
 			$_GET ["link"] = $redirectto;

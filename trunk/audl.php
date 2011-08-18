@@ -217,6 +217,9 @@ function resetProgress()
     if (isset($_POST['cookieuse'])) {
       $start_link.='&cookie='.urlencode(($_POST['cookie']));
     }
+    if (isset($_POST['ytube_mp4'])) {
+      $start_link.='&ytube_mp4='.urlencode(($_POST['ytube_mp4'])).'&yt_fmt='.urlencode(($_POST['yt_fmt']));
+    }
 
 ?>
 <script type="text/javascript">
@@ -410,16 +413,17 @@ function resetProgress()
                               <td>
                                 <select name="yt_fmt" id="yt_fmt">
                                   <option value="highest" selected="selected"><?php echo lang(219); ?></option>
-                                  <option value="17"><?php echo lang(220); ?></option>
-                                  <option value="5"><?php echo lang(221); ?></option>
-                                  <option value="34"><?php echo lang(222); ?></option>
-                                  <option value="35"><?php echo lang(223); ?></option>
-                                  <option value="43"><?php echo lang(224); ?></option>
-                                  <option value="45"><?php echo lang(225); ?></option>
-                                  <option value="18"><?php echo lang(226); ?></option>
-                                  <option value="22"><?php echo lang(227); ?></option>
-                                  <option value="37"><?php echo lang(228); ?></option>
                                   <option value="38"><?php echo lang(377); ?></option>
+                                  <option value="37"><?php echo lang(228); ?></option>
+                                  <option value="22"><?php echo lang(227); ?></option>
+                                  <option value="45"><?php echo lang(225); ?></option>
+                                  <option value="35"><?php echo lang(223); ?></option>
+                                  <option value="44"><?php echo lang(389); ?></option>
+                                  <option value="34"><?php echo lang(222); ?></option>
+                                  <option value="43"><?php echo lang(224); ?></option>
+                                  <option value="18"><?php echo lang(226); ?></option>
+                                  <option value="5"><?php echo lang(221); ?></option>
+                                  <option value="17"><?php echo lang(220); ?></option>
                                 </select>
                               </td>
                             </tr>

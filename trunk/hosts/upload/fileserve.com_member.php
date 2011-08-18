@@ -1,136 +1,94 @@
-<table width=600 align=center>
-</td></tr>
-<tr><td align=center>
-<div id=info width=100% align=center>Retrive upload ID</div>
-<?php 
+<?php
+####### Account Info. ###########
+$fs_login = "";
+$fs_pass = "";
+##############################
 
-/************************************************************
-* Enter your default Login & Password below (if applicable) *
-*************************************************************/
-$fs_login = ""; // Username
-$fs_pass = ""; // Password
-
-$continue_up = false;
-
-if ($_REQUEST ['action'] == "FORM" or (strlen($fs_login) > 0 && strlen($fs_pass) > 0)) {
-	$continue_up = true;
-	if (strlen($fs_login) > 0 && strlen($fs_pass) > 0) {
-		$_REQUEST['my_login'] = $fs_login;
-		$_REQUEST['my_pass'] = $fs_pass;
-	}
-} else {
-	echo "<table border=1 style='width: 540px;' cellspacing=0 align=center>";
-	echo "	<form method=post><input type=hidden name=action value='FORM' />";
-	echo "	";
-	echo "	<tr >";
-	echo "	  <td colspan=4 align=center height=25px ><b>Enter Account</b> </td>";
-	echo "	</tr>";
-	echo "	<tr>";
-	echo "		<td nowrap>&nbsp;Login		";
-	echo "		<td>&nbsp;<input name=my_login value='' style='width: 160px;' />&nbsp;	";	
-	echo "		<td nowrap>&nbsp;Password		";
-	echo "		<td>&nbsp;<input type=password name=my_pass value='' style='width: 160px;' />&nbsp;	";
-	echo "	</tr>	";
-	echo "	<tr><td colspan=4 align=center><input type=submit value='Upload' /></tr>	";
-	echo "</table>";
-	echo "</form>";
-	die;
-
+$not_done=true;
+$continue_up=false;
+if ($fs_login & $fs_pass){
+	$_REQUEST['bin_login'] = $fs_login;
+	$_REQUEST['bin_pass'] = $fs_pass;
+	$_REQUEST['action'] = "FORM";
+	echo "\n";
+}
+if ($_REQUEST['action'] == "FORM")
+    $continue_up=true;
+else{
+?>
+<form method="post">
+<table border="1" style="width:270px;" cellspacing="0" align="center">
+<input type="hidden" name="action" value="FORM"><input type="hidden" value="uploaded value<?php $_REQUEST[uploaded] ?>">
+<input type="hidden" name="filename" value="<?php echo base64_encode($_REQUEST[filename]); ?>">
+<tr><td nowrap>&nbsp;Login<td>&nbsp;<input name="bin_login" value="" style="width:195px;">&nbsp;</tr>
+<tr><td nowrap>&nbsp;Password<td>&nbsp;<input name="bin_pass" value="" style="width:195px;">&nbsp;</tr>
+<tr><td colspan="2" align="center"><a href="http://fileserve.com/signup.php" target="_blank">Registration link</a></tr>
+<tr><td colspan="2" align="center"><input type="submit" value="Upload"></tr>
+</table>
+</form>
+<?php
 }
 
-if ($continue_up) {
-	
-	if (empty ( $_REQUEST ['my_login'] ) || empty ( $_REQUEST ['my_pass'] )) {
-		html_error("Empty login/pass.");		
-	}
-	
-	global $Referer;
-	$loginUrl = "http://www.fileserve.com/login.php";
-	$Referer = "http://www.fileserve.com/";	
-	
-	$post = array();
-	$post["autoLogin"] = true;
-	$post["loginUserName"] = $_REQUEST ['my_login'];
-	$post["loginUserPassword"] = $_REQUEST ['my_pass'];
-	$post["loginFormSubmit"] = true;
-	//$page = $this->GetPage( $loginUrl, 0, $post, $Referer1 , 0, $_GET["proxy"]);
-	
-	$page = geturl("www.fileserve.com", 80, "/login.php", $Referer, 0, $post, 0, "");
-	
-	
-	is_present($page, 'Username doesn\'t exist', 'Error - Username doesn\'t exist!');
-	is_present($page, 'Wrong password', 'Error - Wrong password');
-	
-	//if (!stristr ( $page, "<h3>Premium</h3>" )) {
-	//	html_error("Your account is not a premium account.");		
-	//}
-	$cookie = GetCookies( $page );
+if ($continue_up)
+	{
+		$not_done=false;
+?>
+<table width=600 align=center> 
+</td></tr> 
+<tr><td align=center> 
+<div id=login width=100% align=center></div> 
+<?php
+			$Url=parse_url('http://fileserve.com/login.php');
+			if ($_REQUEST['action'] == "FORM")
+			{
+				$post["loginUserName"]=$_REQUEST['bin_login'];
+				$post["loginUserPassword"]=$_REQUEST['bin_pass'];
+				$post["autoLogin"]="on";
+				$post["recaptcha_response_field"]="";
+				$post["recaptcha_challenge_field"]="";
+				$post["recaptcha_shortencode_field"]="on";
+				$post["loginFormSubmit"]="Login";
+			
+			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://fileserve.com/login.php", 0, $post, 0, $_GET["proxy"], $pauth);
+			if (!preg_match('#Set-Cookie: cookie=([0-9a-zA-Z%]+);#', $page))
+				html_error ('Not logged in. Check your login details!');
+			$cookies = GetCookies($page);
+			}	
+?>
+<script>document.getElementById('info').style.display='none';</script>
+<div id=info width=100% align=center>Retrive upload ID</div> 
+<?php
+			$Url=parse_url('http://fileserve.com/');
+			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://fileserve.com/", $cookies, 0, 0, $_GET["proxy"], $pauth);
+			
+			preg_match('#action="(http:\/\/upload\.fileserve\.com\/upload\/.+)"#',$page,$uploadForm);
+			$first = str_replace('-','',mt_rand(1111111111111, 9999999999999));
+			$second = str_replace('-','',mt_rand(1111111111111, 9999999999999));
+			$url = '?callback=jsonp'.$first.'&_='.$second;
+			$upload_url = $uploadForm[1] . $url;
 
-	
-	$page = geturl("www.fileserve.com", 80, "/", "", $cookie, 0, 0, "");
-
-	is_page($page);
-
-	preg_match('/id="uploadHostURL" value="(.+?)"/', $page, $result);
-	$uploadHostURL = $result[1];		
-	
-	
-	preg_match('/id="userId" value="(.+?)"/', $page, $result);
-	$userId = $result[1];		
-	//echo "userId: ".$userId."<BR>";
-	//$cookie = GetCookies( $page );
-	$page = geturl("www.fileserve.com", 80, "/upload-track.php", $Referer,$cookie, 0, 0, "");
-
-	
-	if (!stristr($page,"sessionId")){
-		html_error("Fail to upload!");
-	}
-	
-	preg_match('/sessionId":"(.+?)"/', $page, $result);
-	$sessionId = $result[1];
-	
-	print "<script>document.getElementById('info').style.display='none';</script>";
-
-	$action_url = "http://".$uploadHostURL."/upload/upload.php?X-Progress-ID=".$sessionId;
-	$path = "/upload/upload.php?X-Progress-ID=".$sessionId;
-	
-	$url = parse_url($action_url);
-	$post = array();
-	$post["affiliateId"] = "";	
-	$post["subAffiliateId"] = "";
-	$post["landingId"] = "";	
-	$post["userId"] = $userId;
-	$post["uploadSessionId"] = $sessionId;
-	$post["uploadHostURL"] = $uploadHostURL;
-	
-	preg_match('/fs(.+?)u/', $uploadHostURL, $serverId);
-	$post["serverId"] = $serverId[1];
-	
-	$upfiles=upfile($uploadHostURL,80,$path,$Referer, $cookie, $post, $lfile, $lname, "file");
-
-	
-	print "<div id=info width=100% align=center>Retrive file link</div>";
-	
-	$path = "/upload/progress.php?X-Progress-ID=".$sessionId."&callback=jsonp1275372927989&_=1275373001197";
-	
-	$page = geturl($uploadHostURL, 80, $path, $Referer,$cookie, 0, 0, "");	
-	
-	$post = array();
-
-	$post["uploadSessionId[]"] = $sessionId;	
-
-	$page = geturl("www.fileserve.com", 80, "/upload-result.php", $Referer,$cookie, $post, 0, "");	
-	
-	if (!stristr($page,"www.fileserve.com/file/")){
-		html_error("Fail to upload!");
-	}
-	$key = cut_str($page, "www.fileserve.com/file/", "\n");
-		
-	
-	$download_link = "http://www.fileserve.com/file/".$key;
-	
-}	
-	
-// written by charles 31/05/10
-// added option to enter a default account (by Jueki @ 03/07/10)
+			$Url=parse_url($upload_url);
+			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://fileserve.com/", $cookies, 0, 0, $_GET["proxy"], $pauth);
+			preg_match("#sessionId:'(.+)'}#",$page,$sessionId);
+			$url = $uploadForm[1] . $sessionId[1] . '/';
+			
+			$url=parse_url($url);
+			$upfiles = upfile($url["host"], $url["port"] ? $url["port"] : 80, $url["path"] . ($url["query"] ? "?" . $url["query"] : ""), 0, $cookies, 0, $lfile, $lname, "file");
+?>
+<script>document.getElementById('progressblock').style.display='none';</script>
+<?php
+			preg_match('#shortenCode":"(.+)"}#',$upfiles,$ddl);
+			preg_match('#deleteCode":"(.+)","sessionId#',$upfiles,$del);
+			if (!empty($ddl[1]))
+			$download_link = 'http://www.fileserve.com/file/' . $ddl[1] . '/' . $lname;
+			else
+			html_error ('Didn\'t find downloadlink!');
+			if (!empty($del[1]))
+			$delete_link= 'http://www.fileserve.com/file/' . $ddl[1] . '/delete/' . $del[1];
+			else
+			html_error ('Didn\'t find deletelink!');
+}
+/**
+written by defport 11/08/2011
+**/   
 ?>
