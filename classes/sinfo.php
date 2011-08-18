@@ -42,7 +42,7 @@ function checkos() {
 function winosname() {
 	$wUnameB = php_uname ( "v" );
 	$wUnameBM = php_uname ( "r" );
-	$wUnameB = eregi_replace ( "build ", "", $wUnameB );
+	$wUnameB = preg_replace ( "@build @i", "", $wUnameB );
 	if ($wUnameBM == "5.0" && ($wUnameB == "2195")) {
 		$wVer = "Windows 2000";
 	}

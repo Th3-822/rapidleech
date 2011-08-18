@@ -9,13 +9,27 @@ class oron_com extends DownloadClass {
 
     public function Download($link) {
         global $premium_acc;
+        if ($_POST['step']=="Captcha"){
+            $this->DownloadPremium($link, 1);
+        }else $cap=0;
         if (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc ["oron_com"] ["user"] && $premium_acc ["oron_com"] ["pass"])) {
-            $this->DownloadPremium($link);
+            $this->DownloadPremium($link,$cap);
         } elseif ($_POST['step'] == "1") {
             $this->DownloadFree($link);
         } else {
             $this->Retrieve($link);
         }
+    }
+
+    private function ContinueDownload($link) {
+        $post = array();
+        $post['login'] = $_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc ["oron_com"] ["user"];
+        $post['password'] = $_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["oron_com"] ["pass"];
+        $post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
+        $post['recaptcha_response_field'] = $_POST['captcha'];
+        $post['op'] = "login";
+        $post['redirect'] = $link;
+        $post['rand'] = $_POST['rand'];
     }
 
     private function DownloadFree($link) {
@@ -74,7 +88,8 @@ class oron_com extends DownloadClass {
         $rand = cut_str($page, 'name="rand" value="', '"');
         $referer = cut_str($page, 'referer" value="', '"');
         $down_direct = cut_str($page, 'own_direct" value="', '"');
-        $page = $this->GetPage("http://www.google.com/recaptcha/api/challenge?k=6LdzWwYAAAAAAAzlssDhsnar3eAdtMBuV21rqH2N");
+        $page = $this->GetPage("http://www.google.com/recaptcha/api/challenge?k=6LdSvrkSAAAAAOIwNj-IY-Q-p90hQrLinRIpZBPi");
+
         is_present($page, "Expired session", "Expired session . Go to main page and reattempt", 0);
         $cookie = GetCookies($page);
         $ch = cut_str($page, "challenge : '", "'");
@@ -92,8 +107,8 @@ class oron_com extends DownloadClass {
         exit();
     }
 
-    private function DownloadPremium($link) {
-        global $premium_acc;
+    private function DownloadPremium($link,$cap) {
+        global $premium_acc,$options;
         $Referer = "http://oron.com/";
         $post = array();
         $post['login'] = $_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc ["oron_com"] ["user"];
@@ -101,10 +116,31 @@ class oron_com extends DownloadClass {
         $post['op'] = "login";
         $post['redirect'] = $link;
         $post['rand']="";
+        if ($cap==1){
+            $post['rand']=$_POST['rand'];
+            $post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
+            $post['recaptcha_response_field'] = $_POST['captcha'];
+        }
         $page = $this->GetPage("http://oron.com/login", 0, $post, "http://oron.com/login.html");
+        if (strpos($page, "6LdzWwYAAAAAAAzlssDhsnar3eAdtMBuV21rqH2N") && ($cap==0)) {//recaptcha
+            $page = $this->GetPage("http://www.google.com/recaptcha/api/challenge?k=6LdzWwYAAAAAAAzlssDhsnar3eAdtMBuV21rqH2N");
+            $cookie = GetCookies($page);
+            $ch = cut_str($page, "challenge : '", "'");
+            $img = "http://www.google.com/recaptcha/api/image?c=" . $ch;
+            $page = $this->GetPage($img);
+            $headerend = strpos($page, "\r\n\r\n");
+            $pass_img = substr($page, $headerend + 4);
+            write_file($options['download_dir'] . "oron_captcha.jpg", $pass_img);
+            $data = $this->DefaultParamArr($link);
+            $data['step'] = "Captcha";
+            $data['rand'] = cut_str($page, 'name="rand" value="', '"');
+            $data['recaptcha_challenge_field'] = $ch;
+            $this->EnterCaptcha($options['download_dir'] . "oron_captcha.jpg", $data, 7);
+            exit;
+        }
         is_present($page,"403 Forbidden","Oron banned this server");
+        is_present($page, "Incorrect Login or Password", "Incorrect Login or Password");
         $cookie = GetCookies($page);
-        is_notpresent($cookie, "login", "Login Failed , Bad username/password combination");
         
         $page = $this->GetPage($link, $cookie, 0, $Referer);
         is_present($page, "File could not be found due to its possible expiration or removal by the file owner.", "File could not be found due to its possible expiration or removal by the file owner.");
