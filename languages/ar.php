@@ -393,6 +393,6 @@ $lang[384] = 'Match text';
 $lang[385] = 'Match';
 $lang[386] = 'Ignore case';
 $lang[387] = 'Put each file on a separated archive';
-$lang[388] = 'Openssl';
-$lang[389] = '44 [ÙÙŠØ¯ÙŠÙˆ: WebM 854x480 | ØµÙˆØª: Vorbis 2ch 44.10kHz]';
+$lang[388] = 'OpenSSL';
+$lang[389] = '44 [فيديو: WebM 854x480 | صوت: Vorbis 2ch 44.10kHz]';
 ?>

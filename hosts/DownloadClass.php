@@ -220,8 +220,8 @@ class DownloadClass {
 Added support of force_name in RedirectDownload function by Raj Malhotra on 02 May 2010
 Fixed  EnterCaptcha function ( Re-Write )  by Raj Malhotra on 16 May 2010
 Added auto-encryption system (szal) 14 June 2010
-Added GetPage support function for https connection by Th3-882 21 April 2011
+Added GetPage support function for https connection by Th3-822 21 April 2011
 Added GetPage support function for xml request by vdhdevil 9 July 2011
-Tweaked DefaultParamArr code by Th3-882 22 July 2011
+Tweaked DefaultParamArr code by Th3-822 22 July 2011
 **********************************************************/
 ?>
