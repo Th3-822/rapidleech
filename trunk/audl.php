@@ -406,9 +406,6 @@ function resetProgress()
                           <label><input type="checkbox" name="ytube_mp4" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;"<?php echo isset($_POST['yt_fmt']) ? ' checked="checked"' : ''; ?> />&nbsp;<?php echo lang(206); ?></label>
                           <table width="150" border="0" id="ytubeopt" style="display: none;">
                             <tr>
-                              <td colspan="2" style="white-space: nowrap;"><input type="checkbox" name="ytdirect" /><small> <?php echo lang(217); ?></small></td>
-                            </tr>
-                            <tr>
                               <td><small><?php echo lang(218); ?></small></td>
                               <td>
                                 <select name="yt_fmt" id="yt_fmt">

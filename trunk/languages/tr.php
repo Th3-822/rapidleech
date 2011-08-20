@@ -394,6 +394,6 @@ $lang[384] = 'Metni Eşleştir';
 $lang[385] = 'Eşleştir';
 $lang[386] = 'Durumu Gözardı Et';
 $lang[387] = 'Her Dosyayı Ayrı Bir Arşive koy';
-$lang[388] = 'Openssl';
+$lang[388] = 'OpenSSL';
 $lang[389] = '44 [Video: WebM 854x480 | Audio: Vorbis 2ch 44.10kHz]';
 ?>
