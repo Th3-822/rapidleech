@@ -1,4 +1,5 @@
 <?php
+
 if (!defined('RAPIDLEECH')) {
     require('../deny.php');
     exit;
@@ -7,105 +8,105 @@ if (!defined('RAPIDLEECH')) {
 // The Turkish language file
 // You should always use this file as a template for translating
 
-$lang[1]   = 'Erişim Engellendi.';
-$lang[2]   = 'Sunucu isteğinizi geri çevirdi';
-$lang[3]   = 'Gerçerli bir e-mail adresi belirtmediniz.';
-$lang[4]   = 'Parçaların boyutları numerik değil';
-$lang[5]   = 'Bilinmeyen URL biçimi, <span class="font-black">Sadece <span class="font-blue">http</span> ya da <span class="font-blue">https</span> or <span class="font-blue">ftp</span> Protokolü kullanınız.</span>';
-$lang[6]   = 'Dosyanın kaydedilecek yolu belirtilmemiş';
-$lang[7]   = 'şu adresten indirmek için yeterli izniniz bulunmuyor: <span class="font-black">%1$s (%2$s)</span>'; // %1$s = host name %2$s = host ip
-$lang[8]   = 'Adrese Yönlendiriliyor:';
-$lang[9]   = 'Dosya listesi güncellenemedi.';
-$lang[10]  = 'Dosya(lar) <b>%1$s</b> (<b>%2$s</b>) Kaydedildi!<br />Süre: <b>%3$s</b><br />Ortalama Hız: <b>%4$s KB/s</b><br />'; // %1$s = filename %2$s = filesize %3$s = time of download %4$s = speed
-$lang[11]  = '<script>mail("Dosya E-Mail Adresine Gönerildi.<b>%1$s</b>.", "%2$s");</script>'; // %1$s = E-mail address %2$s = filename
-$lang[12]  = 'Dosya Gönerimi Başarısız!';
-$lang[13]  = 'Başa Dön';
-$lang[14]  = 'Bağlantı Kaybedildi, Dosya yitirildi.';
-$lang[15]  = 'Tekrar Yükle';
-$lang[16]  = 'Debug Modunu şununla değiştiriniz: <b>1</b>';
-$lang[17]  = 'Azami dosya (%1$s) sayısına erişildi.'; // %1$s = Number of maximum links
-$lang[18]  = '%1$s Bağlantı%2$lar %3$ sürede kontrol edildi. (Yöntem: <b>%4$s</b>)'; // %1$s = Number of links %2$s = Plural form %3$s = seconds %4$s = method for checking links
-$lang[19]  = 'lar'; // End of a plural
-$lang[20]  = 'Hatalı vekil sunucu adresi';
-$lang[21]  = 'Bağlantı';
-$lang[22]  = 'Durum';
-$lang[23]  = 'Bekleme';
-$lang[24]  = 'Gerçersiz Bağlantı';
-$lang[25]  = 'Hazırlanıyor';
-$lang[26]  = 'Başladı';
-$lang[27]  = 'Bağlantı Yitirildi';
-$lang[28]  = 'Tamamlandı';
-$lang[29]  = 'Otomatik Indirmeyi Başlat';
-$lang[30]  = 'Tarayıcınız Çerçeve (Frame) desteklemiyor. Tarayıcınızı değiştiriniz.';
-$lang[31]  = 'Bağlantı Ekle';
-$lang[32]  = 'Bağlantılar';
-$lang[33]  = 'Seçenekler';
-$lang[34]  = 'Dosyaları Indir';
-$lang[35]  = 'Ğroxy Sunucu Ayarı Kullan';
-$lang[36]  = 'Proxy';
-$lang[37]  = 'Kullanıcı Adı';
-$lang[38]  = 'Şifre';
-$lang[39]  = 'Imageshack Hesabını Kullan';
-$lang[40]  = 'Kaydedilecek Yer';
-$lang[41]  = 'Dosya Yolu';
-$lang[42]  = 'Premium Hesap Kullan';
-$lang[43]  = 'Server Tarafından Yürüt';
-$lang[44]  = 'Gecikme Süresi';
-$lang[45]  = 'Gecikme (saniye bazında)';
-$lang[46]  = 'Yüklemek için herhangi bir dosya seçilmedi';
-$lang[47]  = 'Host Seçimini Yapınız';
-$lang[48]  = 'Desteklenen Yükleme Servisi Bulunmuyor!';
-$lang[49]  = 'Yükleme Penceresi';
-$lang[50]  = 'Link Kaydetme Formatı';
-$lang[51]  = 'Default';
-$lang[52]  = 'Hepsini Seç';
-$lang[53]  = 'Seçimi Kaldır';
-$lang[54]  = 'Seçimi Tersine Döndür';
-$lang[55]  = 'İsim';
-$lang[56]  = 'Boyut';
-$lang[57]  = 'Dosya Bulunamadı';
-$lang[58]  = 'Legend for link saving format: (case sensitive)';
-$lang[59]  = 'Indirme Bağlantısı';
-$lang[60]  = 'Dosya Adı';
-$lang[61]  = 'Varsayılan Bağlantı Biçimi';
-$lang[62]  = 'Anything besides the ones stated above will be treated as string, you are unable to do multi line format now, a new line will be inserted for each link.';
-$lang[63]  = '%1$s Dosyası %2$s adresine yükleniyor...'; // %1$s = filename %2$s = file host name
-$lang[64]  = '%1$s Dosyası mevcut değil'; // %1$s = filename
-$lang[65]  = '%1$s Dosyası yazılım tarafından algılanamadı (tanınamadı).'; // %1$s = filename
-$lang[66]  = 'Dosya boyutu izin verilen boyutları aşıyor.';
-$lang[67]  = 'Upload izni yok';
-$lang[68]  = 'Indirme Bağlantısı';
-$lang[69]  = 'Silme Bağlantısı';
-$lang[70]  = 'Istatistik Bağlantısı';
-$lang[71]  = 'Yönetici Bağlantısı';
-$lang[72]  = 'Kullanıcı Adı';
-$lang[73]  = 'FTP ile yükleme';
-$lang[74]  = 'Şifre';
-$lang[75]  = 'Rapidleech PlugMod - Upload Linkler';
-$lang[76]  = '<div class="linktitle">%1$s<strong> için upload linkleri </strong> - <span class="bluefont">Boyut: <strong>%2$s</strong></span></div>'; // %1$s = file name %2$s = file size
-$lang[77]  = 'Tamamlandı';
-$lang[78]  = 'Geri Dön';
-$lang[79]  = '%1$s Sunucusu ile bağlantı kurulamadı.'; // %1$s = FTP server name
-$lang[80]  = 'Hatalı şifre ya da kullanıcı adı.';
-$lang[81]  = 'Bağlanılan Sunucu: <b>%1$s</b>...'; // %1$s = FTP server name
-$lang[82]  = '%1$s dosya türünün indirilmesi yasaklanmıış.'; // %1$s = File type
-$lang[83]  = 'Dosya <b>%1$s</b>, Boyut <b>%2$s</b>...'; // %1$s = file name %2$s = file size
-$lang[84]  = 'Işlem Hatası...';
-$lang[85]  = 'Text passed as counter is string!';
-$lang[86]  = 'Hata: Lütfen JavaScript Etkinleştiriniz.';
-$lang[87]  = 'Lütfen <b>%1$s</b> saniye bekleyiniz...'; // %1$s = number of seconds
-$lang[88]  = '%1$s sunucusuna %2$s portu üzerinden bağlanılamadı.'; // %1$s = host name %2$s = port
-$lang[89]  = 'Veekil sunucusuna bağlanıldı: <b>%1$s</b> port numarası <b>%2$s</b>...'; // %1$s = Proxy host %2$s = Proxy port
-$lang[90]  = '<b>%1$s</b> Sunusuna portu üzerinden bağlanıldı. <b>%2$s</b>...'; // %1$s = host %2$s = port
-$lang[91]  = 'Bağlığa ulaşılamadı';
-$lang[92]  = 'Bu sayfaya erişiminiz durduruldu!';
-$lang[93]  = 'Sayfa bulunamadı!';
-$lang[94]  = 'bu sayfa ya yasaklı ya da bulunamadı!';
-$lang[95]  = 'Hata! [%1$s] adresine yönlendirildi'; // %1$s = redirected address
-$lang[96]  = 'Bu site kullanıcı doğrulaması istemektedir. Kullanıcı adı ve şifreyi şu formatta kullanarak erişimde bulunabilirsiniz:<br />http://<b>login:password@</b>www.sitenizin adresi.com/dosyaadi.exe';
-$lang[97]  = 'Azami boyuta erişildi (indirme limiti)';
-$lang[98]  = 'Bu sunucu sürdürme özelliğini desteklemiyor';
-$lang[99]  = 'Indirme';
+$lang[1] = 'Erişim Engellendi.';
+$lang[2] = 'Sunucu isteğinizi geri çevirdi';
+$lang[3] = 'Gerçerli bir e-mail adresi belirtmediniz.';
+$lang[4] = 'Parçaların boyutları numerik değil';
+$lang[5] = 'Bilinmeyen URL biçimi, <span class="font-black">Sadece <span class="font-blue">http</span> ya da <span class="font-blue">https</span> or <span class="font-blue">ftp</span> Protokolü kullanınız.</span>';
+$lang[6] = 'Dosyanın kaydedilecek yolu belirtilmemiş';
+$lang[7] = 'şu adresten indirmek için yeterli izniniz bulunmuyor: <span class="font-black">%1$s (%2$s)</span>'; // %1$s = host name %2$s = host ip
+$lang[8] = 'Adrese Yönlendiriliyor:';
+$lang[9] = 'Dosya listesi güncellenemedi.';
+$lang[10] = 'Dosya(lar) <b>%1$s</b> (<b>%2$s</b>) Kaydedildi!<br />Süre: <b>%3$s</b><br />Ortalama Hız: <b>%4$s KB/s</b><br />'; // %1$s = filename %2$s = filesize %3$s = time of download %4$s = speed
+$lang[11] = '<script>mail("Dosya E-Mail Adresine Gönerildi.<b>%1$s</b>.", "%2$s");</script>'; // %1$s = E-mail address %2$s = filename
+$lang[12] = 'Dosya Gönerimi Başarısız!';
+$lang[13] = 'Başa Dön';
+$lang[14] = 'Bağlantı Kaybedildi, Dosya yitirildi.';
+$lang[15] = 'Tekrar Yükle';
+$lang[16] = 'Debug Modunu şununla değiştiriniz: <b>1</b>';
+$lang[17] = 'Azami dosya (%1$s) sayısına erişildi.'; // %1$s = Number of maximum links
+$lang[18] = '%1$s Bağlantı%2$lar %3$ sürede kontrol edildi. (Yöntem: <b>%4$s</b>)'; // %1$s = Number of links %2$s = Plural form %3$s = seconds %4$s = method for checking links
+$lang[19] = 'lar'; // End of a plural
+$lang[20] = 'Hatalı vekil sunucu adresi';
+$lang[21] = 'Bağlantı';
+$lang[22] = 'Durum';
+$lang[23] = 'Bekleme';
+$lang[24] = 'Gerçersiz Bağlantı';
+$lang[25] = 'Hazırlanıyor';
+$lang[26] = 'Başladı';
+$lang[27] = 'Bağlantı Yitirildi';
+$lang[28] = 'Tamamlandı';
+$lang[29] = 'Otomatik Indirmeyi Başlat';
+$lang[30] = 'Tarayıcınız Çerçeve (Frame) desteklemiyor. Tarayıcınızı değiştiriniz.';
+$lang[31] = 'Bağlantı Ekle';
+$lang[32] = 'Bağlantılar';
+$lang[33] = 'Seçenekler';
+$lang[34] = 'Dosyaları Indir';
+$lang[35] = 'Ğroxy Sunucu Ayarı Kullan';
+$lang[36] = 'Proxy';
+$lang[37] = 'Kullanıcı Adı';
+$lang[38] = 'Şifre';
+$lang[39] = 'Imageshack Hesabını Kullan';
+$lang[40] = 'Kaydedilecek Yer';
+$lang[41] = 'Dosya Yolu';
+$lang[42] = 'Premium Hesap Kullan';
+$lang[43] = 'Server Tarafından Yürüt';
+$lang[44] = 'Gecikme Süresi';
+$lang[45] = 'Gecikme (saniye bazında)';
+$lang[46] = 'Yüklemek için herhangi bir dosya seçilmedi';
+$lang[47] = 'Host Seçimini Yapınız';
+$lang[48] = 'Desteklenen Yükleme Servisi Bulunmuyor!';
+$lang[49] = 'Yükleme Penceresi';
+$lang[50] = 'Link Kaydetme Formatı';
+$lang[51] = 'Default';
+$lang[52] = 'Hepsini Seç';
+$lang[53] = 'Seçimi Kaldır';
+$lang[54] = 'Seçimi Tersine Döndür';
+$lang[55] = 'İsim';
+$lang[56] = 'Boyut';
+$lang[57] = 'Dosya Bulunamadı';
+$lang[58] = 'Legend for link saving format: (case sensitive)';
+$lang[59] = 'Indirme Bağlantısı';
+$lang[60] = 'Dosya Adı';
+$lang[61] = 'Varsayılan Bağlantı Biçimi';
+$lang[62] = 'Anything besides the ones stated above will be treated as string, you are unable to do multi line format now, a new line will be inserted for each link.';
+$lang[63] = '%1$s Dosyası %2$s adresine yükleniyor...'; // %1$s = filename %2$s = file host name
+$lang[64] = '%1$s Dosyası mevcut değil'; // %1$s = filename
+$lang[65] = '%1$s Dosyası yazılım tarafından algılanamadı (tanınamadı).'; // %1$s = filename
+$lang[66] = 'Dosya boyutu izin verilen boyutları aşıyor.';
+$lang[67] = 'Upload izni yok';
+$lang[68] = 'Indirme Bağlantısı';
+$lang[69] = 'Silme Bağlantısı';
+$lang[70] = 'Istatistik Bağlantısı';
+$lang[71] = 'Yönetici Bağlantısı';
+$lang[72] = 'Kullanıcı Adı';
+$lang[73] = 'FTP ile yükleme';
+$lang[74] = 'Şifre';
+$lang[75] = 'Rapidleech PlugMod - Upload Linkler';
+$lang[76] = '<div class="linktitle">%1$s<strong> için upload linkleri </strong> - <span class="bluefont">Boyut: <strong>%2$s</strong></span></div>'; // %1$s = file name %2$s = file size
+$lang[77] = 'Tamamlandı';
+$lang[78] = 'Geri Dön';
+$lang[79] = '%1$s Sunucusu ile bağlantı kurulamadı.'; // %1$s = FTP server name
+$lang[80] = 'Hatalı şifre ya da kullanıcı adı.';
+$lang[81] = 'Bağlanılan Sunucu: <b>%1$s</b>...'; // %1$s = FTP server name
+$lang[82] = '%1$s dosya türünün indirilmesi yasaklanmıış.'; // %1$s = File type
+$lang[83] = 'Dosya <b>%1$s</b>, Boyut <b>%2$s</b>...'; // %1$s = file name %2$s = file size
+$lang[84] = 'Işlem Hatası...';
+$lang[85] = 'Text passed as counter is string!';
+$lang[86] = 'Hata: Lütfen JavaScript Etkinleştiriniz.';
+$lang[87] = 'Lütfen <b>%1$s</b> saniye bekleyiniz...'; // %1$s = number of seconds
+$lang[88] = '%1$s sunucusuna %2$s portu üzerinden bağlanılamadı.'; // %1$s = host name %2$s = port
+$lang[89] = 'Veekil sunucusuna bağlanıldı: <b>%1$s</b> port numarası <b>%2$s</b>...'; // %1$s = Proxy host %2$s = Proxy port
+$lang[90] = '<b>%1$s</b> Sunusuna portu üzerinden bağlanıldı. <b>%2$s</b>...'; // %1$s = host %2$s = port
+$lang[91] = 'Bağlığa ulaşılamadı';
+$lang[92] = 'Bu sayfaya erişiminiz durduruldu!';
+$lang[93] = 'Sayfa bulunamadı!';
+$lang[94] = 'bu sayfa ya yasaklı ya da bulunamadı!';
+$lang[95] = 'Hata! [%1$s] adresine yönlendirildi'; // %1$s = redirected address
+$lang[96] = 'Bu site kullanıcı doğrulaması istemektedir. Kullanıcı adı ve şifreyi şu formatta kullanarak erişimde bulunabilirsiniz:<br />http://<b>login:password@</b>www.sitenizin adresi.com/dosyaadi.exe';
+$lang[97] = 'Azami boyuta erişildi (indirme limiti)';
+$lang[98] = 'Bu sunucu sürdürme özelliğini desteklemiyor';
+$lang[99] = 'Indirme';
 $lang[100] = 'Bu premium hesabı başka bir IP üzerinden halihazırda kullanılıyor.';
 $lang[101] = '%1$s Dosyası %2$s dizinine kaydedilemiyor.'; // %1$s = file name %2$s = directory name
 $lang[102] = 'Klasörün yazma izinlerini 777 olarak ayarlayınız.';

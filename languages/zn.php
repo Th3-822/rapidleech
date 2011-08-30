@@ -1,4 +1,5 @@
 <?php
+
 if (!defined('RAPIDLEECH')) {
     require('../deny.php');
     exit;
@@ -6,105 +7,105 @@ if (!defined('RAPIDLEECH')) {
 // The Simplified Chinese language file
 // These words has been html entitied to prevent wrong encodings
 
-$lang[1]   = '拒绝访问';
-$lang[2]   = '服务器拒绝执行您的请求';
-$lang[3]   = '您没有输入一个有效的e-mail地址';
-$lang[4]   = '分段大小不是数字';
-$lang[5]   = '未知URL类型，<span class="font-black">只使用<span class="font-blue">http</span> 或 <span class="font-blue">https</span> 或 <span class="font-blue">ftp</span> 协议</span>';
-$lang[6]   = '未指定保存此文件路径';
-$lang[7]   = '你不被允许从<span class="font-black">%1$s (%2$s)</span> 上下载内容 '; // %1$s = host name %2$s = host ip
-$lang[8]   = '重定向到';
-$lang[9]   = '无法更新的文件列表';
-$lang[10]  = '文件<b>%1$s</b> (<b>%2$s</b>) 以保存！<br />用时： <b>%3$s</b><br />平均速度： <b>%4$s KB/s</b><br /> '; // %1$s = filename %2$s = filesize %3$s = time of download %4$s = speed
-$lang[11]  = '<script>mail("文件将被发送到地址<b>%1$s</b>。", "%2$s");</script> '; // %1$s = E-mail address %2$s = filename
-$lang[12]  = '发送文件时出错！';
-$lang[13]  = '回到主页';
-$lang[14]  = '连接丢失，文件已删除。';
-$lang[15]  = '重新加载';
-$lang[16]  = '请更改调试模式到 <b>1</b>';
-$lang[17]  = '已达到最大连接数（%1$s）。 '; // %1$s = Number of maximum links
-$lang[18]  = '%1$s 链接%2$s 被检测到，用时 %3$s 秒。（方法：<b>%4$s</b>） '; // %1$s = Number of links %2$s = Plural form %3$s = seconds %4$s = method for checking links
-$lang[19]  = ''; // End of a plural
-$lang[20]  = '错误的代理服务器地址';
-$lang[21]  = '链接';
-$lang[22]  = '状态';
-$lang[23]  = '请稍候';
-$lang[24]  = '错误的URL地址';
-$lang[25]  = '准备';
-$lang[26]  = '已启动';
-$lang[27]  = '连接丢失';
-$lang[28]  = '已完成';
-$lang[29]  = '启动自动Transload';
-$lang[30]  = '不支持框架，请更新你的浏览器';
-$lang[31]  = '添加链接';
-$lang[32]  = '链接';
-$lang[33]  = '选项';
-$lang[34]  = 'Transload文件';
-$lang[35]  = '使用代理设置';
-$lang[36]  = '代理';
-$lang[37]  = '用戶名';
-$lang[38]  = '密码';
-$lang[39]  = '使用Imageshack帐户';
-$lang[40]  = '保存到';
-$lang[41]  = '路径';
-$lang[42]  = '使用高级帐户';
-$lang[43]  = '在服务器端运行';
-$lang[44]  = '延迟时间';
-$lang[45]  = '延迟（秒）';
-$lang[46]  = '没有选择上传的文件或主机';
-$lang[47]  = '选择要上传的主机';
-$lang[48]  = '不被支持的上传服务！';
-$lang[49]  = '上传窗口';
-$lang[50]  = '链接保存格式';
-$lang[51]  = '默认';
-$lang[52]  = '全部选中';
-$lang[53]  = '取消全部选中';
-$lang[54]  = '反向选择';
-$lang[55]  = '名称';
-$lang[56]  = '大小';
-$lang[57]  = '没有发现文件';
-$lang[58]  = '链接保存格式示例：（区分大小写）';
-$lang[59]  = '下载链接';
-$lang[60]  = '文件的名称';
-$lang[61]  = '默认链接样式';
-$lang[62]  = '除了上面以外的任何东西都将被视为字符串，你现在无法使用多行格式，新行将被插入到每个链接。';
-$lang[63]  = '上传文件 %1$s 到 %2$s '; // %1$s = filename %2$s = file host name
-$lang[64]  = '文件 %1$s 不存在。 '; // %1$s = filename
-$lang[65]  = '文件 %1$s 不可以用脚本读取。 '; // %1$s = filename
-$lang[66]  = '上传到主机的文件过大。';
-$lang[67]  = '上传服务不被允许';
-$lang[68]  = '下载链接';
-$lang[69]  = '删除链接';
-$lang[70]  = '状态链接';
-$lang[71]  = '管理员链接';
-$lang[72]  = '用户名';
-$lang[73]  = 'FTP上传';
-$lang[74]  = '密码';
-$lang[75]  = 'Rapidleech PlugMod - 上传链接';
-$lang[76]  = '<div class="linktitle">上传链接 <strong>%1$s</strong> - <span class="bluefont">大小： <strong>%2$s</strong></span></div> '; // %1$s = file name %2$s = file size
-$lang[77]  = '完成';
-$lang[78]  = '后退';
-$lang[79]  = '无法建立与服务器%1$s 的连接。 '; // %1$s = FTP server name
-$lang[80]  = '错误的用户名和/或密码。';
-$lang[81]  = '已连接到： <b>%1$s</b>... '; // %1$s = FTP server name
-$lang[82]  = '文件类型 %1$s 是禁止下载的 '; // %1$s = File type
-$lang[83]  = '文件 <b>%1$s</b>，大小 <b>%2$s</b>... '; // %1$s = file name %2$s = file size
-$lang[84]  = '检索链接时出错';
-$lang[85]  = '文本作为计数器字符串传递！';
-$lang[86]  = '错误：请启用JavaScript。';
-$lang[87]  = '请等待 <b>%1$s</b> 秒... '; // %1$s = number of seconds
-$lang[88]  = '无法连接到 %1$s 端口 %2$s '; // %1$s = host name %2$s = port
-$lang[89]  = '连接到代理： <b>%1$s</b> 端口 <b>%2$s</b>... '; // %1$s = Proxy host %2$s = Proxy port
-$lang[90]  = '已连接到： <b>%1$s</b> 端口 <b>%2$s</b>... '; // %1$s = host %2$s = port
-$lang[91]  = '没有收到标题';
-$lang[92]  = '你被禁止访问页面！';
-$lang[93]  = '该网页未找到！';
-$lang[94]  = '页面被禁止访问或没有找到！';
-$lang[95]  = '错误！它被重定向到 [%1$s] '; // %1$s = redirected address
-$lang[96]  = '这个网站需要授权。要指定访问的用户和密码需要使用类似以下格式的URL：<br />http:';
-$lang[97]  = '恢复超出限制';
-$lang[98]  = '此服务器不支持恢复';
-$lang[99]  = '下载';
+$lang[1] = '拒绝访问';
+$lang[2] = '服务器拒绝执行您的请求';
+$lang[3] = '您没有输入一个有效的e-mail地址';
+$lang[4] = '分段大小不是数字';
+$lang[5] = '未知URL类型，<span class="font-black">只使用<span class="font-blue">http</span> 或 <span class="font-blue">https</span> 或 <span class="font-blue">ftp</span> 协议</span>';
+$lang[6] = '未指定保存此文件路径';
+$lang[7] = '你不被允许从<span class="font-black">%1$s (%2$s)</span> 上下载内容 '; // %1$s = host name %2$s = host ip
+$lang[8] = '重定向到';
+$lang[9] = '无法更新的文件列表';
+$lang[10] = '文件<b>%1$s</b> (<b>%2$s</b>) 以保存！<br />用时： <b>%3$s</b><br />平均速度： <b>%4$s KB/s</b><br /> '; // %1$s = filename %2$s = filesize %3$s = time of download %4$s = speed
+$lang[11] = '<script>mail("文件将被发送到地址<b>%1$s</b>。", "%2$s");</script> '; // %1$s = E-mail address %2$s = filename
+$lang[12] = '发送文件时出错！';
+$lang[13] = '回到主页';
+$lang[14] = '连接丢失，文件已删除。';
+$lang[15] = '重新加载';
+$lang[16] = '请更改调试模式到 <b>1</b>';
+$lang[17] = '已达到最大连接数（%1$s）。 '; // %1$s = Number of maximum links
+$lang[18] = '%1$s 链接%2$s 被检测到，用时 %3$s 秒。（方法：<b>%4$s</b>） '; // %1$s = Number of links %2$s = Plural form %3$s = seconds %4$s = method for checking links
+$lang[19] = ''; // End of a plural
+$lang[20] = '错误的代理服务器地址';
+$lang[21] = '链接';
+$lang[22] = '状态';
+$lang[23] = '请稍候';
+$lang[24] = '错误的URL地址';
+$lang[25] = '准备';
+$lang[26] = '已启动';
+$lang[27] = '连接丢失';
+$lang[28] = '已完成';
+$lang[29] = '启动自动Transload';
+$lang[30] = '不支持框架，请更新你的浏览器';
+$lang[31] = '添加链接';
+$lang[32] = '链接';
+$lang[33] = '选项';
+$lang[34] = 'Transload文件';
+$lang[35] = '使用代理设置';
+$lang[36] = '代理';
+$lang[37] = '用戶名';
+$lang[38] = '密码';
+$lang[39] = '使用Imageshack帐户';
+$lang[40] = '保存到';
+$lang[41] = '路径';
+$lang[42] = '使用高级帐户';
+$lang[43] = '在服务器端运行';
+$lang[44] = '延迟时间';
+$lang[45] = '延迟（秒）';
+$lang[46] = '没有选择上传的文件或主机';
+$lang[47] = '选择要上传的主机';
+$lang[48] = '不被支持的上传服务！';
+$lang[49] = '上传窗口';
+$lang[50] = '链接保存格式';
+$lang[51] = '默认';
+$lang[52] = '全部选中';
+$lang[53] = '取消全部选中';
+$lang[54] = '反向选择';
+$lang[55] = '名称';
+$lang[56] = '大小';
+$lang[57] = '没有发现文件';
+$lang[58] = '链接保存格式示例：（区分大小写）';
+$lang[59] = '下载链接';
+$lang[60] = '文件的名称';
+$lang[61] = '默认链接样式';
+$lang[62] = '除了上面以外的任何东西都将被视为字符串，你现在无法使用多行格式，新行将被插入到每个链接。';
+$lang[63] = '上传文件 %1$s 到 %2$s '; // %1$s = filename %2$s = file host name
+$lang[64] = '文件 %1$s 不存在。 '; // %1$s = filename
+$lang[65] = '文件 %1$s 不可以用脚本读取。 '; // %1$s = filename
+$lang[66] = '上传到主机的文件过大。';
+$lang[67] = '上传服务不被允许';
+$lang[68] = '下载链接';
+$lang[69] = '删除链接';
+$lang[70] = '状态链接';
+$lang[71] = '管理员链接';
+$lang[72] = '用户名';
+$lang[73] = 'FTP上传';
+$lang[74] = '密码';
+$lang[75] = 'Rapidleech PlugMod - 上传链接';
+$lang[76] = '<div class="linktitle">上传链接 <strong>%1$s</strong> - <span class="bluefont">大小： <strong>%2$s</strong></span></div> '; // %1$s = file name %2$s = file size
+$lang[77] = '完成';
+$lang[78] = '后退';
+$lang[79] = '无法建立与服务器%1$s 的连接。 '; // %1$s = FTP server name
+$lang[80] = '错误的用户名和/或密码。';
+$lang[81] = '已连接到： <b>%1$s</b>... '; // %1$s = FTP server name
+$lang[82] = '文件类型 %1$s 是禁止下载的 '; // %1$s = File type
+$lang[83] = '文件 <b>%1$s</b>，大小 <b>%2$s</b>... '; // %1$s = file name %2$s = file size
+$lang[84] = '检索链接时出错';
+$lang[85] = '文本作为计数器字符串传递！';
+$lang[86] = '错误：请启用JavaScript。';
+$lang[87] = '请等待 <b>%1$s</b> 秒... '; // %1$s = number of seconds
+$lang[88] = '无法连接到 %1$s 端口 %2$s '; // %1$s = host name %2$s = port
+$lang[89] = '连接到代理： <b>%1$s</b> 端口 <b>%2$s</b>... '; // %1$s = Proxy host %2$s = Proxy port
+$lang[90] = '已连接到： <b>%1$s</b> 端口 <b>%2$s</b>... '; // %1$s = host %2$s = port
+$lang[91] = '没有收到标题';
+$lang[92] = '你被禁止访问页面！';
+$lang[93] = '该网页未找到！';
+$lang[94] = '页面被禁止访问或没有找到！';
+$lang[95] = '错误！它被重定向到 [%1$s] '; // %1$s = redirected address
+$lang[96] = '这个网站需要授权。要指定访问的用户和密码需要使用类似以下格式的URL：<br />http:';
+$lang[97] = '恢复超出限制';
+$lang[98] = '此服务器不支持恢复';
+$lang[99] = '下载';
 $lang[100] = '白金帐号已用于另一个IP。';
 $lang[101] = '不能保存文件 %1$s 到目录 %2$s 中 '; // %1$s = file name %2$s = directory name
 $lang[102] = '尝试用chmod更改文件夹到777权限。';

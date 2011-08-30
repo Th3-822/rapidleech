@@ -1,4 +1,5 @@
 <?php
+
 if (!defined('RAPIDLEECH')) {
     require('../deny.php');
     exit;
@@ -7,105 +8,105 @@ if (!defined('RAPIDLEECH')) {
 // You should always use this file as a template for translating
 // By WebAlfa.Net Translate Team
 
-$lang[1]   = 'دسترسي امكان پذير نميباشد';
-$lang[2]   = 'سرور دسترسي شما را محدود كرده است';
-$lang[3]   = 'ادرس پست الكترونيك معبر وارد كنيد';
-$lang[4]   = 'حجم از قطعات هستند عددی نیست';
-$lang[5]   = 'ادرس نامعلوم, <span class="font-black">فقط استفاده <span class="font-blue">http</span> یا <span class="font-blue">https</span> یا <span class="font-blue">ftp</span> Protocol</span>';
-$lang[6]   = 'مسير براي ذخيره اين فايل مشخص نشده است';
-$lang[7]   = 'شما اجازی انتقال از <span class="font-black">%1$s (%2$s)</span> را ندارید'; // %1$s = host name %2$s = host ip
-$lang[8]   = 'انتقال به:';
-$lang[9]   = 'به روز رساني ليست فايل ها';
-$lang[10]  = 'فايل <b>%1$s</b> (<b>%2$s</b>) ذخيره!<br />زمان: <b>%3$s</b><br />ميانيگن سرعت: <b>%4$s KB/s</b><br />'; // %1$s = filename %2$s = filesize %3$s = time of download %4$s = speed
-$lang[11]  = '<script>ايميل("فايل به ايميل شما ارسال شد<b>%1$s</b>.", "%2$s");</script>'; // %1$s = E-mail address %2$s = filename
-$lang[12]  = 'خطا در ارسال فايل!';
-$lang[13]  = 'بازگست به صفحه اصلي';
-$lang[14]  = 'اتصال نا موفق . فايل حذف شده.';
-$lang[15]  = 'بار گذاري مجدد';
-$lang[16]  = 'لطفا تغيير دهيد ديباگ را <b>1</b>';
-$lang[17]  = 'حداكثر  (%1$s) پيوند لينك ها.'; // %1$s = Number of maximum links
-$lang[18]  = '%1$s لينك%2$s چك شده %3$s ثانيه. (Method: <b>%4$s</b>)'; // %1$s = Number of links %2$s = Plural form %3$s = seconds %4$s = method for checking links
-$lang[19]  = 's'; // End of a plural
-$lang[20]  = 'ادرس سرور پروكسي';
-$lang[21]  = 'لينك';
-$lang[22]  = 'وضعيت';
-$lang[23]  = 'صبر كنيد';
-$lang[24]  = 'ادرس نامعتبر URL';
-$lang[25]  = 'اماده';
-$lang[26]  = 'شروع شد';
-$lang[27]  = 'اتصال ناموفق';
-$lang[28]  = 'پايان';
-$lang[29]  = 'شروع اپلود چند رسانه اي';
-$lang[30]  = 'فرم پشتيباني نميشود, به روز رساني مرورگر';
-$lang[31]  = 'اضافه كردن لينك';
-$lang[32]  = 'لينك ها';
-$lang[33]  = 'تنظيمات';
-$lang[34]  = 'Transload فايل ها';
-$lang[35]  = 'استفاده از تنظيمات پروكسي';
-$lang[36]  = 'پروكسي';
-$lang[37]  = 'نام كاربري';
-$lang[38]  = 'كلمه عبور';
-$lang[39]  = 'استفاده Imageshack از حساب';
-$lang[40]  = 'ذخيره در';
-$lang[41]  = 'محل';
-$lang[42]  = 'استفاده از اكانت پولي';
-$lang[43]  = 'اجراي سرور سايد';
-$lang[44]  = 'زمان تاخير';
-$lang[45]  = 'تاخير (در ثانيه)';
-$lang[46]  = 'هيج فايل يا ميزباني انتخاب نشده';
-$lang[47]  = 'ميزباني را براي اپلود انتخاب كنيد';
-$lang[48]  = 'اين سرويس پشتيباني نميشود!';
-$lang[49]  = 'اپلود پنجره ها';
-$lang[50]  = 'فرمت ذخيره لينك';
-$lang[51]  = 'پيشفرض';
-$lang[52]  = 'انتخاب همه ';
-$lang[53]  = 'نه انتخاب همه';
-$lang[54]  = 'برعكس شود';
-$lang[55]  = 'نام';
-$lang[56]  = 'حجم';
-$lang[57]  = 'فايلي يافت نشد';
-$lang[58]  = 'فرمت ذخيره لينك ها: (حساس به كوچكي حروف)';
-$lang[59]  = 'لينك دانلود';
-$lang[60]  = 'نام فايل';
-$lang[61]  = 'لينك پيشفرض';
-$lang[62]  = 'Anything besides the ones stated above will be treated as string, you are unable to do multi line format now, a new line will be inserted for each link.';
-$lang[63]  = 'اپلود فايل  %1$s to %2$s'; // %1$s = filename %2$s = file host name
-$lang[64]  = 'فايل %1$s وجود ندارد.'; // %1$s = filename
-$lang[65]  = 'فايل %1$s قابل خواندن نيست توسط اسكريپت.'; // %1$s = filename
-$lang[66]  = 'فايل براي اپلود بزرگتر از حد مجاز است.';
-$lang[67]  = 'سرويس اپلود در دسترس نيست';
-$lang[68]  = 'لينك - دانلود';
-$lang[69]  = 'حذف - فايل';
-$lang[70]  = 'وضعيت - لينك';
-$lang[71]  = 'مديريت - لينك';
-$lang[72]  = 'نام-ID';
-$lang[73]  = 'FTP اپلود';
-$lang[74]  = 'كلمه عبور';
-$lang[75]  = 'Rapidleech PlugMod - اپلود لينك';
-$lang[76]  = '<div class="linktitle">اپلود لينك براي <strong>%1$s</strong> - <span class="bluefont">حجم: <strong>%2$s</strong></span></div>'; // %1$s = file name %2$s = file size
-$lang[77]  = 'انجام شد';
-$lang[78]  = 'بازگست';
-$lang[79]  = 'متصل شدن به سرور %1$s.'; // %1$s = FTP server name
-$lang[80]  = 'نام كاربري وكلمه عبور نادرست است.';
-$lang[81]  = 'وصل شد به: <b>%1$s</b>...'; // %1$s = FTP server name
-$lang[82]  = 'فايل %1$s is خطا در انتقال'; // %1$s = File type
-$lang[83]  = 'فايل <b>%1$s</b>, حجم <b>%2$s</b>...'; // %1$s = file name %2$s = file size
-$lang[84]  = 'خطا در انتقال لينك';
-$lang[85]  = 'متن تصويب شده!';
-$lang[86]  = 'خطا: لطفا جاوا اسكريپت را فعال كنيد.';
-$lang[87]  = 'لطفا صبر كنيد <b>%1$s</b> ثانيه...'; // %1$s = number of seconds
-$lang[88]  = 'متصل نشده %1$s به پورت %2$s'; // %1$s = host name %2$s = port
-$lang[89]  = 'متصل شد به پروكسي: <b>%1$s</b> پورت <b>%2$s</b>...'; // %1$s = Proxy host %2$s = Proxy port
-$lang[90]  = 'متصل شد: <b>%1$s</b> پورت <b>%2$s</b>...'; // %1$s = host %2$s = port
-$lang[91]  = 'هيچ سرفصلي يافت نشد';
-$lang[92]  = 'دسترسي شما به اين صفحه امكان پذير نمي باشد!';
-$lang[93]  = 'صفحه يافت نشد!';
-$lang[94]  = 'دسترسي به اين صفحه امكان پذير نيست يا يافت نشد!';
-$lang[95]  = 'خطا! انتقال به [%1$s]'; // %1$s = redirected address
-$lang[96]  = 'This site requires authorization. For the indication of username and password of access it is necessary to use similar url:<br />http://<b>login:password@</b>www.site.com/file.exe';
-$lang[97]  = 'محدوديت استفاده از resume ';
-$lang[98]  = 'سرور پشتيباني نميكند ازresume';
-$lang[99]  = 'دانلود';
+$lang[1] = 'دسترسي امكان پذير نميباشد';
+$lang[2] = 'سرور دسترسي شما را محدود كرده است';
+$lang[3] = 'ادرس پست الكترونيك معبر وارد كنيد';
+$lang[4] = 'حجم از قطعات هستند عددی نیست';
+$lang[5] = 'ادرس نامعلوم, <span class="font-black">فقط استفاده <span class="font-blue">http</span> یا <span class="font-blue">https</span> یا <span class="font-blue">ftp</span> Protocol</span>';
+$lang[6] = 'مسير براي ذخيره اين فايل مشخص نشده است';
+$lang[7] = 'شما اجازی انتقال از <span class="font-black">%1$s (%2$s)</span> را ندارید'; // %1$s = host name %2$s = host ip
+$lang[8] = 'انتقال به:';
+$lang[9] = 'به روز رساني ليست فايل ها';
+$lang[10] = 'فايل <b>%1$s</b> (<b>%2$s</b>) ذخيره!<br />زمان: <b>%3$s</b><br />ميانيگن سرعت: <b>%4$s KB/s</b><br />'; // %1$s = filename %2$s = filesize %3$s = time of download %4$s = speed
+$lang[11] = '<script>ايميل("فايل به ايميل شما ارسال شد<b>%1$s</b>.", "%2$s");</script>'; // %1$s = E-mail address %2$s = filename
+$lang[12] = 'خطا در ارسال فايل!';
+$lang[13] = 'بازگست به صفحه اصلي';
+$lang[14] = 'اتصال نا موفق . فايل حذف شده.';
+$lang[15] = 'بار گذاري مجدد';
+$lang[16] = 'لطفا تغيير دهيد ديباگ را <b>1</b>';
+$lang[17] = 'حداكثر  (%1$s) پيوند لينك ها.'; // %1$s = Number of maximum links
+$lang[18] = '%1$s لينك%2$s چك شده %3$s ثانيه. (Method: <b>%4$s</b>)'; // %1$s = Number of links %2$s = Plural form %3$s = seconds %4$s = method for checking links
+$lang[19] = 's'; // End of a plural
+$lang[20] = 'ادرس سرور پروكسي';
+$lang[21] = 'لينك';
+$lang[22] = 'وضعيت';
+$lang[23] = 'صبر كنيد';
+$lang[24] = 'ادرس نامعتبر URL';
+$lang[25] = 'اماده';
+$lang[26] = 'شروع شد';
+$lang[27] = 'اتصال ناموفق';
+$lang[28] = 'پايان';
+$lang[29] = 'شروع اپلود چند رسانه اي';
+$lang[30] = 'فرم پشتيباني نميشود, به روز رساني مرورگر';
+$lang[31] = 'اضافه كردن لينك';
+$lang[32] = 'لينك ها';
+$lang[33] = 'تنظيمات';
+$lang[34] = 'Transload فايل ها';
+$lang[35] = 'استفاده از تنظيمات پروكسي';
+$lang[36] = 'پروكسي';
+$lang[37] = 'نام كاربري';
+$lang[38] = 'كلمه عبور';
+$lang[39] = 'استفاده Imageshack از حساب';
+$lang[40] = 'ذخيره در';
+$lang[41] = 'محل';
+$lang[42] = 'استفاده از اكانت پولي';
+$lang[43] = 'اجراي سرور سايد';
+$lang[44] = 'زمان تاخير';
+$lang[45] = 'تاخير (در ثانيه)';
+$lang[46] = 'هيج فايل يا ميزباني انتخاب نشده';
+$lang[47] = 'ميزباني را براي اپلود انتخاب كنيد';
+$lang[48] = 'اين سرويس پشتيباني نميشود!';
+$lang[49] = 'اپلود پنجره ها';
+$lang[50] = 'فرمت ذخيره لينك';
+$lang[51] = 'پيشفرض';
+$lang[52] = 'انتخاب همه ';
+$lang[53] = 'نه انتخاب همه';
+$lang[54] = 'برعكس شود';
+$lang[55] = 'نام';
+$lang[56] = 'حجم';
+$lang[57] = 'فايلي يافت نشد';
+$lang[58] = 'فرمت ذخيره لينك ها: (حساس به كوچكي حروف)';
+$lang[59] = 'لينك دانلود';
+$lang[60] = 'نام فايل';
+$lang[61] = 'لينك پيشفرض';
+$lang[62] = 'Anything besides the ones stated above will be treated as string, you are unable to do multi line format now, a new line will be inserted for each link.';
+$lang[63] = 'اپلود فايل  %1$s to %2$s'; // %1$s = filename %2$s = file host name
+$lang[64] = 'فايل %1$s وجود ندارد.'; // %1$s = filename
+$lang[65] = 'فايل %1$s قابل خواندن نيست توسط اسكريپت.'; // %1$s = filename
+$lang[66] = 'فايل براي اپلود بزرگتر از حد مجاز است.';
+$lang[67] = 'سرويس اپلود در دسترس نيست';
+$lang[68] = 'لينك - دانلود';
+$lang[69] = 'حذف - فايل';
+$lang[70] = 'وضعيت - لينك';
+$lang[71] = 'مديريت - لينك';
+$lang[72] = 'نام-ID';
+$lang[73] = 'FTP اپلود';
+$lang[74] = 'كلمه عبور';
+$lang[75] = 'Rapidleech PlugMod - اپلود لينك';
+$lang[76] = '<div class="linktitle">اپلود لينك براي <strong>%1$s</strong> - <span class="bluefont">حجم: <strong>%2$s</strong></span></div>'; // %1$s = file name %2$s = file size
+$lang[77] = 'انجام شد';
+$lang[78] = 'بازگست';
+$lang[79] = 'متصل شدن به سرور %1$s.'; // %1$s = FTP server name
+$lang[80] = 'نام كاربري وكلمه عبور نادرست است.';
+$lang[81] = 'وصل شد به: <b>%1$s</b>...'; // %1$s = FTP server name
+$lang[82] = 'فايل %1$s is خطا در انتقال'; // %1$s = File type
+$lang[83] = 'فايل <b>%1$s</b>, حجم <b>%2$s</b>...'; // %1$s = file name %2$s = file size
+$lang[84] = 'خطا در انتقال لينك';
+$lang[85] = 'متن تصويب شده!';
+$lang[86] = 'خطا: لطفا جاوا اسكريپت را فعال كنيد.';
+$lang[87] = 'لطفا صبر كنيد <b>%1$s</b> ثانيه...'; // %1$s = number of seconds
+$lang[88] = 'متصل نشده %1$s به پورت %2$s'; // %1$s = host name %2$s = port
+$lang[89] = 'متصل شد به پروكسي: <b>%1$s</b> پورت <b>%2$s</b>...'; // %1$s = Proxy host %2$s = Proxy port
+$lang[90] = 'متصل شد: <b>%1$s</b> پورت <b>%2$s</b>...'; // %1$s = host %2$s = port
+$lang[91] = 'هيچ سرفصلي يافت نشد';
+$lang[92] = 'دسترسي شما به اين صفحه امكان پذير نمي باشد!';
+$lang[93] = 'صفحه يافت نشد!';
+$lang[94] = 'دسترسي به اين صفحه امكان پذير نيست يا يافت نشد!';
+$lang[95] = 'خطا! انتقال به [%1$s]'; // %1$s = redirected address
+$lang[96] = 'This site requires authorization. For the indication of username and password of access it is necessary to use similar url:<br />http://<b>login:password@</b>www.site.com/file.exe';
+$lang[97] = 'محدوديت استفاده از resume ';
+$lang[98] = 'سرور پشتيباني نميكند ازresume';
+$lang[99] = 'دانلود';
 $lang[100] = 'اين حساب كاربري و اي پي در حال استفاده است.';
 $lang[101] = 'فايل %1$s ذخيره نشد در %2$s'; // %1$s = file name %2$s = directory name
 $lang[102] = 'سطح دسترسي فايل ها به777.';

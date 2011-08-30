@@ -1,4 +1,5 @@
 <?php
+
 if (!defined('RAPIDLEECH')) {
     require('../deny.php');
     exit;
@@ -6,105 +7,105 @@ if (!defined('RAPIDLEECH')) {
 // Le fichier de langue anglaise
 // Vous devriez toujours utiliser ce fichier comme mod&egrave;le pour la traduction
 
-$lang[1]   = 'Acc&egrave;s refus&eacute;';
-$lang[2]   = 'Le serveur a refus&eacute; de r&eacute;pondre &agrave; votre demande';
-$lang[3]   = 'Vous n\'avez pas entr&eacute; une adresse e-mail valide';
-$lang[4]   = 'La taille des pi&egrave;ces n\'est num&eacute;rique';
-$lang[5]   = 'Type d\'URL inconnu, <span class=&quot;font-black&quot;> Utilser ubiquement les protocoles <span class=&quot;font-blue&quot;> http </ span> ou <span class=&quot;font-blue&quot;> https </ span> ou <span class=&quot;font-blue&quot;> FTP </ span>';
-$lang[6]   = 'Le chemin pour enregistrer ce fichier n\'est pas d&eacute;fini';
-$lang[7]   = 'Vous n\'&ecirc;tes pas autoris&eacute; &agrave; t&eacute;l&eacute;charger &agrave; partir de <span class=&quot;font-black&quot;>%1$s (%2$s)</span>'; // %1$s = nom d'h&ocirc;te %2$s = ip de l'h&ocirc;te
-$lang[8]   = 'Redirection vers:';
-$lang[9]   = 'Actualisation de la liste des fichiers impossible';
-$lang[10]  = 'Fichier <b>%1$s</b> (<b>%2$s</b>) sauvegard&eacute;!<br />Dur&eacute;e: <b>%3$s<br />Vitesse moyenne : <b>%4$s KB/s</b><br />'; // %1$s = nom du fichier %2$s = filesize %3$s = time of download %4$s = speed
-$lang[11]  = '<script>mail(&quot;Le fichier a &eacute;t&eacute; envoy&eacute; &agrave; cette adresse<b>%1$s</b>.&quot;, &quot;%2$s&quot;);</ script>'; // %1$s = E-mail address %2$s = nom du fichier
-$lang[12]  = 'Erreur lors de l\'envoi du fichier!';
-$lang[13]  = 'Revenir au menu principal';
-$lang[14]  = 'Connexion perdue, fichier supprim&eacute;.';
-$lang[15]  = 'Recharger';
-$lang[16]  = 'S\'il vous pla&icirc;t, changer le mode de d&eacute;bogage &agrave; <b>1</b>';
-$lang[17]  = 'Le nombre maximum (%1$s) de liens a &eacute;t&eacute; atteint.'; // %1$s = Nombre de liens maximum
-$lang[18]  = '%1$s lien%2$s v&eacute;rifi&eacute;%2$s en %3$s seconde%2$s. (M&eacute;thode: <b>%4$s</b>)'; //%1$s = Nombre de liens%, %2$s = forme plurielle, 3$s = secondes, %4$s = m&eacute;thode pour v&eacute;rifier les liens
-$lang[19]  = 's'; // caract&egrave;re de fin d'un pluriel
-$lang[20]  = 'Mauvaise adresse du serveur proxy';
-$lang[21]  = 'Lien';
-$lang[22]  = 'Statut';
-$lang[23]  = 'attente';
-$lang[24]  = 'URL Invalide';
-$lang[25]  = 'Pr&eacute;paration';
-$lang[26]  = 'Commenc&eacute;';
-$lang[27]  = 'Connexion perdue';
-$lang[28]  = 'Termin&eacute;';
-$lang[29]  = 'D&eacute;marrer le transfert automatique';
-$lang[30]  = 'Frames pas pris en charge, mettre &agrave; jour votre navigateur';
-$lang[31]  = 'Ajouter des liens';
-$lang[32]  = 'Liens';
-$lang[33]  = 'Options';
-$lang[34]  = 'Transf&eacute;rer des fichiers';
-$lang[35]  = 'Utiliser les param&egrave;tres du Proxy';
-$lang[36]  = 'Proxy';
-$lang[37]  = 'Utilisateur';
-$lang[38]  = 'Mot de passe';
-$lang[39]  = 'Utiliser le compte ImagesHack';
-$lang[40]  = 'Enregistrer dans';
-$lang[41]  = 'Chemin';
-$lang[42]  = 'Utiliser le compte Premium';
-$lang[43]  = 'Ex&eacute;cuter c&ocirc;t&eacute; serveur';
-$lang[44]  = 'D&eacute;lai';
-$lang[45]  = 'D&eacute;lai (en secondes)';
-$lang[46]  = 'Pas de fichiers ou d\'h&ocirc;tes s&eacute;lectionn&eacute;s pour l\'envoi';
-$lang[47]  = 'S&eacute;lectionnez les h&ocirc;tes pour l\'envoi';
-$lang[48]  = 'Aucun service de t&eacute;l&eacute;chargement pris en charge!';
-$lang[49]  = 'Fen&ecirc;tre d\'envoi';
-$lang[50]  = 'Format du lien de sauvegarde';
-$lang[51]  = 'Default';
-$lang[52]  = 'Tout s&eacute;lectionner';
-$lang[53]  = 'Tout d&eacute;s&eacute;lectionner';
-$lang[54]  = 'Inverser la s&eacute;lection';
-$lang[55]  = 'Nom';
-$lang[56]  = 'Taille';
-$lang[57]  = 'Aucun fichier trouv&eacute;';
-$lang[58]  = 'L&eacute;gende pour le format du lien de sauvegarde : (sensible &agrave; la casse)';
-$lang[59]  = 'Le lien pour le t&eacute;l&eacute;chargement';
-$lang[60]  = 'Le nom du fichier';
-$lang[61]  = 'Style par d&eacute;faut du lien';
-$lang[62]  = 'Toutes choses autres que celles indiqu&eacute;es ci-dessus seront trait&eacute;es comme des cha&icirc;nes, actuellement le format multi-ligne est impossible, une nouvelle ligne sera ins&eacute;r&eacute;e pour chaque lien.';
-$lang[63]  = 'Envoi du fichier %1$s &agrave; %2$s'; // %1$s = nom du fichier, %2$s = nom du fichier h&ocirc;te
-$lang[64]  = 'Le fichier %1$s n\'existe pas.'; // %1$s = nom du fichier
-$lang[65]  = 'Le fichier %1$s n\'est pas lisible par le script.'; // %1$s = nom du fichier
-$lang[66]  = 'Taille du fichier trop grande pour envoyer &agrave; l\'h&ocirc;te.';
-$lang[67]  = 'Service de t&eacute;l&eacute;chargement non autoris&eacute;';
-$lang[68]  = 'Lien de t&eacute;l&eacute;chargement';
-$lang[69]  = 'Supprimer le lien';
-$lang[70]  = 'Stat-Link';
-$lang[71]  = 'Admin-Link';
-$lang[72]  = 'User-ID';
-$lang[73]  = 'upload FTP';
-$lang[74]  = 'Mot de passe';
-$lang[75]  = 'rapidleech PlugMod - Envoyez les liens';
-$lang[76]  = '<div class=&quot;linktitle&quot;>Liens de t&eacute;l&eacute;chargement pour <strong>%1$s</strong> - <span class=&quot;bluefont&quot;>Taille : <strong>%2$s</strong></span></div>'; // %1$s = nom de fichier, %2$s = taille de fichier
-$lang[77]  = 'Termin&eacute;';
-$lang[78]  = 'Retour';
-$lang[79]  = 'La connexion avec le serveur %1$s n\'a pu &ecirc;tre &eacute;tablie.'; // %1$s = nom du serveur FTP
-$lang[80]  = 'Nom d\'utilisateur et/ou mot de passe incorrect.';
-$lang[81]  = 'Connect&eacute; &agrave;: <b>%1$s</ b >...'; // %1$s = nom du serveur FTP
-$lang[82]  = 'Le type de fichier %1$s est interdit au t&eacute;l&eacute;chargement'; // %1$s = type de fichier
-$lang[83]  = 'Fichier <b>%1$s</ b>, Taille <b>%2$s</ b >...'; // %1$s = nom de fichier, %2$s = taille de fichier
-$lang[84]  = 'Erreur lors de la r&eacute;cup&eacute;ration du lien';
-$lang[85]  = 'Le texte pass&eacute; au compteur est une chaine de caract&egrave;res !';
-$lang[86]  = 'ERREUR : S\'il vous pla&icirc;t, activer JavaScript.';
-$lang[87]  = 'S\'il vous pla&icirc;t, patienter <b>%1$s</ b> secondes ...'; // %1$s = nombre de secondes
-$lang[88]  = 'Connection &agrave; %1$s, port : %2$s impossible'; // %1$s = nom de l'h&ocirc;te, %2$s = port
-$lang[89]  = 'Connect&eacute; au proxy: <b>%1$s</ b> sur le port <b>%2$s</ b >...'; // %1$s = Proxy h&ocirc;te, %2$s = Port Proxy
-$lang[90]  = 'Connect&eacute; &agrave;: <b>%1$s</ b> sur le port <b>%2$s</ b >...'; // %1$s = h&ocirc;te, %2$s = port
-$lang[91]  = 'Aucun ent&ecirc;te re&ccedil;u';
-$lang[92]  = 'Il vous est interdit d\'acc&eacute;der &agrave; la page!';
-$lang[93]  = 'La page est introuvable!';
-$lang[94]  = 'Cette page est soit interdite, soit introuvable!';
-$lang[95]  = 'Erreur! Cette adresse est redirig&eacute;e vers [%1$s]'; // %1$s = adresse redirig&eacute;e
-$lang[96]  = 'Ce site n&eacute;cessite une autorisation. Pour indiquer un nom d\'utilisateur et un mot de passe d\'acc&egrave;s, il est n&eacute;cessaire d\'utiliser des url similaires &agrave; : <br />http://<b>login:password@</b>www.site.com/fichier.extension';
-$lang[97]  = 'Limite de reprise du t&eacute;l&eacute;chargement d&eacute;pass&eacute;e';
-$lang[98]  = 'Ce serveur ne supporte pas la reprise du t&eacute;l&eacute;chargement';
-$lang[99]  = 'T&eacute;l&eacute;charger';
+$lang[1] = 'Acc&egrave;s refus&eacute;';
+$lang[2] = 'Le serveur a refus&eacute; de r&eacute;pondre &agrave; votre demande';
+$lang[3] = 'Vous n\'avez pas entr&eacute; une adresse e-mail valide';
+$lang[4] = 'La taille des pi&egrave;ces n\'est num&eacute;rique';
+$lang[5] = 'Type d\'URL inconnu, <span class=&quot;font-black&quot;> Utilser ubiquement les protocoles <span class=&quot;font-blue&quot;> http </ span> ou <span class=&quot;font-blue&quot;> https </ span> ou <span class=&quot;font-blue&quot;> FTP </ span>';
+$lang[6] = 'Le chemin pour enregistrer ce fichier n\'est pas d&eacute;fini';
+$lang[7] = 'Vous n\'&ecirc;tes pas autoris&eacute; &agrave; t&eacute;l&eacute;charger &agrave; partir de <span class=&quot;font-black&quot;>%1$s (%2$s)</span>'; // %1$s = nom d'h&ocirc;te %2$s = ip de l'h&ocirc;te
+$lang[8] = 'Redirection vers:';
+$lang[9] = 'Actualisation de la liste des fichiers impossible';
+$lang[10] = 'Fichier <b>%1$s</b> (<b>%2$s</b>) sauvegard&eacute;!<br />Dur&eacute;e: <b>%3$s<br />Vitesse moyenne : <b>%4$s KB/s</b><br />'; // %1$s = nom du fichier %2$s = filesize %3$s = time of download %4$s = speed
+$lang[11] = '<script>mail(&quot;Le fichier a &eacute;t&eacute; envoy&eacute; &agrave; cette adresse<b>%1$s</b>.&quot;, &quot;%2$s&quot;);</ script>'; // %1$s = E-mail address %2$s = nom du fichier
+$lang[12] = 'Erreur lors de l\'envoi du fichier!';
+$lang[13] = 'Revenir au menu principal';
+$lang[14] = 'Connexion perdue, fichier supprim&eacute;.';
+$lang[15] = 'Recharger';
+$lang[16] = 'S\'il vous pla&icirc;t, changer le mode de d&eacute;bogage &agrave; <b>1</b>';
+$lang[17] = 'Le nombre maximum (%1$s) de liens a &eacute;t&eacute; atteint.'; // %1$s = Nombre de liens maximum
+$lang[18] = '%1$s lien%2$s v&eacute;rifi&eacute;%2$s en %3$s seconde%2$s. (M&eacute;thode: <b>%4$s</b>)'; //%1$s = Nombre de liens%, %2$s = forme plurielle, 3$s = secondes, %4$s = m&eacute;thode pour v&eacute;rifier les liens
+$lang[19] = 's'; // caract&egrave;re de fin d'un pluriel
+$lang[20] = 'Mauvaise adresse du serveur proxy';
+$lang[21] = 'Lien';
+$lang[22] = 'Statut';
+$lang[23] = 'attente';
+$lang[24] = 'URL Invalide';
+$lang[25] = 'Pr&eacute;paration';
+$lang[26] = 'Commenc&eacute;';
+$lang[27] = 'Connexion perdue';
+$lang[28] = 'Termin&eacute;';
+$lang[29] = 'D&eacute;marrer le transfert automatique';
+$lang[30] = 'Frames pas pris en charge, mettre &agrave; jour votre navigateur';
+$lang[31] = 'Ajouter des liens';
+$lang[32] = 'Liens';
+$lang[33] = 'Options';
+$lang[34] = 'Transf&eacute;rer des fichiers';
+$lang[35] = 'Utiliser les param&egrave;tres du Proxy';
+$lang[36] = 'Proxy';
+$lang[37] = 'Utilisateur';
+$lang[38] = 'Mot de passe';
+$lang[39] = 'Utiliser le compte ImagesHack';
+$lang[40] = 'Enregistrer dans';
+$lang[41] = 'Chemin';
+$lang[42] = 'Utiliser le compte Premium';
+$lang[43] = 'Ex&eacute;cuter c&ocirc;t&eacute; serveur';
+$lang[44] = 'D&eacute;lai';
+$lang[45] = 'D&eacute;lai (en secondes)';
+$lang[46] = 'Pas de fichiers ou d\'h&ocirc;tes s&eacute;lectionn&eacute;s pour l\'envoi';
+$lang[47] = 'S&eacute;lectionnez les h&ocirc;tes pour l\'envoi';
+$lang[48] = 'Aucun service de t&eacute;l&eacute;chargement pris en charge!';
+$lang[49] = 'Fen&ecirc;tre d\'envoi';
+$lang[50] = 'Format du lien de sauvegarde';
+$lang[51] = 'Default';
+$lang[52] = 'Tout s&eacute;lectionner';
+$lang[53] = 'Tout d&eacute;s&eacute;lectionner';
+$lang[54] = 'Inverser la s&eacute;lection';
+$lang[55] = 'Nom';
+$lang[56] = 'Taille';
+$lang[57] = 'Aucun fichier trouv&eacute;';
+$lang[58] = 'L&eacute;gende pour le format du lien de sauvegarde : (sensible &agrave; la casse)';
+$lang[59] = 'Le lien pour le t&eacute;l&eacute;chargement';
+$lang[60] = 'Le nom du fichier';
+$lang[61] = 'Style par d&eacute;faut du lien';
+$lang[62] = 'Toutes choses autres que celles indiqu&eacute;es ci-dessus seront trait&eacute;es comme des cha&icirc;nes, actuellement le format multi-ligne est impossible, une nouvelle ligne sera ins&eacute;r&eacute;e pour chaque lien.';
+$lang[63] = 'Envoi du fichier %1$s &agrave; %2$s'; // %1$s = nom du fichier, %2$s = nom du fichier h&ocirc;te
+$lang[64] = 'Le fichier %1$s n\'existe pas.'; // %1$s = nom du fichier
+$lang[65] = 'Le fichier %1$s n\'est pas lisible par le script.'; // %1$s = nom du fichier
+$lang[66] = 'Taille du fichier trop grande pour envoyer &agrave; l\'h&ocirc;te.';
+$lang[67] = 'Service de t&eacute;l&eacute;chargement non autoris&eacute;';
+$lang[68] = 'Lien de t&eacute;l&eacute;chargement';
+$lang[69] = 'Supprimer le lien';
+$lang[70] = 'Stat-Link';
+$lang[71] = 'Admin-Link';
+$lang[72] = 'User-ID';
+$lang[73] = 'upload FTP';
+$lang[74] = 'Mot de passe';
+$lang[75] = 'rapidleech PlugMod - Envoyez les liens';
+$lang[76] = '<div class=&quot;linktitle&quot;>Liens de t&eacute;l&eacute;chargement pour <strong>%1$s</strong> - <span class=&quot;bluefont&quot;>Taille : <strong>%2$s</strong></span></div>'; // %1$s = nom de fichier, %2$s = taille de fichier
+$lang[77] = 'Termin&eacute;';
+$lang[78] = 'Retour';
+$lang[79] = 'La connexion avec le serveur %1$s n\'a pu &ecirc;tre &eacute;tablie.'; // %1$s = nom du serveur FTP
+$lang[80] = 'Nom d\'utilisateur et/ou mot de passe incorrect.';
+$lang[81] = 'Connect&eacute; &agrave;: <b>%1$s</ b >...'; // %1$s = nom du serveur FTP
+$lang[82] = 'Le type de fichier %1$s est interdit au t&eacute;l&eacute;chargement'; // %1$s = type de fichier
+$lang[83] = 'Fichier <b>%1$s</ b>, Taille <b>%2$s</ b >...'; // %1$s = nom de fichier, %2$s = taille de fichier
+$lang[84] = 'Erreur lors de la r&eacute;cup&eacute;ration du lien';
+$lang[85] = 'Le texte pass&eacute; au compteur est une chaine de caract&egrave;res !';
+$lang[86] = 'ERREUR : S\'il vous pla&icirc;t, activer JavaScript.';
+$lang[87] = 'S\'il vous pla&icirc;t, patienter <b>%1$s</ b> secondes ...'; // %1$s = nombre de secondes
+$lang[88] = 'Connection &agrave; %1$s, port : %2$s impossible'; // %1$s = nom de l'h&ocirc;te, %2$s = port
+$lang[89] = 'Connect&eacute; au proxy: <b>%1$s</ b> sur le port <b>%2$s</ b >...'; // %1$s = Proxy h&ocirc;te, %2$s = Port Proxy
+$lang[90] = 'Connect&eacute; &agrave;: <b>%1$s</ b> sur le port <b>%2$s</ b >...'; // %1$s = h&ocirc;te, %2$s = port
+$lang[91] = 'Aucun ent&ecirc;te re&ccedil;u';
+$lang[92] = 'Il vous est interdit d\'acc&eacute;der &agrave; la page!';
+$lang[93] = 'La page est introuvable!';
+$lang[94] = 'Cette page est soit interdite, soit introuvable!';
+$lang[95] = 'Erreur! Cette adresse est redirig&eacute;e vers [%1$s]'; // %1$s = adresse redirig&eacute;e
+$lang[96] = 'Ce site n&eacute;cessite une autorisation. Pour indiquer un nom d\'utilisateur et un mot de passe d\'acc&egrave;s, il est n&eacute;cessaire d\'utiliser des url similaires &agrave; : <br />http://<b>login:password@</b>www.site.com/fichier.extension';
+$lang[97] = 'Limite de reprise du t&eacute;l&eacute;chargement d&eacute;pass&eacute;e';
+$lang[98] = 'Ce serveur ne supporte pas la reprise du t&eacute;l&eacute;chargement';
+$lang[99] = 'T&eacute;l&eacute;charger';
 $lang[100] = 'Ce compte Premium est d&eacute;j&agrave; utilis&eacute; avec une autre adresse ip.';
 $lang[101] = 'Le fichier %1$s ne peut &ecirc;tre sauvegard&eacute; dans le r&eacute;pertoire %2$s'; // %1$s = file name, %2$s = nom de r&eacute;pertoire
 $lang[102] = 'Essayez de chmoder le dossier &agrave; 777.';

@@ -524,4 +524,13 @@ function decrypt($string)
 
 	return $decrypted;
 }
+
+function textarea($var, $stop = false) {
+	echo "\n<br /><textarea cols='200' rows='30' readonly='readonly'>";
+	if (is_array($var)) var_dump($var);
+	else echo htmlentities($var);
+	echo "</textarea><br />\n";
+	if ($stop) exit;
+}
+
 ?>
