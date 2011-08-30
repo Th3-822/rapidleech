@@ -1,109 +1,110 @@
 <?php
+
 if (!defined('RAPIDLEECH')) {
     require('../deny.php');
     exit;
 }
 // file per la lingua italiana
 
-$lang[1]   = 'Accesso Negato';
-$lang[2]   = 'Il server ha rifiutato di eseguire la tua richiesta';
-$lang[3]   = 'Non hai introdotto un indirizzo e-mail valido';
-$lang[4]   = 'La dimensione delle parti non &eacute; numerico';
-$lang[5]   = 'Tipo URL Sconosciuto, <span class="font-black">Usa Solo Il Protocollo<span class="font-blue">http</span> oppure <span class="font-blue">https</span> oppure <span class="font-blue">ftp</span></span>';
-$lang[6]   = 'Non &eacute; stata specificata un percorso per questo file';
-$lang[7]   = 'Non hai il permesso di scaricare da <span class="font-black">%1$s (%2$s)</span>'; // %1$s = nome del server %2$s = ip del server
-$lang[8]   = 'Reindirizzato a:';
-$lang[9]   = 'Non posso aggiornare la lista dei files';
-$lang[10]  = 'File <b>%1$s</b> (<b>%2$s</b>) Salvato!<br />Tempo: <b>%3$s</b><br />Velocit&agrave media: <b>%4$s KB/s</b><br />'; // %1$s = nome del file %2$s = dimensione %3$s = tempo di download %4$s = velocit&agrave
-$lang[11]  = '<script>mail("Il file &eacute; stato inviato a questo indirizzo<b>%1$s</b>.", "%2$s");</script>'; // %1$s = indirizzo E-mail  %2$s = nome del file
-$lang[12]  = 'Errore nell\'invio del file!';
-$lang[13]  = 'Torna alla pagina principale';
-$lang[14]  = 'Connessione persa, file cancellato.';
-$lang[15]  = 'Ricarica';
-$lang[16]  = 'Per favore cambia la modalit&agrave debugger a <b>1</b>';
-$lang[17]  = 'Il numero massimo di indirizzi (%1$s) &eacute; stato raggiunto.'; // %1$s = Numero massimo di indirizzi
-$lang[18]  = '%1$s Indirizzi%2$s controllati in %3$s secondi. (Metodo: <b>%4$s</b>)'; // %1$s = Numero di indirizzi %2$s = Forma plurale %3$s = secondi %4$s = metodo per controllare gli indirizzi
-$lang[19]  = 's'; // End of a plural
-$lang[20]  = 'Indirizzo del server proxy errato';
-$lang[21]  = 'Indirizzo';
-$lang[22]  = 'Stato';
-$lang[23]  = 'Attendere';
-$lang[24]  = 'URL non valido';
-$lang[25]  = 'Sto iniziando';
-$lang[26]  = 'Inizio';
-$lang[27]  = 'Conessione persa';
-$lang[28]  = 'Finito';
-$lang[29]  = 'Inizio auto Trasferimento';
-$lang[30]  = 'Frames not supporteti, aggiorna il browser';
-$lang[31]  = 'Aggiungi gli indirizzi';
-$lang[32]  = 'Indirizzi';
-$lang[33]  = 'Opzioni';
-$lang[34]  = 'Trasferisci i files';
-$lang[35]  = 'Usa i dati di configurazione del proxy';
-$lang[36]  = 'Proxy';
-$lang[37]  = 'Nome utente';
-$lang[38]  = 'Password';
-$lang[39]  = 'Usa l\'account imageshack';
-$lang[40]  = 'Salva a';
-$lang[41]  = 'Percorso';
-$lang[42]  = 'Usa l\'Account Premium';
-$lang[43]  = 'Esegui Lato Server';
-$lang[44]  = 'Tempo di ritardo';
-$lang[45]  = 'Ritardo (in secondi)';
-$lang[46]  = 'Nessun files o server sezionati per l\'upload';
-$lang[47]  = 'Seleziona il server per l\'upload';
-$lang[48]  = 'Servizio per l\'upload non supportato!';
-$lang[49]  = 'Finestra dell\'upload';
-$lang[50]  = 'Formato degli indirizzi salvati';
-$lang[51]  = 'Default';
-$lang[52]  = 'seleziona tutto';
-$lang[53]  = 'Deseleziona tutto';
-$lang[54]  = 'Inverti la selezione';
-$lang[55]  = 'Nome';
-$lang[56]  = 'Dimensione';
-$lang[57]  = 'Files non trovati';
-$lang[58]  = 'Legenda per il formato dei link salvati: (Sensibile al carattere)';
-$lang[59]  = 'L\'indirizzo per il download';
-$lang[60]  = 'Il nome del file';
-$lang[61]  = 'Stile degli indirizzi predeterminato';
-$lang[62]  = 'Qualsiasi aggiunta sopra sar&agrave trattata come testo, non puoi fare il formato multilinea , una nuova linea sar&agrave inserita per ogni indirizzo.';
-$lang[63]  = 'Upload file %1$s to %2$s'; // %1$s = nome del file %2$s = nome del server
-$lang[64]  = 'Il file %1$s non esiste.'; // %1$s = nome del file
-$lang[65]  = 'Il file %1$s non &eacute; leggibile dallo script.'; // %1$s = nome del file
-$lang[66]  = 'La dimensione del file &eacute; troppo grande per caricarlo su questo server.';
-$lang[67]  = 'Servizio di upload non permesso';
-$lang[68]  = 'Indirizzo di download';
-$lang[69]  = 'Indirizzo di cancellazione';
-$lang[70]  = 'Indirizzo di stato';
-$lang[71]  = 'Indirizzo di amministrazione';
-$lang[72]  = 'ID-UTENTE';
-$lang[73]  = 'Upload FTP';
-$lang[74]  = 'Password';
-$lang[75]  = 'Rapidleech PlugMod - Indirizzi Upload';
-$lang[76]  = '<div class="linktitle">Indirizzi di upload <strong>%1$s</strong> - <span class="bluefont">Dimensione: <strong>%2$s</strong></span></div>'; // %1$s = nome del file %2$s = dimensione file
-$lang[77]  = 'Eseguito';
-$lang[78]  = 'Torna indietro';
-$lang[79]  = 'Non posso stabilire una connessione con il server %1$s.'; // %1$s = nome del server FTP
-$lang[80]  = 'Errato username e/o password.';
-$lang[81]  = 'Connesso a: <b>%1$s</b>...'; // %1$s = nome del server FTP
-$lang[82]  = 'Il tipo di file %1$s &eacute; vietato di essere scaricato'; // %1$s = File type
-$lang[83]  = 'File <b>%1$s</b>, Dimensione <b>%2$s</b>...'; // %1$s = nome del file %2$s = dimensione file
-$lang[84]  = 'Errore nel ricevere l\'indirizzo';
-$lang[85]  = 'Il testo passato come contatore &eacute; di tipo stringa!';
-$lang[86]  = 'ERRORE: Per piacere abilita JavaScript.';
-$lang[87]  = 'Per piacere attendi <b>%1$s</b> secondi...'; // %1$s = numberp di secondi
-$lang[88]  = 'Non posso connettermi a %1$s at port %2$s'; // %1$s = nome server %2$s = porta
-$lang[89]  = 'Connesso al proxy: <b>%1$s</b> alla porta <b>%2$s</b>...'; // %1$s = Server proxy %2$s = Porta proxy
-$lang[90]  = 'Connesso a: <b>%1$s</b> alla porta <b>%2$s</b>...'; // %1$s = server %2$s = porta
-$lang[91]  = 'Nessuna intestazione rivevuta';
-$lang[92]  = 'Non hai il permesso di accedere alla pagina!';
-$lang[93]  = 'La pagina non &eacute; stata trovata!';
-$lang[94]  = 'La pagina era vietata o inesistente!';
-$lang[95]  = 'Errore! Esso &eacute; reindirizzato a [%1$s]'; // %1$s = nuovo indirizzo
-$lang[96]  = 'Questo sito richiede l\'autorizzazione. Per inviare nome utente e Password bisogna usare il seguente formato:<br />http://<b>login:password@</b>www.sito.com/file.exe';
-$lang[97]  = 'Il limite di resume &eacute; stato oltrepassato';
-$lang[98]  = 'Questo server non supporta il resume';
-$lang[99]  = 'Download';
+$lang[1] = 'Accesso Negato';
+$lang[2] = 'Il server ha rifiutato di eseguire la tua richiesta';
+$lang[3] = 'Non hai introdotto un indirizzo e-mail valido';
+$lang[4] = 'La dimensione delle parti non &eacute; numerico';
+$lang[5] = 'Tipo URL Sconosciuto, <span class="font-black">Usa Solo Il Protocollo<span class="font-blue">http</span> oppure <span class="font-blue">https</span> oppure <span class="font-blue">ftp</span></span>';
+$lang[6] = 'Non &eacute; stata specificata un percorso per questo file';
+$lang[7] = 'Non hai il permesso di scaricare da <span class="font-black">%1$s (%2$s)</span>'; // %1$s = nome del server %2$s = ip del server
+$lang[8] = 'Reindirizzato a:';
+$lang[9] = 'Non posso aggiornare la lista dei files';
+$lang[10] = 'File <b>%1$s</b> (<b>%2$s</b>) Salvato!<br />Tempo: <b>%3$s</b><br />Velocit&agrave media: <b>%4$s KB/s</b><br />'; // %1$s = nome del file %2$s = dimensione %3$s = tempo di download %4$s = velocit&agrave
+$lang[11] = '<script>mail("Il file &eacute; stato inviato a questo indirizzo<b>%1$s</b>.", "%2$s");</script>'; // %1$s = indirizzo E-mail  %2$s = nome del file
+$lang[12] = 'Errore nell\'invio del file!';
+$lang[13] = 'Torna alla pagina principale';
+$lang[14] = 'Connessione persa, file cancellato.';
+$lang[15] = 'Ricarica';
+$lang[16] = 'Per favore cambia la modalit&agrave debugger a <b>1</b>';
+$lang[17] = 'Il numero massimo di indirizzi (%1$s) &eacute; stato raggiunto.'; // %1$s = Numero massimo di indirizzi
+$lang[18] = '%1$s Indirizzi%2$s controllati in %3$s secondi. (Metodo: <b>%4$s</b>)'; // %1$s = Numero di indirizzi %2$s = Forma plurale %3$s = secondi %4$s = metodo per controllare gli indirizzi
+$lang[19] = 's'; // End of a plural
+$lang[20] = 'Indirizzo del server proxy errato';
+$lang[21] = 'Indirizzo';
+$lang[22] = 'Stato';
+$lang[23] = 'Attendere';
+$lang[24] = 'URL non valido';
+$lang[25] = 'Sto iniziando';
+$lang[26] = 'Inizio';
+$lang[27] = 'Conessione persa';
+$lang[28] = 'Finito';
+$lang[29] = 'Inizio auto Trasferimento';
+$lang[30] = 'Frames not supporteti, aggiorna il browser';
+$lang[31] = 'Aggiungi gli indirizzi';
+$lang[32] = 'Indirizzi';
+$lang[33] = 'Opzioni';
+$lang[34] = 'Trasferisci i files';
+$lang[35] = 'Usa i dati di configurazione del proxy';
+$lang[36] = 'Proxy';
+$lang[37] = 'Nome utente';
+$lang[38] = 'Password';
+$lang[39] = 'Usa l\'account imageshack';
+$lang[40] = 'Salva a';
+$lang[41] = 'Percorso';
+$lang[42] = 'Usa l\'Account Premium';
+$lang[43] = 'Esegui Lato Server';
+$lang[44] = 'Tempo di ritardo';
+$lang[45] = 'Ritardo (in secondi)';
+$lang[46] = 'Nessun files o server sezionati per l\'upload';
+$lang[47] = 'Seleziona il server per l\'upload';
+$lang[48] = 'Servizio per l\'upload non supportato!';
+$lang[49] = 'Finestra dell\'upload';
+$lang[50] = 'Formato degli indirizzi salvati';
+$lang[51] = 'Default';
+$lang[52] = 'seleziona tutto';
+$lang[53] = 'Deseleziona tutto';
+$lang[54] = 'Inverti la selezione';
+$lang[55] = 'Nome';
+$lang[56] = 'Dimensione';
+$lang[57] = 'Files non trovati';
+$lang[58] = 'Legenda per il formato dei link salvati: (Sensibile al carattere)';
+$lang[59] = 'L\'indirizzo per il download';
+$lang[60] = 'Il nome del file';
+$lang[61] = 'Stile degli indirizzi predeterminato';
+$lang[62] = 'Qualsiasi aggiunta sopra sar&agrave trattata come testo, non puoi fare il formato multilinea , una nuova linea sar&agrave inserita per ogni indirizzo.';
+$lang[63] = 'Upload file %1$s to %2$s'; // %1$s = nome del file %2$s = nome del server
+$lang[64] = 'Il file %1$s non esiste.'; // %1$s = nome del file
+$lang[65] = 'Il file %1$s non &eacute; leggibile dallo script.'; // %1$s = nome del file
+$lang[66] = 'La dimensione del file &eacute; troppo grande per caricarlo su questo server.';
+$lang[67] = 'Servizio di upload non permesso';
+$lang[68] = 'Indirizzo di download';
+$lang[69] = 'Indirizzo di cancellazione';
+$lang[70] = 'Indirizzo di stato';
+$lang[71] = 'Indirizzo di amministrazione';
+$lang[72] = 'ID-UTENTE';
+$lang[73] = 'Upload FTP';
+$lang[74] = 'Password';
+$lang[75] = 'Rapidleech PlugMod - Indirizzi Upload';
+$lang[76] = '<div class="linktitle">Indirizzi di upload <strong>%1$s</strong> - <span class="bluefont">Dimensione: <strong>%2$s</strong></span></div>'; // %1$s = nome del file %2$s = dimensione file
+$lang[77] = 'Eseguito';
+$lang[78] = 'Torna indietro';
+$lang[79] = 'Non posso stabilire una connessione con il server %1$s.'; // %1$s = nome del server FTP
+$lang[80] = 'Errato username e/o password.';
+$lang[81] = 'Connesso a: <b>%1$s</b>...'; // %1$s = nome del server FTP
+$lang[82] = 'Il tipo di file %1$s &eacute; vietato di essere scaricato'; // %1$s = File type
+$lang[83] = 'File <b>%1$s</b>, Dimensione <b>%2$s</b>...'; // %1$s = nome del file %2$s = dimensione file
+$lang[84] = 'Errore nel ricevere l\'indirizzo';
+$lang[85] = 'Il testo passato come contatore &eacute; di tipo stringa!';
+$lang[86] = 'ERRORE: Per piacere abilita JavaScript.';
+$lang[87] = 'Per piacere attendi <b>%1$s</b> secondi...'; // %1$s = numberp di secondi
+$lang[88] = 'Non posso connettermi a %1$s at port %2$s'; // %1$s = nome server %2$s = porta
+$lang[89] = 'Connesso al proxy: <b>%1$s</b> alla porta <b>%2$s</b>...'; // %1$s = Server proxy %2$s = Porta proxy
+$lang[90] = 'Connesso a: <b>%1$s</b> alla porta <b>%2$s</b>...'; // %1$s = server %2$s = porta
+$lang[91] = 'Nessuna intestazione rivevuta';
+$lang[92] = 'Non hai il permesso di accedere alla pagina!';
+$lang[93] = 'La pagina non &eacute; stata trovata!';
+$lang[94] = 'La pagina era vietata o inesistente!';
+$lang[95] = 'Errore! Esso &eacute; reindirizzato a [%1$s]'; // %1$s = nuovo indirizzo
+$lang[96] = 'Questo sito richiede l\'autorizzazione. Per inviare nome utente e Password bisogna usare il seguente formato:<br />http://<b>login:password@</b>www.sito.com/file.exe';
+$lang[97] = 'Il limite di resume &eacute; stato oltrepassato';
+$lang[98] = 'Questo server non supporta il resume';
+$lang[99] = 'Download';
 $lang[100] = 'Questo account premium &eacute; gi&agrave in uso da un\'altro ip.';
 $lang[101] = 'Il file %1$s non pu&ograve essere salvato nella directory %2$s'; // %1$s = nome del file %2$s = nome directory
 $lang[102] = 'Prova a cambiare il chmod della cartella a 777.';

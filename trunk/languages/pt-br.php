@@ -1,110 +1,111 @@
 <?php
+
 if (!defined('RAPIDLEECH')) {
     require('../deny.php');
     exit;
 }
-// Arquivo para o idioma Português-BR
+// Arquivo para o idioma Portuguï¿½s-BR
 // You should always use this file as a template for translating
 
-$lang[1]   = 'Acesso negado';
-$lang[2]   = 'O servidor recusou-se a satisfazer o seu pedido';
-$lang[3]   = 'Voc&ecirc; n&atilde;o inseriu um endere&ccedil;o de e-mail v&aacute;lido';
-$lang[4]   = 'Tamanho das partes n&atilde;o s&atilde;o num&eacute;ricos';
-$lang[5]   = 'Desconhecido Tipo de URL, <span class="font-black">Use apenas <span class="font-blue">http</span> ou <span class="font-blue">https</span> ou <span class="font-blue">ftp</span> Protocol</span>';
-$lang[6]   = 'O caminho n&atilde;o especificado para salvar este arquivo';
-$lang[7]   = 'Voc&ecirc; n&atilde;o est&aacute; autorizado a baixar de <span class="font-black">%1$s (%2$s)</span>'; // %1$s = host name %2$s = host ip
-$lang[8]   = 'Redirecionando para:';
-$lang[9]   = 'N&atilde;o foi poss&iacute;vel atualizar a lista de arquivos';
-$lang[10]  = 'Arquivo <b>%1$s</b> (<b>%2$s</b>) Salvo!<br />Tempo: <b>%3$s</b><br />Velocidade M&eacute;dia: <b>%4$s KB/s</b><br />'; // %1$s = filename %2$s = filesize %3$s = time of download %4$s = speed
-$lang[11]  = '<script>E-mail("O arquivo foi enviado para este endere&ccedil;o<b>%1$s</b>.", "%2$s");</script>'; // %1$s = E-mail address %2$s = filename
-$lang[12]  = 'Erro ao enviar arquivo!';
-$lang[13]  = 'Voltar para a principal';
-$lang[14]  = 'Conex&atilde;o perdida, arquivo foi exclu&iacute;do.';
-$lang[15]  = 'Atualizar';
-$lang[16]  = 'Por favor, altere o modo de depura&ccedil;&atilde;o para <b>1</b>';
-$lang[17]  = 'No m&aacute;ximo (%1$s) dos links foram alcan&ccedil;ados.'; // %1$s = Number of maximum links
-$lang[18]  = '%1$s Link%2$s checados em %3$s segundos. (M&eacute;todo: <b>%4$s</b>)'; // %1$s = Number of links %2$s = Plural form %3$s = seconds %4$s = method for checking links
-$lang[19]  = 's'; // End of a plural
-$lang[20]  = 'Bad proxy server address';
-$lang[21]  = 'Link';
-$lang[22]  = 'Status';
-$lang[23]  = 'Esperando';
-$lang[24]  = 'URL Inv&aacute;lida';
-$lang[25]  = 'Preparando';
-$lang[26]  = 'Iniciado';
-$lang[27]  = 'Conex&atilde;o perdida';
-$lang[28]  = 'Conclu&iacute;do';
-$lang[29]  = 'Baixar arquivos';
-$lang[30]  = 'Frames sem suporte, atualize seu navegador';
-$lang[31]  = 'Adicionar links';
-$lang[32]  = 'Links';
-$lang[33]  = 'Op&ccedil;&otilde;es';
-$lang[34]  = 'Baixar arquivos';
-$lang[35]  = 'Use configura&ccedil;&otilde;es de proxy';
-$lang[36]  = 'Proxy';
-$lang[37]  = 'Usu&aacute;rio';
-$lang[38]  = 'Senha';
-$lang[39]  = 'Utilizar Imageshack Conta';
-$lang[40]  = 'Salvar em';
-$lang[41]  = 'Caminho';
-$lang[42]  = 'Use Conta Premium';
-$lang[43]  = 'Executar Server Side';
-$lang[44]  = 'Tempo de atraso';
-$lang[45]  = 'Atraso (em segundos)';
-$lang[46]  = 'Nenhum arquivo ou hosts selecionados para upload';
-$lang[47]  = 'Selecione os Hosts para upload';
-$lang[48]  = 'N&atilde;o suporta servi&ccedil;os de upload!';
-$lang[49]  = 'Upload em janelas';
-$lang[50]  = 'Link para o formato salvo';
-$lang[51]  = 'Default';
-$lang[52]  = 'Marcar Todos';
-$lang[53]  = 'Desmarcar Todos';
-$lang[54]  = 'Inverter Sele&ccedil;&atilde;o';
-$lang[55]  = 'Nome';
-$lang[56]  = 'Tamanho';
-$lang[57]  = 'N&atilde;o foram encontrados arquivos';
-$lang[58]  = 'Leganda para o link salvo no formato: (mai&uacute;sculas e min&uacute;sculas)';
-$lang[59]  = 'O link para baixar';
-$lang[60]  = 'O nome do arquivo';
-$lang[61]  = 'Padr&atilde;o de estilo link';
-$lang[62]  = 'Qualquer coisa al&eacute;m do declarado acima ser&aacute; tratado como fio, voc&ecirc; n&atilde;o pode enfileirar multi formate agora, uma linha nova ser&aacute; inserida para cada link.';
-$lang[63]  = 'Arquivo carregando %1$s to %2$s'; // %1$s = filename %2$s = file host name
-$lang[64]  = 'Arquivo %1$s n&atilde;o existe.'; // %1$s = filename
-$lang[65]  = 'Arquivo %1$s n&atilde;o &eacute; lido pelo script.'; // %1$s = filename
-$lang[66]  = 'Tamanho do arquivo muito grande para fazer o upload no host.';
-$lang[67]  = 'Servi&ccedil;o de upload n&atilde;o permitido';
-$lang[68]  = 'Baixar-Link';
-$lang[69]  = 'Deletar-Link';
-$lang[70]  = 'Iniciar-Link';
-$lang[71]  = 'Admin-Link';
-$lang[72]  = 'USER-ID';
-$lang[73]  = 'FTP upload';
-$lang[74]  = 'Senha';
-$lang[75]  = 'Rapidleech PlugMod - Upload Links';
-$lang[76]  = '<div class="linktitle">Links para upload <strong>%1$s</strong> - <span class="bluefont">Tamanho: <strong>%2$s</strong></span></div>'; // %1$s = file name %2$s = file size
-$lang[77]  = 'Conclu&iacute;do';
-$lang[78]  = 'Voltar';
-$lang[79]  = 'N&atilde;o foi poss&iacute;vel estabelecer uma conex&atilde;o com o servidor %1$s.'; // %1$s = FTP server name
-$lang[80]  = 'Nome de usu&aacute;rio incorreto e/ou senha.';
-$lang[81]  = 'Conectado a: <b>%1$s</b>...'; // %1$s = FTP server name
-$lang[82]  = 'O tipo de ficheiro %1$s &eacute; proibido de ser baixado'; // %1$s = File type
-$lang[83]  = 'Arquivo <b>%1$s</b>, Tamanho <b>%2$s</b>...'; // %1$s = file name %2$s = file size
-$lang[84]  = 'Erro ao recuperar o link';
-$lang[85]  = 'Texto contador &eacute; passado como string!';
-$lang[86]  = 'ERRO: Por favor habilite o JavaScript.';
-$lang[87]  = 'Por favor, aguarde <b>%1$s</b> segundos...'; // %1$s = number of seconds
-$lang[88]  = 'N&atilde;o foi poss&iacute;vel conectar %1$s na porta %2$s'; // %1$s = host name %2$s = port
-$lang[89]  = 'Conectado ao proxy: <b>%1$s</b> na porta <b>%2$s</b>...'; // %1$s = Proxy host %2$s = Proxy port
-$lang[90]  = 'Conectado a: <b>%1$s</b> na porta <b>%2$s</b>...'; // %1$s = host %2$s = port
-$lang[91]  = 'N&atilde;o recebeu o cabe&ccedil;alho';
-$lang[92]  = 'Voc&ecirc; est&aacute; proibido de acessar a p&aacute;gina!';
-$lang[93]  = 'A p&aacute;gina n&atilde;o foi encontrada!';
-$lang[94]  = 'A p&aacute;gina foi proibida ou n&atilde;o &eacute; encontrada!';
-$lang[95]  = 'Error! it is redirected to [%1$s]'; // %1$s = redirected address
-$lang[96]  = 'Este site requer autoriza&ccedil;&atilde;o. Para a indica&ccedil;&atilde;o do nome de usu&aacute;rio e senha de acesso &eacute; necess&aacute;rio usar uma URL similar a essa:<br />http://<b>usu&aacute;rio:senha@</b>www.site.com/arquivo.exe';
-$lang[97]  = 'O limite do resumo excedeu';
-$lang[98]  = 'Este servidor n&atilde;o suporta resumo';
-$lang[99]  = 'Baixar';
+$lang[1] = 'Acesso negado';
+$lang[2] = 'O servidor recusou-se a satisfazer o seu pedido';
+$lang[3] = 'Voc&ecirc; n&atilde;o inseriu um endere&ccedil;o de e-mail v&aacute;lido';
+$lang[4] = 'Tamanho das partes n&atilde;o s&atilde;o num&eacute;ricos';
+$lang[5] = 'Desconhecido Tipo de URL, <span class="font-black">Use apenas <span class="font-blue">http</span> ou <span class="font-blue">https</span> ou <span class="font-blue">ftp</span> Protocol</span>';
+$lang[6] = 'O caminho n&atilde;o especificado para salvar este arquivo';
+$lang[7] = 'Voc&ecirc; n&atilde;o est&aacute; autorizado a baixar de <span class="font-black">%1$s (%2$s)</span>'; // %1$s = host name %2$s = host ip
+$lang[8] = 'Redirecionando para:';
+$lang[9] = 'N&atilde;o foi poss&iacute;vel atualizar a lista de arquivos';
+$lang[10] = 'Arquivo <b>%1$s</b> (<b>%2$s</b>) Salvo!<br />Tempo: <b>%3$s</b><br />Velocidade M&eacute;dia: <b>%4$s KB/s</b><br />'; // %1$s = filename %2$s = filesize %3$s = time of download %4$s = speed
+$lang[11] = '<script>E-mail("O arquivo foi enviado para este endere&ccedil;o<b>%1$s</b>.", "%2$s");</script>'; // %1$s = E-mail address %2$s = filename
+$lang[12] = 'Erro ao enviar arquivo!';
+$lang[13] = 'Voltar para a principal';
+$lang[14] = 'Conex&atilde;o perdida, arquivo foi exclu&iacute;do.';
+$lang[15] = 'Atualizar';
+$lang[16] = 'Por favor, altere o modo de depura&ccedil;&atilde;o para <b>1</b>';
+$lang[17] = 'No m&aacute;ximo (%1$s) dos links foram alcan&ccedil;ados.'; // %1$s = Number of maximum links
+$lang[18] = '%1$s Link%2$s checados em %3$s segundos. (M&eacute;todo: <b>%4$s</b>)'; // %1$s = Number of links %2$s = Plural form %3$s = seconds %4$s = method for checking links
+$lang[19] = 's'; // End of a plural
+$lang[20] = 'Bad proxy server address';
+$lang[21] = 'Link';
+$lang[22] = 'Status';
+$lang[23] = 'Esperando';
+$lang[24] = 'URL Inv&aacute;lida';
+$lang[25] = 'Preparando';
+$lang[26] = 'Iniciado';
+$lang[27] = 'Conex&atilde;o perdida';
+$lang[28] = 'Conclu&iacute;do';
+$lang[29] = 'Baixar arquivos';
+$lang[30] = 'Frames sem suporte, atualize seu navegador';
+$lang[31] = 'Adicionar links';
+$lang[32] = 'Links';
+$lang[33] = 'Op&ccedil;&otilde;es';
+$lang[34] = 'Baixar arquivos';
+$lang[35] = 'Use configura&ccedil;&otilde;es de proxy';
+$lang[36] = 'Proxy';
+$lang[37] = 'Usu&aacute;rio';
+$lang[38] = 'Senha';
+$lang[39] = 'Utilizar Imageshack Conta';
+$lang[40] = 'Salvar em';
+$lang[41] = 'Caminho';
+$lang[42] = 'Use Conta Premium';
+$lang[43] = 'Executar Server Side';
+$lang[44] = 'Tempo de atraso';
+$lang[45] = 'Atraso (em segundos)';
+$lang[46] = 'Nenhum arquivo ou hosts selecionados para upload';
+$lang[47] = 'Selecione os Hosts para upload';
+$lang[48] = 'N&atilde;o suporta servi&ccedil;os de upload!';
+$lang[49] = 'Upload em janelas';
+$lang[50] = 'Link para o formato salvo';
+$lang[51] = 'Default';
+$lang[52] = 'Marcar Todos';
+$lang[53] = 'Desmarcar Todos';
+$lang[54] = 'Inverter Sele&ccedil;&atilde;o';
+$lang[55] = 'Nome';
+$lang[56] = 'Tamanho';
+$lang[57] = 'N&atilde;o foram encontrados arquivos';
+$lang[58] = 'Leganda para o link salvo no formato: (mai&uacute;sculas e min&uacute;sculas)';
+$lang[59] = 'O link para baixar';
+$lang[60] = 'O nome do arquivo';
+$lang[61] = 'Padr&atilde;o de estilo link';
+$lang[62] = 'Qualquer coisa al&eacute;m do declarado acima ser&aacute; tratado como fio, voc&ecirc; n&atilde;o pode enfileirar multi formate agora, uma linha nova ser&aacute; inserida para cada link.';
+$lang[63] = 'Arquivo carregando %1$s to %2$s'; // %1$s = filename %2$s = file host name
+$lang[64] = 'Arquivo %1$s n&atilde;o existe.'; // %1$s = filename
+$lang[65] = 'Arquivo %1$s n&atilde;o &eacute; lido pelo script.'; // %1$s = filename
+$lang[66] = 'Tamanho do arquivo muito grande para fazer o upload no host.';
+$lang[67] = 'Servi&ccedil;o de upload n&atilde;o permitido';
+$lang[68] = 'Baixar-Link';
+$lang[69] = 'Deletar-Link';
+$lang[70] = 'Iniciar-Link';
+$lang[71] = 'Admin-Link';
+$lang[72] = 'USER-ID';
+$lang[73] = 'FTP upload';
+$lang[74] = 'Senha';
+$lang[75] = 'Rapidleech PlugMod - Upload Links';
+$lang[76] = '<div class="linktitle">Links para upload <strong>%1$s</strong> - <span class="bluefont">Tamanho: <strong>%2$s</strong></span></div>'; // %1$s = file name %2$s = file size
+$lang[77] = 'Conclu&iacute;do';
+$lang[78] = 'Voltar';
+$lang[79] = 'N&atilde;o foi poss&iacute;vel estabelecer uma conex&atilde;o com o servidor %1$s.'; // %1$s = FTP server name
+$lang[80] = 'Nome de usu&aacute;rio incorreto e/ou senha.';
+$lang[81] = 'Conectado a: <b>%1$s</b>...'; // %1$s = FTP server name
+$lang[82] = 'O tipo de ficheiro %1$s &eacute; proibido de ser baixado'; // %1$s = File type
+$lang[83] = 'Arquivo <b>%1$s</b>, Tamanho <b>%2$s</b>...'; // %1$s = file name %2$s = file size
+$lang[84] = 'Erro ao recuperar o link';
+$lang[85] = 'Texto contador &eacute; passado como string!';
+$lang[86] = 'ERRO: Por favor habilite o JavaScript.';
+$lang[87] = 'Por favor, aguarde <b>%1$s</b> segundos...'; // %1$s = number of seconds
+$lang[88] = 'N&atilde;o foi poss&iacute;vel conectar %1$s na porta %2$s'; // %1$s = host name %2$s = port
+$lang[89] = 'Conectado ao proxy: <b>%1$s</b> na porta <b>%2$s</b>...'; // %1$s = Proxy host %2$s = Proxy port
+$lang[90] = 'Conectado a: <b>%1$s</b> na porta <b>%2$s</b>...'; // %1$s = host %2$s = port
+$lang[91] = 'N&atilde;o recebeu o cabe&ccedil;alho';
+$lang[92] = 'Voc&ecirc; est&aacute; proibido de acessar a p&aacute;gina!';
+$lang[93] = 'A p&aacute;gina n&atilde;o foi encontrada!';
+$lang[94] = 'A p&aacute;gina foi proibida ou n&atilde;o &eacute; encontrada!';
+$lang[95] = 'Error! it is redirected to [%1$s]'; // %1$s = redirected address
+$lang[96] = 'Este site requer autoriza&ccedil;&atilde;o. Para a indica&ccedil;&atilde;o do nome de usu&aacute;rio e senha de acesso &eacute; necess&aacute;rio usar uma URL similar a essa:<br />http://<b>usu&aacute;rio:senha@</b>www.site.com/arquivo.exe';
+$lang[97] = 'O limite do resumo excedeu';
+$lang[98] = 'Este servidor n&atilde;o suporta resumo';
+$lang[99] = 'Baixar';
 $lang[100] = 'Est&aacute; conta premium j&aacute; est&aacute; em uso com outro ip.';
 $lang[101] = 'Arquivo %1$s n&atilde;o pode ser salvo no direct&oacute;rio %2$s'; // %1$s = file name %2$s = directory name
 $lang[102] = 'Tente chmod 777 para a pasta.';
@@ -233,7 +234,7 @@ $lang[224] = '43 [V&iacute;deo: WebM 640x360 | &Aacute;udio: Vorbis 2ch 44.10kHz
 $lang[225] = '45 [V&iacute;deo: WebM 1280x720 | &Aacute;udio: Vorbis 2ch 44.10kHz]';
 $lang[226] = '18 [V&iacute;deo: MP4 480x360 | &Aacute;udio: AAC 2ch 44.10kHz]';
 $lang[227] = '22 [V&iacute;deo: MP4 1280x720 | &Aacute;udio: AAC 2ch 44.10kHz]';
-$lang[228] = '37 [V&iacute;deo: MP4 1920×1080 | &Aacute;udio: AAC 2ch 44.10kHz]';
+$lang[228] = '37 [V&iacute;deo: MP4 1920ï¿½1080 | &Aacute;udio: AAC 2ch 44.10kHz]';
 $lang[229] = 'ImageShack&reg; Servi&ccedil;o de Torrent';
 $lang[230] = 'Usu&aacute;rio';
 $lang[231] = 'Senha';
@@ -382,7 +383,7 @@ $lang[373] = '<b>Extraindo arquivos de %1$s</b>:';
 $lang[374] = 'Status:';
 $lang[375] = 'Selecione o texto';
 $lang[376] = 'Contas Premium :';
-$lang[377] = '38 [V&iacute;deo: MP4 4096×3072 | &Aacute;udio: AAC 2ch 44.10kHz]';
+$lang[377] = '38 [V&iacute;deo: MP4 4096ï¿½3072 | &Aacute;udio: AAC 2ch 44.10kHz]';
 $lang[378] = 'Fechar a janela';
 $lang[379] = 'Arquivos';
 $lang[380] = 'Mudan&ccedil;a de MD5 deve ser aplicado apenas para os formatos conhecidos de trabalho (ie. rar ou. zip)<br />Voc&ecirc; quer continuar?';
