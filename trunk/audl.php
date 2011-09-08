@@ -209,10 +209,11 @@ function resetProgress()
        }
 
     $start_link.='&imageshack_tor='.$_REQUEST['imageshack_acc'].'&premium_acc='.$_REQUEST['premium_acc'];
-    if (isset($_POST['premium_user'])) {
-      $start_link.='&premium_acc=on&premium_user='.urlencode($_POST['premium_user']).'&premium_pass='.urlencode($_POST['premium_pass']);
-    } elseif (isset($_POST['premium_acc'])) {
-      $start_link .= '&premium_acc=on';
+    if ($_POST['premium_acc'] == 'on') {
+      $start_link.='&premium_acc=on';
+      if (!empty($_POST["premium_user"]) && !empty($_POST["premium_pass"])) {
+        $start_link .= '&premium_user='.urlencode(trim($_POST['premium_user'])).'&premium_pass='.urlencode(trim($_POST['premium_pass']));
+      }
     }
     if (isset($_POST['cookieuse'])) {
       $start_link.='&cookie='.urlencode(($_POST['cookie']));
@@ -383,7 +384,7 @@ function resetProgress()
                       </tr>
 <?php } ?>
                       <tr>
-                        <td><input type="checkbox" name="premium_acc" id="premium_acc" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;"<?php if (count($premium_acc) > 0) { echo ' checked="checked"'; } ?> />&nbsp;<?php echo lang(42); ?></td>
+                        <td><input type="checkbox" value="on" name="premium_acc" id="premium_acc" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;"<?php if (count($premium_acc) > 0) { echo ' checked="checked"'; } ?> />&nbsp;<?php echo lang(42); ?></td>
                         <td>&nbsp;</td>
                         <td id="premiumblock" style="display: none;">
                           <table width="150" border="0">
