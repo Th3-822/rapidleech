@@ -59,7 +59,7 @@ function rl_mail() {
 }
 
 function mail_go() {
-	global $list, $options;
+	global $list, $options, $fromaddr;
 	require_once (CLASS_DIR . "mail.php");
 	if (! checkmail ( $_POST ["email"] )) {
 		echo lang(166)."<br /><br />";
