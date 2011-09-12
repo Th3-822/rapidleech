@@ -447,6 +447,7 @@ function formpostdata($post=array()) {
 	return $postdata;
 }
 
+// function to reconvert array cookie into string
 function CookiesToStr($cookie=array()) {
 	$cookies = "";
 	foreach ($cookie as $k => $v) {
@@ -466,6 +467,12 @@ function GetCookies($content) {
 	return $cook;
 }
 
+/**
+ * Function to get cookies & converted into array
+ * @param string The content you want to get the cookie from
+ * @param bool Options to remove temporary cookie (usually it named as 'deleted')
+ * @param string The default name for temporary cookie
+ */
 function GetCookiesArr($content, $del=true, $dval='deleted') {
 	preg_match_all ('/Set-Cookie: (.*)(;|\r\n)/U', $content, $temp);
 	$cookie = array();
@@ -518,161 +525,163 @@ function GetChunkSize($fsize) {
 }
 
 function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, $fieldname, $field2name = "", $proxy = 0, $pauth = 0, $upagent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.1") {
-	global $nn, $lastError, $sleep_time, $sleep_count;
+    global $nn, $lastError, $sleep_time, $sleep_count;
 
-	$scheme = "http://";
-	$bound = "--------" . md5(microtime());
-	$saveToFile = 0;
+    $scheme = "http://";
+    $bound = "--------" . md5(microtime());
+    $saveToFile = 0;
 
-	foreach ( $post as $key => $value ) {
-		$postdata .= "--" . $bound . $nn;
-		$postdata .= 'Content-Disposition: form-data; name="'.$key.'"' . $nn . $nn;
-		$postdata .= $value . $nn;
-	}
+    if ($post) {
+        foreach ($post as $key => $value) {
+            $postdata .= "--" . $bound . $nn;
+            $postdata .= 'Content-Disposition: form-data; name="' . $key . '"' . $nn . $nn;
+            $postdata .= $value . $nn;
+        }
+    }
 
-	$fileSize = getSize ( $file );
+    $fileSize = getSize($file);
 
-	$fieldname = $fieldname ? $fieldname : file . md5 ( $filename );
+    $fieldname = $fieldname ? $fieldname : file . md5($filename);
 
-	if (! is_readable ( $file )) {
-		$lastError = sprintf(lang(65),$file);
-		return FALSE;
-	}
-	if ($field2name != '') {
-		$postdata .= "--" . $bound . $nn;
-		$postdata .= 'Content-Disposition: form-data; name="'.$field2name.'"; filename=""' . $nn;
-		$postdata .= "Content-Type: application/octet-stream" . $nn . $nn;
-	}
+    if (!is_readable($file)) {
+        $lastError = sprintf(lang(65), $file);
+        return FALSE;
+    }
+    if ($field2name != '') {
+        $postdata .= "--" . $bound . $nn;
+        $postdata .= 'Content-Disposition: form-data; name="' . $field2name . '"; filename=""' . $nn;
+        $postdata .= "Content-Type: application/octet-stream" . $nn . $nn;
+    }
 
-	$postdata .= "--" . $bound . $nn;
-	$postdata .= 'Content-Disposition: form-data; name="'.$fieldname.'"; filename="'.$filename.'"' . $nn;
-	$postdata .= "Content-Type: application/octet-stream" . $nn . $nn;
+    $postdata .= "--" . $bound . $nn;
+    $postdata .= 'Content-Disposition: form-data; name="' . $fieldname . '"; filename="' . $filename . '"' . $nn;
+    $postdata .= "Content-Type: application/octet-stream" . $nn . $nn;
 
 
-	if ($cookie) {
-		if (is_array ( $cookie )) {
-			$cookies = "Cookie: " . CookiesToStr ( $cookie ) . $nn;
-		} else {
-			$cookies = "Cookie: " . trim ( $cookie ) . $nn;
-		}
-	}
-	$referer = $referer ? "Referer: " . $referer . $nn : "";
+    if ($cookie) {
+        if (is_array($cookie)) {
+            $cookies = "Cookie: " . CookiesToStr($cookie) . $nn;
+        } else {
+            $cookies = "Cookie: " . trim($cookie) . $nn;
+        }
+    }
+    $referer = $referer ? "Referer: " . $referer . $nn : "";
 
-	if ($scheme == "https://") {
-		$scheme = "ssl://";
-		$port = 443;
-	}
+    if ($scheme == "https://") {
+        $scheme = "ssl://";
+        $port = 443;
+    }
 
-	if ($proxy) {
-		list ( $proxyHost, $proxyPort ) = explode ( ":", $proxy);
-		$url = $scheme . $host . ":" . $port . $url;
-		$host = $host . ":" . $port;
-	}
+    if ($proxy) {
+        list ( $proxyHost, $proxyPort ) = explode(":", $proxy);
+        $url = $scheme . $host . ":" . $port . $url;
+        $host = $host . ":" . $port;
+    }
 
-	if ($scheme != "ssl://") {
-		$scheme = "";
-	}
+    if ($scheme != "ssl://") {
+        $scheme = "";
+    }
 
-	$http_auth = ($auth) ? "Authorization: Basic " . $auth . $nn : "";
-	$proxyauth = ($pauth) ? "Proxy-Authorization: Basic " . $pauth . $nn : "";
+    $http_auth = ($auth) ? "Authorization: Basic " . $auth . $nn : "";
+    $proxyauth = ($pauth) ? "Proxy-Authorization: Basic " . $pauth . $nn : "";
 
-	$zapros = "POST " . str_replace ( " ", "%20", $url ) . " HTTP/1.0" . $nn . "Host: " . $host . $nn . $cookies . "Content-Type: multipart/form-data; boundary=" . $bound . $nn . "Content-Length: " . (strlen ( $postdata ) + strlen ( $nn . "--" . $bound . "--" . $nn ) + $fileSize) . $nn . "User-Agent: " . $upagent . $nn . "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5" . $nn . "Accept-Language: en-en,en;q=0.5" . $nn . "Accept-Charset: utf-8,windows-1251;koi8-r;q=0.7,*;q=0.7" . $nn . "Connection: Close" . $nn . $http_auth . $proxyauth . $referer . $nn . $postdata;
-	$errno = 0; $errstr = "";
-	$posturl = ($proxyHost ? $scheme . $proxyHost : $scheme . $host) . ':' . ($proxyPort ? $proxyPort : $port);
-	$fp = @stream_socket_client ( $posturl, $errno, $errstr, 120, STREAM_CLIENT_CONNECT );
-	//$fp = @fsockopen ( $host, $port, $errno, $errstr, 150 );
-	//stream_set_timeout ( $fp, 300 );
+    $zapros = "POST " . str_replace(" ", "%20", $url) . " HTTP/1.0" . $nn . "Host: " . $host . $nn . $cookies . "Content-Type: multipart/form-data; boundary=" . $bound . $nn . "Content-Length: " . (strlen($postdata) + strlen($nn . "--" . $bound . "--" . $nn) + $fileSize) . $nn . "User-Agent: " . $upagent . $nn . "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5" . $nn . "Accept-Language: en-en,en;q=0.5" . $nn . "Accept-Charset: utf-8,windows-1251;koi8-r;q=0.7,*;q=0.7" . $nn . "Connection: Close" . $nn . $http_auth . $proxyauth . $referer . $nn . $postdata;
+    $errno = 0; $errstr = "";
+    $posturl = ($proxyHost ? $scheme . $proxyHost : $scheme . $host) . ':' . ($proxyPort ? $proxyPort : $port);
+    $fp = @stream_socket_client($posturl, $errno, $errstr, 120, STREAM_CLIENT_CONNECT);
+    //$fp = @fsockopen ( $host, $port, $errno, $errstr, 150 );
+    //stream_set_timeout ( $fp, 300 );
 
-	if (! $fp) {
-		$dis_host = $proxyHost ? $proxyHost : $host;
-		$dis_port = $proxyPort ? $proxyPort : $port;
-		html_error ( sprintf ( lang ( 88 ), $dis_host, $dis_port ) );
-	}
+    if (!$fp) {
+        $dis_host = $proxyHost ? $proxyHost : $host;
+        $dis_port = $proxyPort ? $proxyPort : $port;
+        html_error(sprintf(lang(88), $dis_host, $dis_port));
+    }
 
-	if ($errno || $errstr) {
-		$lastError = $errstr;
-		return false;
-	}
+    if ($errno || $errstr) {
+        $lastError = $errstr;
+        return false;
+    }
 
-	if ($proxy) {
-			echo '<p>'.sprintf(lang(89),$proxyHost,$proxyPort).'<br />';
-			echo "UPLOAD: <b>" . $url . "</b>...<br />\n";
-		} else {
-			echo "<p>";
-			printf(lang(90),$host,$port);
-			echo "</p>";
-		}
+    if ($proxy) {
+        echo '<p>' . sprintf(lang(89), $proxyHost, $proxyPort) . '<br />';
+        echo "UPLOAD: <b>" . $url . "</b>...<br />\n";
+    } else {
+        echo "<p>";
+        printf(lang(90), $host, $port);
+        echo "</p>";
+    }
 
-	echo(lang(104).' <b>'.$filename.'</b>, '.lang(56).' <b>'.bytesToKbOrMb ( $fileSize ).'</b>...<br />');
-	global $id;
-	$id = md5 ( time () * rand ( 0, 10 ) );
-	require (TEMPLATE_DIR . '/uploadui.php');
-	flush ();
+    echo(lang(104) . ' <b>' . $filename . '</b>, ' . lang(56) . ' <b>' . bytesToKbOrMb($fileSize) . '</b>...<br />');
+    global $id;
+    $id = md5(time () * rand(0, 10));
+    require (TEMPLATE_DIR . '/uploadui.php');
+    flush ();
 
-	$timeStart = getmicrotime ();
+    $timeStart = getmicrotime ();
 
-	//$chunkSize = 16384;		// Use this value no matter what (using this actually just causes massive cpu usage for large files, too much data is flushed to the browser!)
-	$chunkSize = GetChunkSize ( $fileSize );
+    //$chunkSize = 16384;		// Use this value no matter what (using this actually just causes massive cpu usage for large files, too much data is flushed to the browser!)
+    $chunkSize = GetChunkSize($fileSize);
 
-	fputs ( $fp, $zapros );
-	fflush ( $fp );
+    fputs($fp, $zapros);
+    fflush($fp);
 
-	$fs = fopen ( $file, 'r' );
+    $fs = fopen($file, 'r');
 
-	$local_sleep = $sleep_count;
-	//echo('<script type="text/javascript">');
-	while ( ! feof ( $fs ) ) {
-		$data = fread ( $fs, $chunkSize );
-		if ($data === false) {
-			fclose ( $fs );
-			fclose ( $fp );
-			html_error ( lang(112) );
-		}
+    $local_sleep = $sleep_count;
+    //echo('<script type="text/javascript">');
+    while (!feof($fs)) {
+        $data = fread($fs, $chunkSize);
+        if ($data === false) {
+            fclose($fs);
+            fclose($fp);
+            html_error(lang(112));
+        }
 
-		if (($sleep_count !== false) && ($sleep_time !== false) && is_numeric ( $sleep_time ) && is_numeric ( $sleep_count ) && ($sleep_count > 0) && ($sleep_time > 0)) {
-			$local_sleep --;
-			if ($local_sleep == 0) {
-				usleep ( $sleep_time );
-				$local_sleep = $sleep_count;
-			}
-		}
+        if (($sleep_count !== false) && ($sleep_time !== false) && is_numeric($sleep_time) && is_numeric($sleep_count) && ($sleep_count > 0) && ($sleep_time > 0)) {
+            $local_sleep--;
+            if ($local_sleep == 0) {
+                usleep($sleep_time);
+                $local_sleep = $sleep_count;
+            }
+        }
 
-		$sendbyte = fputs ( $fp, $data );
-		fflush ( $fp );
+        $sendbyte = fputs($fp, $data);
+        fflush($fp);
 
-		if ($sendbyte === false) {
-			fclose ( $fs );
-			fclose ( $fp );
-			html_error ( lang(113) );
-		}
+        if ($sendbyte === false) {
+            fclose($fs);
+            fclose($fp);
+            html_error(lang(113));
+        }
 
-		$totalsend += $sendbyte;
+        $totalsend += $sendbyte;
 
-		$time = getmicrotime () - $timeStart;
-		$chunkTime = $time - $lastChunkTime;
-		$chunkTime = $chunkTime ? $chunkTime : 1;
-		$lastChunkTime = $time;
-		$speed = round ( $sendbyte / 1024 / $chunkTime, 2 );
-		$percent = round ( $totalsend / $fileSize * 100, 2 );
-		echo '<script type="text/javascript">pr('."'"  . $percent . "', '" . bytesToKbOrMb ( $totalsend ) . "', '" . $speed . "');</script>\n";
-		flush ();
-	}
-	//echo('</script>');
-	fclose ( $fs );
+        $time = getmicrotime () - $timeStart;
+        $chunkTime = $time - $lastChunkTime;
+        $chunkTime = $chunkTime ? $chunkTime : 1;
+        $lastChunkTime = $time;
+        $speed = round($sendbyte / 1024 / $chunkTime, 2);
+        $percent = round($totalsend / $fileSize * 100, 2);
+        echo '<script type="text/javascript">pr(' . "'" . $percent . "', '" . bytesToKbOrMb($totalsend) . "', '" . $speed . "');</script>\n";
+        flush ();
+    }
+    //echo('</script>');
+    fclose($fs);
 
-	fputs ( $fp, $nn . "--" . $bound . "--" . $nn );
-	fflush ( $fp );
+    fputs($fp, $nn . "--" . $bound . "--" . $nn);
+    fflush($fp);
 
-	while ( ! feof ( $fp ) ) {
-		$data = fgets ( $fp, 16384 );
-		if ($data === false) {
-			break;
-		}
-		$page .= $data;
-	}
+    while (!feof($fp)) {
+        $data = fgets($fp, 16384);
+        if ($data === false) {
+            break;
+        }
+        $page .= $data;
+    }
 
-	fclose ( $fp );
+    fclose($fp);
 
-	return $page;
+    return $page;
 }
 ?>

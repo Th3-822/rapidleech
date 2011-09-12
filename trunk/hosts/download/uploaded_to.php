@@ -1,5 +1,4 @@
 <?php
-
 if (!defined('RAPIDLEECH')) {
     require_once ("index.html");
     exit ();
@@ -9,7 +8,24 @@ class uploaded_to extends DownloadClass {
 
     public function Download($link) {
         global $premium_acc, $options;
-        if (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc ["uploaded_to"] ["user"] && $premium_acc ["uploaded_to"] ["pass"])) {
+        if (preg_match('/http:\/\/uploaded\.to\/folder\/[^"]+/i', $link, $dir)) {
+            if (!$dir[0]) {
+                html_error('Could\'nt find any link, please check again!');
+            }
+            $page = $this->GetPage($link);
+            preg_match_all('%href="(file\/\w+\/from\/\w+)%', $page, $match, PREG_SET_ORDER);
+            foreach ($match as $temp) {
+                $arr_link[] = str_ireplace('href="', '', "http://uploaded.to/$temp[0]");
+            }
+            $this->moveToAutoDownloader($arr_link);
+        } else {
+            $page = $this->GetPage($link);
+            is_present($page, "/404", "File not found");
+        }
+        if (($_REQUEST["cookieuse"] == "on" && preg_match("/login\s?=\s?(\w{84})/i", $_REQUEST["cookie"], $c)) || ($_REQUEST["premium_acc"] == "on" && $premium_acc["uploaded_to"]["cookie"])) {
+            $cookie = (empty($c[1]) ? $premium_acc["uploaded_to"]["cookie"] : $c[1]);
+            $this->DownloadPremium($link, $cookie);
+        } elseif (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc ["uploaded_to"] ["user"] && $premium_acc ["uploaded_to"] ["pass"])) {
             $this->DownloadPremium($link);
         } elseif ($_POST['step'] == "1") {
             $this->DownloadFree($link);
@@ -22,7 +38,6 @@ class uploaded_to extends DownloadClass {
         global $options;
         $page = $this->GetPage($link);
         $Cookies = GetCookies($page);
-        is_present($page, "/404", "File not found");
         if (!preg_match('#(\d+)</span> seconds#', $page, $count)) {
             html_error("Error 0x01: Plugin is out of date");
         }
@@ -57,21 +72,43 @@ class uploaded_to extends DownloadClass {
         exit;
     }
 
-    private function DownloadPremium($link) {
-        global $premium_acc;
-        $post = array();
-        $post["id"] = $_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc ["uploaded_to"] ["user"];
-        $post["pw"] = $_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["uploaded_to"] ["pass"];
-        $page = $this->GetPage("http://uploaded.to/io/login", 0, $post, $link);
-        $Cookies = GetCookies($page);
-        $page = $this->GetPage($link, $Cookies, 0, $link);
-		is_present($page, "/404", "File not found");
-		is_present($page,"Traffic exhausted","Premium account is out of Bandwidth");
-        if (!preg_match('#http://.+/dl?[^\r"]+#', $page, $dlink)) {
+    private function DownloadPremium($link, $cookie = false) {
+        $cookie = $this->login($cookie);
+        $page = $this->GetPage($link, $cookie);
+        is_present($page, "Traffic exhausted", "Premium account is out of Bandwidth");
+
+        if (!preg_match('#http:\/\/stor(\d+)?\.uploaded\.to/dl\/[^\r"]+#', $page, $dlink)) {
             html_error("Error 1x01: Plugin is out of date");
         }
-        $this->RedirectDownload(trim($dlink[0]), "uploaded", $Cookies, 0, $link);
-        exit;
+        $this->RedirectDownload(trim($dlink[0]), "uploaded", $cookie, 0, $link);
+    }
+
+    private function login($loginc = false) {
+        global $premium_acc;
+        if (!$loginc) {
+            $user = ($_REQUEST["premium_user"] ? $_REQUEST["premium_user"] : $premium_acc["uploaded_to"]["user"]);
+            $pass = ($_REQUEST["premium_pass"] ? $_REQUEST["premium_pass"] : $premium_acc["uploaded_to"]["pass"]);
+            if (empty($user) || empty($pass)) {
+                html_error("Login Failed: Username or Password is empty. Please check login data.");
+            }
+            $post = array();
+            $post["id"] = $user;
+            $post["pw"] = $pass;
+            $page = $this->GetPage("http://uploaded.to/io/login", 0, $post, 'http://uploaded.to/\r\nX-Requested-With: XMLHttpRequest'); //other way add xml request without edit http.php
+            $cookie = GetCookies($page);
+            is_present($page, 'err:"User and password do not match', 'Login Failed, please check your account');
+        } elseif (strlen($loginc) == 84) {
+            $cookie = 'login=' . $loginc;
+        } else {
+            html_error("[Cookie] Invalid cookie (" . strlen($loginc) . " != 84). Try to encode your cookie first!");
+        }
+
+        $page = $this->GetPage('http://uploaded.to/me', $cookie);
+        $cookie = $cookie . '; ' . GetCookies($page);
+        is_present($page, '<em>Free</em>', 'Account free, please check ur premium account');
+        is_present($page, 'ocation: http://uploaded.to', 'Cookie failed, please check ur account');
+
+        return $cookie;
     }
 
 }
@@ -79,6 +116,7 @@ class uploaded_to extends DownloadClass {
 /*
  * by vdhdevil 15-March-2011
  * Updated 01-May-2011
- * 
+ * Fixed by Ruud v.Tony also add some improvement 11-09-2011
+ *
  */
 ?>

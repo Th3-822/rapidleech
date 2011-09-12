@@ -11,20 +11,17 @@ function getftpurl($host, $port, $url, $saveToFile = 0) {
     if (!$ftp->SetServer($host, (int) $port)) {
         $ftp->quit();
         $server = $host . ':' . $port;
-        $lastError = sprintf(lang(79), $server) . "<br />" .
-                '<a href="javascript:history.back(-1);">' . lang(78) . '</a><br /><br />';
+        $lastError = sprintf(lang(79), $server) . "<br />" . '<a href="javascript:history.back(-1);">' . lang(78) . '</a><br /><br />';
         return FALSE;
     } else {
         if (!$ftp->connect()) {
             $ftp->quit();
-            $lastError = sprintf(lang(79), $server) . "<br />" .
-                    '<a href="javascript:history.back(-1);">' . lang(78) . '</a><br /><br />';
+            $lastError = sprintf(lang(79), $server) . "<br />" . '<a href="javascript:history.back(-1);">' . lang(78) . '</a><br /><br />';
             return FALSE;
         } else {
             if (!$ftp->login($AUTH["ftp"]["login"], $AUTH["ftp"]["password"])) {
                 $ftp->quit();
-                $lastError = lang(80) . "<br />" .
-                        '<a href="javascript:history.back(-1);">' . lang(78) . '</a><br /><br />';
+                $lastError = lang(80) . "<br />" . '<a href="javascript:history.back(-1);">' . lang(78) . '</a><br /><br />';
                 return FALSE;
             } else {
                 echo('<p>');
@@ -398,7 +395,7 @@ class ftp_base {
             return FALSE;
         if (!$this->_checkCode())
             return FALSE;
-        return preg_replace("#^[0-9]{3} \"(.+)\" .+#" . CRLF, "\\1", $this->_message);
+        return preg_replace("#^[0-9]{3} \"(.+)\" .+" . CRLF."#", "\\1", $this->_message);
     }
 
     function cdup() {
@@ -453,7 +450,7 @@ class ftp_base {
             return FALSE;
         if (!$this->_checkCode())
             return FALSE;
-        return preg_replace("#^[0-9]{3} ([0-9]+)#" . CRLF, "\\1", $this->_message);
+        return preg_replace("#^[0-9]{3} ([0-9]+)" . CRLF."#", "\\1", $this->_message);
     }
 
     function mdtm($pathname) {
@@ -461,7 +458,7 @@ class ftp_base {
             return FALSE;
         if (!$this->_checkCode())
             return FALSE;
-        $mdtm = preg_replace("#^[0-9]{3} ([0-9]+)#" . CRLF, "\\1", $this->_message);
+        $mdtm = preg_replace("#^[0-9]{3} ([0-9]+)" . CRLF."#", "\\1", $this->_message);
         $date = sscanf($mdtm, "%4d%2d%2d%2d%2d%2d");
         $timestamp = mktime($date[3], $date[4], $date[5], $date[1], $date[2], $date[0]);
         return $timestamp;
@@ -511,7 +508,7 @@ class ftp_base {
             return FALSE;
         if (!$this->_checkCode())
             return FALSE;
-        return preg_split("/[" . CRLF . "]+/", preg_replace("#[0-9]{3}[ -][^" . CRLF . "]*#" . CRLF, "", $this->_message), -1, PREG_SPLIT_NO_EMPTY);
+        return preg_split("/[" . CRLF . "]+/", preg_replace("#[0-9]{3}[ -][^" . CRLF . "]*" . CRLF."#", "", $this->_message), -1, PREG_SPLIT_NO_EMPTY);
     }
 
     function rawlist($arg="", $pathname="") {
@@ -815,7 +812,7 @@ class ftp extends ftp_base {
                 $this->_data_close();
                 return FALSE;
             }
-            $ip_port = explode(",", preg_replace("#^.+ \\(?([0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9]+,[0-9]+)\\)?.*" . CRLF . "$#", "\\1", $this->_message));
+            $ip_port = explode(",", preg_replace("#^.+ \\(?([0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9]+,[0-9]+)\\)?.*" . CRLF . "$"."#", "\\1", $this->_message));
             $this->_datahost = $ip_port[0] . "." . $ip_port[1] . "." . $ip_port[2] . "." . $ip_port[3];
             $this->_dataport = (((int) $ip_port[4]) << 8) + ((int) $ip_port[5]);
             $this->SendMSG("Connecting to " . $this->_datahost . ":" . $this->_dataport);

@@ -1,5 +1,4 @@
 <?php
-
 if (!defined('RAPIDLEECH')) {
     require_once ("index.html");
     exit ();
@@ -44,30 +43,30 @@ class share_online_biz extends DownloadClass {
         }
         $dl = cut_str($page, 'dl="', '"');
         insert_timer($count[1]);
-        $this->GetLink($Cookies, $dl,$link);
+        $this->GetLink($Cookies, $dl, $link);
         exit;
     }
 
     private function DownloadPremium($link) {
         global $premium_acc;
-        $post = array();
-        $post["user"] = $_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc ["shareonline_biz"] ["user"];
-        $post["pass"] = $_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["shareonline_biz"] ["pass"];
-        $post["l_rememberme"] = "1";
-        $page = sslcurl("https://www.share-online.biz/user/login", $post, 0, "http://www.share-online.biz/");
-        $Cookies = GetCookies($page);
-        $page = $this->GetPage($link, $Cookies);
-        if (preg_match("#Location: (.+)#", $page, $temp)) {
-            $link = trim("http://www.share-online.biz" . $temp[1]);
-            $page = $this->GetPage($link, $Cookies);
-        }
-        $Cookies.=GetCookies($page);
-        $dl = cut_str($page, 'var dl="', '"');
-        $this->GetLink($Cookies, $dl,$link);
-        exit;
+        preg_match('#([A-Z0-9]+)#', $link, $link_id);
+        $username = $_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc ["shareonline_biz"] ["user"];
+        $password = $_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["shareonline_biz"] ["pass"];
+        $url = 'http://api.share-online.biz/account.php?username=' . $username . '&password=' . $password . '&act=userDetails';
+        $page = $this->GetPage($url, 0, 0, 0);
+        is_present($page, "EXCEPTION input data invalid", "Check your login details!");
+        preg_match('#(dl=.+)#', $page, $details);
+
+        $url = 'http://api.share-online.biz/account.php?username=' . $username . '&password=' . $password . '&act=download&lid=' . $link_id[1] . '';
+        $page = $this->GetPage($url, $details[1], 0, $url);
+        preg_match('#URL: (.+)#', $page, $newurl);
+        $page = $this->GetPage($newurl[1], $details[1], 0, $url);
+        is_present($page, "EXCEPTION what do you expect to find here", "Download link not found, plugin need to be updated!");
+        preg_match('#Location: (.+)#', $page, $dlink);
+        $this->RedirectDownload(trim($dlink[1]), "share-online", $details[1], 0, $newurl[1]);
     }
 
-    private function GetLink($Cookies, $dl,$link) {
+    private function GetLink($Cookies, $dl, $link) {
         $ss = <<<HTML
 <html>
 <head>
@@ -85,10 +84,12 @@ HTML;
         $script = $ss . '<script language="Javascript">' . $this->jscript_base64 . 'var dl=".' . $dl . '";' . 'document.getElementById("link").value=$.base64Decode(dl);document.plink.submit();</script>';
         echo ($script);
     }
+
 }
 
 /*
  * by vdhdevil Feb-10-2011
  * updated Feb-13-2011: fixed work with autodownload
+ * Updated Sep-09-2011: Fixed AutoTransload with using api support by defport
  */
- ?>
+?>

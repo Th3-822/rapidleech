@@ -525,12 +525,21 @@ function decrypt($string)
 	return $decrypted;
 }
 
-function textarea($var, $stop = false) {
-	echo "\n<br /><textarea cols='200' rows='30' readonly='readonly'>";
-	if (is_array($var)) var_dump($var);
-	else echo htmlentities($var);
-	echo "</textarea><br />\n";
-	if ($stop) exit;
+/**
+ * Textarea for debugging variable
+ * @param string The variable you want to debug
+ * @param int Column for variable display
+ * @param int Rows for variable display
+ * @param bool Options to continue or not process
+ */
+function textarea($var, $cols = 200, $rows = 30, $stop = false) {
+    $cols = ($cols == 0) ? 200 : $cols;
+    $rows = ($rows == 0) ? 30 : $rows;
+    echo "\n<br /><textarea cols='$cols' rows='$rows' readonly='readonly'>";
+    if (is_array($var)) echo htmlentities(print_r($var, true), ENT_QUOTES);
+    else echo htmlentities($var, ENT_QUOTES);
+    echo "</textarea><br />\n";
+    if ($stop) exit;
 }
 
 ?>
