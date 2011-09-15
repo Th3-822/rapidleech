@@ -37,6 +37,12 @@ function getftpurl($host, $port, $url, $saveToFile = 0) {
 
                 list($saveToFile, $tmp) = explode('?', $saveToFile);
 
+                if ($options['file_size_limit'] > 0) {
+                   if ($fileSize > $options['file_size_limit']*1024*1024) {
+                      $lastError = lang(336) . bytesToKbOrMbOrGb ( $options['file_size_limit']*1024*1024 ) .".";
+                      return false;
+                   }
+                }
                 if (!empty($options['rename_prefix'])) {
                     $File_Name = $options['rename_prefix'] . '_' . basename($saveToFile);
                     $saveToFile = dirname($saveToFile) . PATH_SPLITTER . $File_Name;
