@@ -46,7 +46,7 @@ if ($continue_up)
 			
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 0, 0, $post, 0, $_GET["proxy"], $pauth);
 			is_present($page, 'EXCEPTION username or password invalid', 'Your login details are wrong!');
-			preg_match('#([a-zA-Z0-9]+);(dlw([0-9]+)-[0-9]\.share-online\.biz\/upv3\.php)#', $page,$session);
+			preg_match('#([a-zA-Z0-9]+);(dlw([0-9]+)-[0-9]\.share-online\.biz\/upload)#', $page,$session);
 			}	
 ?>
 <script>document.getElementById('info').style.display='none';</script>
