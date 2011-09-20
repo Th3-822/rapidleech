@@ -123,7 +123,7 @@ class DownloadClass {
 		
 		echo "<form action='audl.php?GO=GO' method='post' >\n";
 		echo "<input type='hidden' name='links' value='" . $links . "'>\n";
-		$key_array = array ( "useproxy", "proxy", "proxyuser", "proxypass" );
+		$key_array = array ( "useproxy", "proxy", "proxyuser", "proxypass", "premium_acc", "premium_user", "premium_pass", "cookieuse", "cookie" );
 		foreach ( $key_array as $v )
 			echo "<input type='hidden' name='" . $v . "' value='" . $_GET [$v] . "' >\n";
 		echo "<script language='JavaScript'>void(document.forms[0].submit());</script>\n";

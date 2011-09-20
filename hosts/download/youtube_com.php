@@ -6,7 +6,7 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class youtube_com extends DownloadClass {
-	private $page;
+	private $page, $cookie;
 	public function Download($link) {
 		$this->page = $this->GetPage($link);
 		if (preg_match('#^HTTP/1.(0|1) 404 Not Found#i', $this->page)) {
@@ -19,9 +19,16 @@ class youtube_com extends DownloadClass {
 		if ($_REQUEST["step"] || preg_match('#Location: http://(www.)?youtube.com/das_captcha#i', $this->page)) {
 			$this->captcha($link);
 		}
+		$Mesg = lang(300);
 		if (preg_match('#Location: http://(www.)?youtube.com/verify_age#i', $this->page)) {
-			$this->changeMesg(lang(300)."<br />Verify_age page found:<br />This video may contain content that is inappropriate for some users<br />Logging in to Youtube...");
+			$Mesg .= "<br /><br />Verify_age page found:<br />This video may contain content that is inappropriate for some users<br /><br />Logging in to Youtube...<br />Direct Link option may not work.";
+			$this->changeMesg($Mesg);
 			$this->verify_age($link);
+		}
+		if (preg_match('#Location: http://(www.)?youtube.com/verify_controversy#i', $this->page)) {
+			$Mesg .= "<br /><br />Verify_controversy page found:<br />The following content has been identified by the YouTube community as being potentially offensive or inappropriate. Viewer discretion is advised.";
+			$this->changeMesg($Mesg);
+			$this->verify_controversy($link);
 		}
 
 		if (!preg_match('#fmt_stream_map=(.+?)(&|(\\\u0026))#', $this->page, $fmt_url_map)) html_error('Video link not found.');
@@ -93,7 +100,7 @@ class youtube_com extends DownloadClass {
 		}
 		else
 		{
-			$this->RedirectDownload (urldecode($furl), $FileName, $cookies, 0, 0, $FileName);
+			$this->RedirectDownload (urldecode($furl), $FileName, $this->cookie, 0, 0, $FileName);
 		}
 	}
 
@@ -113,7 +120,8 @@ class youtube_com extends DownloadClass {
 			is_present($page, "\r\n\r\nAuthorization Error.", "Error sending captcha.");
 			is_notpresent($page, "Set-Cookie: goojf=", "Cannot get captcha cookie.");
 
-			$this->page = $this->GetPage($link, GetCookies($page));
+			$this->cookie = GetCookiesArr($page);
+			$this->page = $this->GetPage($link, $this->cookie);
 		} else {
 			$page = $this->GetPage($url);
 
@@ -133,7 +141,7 @@ class youtube_com extends DownloadClass {
 		}
 	}
 
-	private function login() {
+	private function login($link) {
 		global $premium_acc;
 
 		if (!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) {
@@ -146,8 +154,8 @@ class youtube_com extends DownloadClass {
 		if (empty($user) || empty($pass)) html_error("Login Failed: Login Empty.", 0);
 
 		$post = array();
-		$post["Email"] = $user;
-		$post["Passwd"] = $pass;
+		$post["Email"] = urlencode($user);
+		$post["Passwd"] = urlencode($pass);
 		$post["service"] = 'youtube';
 
 		$page = $this->GetPage("https://www.google.com/accounts/ClientLogin", 0, $post, "https://www.google.com/accounts/ClientLogin");
@@ -162,25 +170,42 @@ class youtube_com extends DownloadClass {
 		is_present($page, "Error=ServiceUnavailable", "Login Failed: Service is not available; try again later.");
 
 		if (!preg_match('@SID=([^\r|\n]+)@i', $page, $sid)) html_error("Login Failed: SessionID token not found.", 0);
-		return "SID={$sid[1]}";
+
+		$this->cookie["SID"] = $sid[1];
+		$this->page = $this->GetPage($link, $this->cookie);
+		$this->cookie = array_merge($this->cookie, GetCookiesArr($this->page));
 	}
 
 	private function verify_age($link) {
-		$cookie = $this->login();
-		$this->page = $this->GetPage($link, $cookie);
-		$cookie = "SID={$sid[1]} ;" . GetCookies($this->page);
+		$this->login($link);
+
 		if (!preg_match('#Location: http://(www.)?youtube.com/verify_age#i', $this->page)) return;
 
 		$url = "http://www.youtube.com/verify_age?next_url=" . urlencode($link);
-		$page = $this->GetPage($url, $cookie);
+		$page = $this->GetPage($url, $this->cookie);
 
 		$post = array();
 		$post['next_url'] = urlencode($link);
 		$post['set_racy'] = 'true';
 		$post['session_token'] = urlencode(cut_str($page, "'XSRF_TOKEN': '", "'"));
 
-		$page = $this->GetPage("http://www.youtube.com/verify_age?action_confirm=true", $cookie, $post, $url);
-		$this->page = $this->GetPage("$link&has_verified=1", $cookie, 0, "http://www.youtube.com/verify_age?action_confirm=true");
+		$urlc = "http://www.youtube.com/verify_age?action_confirm=true";
+		$page = $this->GetPage($urlc, $this->cookie, $post, $url);
+		$this->page = $this->GetPage("$link&has_verified=1", $this->cookie, 0, $urlc);
+	}
+
+	private function verify_controversy($link) {
+		$url = "http://www.youtube.com/verify_controversy?next_url=" . urlencode($link);
+		$page = $this->GetPage($url, $this->cookie);
+
+		$post = array();
+		$post['next_url'] = urlencode($link);
+		// $post['ignorecont'] = 'on';
+		$post['session_token'] = urlencode(cut_str($page, "'XSRF_TOKEN': '", "'"));
+
+		$urlc = "http://www.youtube.com/verify_controversy?action_confirm=1";
+		$page = $this->GetPage($urlc, $this->cookie, $post, $url);
+		$this->page = $this->GetPage("$link&skipcontrinter=1", $this->cookie, 0, $urlc);
 	}
 }
 
@@ -192,5 +217,6 @@ class youtube_com extends DownloadClass {
 // [04-8-2011]  Fixed for recent changes in fmt_stream_map content & some edits maded for work fine. (Redirect is needed yet) - Th3-822
 // [12-8-2011]  Added support for videos that need login for verify age & Changed fmt order by quality & Fixed regexps for fileext. - Th3-822
 // [13-8-2011]  Some fixes & removed not working code & fixed verify_age function. - Th3-822
+// [17-9-2011]  Added function for skip 'verify_controversy' on youtube && Fixed cookies after captcha && Little changes. - Th3-822
 
 ?>
