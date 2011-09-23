@@ -96,6 +96,10 @@ class torrific_com extends DownloadClass
 		is_present( $page, 'torrent is downloading', 'Your torrent is downloading. Please wait till it get finished.' );
 		is_present( $page, 'torrent was added to the queue', 'Sorry, this torrent was in queue, please wait till it gets completed.' );
 		
+		if (preg_match('%<span id="delay_message">in (\d+) seconds<\/span>%', $page, $wait)) {
+			$this->CountDown($wait[1]);
+		}
+    
 		if ( strpos( $page, '<table id="files"' ) === false )
 		{
 			html_error ("Unable to fetch the download links. Please check your download link!", 0 );
