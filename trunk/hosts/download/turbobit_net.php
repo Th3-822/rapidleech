@@ -1,5 +1,4 @@
 <?php
-
 if (!defined('RAPIDLEECH')) {
     require_once("index.html");
     exit;
@@ -88,6 +87,9 @@ class turbobit_net extends DownloadClass {
         $page = $this->GetPage($flink, $Cookies, $post, $link);
         is_present($page, "Incorrect, try again!", "Incorrect Captcha");
         if (!strpos($page, "imit : 60")) {
+            if (preg_match("#limit: (\d+)#",$page,$count)){
+                html_error("Please wait {$count[1]} for next download");
+            }
             html_error("Error 0x11: Plugin is out of date");
         }
         insert_timer(60);
@@ -95,7 +97,7 @@ class turbobit_net extends DownloadClass {
         if (!preg_match("#maxLimit : (\d+)#", $page,$maxlimit)){
             html_error("Error 0x12: Plugin is out of date");
         }
-        $rlink = "http://turbobit.net" . $tmp.$maxlimit[1];
+        $rlink = "http://turbobit.net" . $tmp.($maxlimit[1]*2);
         $page = $this->GetPage($rlink, $Cookies, 0, $link, 0, 1);
         if (!preg_match("#/download/[^']+#", $page, $tmp)) {
             html_error("Error 0x13: Plugin is out of date");
