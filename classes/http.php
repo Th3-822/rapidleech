@@ -201,6 +201,20 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 	if ($saveToFile) {
 		//$bytesTotal = intval ( trim ( cut_str ( $header, "Content-Length:", "\n" ) ) );
+      if (preg_match("#(a-z0-9.]+)?(([a-z]+).[a-z]+([.a-z]+)?)#", $host, $tmp)) {
+            $hostclass = $tmp[2];
+            if (substr($hostclass, 0, 1) > 0) {
+                $hostclass = "d" . $hostclass;
+            }
+            $hostclass=str_replace(array("-","."), "_", $hostclass);
+            if (file_exists(HOST_DIR."download/".$hostclass.".php")){
+                /* @var $hostvar DownloadClass */
+                require(HOST_DIR."DownloadClass.php");
+                require(HOST_DIR."download/".$hostclass.".php");
+                $hostvar = new $hostclass();
+                $hostvar->CheckBack($header);
+            }
+        }
 		$bytesTotal = trim ( cut_str ( $header, "Content-Length:", "\n" ) );
 
 		global $options;

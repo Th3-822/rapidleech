@@ -1,5 +1,4 @@
 <?php
-
 if (!defined('RAPIDLEECH')) {
     require_once ("index.html");
     exit ();
@@ -9,64 +8,97 @@ class easy_share_com extends DownloadClass {
 
     public function Download($link) {
         global $premium_acc;
-        if (( $_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"] ) ||
-                ( $_REQUEST ["premium_acc"] == "on" && $premium_acc ["easyshare_com"] ["user"] && $premium_acc ["easyshare_com"] ["pass"] )) {
+        if (( $_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"] ) || ( $_REQUEST ["premium_acc"] == "on" && $premium_acc ["easyshare_com"] ["user"] && $premium_acc ["easyshare_com"] ["pass"] )) {
             $this->DownloadPremium($link);
-        } else if ($_POST['easy_share'] == "ok") {
+        } else if ($_POST['step'] == "1") {
             $this->DownloadFree($link);
         } else {
             $this->Retrieve($link);
         }
     }
 
+  /*
+   * exit for terminated download
+   * return for continue download
+   * $content is header content before download
+   */
+    public function CheckBack($content) {
+        if (!strpos($content, "ontent-Disposition: attachment; ")){
+            html_error("You have input wrong captcha, Please try again!");
+        }
+        return;
+    }
+
     private function Retrieve($link) {
-      global $options;
-        $page = $this->GetPage($link);
+      global $Referer;
+        $page = $this->GetPage($link, "language=en"); // keep page in english
         is_present($page, "The file could not be found", "The file could not be found. Please check the download link.");
         is_present($page, "File not available", "File not available");
         is_present($page, "Page not found", "The file could not be found. Please check the download link.");
-        $cookie = GetCookies($page);
-        $FileName = cut_str($page, 'Download ', ',');
-        $FileName = trim($FileName);
-        $linkcaptcha = cut_str($page, "/file_contents/captcha/", "'");
-        if (!strpos($page, 'method="post" action="')) {
-            $time = cut_str($page, "w='", "'");
-            insert_timer($time);
-            $randnum = rand(10000, 100000);
-            $Referer = $link;
-            $linkcaptcha = "http://www.easy-share.com/file_contents/captcha/" . $linkcaptcha;
-            $page = $this->GetPage($linkcaptcha, $cookie, 0, $Referer);
-            $cookie .='; ' . GetCookies($page);
+        is_present($page, 'There is another download in progress from your IP', 'There is another download in progress from your IP. Please try to downloading later.');
+        $cookie = GetCookies($page). "; language=en";
+        $FileName = trim(str_replace(" ", ".", cut_str($page, 'Download ', ',')));
+        // first timer
+        if (preg_match('/wf = (\d+);/', $page, $wait)) {
+            $this->CountDown($wait[1]);
         }
-        $linkpost = cut_str($page, 'method="post" action="', '"');
-        $linkcaptcha = cut_str($page, 'Recaptcha.create("', '"');
-        $valid = cut_str($page, 'name="id" value="', '"');
-        $page = $this->GetPage('http://www.google.com/recaptcha/api/challenge?k=' . $linkcaptcha . '&ajax=1');
-        $challenge = cut_str($page, "challenge : '", "'");
-        $img = 'http://www.google.com/recaptcha/api/image?c=' . $challenge;
-        $page = $this->GetPage($img);
-        $headerend = strpos($page, "\r\n\r\n");
-        $pass_img = substr($page, $headerend + 4);
-        write_file($options['download_dir'] . "easyshare_captcha.jpg", $pass_img);
-        $data = $this->DefaultParamArr($linkpost, $cookie, $referer);
-        $data['challenge'] = $challenge;
-        $data['valid'] = $valid;
-        $data['easy_share'] = "ok";
-        $data['FileName'] = $FileName;
-        $this->EnterCaptcha($options['download_dir'] . "easyshare_captcha.jpg", $data, 5);
+        if (!strpos($page, 'method="post" action="')) {
+            // get captcha data
+            $link = "http://www.easy-share.com".cut_str($page, "u='", "';");
+            $page = $this->GetPage($link, $cookie, 0, $Referer, 0, 1);
+            //get new timer, then refresh the page
+            if (preg_match("/w='(\d+)';/", $page, $wait)) {
+                if ($wait[1] > 90) {
+                     // no post, seem I've mistaken, damn it...
+                    $this->JSCountdown($wait[1]);
+                } else {
+                    $this->CountDown($wait[1]);
+                }
+                $page = $this->GetPage($link, $cookie, 0, $Referer, 0, 1);
+            }
+            $cookie = $cookie. '; ' . GetCookies($page);
+        }
+        $link = cut_str($page, 'method="post" action="', '"');
+        $id = cut_str($page, 'name="id" value="', '"');
+        // now we start to display the captcha data
+        if (!preg_match('/Recaptcha\.create\("([^"]+)/i', $page, $cid)) {
+            html_error('Can\'t find chaptcha id');
+        }
+
+        $page = $this->GetPage("http://www.google.com/recaptcha/api/challenge?k=$cid[1]&cachestop=" . rand() . "&ajax=1");
+        $ch = cut_str($page, "challenge : '", "'");
+        if ($ch) {
+            $page = $this->GetPage("http://www.google.com/recaptcha/api/image?c=".$ch);
+            $capture = substr($page, strpos($page, "\r\n\r\n") + 4);
+            $imgfile = DOWNLOAD_DIR . "easyshare.jpg";
+            if (file_exists($imgfile)) {
+                unlink($imgfile);
+            }
+            write_file($imgfile, $capture);
+        } else {
+            html_error('Can\'t find challenge data!');
+        }
+
+        $data = $this->DefaultParamArr($link, $cookie);
+        $data['step'] = '1';
+        $data['recaptcha_challenge_field'] = $ch;
+        $data['id'] = $id;
+        $data['name'] = $FileName;
+        $this->EnterCaptcha($imgfile, $data, 20);
+        exit();
     }
 
     private function DownloadFree($link) {
-        $post = array();
-        $post["recaptcha_challenge_field"] = $_POST['challenge'];
+        global $Referer;
+        $post["recaptcha_challenge_field"] = $_POST['recaptcha_challenge_field'];
         $post["recaptcha_response_field"] = $_POST['captcha'];
-        $post["id"] = $_POST['valid'];
-        $cookie = $_POST['cookie'];
-        $Referer = $_POST['referer'];
-        $FileName = $_POST["FileName"];
-        $Url = parse_url($link);
-        $FileName = !$FileName ? basename($Url["path"]) : $FileName;
-        $this->RedirectDownload($link, $FileName, $cookie, $post, $Referer);
+        $post["id"] = $_POST['id'];
+        $cookie = urldecode($_POST['cookie']);
+        $dlink = urldecode($_POST['link']);
+        $FileName = $_POST['name'];
+        $this->RedirectDownload($dlink, $FileName, $cookie, $post, $Referer);
+        $this->CheckBack($dlink);
+        exit();
     }
 
     private function DownloadPremium($link) {
@@ -108,7 +140,6 @@ class easy_share_com extends DownloadClass {
         }
         exit();
     }
-
 }
 
 /* * ************************************************\
@@ -117,5 +148,6 @@ class easy_share_com extends DownloadClass {
   FIXED by rajmalhotra on 12 Feb 2010 => FIXED downloading from Premium Account
   FIXED by vdhdevil on 01 Dec 2010 => Fixed Premium for v42
   FIXED by Ruud v.Tony on 6 Feb 2011 => Fixed the free codes, my first rapidleech code made, lol :D
+  FIXED by Ruud v.Tony on 25 Sept 2011 => Fixed the captcha display problem...
   \************************************************* */
 ?>
