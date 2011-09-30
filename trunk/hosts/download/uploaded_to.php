@@ -22,6 +22,7 @@ class uploaded_to extends DownloadClass {
             $page = $this->GetPage($link);
             is_present($page, "/404", "File not found");
         }
+        unset($page);
         if (($_REQUEST["cookieuse"] == "on" && preg_match("/login\s?=\s?(\w{84})/i", $_REQUEST["cookie"], $c)) || ($_REQUEST["premium_acc"] == "on" && $premium_acc["uploaded_to"]["cookie"])) {
             $cookie = (empty($c[1]) ? $premium_acc["uploaded_to"]["cookie"] : $c[1]);
             $this->DownloadPremium($link, $cookie);

@@ -86,6 +86,7 @@ class rapidshare_com extends DownloadClass {
 			return $this->DownloadFree($link);
 		}
 	}
+	
 	private function DownloadFree($link) {
 		$page = $this->GetPageS($this->apiurl."?sub=download&fileid={$this->fileid}&filename={$this->filename}&try=1");
 
@@ -115,33 +116,7 @@ class rapidshare_com extends DownloadClass {
 			html_error("Download link not found.");
 		}
 	}
-	private function JSCountdown($secs, $post = 0, $text='Waiting link timelock') {
-		global $PHP_SELF;
-		echo "<p><center><span id='dl' class='htmlerror'><b>ERROR: Please enable JavaScript. (Countdown)</b></span><br /><span id='dl2'>Please wait</span></center></p>\n";
-		echo "<form action='$PHP_SELF' name='cdwait' method='POST'>\n";
-		if ($post) {
-			foreach ($post as $name => $input) {
-				echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
-			}
-		}?>	<script type="text/javascript">
-		var c = <?php echo $secs; ?>;var text = "<?php echo $text; ?>";var c2 = 0;var dl = document.getElementById("dl");var a2 = document.getElementById("dl2");fc();fc2();
-		function fc() {
-			if (c > 0) {
-				if (c > 120) {
-					dl.innerHTML = text+". Please wait <b>"+ Math.round(c/60) +"</b> minutes...";
-				} else {
-					dl.innerHTML = text+". Please wait <b>"+c+"</b> seconds...";
-				}
-				c = c - 1;
-				setTimeout("fc()", 1000);
-			} else {
-				dl.style.display="none";
-				void(<?php if ($post) echo 'document.forms.cdwait.submit()';else echo 'location.reload()'; ?>);
-			}
-		}
-		function fc2(){if(c>120){if(c2<=20){a2.innerHTML=a2.innerHTML+".";c2=c2+1}else{c2=10;a2.innerHTML=""}setTimeout("fc2()",100)}else{dl2.style.display="none"}}<?php echo "</script></form></body></html>";
-		exit;
-	}
+	
 	private function DownloadPremium() {
 		global $premium_acc;
 
@@ -168,6 +143,7 @@ class rapidshare_com extends DownloadClass {
 		$Href = $this->ReLocation($page);
 		$this->RedirectDownload($Href, $this->filename, $cookie, 0, 0, 0, $sendauth);
 	}
+	
 	private function PremiumCookieDownload($cookie) {
 		$this->ChkAccInfo($cookie);
 		$cookie = "enc=$cookie;";
@@ -178,6 +154,7 @@ class rapidshare_com extends DownloadClass {
 		$Href = $this->ReLocation($page);
 		$this->RedirectDownload($Href, $this->filename, $cookie);
 	}
+	
 	private function ChkAccInfo($cookie, $user='', $pass='', $pA=false) {
 		if ($cookie != "login") {
 			$page = $this->GetPageS($this->apiurl."?sub=getaccountdetails&cookie=$cookie");
@@ -228,6 +205,7 @@ class rapidshare_com extends DownloadClass {
 		}
 		if ($user) return $info['cookie'];
 	}
+	
 	private function ReLocation($page, $stop=1) {
 		if (!preg_match('@Location: https?://((\w+\.)?rapidshare\.com/[^\r|\n]+)@i', $page, $rloc)) {
 			if ($stop) html_error("Redirection not found.");
@@ -235,6 +213,7 @@ class rapidshare_com extends DownloadClass {
 		}
 		return "https://" . $rloc[1];
 	}
+	
 	private function GetPageS($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0) {
 		if (!$referer) {
 			global $Referer;
@@ -247,6 +226,7 @@ class rapidshare_com extends DownloadClass {
 		else $page = $this->GetPage($link, $cookie, $post, $referer, $auth);
 		return $page;
 	}
+	
 	private function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0) {
 		$opt = array(CURLOPT_HEADER => 1, CURLOPT_COOKIE => $cookie, CURLOPT_REFERER => $referer,
 			CURLOPT_SSL_VERIFYPEER => 0, CURLOPT_SSL_VERIFYHOST => 0, CURLOPT_RETURNTRANSFER => 1,

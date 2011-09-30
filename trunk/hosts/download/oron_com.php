@@ -1,5 +1,4 @@
 <?php
-
 if (!defined('RAPIDLEECH')) {
     require_once ("index.html");
     exit ();
@@ -33,77 +32,67 @@ class oron_com extends DownloadClass {
     }
 
     private function DownloadFree($link) {
-        global $Referer;
+        $post = array();
         $post['op'] = 'download2';
-        $post['method_free'] = 'Free Download';
-        $post['method_premium'] = '';
-        $post['down_direct'] = '1';
-        $post['referer'] = $link;
-        $post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
-        $post['recaptcha_response_field'] = $_POST['captcha'];
         $post['id'] = $_POST['id'];
         $post['rand'] = $_POST['rand'];
+        $post['referer'] = $_POST['link_referer'];
+        $post['method_free'] = ' Regular Download ';
+        $post['method_premium'] = '';
+        $post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
+        $post['recaptcha_response_field'] = $_POST['captcha'];
+        $post['down_direct'] = '1';
+        $link = urldecode($_POST['link']);
         $page = $this->GetPage($link, 0, $post, $link);
         is_present($page, "Wrong captcha", "Wrong captcha . Go to main page and reattempt", 0);
         is_present($page, "Expired session", "Expired session . Go to main page and reattempt", 0);
-        $snap = cut_str($page, 'Filename:', '</table>');
-        $dwn = cut_str($snap, 'href="', '"');
-        if (!$dwn)
-            html_error("Error getting download link", 0);
-        $Url = parse_url($dwn);
-        $FileName = basename($dwn);
-        $loc = "$PHP_SELF?filename=" . urlencode($FileName) .
-                "&host=" . $Url ["host"] .
-                "&port=" . $Url ["port"] .
-                "&path=" . urlencode($Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "")) .
-                "&referer=" . urlencode($Referer) .
-                "&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") .
-                "&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") .
-                "&method=" . $_GET ["method"] .
-                "&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") .
-                "&saveto=" . $_GET ["path"] .
-                "&link=" . urlencode($LINK) .
-                ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode($_GET ["comment"]) : "") .
-                $auth .
-                ($pauth ? "&pauth=$pauth" : "");
-        insert_location($loc);
+
+        if (!preg_match('%href="(.*)" class="atitle">%', $page, $dl)) html_error('Error: Free download link can\'t be found!');
+        $Url = parse_url($dl[1]);
+        $FileName = basename($Url['path']);
+        $this->RedirectDownload($dl[1], $FileName, 0, 0, $link);
+        exit();
     }
 
     private function Retrieve($link) {
-        global $options;
         $page = $this->GetPage($link);
         is_present($page,"403 Forbidden","Oron banned this server");
-        is_present($page, "File Not Found", "File Not Found", 0);
+        is_present($page, "File Not Found", "File could not be found due to its possible expiration or removal by the file owner.");
+
         $id = cut_str($page, 'name="id" value="', '"');
         $fname = cut_str($page, 'name="fname" value="', '"');
+
         $post = array();
         $post['op'] = 'download1';
         $post['usr_login'] = '';
         $post['id'] = $id;
         $post['fname'] = $fname;
-        $post['referer'] = '';
-        $post['method_free'] = ' Free Download ';
+        $post['referer'] = $link;
+        $post['method_free'] = ' Regular Download ';
         $page = $this->GetPage($link, 0, $post, $link);
-        insert_timer(60);
-        $rand = cut_str($page, 'name="rand" value="', '"');
-        $referer = cut_str($page, 'referer" value="', '"');
-        $down_direct = cut_str($page, 'own_direct" value="', '"');
-        $page = $this->GetPage("http://www.google.com/recaptcha/api/challenge?k=6LdSvrkSAAAAAOIwNj-IY-Q-p90hQrLinRIpZBPi");
+        if (preg_match('%<p class="err">(.*)<br>%', $page, $msg)) html_error ($msg[1]);
+        if (preg_match('#(\d+)</span> seconds#', $page, $wait)) $this->CountDown ($wait[1]);
 
-        is_present($page, "Expired session", "Expired session . Go to main page and reattempt", 0);
-        $cookie = GetCookies($page);
+        $rand = cut_str($page, 'name="rand" value="', '"');
+        $k = cut_str($page, 'api/challenge?k=', '"');
+        $page = $this->GetPage("http://www.google.com/recaptcha/api/challenge?k=$k");
         $ch = cut_str($page, "challenge : '", "'");
         $img = "http://www.google.com/recaptcha/api/image?c=" . $ch;
         $page = $this->GetPage($img);
-        $headerend = strpos($page, "\r\n\r\n");
-        $pass_img = substr($page, $headerend + 4);
-        write_file($options['download_dir'] . "oron_captcha.jpg", $pass_img);
+        $pass_img = substr($page, strpos($page, "\r\n\r\n") + 4);
+        $imgfile = DOWNLOAD_DIR. "oron_captcha.jpg";
+        if (file_exists($imgfile)) {
+            unlink($imgfile);
+        }
+        write_file($imgfile, $pass_img);
+
         $data = $this->DefaultParamArr($link);
         $data['step'] = 1;
         $data['id'] = $id;
         $data['rand'] = $rand;
+        $data['link_referer'] = $link;
         $data['recaptcha_challenge_field'] = $ch;
-        $this->EnterCaptcha($options['download_dir'] . "oron_captcha.jpg", $data, 10);
+        $this->EnterCaptcha($imgfile, $data, 10);
         exit();
     }
 
@@ -175,5 +164,6 @@ class oron_com extends DownloadClass {
   UPDATE BY Slider324 17-oct-10 UPDATE SUPPORT TO CAPTCHA
   UPDATE BY vdhdevil  04-Nov-10 UPDATE SUPPORT PREMIUM ACCOUNT
   UPDATE BY vdhdevil  19-March-10 [FIX]Login premium account
+  UPDATE BY Ruud v.Tony 29-Sept-2011 [FIX] Free Download code
  * \************************************************* */
 ?>
