@@ -29,6 +29,7 @@ $sites = array(
 	array('name' => 'Oron.com', 'link' => "^http://(www\.)?oron\.com/\w+", 'regex' => "Filename:", 'options' => array('cookie' => 'lang=english')),
 	array('name' => 'Shareflare.net', 'link' => "^http://(www\.)?shareflare\.net/download/[^/]+/.+\.html", 'regex' => '"file-desc"'),
 	array('name' => 'Bitshare.com', 'link' => "^http://(www\.)?bitshare\.com/files/\w+/.+(\.html)?", 'regex' => 'class="download"'),
-	array('name' => 'Enterupload.com', 'link' => "^http://(www\.)?enterupload\.com/\w+(/.+(\.html)?)?", 'regex' => "File size:", 'pattern' => '@/$@')
+	array('name' => 'Enterupload.com', 'link' => "^http://(www\.)?enterupload\.com/\w+(/.+(\.html)?)?", 'regex' => "File size:", 'pattern' => '@/$@'),
+	array('name' => 'filejungle.com', 'link' => "^http://(www\.)?filejungle\.com/f/", 'regex' => '<div id="file_name">')
 );
 ?>
