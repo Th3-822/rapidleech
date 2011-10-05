@@ -1,16 +1,16 @@
 ﻿<?php
 
 ####### Account Info. ###########
-$u_115_login = ""; //Set you username
-$u_115_pass = ""; //Set your password
+$u115_login = ""; //Set you username
+$u115_pass = ""; //Set your password
 ##############################
 
 $not_done=true;
 $continue_up=false;
-if ($u_115_login & $u_115_pass)
+if ($u115_login & $u115_pass)
     {
-        $_REQUEST['my_login'] = $u_115_login;
-        $_REQUEST['my_pass'] = $u_115_pass;
+        $_REQUEST['my_login'] = $u115_login;
+        $_REQUEST['my_pass'] = $u115_pass;
         $_REQUEST['action'] = "FORM";
         echo "<b><center>Use Default login/pass.</center></b>\n";
     }
@@ -25,7 +25,7 @@ else{
 <tr><td nowrap>&nbsp;User*<td>&nbsp;<input type=text name=my_login value='' style="width:160px;" />&nbsp;</tr>
 <tr><td nowrap>&nbsp;Password*<td>&nbsp;<input type=password name=my_pass value='' style="width:160px;" />&nbsp;</tr>
 <tr><td colspan=2 align=center><input type=submit value='Upload' /></tr>
-<tr><td colspan=2 align=center><small>*You can set it as default in <b><?php echo $page_upload["u.115.com"]; ?></b></small></tr>
+<tr><td colspan=2 align=center><small>*You can set it as default in <b><?php echo $page_upload["115.com"]; ?></b></small></tr>
 </table>
 </form>
 <?php
@@ -116,7 +116,7 @@ if ($continue_up)
         else
         {
             echo (" <div> Note: You required login before you can see it. </div>");
-            $download_link = "http://u.115.com/file/$pickcode";
+            $download_link = "http://115.com/file/$pickcode";
         }
         // echo (" <div> Mark </div>");
     }

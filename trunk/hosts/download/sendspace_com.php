@@ -1,157 +1,81 @@
 <?php
-
-if (!defined('RAPIDLEECH'))
-  {
-  require_once("index.html");
-  exit;
-  }
-
-if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["sendspace"]["user"] && $premium_acc["sendspace"]["pass"]))
-{
-	function biscotti($content)
-	{
-		is_page($content);
-		preg_match_all("/Set-Cookie: (.*)\n/",$content,$matches);
-		foreach ($matches[0] as $coll)
-		{
-			$bis.=cut_str($coll,"Set-Cookie: ","; ")."; ";
-		}
-	return $bis;
-	}
-
-	$page = geturl("sendspace.com", 80, "/", "", 0, 0, 0, "");
-	$cook=biscotti($page);
-	$post["action"] = "login";
-	$post["username"] = $_GET["premium_user"] ? trim($_GET["premium_user"]) : $premium_acc["sendspace"]["user"];
-	$post["password"] = $_GET["premium_pass"] ? trim($_GET["premium_pass"]) : $premium_acc["sendspace"]["pass"];
-	$post["remember"] = '1';
-	$post["submit"] = "login";
-	$post["openid_url"] = "";
-	$post["action_type"] = "login";
-	$page=geturl("sendspace.com", 80, "/login.html", "http://sendspace.com/login.html", $cook, $post, 0, $_GET["proxy"]);
-	$cook=$cook." ".biscotti($page);
-	is_present($cook,"ssal=deleted","Login incorrect retype your username or password correctly");
-	$Url = parse_url($LINK);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], 0, $cook, 0, 0, $_GET["proxy"], $pauth);
-	preg_match('%(http://fs.+\.sendspace\.com/dlp/[a-f0-9]{32}/.{8}/.{6}/.{6}/[^/]+\..{3})"\s%', $page, $dlink);
-	$Url = parse_url($dlink[1]);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], 0, $cook, 0, 0, $_GET["proxy"], $pauth);
-	preg_match('%ocation: (.+)\r\n%', $page, $flink);
-	$Href = 'http://' . $Url['host'] . $flink[1];
-	$Url = parse_url($Href);
-	$FileName = basename($Url['path']);
-	insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($LINK)."&cookie=".urlencode($cook)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".$LINK.($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+if (!defined('RAPIDLEECH')) {
+    require_once("index.html");
+    exit;
 }
-else
-//Use FREE instead?
-{
-	function sendspace_enc($par1,$par2,$text)
-  {
-  $myarr = array();
 
-  for ($i = 0; $i < $par1; $i++)
-    {
-		$myarr[$i] = $i;
-    }
-	
-  for ($j = 0,$k = $j,$l = $myarr; $j < $par1; $j++)
-    {
-		$k = (ord($par2[$j%strlen($par2)])+$l[$j]+$k)%$par1;
-		$m = $l[$j];
-		$l[$j] = $l[$k];
-		$l[$k] = $m;
-		$l[$k] = $l[$k]^5;
-    }
+class sendspace_com extends DownloadClass {
 
-  for ($res = '', $k = 0,$n = 0;$n < strlen($text); $n++)
-    {
-		$o = $n%$par1;
-		$k = ($l[$o]+$k)%$par1;
-		$p = $l[$o];
-		$l[$o] = $l[$k];
-		$l[$k] = $p;
-		$res.= chr(ord($text[$n])^$l[($l[$o]+$l[$k])%$par1]);
-    }
-
-  return $res;
-  }
-
-function sendspace_base64ToText($t)
-  {
-	$b64s = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"';
-  $r = '';
-  $m = 0;
-  $a = 0;
-  $l = strlen($t);
-    
-  for($n = 0; $n<$l; $n++)
-    {
-    $c = strpos($b64s,$t[$n]);
-    if($c >= 0)
-      {
-      if($m)
-       	{
-       	$d = ($c << (8-$m))& 255 | $a;
-        $r.= chr($d);
+    public function Download($link) {
+        global $premium_acc;
+        if (($_REQUEST['premium_acc'] == 'on' && $_REQUEST['premium_user'] && $_REQUEST['premium_pass']) || ($_REQUEST['premium_acc'] == 'on' && $premium_acc['sendspace']['user'] && $premium_acc['sendspace']['pass'])) {
+            $this->Premium($link);
+        } else {
+            $this->Free($link);
         }
-      $a = $c >> $m;
-      $m+= 2;
-      if($m == 8)
-        {
-        $m = 0;
+    }
+
+    private function Free($link) {
+        global $Referer;
+
+        $page = $this->GetPage($link);
+        if (preg_match('@Location: (http:\/\/.+sendspace\.com\/pro\/[^|\r|\n]+)@i', $page, $temp)) {
+            $link = trim($temp[1]);
+            $page = $this->GetPage($link);
         }
-      }
+        is_present($page, 'Sorry, the file you requested is not available.');
+        $cookie = GetCookies($page);
+        if (!preg_match('@http:\/\/fs(\d+)?n(\d+)?\.sendspace\.com\/[^|\r|\n|\'?"?]+@i', $page, $dl)) html_error("Error 0x01: Plugin out of date!");
+        $dlink = html_entity_decode(urldecode(trim($dl[0])), ENT_QUOTES, 'UTF-8');
+        $filename = parse_url($dlink);
+        $FileName = basename($filename['path']);
+        $this->RedirectDownload($dlink, $FileName, $cookie, 0, $Referer);
+        exit();
+    }
+
+    private function Premium($link) {
+        $pA = ($_REQUEST["premium_user"] && $_REQUEST["premium_pass"] ? true : false);
+        $cookie = $this->login($pA);
+        $page = $this->GetPage($link, $cookie);
+        if (preg_match('@Location: (http:\/\/.+sendspace\.com\/pro\/[^|\r|\n]+)@i', $page, $temp)) {
+            $link = trim($temp[1]);
+            $page = $this->GetPage($link, $cookie);
+        }
+        is_present($page, 'Sorry, the file you requested is not available.');
+        if (!preg_match('@http:\/\/fs(\d+)?n(\d+)?\.sendspace\.com\/[^|\r|\n|\'?"?]+@i', $page, $dl)) html_error("Error 0x02: Plugin out of date!");
+        $dlink = html_entity_decode(urldecode(trim($dl[0])), ENT_QUOTES, 'UTF-8');
+        $filename = parse_url($dlink);
+        $FileName = basename($filename['path']);
+        $this->RedirectDownload($dlink, $FileName, $cookie);
     }
     
-  return $r;
-  }
-  
-  
+    private function login($pA = false) {
+        global $premium_acc;
+        
+        $user = ($pA ? $_REQUEST["premium_user"] : $premium_acc["sendspace"]["user"]);
+        $pass = ($pA ? $_REQUEST["premium_pass"] : $premium_acc["sendspace"]["pass"]);
+        if (empty($user) || empty($pass)) {
+                html_error("Login Failed: EMail or Password is empty. Please check login data.");
+        }
+        $post['action'] = 'login';
+        $post['submit'] = 'login';
+        $post['target'] = urlencode('%2F');
+        $post['action_type'] = 'login';
+        $post['remember'] = '1';
+        $post['username'] = $user;
+        $post['password'] = $pass;
+        $post['remember'] = 'on';
+        $page = $this->GetPage('http://www.sendspace.com/login.html', 0, $post, 'http://www.sendspace.com/');
+        $cookie = GetCookies($page);
+        is_present($cookie, "ssal=deleted", "Login incorrect retype your username or password correctly");
+
+        $page = $this->GetPage('http://www.sendspace.com/mysendspace/myindex.html', $cookie);
+        is_notpresent($page, 'Your membership is valid', 'Account Free, login not validated!');
+
+        return $cookie;
+    }
 }
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], 0, 0, 0, 0, $_GET["proxy"],$pauth);
-is_page($page);
-				
-is_present($page,"There are no free download slots available");
-is_present($page,"Sorry, the file you requested is not available");
-//$countDown=trim(cut_str($page,"var count = ",";"));
-//insert_timer($countDown, "File is being prepared.","",true);
-$cookie = GetCookies($page);
-$post["download"]="%C2%A0REGULAR+DOWNLOAD%C2%A0";
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, $post, 0, $_GET["proxy"],$pauth);
-is_page($page);
-
-
-//$code_enc = cut_str($page,"utf8_decode(enc(base64ToText('","'");
-/*
-if (!$code_enc)
-	{
-	html_error('Error getting link');
-	}
-	*/
-//$dec_text = $code_enc;
-				
-//$d64text = sendspace_base64ToText($dec_text);
-//$urlnew = sendspace_utf8_decode($d64text);
-
-//is_notpresent($urlnew,'href="','Error decrypting URL page');
-$snap = cut_str ( $page ,'Download Link: ' ,'</a>' );			
-$Href = cut_str($snap,'href="','" onclick');
-if (!$Href)
-	{
-	html_error('Error decrypting URL page');
-	}
-$post=array();
-$Url = parse_url($Href);
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, $post, 0, $_GET["proxy"],$pauth);
-if(preg_match('/location: (.*)/im', $page, $loc)){
-	$Href = 'http://'.$Url["host"].$loc[1];
-}
-$Url = parse_url($Href);
-//$FileName = !$FileName ? basename($Url["path"]) : $FileName;
-$FileName = !$FileName ? basename(trim($loc[1])) : $FileName;
-
-insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
-
 // Use PREMIUM? [szalinski 09-May-09]
 // fix free download by kaox 19-dec-2009
+// Fix premium & free by Ruud v.Tony 03-Okt-2011
 ?>
