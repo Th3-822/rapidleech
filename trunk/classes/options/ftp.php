@@ -19,27 +19,27 @@ function ftp() {
 				<table>
 					<tr>
 						<td><?php echo lang(153); ?>:</td>
-						<td><input type="text" name="host" id="host" <?php echo $_COOKIE ["host"] ? ' value="' . $_COOKIE ["host"] . '"' : ''; ?>
+						<td><input type="text" name="host" id="host" <?php echo @$_COOKIE ["host"] ? ' value="' . $_COOKIE ["host"] . '"' : ''; ?>
 							size="23" /></td>
 					</tr>
 					<tr>
 						<td><?php echo lang(154); ?>:</td>
-						<td><input type="text" name="port" id="port" <?php echo $_COOKIE ["port"] ? ' value="' . $_COOKIE ["port"] . '"' : ' value="21"'; ?>
+						<td><input type="text" name="port" id="port" <?php echo @$_COOKIE ["port"] ? ' value="' . $_COOKIE ["port"] . '"' : ' value="21"'; ?>
 							size="4" /></td>
 					</tr>
 					<tr>
 						<td><?php echo lang(37); ?>:</td>
-						<td><input type="text" name="login" id="login" <?php echo $_COOKIE ["login"] ? ' value="' . $_COOKIE ["login"] . '"' : ''; ?>
+						<td><input type="text" name="login" id="login" <?php echo @$_COOKIE ["login"] ? ' value="' . $_COOKIE ["login"] . '"' : ''; ?>
 							size="23" /></td>
 					</tr>
 					<tr>
 						<td><?php echo lang(38); ?>:</td>
-						<td><input type="password" name="password" id="password" <?php echo $_COOKIE ["password"] ? ' value="' . $_COOKIE ["password"] . '"' : ''; ?>
+						<td><input type="password" name="password" id="password" <?php echo @$_COOKIE ["password"] ? ' value="' . $_COOKIE ["password"] . '"' : ''; ?>
 							size="23" /></td>
 					</tr>
 					<tr>
 						<td><?php echo lang(155); ?>:</td>
-						<td><input type="text" name="dir" id="dir" <?php echo $_COOKIE ["dir"] ? ' value="' . $_COOKIE ["dir"] . '"' : ' value="/"'; ?>
+						<td><input type="text" name="dir" id="dir" <?php echo @$_COOKIE ["dir"] ? ' value="' . $_COOKIE ["dir"] . '"' : ' value="/"'; ?>
 							size="23" /></td>
 					</tr>
 					<tr>
@@ -68,7 +68,7 @@ function ftp() {
 }
 
 function ftp_go() {
-	global $list, $options;
+	global $list, $options, $FtpUpload, $FtpBytesTotal, $FtpChunkSize, $FtpTimeStart, $FtpUploadBytesSent, $FtpLastChunkTime, $FtpLast;
 	require_once (CLASS_DIR . "ftp.php");
 	$ftp = new ftp ( );
 	if (! $ftp->SetServer ( $_POST ["host"], ( int ) $_POST ["port"] )) {
@@ -119,26 +119,30 @@ function ftp_go() {
 					</tr>
 				</table>
 				<br />
+				<script type="text/javascript">switchCell(3);</script>
 <?php
 					for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {
 						$file = $list [$_POST ["files"] [$i]];
-						echo '<script type="text/javascript">changeStatus('."'" . addslashes(basename ( $file ["name"] )) . "', '" . $file ["size"] . "');</script>";
+						echo '<script type="text/javascript">pr(0,0,0);changeStatus('."'" . addslashes(basename ( $file ["name"] )) . "', '" . $file ["size"] . "');</script>";
+						$FtpUpload = true;
 						$FtpBytesTotal = filesize ( $file ["name"] );
+						$FtpChunkSize = 4096;
 						$FtpTimeStart = getmicrotime ();
+						$FtpUploadBytesSent = $FtpLastChunkTime = $FtpLast = 0;
 						if ($ftp->put ( $file ["name"], basename ( $file ["name"] ) )) {
 							$time = round ( getmicrotime () - $FtpTimeStart );
 							$speed = @round ( $FtpBytesTotal / 1024 / $time, 2 );
 							echo '<script type="text/javascript">pr(100, '."'" . bytesToKbOrMbOrGb ( $FtpBytesTotal ) . "', " . $speed . ")</script>\r\n";
 							flush ();
-							
-							if ($_POST["del_ok"] && !$options['disable_deleting']) {
+
+							if (@$_POST["del_ok"] && !$options['disable_deleting']) {
 								if (@unlink ( $file ["name"] )) {
 									unset ( $list [$_POST ["files"] [$i]] );
 								}
 							}
-							
-								printf(lang(160),'<a href="ftp://' . $_POST ["login"] . ':' . $_POST ["password"] . '@' . $_POST ["host"] . ':' . $_POST ["port"] . $_POST ["dir"] . '/' . basename ( $file ["name"] ) . '"><b>' . basename ( $file ["name"] ) . '</b></a>');
-								echo "<br />".lang(161).": <b>" . sec2time ( $time ) . "</b><br />".lang(162).": <b>" . $speed . " KB/s</b><br /><br />";
+
+							printf(lang(160),'<a href="ftp://' . $_POST ["login"] . ':' . $_POST ["password"] . '@' . $_POST ["host"] . ':' . $_POST ["port"] . $_POST ["dir"] . (substr ($_POST ["dir"], - 1) != '/' ? '/' : '') . basename ( $file ["name"] ) . '"><b>' . basename ( $file ["name"] ) . '</b></a>');
+							echo "<br />".lang(161).": <b>" . sec2time ( $time ) . "</b><br />".lang(162).": <b>" . $speed . " KB/s</b><br /><br />";
 						} else {
 							printf(lang(163),basename($file['name']));
 							echo "<br />";
@@ -148,7 +152,6 @@ function ftp_go() {
 				}
 			}
 		}
-	
 	}
 }
 ?>
