@@ -43,7 +43,7 @@ class shareflare_net extends DownloadClass {
         $post['submit_ifree'] = 'Download file';
         $page = $this->GetPage($flink, $cookie, $post, $link);
         if (!preg_match('%<form action="(.*)" method="post" id="dvifree">%', $page, $redir)) html_error ('Error: Redirect link 1 can\'t be found!');
-        $link = trim($redir[1]);
+        $rlink = trim($redir[1]);
         $t = explode(";", GetCookies($page));
         $cookie .=";" . $t[0] . ";" . $t[2];
         unset($post);
@@ -60,34 +60,35 @@ class shareflare_net extends DownloadClass {
         $post['sssize'] = cut_str($page, 'name="sssize" value="', '"');
         $post['optiondir'] = cut_str($page, 'name="optiondir" value="', '"');
         $post['tarif'] = 'default';
-        $page = $this->GetPage($link, $cookie, $post, $Referer);
+        $page = $this->GetPage($rlink, $cookie, $post, $flink);
         if (!preg_match('%<frame src="(.*)" name="topFrame"%', $page, $redir)) html_error ('Error: Redirect link 2 can\'t be found!');
         $tlink = "http://shareflare.net".$redir[1];
 
-        return $this->BeforeDownload($tlink, $cookie, $this->GetPage($tlink, $cookie, 0, $flink));
+        return $this->BeforeDownload($tlink, $cookie, $this->GetPage($tlink, $cookie, 0, $rlink));
     }
 
     private function BeforeDownload($link, $cookie, $page) {
 
         if (!preg_match('@(\d+)<\/span> seconds@', $page, $wait)) html_error ('Error: Timer not found!');
         $this->CountDown($wait[1]);
-        if (!preg_match('@window\.location\.href="(.*)"@', $page, $redir)) html_error('Error: Redirect link can\'t be found!');
+        if (!preg_match('@window\.location\.href="(.*)"@', $page, $redir)) html_error('Error: Redirect link 3 can\'t be found!');
         $rlink = trim($redir[1]);
 
         return $this->ContinueDownload($rlink, $cookie, $this->GetPage($rlink, $cookie, 0, $link));
     }
 
     private function ContinueDownload($link, $cookie, $page) {
-        
-        if (!preg_match('@http:\/\/.+download(\d+)?\/sha(\d+)?\/[^\'"]+@i', $page, $dl)) {
+
+        if (stristr($page, 'Wait your turn')) {
             return $this->BeforeDownload($link, $cookie, $this->GetPage($link, $cookie, 0, $link));
-        } else {
-            $dlink = trim($dl[0]);
-            $filename = parse_url($dlink);
-            $FileName = basename($filename['path']);
-            $this->RedirectDownload($dlink, $FileName, $cookie, 0, $link);
-            exit();
         }
+        
+        if (!preg_match('@http:\/\/.+download(\d+)?\/sha(\d+)?\/[^\'"]+@i', $page, $dl)) html_error('Error: Download link not found, plugin need to be updated!');
+        $dlink = trim($dl[0]);
+        $filename = parse_url($dlink);
+        $FileName = basename($filename['path']);
+        $this->RedirectDownload($dlink, $FileName, $cookie, 0, $link);
+        exit();
     }
 }
 

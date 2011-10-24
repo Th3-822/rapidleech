@@ -44,7 +44,7 @@
 
 	$page = geturl("oron.com", 80, "/", $up_url, $cookie, $post, 0, $_GET["proxy"], $pauth);is_page($page);
 
-	if (preg_match('@(http://oron\.com/\w+/.*\.html)\?killcode=\w+@i', $page, $lnk)) {
+	if (preg_match('@(https?://(?:www\.)?oron\.com/\w+)\?killcode=\w+@i', $page, $lnk)) {
 		$download_link = $lnk[1];
 		$delete_link = $lnk[0];
 	} else {
@@ -53,5 +53,6 @@
 
 //[11-6-2011] Rewritten by Th3-822
 //[11-6-2011] Edited for non member upload. (Based in member plugin) -Th3-822
+//[23-10-2011] Fixed Regex for getting dlink. - Th3-822
 
 ?>

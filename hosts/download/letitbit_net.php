@@ -86,7 +86,7 @@ class letitbit_net extends DownloadClass {
         $dlink = trim($dl[0]);
         $filename = parse_url($dlink);
         $Filename = basename($filename['path']);
-        $this->RedirectDownload($dlink, $Filename, $cookie, 0, $rlink);
+        $this->RedirectDownload($dlink, $Filename, $cookie, 0, $tlink);
         exit();
     }
 

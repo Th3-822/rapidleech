@@ -21,7 +21,7 @@ $premium_acc = array();
 //$premium_acc["sendspace"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["depositfiles"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["depositfiles"] = array('cookie' => 'Your premium cookie');
-//$premium_acc["easyshare_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["crocko_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["torrific_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["hotfile_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["hotfile_com"] = array('cookie' => 'your premium cookie');
