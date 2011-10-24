@@ -9,6 +9,13 @@ class filepost_com extends DownloadClass {
     public function Download($link) {
         global $premium_acc;
 
+        if (!$_REQUEST['step']) {
+            $Url = "http://filepost.com/files/checker/?JsHttpRequest=" . round(microtime(true) * 1000) . "-xml";
+            $page = $this->GetPage($Url, 0, array('urls' => $link));
+            is_notpresent($page, 'Active', "This link is not available");
+        }
+        unset($page);
+
         if (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc ["filepost_com"] ["user"] && $premium_acc ["filepost_com"] ["pass"])) {
             $this->DownloadPremium($link);
         } else if ($_POST['step'] == '1') {
@@ -81,9 +88,6 @@ class filepost_com extends DownloadClass {
     private function DownloadPremium($link) {
         global $premium_acc;
 
-        $Url = "http://filepost.com/files/checker/?JsHttpRequest=" . round(microtime(true) * 1000) . "-xml";
-        $page = $this->GetPage($Url, 0, array('urls' => $link));
-        is_notpresent($page, 'Active', "This link is not available");
         $page = $this->GetPage($link);
         preg_match_all("#Set-Cookie: (\w+)=([^;]+)#", $page, $tmp);
         $CookiesArr = array_combine($tmp[1], $tmp[2]);
