@@ -305,6 +305,8 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		}
 
 		if (@file_exists ( $saveToFile ) && $options['bw_save']) {
+      // Skip in audl.
+      echo '<script type="text/javascript">parent.nextlink();</script>';
 			html_error ( lang(99).': '.link_for_file($saveToFile), 0 );
 		}
 		if (@file_exists ( $saveToFile ) && $Resume ["use"] === TRUE) {

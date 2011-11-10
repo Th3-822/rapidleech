@@ -1,183 +1,136 @@
 <?php
-if (! defined ( 'RAPIDLEECH' )) {
-  require_once ("index.html");
-  exit ();
+if (!defined('RAPIDLEECH')) {
+    require_once ("index.html");
+    exit();
 }
+
 class filejungle_com extends DownloadClass {
-  public function Download($link) {
-    global $premium_acc;
-    if (strstr($link,"list")) {
-      $page = $this->GetPage( $link, 0, 0, 0);
-      is_page($page);
-      preg_match_all("%href=\"\/f\/([0-9A-Za-z]+)%i", $page, $fs, PREG_SET_ORDER);
-      $all_fs = array();
-      foreach($fs as $link2) {
-        $all_fs[] = str_ireplace("href=\"", "", "http://www.filejungle.com$link2[0]");
-      }
-      if(!$all_fs) {
-        html_error('File not found on Filejungle.com. Please check the download link!');
-      }
-      $Href=str_replace("'","http://www.filejungle.com",$all_fs);
-      if (!is_file("audl.php")) html_error('audl.php not found');
-      echo "<form action=\"audl.php?GO=GO\" method=post>\n";
-      echo "<input type=hidden name=links value='".implode("\r\n",$all_fs)."'>\n";
-      foreach (array ("useproxy","proxy","proxyuser","proxypass") as $v)
-        echo "<input type=hidden name=$v value=".$_GET[$v].">\n";
-      echo "<script language=\"JavaScript\">void(document.forms[0].submit());</script>\n</form>\n";
-      flush();
-      exit();
-    }
-    if ( ($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ( $_REQUEST ["premium_acc"] == "on" && $premium_acc ["filejungle_com"] ["user"] && $premium_acc ["filejungle_com"] ["pass"] ) ) {
-      $this->DownloadPremium($link);
-    } else {
-      $this->DownloadFree($link);
-    }           	
-  }
-  private function DownloadFree($link) {
-    global $Referer,$options;
-    if( $_POST['wait'] == "wait") {
-      $link= $_POST['link'];
-      $cookie= $_POST['cookie'];
-      $post["downloadLink"]="show";
-      $page = $this->GetPage($link,$cookie,$post,$Referer."\r\nX-Requested-With: XMLHttpRequest");
-      is_page($page);
-      unset($post);
-      $post["download"]="normal";
-      $page = $this->GetPage($link,$cookie,$post,$Referer);
-      is_page($page);
-      is_present($page,"Your download link has expired.", "Your download link has expired!. Please try again later!.", 0);
-      if (stristr ( $page, "Location:" )) {
-        $Href = trim ( cut_str ( $page, "Location: ", "\n" ) );
-        $Url=parse_url($Href);
-        $FileName = basename($Url["path"]);
-        //if (function_exists(encrypt) && $cookie!="") {$cookie=encrypt($cookie);};
-        $this->RedirectDownload($Href,$FileName,$cookie);exit;
-      }else {
-        html_error ( "Download link not found", 0 );
-      }  
-    }
-    if( $_POST['captcha'] == "ok") {
-      ##
-      $post["recaptcha_challenge_field"] =$_POST["recaptcha_challenge_field"];
-      $post["recaptcha_response_field"] = $_POST["recaptcha_response_field"];
-      $post["recaptcha_shortencode_field"] =$_POST["recaptcha_shortencode_field"];
-      $link = $_POST["link"];
-      $cookie = $_POST["cookie"];
-      $page = $this->GetPage("http://www.filejungle.com/checkReCaptcha.php",$cookie,$post,$Referer."\r\nX-Requested-With: XMLHttpRequest");
-      is_page($page);   
-      if (stristr($page,'error":"incorrect-captcha-sol"')) {
-        echo  ("<center><font color=red><b>Entered code was incorrec. Please re-enter</b></font></center>");
-      }
-      if (stristr($page,'success":1')) {
-        unset($post);
-        $post["downloadLink"] = "wait";
-        $page = $this->GetPage($link,$cookie,$post,$Referer."\r\nX-Requested-With: XMLHttpRequest");
-        is_page($page);      
-        $countDown = cut_str ( $page ,'waitTime":',',"');
-        if ($countDown) {       
-          ?>
-          <center><div id="cnt"><h4>ERROR: Please enable JavaScript.</h4></div></center>
-          <form action="<?php echo $PHP_SELF; ?>" method="post">
-          <input type="hidden" name="link" value="<?php echo $link; ?>">
-          <input type="hidden" name="cookie" value="<?php echo $cookie; ?>">
-          <input type="hidden" name="wait" value="wait">
-          <script language="JavaScript">
-          var c = <?php echo $countDown; ?>;
-          fcwait();
-          function fcwait() {
-            if(c>0) {
-              if(c>60) {
-                dt ="<font color=red>You reached your traffic limit_FileJungle Free User</font>";
-              } else {
-                dt ="<font color=yellow>FileJungle Free User</font>";
-              }
-              document.getElementById("cnt").innerHTML = "<b>" + dt + "</b><br>Please wait <b>" + c + "</b> seconds...";
-              c = c - 1;
-              setTimeout("fcwait()", 1000);
-            } else {
-              document.getElementById("cnt").style.display="none";
-              void(document.forms[0].submit());
+
+    public function Download($link) {
+        global $premium_acc;
+        // check link
+        if (preg_match('@http:\/\/filejungle\.com\/l\/[^|\r|\n]+@i', $link, $dir)) {
+            if (!$dir[0]) html_error('Filejungle folder link can\'t be found!');
+            $check = $this->GetPage($link);
+            preg_match_all('@http:\/\/www\.filejungle\.com\/f\/[^"]+@i', $check, $fj, PREG_SET_ORDER);
+            $arr_link = array();
+            foreach ($fj as $match) {
+                $arr_link[] = $match[0];
             }
-          }
-          </script>
-          </form></body></html>
-          <?php
-          exit;
+            if (!$arr_link) html_error('Can\'t find filejungle single link, probably folder is empty?');
+            $this->moveToAutoDownloader($arr_link);
         }
-      }
-      ##
-    } else {
-      $page = $this->GetPage( $link, 0, 0, 0);
-      is_page($page);
-      $cookie = GetCookies($page);
-      is_present($page,"File not available", "File not available. Please check download link!", 0);
-      $k = cut_str ( $page ,"var reCAPTCHA_publickey='","';");
-      $post["checkDownload"] = "check";
-      $page = $this->GetPage( $link, $cookie, $post, $Referer."\r\nX-Requested-With: XMLHttpRequest");
-      is_page($page);
-      is_present($page,"timeLimit", "Your download link has expired!. Please try again later!.", 0);
-      is_present($page,"captchaFail", "Your IP has failed the captcha too many times. Please retry later.!", 0);
-      $showCaptcha = cut_str ( $page ,'success":"','"}');
-      if($showCaptcha =="showCaptcha") {
-        $recaptcha_shortencode_field = cut_str($link, 'f/', '/');
-        $recaptcha_shortencode_field = str_replace("/", "", $recaptcha_shortencode_field);
-        ?>
-        <form action="" method="post">
-        <br>
-        <script type="text/javascript" src="http://www.google.com/recaptcha/api/challenge?k=<?php echo $k;?>"></script>
-        <noscript>
-        <iframe src="http://www.google.com/recaptcha/api/noscript?k=<?php echo $k;?>"
-        height="300" width="500" frameborder="0"></iframe><br>
-        <textarea name="recaptcha_challenge_field" rows="3" cols="40"></textarea>
-        <input type="hidden" name="recaptcha_response_field" value="manual_challenge">  
-        </noscript>
-        <br>
-        <input type="hidden" name="recaptcha_shortencode_field" value="<?php echo $recaptcha_shortencode_field;?>">
-        <input type="hidden" name="link" value="<?php echo $link;?>">
-        <input type="hidden" name="cookie" value="<?php echo $cookie;?>">
-        <input type="hidden" name="captcha" value="ok">
-        <input type="Submit" name="Submit" value="Download Now" >
-        </form> 
-        <?php
-        exit;
-      }
-    }   
-  }
-  private function DownloadPremium($link) {
-    global $Referer, $premium_acc;
-    $page = $this->GetPage( "http://www.filejungle.com/index.php", 0, 0, "http://www.filejungle.com/index.php");
-    is_page($page);
-    $cookie = GetCookies($page);
-    $post = array ();
-    $post ["loginUserName"] = $_GET ["premium_user"] ? $_GET ["premium_user"] : $premium_acc ["filejungle_com"] ["user"];
-    $post ["loginUserPassword"] = $_GET ["premium_pass"] ? $_GET ["premium_pass"] : $premium_acc ["filejungle_com"] ["pass"];
-    $post ["autoLogin"] = 'on';
-    $post ["loginFormSubmit"] = 'Login';
-    $page = $this->GetPage( "http://www.filejungle.com/login.php", $cookie, $post, "http://www.filejungle.com/index.php");
-    is_page($page);
-    $cookie = GetCookies($page);
-    unset($post);
-    $page = $this->GetPage( $link, $cookie, 0, $Referer);
-    if (stristr ( $page, "Location:" )) {
-      $Href = trim ( cut_str ( $page, "Location: ", "\n" ) );
-      $Url=parse_url($Href);
-      $FileName = basename($Url["path"]);
-      $this->RedirectDownload($Href,$FileName,$cookie);
-    } else {
-      $post["download"]="premium";
-      $page = $this->GetPage( $link, $cookie, $post, $Referer);
-      is_page($page);
-      is_present($page,"File not available", "File not available. Please check download link!", 0); 
-      $cookie = GetCookies($page);
-      if (stristr ( $page, "Location:" )) {
-        $Href = trim ( cut_str ( $page, "Location: ", "\n" ) );
-        $Url=parse_url($Href);
-        $FileName = basename($Url["path"]);
-        $this->RedirectDownload($Href,$FileName,$cookie);
-      } else {
-        html_error ( "Download link not found, make sure you are Premium Member", 0 );
-      }
+        if (($_REQUEST['premium_acc'] == 'on' && $_REQUEST['premium_user'] && $_REQUEST['premium_pass']) || ($_REQUEST['premium_acc'] == 'on' && $premium_acc['filejungle_com']['user'] && $premium_acc['filejungle_com']['pass'])) {
+            return $this->Premium($link);
+        } else {
+            return $this->Free($link);
+        }
     }
-  }
+
+    private function Premium($link) {
+        $pA = ($_REQUEST["premium_user"] && $_REQUEST["premium_pass"] ? true : false);
+        $cookie = $this->Login($pA);
+        $page = $this->GetPage($link, $cookie);
+        is_present($page, 'This file is no longer available.');
+        if (!stristr($page, 'Location:')) {
+            $page = $this->GetPage($link, $cookie, array('download' => 'premium'), $link);
+        }
+        $dlink = trim(cut_str($page, "Location: ", "\r\n"));
+        if (empty($dlink)) html_error('Error: Premium download link not found, plugin need to be updated!');
+        $FileName = urldecode(basename(parse_url($dlink, PHP_URL_PATH)));
+        $this->RedirectDownload($dlink, $FileName, $cookie);
+    }
+
+    private function Login($pA = false) {
+        global $premium_acc;
+        $user = ($pA ? $_REQUEST["premium_user"] : $premium_acc["filejungle_com"]["user"]);
+        $pass = ($pA ? $_REQUEST["premium_pass"] : $premium_acc["filejungle_com"]["pass"]);
+        if (empty($user) || empty($pass)) {
+            html_error("Login Failed: Username or Password is empty!");
+        }
+
+        $posturl = "http://filejungle.com/";
+        $post['autoLogin'] = 'on';
+        $post['loginUserName'] = $user;
+        $post['loginUserPassword'] = $pass;
+        $post['loginFormSubmit'] = 'Login';
+
+        $page = $this->GetPage($posturl . "login.php", 0, $post, $posturl);
+        is_present($page, "The length of user name should be larger than or equal to 6");
+        is_present($page, "Username doesn't exist.");
+        is_present($page, "Wrong password.");
+
+        $cookie = GetCookies($page);
+        is_notpresent($cookie, "cookie=", "Login error. Problem with cookie cache?");
+
+        $page = $this->GetPage($posturl . 'dashboard.php', $cookie, 0, $posturl);
+        is_present($page, "FREE<span>", "Account Free! What do you expect from that?");
+
+        return $cookie;
+    }
+
+    private function Free($link) {
+        if ($_REQUEST['step'] == 'Captcha') {
+            $post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
+            $post['recaptcha_response_field'] = $_POST['captcha'];
+            $post['recaptcha_shortencode_field'] = $_POST['recaptcha_shortencode_field'];
+            $cookie = urldecode($_POST['cookie']);
+            $link = urldecode($_POST['link']);
+            $check = $this->GetPage('http://www.filejungle.com/checkReCaptcha.php', $cookie, $post, $link . "\r\nX-Requested-With: XMLHttpRequest");
+        } else {
+            $this->page = $this->GetPage($link);
+            is_present($this->page, 'This file is no longer available.');
+            $cookie = GetCookies($this->page);
+            $check = $this->GetPage($link, $cookie, array('checkDownload' => 'check'), $link . "\r\nX-Requested-With: XMLHttpRequest");
+        }
+        if (preg_match('@\{"(\w+)":"?([a-zA-Z0-9]+)"?(,"(\w+)":"?([a-zA-Z0-9\-]+)"?)?@i', $check, $match)) {
+            if ($match[1] == 'success' && $match[4] !== 'error') {
+                switch ($match[2]) {
+                    case 'showCaptcha':
+                        if (!preg_match('@reCAPTCHA_publickey=\'([^\']+)@i', $this->page, $cap)) html_error('Captcha not found!');
+                        if (!preg_match('@shortencode_field" value="([^"]+)@i', $this->page, $rsc)) html_error('Link id not found!');
+
+                        $ch = cut_str($this->GetPage("http://www.google.com/recaptcha/api/challenge?k=$cap[1]&ajax=1"), "challenge : '", "'");
+                        if ($ch) {
+                            $page = $this->GetPage("http://www.google.com/recaptcha/api/image?c=" . $ch);
+                            $pass_img = substr($page, strpos($page, "\r\n\r\n") + 4);
+                            $imgfile = DOWNLOAD_DIR . "filejungle_captcha.jpg";
+                            if (file_exists($imgfile)) unlink($imgfile);
+                            write_file($imgfile, $pass_img);
+                        } else {
+                            html_error('Can\'t find captcha image?');
+                        }
+                        $data = $this->DefaultParamArr($link, $cookie);
+                        $data['recaptcha_shortencode_field'] = $rsc[1];
+                        $data['recaptcha_challenge_field'] = $ch;
+                        $data['step'] = 'Captcha';
+                        $this->EnterCaptcha("$imgfile?" . time(), $data, 20);
+                        exit();
+                        break;
+                    case 'showTimmer': case '1':
+                        $check = $this->GetPage($link, $cookie, array('downloadLink' => 'wait'), $link . "\r\nX-Requested-With: XMLHttpRequest");
+                        if (!preg_match('@waitTime":(\d+),@', $check, $wait)) html_error('Timer not found?');
+                        $this->CountDown($wait[1]);
+                        $check = $this->GetPage($link, $cookie, array('downloadLink' => 'show'), $link . "\r\nX-Requested-With: XMLHttpRequest");
+                        is_present($check, 'forcePremiumDownload_exceed_4', 'You have reach download size limit for free user!');
+                        $this->page = $this->GetPage($link, $cookie, array('download' => 'normal'), $link . "\r\nX-Requested-With: XMLHttpRequest");
+                        break;
+                }
+            }
+            is_present($match[2], 'timeLimit', 'Please wait for 1200 seconds to download the next file.');
+            is_present($match[2], "captchaFail", "Your IP has failed the captcha too many times. Please retry again in $match[5] mins");
+            is_present($match[5], "incorrect-captcha-sol", "Entered captcha was incorrect.");
+        }
+        if (!preg_match('@Location: (http:\/\/[a-zA-Z0-9]+\.filejungle\.com\/[^|\r|\n]+)@i', $this->page, $dl)) html_error('Error: Free download link not found, plugin need to be updated!');
+        $dlink = trim($dl[1]);
+        $FileName = urldecode(basename(parse_url($dlink, PHP_URL_PATH)));
+        $this->RedirectDownload($dlink, $FileName, $cookie, 0, $link);
+        exit();
+    }
+
 }
+
+/*
+ * filejungle download plugin by Ruud v.Tony 01/11/2011
+ */
 ?>

@@ -23,9 +23,9 @@ class sendspace_com extends DownloadClass {
                 $link = trim($check[1]);
                 $page = $this->GetPage($link);
             }
-            is_present($page, 'Sorry, the file you requested is not available.');
-            $cookie = GetCookies($page);
         }
+        is_present($page, 'Sorry, the file you requested is not available.');
+        $cookie = GetCookies($page);
         $dlink = html_entity_decode(urldecode(trim($dl[0])), ENT_QUOTES, 'UTF-8');
         $filename = parse_url($dlink);
         $FileName = basename($filename['path']);
@@ -42,8 +42,8 @@ class sendspace_com extends DownloadClass {
                 $link = trim($check[1]);
                 $page = $this->GetPage($link, $cookie);
             }
-            is_present($page, 'Sorry, the file you requested is not available.');
         }
+        is_present($page, 'Sorry, the file you requested is not available.');
         $dlink = html_entity_decode(urldecode(trim($dl[0])), ENT_QUOTES, 'UTF-8');
         $filename = parse_url($dlink);
         $FileName = basename($filename['path']);
