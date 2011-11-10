@@ -108,7 +108,7 @@ class torrific_com extends DownloadClass
 		$frmfiles = cut_str( $page,'<table id="files"', '</table>' );
 		//preg_match_all('%http://.+/get\?[^\'"]+%i',$frmfiles,$files) ;
 		//preg_match_all( '%http://u01\.btaccel\.com/[^\"]+%i', $frmfiles, $files ) ;
-		preg_match_all( '%http://u\d{2}\.btaccel\.com/[^\"]+%i', $frmfiles, $files ) ;
+		preg_match_all( '@http:\/\/u(\d{2})w(\d{3})\.btaccel\.com\/[^|\r|\n|"]+@i', $frmfiles, $files ) ;
 		preg_match_all( '%\/dl\/[^\"]+%i', $frmfiles, $filesNew ) ;
 		
 		$cc=1 ;

@@ -19,15 +19,15 @@ class turbobit_net extends DownloadClass {
 
     private function Retrieve($link) {
         global $options;
-        $page = $this->GetPage($link,"set_user_lang_change=en",0,$link);
+        $page = $this->GetPage($link, "set_user_lang_change=en", 0, $link);
         preg_match_all("#[\w-]+: (\w+)=([^;]+)#", $page, $tmp);
         $arrCookies = array_combine($tmp[1], $tmp[2]);
         $Cookies = urldecode(http_build_query($arrCookies, "", "; "));
-        $Cookies = str_replace(array("user_isloggedin=deleted; ","set_user_lang_change=deleted; "), "", $Cookies);
-        if (!preg_match('#class="free\W\w+" href="([^"]+)#', $page, $tmp)) {
-            html_error("Plugin is out of date");
+        $Cookies = str_replace(array("user_isloggedin=deleted; ", "set_user_lang_change=deleted; "), "", $Cookies);
+        if (!preg_match('#/[a-w+]+/[e-r]{4}/\w+#', $page, $tmp)) {
+            html_error("Error 0x01: Plugin is out of date");
         }
-        $flink = "http://turbobit.net" . $tmp[1];
+        $flink = "http://turbobit.net" . $tmp[0];
         $page = $this->GetPage($flink, $Cookies, 0, $link);
         if (preg_match('#(\d+)</span> seconds#', $page, $count)) {
             html_error("You have reached the limit of connections,try downloading again after " . $count[1] . " seconds");
@@ -87,24 +87,24 @@ class turbobit_net extends DownloadClass {
         $page = $this->GetPage($flink, $Cookies, $post, $link);
         is_present($page, "Incorrect, try again!", "Incorrect Captcha");
         if (!strpos($page, "imit : 60")) {
-            if (preg_match("#limit: (\d+)#",$page,$count)){
+            if (preg_match("#limit: (\d+)#", $page, $count)) {
                 html_error("Please wait {$count[1]} for next download");
             }
             html_error("Error 0x11: Plugin is out of date");
         }
         insert_timer(60);
         $tmp = cut_str($page, '$("#timeoutBox").load("', '"');
-        if (!preg_match("#maxLimit : (\d+)#", $page,$maxlimit)){
+        if (!preg_match("#maxLimit : (\d+)#", $page, $maxlimit)) {
             html_error("Error 0x12: Plugin is out of date");
         }
-        $rlink = "http://turbobit.net" . $tmp.($maxlimit[1]*2);
-        $page = $this->GetPage($rlink, $Cookies, 0, $link, 0, 1);
+        $rlink = "http://turbobit.net" . $tmp . ($maxlimit[1]);
+        $page = $this->GetPage($rlink, $Cookies, 0, $flink . "\r\nX-Requested-With: XMLHttpRequest", 0);
         if (!preg_match("#/download/[^']+#", $page, $tmp)) {
             html_error("Error 0x13: Plugin is out of date");
         }
         $dlink = "http://turbobit.net" . $tmp[0];
         $page = $this->GetPage($dlink, $Cookies, 0, $link);
-        if (!preg_match("#Location: (.*)#", $page, $rlink)) {            
+        if (!preg_match("#Location: (.*)#", $page, $rlink)) {
             html_error("Error 0x14: Plugin is out of date");
         }
         $this->RedirectDownload(trim($rlink[1]), "turbobit", 0, 0, $link);

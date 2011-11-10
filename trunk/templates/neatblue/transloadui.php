@@ -30,7 +30,6 @@ function pr(percent, received, speed)
 	document.title = percent + '% Downloaded';
 	return true;
 }
-
 function mail(str, field)
 {
 	document.getElementById("mailPart." + field).innerHTML = str;
