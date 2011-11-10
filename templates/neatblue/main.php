@@ -11,7 +11,7 @@ if (!defined('RAPIDLEECH')) {
 <table width="100%">
 <tr>
 <td valign="top">
-<table cellpadding="0" cellspacing="0">
+<table border="0" cellpadding="0" cellspacing="0">
 <tr><td width="131" height="100%"><a onclick="toggle('hide-plg'); return false;"><div class="cell-plugin"><?php echo count($host); ?> <?php echo lang(333); ?></div></a></td></tr>
 <tr>
 <td height="100%" style="padding:0px;">
@@ -32,7 +32,7 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 {?>
 <a onclick="toggle('hide'); return false;"><div class="cell-plugin"><?php echo lang(376); ?></div></a>
 <span id="hide" style="display: none;">
-<table>
+<table border="0">
 <tr>
 <td height="100%" style="padding:3px;">
 <div dir="rtl" align="left" style="padding-left:5px;">
@@ -69,7 +69,7 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 </tr>
 </table>
 </td>
-<td align="center" valign="top"><table cellpadding="0" cellspacing="1">
+<td align="center" valign="top"><table border="0" cellpadding="0" cellspacing="1">
 <tbody>
 <tr>
 <td id="navcell1" class="cell-nav" onclick="javascript:switchCell(1);"><?php echo lang(329); ?></td>
@@ -84,7 +84,7 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 <tr>
 <td align="center">
 <form action="<?php echo $PHP_SELF; ?>" name="transload" method="post"<?php if ($options['new_window']) { echo ' target="_blank"'; } ?>>
-<table class="tab-content" id="tb1" cellspacing="5">
+<table class="tab-content" id="tb1" cellspacing="5" width="100%">
 <tbody>
 <tr>
 <td align="left"><b><?php echo lang(207); ?>:</b><br />&nbsp;<input type="text" name="link" id="link" size="50" /><br /><br /></td>
@@ -107,7 +107,7 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 <tr><td>&nbsp;</td></tr>
 </tbody>
 </table>
-<table class="hide-table" id="tb2" cellspacing="5">
+<table class="hide-table" id="tb2" cellspacing="5" width="100%">
 <tbody>
 <tr>
 <td align="center">
@@ -164,7 +164,7 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 <tr>
 <td align="left">
 <label><input type="checkbox" name="cookieuse" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('cookieblock').style.display=displ;" />&nbsp;<small><?php echo lang(235); ?></small></label>
-<table width="150" id="cookieblock" style="display: none;">
+<table width="150"  border="0" id="cookieblock" style="display: none;">
 <tr><td><?php echo lang(236); ?>;</td><td><input type="text" name="cookie" id="cookie" size="25" value="" /></td></tr>
 </table>
 </td>
@@ -197,7 +197,7 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 <td><input type="checkbox" id="useproxy" name="useproxy" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('proxy').style.display=displ;"<?php echo $_COOKIE["useproxy"] ? ' checked="checked"' : ''; ?> />&nbsp;<?php echo lang(245); ?></td>
 <td>&nbsp;</td>
 <td id="proxy"<?php echo $_COOKIE["useproxy"] ? '' : ' style="display: none;"'; ?>>
-<table width="150">
+<table width="150" border="0">
 <tr><td><?php echo lang(246); ?>:&nbsp;</td><td><input type="text" name="proxy" id="proxyproxy" size="20"<?php echo $_COOKIE["proxy"] ? ' value="'.$_COOKIE["proxy"].'"' : ''; ?> /></td></tr>
 <tr><td><?php echo lang(247); ?>:&nbsp;</td><td><input type="text" name="proxyuser" id="proxyuser" size="20"<?php echo $_COOKIE["proxyuser"] ? ' value="'.$_COOKIE["proxyuser"].'"' : ''; ?> /></td></tr>
 <tr><td><?php echo lang(248); ?>:&nbsp;</td><td><input type="text" name="proxypass" id="proxypass" size="20"<?php echo $_COOKIE["proxypass"] ? ' value="'.$_COOKIE["proxypass"].'"' : ''; ?> /></td></tr>
@@ -211,7 +211,7 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 <td><input type="checkbox" name="premium_acc" id="premium_acc" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('premiumblock').style.display=displ;"<?php if (count($premium_acc) > 0) print ' checked="checked"'; ?> />&nbsp;<?php echo lang(249); ?></td>
 <td>&nbsp;</td>
 <td id="premiumblock" style="display: none;">
-<table width="150">
+<table width="150" border="0">
 <tr><td><?php echo lang(250); ?>:&nbsp;</td><td><input type="text" name="premium_user" id="premium_user" size="15" value="" /></td></tr>
 <tr><td><?php echo lang(251); ?>:&nbsp;</td><td><input type="password" name="premium_pass" id="premium_pass" size="15" value="" /></td></tr>
 </table>
@@ -239,7 +239,7 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 </tbody>
 </table>
 </form>
-<table class="hide-table" id="tb3" cellspacing="5">
+<table class="hide-table" id="tb3" cellspacing="5" width="100%">
 <tbody><tr><td align="center" width="100%">
 <?php
 _create_list();
@@ -280,7 +280,7 @@ else
 <form action="<?php echo $PHP_SELF; ?>" name="flist" method="post">
 <?php echo renderActions(); ?>
 <div style="position:relative; width:800px; padding:1px 0px 1px 0px;">
-<div style="overflow:auto; height:auto; max-height:450px; width: 760px;">
+<div style="overflow:auto; height:auto; max-height:450px; width: 800px;">
 <?php if ($options['flist_h_fixed']) { ?>
 <table id="table_filelist_h" cellpadding="3" cellspacing="1" class="filelist" align="left" style="position:absolute;left:0px;top:0px;">
 <tbody>
@@ -288,6 +288,7 @@ else
 <td id="file_list_checkbox_title_h">&nbsp;</td>
 <td><b><?php echo lang(262); ?></b></td>
 <td><b><?php echo lang(263); ?></b></td>
+<td><b><?php echo lang(264); ?></b></td>
 <td><b><?php echo lang(265); ?></b></td>
 </tr>
 </tbody>
@@ -299,6 +300,7 @@ else
 <td id="file_list_checkbox_title" class="sorttable_checkbox">&nbsp;</td>
 <td class="sorttable_alpha"><b><?php echo lang(262); ?></b></td>
 <td><b><?php echo lang(263); ?></b></td>
+<td><b><?php echo lang(264); ?></b></td>
 <td><b><?php echo lang(265); ?></b></td>
 </tr>
 </thead>
@@ -340,6 +342,7 @@ if($list)
 <td><input onmousedown="checkFile(<?php echo $filecount;?>); return false;" id="files<?php echo $filecount; ?>" type="checkbox" name="files[]" value="<?php echo $file["date"]; ?>" /></td>
 <td><?php echo link_for_file($file["name"], FALSE, 'style="font-weight: bold; color: #000;"'); ?></td>
 <td><?php echo $file["size"]; ?></td>
+<td><?php echo $file["comment"] ? str_replace("\\r\\n", "<br />", $file["comment"]) : ""; ?></td>
 <td><?php echo date("d.m.Y H:i:s", $file["date"]) ?></td>
 </tr>
 <?php
@@ -349,7 +352,7 @@ $filecount ++;
 </tbody>
 <?php
   if (($total_files > 1) && ($total_size > 0)) {
-    $tmp = '<tbody><tr class="flisttblftr">'.$nn.'<td>&nbsp;</td>'.$nn.'<td>Total:</td>'.$nn.'<td>'.bytesToKbOrMbOrGb($total_size).'</td>'.$nn.'<td>&nbsp;</td>'.$nn.''.$nn.'</tr></tbody>';
+    $tmp = '<tbody><tr class="flisttblftr">'.$nn.'<td>&nbsp;</td>'.$nn.'<td>Total:</td>'.$nn.'<td>'.bytesToKbOrMbOrGb($total_size).'</td>'.$nn.'<td>&nbsp;</td>'.$nn.'<td>&nbsp;</td>'.$nn.'</tr></tbody>';
     echo $tmp;
     if ($options['flist_h_fixed']) {
       echo '</table><table id="table_filelist_f" cellpadding="3" cellspacing="1" class="filelist" align="left" style="position:absolute;left:0px;bottom:0px;">'.$tmp;
@@ -382,7 +385,7 @@ $(document).ready(function() {
 /* ]]> */
 </script>
 <!--Start Lix Checker-->
-<table class="hide-table" id="tb4" cellspacing="5">
+<table class="hide-table" id="tb4" cellspacing="5" width="100%">
 <tbody>
 <tr>
 <td align="center" width="100%">
