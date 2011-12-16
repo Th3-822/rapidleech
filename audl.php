@@ -118,73 +118,84 @@ function resetProgress()
             $isHost = true;
           }
         }
-        if (!$isHost) {
-          $FileName = basename($Url["path"]);
-          insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&port=".$Url["port"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=&partSize=&method=&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK));
-        }
-        echo '<script type="text/javascript">updateStatus('.$i.", '".lang(25)."');</script>".$nn;
-        $redir = "";
-        $lastError = "";
-        do {
-          list($_GET["filename"],$tmp) = explode('?',urldecode(trim($_GET["filename"])));
-          $_GET["saveto"] = urldecode(trim($_GET["saveto"]));
-          $_GET["host"] = urldecode(trim($_GET["host"]));
-          $_GET["path"] = urldecode(trim($_GET["path"]));
-          $_GET["port"] = $_GET["port"] ? urldecode(trim($_GET["port"])) : 80;
-          $_GET["referer"] = $_GET["referer"] ? urldecode(trim($_GET["referer"])) : 0;
-          $_GET["link"] = urldecode(trim($_GET["link"]));
-          $_GET["post"] = $_GET["post"] ? unserialize(stripslashes(urldecode(trim($_GET["post"])))) : 0;
-          $_GET["cookie"] = $_GET["cookie"] ? decrypt(urldecode(trim($_GET["cookie"]))) : "";
+		if (!$isHost) {
+			$FileName = basename($Url["path"]);
+			$auth = ($Url ["user"] && $Url ["pass"]) ? "&auth=" . urlencode (encrypt (base64_encode ($Url ["user"] . ":" . $Url ["pass"]))) : "";
+			insert_location ("$PHP_SELF?filename=" . urlencode ($FileName) . "&host=" . $Url ["host"] . "&port=" . $Url ["port"] . "&path=" . urlencode ($Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "")) . "&referer=" . urlencode ($Referer) . "&partSize=&method=&saveto=" . $_GET ["path"] . "&link=" . urlencode ($LINK) . $auth . "&cookie=" . ($_GET ["cookie"] ? urlencode (encrypt ($_GET ['cookie'])) : ''));
+		}
+		echo '<script type="text/javascript">updateStatus('.$i.", '".lang(25)."');</script>".$nn;
+		$redir = "";
+		$lastError = "";
+		do {
+			list($_GET["filename"],$tmp) = explode('?',urldecode(trim($_GET["filename"])));
+			$_GET["saveto"] = urldecode(trim($_GET["saveto"]));
+			$_GET["host"] = urldecode(trim($_GET["host"]));
+			$_GET["path"] = urldecode(trim($_GET["path"]));
+			$_GET["port"] = $_GET["port"] ? urldecode(trim($_GET["port"])) : 80;
+			$_GET["referer"] = $_GET["referer"] ? urldecode(trim($_GET["referer"])) : 0;
+			$_GET["link"] = urldecode(trim($_GET["link"]));
+			$_GET["post"] = $_GET["post"] ? unserialize(stripslashes(urldecode(trim($_GET["post"])))) : 0;
+			$_GET["cookie"] = $_GET["cookie"] ? decrypt(urldecode(trim($_GET["cookie"]))) : "";
 
-          $redirectto = "";
+			$redirectto = "";
 
-          $pauth = urldecode(trim($_GET["pauth"]));
-          $auth = urldecode(trim($_GET["auth"]));
+			$pauth = urldecode(trim($_GET["pauth"]));
 
-          if($_GET["auth"]) {
-            $AUTH["use"] = TRUE;
-            $AUTH["str"] = $_GET["auth"];
-          } else {
-            unset($AUTH);
-          }
+			if ($_GET['auth'] == 1) {
+				if (!preg_match("|^(?:.+\.)?(.+\..+)$|i", $_GET ["host"], $hostmatch)) html_error('No valid hostname found for authorisation!');
+				$hostmatch = str_replace('.', '_', $hostmatch[1]);
+				if ($premium_acc ["$hostmatch"] && $premium_acc ["$hostmatch"] ["user"] && $premium_acc ["$hostmatch"] ["pass"]) {
+					$auth = base64_encode ( $premium_acc ["$hostmatch"] ["user"] . ":" . $premium_acc ["$hostmatch"] ["pass"] );
+				} else html_error('No useable premium account found for this download - please set one in accounts.php');
+			} elseif ($_GET['auth']) {
+				$auth = decrypt(urldecode(trim($_GET['auth'])));
+				$AUTH ["use"] = true;
+				$AUTH ["str"] = $_GET ["auth"];
+			} else {
+				unset ($auth, $AUTH);
+			}
 
-          $ftp = parse_url($_GET["link"]);
-          $IS_FTP = $ftp["scheme"] == "ftp" ? TRUE : FALSE;
-          $AUTH["ftp"] = array("login" => ($ftp["user"] ? $ftp["user"] : "anonymous"), "password" => ($ftp["pass"] ? $ftp["pass"] : "anonymous@leechget.com"));
+			$ftp = parse_url($_GET["link"]);
+			$IS_FTP = $ftp["scheme"] == "ftp" ? TRUE : FALSE;
+			$AUTH["ftp"] = array("login" => ($ftp["user"] ? $ftp["user"] : "anonymous"), "password" => ($ftp["pass"] ? $ftp["pass"] : "anonymous@leechget.com"));
 
-          $pathWithName = $_GET["saveto"].PATH_SPLITTER.$_GET["filename"];
-          while (stristr($pathWithName, "\\\\")) {
-            $pathWithName = str_replace("\\\\", "\\", $pathWithName);
-          }
-          list($pathWithName,$tmp) = explode('?',$pathWithName);
+			$pathWithName = $_GET["saveto"].PATH_SPLITTER.$_GET["filename"];
+			while (stristr($pathWithName, "\\\\")) {
+			$pathWithName = str_replace("\\\\", "\\", $pathWithName);
+			}
+			list($pathWithName,$tmp) = explode('?',$pathWithName);
 
-          echo '<script type="text/javascript">updateStatus('.$i.", '".lang(26)."');</script>".$nn;
-          if ($ftp["scheme"] == "ftp" && !$_GET["proxy"]) {
-            $file = getftpurl($_GET["host"], $ftp["port"] ? $ftp["port"] : 21, $_GET["path"], $pathWithName);
-          } else {
-            $_GET["force_name"] ? $force_name = urldecode($_GET["force_name"]) : '';
-            $file = geturl($_GET["host"], $_GET["port"], $_GET["path"], $_GET["referer"], $_GET["cookie"], $_GET["post"], $pathWithName, $_GET["proxy"], $pauth, $auth, $ftp["scheme"]);
-          }
-          if ($redir && $lastError && stristr($lastError,"Error! it is redirected to [")) {
-            $redirectto = trim(cut_str($lastError,"Error! it is redirected to [","]"));
-            $_GET["link"] = $redirectto;
-            $purl = parse_url($redirectto);
-            list($_GET["filename"],$tmp) = explode('?',basename($redirectto));
-            $_GET["host"] = $purl["host"];
-            $_GET["path"] = $purl["path"].($purl["query"] ? "?".$purl["query"] : "");
-            $lastError = "";
-          }
-          if ($lastError) {
-            echo '<script type="text/javascript">updateStatus('.$i.", '".$lastError."');</script>".$nn;
-          } elseif ($file["bytesReceived"] == $file["bytesTotal"] || $file["size"] == "Unknown") {
-            echo '<script type="text/javascript">updateStatus('.$i.", '100%');resetProgress();</script>".$nn;
-            write_file(CONFIG_DIR."files.lst", serialize(array("name" => $file["file"], "size" => $file["size"], "date" => time(), "link" => $_GET["link"], "comment" => str_replace("\n", "\\n", str_replace("\r", "\\r", $_GET["comment"]))))."\r\n", 0);
-            $hideDiv = true;
-          } else {
-            echo '<script type="text/javascript">updateStatus('.$i.", '".lang(27)."');</script>".$nn;
-          }
-        }
-        while ($redirectto && !$lastError);
+			echo '<script type="text/javascript">updateStatus('.$i.", '".lang(26)."');</script>".$nn;
+			if ($ftp["scheme"] == "ftp" && !$_GET["proxy"]) {
+				$file = getftpurl($_GET["host"], $ftp["port"] ? $ftp["port"] : 21, $_GET["path"], $pathWithName);
+			} else {
+				$_GET["force_name"] ? $force_name = urldecode($_GET["force_name"]) : '';
+				$file = geturl($_GET["host"], $_GET["port"], $_GET["path"], $_GET["referer"], $_GET["cookie"], $_GET["post"], $pathWithName, $_GET["proxy"], $pauth, $auth, $ftp["scheme"]);
+			}
+			if ($options['redir'] && $lastError && stristr ($lastError, substr(lang(95), 0, strpos(lang(95), '%1$s')))) {
+				$redirectto = trim(cut_str($lastError, substr(lang(95), 0, strpos(lang(95), '%1$s')), "]"));
+				$_GET ["referer"] = $_GET ["link"];
+				$_GET ["link"] = $redirectto;
+				$purl = parse_url ($redirectto);
+				list ($_GET ["filename"], $tmp) = explode ('?', basename ($redirectto)); 
+				// In case the redirect didn't include the host
+				$_GET ["host"] = ($purl ["host"]) ? $purl ["host"] : $_GET ["host"];
+				$_GET ["path"] = $purl ["path"] . ($purl ["query"] ? "?" . $purl ["query"] : "");
+				$_GET ['port'] = $purl ['port'] ? $purl ['port'] : 80;
+				$_GET ['cookie'] = $_GET ["cookie"] ? urlencode(encrypt($_GET["cookie"])) : "";
+				$lastError = "";
+			}
+			if ($lastError) {
+				echo '<script type="text/javascript">updateStatus('.$i.", '".$lastError."');</script>".$nn;
+			} elseif ($file["bytesReceived"] == $file["bytesTotal"] || $file["size"] == "Unknown") {
+				echo '<script type="text/javascript">updateStatus('.$i.", '100%');resetProgress();</script>".$nn;
+				write_file(CONFIG_DIR."files.lst", serialize(array("name" => $file["file"], "size" => $file["size"], "date" => time(), "link" => $_GET["link"], "comment" => str_replace("\n", "\\n", str_replace("\r", "\\r", $_GET["comment"]))))."\r\n", 0);
+				$hideDiv = true;
+			} else {
+				echo '<script type="text/javascript">updateStatus('.$i.", '".lang(27)."');</script>".$nn;
+			}
+		}
+		while ($redirectto && !$lastError);
         echo "</div>".$nn;
         if ($hideDiv) {
           echo '<script type="text/javascript">document.getElementById("progress'.$i.'").style.display="none";</script>'.$nn;
@@ -195,32 +206,30 @@ function resetProgress()
       }
     }
     exit;
-  } else {
-    $start_link='index.php?audl=doum';
+} else {
+		$start_link='index.php?audl=doum';
 
-    if(isset($_REQUEST['useproxy']) && $_REQUEST['useproxy'] && (!$_REQUEST['proxy'] || !strstr($_REQUEST['proxy'], ":"))) {
-           html_error(lang(20));
-       } else {
-         if ($_REQUEST['useproxy'] == "on") {
-        $start_link.='&proxy='.$_REQUEST['proxy'];
-        $start_link.='&proxyuser='.$_REQUEST['proxyuser'];
-        $start_link.='&proxypass='.$_REQUEST['proxypass'];
-      }
-       }
+		if(isset($_REQUEST['useproxy']) && $_REQUEST['useproxy'] && (!$_REQUEST['proxy'] || !strstr($_REQUEST['proxy'], ":"))) {
+			html_error(lang(20));
+		} else if ($_REQUEST['useproxy'] == "on") {
+			$start_link.='&useproxy=on&proxy='.$_REQUEST['proxy'];
+			$start_link.='&proxyuser='.$_REQUEST['proxyuser'];
+			$start_link.='&proxypass='.$_REQUEST['proxypass'];
+		}
 
-    $start_link.='&imageshack_tor='.$_REQUEST['imageshack_acc'].'&premium_acc='.$_REQUEST['premium_acc'];
-    if ($_POST['premium_acc'] == 'on') {
-      $start_link.='&premium_acc=on';
-      if (!empty($_POST["premium_user"]) && !empty($_POST["premium_pass"])) {
-        $start_link .= '&premium_user='.urlencode(trim($_POST['premium_user'])).'&premium_pass='.urlencode(trim($_POST['premium_pass']));
-      }
-    }
-    if (isset($_POST['cookieuse'])) {
-      $start_link.='&cookie='.urlencode(($_POST['cookie']));
-    }
-    if (isset($_POST['ytube_mp4'])) {
-      $start_link.='&ytube_mp4='.urlencode(($_POST['ytube_mp4'])).'&yt_fmt='.urlencode(($_POST['yt_fmt']));
-    }
+		$start_link.='&imageshack_tor='.$_REQUEST['imageshack_acc'].'&premium_acc='.$_REQUEST['premium_acc'];
+		if ($_POST['premium_acc'] == 'on') {
+			$start_link.='&premium_acc=on';
+			if (!empty($_POST["premium_user"]) && !empty($_POST["premium_pass"])) {
+				$start_link .= '&premium_user='.urlencode(trim($_POST['premium_user'])).'&premium_pass='.urlencode(trim($_POST['premium_pass']));
+			}
+		}
+		if (isset($_POST['cookieuse'])) {
+			$start_link.='&cookie='.urlencode(($_POST['cookie']));
+		}
+		if (isset($_POST['ytube_mp4'])) {
+			$start_link.='&ytube_mp4='.urlencode(($_POST['ytube_mp4'])).'&yt_fmt='.urlencode(($_POST['yt_fmt']));
+		}
 
 ?>
 <script type="text/javascript">

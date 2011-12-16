@@ -30,16 +30,18 @@ class depositfiles_com extends DownloadClass {
             return $this->Login($link, $cap, $cookie);
         } elseif (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc ["depositfiles"] ["user"] && $premium_acc ["depositfiles"] ["pass"])) {
             return $this->Login($link, $cap);
-        } elseif ($_POST['step'] == 'Captcha') {
+        } elseif ($_POST['step'] == 'CaptchaPre') {
             return $this->Login($link, 1);
+        } elseif ($_POST['step'] == 'CaptchaFree') {
+            return $this->DownloadFree($link);
         } else {
             $page = $this->GetPage($link, "lang_current=en");
             $cookie = GetCookies($page) . "; lang_current=en";
-            return $this->DownloadFree($link, $cookie, $this->GetPage($link, $cookie, array('gateway_result' => '1'), $Referer));
+            return $this->Retrieve($link, $cookie, $this->GetPage($link, $cookie, array('gateway_result' => '1'), $Referer));
         }
     }
 
-    private function DownloadFree($link, $cookie, $page) {
+    private function Retrieve($link, $cookie, $page) {
         global $Referer;
 
         is_present($page, "Such file does not exist or it has been removed for infringement of copyrights.");
@@ -56,14 +58,41 @@ class depositfiles_com extends DownloadClass {
             echo "\n</form></center>\n</body>\n</html>";
             exit();
         }
-        if (preg_match('%<span id="download_waiter_remain">(\d+)<\/span>%', $page, $wait)) $this->CountDown($wait[1]);
-        $cookie = $cookie . '; '.GetCookies($page);
-        if (!preg_match("#/get_file.php[^&|']+#", $page, $temp)) html_error("Error 1x03:Plugin is out of date");
-        $page = $this->GetPage("http://depositfiles.com$temp[0]", $cookie, 0, $Referer);
-        if (!preg_match('%<form action="(.*)" method="get"%U', $page, $dl)) html_error("Error 1x04:Plugin is out of date");
+        if (!preg_match('%<span id="download_waiter_remain">(\d+)<\/span>%', $page, $wait)) html_error('Error 0x01:Plugin is out of date');
+        $this->CountDown($wait[1]);
+        $cookie = $cookie . '; ' . GetCookies($page);
+        if (!preg_match("@var fid = '([^|']+)@i", $page, $fid)) html_error('Error 0x02:Plugin is out of date');
+        if (!preg_match("@Recaptcha\.create\('([^|']+)@i", $page, $cid)) html_error('Error 0x03:Plugin is out of date');
+        if (!preg_match("@\/get_file\.php[^|']+@i", $page, $temp)) html_error('Error 0x04:Plugin is out of date');
+
+        $data = $this->DefaultParamArr("http://depositfiles.com$temp[0]", $cookie);
+        $data['step'] = 'CaptchaFree';
+        $data['fid'] = $fid[1];
+        $data['check'] = $cid[1];
+        $this->Show_reCaptcha($cid[1], $data);
+        exit();
+    }
+
+    private function DownloadFree($link) {
+        global $Referer;
+
+        $fid = $_POST['fid'];
+        $check = $_POST['check'];
+        $challenge = $_POST['recaptcha_challenge_field'];
+        $response = $_POST['recaptcha_response_field'];
+        $link = urldecode($_POST['link']);
+        $cookie = urldecode($_POST['cookie']);
+        $page = $this->GetPage($link . "$fid&challenge=$challenge&response=$response", $cookie, 0, $Referer);
+        if (preg_match("@check_recaptcha\('$fid'@i", $page)) {
+            $data = $this->DefaultParamArr($link, $cookie);
+            $data['step'] = 'CaptchaFree';
+            $data['fid'] = $fid;
+            $this->Show_reCaptcha($check, $data);
+            exit();
+        }
+        if (!preg_match('%<form action="(.*)" method="get"%U', $page, $dl)) html_error("Error 0x05:Plugin is out of date");
         $dlink = trim($dl[1]);
-        $filename = parse_url($dlink);
-        $FileName = basename($filename['path']);
+        $FileName = basename(parse_url($dlink, PHP_URL_PATH));
         $this->RedirectDownload($dlink, $FileName, $cookie, 0, $Referer);
         exit();
     }
@@ -83,30 +112,17 @@ class depositfiles_com extends DownloadClass {
             $post['login'] = $user;
             $post['password'] = $pass;
             if ($cap == 1) {
-                $post['recaptcha_challenge_field'] = $_POST['challenge'];
-                $post['recaptcha_response_field'] = $_POST['captcha'];
+                $post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
+                $post['recaptcha_response_field'] = $_POST['recaptcha_response_field'];
             }
             $page = $this->GetPage($postlog, "lang_current=en", $post, 'http://depositfiles.com/');
             if (strpos($page, 'Enter security code') && ($cap == 0)) {
                 if (preg_match('@api\/challenge[?]k=([^"]+)@i', $page, $cap) && preg_match('@api\/noscript[?]k=([^"]+)@i', $page, $cap)) {
                     $k = $cap[1];
                 }
-                $page = $this->GetPage("http://www.google.com/recaptcha/api/challenge?k=$k");
-                $ch = cut_str($page, "challenge : '", "'");
-                if ($ch) {
-                    $page = $this->GetPage("http://www.google.com/recaptcha/api/image?c=$ch");
-                    $capture = substr($page, strpos($page, "\r\n\r\n") + 4);
-                    $imgfile = DOWNLOAD_DIR . 'depositfiles_captcha.jpg';
-                    if (file_exists($imgfile)) unlink($imgfile);
-                    write_file($imgfile, $capture);
-                } else {
-                    html_error('Can\'t find captcha data!');
-                }
-
                 $data = $this->DefaultParamArr($postlog);
-                $data['step'] = 'Captcha';
-                $data['challenge'] = $ch;
-                $this->EnterCaptcha($imgfile, $data, 20);
+                $data['step'] = 'CaptchaPre';
+                $this->Show_reCaptcha($k, $data);
                 exit();
             }
             $cookie = GetCookies($page) . '; lang_current=en';
@@ -144,13 +160,31 @@ class depositfiles_com extends DownloadClass {
             echo "\n</form></center>\n</body>\n</html>";
             exit();
         }
-        if (!preg_match('@http:\/\/.+depositfiles\.com\/auth-[^|\r|\n|\'"]+@i', $page, $dl)) {
-            html_error("Error 1x01:Plugin is out of date");
-        }
+        if (!preg_match('@http:\/\/.+depositfiles\.com\/auth-[^|\r|\n|\'"]+@i', $page, $dl)) html_error("Error 0x06:Plugin is out of date");
         $dlink = trim($dl[0]);
-        $Url = parse_url($dlink);
-        $FileName = basename($Url['path']);
+        $FileName = basename(parse_url($dlink, PHP_URL_PATH));
         $this->RedirectDownload($dlink, $FileName, $cookie, 0, $Referer);
+    }
+
+    private function Show_reCaptcha($pid, $inputs) {
+        global $PHP_SELF;
+
+        if (!is_array($inputs)) {
+            html_error("Error parsing captcha data.");
+        }
+        // Themes: 'red', 'white', 'blackglass', 'clean'
+        echo "<script language='JavaScript'>var RecaptchaOptions={theme:'white', lang:'en'};</script>\n";
+        echo "\n<center><form name='dl' action='$PHP_SELF' method='post' ><br />\n";
+        foreach ($inputs as $name => $input) {
+            echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
+        }
+        echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script>";
+        echo "<noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br />";
+        echo "<textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br />";
+        echo "<input type='submit' name='submit' onclick='javascript:return checkc();' value='Enter Captcha' />\n";
+        echo "<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n";
+        echo "</form></center>\n</body>\n</html>";
+        exit();
     }
 
 }
@@ -161,4 +195,5 @@ class depositfiles_com extends DownloadClass {
 //Updated by Ruud v.Tony 16-May-2011: Updated Download Free
 //Updated by Ruud v.Tony 03-Okt-2011: Updated for depositfiles new layout, support captcha in login, password protected file, folder file
 //Updated by Ruud v.Tony 05-Okt-2011: Updated in password protected files so we dont need to start over the page :D
+//Updated by Ruud v.Tony 26-Okt-2011: Add captcha function in free download
 ?>

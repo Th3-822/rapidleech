@@ -28,7 +28,7 @@ switch ($_GET['ajax']) {
 		break;
 	case 'linkcheck':
 		require_once(CLASS_DIR.'linkchecker.php');
-		if(isset($_POST['debug'])) {
+		if(!empty($_POST['debug'])) {
 			if($debug == 1)
 			debug();
 			else
@@ -41,7 +41,7 @@ switch ($_GET['ajax']) {
 			$alllinks = explode("\n", $alllinks);
 
 			$x = 1;
-			$l = ($_POST['k'] == 1) ? 0 : 1;
+			$l = ($_POST['k']) ? 0 : 1;
 
 			$alllinks = array_unique($alllinks); //removes duplicates
 			echo "<div id='listlinks'>\n";
@@ -69,7 +69,7 @@ switch ($_GET['ajax']) {
 					}
 				}
 
-				if(preg_match('/^http:\/\/(www\.)?zpag\.es\/\w+/i', $link, $m)){
+				if(preg_match('/^http:\/\/(www\.)?zpag\.es\/((\d+\/.+)|([^\/|\r|\n]+))/i', $link, $m)){
 					$page = curl($m[0]);
 					preg_match('/window\.location = "(https?:[^"]+)"/i', $page, $match);
 					if (!empty($match[1]) && $match[1] != $link) {
@@ -93,6 +93,7 @@ switch ($_GET['ajax']) {
 
 				if(preg_match('/^http:\/\/(\w+\.)?linkbucks\.com\/?(link\/[^\/|\r|\n]+)?/i' , $link, $m)) {
 					$page = curl($m[0],0,0,0);
+					sleep(2); // linkbucks now show a flood warning, waiting 2 seconds.
 					if (!preg_match("/(?:(?:Linkbucks)|(?:Lbjs)).TargetUrl = '(https?:[^']+)'/i" , $page , $match)) {
 						if (!preg_match('/<iframe id="content" src="(https?:[^"]+)"/i' , $page , $match)) {
 							preg_match("/Location: (https?:.+)/i", $page, $match);
@@ -121,7 +122,10 @@ switch ($_GET['ajax']) {
 					if (!empty($match[1]) && $match[1] != $m[0]) {
 						$link = $match[1];
 						$Kl = $m[1];
-					} else $link = $m[0]." - ERROR.";
+					} else {
+						$link = $m[0]." - ERROR.";
+						$skip = true;
+					}
 				}
 
 				if(preg_match('@^http://(?:www\.)?multiupload\.com/(\w{2}_)?\w+@i', $link, $m)){
@@ -134,9 +138,9 @@ switch ($_GET['ajax']) {
 						if (preg_match_all('@(http://(?:www\.)?multiupload\.com/(?:\w{2}_\w+))</a@i', $page, $match)) {
 							foreach ($match[1] as $link) {
 								echo "<a class='n' style='text-align:left;' title='Removed folder: multiupload.com'><b>$link</b></a><br />\n";
-								$Checked = true;
-								CountandCheck($x);
 							}
+							$Checked = true;
+							CountandCheck($x);
 						}
 						else $link = $m[0]." - ERROR.";
 					} elseif (!$skip) {
@@ -148,20 +152,42 @@ switch ($_GET['ajax']) {
 					}
 				}
 
+				// Some hosts needs other way to check file and get the filesize
+				if(preg_match('@^https?://(?:[^/]+\.)?rapidshare\.com/(?:(?:files/(\d+)/([^/|#|\r|\n]+))|(?:\??#!download\|[^\|]+\|(\d+)\|([^\||\r|\n]+)))@i', $link, $m)) { // O.O
+					if (!empty($m[1])) {
+						$m['id'] = $m[1];
+						$m['filename'] = $m[2];
+					} else {
+						$m['id'] = $m[3];
+						$m['filename'] = $m[4];
+					}
+					$page = curl("http://api.rapidshare.com/cgi-bin/rsapi.cgi", "sub=checkfiles&files={$m['id']}&filenames=".$m['filename'],0,0,0,0);
+					$page = explode(',', $page);
+					if ($page[2] > 0) {
+						if ($page[4] == 1) $chk = 1;
+						elseif ($page[4] == 3) $chk = 2;
+						else $chk = 0;
+					} else $chk = 0;
+
+					showlink("http://rapidshare.com/files/".$page[0]."/".$page[1], bytesToKbOrMbOrGb($page[2]), $chk);
+					$Checked = $skip = true;
+					CountandCheck($x);
+				}
+
 				if($l == 1 && !$skip) {
 					foreach($sites as $site) {
-						if(preg_match('@'.$site['link'].'@i', $link)) {
-							$pattern = '';
-							$replace = '';
+						if(!empty($site['link']) && preg_match('@'.$site['link'].'@i', $link)) {
+							$szregex = $pattern = $replace = '';
+							$opt = array();
+							if (isset($site['szregex'])) $szregex = $site['szregex'];
 							if (isset($site['pattern'])) $pattern = $site['pattern'];
 							if (isset($site['replace'])) $replace = $site['replace'];
-							$opt = '';
 							if (array_key_exists('options', $site) && is_array($site['options'])) {
 								$opt = $site['options'];
 							}
-							$chk = check(trim($link), $x, $site['regex'], $pattern, $replace, $opt);
+							$chk = check(trim($link), $x, $site['regex'], $szregex, $pattern, $replace, $opt);
 							echo $chk[0];
-							flush();ob_flush();
+							flush();//ob_flush();
 							$Checked = true;
 							CountandCheck($x);
 						}

@@ -1,95 +1,104 @@
 <?php
-
 ####### Account Info. ###########
-$mega_login = ""; // login
-$mega_pass = ""; // password
+$upload_acc['megaupload_com']['user'] = ""; //Set you username
+$upload_acc['megaupload_com']['pass'] = ""; //Set your password
 ##############################
 
-$not_done=true;
-$continue_up=false;
-if ($mega_login && $mega_pass){
-	$_REQUEST['my_login'] = $mega_login;
-	$_REQUEST['my_pass'] = $mega_pass;
-	$_REQUEST['action'] = "FORM";
-	echo "<b><center>Use Default login/pass.</center></b>\n";
+function generateRandomID($param) {
+    $tmp = "0" . (microtime(true) * 100);
+    $len = $param - strlen($tmp);
+    $count = 1;
+    while ($count <= $len) {
+        $tmp .= rand(0, 9);
+        $count++;
+    }
+    return $tmp;
+}
+
+$not_done = true;
+$continue_up = false;
+if ($upload_acc['megaupload_com']['user'] && $upload_acc['megaupload_com']['pass']) {
+    $_REQUEST['up_login'] = $upload_acc['megaupload_com']['user'];
+    $_REQUEST['up_pass'] = $upload_acc['megaupload_com']['pass'];
+    $_REQUEST['action'] = "FORM";
+    echo "<b><center>Using Default Login and Pass.</center></b>\n";
 }
 if ($_REQUEST['action'] == "FORM")
-    $continue_up=true;
-else{
-?>
-<table border=0 style="width:270px;" cellspacing=0 align=center>
-<form method=post>
-<input type=hidden name=action value='FORM' />
-<tr><td nowrap>&nbsp;User*<td>&nbsp;<input type=text name=my_login value='' style="width:160px;" />&nbsp;</tr>
-<tr><td nowrap>&nbsp;Password*<td>&nbsp;<input type=password name=my_pass value='' style="width:160px;" />&nbsp;</tr>
-<tr><td colspan=2 align=center><input type=submit value='Upload' /></tr>
-<tr><td colspan=2 align=center><small>*You can set it as default in <b><?php echo $page_upload["megaupload.com"]; ?></b></small></tr>
-</table>
-</form>
+    $continue_up = true;
+else {
+    ?>
+    <form method='post'>
+        <input type='hidden' name='action' value='FORM' />
+        <table style="text-align: center;width:270px;border-style: none;border-collapse: collapse;margin-left: auto;margin-right: auto">
+            <tr><td nowrap>&nbsp;User*<td>&nbsp;<input type='text' name='up_login' value='' style='width:160px;' />&nbsp;</tr>
+            <tr><td nowrap>&nbsp;Password*<td>&nbsp;<input type='password' name='up_pass' value='' style='width:160px;' />&nbsp;</tr>
+            <tr><td colspan='2' align='center'><input type='submit' value='Upload' /></tr>
+            <tr><td colspan='2' align='center'><small>*You can set it as default in <b><?php echo $page_upload["megaupload.com_member"]; ?></b></small></tr>
+        </table>    
+    </form>
 
-<?php
-	}
 
-if ($continue_up)
-	{
-		$not_done=false;
-?>
-<table width=600 align=center>
-</td></tr>
-<tr><td align=center>
-<div id=login width=100% align=center>Login to Megaupload.com</div>
-<?php
-	                $post = array();
-	                $post['login'] = '1';
-	                $post['username'] = trim($_REQUEST['my_login']);
-	                $post['password'] = trim($_REQUEST['my_pass']);
-	                $page = geturl("megaupload.com", 80, "/?c=account", 0, 0, $post, 0, $_GET["proxy"], $pauth);
-	                is_page($page);
-                        is_present($page, 'Username and password do not match. Please try again!', 'Error logging in - are your logins correct!');
-                        $cookie = GetCookies($page);
-	                $page = geturl("megaupload.com", 80, "/", "http://www.megaupload.com/", $cookie, 0, 0, "");
-                        is_page($page);
-                        
-?>
-<script>document.getElementById('login').style.display='none';</script>
-<div id=info width=100% align=center>Retrive upload ID</div>
-<?php 		
-                        $server = cut_str($page, 'flashvars.server = "','";');
-                        $s = rndNum(6);
-                        $rand = rndNum(21);                  
-                        $ID= '0'.time().$rand;
-                        $upload_form = $server."upload_done.php?UPLOAD_IDENTIFIER=$ID&user=undefined&s=$s";
-                        $url = parse_url($upload_form);
+    <?php
+}
 
-?>
+if ($continue_up) {
+    $not_done = false;
+    ?>
+    <table width='600' align='center'>
+        <tr><td></td></tr>
+        <tr><td align='center'>
+                <div id='login' width='100%' align='center'>Login to Megaupload</div>
+                <?php
+                if (!empty($_REQUEST['up_login']) && !empty($_REQUEST['up_pass'])) {
+                    $post = array();
+                    $post['login'] = "1";
+                    $post['redir'] = "1";
+                    $post['username'] = $_REQUEST['up_login'];
+                    $post['password'] = $_REQUEST['up_pass'];
+                    $Url = parse_url("http://megaupload.com/?c=login");
+                    $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://megaupload.com/?c=login", 0, $post, 0, $_GET["proxy"], $pauth);
+                    is_page($page);
+                    $Cookies = GetCookies($page);                    
+                    if (!strpos($Cookies, "ser=")) {
+                        html_error("Login Failed");
+                    }
+                } else {
+                    echo "<b><center>Login not found or empty, using non member upload.</center></b>\n";
+                }
+                ?>
+                <script type='text/javascript'>document.getElementById('login').style.display='none';</script>
+                <div id='info' width='100%' align='center'>Retrive upload ID</div>
+                <?php
+                $Url = parse_url("http://www.megaupload.com/?login=1");
+                $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://megaupload.com/?c=login", $Cookies, 0, 0, $_GET["proxy"], $pauth);
+                is_page($page);
+                if (!preg_match_all("#http://www\d+.megaupload.com/#", $page, $tmp)) {
+                    html_error("Upload server not found");
+                }
+                $uploadserver=$tmp[0][rand(0, count($tmp[0])-1)];                
+                $UPLOAD_IDENTIFIER = generateRandomID(32);
+                preg_match("#user=([\w-\.]+)#", $Cookies, $user);                
+                $upload_url = $uploadserver."upload_done.php?UPLOAD_IDENTIFIER=$UPLOAD_IDENTIFIER&user=$user[1]&s=" . filesize($lfile);
+                $url=parse_url($upload_url);
+                $dpost=array();
+                $dpost["Filename"]=$lname;
+                $dpost["message"]="Upload by rapidleech";
+                $dpost['password']="";
+                $dpost['user']=$user[1];
+                ?>
+                <script type='text/javascript'>document.getElementById('info').style.display='none';</script>
+                <?php
+                $upagent = "Shockwave Flash";
+                $upfiles = upfile($url["host"], $url["port"] ? $url["port"] : 80, $url["path"] . ($url["query"] ? "?" . $url["query"] : ""), 0, $Cookies, $dpost, $lfile, $lname, "Filedata", "", $_GET["proxy"], $pauth, $upagent);
+                ?>
+                <script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>
+                <?php
+                is_page($upfiles);
+                if (!preg_match("#http://www.megaupload.com/\?d=\w+#", $upfiles, $done)){
+                    html_error("Upload link not found");
+                }
+                $download_link = $done[0];                
+            }
 
-<?php 	
-			$fpost = array();
-			$fpost["Filename"] = $lname;
-			$fpost["message"] = 'LeechViet';
-			$fpost["trafficurl"] = 'undefined';
-			$fpost["user"] = 'undefined';
-			$fpost["hotlink"] = '0';
-			$fpost["Upload"] = 'Submit Query';		
-			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), "http://www.megaupload.com/",$cookie, $fpost, $lfile, $lname, "Filedata");
-?>
-
-<script>document.getElementById('progressblock').style.display='none';</script>
-<?php 	
-			is_page($upfiles);
-                        insert_timer( 5, "Wait for Redirect Download Link.","",true );
-                        preg_match('/downloadurl *= *\'(.*?)\'/i', $upfiles, $dllink);
-                        $download_link = $dllink[1];
-
-			
-	}
-function rndNum($lg){
-        $str="0123456789"; 
-	for ($i=1;$i<=$lg;$i++){
-	$st=rand(1,9);
-	$pnt.=substr($str,$st,1);}
-        return $pnt;
-        }
-
-//VinhNhaTrang_01.12.2010
-?>
+//by vdhdevil
+            ?>

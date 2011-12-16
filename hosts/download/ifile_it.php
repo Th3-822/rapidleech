@@ -19,11 +19,13 @@ class ifile_it extends DownloadClass {
 			if (extension_loaded('curl')) {
 				$cV = curl_version();
 				if (in_array('https', $cV['protocols'], true)) $this->usecurl = true;
+				else $cantlogin = true;
 			} else $cantlogin = true;
-			if ($cantlogin) $this->changeMesg(lang(300)."<br /><br />Https support: NO<br />Member Login disabled.");
+			if ($_REQUEST["premium_acc"] == "on" && !empty($premium_acc["ifile_it"]["apikey"])) $cantlogin = false;
+			if ($cantlogin) $this->changeMesg(lang(300)."<br /><br />Https support: NO<br />Login disabled.");
 		}
 
-		if (!$cantlogin && $_REQUEST["premium_acc"] == "on" && ((!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) || ($premium_acc["ifile_it"]["user"] && $premium_acc["ifile_it"]["pass"]))) $this->Login($link);
+		if (!$cantlogin && $_REQUEST["premium_acc"] == "on" && (((!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) || ($premium_acc["ifile_it"]["user"] && $premium_acc["ifile_it"]["pass"])) || !empty($premium_acc["ifile_it"]["apikey"]))) $this->Login($link);
 		elseif ($_POST["skip"] == "true") $this->chkcaptcha($link);
 		else $this->Prepare($link);
 	}
@@ -69,11 +71,11 @@ class ifile_it extends DownloadClass {
 
 	private function chkcaptcha($link) {
 		if ($_POST["skip"] == "true") {
-			if (empty($_POST['recaptcha_response_field'])) html_error("You didn't enter the image verification code.");
+			if (empty($_POST['captcha'])) html_error("You didn't enter the image verification code.");
 			$post = array();
 			$post['ctype'] = 'recaptcha';
-			$post['recaptcha_response'] = $_POST['recaptcha_response_field'];
-			$post['recaptcha_challenge'] = $_POST['recaptcha_challenge_field'];
+			$post['recaptcha_response'] = $_POST['captcha'];
+			$post['recaptcha_challenge'] = $_POST['challenge'];
 			$this->_url = urldecode($_POST['_link']);
 			$this->dlreq = urldecode($_POST['_dlreq']);
 			$this->cookie = urldecode($_POST['cookie']);
@@ -99,31 +101,33 @@ class ifile_it extends DownloadClass {
 					$data['_link'] = urlencode($this->_url);
 					$data['_dlreq'] = urlencode($this->dlreq);
 					$data['skip'] = 'true';
-					$this->Show_reCaptcha($this->captcha, $data);
+					$this->DL_reCaptcha($this->captcha, $data);
 				}
 			} else html_error("Error getting download data ('{$rply['status']}' => '{$rply['message']}').");
 		}
 		return false;
 	}
 
-	private function Show_reCaptcha($pid, $inputs) {
-		global $PHP_SELF;
+	private function DL_reCaptcha($pid, $data) {
+		$page = $this->GetPage("http://www.google.com/recaptcha/api/challenge?k=" . $pid);
+		if (!preg_match('/challenge \: \'([^\']+)/i', $page, $ch)) html_error("Error getting CAPTCHA data.");
+		$challenge = $ch[1];
 
-		if (!is_array($inputs)) html_error("Error parsing captcha data.");
+		$data['challenge'] = $challenge;
 
-		// Themes: 'red', 'white', 'blackglass', 'clean'
-		echo "<script language='JavaScript'>var RecaptchaOptions={theme:'red', lang:'en'};</script>\n";
+		//Download captcha img.
+		$page = $this->GetPage("http://www.google.com/recaptcha/api/image?c=" . $challenge);
+		$capt_img = substr($page, strpos($page, "\r\n\r\n") + 4);
+		$imgfile = DOWNLOAD_DIR . "ifile_it_captcha.jpg";
 
-		echo "\n<center><form name='dl' action='$PHP_SELF' method='post' ><br />\n";
-		foreach ($inputs as $name => $input) {
-			echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
+		if (file_exists($imgfile)) {
+			unlink($imgfile);
 		}
-		echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script>";
-		echo "<noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br />";
-		echo "<textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br />";
-		echo "<input type='submit' name='submit' onclick='javascript:return checkc();' value='Download File' />\n";
-		echo "<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n";
-		echo "</form></center>\n</body>\n</html>";
+		if (! write_file($imgfile, $capt_img)) {
+			html_error("Error getting CAPTCHA image.", 0);
+		}
+
+		$this->EnterCaptcha($imgfile, $data, 20);
 		exit;
 	}
 
@@ -168,25 +172,65 @@ class ifile_it extends DownloadClass {
 	private function Login($link) {
 		global $premium_acc;
 
-		if (!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) $pA = true;
-		else $pA = false;
-		$user = ($pA ? $_REQUEST["premium_user"] : $premium_acc["ifile_it"]["user"]);
-		$pass = ($pA ? $_REQUEST["premium_pass"] : $premium_acc["ifile_it"]["pass"]);
-		if (empty($user) || empty($pass)) html_error("Login Failed: Username or Password are empty. Please check login data.");
+		// Ping api
+		$page = $this->GetPage('http://ifile.it/api-ping.api');
+		is_notpresent($page, '"message":"pong"', "Error: ifile.it api is down?.");
 
-		$post = array();
-		$post["username"] = urlencode($user);
-		$post["password"] = urlencode($pass);
-		$page = $this->GetPageS("https://secure.ifile.it/account-signin_p.html", $this->cookie, $post, 'https://secure.ifile.it/account-signin.html');
-		$this->cookie = GetCookiesArr($page);
+		if (empty($premium_acc["ifile_it"]["apikey"])) {
+			if (!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) $pA = true;
+			else $pA = false;
+			$user = ($pA ? $_REQUEST["premium_user"] : $premium_acc["ifile_it"]["user"]);
+			$pass = ($pA ? $_REQUEST["premium_pass"] : $premium_acc["ifile_it"]["pass"]);
+			if (empty($user) || empty($pass)) html_error("Login Failed: Username or Password are empty. Please check login data.");
 
-		is_present($page, 'error=SIGNIN_FAILURE', "Login failed: Username or Password is incorrect.");
-		is_notpresent($page, "Set-Cookie: if_akey=", "Login Failed: Cannot get cookie.");
+			$post = array();
+			$post["username"] = urlencode($user);
+			$post["password"] = urlencode($pass);
+			$page = $this->GetPageS('https://secure.ifile.it/api-fetch_apikey.api', 0, $post);
+			$rply = $this->Get_Reply($page);
 
-		$this->Prepare($link);
+			if ($rply['status'] != 'ok') html_error("Login Failed: ".htmlentities($rply['message']));
+			if (empty($rply['akey'])) html_error("Login Failed: Akey not found.");
+		} else {
+			$rply = array();
+			$rply['akey'] = $premium_acc["ifile_it"]["apikey"];
+		}
+
+		$this->cookie = array();
+		$this->cookie['if_akey'] = $rply['akey'];
+
+		$page = $this->GetPage('http://ifile.it/api-fetch_account_info.api', 0, array('akey'=>$rply['akey']));
+		$rply = $this->Get_Reply($page);
+
+		if ($rply['status'] != 'ok') html_error("Cannot check acc status: ".htmlentities($rply['message']));
+		if (empty($rply['user_group']))  html_error("Cannot check acc type");
+
+		// If isn't a normal account, should be premium/tester/vip...
+		if ($rply['user_group'] != 'normal') return $this->PremiumDL($link);
+		else {
+			$this->changeMesg(lang(300)."<br /><b>Account isn\\\'t premium</b><br />Using it as member.");
+			return $this->Prepare($link);
+		}
+	}
+
+	private function PremiumDL($link) {
+		$page = $this->GetPage($link);
+		is_present($page, "ifile.it/?error=", "File not Found or Deleted");
+		if (!preg_match("@var[\s|\t]+__ukey[\s|\t]*=[\s|\t]*'([^']+)'@i", $page, $ukey)) html_error("Error: FileID not found.");
+
+		$page = $this->GetPage('http://ifile.it/api-fetch_download_url.api', 0, array('akey' => $this->cookie['if_akey'], 'ukey' => $ukey[1]));
+		$rply = $this->Get_Reply($page);
+
+		if ($rply['status'] != 'ok') html_error("Error getting premium dlink: ".htmlentities($rply['message']));
+		if (empty($rply['download_url'])) html_error("Error getting premium dlink... Empty?");
+
+		$filename = parse_url($rply['download_url']);$filename = urldecode(basename($filename["path"]));
+		return $this->RedirectDownload($rply['download_url'], $filename);
 	}
 }
 
 //[16-Oct-2011] Written by Th3-822.
+//[21-Nov-2011] Captcha now doesn't allow hotlinking, fixed. - Th3-822
+//[09-Dec-2011] Added premium acc support (non tested) & apikey support. - Th3-822
 
 ?>
