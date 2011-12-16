@@ -54,6 +54,7 @@ $premium_acc = array();
 //$premium_acc["fastdebrid_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["realdebrid_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["fileape_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["extabit_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["letitbit_net"] = array('pass' => 'your password');
 //$premium_acc["vip_file_com"] = array('pass' => 'your password');
 //$premium_acc["shareflare_net"] = array('pass' => 'your password');

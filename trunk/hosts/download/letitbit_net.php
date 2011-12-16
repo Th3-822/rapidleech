@@ -12,13 +12,14 @@ class letitbit_net extends DownloadClass {
             $page = $this->GetPage($link, 'lang=en'); //set the page to english
             is_present($page, "File not found", "The requested file was not found");
         }
-        unset($page);
         if (($_REQUEST ['premium_acc'] == 'on' && $_REQUEST['premium_user'] && $_REQUEST ['premium_pass']) || ($_REQUEST ['premium_acc'] == 'on' && (!empty($premium_acc ['letitbit_net'] ['user']) && !empty($premium_acc ['letitbit_net'] ['pass'])))) {
             $this->Login($link);
         } else {
             $cookie = GetCookies($page). "; lang=en";
             $post['uid5'] = cut_str($page, 'name="uid5" value="', '"');
             $post['uid'] = cut_str($page, 'name="uid" value="', '"');
+            $post['id'] = cut_str($page, 'name="id" value="', '"');
+            $post['live'] = cut_str($page, 'name="live" value="', '"');
             $post['seo_name'] = cut_str($page, 'name="seo_name" value="', '"');
             $post['name'] = cut_str($page, 'name="name" value="', '"');
             $post['pin'] = cut_str($page, 'name="pin" value="', '"');
@@ -30,7 +31,9 @@ class letitbit_net extends DownloadClass {
             $post['index'] = cut_str($page, 'name="index" value="', '"');
             $post['dir'] = cut_str($page, 'name="dir" value="', '"');
             $post['optiondir'] = cut_str($page, 'name="optiondir" value="', '"');
+            $post['desc'] = cut_str($page, 'name="desc" value="', '"');
             $post['lsarrserverra'] = cut_str($page, 'name="lsarrserverra" value="', '"');
+            $post['page'] = cut_str($page, 'name="page" value="', '"');
             $post['pin_wm'] = cut_str($page, 'name="pin_wm" value="', '"');
             $post['md5crypt'] = cut_str($page, 'name="md5crypt" value="', '"');
             $post['realuid_free'] = cut_str($page, 'name="realuid_free" value="', '"');
@@ -52,11 +55,14 @@ class letitbit_net extends DownloadClass {
 
         $t = explode(";", GetCookies($page));
         $cookie .=";" . $t[0] . ";" . $t[2];
-        if (!preg_match('%<form action="(.*)" method="post" id="dvifree">%', $page, $match)) html_error('Error: redirect link 1 not found!');
+        if (!preg_match('%<form action="(.*)" method="post" id="d3_form">%', $page, $match)) html_error('Error: redirect link 1 not found!');
         $link = $match[1];
         unset($post);
+        // just copy paste here from the previous post, it's the same...
         $post['uid5'] = cut_str($page, 'name="uid5" value="', '"');
         $post['uid'] = cut_str($page, 'name="uid" value="', '"');
+        $post['id'] = cut_str($page, 'name="id" value="', '"');
+        $post['live'] = cut_str($page, 'name="live" value="', '"');
         $post['seo_name'] = cut_str($page, 'name="seo_name" value="', '"');
         $post['name'] = cut_str($page, 'name="name" value="', '"');
         $post['pin'] = cut_str($page, 'name="pin" value="', '"');
@@ -68,24 +74,26 @@ class letitbit_net extends DownloadClass {
         $post['index'] = cut_str($page, 'name="index" value="', '"');
         $post['dir'] = cut_str($page, 'name="dir" value="', '"');
         $post['optiondir'] = cut_str($page, 'name="optiondir" value="', '"');
+        $post['desc'] = cut_str($page, 'name="desc" value="', '"');
         $post['lsarrserverra'] = cut_str($page, 'name="lsarrserverra" value="', '"');
+        $post['page'] = cut_str($page, 'name="page" value="', '"');
         $post['pin_wm'] = cut_str($page, 'name="pin_wm" value="', '"');
         $post['md5crypt'] = cut_str($page, 'name="md5crypt" value="', '"');
         $post['realuid_free'] = cut_str($page, 'name="realuid_free" value="', '"');
         $post['pin_wm_tarif'] = 'default';
+        // end copy paste, lol...
         $post['ac_http_referer'] = cut_str($page, 'name="ac_http_referer" value="', '"');
         $post['links_sent'] = "1";
         $post['rand'] = cut_str($page, 'name="rand" value="', '"');
         $page = $this->GetPage($link, $cookie, $post, $Referer);
-        if (!preg_match('@(\d+)<\/span> seconds@', $page, $wait)) html_error('Error: Timer not found!');
-        $this->CountDown($wait[1]);
-        if (!preg_match("@ajax_check_url = '([^|\r|\n]+)'@", $page, $match)) html_error('Error: Redirect link 2 not found');
-        $tlink = $match[1];
+        $tlink = cut_str($page, "ajax_check_url = '", "'");
+        $wait = cut_str($page, "seconds = ", ";");
+        if (empty($tlink) || empty($wait)) html_error('Timer or redirect link 2 not found');
+        $this->CountDown($wait);
         $page = $this->GetPage($tlink, $cookie, $post, $link."\r\nX-Requested-With: XMLHttpRequest");
         if (!preg_match('@http:\/\/.+download(\d+)?\/let(\d+)?\/[^|\r|\n]+@', $page, $dl)) html_error('Error: Free Download link can\'t be found!');
         $dlink = trim($dl[0]);
-        $filename = parse_url($dlink);
-        $Filename = basename($filename['path']);
+        $FileName = basename(parse_url($dlink, PHP_URL_PATH));
         $this->RedirectDownload($dlink, $Filename, $cookie, 0, $tlink);
         exit();
     }
@@ -136,5 +144,6 @@ class letitbit_net extends DownloadClass {
   Updated the premium code by Ruud v.Tony 19-5-2011
   Updated for site layout change by Ruud v.Tony 24-7-2011
   Updated for joining between premium user & pass with only single key by Ruud v.Tony 13-10-2011
+  Small fix in post form by Ruud v.Tony 16-12-2011 (sorry for the delay, I'm busy with my real life)
 \***********************************************************************************************/
 ?>

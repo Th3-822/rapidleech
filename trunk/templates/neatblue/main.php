@@ -87,8 +87,16 @@ if ( !empty ( $premium_acc ) || ( $mu_cookie_user_value ) )
 <table class="tab-content" id="tb1" cellspacing="5" width="100%">
 <tbody>
 <tr>
-<td align="left"><b><?php echo lang(207); ?>:</b><br />&nbsp;<input type="text" name="link" id="link" size="50" /><br /><br /></td>
-<td align="center"><input value="<?php echo lang(209); ?>" type="<?php echo ($options['new_window'] && $options['new_window_js']) ? 'button" onclick="new_transload_window();' : 'submit'; ?>" /></td>
+<td align="left">
+<p align="left"><b><?php echo lang(207); ?>:</b><br />&nbsp;<input type="text" name="link" id="link" size="50" /></p>
+<p align="left"><b><?php echo lang(208); ?>:</b><br />&nbsp;<input type="text" name="referer" id="referer" size="50" /></p>
+</td>
+<td align="left" valign="top">
+<div style="padding-top:26px;"></div>
+<input value="<?php echo lang(209); ?>" type="<?php echo ($options['new_window'] && $options['new_window_js']) ? 'button" onclick="new_transload_window();' : 'submit'; ?>" />
+</td>
+</tr>
+<tr>
 </tr>
 <tr><td align="left">
 <input type="checkbox" name="user_pass" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('usernpass').style.display=displ;" value="on" />&nbsp;<?php echo lang(210); ?></td></tr>

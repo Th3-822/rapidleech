@@ -31,9 +31,10 @@ class d4shared_com extends DownloadClass {
 		preg_match('/.com\/[^\/]+\/([^\/]+)\/?(.*)/i', $link, $L);
 		$page = $this->GetPage("http://www.4shared.com/get/{$L[1]}/{$L[2]}", $this->cookie);
 
-		if (preg_match('/href=\'(http:\/\/dc[^\']+)\'>Download file now/i', $page, $D)) {
+		if (preg_match('/href=\'(http:\/\/dc[^\']+)\'[^>]*>Download file now/i', $page, $D)) {
 			$this->cookie = $this->cookie."; ".GetCookies($page);
 			$dllink = $D[1];
+			if (preg_match('/(?:\?|&)dirPwdVerified=(\w+)/i', $link, $pwd)) $dllink .= "&dirPwdVerified=".$pwd[1];
 		} else {
 			html_error("Download-link not found.");
 		}
@@ -101,6 +102,7 @@ class d4shared_com extends DownloadClass {
 			html_error("Error: Download-link not found.");
 		}
 		$dllink = $dl[1];
+		if (preg_match('/(?:\?|&)dirPwdVerified=(\w+)/i', $link, $pwd)) $dllink .= "&dirPwdVerified=".$pwd[1];
 
 		$url = parse_url($dllink);
 		$FileName = basename($url["path"]);
@@ -139,7 +141,7 @@ class d4shared_com extends DownloadClass {
 		$page = $this->GetPage($rloc[1], $cookie, 0, $redir);
 		is_present($page, "HTTP/1.1 302 Moved Temporarily", "Error: Unknown redirect found.");
 		$quota = cut_str($page, 'Bandwidth:', "</div>");
-		if (!preg_match('/"quotausagebar" title="([\d|\.]+)% of ([\d|\.]+) (\w+)"/i', $quota, $qm)) html_error("Cannot get Bandwidth info. Acc. is not premium?");
+		if (!preg_match('/"quota(?:(?:usagebar" title=")|(?:count">))([\d|\.]+)% of ([\d|\.]+) (\w+)/i', $quota, $qm)) html_error("Cannot get Bandwidth info. Acc. is not premium?");
 		$used = floatval($qm[1]);
 		$total = floatval($qm[2]);
 		// I have to check the BW... I will show it too :)
@@ -155,5 +157,8 @@ class d4shared_com extends DownloadClass {
 //[02-Apr-2011] Fixed error when downloading pass-protected files & Added 1 Error Msg. - Th3-822
 //[07-May-2011] Some edits to the plugin && Added Premium download support. - Th3-822
 //[25-Jul-2011] Using a function for longer link timelock at free download ( I should add it to DownloadClass. :D ). -Th3-822
+//[12-Sep-2011] Fixed regex for get BW usage in Premium && Password in files can be skiped with '?dirPwdVerified=xxxxxxxx' in the url. -Th3-822
+//[15-Oct-2011] JSCountdown was added in DownloadClass.php... Removed declaration from plugin. - Th3-822
+//[21-Nov-2011] Fixed regexp for get dlink in FreeDL. - Th3-822
 
 ?>
