@@ -26,7 +26,7 @@ include(TEMPLATE_DIR.'header.php'); ?>
 ?>
 <div align="center">
 <form method="post" action="<?php echo (!$PHP_SELF ? $_SERVER["PHP_SELF"] : $PHP_SELF); ?>">
-<textarea class="notes" name="notes" rows="1" cols="1"><?php echo $content; ?></textarea>
+<textarea class="notes" name="notes" rows="1" cols="1"><?php echo htmlentities($content); ?></textarea>
 <br /><input type="submit" name="submit" value="<?php echo lang(326); ?>" />
 </form>
 </div>

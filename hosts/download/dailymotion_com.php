@@ -16,7 +16,7 @@ class dailymotion_com extends DownloadClass {
         $FileName = str_replace(" ", "_", $FileName) . ".mp4";
         try {
             if (!preg_match('@"hqURL":"([^|\r|\n|"]+)@i', urldecode($page), $temp)) {
-                preg_match('@"URL":"([^|\r|\n|"]+)@i', urldecode($page), $temp);
+                preg_match('@"(?:sd)?URL":"([^|\r|\n|"]+)@i', urldecode($page), $temp);
             }
             if (!isset($temp[1])) {
                 throw new Exception("Error : Video link not found!");
@@ -36,4 +36,5 @@ class dailymotion_com extends DownloadClass {
 
 // dailymotion download plugin by vdhdevil
 // small fix in regex & filename by Ruud v.Tony 07-11-2011
+// small fix in regex based on SVN patch by Th3-822 13-12-2011
 ?>

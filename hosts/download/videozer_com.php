@@ -86,139 +86,39 @@ class videozer_com extends DownloadClass {
 		foreach ($spn as $value) {
 			$val = explode('=', $value);
 			if ($val[1] == 1) {
-				if (!preg_match('/"sece2":"(\w{64})"/i', $page, $kk)) break;
+				if (!preg_match('/"sece2":"(\w+)"/i', $page, $kk)) break;
 				$akey .= $val[0].'='.$this->mvDecode($kk[1], $key1, 215678).'&'; // decrypt32byte
 			} elseif ($val[1] == 2) {
-				if (!preg_match('/"url":"(\w{64})"/i', $page2, $kk)) break;
+				if (!preg_match('/"url":"(\w+)"/i', $page2, $kk)) break;
 				$akey .= $val[0].'='.$this->bitDecrypt($kk[1], $key1, 215678).'&'; // bitDecrypt
 			} elseif ($val[1] == 3) {
-				if (!preg_match('/"type":"(\w{64})"/i', $page2, $kk)) break;
+				if (!preg_match('/"type":"(\w+)"/i', $page2, $kk)) break;
 				$akey .= $val[0].'='.$this->bitDecrypt($kk[1], $key1, 215678,26,25431,56989,93,32589,784152).'&'; // d9300
 			} elseif ($val[1] == 4) {
-				if (!preg_match('/"time":"(\w{64})"/i', $page2, $kk)) break;
+				if (!preg_match('/"time":"(\w+)"/i', $page2, $kk)) break;
 				$akey .= $val[0].'='.$this->bitDecrypt($kk[1], $key1, 215678,82,84669,48779,32,65598,115498).'&'; // lion
 			} else html_error("Error parsing link [2-E-$decoded]");
 			$decoded++;
 		}
-		if ($decoded =! count($spn)) html_error("Error parsing link [2-{$val[0]}-{$val[1]}]");
+		if ($decoded != count($spn)) html_error("Error parsing link [2-{$val[0]}-{$val[1]}]");
 		$akey .= "start=0";
 		return $akey;
 	}
 
+	// Shorter string2bin and bin2String functions by rootwarex
 	private function string2bin($str) {
-		$bin = array();
-		for($i = 0; $i < strlen ($str); ++ $i) {
-			switch ($str {$i}) {
-				case "0" :
-					$bin[] = "0000";
-					break;
-				case "1" :
-					$bin[] = "0001";
-					break;
-				case "2" :
-					$bin[] = "0010";
-					break;
-				case "3" :
-					$bin[] = "0011";
-					break;
-				case "4" :
-					$bin[] = "0100";
-					break;
-				case "5" :
-					$bin[] = "0101";
-					break;
-				case "6" :
-					$bin[] = "0110";
-					break;
-				case "7" :
-					$bin[] = "0111";
-					break;
-				case "8" :
-					$bin[] = "1000";
-					break;
-				case "9" :
-					$bin[] = "1001";
-					break;
-				case "a" :
-					$bin[] = "1010";
-					break;
-				case "b" :
-					$bin[] = "1011";
-					break;
-				case "c" :
-					$bin[] = "1100";
-					break;
-				case "d" :
-					$bin[] = "1101";
-					break;
-				case "e" :
-					$bin[] = "1110";
-					break;
-				case "f" :
-					$bin[] = "1111";
-					break;
-			}
+		for ($i = 0; $i < strlen($str); ++ $i) {
+			$bin .= str_pad(decbin(hexdec($str{$i})), 4, '0', STR_PAD_LEFT);
 		}
-		$bin = implode($bin);
 		return $bin;
 	}
 
 	private function bin2String($bin) {
-		$str = array();
-		for($i = 0; $i < count ($bin); ++ $i) {
-			switch ($bin[$i]) {
-				case "0000" :
-					$str[] = "0";
-					break;
-				case "0001" :
-					$str[] = "1";
-					break;
-				case "0010" :
-					$str[] = "2";
-					break;
-				case "0011" :
-					$str[] = "3";
-					break;
-				case "0100" :
-					$str[] = "4";
-					break;
-				case "0101" :
-					$str[] = "5";
-					break;
-				case "0110" :
-					$str[] = "6";
-					break;
-				case "0111" :
-					$str[] = "7";
-					break;
-				case "1000" :
-					$str[] = "8";
-					break;
-				case "1001" :
-					$str[] = "9";
-					break;
-				case "1010" :
-					$str[] = "a";
-					break;
-				case "1011" :
-					$str[] = "b";
-					break;
-				case "1100" :
-					$str[] = "c";
-					break;
-				case "1101" :
-					$str[] = "d";
-					break;
-				case "1110" :
-					$str[] = "e";
-					break;
-				case "1111" :
-					$str[] = "f";
-					break;
-			}
+		$bin = join($bin);
+		for ($i = strlen($bin)-4; $i >= 0; $i -= 4) {
+			$hex .= dechex(bindec(substr($bin, $i, 4)));
 		}
-		$str = implode($str);
-		return $str;
+		return strrev($hex);
 	}
 
 	// From megavideo plugin...
@@ -299,5 +199,6 @@ class videozer_com extends DownloadClass {
 //[26-11-2011]  Using info posted by czerep from: http://rapidleech.com/index.php?showtopic=12433 for fix the plugin - Added function from megavideo plugin. - Th3-822
 //[04-12-2011]  Function mvDecode was called more than 1 time... Fixed. - Th3-822
 //[16-12-2011]  Added lastest edits from videobb plugin. - Th3-822
+//[17-12-2011]  Fixed 2 regexps and a typo in a if() && Added shorted string2bin and bin2String functions posted by rootwarex. - Th3-822
 
 ?>
