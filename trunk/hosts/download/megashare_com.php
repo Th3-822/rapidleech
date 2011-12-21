@@ -42,7 +42,7 @@ class megashare_com extends DownloadClass {
 			$post[$k] = ($v=="") ? 1 : $v;
 		}
 
-		if (!preg_match('/var c = (\d+);/i', $page, $cD)) html_error("Error getting timer.");
+		if (!preg_match('@var cSecs=cTmr [%] (\d+);@i', $page, $cD)) html_error("Error getting timer.");
 		$this->CountDown($cD[1]);
 
 		$page = $this->GetPage($link, $cookie, $post);
@@ -188,6 +188,7 @@ class megashare_com extends DownloadClass {
 }
 
 //[28-4-2011] Written by Th3-822.
-//[09-7-2010] Fixed regexps. (No more chunked content.) - Th3-822
+//[09-7-2011] Fixed regexps. (No more chunked content.) - Th3-822
+//[21-12-2011] Fix countdown timer - Ruud v.Tony
 
 ?>
