@@ -15,10 +15,9 @@ class videobb_com extends DownloadClass {
 		is_notpresent ($page, "you still have quota left", "Error: Still have quota left?");
 
 		if (!preg_match('/"video":\{"title":"([^"]+)"/i', $page, $tl)) html_error('Video title not found.');
-		if (!preg_match('/"rkts":(\d+)/i', $page, $rk)) html_error('Video key1 not found.');
 		if (!preg_match_all('/\{"d":(false|true),"l":"([^"]+)","u":"([^"]+)"/i', $page, $st)) html_error('Video stream(s) not found.'); //Get streams
 
-		$akey = $this->vbb_decode($page, $rk[1]);
+		$akey = $this->vbb_decode($page);
 
 		$stream = array();
 		for ($i = 0; $i < count($st[0]); $i++) {
@@ -77,32 +76,80 @@ class videobb_com extends DownloadClass {
 		exit;
 	}
 
-	private function vbb_decode($page, $key1) {
-		if (!preg_match('/"spn":"([^\"]+)"/i', $page, $spn)) html_error("Error parsing link [1]");
-		$spn = explode('&', base64_decode($spn[1]));
+	private function Get_Reply($page) {
+		if (!function_exists('json_decode')) html_error("Error: Please enable JSON in php.");
+		$json = substr($page, strpos($page,"\r\n\r\n") + 4);
+		$json = substr($json, strpos($json, "{"));$json = substr($json, 0, strrpos($json, "}") + 1);
+		$rply = json_decode($json, true);
+		if (!$rply || count($rply) == 0) html_error("Error getting json data.");
+		return $rply;
+	}
+
+	private function vbb_decode($page) {
+		$json = $this->Get_Reply($page);
+
+		$key1 = $key2 = $key3 = false;
+		if (!$key1 = $json["settings"]["config"]["rkts"]) html_error("Error getting keys [1]");
+		if (!$key2 = $json["settings"]["login_status"]["pepper"]) html_error("Error getting keys [2]");
+		if (!$key3 = $json["settings"]["banner"]["lightbox2"]["time"]) html_error("Error getting keys [3]");
+
+		list ($spn, $outk) = explode(";", $this->hextostr($this->bitDecrypt($json["settings"]["login_status"]["spen"], $json["settings"]["login_status"]["salt"], 950569)), 2);
+		if (!$spn || !$outk) html_error("Error parsing link [1]");
+
+		$outs = array();
+		foreach (explode("&",$outk) as $out) {
+			$tmp = explode("=", $out, 2);
+			$outs[$tmp[0]] = $tmp[1];
+		}
+		$ikey = $this->getikey($outs["ik"]);
+
+		$spn = explode('&', $spn);
 		$akey = "";
 		$decoded = 0;
-		$page2 = cut_str($page, '"g_ads":{', '}');
 		foreach ($spn as $value) {
 			$val = explode('=', $value);
 			if ($val[1] == 1) {
-				if (!preg_match('/"sece2":"(\w+)"/i', $page, $kk)) break;
-				$akey .= $val[0].'='.$this->mvDecode($kk[1], $key1, 226593).'&'; // decrypt32byte
+				if (!$ks1 = $json["settings"]["video_details"]["sece2"]) break;
+				$akey .= $val[0].'='.$this->mvDecode($ks1, $key1, $ikey).'&'; // decrypt32byte
 			} elseif ($val[1] == 2) {
-				if (!preg_match('/"url":"(\w+)"/i', $page2, $kk)) break;
-				$akey .= $val[0].'='.$this->bitDecrypt($kk[1], $key1, 226593).'&'; // bitDecrypt
+				if (!$ks1 = $json["settings"]["banner"]["g_ads"]["url"]) break;
+				$akey .= $val[0].'='.$this->bitDecrypt($ks1, $key1, $ikey).'&'; // bitDecrypt
 			} elseif ($val[1] == 3) {
-				if (!preg_match('/"type":"(\w+)"/i', $page2, $kk)) break;
-				$akey .= $val[0].'='.$this->bitDecrypt($kk[1], $key1, 226593,26,25431,56989,93,32589,784152).'&'; // d9300
+				if (!$ks1 = $json["settings"]["banner"]["g_ads"]["type"]) break;
+				$akey .= $val[0].'='.$this->bitDecrypt($ks1, $key1, $ikey,26,25431,56989,93,32589,784152).'&'; // d9300
 			} elseif ($val[1] == 4) {
-				if (!preg_match('/"time":"(\w+)"/i', $page2, $kk)) break;
-				$akey .= $val[0].'='.$this->bitDecrypt($kk[1], $key1, 226593,82,84669,48779,32,65598,115498).'&'; // lion
-			} else html_error("Error parsing link [2-E-$decoded]");
+				if (!$ks1 = $json["settings"]["banner"]["g_ads"]["time"]) break;
+				$akey .= $val[0].'='.$this->bitDecrypt($ks1, $key1, $ikey,82,84669,48779,32,65598,115498).'&'; // lion
+			} elseif ($val[1] == 5) {
+				if (!$ks1 = $json["settings"]["login_status"]["euno"]) break;
+				$akey .= $val[0].'='.$this->bitDecrypt($ks1, $key2, $ikey,10,12254,95369,39,21544,545555).'&'; // heal
+			} elseif ($val[1] == 6) {
+				if (!$ks1 = $json["settings"]["login_status"]["sugar"]) break;
+				$akey .= $val[0].'='.$this->bitDecrypt($ks1, $key3, $ikey,22,66595,17447,52,66852,400595).'&'; // brokeup
+			} else html_error("Error parsing link [2-?-{$val[0]}-{$val[1]}]");
 			$decoded++;
 		}
 		if ($decoded != count($spn)) html_error("Error parsing link [2-{$val[0]}-{$val[1]}]");
 		$akey .= "start=0";
 		return $akey;
+	}
+
+	private function getikey($int) { 
+		switch($int) {
+			default:html_error("Error getting ikey [$int]");
+			case 1:return 226593;
+			case 2:return 441252;
+			case 3:return 301517;
+			case 4:return 596338;
+			case 5:return 852084;
+		}
+	}
+
+	// Finded at php.net
+	private function hextostr($x) { 
+		$s=''; 
+		foreach(explode("\n",trim(chunk_split($x,2))) as $h) $s.=chr(hexdec($h)); 
+		return($s); 
 	}
 
 	// Shorter string2bin and bin2String functions by rootwarex
@@ -199,5 +246,6 @@ class videobb_com extends DownloadClass {
 //[04-12-2011]  Function mvDecode was called more than 1 time... Fixed. - Th3-822
 //[15-12-2011]  Videobb uses now more than 1 decrypt function, added more functions, and mvDecode edited for make 2 more functions. - Th3-822
 //[17-12-2011]  Fixed 2 regexps and a typo in a if() && Added shorted string2bin and bin2String functions posted by rootwarex. - Th3-822
+//[22-12-2011]  Now using json decode for vbb_decode && Fixed again... - Th3-822 
 
 ?>

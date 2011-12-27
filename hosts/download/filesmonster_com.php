@@ -19,7 +19,8 @@ class filesmonster_com extends DownloadClass {
 
     private function Retrieve($link) {
         $page = $this->GetPage($link);
-        is_present($page, "File was deleted", "File was deleted by owner or it was deleted for violation of copyrights");
+        is_present($page, "File was deleted");
+        is_present($page, "You need Premium membership to download files larger than 1.0 GB.");
         //check the file size
         $flsize = cut_str($page, 'File size:</td>', '</tr>');
         preg_match('/(\d+)\.([0-9]) MB/', $flsize, $match);
