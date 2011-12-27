@@ -147,6 +147,9 @@ class youtube_com extends DownloadClass {
 		if (!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) {
 			$user = $_REQUEST["premium_user"];
 			$pass = $_REQUEST["premium_pass"];
+		} else if (!empty($_REQUEST["iuser"]) && !empty($_REQUEST["ipass"])) {
+			$user = $_REQUEST["iuser"];
+			$pass = $_REQUEST["ipass"];
 		} else {
 			$user = $premium_acc["youtube_com"]['user'];
 			$pass = $premium_acc["youtube_com"]['pass'];
@@ -218,5 +221,6 @@ class youtube_com extends DownloadClass {
 // [12-8-2011]  Added support for videos that need login for verify age & Changed fmt order by quality & Fixed regexps for fileext. - Th3-822
 // [13-8-2011]  Some fixes & removed not working code & fixed verify_age function. - Th3-822
 // [17-9-2011]  Added function for skip 'verify_controversy' on youtube && Fixed cookies after captcha && Little changes. - Th3-822
+// [28-12-2011] Added support for taking username and password from User & Pass (HTTP/FTP) option - Raj Malhotra
 
 ?>
