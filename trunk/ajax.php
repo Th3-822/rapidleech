@@ -28,6 +28,7 @@ switch ($_GET['ajax']) {
 		break;
 	case 'linkcheck':
 		require_once(CLASS_DIR.'linkchecker.php');
+		$glinks = array();
 		if(!empty($_POST['debug'])) {
 			if($debug == 1)
 			debug();
@@ -40,15 +41,19 @@ switch ($_GET['ajax']) {
 			$alllinks = implode("\n", $alllinks);
 			$alllinks = explode("\n", $alllinks);
 
-			$x = 1;
-			$l = ($_POST['k']) ? 0 : 1;
+			$x = $x2 = 1;
+			$l = ($_POST['k']) ? false : true;
+			$d = ($_POST['d']) ? false : true;
+			$dk = (!$l && !$d) ? true : false;
 
 			$alllinks = array_unique($alllinks); //removes duplicates
 			echo "<div id='listlinks'>\n";
 			foreach($alllinks as $link) {
 				if (empty($link)) continue;
+				$x2++;
 				$link = trim($link);
 				$Checked = $skip = $Kl = false;
+
 				if(preg_match("/^(http)\:\/\/(www\.)?anonym\.to\/\?/i", $link)){
 					$link = explode("?", $link);
 					unset($link[0]);
@@ -136,9 +141,7 @@ switch ($_GET['ajax']) {
 					}
 					if (empty($m[1]) && !$skip) {
 						if (preg_match_all('@(http://(?:www\.)?multiupload\.com/(?:\w{2}_\w+))</a@i', $page, $match)) {
-							foreach ($match[1] as $link) {
-								echo "<a class='n' style='text-align:left;' title='Removed folder: multiupload.com'><b>$link</b></a><br />\n";
-							}
+							foreach ($match[1] as $link) showlink($link, 0, 3, "Removed folder: multiupload.com");
 							$Checked = true;
 							CountandCheck($x);
 						}
@@ -153,7 +156,7 @@ switch ($_GET['ajax']) {
 				}
 
 				// Some hosts needs other way to check file and get the filesize
-				if(preg_match('@^https?://(?:[^/]+\.)?rapidshare\.com/(?:(?:files/(\d+)/([^/|#|\r|\n]+))|(?:\??#!download\|[^\|]+\|(\d+)\|([^\||\r|\n]+)))@i', $link, $m)) { // O.O
+				if($l && !$skip && preg_match('@^https?://(?:[^/]+\.)?rapidshare\.com/(?:(?:files/(\d+)/([^/|#|\r|\n]+))|(?:\??#!download\|[^\|]+\|(\d+)\|([^\||\r|\n]+)))@i', $link, $m)) { // O.O
 					if (!empty($m[1])) {
 						$m['id'] = $m[1];
 						$m['filename'] = $m[2];
@@ -169,12 +172,17 @@ switch ($_GET['ajax']) {
 						else $chk = 0;
 					} else $chk = 0;
 
-					showlink("http://rapidshare.com/files/".$page[0]."/".$page[1], bytesToKbOrMbOrGb($page[2]), $chk);
+					$link = "http://rapidshare.com/files/{$page[0]}/".$page[1];
+					$size = explode(' ', bytesToKbOrMbOrGb($page[2]));
+					$size[0] = round($size[0], 2);
+					$size = implode(' ', $size);
+					showlink($link, $size, $chk);
+					if ($chk == 1) $glinks[$link] = $size;
 					$Checked = $skip = true;
 					CountandCheck($x);
 				}
 
-				if($l == 1 && !$skip) {
+				if($l && !$skip) {
 					foreach($sites as $site) {
 						if(!empty($site['link']) && preg_match('@'.$site['link'].'@i', $link)) {
 							$szregex = $pattern = $replace = '';
@@ -185,8 +193,8 @@ switch ($_GET['ajax']) {
 							if (array_key_exists('options', $site) && is_array($site['options'])) {
 								$opt = $site['options'];
 							}
-							$chk = check(trim($link), $x, $site['regex'], $szregex, $pattern, $replace, $opt);
-							echo $chk[0];
+							list($chk, $size) = check(trim($link), $x, $site['regex'], $szregex, $pattern, $replace, $opt);
+							if ($chk == 1) $glinks[$link] = $size;
 							flush();//ob_flush();
 							$Checked = true;
 							CountandCheck($x);
@@ -194,12 +202,12 @@ switch ($_GET['ajax']) {
 					}
 				}
 
-				if(!$Checked && $Kl != false) {
-					echo "<a class='n' style='text-align:left;' title='Removed: $Kl'><b>$link</b></a><br />\n";
+				if(($d || $dk) && !$Checked && $Kl != false) {
+					showlink($link, 0, 3, "Removed: $Kl");
 					CountandCheck($x);
 					flush();
-				} elseif(!$Checked && $l == 1 && !$_POST['d']) {
-					echo "<a class='y' style='text-align:left;' title='Unknown Link'><b>$link&nbsp;???</b></a><br />\n";
+				} elseif($d && !$Checked) {
+					showlink($link, 0, 4, 'Unknown Link');
 					//CountandCheck($x); //Count?
 					flush();
 				}
@@ -209,12 +217,44 @@ switch ($_GET['ajax']) {
 			$time = $time[1] + $time[0];
 			$endtime = $time;
 			$totaltime = ($endtime - $begintime);
-			$x--;
+			$x--;$x2--;
 			$plural = ($x == 1) ? "" : lang(19);
 			($options['fgc'] == 0) ? $method = 'cURL' : $method = 'file_get_contents';
 			echo '<p style="text-align:center">';
 			printf(lang(18),$x,$plural,$totaltime,$method);
-			echo "</p>";
+			echo "</p>\n";
+			if (count($glinks) > 1 && is_file("audl.php")) {
+				$links = "";
+				$fsize = 0;
+				$afhs = true;
+				foreach ($glinks as $lnk => $sz) {
+					$links .= "$lnk\n";
+					if (!empty($sz) && $sz != 0) {
+						$sz = explode(' ', strtoupper($sz));
+						switch ($sz[1]) { // KbOrMbOrGbToBytes :D
+							case 'GB': $sz[0] *= 1024;
+							case 'MB': $sz[0] *= 1024;
+							case 'KB': $sz[0] *= 1024;
+						}
+						$fsize += $sz[0];
+					} else $afhs = false;
+				}
+				$fsize = explode(' ', bytesToKbOrMbOrGb($fsize));
+				$fsize[0] = round($fsize[0], 2);
+				$fsize = implode(' ', $fsize);
+				$fsize = (!$afhs ? '&gt;' : '').$fsize;
+				echo '<div style="text-align:center;">';
+				echo "<br /><form action='audl.php?GO=GO' method='post' >\n";
+				echo "<input type='hidden' name='links' value='" . $links . "'>\n";
+				$key_array = array("useproxy", "proxy", "proxyuser", "proxypass", "premium_acc", "premium_user", "premium_pass", "cookieuse", "cookie");
+				foreach ($key_array as $v) if (array_key_exists($v, $_GET)) echo "<input type='hidden' name='".$v."' value='".$_GET[$v]."' >\n";
+				if ($x == $x2) $btext = "Send links to AUDL ($fsize)";
+				else $btext = "Send working links to AUDL ($fsize)";
+				echo "<input type='submit' value='$btext' />\n";
+				echo "</form>\n";
+				echo "</div>\n";
+			}
+			flush;
 		}
 		break;
 }

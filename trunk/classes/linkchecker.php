@@ -93,14 +93,24 @@ function curl($link, $post = 0, $cook = 0, $follow = 1, $refer = 0, $header = 1)
 }
 
 
-function check($link, $x, $regex, $szregex='', $pattern='', $replace='', $opt = array()) {
+function check(&$link, $x, $regex, $szregex='', $pattern='', $replace='', $opt = array()) {
 	if(!empty($pattern)) $link = preg_replace($pattern, $replace, $link);
 
-	$cook = $ref = $bytes = 0;
+	$cook = $ref = $bytes = $fixsize = $size = 0;
 	$fol = $head = 1;
 	if(!empty($opt)) {
 		if (array_key_exists('bytes', $opt)) {
 			$bytes = ($opt['bytes']) ? 1 : 0;
+		}
+		if (array_key_exists('fixsize', $opt)) {
+			$fixsize = ($opt['fixsize']) ? 1 : 0;
+			$fixsizeP = $fixsizeR = '';
+			if ($fixsize) {
+				if (array_key_exists('fixsizeP', $opt)) {
+					$fixsizeP = $opt['fixsizeP'];
+					if (array_key_exists('fixsizeR', $opt)) $fixsizeR = $opt['fixsizeR'];
+				}
+			}
 		}
 		if (array_key_exists('cookie', $opt) && $opt['cookie'] != false) {
 			$cook = $opt['cookie'];
@@ -118,60 +128,72 @@ function check($link, $x, $regex, $szregex='', $pattern='', $replace='', $opt = 
 	$page = curl($link, 0, $cook, $fol, $ref, $head);
 	$link = htmlentities($link, ENT_QUOTES);
 
-	if(preg_match('@'.$regex.'@i', $page)) {
-		$ret = "<a class='g' title='".lang(114)."' href='$link'><b>$link</b></a>";
-		if (!$_POST['d']) $ret = "$x: ".lang(114).": $ret";
+	if (preg_match('@'.$regex.'@i', $page)) {
 		if (!empty($szregex) && preg_match('@'.$szregex.'@i', $page, $fz)) {
 			if (!array_key_exists('size', $fz)) $fz['size'] = $fz[1];
 
 			if ($bytes) $size = bytesToKbOrMbOrGb($fz['size']);
-			else {
+			else if ($fixsize) {
 				if (!array_key_exists('XB', $fz)) $fz['XB'] = $fz[2];
+				$fz['XB'] = str_replace(array('YTES', 'YTE'), '', strtoupper($fz['XB']));
+				if (!empty($fixsizeP)) $fz['size'] = str_replace($fixsizeP, $fixsizeR, $fz['size']);
 				$fz['size'] = str_replace(',', '.', $fz['size']);
-				$size = round($fz['size'], 2).' '.strtoupper($fz['XB']);
+				switch ($fz['XB']) { // KbOrMbOrGbToBytes :D
+					case 'GB': $fz['size'] *= 1024;
+					case 'MB': $fz['size'] *= 1024;
+					case 'KB': $fz['size'] *= 1024;
+				}
+				$size = bytesToKbOrMbOrGb($fz['size']);
+			} else {
+				if (!array_key_exists('XB', $fz)) $fz['XB'] = strtoupper($fz[2]);
+				$fz['size'] = str_replace(',', '.', $fz['size']);
+				$size = $fz['size'].' '.$fz['XB'];
 			}
 
-			$ret .= " | <span title='".lang(56)."'>$size</span>";
+			$size = explode(' ', $size);
+			$size[0] = round($size[0], 2);
+			$size = implode(' ', $size);
 		}
-		$cl = 'g';
-		$chk = 'green';
-	} elseif(empty($page) || preg_match("@The file you are trying to access is temporarily unavailable.@i", $page)) {
-		$ret = "<a class='y' title='".lang(115)."' href='$link'><b>$link</b></a>";
-		if (!$_POST['d']) $ret = "$x: ".lang(115).": $ret";
-		$cl = 'y';
-		$chk = 'yellow';
-	} else {
-		$ret = "<a class='r' title='".lang(116)."' href='$link'><b>$link</b></a>";
-		if (!$_POST['d']) $ret = "$x: ".lang(116).": $ret";
-		$cl = 'r';
-		$chk = 'red';
-	}
+		$chk = showlink($link, $size);
+	} elseif (empty($page) || preg_match("@The file you are trying to access is temporarily unavailable.@i", $page)) $chk = showlink($link, 0, 2);
+	else $chk = showlink($link, 0, 0);
 
-	$ret = "<div class='$cl' style='text-align:left;'>$ret</div>\n";
-
-	return array($ret, $chk);
+	return array($chk, $size);
 }
 
-function showlink($link, $size='', $chk=1) {
+function showlink($link, $size='', $chk=1, $title='') {
 	global $x;
-	if($chk == 1) {
-		$ret = "<a class='g' title='".lang(114)."' href='$link'><b>$link</b></a>";
-		if (!$_POST['d']) $ret = "$x: ".lang(114).": $ret";
-		if (!empty($size) && $size != 0) $ret .= " | <span title='".lang(56)."'>$size</span>";
-		$cl = 'g';
-	} elseif($chk == 2) {
-		$ret = "<a class='y' title='".lang(115)."' href='$link'><b>$link</b></a>";
-		if (!$_POST['d']) $ret = "$x: ".lang(115).": $ret";
-		$cl = 'y';
-	} else {
-		$ret = "<a class='r' title='".lang(116)."' href='$link'><b>$link</b></a>";
-		if (!$_POST['d']) $ret = "$x: ".lang(116).": $ret";
-		$cl = 'r';
+	switch ($chk) {
+		case 1:
+			$cl = 'g';
+			$ret = "<a class='$cl' title='".lang(114)."' href='$link'><b>$link</b></a>";
+			if (!$_POST['d']) $ret = "$x: ".lang(114).": $ret";
+			if (!empty($size) && $size != 0) $ret .= " | <span title='".lang(56)."'>$size</span>";
+			break;
+		case 2:
+			$cl = 'y';
+			$ret = "<a class='$cl' title='".lang(115)."' href='$link'><b>$link</b></a>";
+			if (!$_POST['d']) $ret = "$x: ".lang(115).": $ret";
+			break;
+		case 3:
+			$cl = 'b';
+			$ret = "<a class='$cl' title='".htmlentities($title, ENT_QUOTES)."' href='$link'><b>$link</b></a>";
+			break;
+		case 4:
+			$cl = 'y';
+			$ret = "<b>$link&nbsp;???</b>";
+			break;
+		default:
+			$cl = 'r';
+			$ret = "<a class='$cl' title='".lang(116)."' href='$link'><b>$link</b></a>";
+			if (!$_POST['d']) $ret = "$x: ".lang(116).": $ret";
+			break;
 	}
 
-	$ret = "<div class='$cl' style='text-align:left;'>$ret</div>\n";
+	$ret = "<div class='$cl' style='text-align:left;'".(!empty($title)?" title='".htmlentities($title, ENT_QUOTES)."'":'').">$ret</div>\n";
 
 	echo $ret;
+	return $chk;
 }
 
 function debug() {
