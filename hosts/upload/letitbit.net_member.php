@@ -1,15 +1,14 @@
 <?php
-
 ####### Account Info. ###########
-$letitbit_net_login = ""; //Set you username
-$letitbit_net_pass = ""; //Set your password
+$upload_acc['letitbit_net']['user'] = ""; //Set your email
+$upload_acc['letitbit_net']['pass'] = ""; //Set your password
 ##############################
 
 $not_done=true;
 $continue_up=false;
-if ($letitbit_net_login & $letitbit_net_pass){
-	$_REQUEST['my_login'] = $letitbit_net_login;
-	$_REQUEST['my_pass'] = $letitbit_net_pass;
+if ($upload_acc['letitbit_net']['user'] && $upload_acc['letitbit_net']['pass']){
+	$_REQUEST['login'] = $upload_acc['letitbit_net']['user'];
+	$_REQUEST['password'] = $upload_acc['letitbit_net']['pass'];
 	$_REQUEST['action'] = "FORM";
 	echo "<b><center>Use Default login/pass.</center></b>\n";
 }
@@ -17,98 +16,94 @@ if ($_REQUEST['action'] == "FORM")
     $continue_up=true;
 else{
 ?>
-<table border=0 style="width:270px;" cellspacing=0 align=center>
-<form method=post>
-<input type=hidden name=action value='FORM' />
-<tr><td nowrap>&nbsp;Login*<td>&nbsp;<input type=text name=my_login value='' style="width:160px;" />&nbsp;</tr>
-<tr><td nowrap>&nbsp;Password*<td>&nbsp;<input type=password name=my_pass value='' style="width:160px;" />&nbsp;</tr>
-<tr><td colspan=2 align=center><input type=submit value='Upload' /></tr>
-<tr><td colspan=2 align=center><small>*You can set it as default in <b><?php echo $page_upload["!letitbit.net_member"]; ?></b></small></tr>
-</table>
+<table border="0" style="width:270px;margin:auto;" cellspacing="0">
+<form method="POST">
+<input type="hidden" name="action" value="FORM" />
+<tr><td style="white-space:nowrap;">&nbsp;Email*<td>&nbsp;<input type="text" name="login" value="" style="width:160px;" />&nbsp;</tr>
+<tr><td style="white-space:nowrap;">&nbsp;Password*<td>&nbsp;<input type="password" name="password" value="" style="width:160px;" />&nbsp;</tr>
+<tr><td colspan="2" align="center"><input type="submit" value="Upload" /></tr>
+<tr><td colspan="2" align="center"><small>*You can set it as default in <b><?php echo $page_upload["letitbit.net_member"]; ?></b></small></tr>
 </form>
-
+</table>
 <?php
-	}
+}
 
 if ($continue_up)
 	{
 		$not_done=false;
 ?>
-<table width=600 align=center>
+<table style="width:600px;margin:auto;">
 </td></tr>
-<tr><td align=center>
-<div id=login width=100% align=center>Login to Letitbit.net</div>
-<?php 
-	        $post['login'] = $_REQUEST['my_login'];
-            $post['password'] = $_REQUEST['my_pass'];
-			$post['act'] = "login";
-			
-            $page = geturl("letitbit.net", 80, "/", 0, 0, $post);
-			is_page($page);
-			
-			$cookie = preg_replace("/((log)|(pas)|(host))=deleted;/", "", GetCookies($page)); //sometimes cookies like "log=deleted" appears
-?>
-<script>document.getElementById('login').style.display='none';</script>
-<div id=info width=100% align=center>Retrive upload ID</div>
-<?php 
-			$url_id = 'http://wm.letitbit.net/wm-panel/Upload';
-			$Url = parse_url($url_id);
-			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
-			is_page($page);
-			preg_match('/name="MAX_FILE_SIZE" value="(.*)"/i', $page, $max);
-			preg_match('/name="owner" type="hidden" value="(.*)"/i', $page, $owner);
-			preg_match('/name="pin" type="hidden" value="(.*)"/i', $page, $pin);
-			preg_match('/name="base" type="hidden" value="(.*)"/i', $page, $base);
-			preg_match('/name="host" type="hidden" value="(.*)"/i', $page, $host);
-			preg_match('/name="source" type="hidden" value="(.*)"/i', $page, $source);
-			preg_match("/ACUPL_UPLOAD_SERVER = '(.*?)'/i", $page, $ACUPL_UPLOAD_SERVER);
+<tr><td align="center">
+<div id="login" style="width:100%;text-align:center;">Login to letitbit.net</div>
+<?php
+	if (empty($_REQUEST['login']) || empty($_REQUEST['password'])) html_error("Login failed: User/Password empty.", 0);
+	$post = array();
+	$post['act'] = "login";
+	$post['login'] = urlencode($_REQUEST['login']);
+	$post['password'] = urlencode($_REQUEST['password']);
 
-			function randomString($length)
-			{
-				$random= "";
-				srand((double)microtime()*1000000);
-				$char_list = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-				$char_list .= "abcdefghijklmnopqrstuvwxyz";
-				$char_list .= "1234567890";
-	
-				for($i = 0; $i < $length; $i++)
-				{
-					$random .= substr($char_list,(rand()%(strlen($char_list))), 1);
-				}
-				return $random;
-			}
-			$acupl_UID = strtoupper(dechex((int)(microtime(true) * 1000))) . '_' . randomString(40);
-			$url_action = 'http://' . $ACUPL_UPLOAD_SERVER[1] . '/marker=' . $acupl_UID;
-			$fpost['MAX_FILE_SIZE'] = $max[1];
-			$fpost['owner'] = $owner[1];
-			$fpost['pin'] = $pin[1];
-			$fpost['base'] = $base[1];
-			$fpost['host'] = $host[1];
-			$fpost['source'] = $source[1];
+	$page = geturl('letitbit.net', 80, '/ajax/auth.php', 'http://letitbit.net/', 'lang=en', $post, 0, $_GET["proxy"], $pauth);is_page($page);
+	is_present($page, "Authorization data is invalid", "Login failed: User/Password incorrect.");
+	is_notpresent($page, 'Set-Cookie: log=', 'Login failed: Cannot find login cookie.');
+	is_notpresent($page, 'Set-Cookie: pas=', 'Login failed: Cannot find paswword cookie.');
+	$cookie = GetCookiesArr($page);
+	$cookie['lang'] = 'en';
 ?>
-<script>document.getElementById('info').style.display='none';</script>
-<?php 		
-			$url = parse_url($url_action);
-			$upagent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1";
-			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""),0, $cookie, $fpost, $lfile, $lname, "file0");
-?>
-<script>document.getElementById('progressblock').style.display='none';</script>
-<?php 	
-			is_page($upfiles);
-			$Url = parse_url("http://letitbit.net/acupl_proxy.php?srv=". $ACUPL_UPLOAD_SERVER[1] ."&uid=". $acupl_UID);
-			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
-			preg_match('/"post_result": "(.*?)"/i', $page, $post_result);
-			$Url = parse_url(preg_replace("/letitbit.net/", "vip-file.com", $post_result[1]));
-			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, "", 0, 0, $_GET["proxy"],$pauth);
-			is_page($page);
-			preg_match_all('/textarea.*?>(.*?)</i', preg_replace("/vip-file.com/", "letitbit.net", $page), $links);
-			$download_link = $links[1][0];
-			$adm_link = preg_replace("/letitbit.net/", "vip-file.com", $links[1][0]);
-			$delete_link = $links[1][1];
-			echo "<h3><font color='green'>File successfully uploaded to your account</font></h3>";
+<script type="text/javascript">document.getElementById('login').style.display='none';</script>
+<div id="info" style="width:100%;text-align:center;">Retrive upload ID</div>
+<?php
+	$page = geturl("letitbit.net", 80, "/", 'http://letitbit.net/', $cookie, 0, 0, $_GET["proxy"], $pauth);is_page($page);
+	if (!preg_match("@var\s+ACUPL_UPLOAD_SERVER\s*=\s*'([^\']+)'\s*;@i",$page, $up)) html_error('Error: Cannot find upload server.', 0);
+
+	function rndStr($lg, $num = false){
+		if ($num) $str = "0123456789";
+		else {
+			$str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+			$str .= strtolower($str)."0123456789";
+		}
+		$str = str_split($str);
+		$ret = '';
+		for ($i = 1; $i <= $lg; $i++) $ret .= $str[array_rand($str)];
+		return $ret;
 	}
-/*************************\
-WRITTEN by kaox 08/05/2009
-UPDATE by kaox 05/09/2009
-\*************************/
+
+	$UID = strtoupper(base_convert(time().rndStr(3, true),10,16)).'_'.rndStr(40);
+
+	$post = array();
+	$post['MAX_FILE_SIZE'] = cut_str($page, 'name="MAX_FILE_SIZE" value="', '"');
+	$post['owner'] = cut_str($page, 'name="owner" type="hidden" value="', '"');
+	$post['pin'] = cut_str($page, 'name="pin" type="hidden" value="', '"');
+	$post['base'] = cut_str($page, 'name="base" type="hidden" value="', '"');
+	$post['host'] = cut_str($page, 'name="host" type="hidden" value="', '"');
+
+	$up_url = "http://{$up[1]}/marker=$UID";
+?>
+<script type="text/javascript">document.getElementById('info').style.display='none';</script>
+<?php
+
+	$url = parse_url($up_url);
+	$upfiles = upfile($url["host"], $url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), 'http://letitbit.net/', $cookie, $post, $lfile, $lname, "file0");
+
+?>
+<script type="text/javascript">document.getElementById('progressblock').style.display='none';</script>
+<?php
+	is_page($upfiles);
+
+	$page = geturl("letitbit.net", 80, "/acupl_proxy.php?srv={$up[1]}&uid=$UID", 'http://letitbit.net/', $cookie, 0, 0, $_GET["proxy"], $pauth);is_page($page);
+	if (!preg_match('@"post_result":\s*"(http://[^\"]+)"@i', $page, $rd)) html_error("Error: Redirect not found.", 0);
+
+	$url = parse_url($rd[1]);
+	$page = geturl($url["host"], $url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), 'http://letitbit.net/', $cookie, 0, 0, $_GET["proxy"], $pauth);is_page($page);
+
+	if (preg_match('@https?://[^/|\"|\'|<|\r|\n]+/download/[^\"|\'|<|\r|\n]+@i', $page, $lnk)) {
+		$download_link = $lnk[0];
+		if (preg_match('@https?://[^/|\"|\'|<|\r|\n]+/download/delete[^\"|\'|<|\r|\n]+@i', $page, $dlnk)) $delete_link = $dlnk[0];
+	} else {
+		html_error("Error: Download link not found.", 0);
+	}
+}
+
+//[01-1-2012] Written by Th3-822. // Happy New Year!
+
 ?>

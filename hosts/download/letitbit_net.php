@@ -8,101 +8,94 @@ class letitbit_net extends DownloadClass {
 
     public function Download($link) {
         global $premium_acc, $Referer;
+        //check link
         if (!$_REQUEST['step']) {
-            $page = $this->GetPage($link, 'lang=en'); //set the page to english
-            is_present($page, "File not found", "The requested file was not found");
+            $this->page = $this->GetPage($link, 'lang=en');
+            is_present($this->page, "File not found", "The requested file was not found");
+            $this->cookiearr = GetCookiesArr($this->page);
+            //We dont need to always convert the cookie from array into string, I do that becuz htmlentities cant validate array value even it's working
+            $this->cookie = CookiesToStr($this->cookiearr) . "; lang=en"; //keep page in english
         }
+        $this->link = $link;
         if (($_REQUEST ['premium_acc'] == 'on' && $_REQUEST['premium_user'] && $_REQUEST ['premium_pass']) || ($_REQUEST ['premium_acc'] == 'on' && (!empty($premium_acc ['letitbit_net'] ['user']) && !empty($premium_acc ['letitbit_net'] ['pass'])))) {
-            $this->Login($link);
+            $this->Login();
+        } elseif ($_REQUEST['step'] == '1') {
+            $this->Free();
         } else {
-            $cookie = GetCookies($page). "; lang=en";
-            $post['uid5'] = cut_str($page, 'name="uid5" value="', '"');
-            $post['uid'] = cut_str($page, 'name="uid" value="', '"');
-            $post['id'] = cut_str($page, 'name="id" value="', '"');
-            $post['live'] = cut_str($page, 'name="live" value="', '"');
-            $post['seo_name'] = cut_str($page, 'name="seo_name" value="', '"');
-            $post['name'] = cut_str($page, 'name="name" value="', '"');
-            $post['pin'] = cut_str($page, 'name="pin" value="', '"');
-            $post['realuid'] = cut_str($page, 'name="realuid" value="', '"');
-            $post['realname'] = cut_str($page, 'name="realname" value="', '"');
-            $post['host'] = cut_str($page, 'name="host" value="', '"');
-            $post['ssserver'] = cut_str($page, 'name="ssserver" value="', '"');
-            $post['sssize'] = cut_str($page, 'name="sssize" value="', '"');
-            $post['index'] = cut_str($page, 'name="index" value="', '"');
-            $post['dir'] = cut_str($page, 'name="dir" value="', '"');
-            $post['optiondir'] = cut_str($page, 'name="optiondir" value="', '"');
-            $post['desc'] = cut_str($page, 'name="desc" value="', '"');
-            $post['lsarrserverra'] = cut_str($page, 'name="lsarrserverra" value="', '"');
-            $post['page'] = cut_str($page, 'name="page" value="', '"');
-            $post['pin_wm'] = cut_str($page, 'name="pin_wm" value="', '"');
-            $post['md5crypt'] = cut_str($page, 'name="md5crypt" value="', '"');
-            $post['realuid_free'] = cut_str($page, 'name="realuid_free" value="', '"');
-            $post['pin_wm_tarif'] = 'default';
             if (($_REQUEST['premium_acc'] == 'on' && $_REQUEST['premium_pass']) || ($_REQUEST['premium_acc'] == 'on' && (!empty($premium_acc['letitbit_net']['pass'])))) {
-                $post['pass'] = $_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["letitbit_net"] ["pass"];
+                $form = cut_str($this->page, '<div class="hide-block" id="password_area">', '<div class="column label" style="width:200px">');
+                if (empty($form)) html_error("Error: Empty Premium Key Form!");
+                $post = $this->AutomatePost($form);
+                //additional post data
+                $post['pass'] = $_REQUEST ["premium_pass"] ? $_REQUEST ["premium_pass"] : $premium_acc ["letitbit_net"] ["pass"];
                 $post['submit_sms_ways_have_pass'] = 'Download file';
-                $link = 'http://letitbit.net'. cut_str(cut_str($page, 'id="password_area">', '<div class="clear-line">'), '<form action="', '"');
-                return $this->Premium($this->GetPage($link, $cookie, $post, $Referer), $link, $cookie);
+                //textarea($post, 0, 0, true);
+                $this->link = "http://letitbit.net" . cut_str($form, '<form action="', '"');
+                $this->page = $this->GetPage($this->link, $this->cookie, $post, $Referer);
+                return $this->Premium();
             } else {
-                $link = "http://letitbit.net" . cut_str($page, 'id="ifree_form" action="', '" ');
-                return $this->Free($this->GetPage($link, $cookie, $post, $Referer), $link, $cookie);
+                $form = cut_str($this->page, '<form id="ifree_form"', '<div class="wrapper-centered">');
+                if (empty($form)) html_error("Error: Empty Free Form 1!");
+                $post = $this->AutomatePost($form);
+                $this->link = "http://letitbit.net" . cut_str($form, 'action="', '"');
+                $this->page = $this->GetPage($this->link, $this->cookie, $post, $Referer);
+                return $this->PrepareFree();
             }
         }
     }
 
-    private function Free($page, $link, $cookie) {
+    private function PrepareFree() {
         global $Referer;
 
-        $t = explode(";", GetCookies($page));
-        $cookie .=";" . $t[0] . ";" . $t[2];
-        if (!preg_match('%<form action="(.*)" method="post" id="d3_form">%', $page, $match)) html_error('Error: redirect link 1 not found!');
-        $link = $match[1];
+        $this->cookiearr = array_merge($this->cookiearr, GetCookiesArr($this->page));
+        $this->cookie = CookiesToStr($this->cookiearr);
         unset($post);
-        // just copy paste here from the previous post, it's the same...
-        $post['uid5'] = cut_str($page, 'name="uid5" value="', '"');
-        $post['uid'] = cut_str($page, 'name="uid" value="', '"');
-        $post['id'] = cut_str($page, 'name="id" value="', '"');
-        $post['live'] = cut_str($page, 'name="live" value="', '"');
-        $post['seo_name'] = cut_str($page, 'name="seo_name" value="', '"');
-        $post['name'] = cut_str($page, 'name="name" value="', '"');
-        $post['pin'] = cut_str($page, 'name="pin" value="', '"');
-        $post['realuid'] = cut_str($page, 'name="realuid" value="', '"');
-        $post['realname'] = cut_str($page, 'name="realname" value="', '"');
-        $post['host'] = cut_str($page, 'name="host" value="', '"');
-        $post['ssserver'] = cut_str($page, 'name="ssserver" value="', '"');
-        $post['sssize'] = cut_str($page, 'name="sssize" value="', '"');
-        $post['index'] = cut_str($page, 'name="index" value="', '"');
-        $post['dir'] = cut_str($page, 'name="dir" value="', '"');
-        $post['optiondir'] = cut_str($page, 'name="optiondir" value="', '"');
-        $post['desc'] = cut_str($page, 'name="desc" value="', '"');
-        $post['lsarrserverra'] = cut_str($page, 'name="lsarrserverra" value="', '"');
-        $post['page'] = cut_str($page, 'name="page" value="', '"');
-        $post['pin_wm'] = cut_str($page, 'name="pin_wm" value="', '"');
-        $post['md5crypt'] = cut_str($page, 'name="md5crypt" value="', '"');
-        $post['realuid_free'] = cut_str($page, 'name="realuid_free" value="', '"');
-        $post['pin_wm_tarif'] = 'default';
-        // end copy paste, lol...
-        $post['ac_http_referer'] = cut_str($page, 'name="ac_http_referer" value="', '"');
-        $post['links_sent'] = "1";
-        $post['rand'] = cut_str($page, 'name="rand" value="', '"');
-        $page = $this->GetPage($link, $cookie, $post, $Referer);
-        $tlink = cut_str($page, "ajax_check_url = '", "'");
-        $wait = cut_str($page, "seconds = ", ";");
-        if (empty($tlink) || empty($wait)) html_error('Timer or redirect link 2 not found');
-        $this->CountDown($wait);
-        $page = $this->GetPage($tlink, $cookie, $post, $link."\r\nX-Requested-With: XMLHttpRequest");
-        if (!preg_match('@http:\/\/.+download(\d+)?\/let(\d+)?\/[^|\r|\n]+@', $page, $dl)) html_error('Error: Free Download link can\'t be found!');
-        $dlink = trim($dl[0]);
-        $FileName = basename(parse_url($dlink, PHP_URL_PATH));
-        $this->RedirectDownload($dlink, $Filename, $cookie, 0, $tlink);
+        $form = cut_str($this->page, 'id="d3_form">', '</form>');
+        if (empty($form)) html_error("Error: Empty Free Form 2!");
+        $post = $this->AutomatePost($form);
+        if (!preg_match('%<form action="((http:\/\/s\d+\.letitbit\.net)\/[^"]+)" method="post" id="d3_form">%', $this->page, $check)) html_error("Error: Redirect link [Free] not found!");
+        $this->link = $check[1];
+        $this->server = $check[2];
+        $this->page = $this->GetPage($this->link, $this->cookie, $post, $Referer);
+        $this->link = $this->server . '/ajax/download3.php';
+        // If you want, you can skip the countdown...
+        if (preg_match('@(\d+)<\/span> seconds@', $this->page, $wait)) $this->CountDown($wait[1]);
+        // end countdown timer...
+        $this->page = $this->GetPage($this->link, $this->cookie, array(), $Referer, 0, 1); //empty array in post variable needed...
+        $data = $this->DefaultParamArr($this->server . "/ajax/check_captcha.php", $this->cookie);
+        $data['step'] = '1';
+        //Download captcha img.
+        $cap = $this->GetPage($this->server . '/captcha_new.php', $this->cookie); // Yes, the cookie is needed
+        $capt_img = substr($cap, strpos($cap, "\r\n\r\n") + 4);
+        $imgfile = DOWNLOAD_DIR . "letitbit_captcha.png";
+
+        if (file_exists($imgfile)) unlink($imgfile);
+        if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.", 0);
+        // Captcha img downloaded
+        $this->EnterCaptcha($imgfile, $data);
         exit();
     }
 
-    private function Login($link) {
+    private function Free() {
+        global $Referer;
+
+        $post['code'] = $_POST['captcha'];
+        $this->link = urldecode($_POST['link']);
+        $this->cookie = urldecode($_POST['cookie']);
+        $this->page = $this->GetPage($this->link, $this->cookie, $post, $Referer, 0, 1); //too many XML request needed so I used default http.php function in geturl...
+        is_present($this->page, "Content-Length: 0", "Error: Wrong Captcha Entered.");
+        if (!preg_match('@http:\/\/[^\r|\n]+@i', $this->page, $dl)) html_error("Error: Download link [Free] not found.");
+        $dlink = trim($dl[0]);
+        $FileName = urldecode(basename(parse_url($dlink, PHP_URL_PATH)));
+        $this->RedirectDownload($dlink, $FileName, $this->cookie, 0, $Referer);
+        exit();
+    }
+
+    private function Login() {
         global $premium_acc;
 
-        $user = ($_REQUEST ["premium_user"] ? $_REQUEST ["premium_user"] : $premium_acc ["letitbit_net"] ["user"]);
-        $password = ($_REQUEST ["premium_pass"] ? $_REQUEST ["premium_pass"] : $premium_acc ["letitbit_net"] ["pass"]);
+        $user = $_REQUEST ["premium_user"] ? $_REQUEST ["premium_user"] : $premium_acc ["letitbit_net"] ["user"];
+        $password = $_REQUEST ["premium_pass"] ? $_REQUEST ["premium_pass"] : $premium_acc ["letitbit_net"] ["pass"];
         if (empty($user) || empty($password)) {
             html_error("Login Failed: Username or Password is empty. Please check login data.");
         }
@@ -111,33 +104,44 @@ class letitbit_net extends DownloadClass {
         $post['act'] = 'login';
         $post['login'] = $user;
         $post['password'] = $password;
-        $page = $this->GetPage('http://letitbit.net/', 'lang=en', $post, 'http://letitbit.net/');
-        is_present($page, 'Authorization data is invalid', 'Authorization data is invalid, please check ur account!');
-        $cookie = GetCookies($page). "; lang=en";
+        $this->page = $this->GetPage('http://letitbit.net/', $this->cookie, $post, 'http://letitbit.net/');
+        is_present($this->page, 'Authorization data is invalid');
+        $this->cookie = GetCookies($this->page) . "; lang=en";
+        $this->page = $this->GetPage($this->link, $this->cookie);
 
-        return $this->Premium($this->GetPage($link, $cookie), $link, $cookie);
-
+        return $this->Premium();
     }
 
-    private function Premium($page, $link, $cookie) {
-        
-        $cookie = $cookie . "; " . GetCookies($page);
-        if (stristr($page, "Location:")) {
-            $link = trim(cut_str($page, "Location: ", "\n"));
-            $page = $this->GetPage($link, $cookie);
+    private function Premium() {
+
+        $this->cookie = $this->cookie . "; " . GetCookies($this->page);
+        if (stristr($this->page, "Location:")) {
+            $this->link = trim(cut_str($this->page, "Location: ", "\r\n"));
+            $this->page = $this->GetPage($this->link, $this->cookie);
         }
-        $tlink = cut_str(cut_str($page, '<iframe', '</iframe>'), 'src="', '"');
+        $tlink = cut_str(cut_str($this->page, '<iframe', '</iframe>'), 'src="', '"');
         if (empty($tlink)) html_error('Error: Please check your premium account!');
-        $page = $this->GetPage($tlink, $cookie, 0, $link);
-        if (!preg_match('@http:\/\/.+downloadp(\d+)?\/let(\d+)?\/[^\'"]+@i', $page, $dl)) html_error('Error: Can\'t found premium download link!');
+        $this->page = $this->GetPage($tlink, $this->cookie, 0, $this->link);
+        if (!preg_match('@http:\/\/.+downloadp(\d+)?\/let(\d+)?\/[^\'?"?]+@i', $this->page, $dl)) html_error('Error: Download Link [Premium] not found!');
         $dlink = trim($dl[0]);
-        $Url = parse_url($dlink);
-        $FileName = basename($Url['path']);
-        $this->RedirectDownload($dlink, $FileName, $cookie, 0, $tlink);
+        $FileName = urldecode(basename(parse_url($dlink, PHP_URL_PATH)));
+        $this->RedirectDownload($dlink, $FileName, $this->cookie, 0, $tlink);
     }
+
+    private function AutomatePost($form) {
+        if (!preg_match_all('@<input type="hidden" name="([^"]+)" value="([^"]+)" \/>@i', $form, $match)) html_error("Error: Post Data not found!");
+        $post = array();
+        $match = array_combine($match[1], $match[2]);
+        foreach ($match as $k => $v) {
+            $post[$k] = ($v == "") ? 1 : $v;
+        }
+
+        return $post;
+    }
+
 }
 
-/***********************************************************************************************\
+/* * *********************************************************************************************\
   WRITTEN BY VinhNhaTrang 15-11-2010
   Fix the premium code by code by vdhdevil
   Fix the free download code by vdhdevil & Ruud v.Tony 25-3-2011
@@ -145,5 +149,6 @@ class letitbit_net extends DownloadClass {
   Updated for site layout change by Ruud v.Tony 24-7-2011
   Updated for joining between premium user & pass with only single key by Ruud v.Tony 13-10-2011
   Small fix in post form by Ruud v.Tony 16-12-2011 (sorry for the delay, I'm busy with my real life)
-\***********************************************************************************************/
+  Fix free code by Ruud v.Tony & Th3-822 for letitbit new layout 31-12-2011 (Happy new year everyone)
+  \********************************************************************************************** */
 ?>
