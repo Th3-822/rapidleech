@@ -441,7 +441,7 @@ Rapidshare.com Folders | Usercash.com</div><br />
 </form>
 </div>
 <p style="text-align:center; font-size:10px">
-	<small>Lix Checker v3.0.0 | Copyright Dman - MaxW.org | Optimized by zpikdum and sarkar<br /><b>Mod by eqbal | Ajax'd by TheOnly92</b></small></p><br />
+	<small>Lix Checker v3.0.0 | Copyright Dman - MaxW.org | Optimized by zpikdum and sarkar<br /><b>Mod by eqbal | Ajax'd by TheOnly92 | Updated by Th3-822</b></small></p><br />
 
 <span id="loading" style="display: none;">
       &nbsp;&nbsp;
