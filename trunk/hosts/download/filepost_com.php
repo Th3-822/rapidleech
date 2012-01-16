@@ -8,6 +8,9 @@ class filepost_com extends DownloadClass {
 
     public function Download($link) {
         global $premium_acc;
+        if (strstr($link, "fp.io/")) {
+            $link = str_replace("fp.io/", "filepost/files/", $link);
+        }
         $this->link = $link;
         if (!$_REQUEST['step']) {
             $this->tid = round(microtime(true) * 1000);
@@ -73,13 +76,12 @@ class filepost_com extends DownloadClass {
                 $check = $this->GetPage($Url, $this->Cookies, $post, $this->link);
                 break;
             default:
-                if (!preg_match("@\{action: '([\w\-]+)', code: '(\w+)'\}@", $this->page, $tmp)) html_error('Error 0x02: Plugin is out of date!');
-                $action = $tmp[1];
-                $code = $tmp[2];
-                if (!preg_match("@\('token', '(\w+)'\)@", $this->page, $tmp)) html_error('Error 0x03: Plugin is out of date!');
+                if (!preg_match("@code: '([^']+)',@", $this->page, $match)) html_error('Error 0x02: Plugin is out of date!');
+                $code = $match[1];
+                if (!preg_match("@[({]token: '([^']+)',@", $this->page, $tmp)) html_error('Error 0x03: Plugin is out of date!');
                 $token = $tmp[1];
                 $Url = "http://filepost.com/files/get/?SID={$this->sid}&JsHttpRequest={$this->tid}-xml";
-                $post = array('action' => $action, 'code' => $code, 'token' => $token);
+                $post = array('action' => 'set_download', 'code' => $code, 'token' => $token);
                 $check = $this->GetPage($Url, $this->Cookies, $post, $this->link);
                 if (!preg_match('@"js":\{"(\w+)":\{?"([a-z|\_]+)"?:?"?(\d+)"?@i', $check, $match)) html_error('Error : timer not found!');
                 $this->CountDown($match[3]);
@@ -136,7 +138,7 @@ class filepost_com extends DownloadClass {
                     break;
             }
         } else {
-            echo "<pre>"; var_dump(nl2br(htmlentities($check))); echo "</pre>"; exit;
+            html_error("Error: Unknown Page Response!");
         }
     }
 
@@ -177,5 +179,7 @@ class filepost_com extends DownloadClass {
  * Filepost.com free download plugin by Ruud v.Tony 29-09-2011
  * Updated to support premium by vdhdevil 12-10-2011
  * Updated the free download code by Ruud v.Tony 02-11-2011 for multiple option error
+ * Small regex fix in free download by Ruud v.Tony 10-01-2012
+ * Updated for including short link (fp.io) in check link by Ruud v.Tony 13-01-2012
  */
 ?>

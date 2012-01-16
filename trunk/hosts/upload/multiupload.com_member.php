@@ -29,7 +29,7 @@ function GetMUSites($page='') {
 	$sites = array();
 	foreach ($hosts[1] as $host) {
 		$popup = cut_str($page, 'id="details_'.$host.'">', '</div></div>');
-		if (empty($popup) || (!preg_match('@"logos/(\d+)\.[^"]+"@i', $popup, $hid) || !preg_match('@Upload files directly into my ([^\"|\'|\<|\:]+) account\:@i', $popup, $name))) html_error("Cannot Check Supported Sites [2 ($host)]");
+		if (empty($popup) || (!preg_match('@"(?:http://[^"]+/)?logos/(\d+)\.[^"]+"@i', $popup, $hid) || !preg_match('@Upload files directly into my ([^\"|\'|\<|\:]+) account\:@i', $popup, $name))) html_error("Cannot Check Supported Sites [2 ($host)]");
 		$name[1] = trim($name[1]);
 		if ($hid[1] != 14) $sites[] = array('hname'=>$name[1], 'id' => $hid[1], 'sname' => $host);
 		unset($popup,$hid,$name);
@@ -136,5 +136,6 @@ if ($continue_up) {
 }
 
 //[21-11-2011]  Written by Th3-822.
+//[05-1-2012]  Fixed regexp in GetMUSites function. -Th3-822
 
 ?>

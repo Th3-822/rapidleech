@@ -31,8 +31,8 @@ require(TEMPLATE_DIR.'/header.php');
 <center>
 <?php
 if ($_REQUEST["GO"] == "GO") {
-  $getlinks=explode("\r\n",trim($_REQUEST['links']));
-  if (!count($getlinks) || (trim($_REQUEST['links']) == "")) {
+  $getlinks=explode("\r\n", htmlentities(trim($_REQUEST['links']))); //htmlentities prevent xss attack
+  if (!count($getlinks) || htmlentities(trim($_REQUEST['links']) == "")) {
     html_error("No link submited");
   }
   if ($_REQUEST['server_side'] == 'on') {
