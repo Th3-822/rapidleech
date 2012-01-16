@@ -16,7 +16,7 @@ class megaupload_com extends DownloadClass {
 		$this->MuFolderToAuDl();
 
 		if ($_REQUEST["mu_acc"] == "on" && (!empty($_REQUEST["mu_cookie"]) || !empty($mu_cookie_user_value))) $this->Login();
-		elseif ($_REQUEST["premium_acc"] == "on" && ((!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) || ($premium_acc["megaupload_com"]["user"] && $premium_acc["megaupload_com"]["pass"]) || !empty($premium_acc["megaupload_com"]['cookie']))) $this->Login();
+		elseif ($_REQUEST["premium_acc"] == "on" && ((!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) || ($premium_acc["megaupload_com"]["user"] && $premium_acc["megaupload_com"]["pass"]) || !empty($premium_acc["megaupload_com"]["cookie"]))) $this->Login();
 		else $this->FreeDL();
 	}
 
@@ -39,7 +39,7 @@ class megaupload_com extends DownloadClass {
 		}
 
 		$page = $this->GetPage($this->link, $this->cookie, $post);
-		is_present($page, "The file you are trying to access is temporarily unavailable");
+		if (stristr($page, 'class="bott_p_access"') || stristr($page, 'class="bott_p_access2"')) html_error('The file you are trying to access is temporarily unavailable.', 0);
 		is_present($page, 'class="na_description"', "Link Not Available.");
 		is_present($page, 'class="download_l_descr"', 'Only premium users can download files larger than 1 GB.');
 
@@ -50,13 +50,8 @@ class megaupload_com extends DownloadClass {
 
 		if (!preg_match('@(http://www\d+\.megaupload.com/files/[^"]+)"\s+class="download_regular_usual"@i', $page, $dlink)) html_error("Error: Download link not found");
 
-		$CD = array();
-		$Ch = '\s*(?:\r?\n[^\r|\n]+\r?\n)?\s*'; // rapidleech should decode html chunked content... (Or send request with HTTP 1.0 header)
-		if (!preg_match("@count$Ch=$Ch(\d+)\s*;@i", $page, $CD)) {
-			$this->changeMesg(lang(300)."<br /><br /><b>Countdown not found</b><br />Setting countdown to 60.");
-			$CD[1] = 60;
-		}
-		$this->CountDown($CD[1]);
+		//$Ch = '\s*(?:\r?\n[^\r|\n]+\r*\n)?\s*';
+		//if (preg_match("@count$Ch=$Ch(\d+)\s*;@i", $page, $CD)) $this->CountDown($CD[1]);
 
 		$url = parse_url(html_entity_decode($dlink[1]));
 		$FileName = urldecode(basename($url["path"]));
@@ -69,7 +64,7 @@ class megaupload_com extends DownloadClass {
 		if ($_REQUEST["mu_acc"] == "on") {
 			if (!empty($_REQUEST["mu_cookie"])) $cookie = $_REQUEST["mu_cookie"];
 			elseif (!empty($mu_cookie_user_value)) $cookie = $mu_cookie_user_value;
-		}elseif (!empty($premium_acc["megaupload_com"]['cookie'])) $cookie = $premium_acc["megaupload_com"]['cookie'];
+		} elseif (!empty($premium_acc["megaupload_com"]['cookie'])) $cookie = $premium_acc["megaupload_com"]['cookie'];
 
 		if (!$cookie) {
 			if (!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) $pA = true;
@@ -84,6 +79,7 @@ class megaupload_com extends DownloadClass {
 
 			$page = $this->GetPage('http://www.megaupload.com/?c=login', $this->cookie, $post, 'http://www.megaupload.com/');
 			is_present($page, 'Username and password do not match', 'Login Failed: Invalid username and/or password.');
+			is_present($page, 'Your account is for personal use only', 'MU has blocked your account.'); //showNotify('Your account is for personal use only. Please check your e-mail.','username');</script>
 			is_notpresent($page, 'Set-Cookie: user=', 'Login Failed: Cannot get cookie.');
 			$this->cookie = array_merge($this->cookie, GetCookiesArr($page));
 		} else $this->cookie['user'] = $cookie;
@@ -92,7 +88,7 @@ class megaupload_com extends DownloadClass {
 		is_present($page, 'class="log_main_bl"', 'Login Failed: Invalid cookie.');
 		if (!stristr($page, 'class="account_txt">Premium') && !stristr($page, 'class="account_txt">Lifetime Platinum')) {
 			// class="account_txt">Regular
-			html_error("Login Failed: Account isn't premium"); // I don't get less wait time with free account... So, show a html_error().
+			html_error("Login Failed: Account isn't premium");
 			//$this->changeMesg(lang(300)."<br /><br /><b>Account isn\\\'t premium</b><br />Using Free Download.");
 			//return $this->FreeDL();
 		}
@@ -109,7 +105,7 @@ class megaupload_com extends DownloadClass {
 		}
 
 		$page = $this->GetPage($this->link, $this->cookie, $post);
-		is_present($page, "The file you are trying to access is temporarily unavailable");
+		is_present($page, 'class="bott_p_access"', "The file you are trying to access is temporarily unavailable.");
 		is_present($page, 'class="na_description"', "Link Not Available.");
 
 		if (stristr($page, 'The file you are trying to download is password protected')) {
@@ -132,6 +128,6 @@ class megaupload_com extends DownloadClass {
 }
 
 //[10-Dec-2011]  Rewritten (from the older svn plugin) and fixed for the changes @ MU site. - Th3-822
-//[11-Dec-2011]  Fixed countdown code... Using a regexp for get the CD time, and setting a default value if regexp doesn't match. - Th3-822
+//[10-Jan-2012]  Removed countdown code && Added more error msgs. - Th3-822
 
 ?>

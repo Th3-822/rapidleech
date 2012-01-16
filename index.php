@@ -75,6 +75,12 @@ register_shutdown_function ("pause_download");
 
 login_check();
 
+$refhost = cut_str($_SERVER['HTTP_REFERER'], '://', '/');
+if (!empty($_SERVER['HTTP_REFERER']) && $refhost && !preg_match(str_replace('.', '\.', "@({$_SERVER['SERVER_NAME']})|({$_SERVER['SERVER_ADDR']})(:\d+)?$@i"), $refhost)) {
+        header("Location: http://www.youtube.com/watch?v=oHg5SJYRHA0"); // Comment this line if you don't want rickroll the users from Form leechers.
+        html_error(sprintf(lang(7), $refhost, 'Referer not allowed.'));
+}
+
 foreach ($_POST as $key => $value)
 {
 	$_GET [$key] = $value;

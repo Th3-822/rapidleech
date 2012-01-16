@@ -8,6 +8,10 @@ class crocko_com extends DownloadClass {
 
     public function Download($link) {
         global $premium_acc;
+        
+        if (strstr($link, "easy-share.com/")) {
+            $link = str_replace("easy-share.com/", "crocko.com/", $link);
+        }
         if (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc["crocko_com"]["user"] && $premium_acc["crocko_com"]["pass"])) {
             $this->DownloadPremium($link);
         } else {
@@ -121,5 +125,6 @@ class crocko_com extends DownloadClass {
 
 /*
  * crocko.com download plugin by Ruud v.Tony & vdhdevil 19-10-2011
+ * updated for including easy-share.com in checking link by Ruud v.Tony 13-01-2012
  */
 ?>

@@ -7,6 +7,9 @@ if (!defined('RAPIDLEECH')) {
 class filerio_com extends DownloadClass {
 
     public function Download($link) {
+        if (strstr($link, "filekeen.com/")) {
+            $link = str_replace("filekeen.com/", "filerio.com/", $link);
+        }
         $page = $this->GetPage($link);
         is_present($page, "File Not Found");
 
@@ -20,7 +23,7 @@ class filerio_com extends DownloadClass {
         $post['fname'] = $FileName;
         $post['referer'] = $link;
         $post['method_free'] = "Generate Download Link";
-        $page = $this->GetPage($link, 0, $post, $link);
+        $page = $this->GetPage($link, $cookie, $post, $link);
         if (preg_match_all("#<span style='[^\d]+(\d+)[^\d]+\d+\w+;'>\W+(\d+);</span>#", $page, $temp)) {
             for ($i=0;$i<count($temp[1])-1;$i++){
                 for ($j=$i+1;$j<count($temp[1]);$j++){
@@ -51,17 +54,19 @@ class filerio_com extends DownloadClass {
         $post['code'] = $captcha;
         $post['down_script'] = "1";
         $page = $this->GetPage($link, 0, $post, $link);
-        if (!preg_match('@http:\/\/.+(:\d+)?\/d\/[^|\r|\n|"]+@i', $page, $dl)) {
+        is_present($page, "Wrong captcha");
+        if (!preg_match('@http:\/\/[\d.]+(:\d+)?\/d\/[^|\r|\n|"]+@i', $page, $dl)) {
             html_error("Error: Download link not found!");
         }
         $dlink = trim($dl[0]);
-        if (!$FileName) $FileName = basename(parse_url($dlink, PHP_URL_PATH));
+        $FileName = basename(parse_url($dlink, PHP_URL_PATH));
         $this->RedirectDownload($dlink, $FileName, 0, 0, $link);
         exit();
     }
 }
 /* 
  * imported from the existing filekeen code configuration by Ruud v.Tony 21-12-2011
+ * updated to include filekeen.com in link by Ruud v.Tony 13-01-2012
  */
 
 ?>

@@ -1,5 +1,4 @@
 <?php
-
 if (!defined('RAPIDLEECH')) {
     require_once("index.html");
     exit;
@@ -8,7 +7,7 @@ if (!defined('RAPIDLEECH')) {
 class mediafire_com extends DownloadClass {
 
     private function get_mf($page) {
-        preg_match_all('%<div class="download_link" style=".*;z-index:(.*)" id=".*" name=".*"> <a href="(.*)" onclick=%U', $page, $match);
+        preg_match_all('%<div class="download_link" style=".*" id=".*" name=".*"> <a href="(.*)" onclick=%U', $page, $match);
         $dl = array();
         $index = array();
         $re = '';
@@ -34,9 +33,11 @@ class mediafire_com extends DownloadClass {
 
     public function Download($link) {
         if (isset($_POST['mfpassword']) && ($_POST['mfpassword'] != "")) {
-            $Cookies=$_POST['cookie'];
+            $Cookies = urldecode($_POST['cookie']);
+            $link = urldecode($_POST['link']);
             $page=$this->GetPage($link, $Cookies, array("downloadp"=>$_POST['mfpassword']), $link);
-            $dlink=$this->get_mf($page);
+            if (!preg_match('%<div class="download_link" style=".*" id=".*" name=".*"> <a href="(.*)" onclick=%U', $page, $dl)) html_error("Test fix [password] broken!");
+            $dlink = trim($dl[1]);
             $this->RedirectDownload($dlink, "Mediafire.com",$Cookies);
             exit;
         } else {
@@ -54,7 +55,8 @@ class mediafire_com extends DownloadClass {
                 echo $html;
                 exit;
             }
-            $dlink = $this->get_mf($page);
+            if (!preg_match('%<div class="download_link" style=".*" id=".*" name=".*"> <a href="(.*)" onclick=%U', $page, $dl)) html_error("Test fix [normal] broken!");
+            $dlink = trim($dl[1]);
             $this->RedirectDownload($dlink, "Mediafire.com", $Cookies);
             exit;
         }
@@ -64,5 +66,6 @@ class mediafire_com extends DownloadClass {
 /*
  * credit to farizemo [at] rapidleech forum
  * by vdhdevil
+ * remove additional function for temporary fix until get finished - Ruud v.Tony 06-01-2011
  */
 ?>
