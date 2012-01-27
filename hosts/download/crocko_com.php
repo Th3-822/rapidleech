@@ -19,23 +19,14 @@ class crocko_com extends DownloadClass {
         }
     }
 
-    /*
-     * exit for terminated download
-     * return for continue download
-     * $content is header content before download
-     */
-
-    public function CheckBack($content) {
-        if (!strpos($content, "ontent-Disposition: attachment; ")) {
-            html_error("You have input wrong captcha, Please try again!");
-        }
-        return;
+    public function CheckBack($header) {
+        is_notpresent($header, "ontent-Disposition: attachment;", "You have input wrong captcha, Please try again!");
     }
 
     private function DownloadFree($link) {
         global $Referer;
 
-        if ($_POST['step'] == '1') {
+        if ($_REQUEST['step'] == 'captcha') {
             $post["recaptcha_challenge_field"] = $_POST['recaptcha_challenge_field'];
             $post["recaptcha_response_field"] = $_POST['recaptcha_response_field'];
             $post["id"] = $_POST['id'];
@@ -43,32 +34,45 @@ class crocko_com extends DownloadClass {
             $dlink = urldecode($_POST['link']);
             $FileName = $_POST['name'];
             $this->RedirectDownload($dlink, $FileName, $cookie, $post, $Referer);
-            $this->CheckBack($dlink);
             exit();
+        }elseif ($_REQUEST['step'] == 'countdown') {
+            $link = urldecode($_POST['link']);
+            $cookie = urldecode($_POST['cookie']);
+            $page = $this->GetPage($link, $cookie, 0, $Referer);
         } else {
-            $page = $this->GetPage($link, 'language=en');
+            $page = $this->GetPage($link);
             is_present($page, 'Requested file is deleted.');
             is_present($page, 'There is another download in progress from your IP. Please try to downloading later.');
-            $cookie = GetCookies($page) . "; language=en";
+            $cookie = GetCookies($page);
             $FileName = trim(str_replace(" ", ".", cut_str($page, 'Download ', ',')));
             // first timer
             if (preg_match('/wf = (\d+);/', $page, $wait)) $this->CountDown($wait[1]);
             if (preg_match("/u='(.+)'/", $page, $cap)) $link = "http://www.crocko.com$cap[1]";
             $page = $this->GetPage($link, $cookie, 0, $Referer);
-            //get new timer, then refresh the page
-            if (preg_match("/w='(\d+)'/", $page, $wait)) {
-                if ($wait[1] > 90) {
-                    $this->JSCountdown($wait[1]);
-                } else {
-                    $this->CountDown($wait[1]);
-                }
+        }            
+        //get new timer, then refresh the page
+        if (preg_match("/w='(\d+)'/", $page, $wait)) {
+            if ($wait[1] > 100) {
+                $data = $this->DefaultParamArr($link, $cookie);
+                $data['step'] = 'countdown';
+                $this->JSCountdown($wait[1], $data);
+            } else {
+                $this->CountDown($wait[1]);
                 $page = $this->GetPage($link, $cookie, 0, $Referer);
             }
-            if (preg_match('%<form  method="post" action="(.*)">%', $page, $match)) $link = $match[1];
-            // now we start to display the captcha data
+        }
+        if (preg_match('%<form  method="post" action="([^"]+)">%', $page, $dl)) {
+            $dlink = trim($dl[1]);
+            if (!is_array($cookie)) {
+                if (!preg_match_all("@([^=]+)=([^;]+);?@", $cookie, $c)) html_error("Error: Cookie is empty???");
+                $tcookie = array_combine($c[1], $c[2]);
+            } else {
+                $tcookie = $cookie;
+            }
+            $cookie = CookiesToStr(array_merge($tcookie, GetCookiesArr($page)));
             if (!preg_match('/Recaptcha\.create\("([^"]+)/i', $page, $cid)) html_error('Can\'t find chaptcha id');
-            $data = $this->DefaultParamArr($link, $cookie);
-            $data['step'] = '1';
+            $data = $this->DefaultParamArr($dlink, $cookie);
+            $data['step'] = 'captcha';
             $data['id'] = cut_str($page, 'name="id" value="', '"');
             $data['name'] = $FileName;
             $this->Show_reCaptcha($cid[1], $data);
@@ -77,7 +81,7 @@ class crocko_com extends DownloadClass {
     }
 
     private function DownloadPremium($link) {
-        global $premium_acc;
+        global $premium_acc, $pauth;
 
         $post = array();
         $post ["login"] = $_REQUEST ["premium_user"] ? $_REQUEST ["premium_user"] : $premium_acc ["crocko_com"] ["user"];

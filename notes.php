@@ -25,7 +25,7 @@ include(TEMPLATE_DIR.'header.php'); ?>
 	$content = file_get_contents("files/".lang(327).".txt");
 ?>
 <div align="center">
-<form method="post" action="<?php echo (!$PHP_SELF ? $_SERVER["PHP_SELF"] : $PHP_SELF); ?>">
+<form method="post" action="<?php echo $PHP_SELF;?>">
 <textarea class="notes" name="notes" rows="1" cols="1"><?php echo htmlentities($content); ?></textarea>
 <br /><input type="submit" name="submit" value="<?php echo lang(326); ?>" />
 </form>

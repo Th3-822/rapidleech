@@ -23,7 +23,7 @@ class filerio_com extends DownloadClass {
         $post['fname'] = $FileName;
         $post['referer'] = $link;
         $post['method_free'] = "Generate Download Link";
-        $page = $this->GetPage($link, $cookie, $post, $link);
+        $page = $this->GetPage($link, 0, $post, $link);
         if (preg_match_all("#<span style='[^\d]+(\d+)[^\d]+\d+\w+;'>\W+(\d+);</span>#", $page, $temp)) {
             for ($i=0;$i<count($temp[1])-1;$i++){
                 for ($j=$i+1;$j<count($temp[1]);$j++){

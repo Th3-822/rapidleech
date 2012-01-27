@@ -11,6 +11,7 @@
 <link title="Rapidleech Style" href="templates/plugmod/styles/rl_style_pm.css" rel="stylesheet" type="text/css" />
 
 <title><?php
+if (!isset($nn)) $nn = "\r\n";
 if (!isset($page_title)) {
 	echo 'Rapidleech v2 rev. '.$rev_num;
 } else {

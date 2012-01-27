@@ -1,4 +1,5 @@
-<!doctype html>
+<!DOCTYPE html>
+<html>
 <head>
 <meta charset="utf-8">
 <meta name="author" content="blacklizt">
@@ -7,6 +8,7 @@
 <meta name="keywords" content="neatblue">
 <link rel="stylesheet" href="templates/neatblue/styles/rl_style_pm.css">
 <title><?php
+if (!isset($nn)) $nn = "\r\n";
 if (!isset($page_title)) {
 	echo 'Rapidleech v2 rev. '.$rev_num;
 } else {

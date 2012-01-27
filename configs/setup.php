@@ -9,7 +9,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-$PHP_SELF = !$PHP_SELF ? $_SERVER["PHP_SELF"] : $PHP_SELF;
+$PHP_SELF = $_SERVER ['SCRIPT_NAME'];
 define('RAPIDLEECH', 'yes');
 define ('CONFIG_DIR', 'configs/');
 

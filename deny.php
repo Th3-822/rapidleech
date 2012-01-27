@@ -9,7 +9,7 @@ ob_end_clean();
 ob_implicit_flush(TRUE);
 ignore_user_abort(1);
 clearstatcache();
-$PHP_SELF = !$PHP_SELF ? $_SERVER["PHP_SELF"] : $PHP_SELF;
+$PHP_SELF = $_SERVER ['SCRIPT_NAME'];
 define('HOST_DIR', 'hosts/');
 define('CLASS_DIR', 'classes/');
 define('CONFIG_DIR', 'configs/');

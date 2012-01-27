@@ -6,44 +6,23 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class rapidshare_com extends DownloadClass {
-	public $usecurl, $lastmesg, $apiurl;
+	public $lastmesg, $apiurl;
 	private $fileid, $filename;
 	public function Download($link) {
 		global $premium_acc;
 		$this->apiurl = "https://api.rapidshare.com/cgi-bin/rsapi.cgi";
-		// Check for https support.
-		$this->usecurl = $cantuse = false;
-		if (!extension_loaded('openssl')) {
-			if (extension_loaded('curl')) {
-				$cV = curl_version();
-				if (!in_array('https', $cV['protocols'], true)) $cantuse = true;
-				$this->usecurl = true;
-			} else $cantuse = true;
-			if ($cantuse) html_error("Need OpenSSL enabled or cURL (with SSL) to use this plugin.");
-		}
-
-		//Continue free download?
-		if ($_REQUEST['rs_freedl'] == 'ok') {
-			$this->changeMesg("RS Free Download<br />Starting download...");
-			$host = $_REQUEST['rs_host'];
-			$fileid = $_REQUEST['rs_fileid'];
-			$filename = $_REQUEST['rs_filename'];
-			$dlauth = $_REQUEST['rs_dlauth'];
-			$this->RedirectDownload("http://" . $host . "/cgi-bin/rsapi.cgi?sub=download&editparentlocation=0&bin=1&fileid=" . $fileid . "&filename=" . urlencode($filename) . "&dlauth=$dlauth", $filename);
-			exit;
-		}
 
 		$link = str_replace('http://', 'https://', $link);
 		$URl = parse_url(trim($link));
 		if (preg_match("/!download\|([^\|]+)\|(\d+)\|([^\|]+)/i", $URl["fragment"], $m)) $link = "https://rapidshare.com/files/{$m[2]}/{$m[3]}";
-		$page = $this->GetPageS($link);
+		$page = $this->GetPage($link);
 
 		is_present($page, "ERROR: Filename invalid.", "Filename invalid. Please check the download link.");
 		is_present($page, "ERROR: File ID invalid.", "File ID invalid. Please check the download link.");
 		is_present($page, "ERROR: Unassigned file limit of 10 downloads reached.", "Unassigned file limit of 10 downloads reached.");
 		is_present($page, "ERROR: Server under repair.", "Server under repair. Please try again later");
 
-		if ($linkb = $this->ReLocation($page, 0)) $page = $this->GetPageS($linkb);
+		if ($linkb = $this->ReLocation($page, 0)) $page = $this->GetPage($linkb);
 		if (!preg_match("/!download\|([^\|]+)\|(\d+)\|([^\|]+)/i", $page, $m)) html_error("Cannot check link");
 		$this->fileid = $m[2];
 		$this->filename = $m[3];
@@ -86,9 +65,8 @@ class rapidshare_com extends DownloadClass {
 			return $this->DownloadFree($link);
 		}
 	}
-	
 	private function DownloadFree($link) {
-		$page = $this->GetPageS($this->apiurl."?sub=download&fileid={$this->fileid}&filename={$this->filename}&try=1");
+		$page = $this->GetPage($this->apiurl."?sub=download&fileid={$this->fileid}&filename={$this->filename}&try=1");
 
 		is_present($page, "ERROR: This file is too big to download it for free.", "This file is too big to download it for free.");
 		is_present($page, "ERROR: You need RapidPro to download more files from your IP address.", "Too many parallel downloads from your IP address.");
@@ -109,16 +87,27 @@ class rapidshare_com extends DownloadClass {
 			$dlauth = $details[1];
 			$countdown = $details[2];
 
-			$data = array_merge($this->DefaultParamArr($link), array('rs_host' => urlencode($host), 'rs_fileid' => $this->fileid,
-				'rs_filename' => urlencode($this->filename), 'rs_dlauth' => urlencode($dlauth), 'rs_freedl' => 'ok'));
-			$this->JSCountdown($countdown, $data);
+			$dllink = "http://$host/cgi-bin/rsapi.cgi?sub=download&editparentlocation=0&bin=1&fileid={$this->fileid}&filename={$this->filename}&dlauth=$dlauth";
+			if ($countdown == 0) $this->RedirectDownload($dllink, $this->filename);
+			else {
+				$url = parse_url($dllink);
+
+				$data = $this->DefaultParamArr($dllink);
+				unset($data['audl']); // Can't use audl in free dl.
+				$data['filename'] = urlencode($this->filename);
+				$data['host'] = $url["host"];
+				$data['port'] = $url["port"];
+				$data['path'] = urlencode($url["path"] . ($url["query"] ? "?" . $url["query"] : ""));
+				$data['saveto'] = $_GET["path"];
+				$this->JSCountdown($countdown, $data);
+			}
 		} else {
 			html_error("Download link not found.");
 		}
 	}
-	
 	private function DownloadPremium() {
 		global $premium_acc;
+		if (!extension_loaded('openssl')) html_error("Need OpenSSL enabled for premium download.");
 
 		if (!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) {
 			$pA = true;
@@ -137,30 +126,29 @@ class rapidshare_com extends DownloadClass {
 		if ($pA) $sendauth = 0;
 		else $cookie = 0;
 
-		$page = $this->GetPageS("https://rapidshare.com/files/{$this->fileid}/{$this->filename}", $cookie, 0, 0, ($sendauth) ? base64_encode("$user:$pass") : '');
+		$page = $this->GetPage("https://rapidshare.com/files/{$this->fileid}/{$this->filename}", $cookie, 0, 0, ($sendauth) ? base64_encode("$user:$pass") : '');
 		if (!stristr($page, "Location:")) html_error("Cannot use premium account", 0);
 
 		$Href = $this->ReLocation($page);
 		$this->RedirectDownload($Href, $this->filename, $cookie, 0, 0, 0, $sendauth);
 	}
-	
 	private function PremiumCookieDownload($cookie) {
+		if (!extension_loaded('openssl')) html_error("Need OpenSSL enabled for premium download.");
 		$this->ChkAccInfo($cookie);
 		$cookie = "enc=$cookie;";
 
-		$page = $this->GetPageS("https://rapidshare.com/files/{$this->fileid}/{$this->filename}", $cookie);
+		$page = $this->GetPage("https://rapidshare.com/files/{$this->fileid}/{$this->filename}", $cookie);
 		if (!stristr($page, "Location:")) html_error("Cannot use premium account", 0);
 
 		$Href = $this->ReLocation($page);
 		$this->RedirectDownload($Href, $this->filename, $cookie);
 	}
-	
 	private function ChkAccInfo($cookie, $user='', $pass='', $pA=false) {
 		if ($cookie != "login") {
-			$page = $this->GetPageS($this->apiurl."?sub=getaccountdetails&cookie=$cookie");
+			$page = $this->GetPage($this->apiurl."?sub=getaccountdetails&cookie=$cookie");
 			$t1 = 'Cookie';$t2 = 'cookie';
 		} elseif (!empty($user) && !empty($pass)) {
-			$page = $this->GetPageS($this->apiurl."?sub=getaccountdetails&withcookie=1&login=$user&password=$pass");
+			$page = $this->GetPage($this->apiurl."?sub=getaccountdetails&withcookie=1&login=$user&password=$pass");
 			$t1 = 'Error';$t2 = 'login details';
 		} else html_error("Login failed. User/Password empty.");
 
@@ -197,7 +185,7 @@ class rapidshare_com extends DownloadClass {
 			html_error("[$t1] RapidPro has expired or is inactive.");
 		} elseif ($info['directstart'] == 0 && (!$user || $pA)) {
 			if ($pA) $cookie = $info['cookie'];
-			$dd = $this->GetPageS($this->apiurl."?cookie=$cookie&sub=setaccountdetails&directstart=1");
+			$dd = $this->GetPage($this->apiurl."?cookie=$cookie&sub=setaccountdetails&directstart=1");
 			if (substr(strrchr($dd, "\n"), 1) != 'OK') {
 				html_error("Error enabling direct downloads. Please do it manually.");
 			}
@@ -205,55 +193,12 @@ class rapidshare_com extends DownloadClass {
 		}
 		if ($user) return $info['cookie'];
 	}
-	
 	private function ReLocation($page, $stop=1) {
 		if (!preg_match('@Location: https?://((\w+\.)?rapidshare\.com/[^\r|\n]+)@i', $page, $rloc)) {
 			if ($stop) html_error("Redirection not found.");
 			else return false;
 		}
 		return "https://" . $rloc[1];
-	}
-	
-	private function GetPageS($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0) {
-		if (!$referer) {
-			global $Referer;
-			$referer = $Referer;
-		}
-		$url = parse_url(trim($link));
-
-		if ($this->usecurl && strstr($this->lastmesg, "RS Premium")) html_error("Need OpenSSL enabled for premium download.");
-		if ($this->usecurl) $page = $this->cURL($link, $cookie, $post, $referer, base64_decode($auth));
-		else $page = $this->GetPage($link, $cookie, $post, $referer, $auth);
-		return $page;
-	}
-	
-	private function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0) {
-		$opt = array(CURLOPT_HEADER => 1, CURLOPT_COOKIE => $cookie, CURLOPT_REFERER => $referer,
-			CURLOPT_SSL_VERIFYPEER => 0, CURLOPT_SSL_VERIFYHOST => 0, CURLOPT_RETURNTRANSFER => 1,
-			CURLOPT_USERAGENT => "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.6) Gecko/20050317 Firefox/1.0.2");
-		if ($post != '0') {
-			$POST = "";
-			foreach ($post as $k => $v) {
-				$POST .= "$k=$v&";
-			}
-			$opt[CURLOPT_POST] = 1;
-			$opt[CURLOPT_POSTFIELDS] = substr($POST, 0, -1);
-		}
-		if ($auth) {
-			$opt[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
-			$opt[CURLOPT_USERPWD] = $auth;
-		}
-		$ch = curl_init($link);
-		foreach ($opt as $O => $V) { // Using this instead of 'curl_setopt_array'
-			curl_setopt($ch, $O, $V);
-		}
-		$page = curl_exec($ch);
-		$errz = curl_errno($ch);
-		$errz2 = curl_error($ch);
-		curl_close($ch);
-
-		if ($errz != 0) html_error("RS:[cURL:$errz] $errz2");
-		return $page;
 	}
 }
 // updated by rajmalhotra  on 17 Dec 09 :  added some error messages
@@ -271,5 +216,6 @@ class rapidshare_com extends DownloadClass {
 //[29-MAY-11]  Premium: Removed support for multi RS logins (Isn't needed now) & changed the login process using 'ChkAccInfo'. Free: Changed countdown, added new function. And plugin checked. - Th3-822
 //[01-JUN-11]  Premium: Fixed error in login. - Th3-822
 //[10-JUL-11]  Check_Limit() function isn't needed now, removed & Thinking about delete the old fixes info (Too long for read. :D ). - Th3-822
+//[15-OCT-11] JSCountdown was added in DownloadClass.php... Removed declaration from plugin && Some edits in free dl countdown. - Th3-822
 
 ?>

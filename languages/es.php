@@ -96,7 +96,7 @@ $lang[87] = 'Por favor espera <b>%1$s</b> segundos...'; // %1$s = número de seg
 $lang[88] = 'No fue posible conectarse a %1$s en el puerto %2$s'; // %1$s = nombre de host %2$s = puerto
 $lang[89] = 'Conectado al proxy: <b>%1$s</b> en el puerto <b>%2$s</b>...'; // %1$s = host del proxy %2$s = puerto del proxy
 $lang[90] = 'Conectado a: <b>%1$s</b> en el puerto <b>%2$s</b>...'; // %1$s = host %2$s = puerto
-$lang[91] = 'no se recivió encabezado';
+$lang[91] = 'No se recivió el encabezado';
 $lang[92] = '¡No tienes permiso de acceder a la página!';
 $lang[93] = '¡La página no fue encontrada!';
 $lang[94] = '¡La página fue prohibida o no encontrada!';
@@ -141,7 +141,7 @@ $lang[132] = 'minuto';
 $lang[133] = 'segundos'; // Plural
 $lang[134] = 'segundo';
 $lang[135] = 'getCpuUsage (): no se puede acceder a la ruta de STAT o el archivo STAT no es válido';
-$lang[136] = 'carga de CPU';
+$lang[136] = 'Carga de CPU';
 $lang[137] = 'Se ha producido un error';
 $lang[138] = 'Selecciona al menos un archivo.';
 $lang[139] = 'Emails';
@@ -233,7 +233,7 @@ $lang[224] = '43 [Video: WebM 640x360 | Audio: Vorbis 2ch 44.10kHz]';
 $lang[225] = '45 [Video: WebM 1280x720 | Audio: Vorbis 2ch 44.10kHz]';
 $lang[226] = '18 [Video: MP4 480x360 | Audio: AAC 2ch 44.10kHz]';
 $lang[227] = '22 [Video: MP4 1280x720 | Audio: AAC 2ch 44.10kHz]';
-$lang[228] = '37 [Video: MP4 1920×1080 | Audio: AAC 2ch 44.10kHz]';
+$lang[228] = '37 [Video: MP4 1920x1080 | Audio: AAC 2ch 44.10kHz]';
 $lang[229] = 'TorrentService de ImageShack&reg;';
 $lang[230] = 'Nombre de usuario';
 $lang[231] = 'Contraseña';
@@ -382,7 +382,7 @@ $lang[373] = '<b>Extrayendo ficheros desde %1$s</b>:';
 $lang[374] = 'Estado:';
 $lang[375] = 'Seleccionar texto';
 $lang[376] = 'Cuentas Premium :';
-$lang[377] = '38 [Video: MP4 4096×3072 | Audio: AAC 2ch 44.10kHz]';
+$lang[377] = '38 [Video: MP4 4096x3072 | Audio: AAC 2ch 44.10kHz]';
 $lang[378] = 'Cerrar ventana';
 $lang[379] = 'Archivos';
 $lang[380] = 'El cambio de MD5 solo debeser aplicado a formatos conocidos que funcionen con él(p.e. .rar o .zip)<br />¿Deseas continuar?';

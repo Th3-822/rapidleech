@@ -92,6 +92,7 @@ function is_page($lpage) {
 function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveToFile = 0, $proxy = 0, $pauth = 0, $auth = 0, $scheme = "http", $resume_from = 0, $XMLRequest=0) {
 	global $nn, $lastError, $PHP_SELF, $AUTH, $IS_FTP, $FtpBytesTotal, $FtpBytesReceived, $FtpTimeStart, $FtpChunkSize, $Resume, $bytesReceived, $fs, $force_name, $options;
 	$scheme .= "://";
+	$HOST = $host;
 
 	if (($post !== 0) && ($scheme == "http://" || $scheme == "https://")) {
 		$method = "POST";
@@ -104,11 +105,12 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		$content_tl = "";
 	}
 
+	$cookies = "";
 	if ($cookie) {
 		if (is_array ( $cookie )) {
-			$cookies = "Cookie: " . CookiesToStr ( $cookie ) . $nn;
+			if (count($cookie) > 0) $cookies = "Cookie: " . CookiesToStr ( $cookie ) . $nn;
 		} else {
-			$cookies = "Cookie: " . $cookie . $nn;
+			$cookies = "Cookie: " . trim($cookie) . $nn;
 		}
 	}
 	$referer = $referer ? "Referer: " . $referer . $nn : "";
@@ -131,11 +133,11 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	$http_auth = ($auth) ? "Authorization: Basic " . $auth . $nn : "";
 	$proxyauth = ($pauth) ? "Proxy-Authorization: Basic " . $pauth . $nn : "";
 
-	$request = $method . " " . str_replace ( " ", "%20", $url ) . " HTTP/1.1" . $nn . "Host: " . $host . $nn . "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.14) Gecko/20080404 Firefox/2.0.0.14" . $nn . "Accept: */*" . $nn . "Accept-Language: en-us;q=0.7,en;q=0.3" . $nn . "Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7" . $nn . "Pragma: no-cache" . $nn . "Cache-Control: no-cache" . $nn . ($Resume ["use"] === TRUE ? "Range: bytes=" . $Resume ["from"] . "-" . $nn : "") . $http_auth . $proxyauth . $referer .($XMLRequest ? "X-Requested-With: XMLHttpRequest" . $nn : ""). $cookies . "Connection: Close" . $nn . $content_tl . $nn . $postdata;
+	$request = $method . " " . str_replace ( " ", "%20", $url ) . " HTTP/1.1" . $nn . "Host: " . $host . $nn . "User-Agent: Opera/9.80 (Windows NT 6.1; U; en-US) Presto/2.10.229 Version/11.61" . $nn . "Accept: */*" . $nn . "Accept-Language: en-us;q=0.7,en;q=0.3" . $nn . "Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7" . $nn . "Pragma: no-cache" . $nn . "Cache-Control: no-cache" . $nn . ($Resume ["use"] === TRUE ? "Range: bytes=" . $Resume ["from"] . "-" . $nn : "") . $http_auth . $proxyauth . $referer .($XMLRequest ? "X-Requested-With: XMLHttpRequest" . $nn : ""). $cookies . "Connection: Close" . $nn . $content_tl . $nn . $postdata;
 
 	$errno = 0;
 	$errstr = "";
-	$hosts = ($proxyHost ? $scheme . $proxyHost : $scheme . $host) . ':' . ($proxyPort ? $proxyPort : $port);
+	$hosts = (!empty($proxyHost) ? $scheme . $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
 	$fp = @stream_socket_client ( $hosts, $errno, $errstr, 120, STREAM_CLIENT_CONNECT );
 	//$fp = @fsockopen($proxyHost ? $scheme.$proxyHost : $scheme.$host, $proxyPort ? $proxyPort : $port, $errno, $errstr, 15);
 
@@ -170,51 +172,51 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	// Rewrote the get header function according to the proxy script
 	// Also made sure it goes faster and I think 8192 is the best value for retrieving headers
 	// Oops.. The previous function hooked up everything and now I'm returning it back to normal
+
+	$llen = 0;
+	$header = "";
 	do {
 		$header .= fgets ( $fp, 16384 );
+		$len = strlen($header);
+		if (!$header || $len == $llen) {
+			$lastError = lang(91);
+			return false;
+		}
+		$llen = $len;
 	} while ( strpos ( $header, $nn . $nn ) === false );
 
 	#########################################################################
 
-
-	if (! $header) {
-		$lastError = lang(91);
-		return false;
-	}
-
-	$responsecode = "";
-	preg_match ( '/^HTTP\/1\.0|1 ([0-9]+) .*/', $header, $responsecode );
-	if (($responsecode [1] == 404 || $responsecode [1] == 403) && $saveToFile) {
-		// Do some checking, please, at least tell them what error it was
-		if ($responsecode [1] == 403) {
-			$lastError = lang(92);
-		} elseif ($responsecode [1] == 404) {
-			$lastError = lang(93);
-		} else {
-			// Weird, it shouldn't come here...
-			$lastError = lang(94);
-		}
-		return false;
-	}
-
-
-
+	$NoDownload = FALSE;
 	if ($saveToFile) {
-		//$bytesTotal = intval ( trim ( cut_str ( $header, "Content-Length:", "\n" ) ) );
-      if (preg_match("#(a-z0-9.]+)?(([a-z]+).[a-z]+([.a-z]+)?)#", $host, $tmp)) {
-            $hostclass = $tmp[2];
-            if (substr($hostclass, 0, 1) > 0) {
-                $hostclass = "d" . $hostclass;
-            }
-            $hostclass=str_replace(array("-","."), "_", $hostclass);
-            if (file_exists(HOST_DIR."download/".$hostclass.".php")){
-                /* @var $hostvar DownloadClass */
-                require(HOST_DIR."DownloadClass.php");
-                require(HOST_DIR."download/".$hostclass.".php");
-                $hostvar = new $hostclass();
-                $hostvar->CheckBack($header);
+		foreach ($GLOBALS['host'] as $site => $file) {
+			if (preg_match ("/^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/", $HOST)) break;
+			if (preg_match ("/^(.+\.)?" . $site . "$/i", $HOST)) {
+				require_once (HOST_DIR . "DownloadClass.php");
+				require_once (HOST_DIR . 'download/' . $file);
+				$class = substr($file, 0, -4);
+				$firstchar = substr($file, 0, 1);
+				if ($firstchar > 0) $class = "d" . $class;
+				if (class_exists($class) && method_exists($class, 'CheckBack')) {
+					$GLOBALS['lang'][300] = '';
+					$hostClass = new $class();
+					$hostClass->CheckBack($header);
+				}
             }
         }
+		if (preg_match('/^HTTP\/1\.0|1 ([0-9]+) .*/', $header, $responsecode) && ($responsecode[1] == 404 || $responsecode[1] == 403)) {
+			// Do some checking, please, at least tell them what error it was
+			if ($responsecode [1] == 403) {
+				$lastError = lang(92);
+			} elseif ($responsecode [1] == 404) {
+				$lastError = lang(93);
+			} else {
+				// Weird, it shouldn't come here...
+				$lastError = lang(94);
+			}
+			return false;
+		}
+		//$bytesTotal = intval ( trim ( cut_str ( $header, "Content-Length:", "\n" ) ) );
 		$bytesTotal = trim ( cut_str ( $header, "Content-Length:", "\n" ) );
 
 		global $options;
@@ -229,12 +231,6 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				$page_src .= fread ( $fp, 1024 * 8 );
 			}
 			is_present ( $page_src, "is already in use with another ip", lang(100) );
-		}
-		if (stristr ( $host, "imageshack" ) && $bytesTotal < 15000) {
-			while ( ! feof ( $fp ) ) {
-				$page_src .= fread ( $fp, 1024 * 8 );
-			}
-			is_present ( $page_src, "To avoid creation of corrupted zip files, you cannot create a zip on this torrent until it is done downloading" );
 		}
 		$redir = "";
 		if (trim ( preg_match ( '/[^\-]Location: *(.+)(\r|\n)+/i', $header, $redir ) )) {
@@ -355,6 +351,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		$page = $header;
 	}
 
+	$time = $last = $lastChunkTime = 0;
 	do {
 		$data = @fread ( $fp, ($saveToFile ? $chunkSize : 16384) );	// 16384 saw this value in Pear HTTP_Request2 package // (fix - szal) using this actually just causes massive cpu usage for large files, too much data is flushed to the browser!)
 		if ($data == '')
@@ -422,32 +419,55 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	}
 }
 
-
-//simple curl function for https:// logins
-function sslcurl($link, $post = 0, $cookie = 0, $refer = 0)
-{
-	$mm = !empty($post) ? 1 : 0;
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $link);
-	curl_setopt($ch, CURLOPT_HEADER, 1);
-	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U;Windows NT 5.1; de;rv:1.8.0.1)\r\nGecko/20060111\r\nFirefox/1.5.0.1');
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	if ($mm == 1)
-	{
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, formpostdata($post));
+function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0) {
+	global $pauth;
+	$arr = explode("\r\n", $referer);
+	$header = array();
+	if (count($arr) > 1) {
+		$referer = $arr[0];
+		unset($arr[0]);
+		$header = array_filter(array_map('trim', $arr));
 	}
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-	curl_setopt($ch, CURLOPT_REFERER, $refer);
-	curl_setopt($ch, CURLOPT_COOKIE, $cookie) ;
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-	// curl_setopt ( $ch , CURLOPT_TIMEOUT, 15);
-	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
-	$contents .= curl_exec($ch);
-	// $info = curl_getinfo($ch);
-	// $stat = $info['http_code'];
+	if (is_array($cookie)) {
+		if (count($cookie) == 0) $cookie = CookiesToStr($cookie);
+		else $cookie = '';
+	} else $cookie = trim($cookie);
+
+	$opt = array(CURLOPT_HEADER => 1, CURLOPT_COOKIE => $cookie,
+		CURLOPT_REFERER => $referer, CURLOPT_SSL_VERIFYPEER => 0,
+		CURLOPT_SSL_VERIFYHOST => 0, CURLOPT_RETURNTRANSFER => 1,
+		CURLOPT_FOLLOWLOCATION => 0, CURLOPT_FAILONERROR => 0,
+		CURLOPT_FORBID_REUSE => 1, CURLOPT_FRESH_CONNECT => 1,
+		CURLOPT_USERAGENT => "Opera/9.80 (Windows NT 5.1; U; en-US) Presto/2.10.229 Version/11.61");
+	if (count($header) > 0) $opt[CURLOPT_HTTPHEADER] = $header;
+	if ($post != '0') {
+		$opt[CURLOPT_POST] = 1;
+		$opt[CURLOPT_POSTFIELDS] = formpostdata($post);
+	}
+	if ($auth) {
+		$opt[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
+		$opt[CURLOPT_USERPWD] = base64_decode($auth);
+	}
+	if (isset($_GET["useproxy"]) && $_GET["useproxy"] == 'on' && !empty($_GET["proxy"])) {
+		$opt[CURLOPT_HTTPPROXYTUNNEL] = true;
+		$opt[CURLOPT_PROXY] = $_GET["proxy"];
+		if ($pauth) $opt[CURLOPT_PROXYUSERPWD] = base64_decode($pauth);
+	}
+	$opt[CURLOPT_CONNECTTIMEOUT] = $opt[CURLOPT_TIMEOUT] = 120;
+	if (is_array($opts) && count($opts) > 0) foreach ($opts as $O => $V) $opt[$O] = $V;
+
+	$ch = curl_init($link);
+	foreach ($opt as $O => $V) { // Using this instead of 'curl_setopt_array'
+		curl_setopt($ch, $O, $V);
+	}
+	$page = curl_exec($ch);
+	$errz = curl_errno($ch);
+	$errz2 = curl_error($ch);
 	curl_close($ch);
-	return $contents;
+
+	if ($errz != 0) html_error("[cURL:$errz] $errz2");
+	if (!empty($opt[CURLOPT_PROXY])) $page = preg_replace("@^(HTTP/1.[0-1] \d+ [^\r|\n]+)\r\n\r\n(HTTP/1.[0-1] \d+ [^\r|\n]+)@i", "$2\r\ncURL-Proxy: $1", $page, 1); // The proxy response header can break some functions in plugins, let rename it...
+	return $page;
 }
 
 
@@ -463,14 +483,15 @@ function formpostdata($post=array()) {
 	return $postdata;
 }
 
-// function to reconvert array cookie into string
+// function to reconvert a array of cookies into a string
 function CookiesToStr($cookie=array()) {
+	if (count($cookie) == 0) return '';
 	$cookies = "";
 	foreach ($cookie as $k => $v) {
 		$cookies .= "$k=$v;";
 	}
 	// Remove the last ';'
-	$cookies = substr($cookies, 0, -1);
+	$cookies = substr($cookies, 0, -2);
 	return $cookies;
 }
 
@@ -486,16 +507,36 @@ function GetCookies($content) {
 /**
  * Function to get cookies & converted into array
  * @param string The content you want to get the cookie from
- * @param bool Options to remove temporary cookie (usually it named as 'deleted')
- * @param string The default name for temporary cookie
+ * @param array Array of cookies for be updated [optional]
+ * @param bool Options to remove temporary cookie (usually it named as 'deleted') [optional]
+ * @param mixed The default name for temporary cookie, values are accepted in a array [optional]
  */
-function GetCookiesArr($content, $del=true, $dval='deleted') {
-	preg_match_all ('/Set-Cookie: (.*)(;|\r\n)/U', $content, $temp);
-	$cookie = array();
+function GetCookiesArr($content, $cookie=array(), $del=true, $dval='deleted') {
+	if (!is_array($cookie)) $cookie = array();
+	if (!preg_match_all ('/Set-Cookie: (.*)(;|\r\n)/U', $content, $temp)) return $cookie;
 	foreach ($temp[1] as $v) {
 		$v = explode('=', $v, 2);
 		$cookie[$v[0]] = $v[1];
-		if ($del && $v[1] == $dval) unset($cookie[$v[0]]);
+		if ($del) {
+			if (!is_array($dval)) $dval = array($dval);
+			foreach ($dval as $dv) if ($v[1] == $dv) unset($cookie[$v[0]]);
+		}
+	}
+	return $cookie;
+}
+
+// function to convert a string of cookies into an array
+function StrToCookies($cookies='', $cookie=array(), $del=true, $dval='deleted') {
+	if (!is_array($cookie)) $cookie = array();
+	$cookies = trim($cookies);
+	if (empty($cookies)) return $cookie;
+	foreach (array_filter(array_map('trim', explode(';', $cookies))) as $v) {
+		$v = array_map('trim', explode('=', $v, 2));
+		$cookie[$v[0]] = $v[1];
+		if ($del) {
+			if (!is_array($dval)) $dval = array($dval);
+			foreach ($dval as $dv) if ($v[1] == $dv) unset($cookie[$v[0]]);
+		}
 	}
 	return $cookie;
 }
@@ -540,7 +581,7 @@ function GetChunkSize($fsize) {
 	return 4096 * 210;
 }
 
-function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, $fieldname, $field2name = "", $proxy = 0, $pauth = 0, $upagent = "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.1") {
+function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, $fieldname, $field2name = "", $proxy = 0, $pauth = 0, $upagent = "Opera/9.80 (Windows NT 6.1; U; en-US) Presto/2.10.229 Version/11.61") {
     global $nn, $lastError, $sleep_time, $sleep_count;
 
     $scheme = "http://";
@@ -574,9 +615,10 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
     $postdata .= "Content-Type: application/octet-stream" . $nn . $nn;
 
 
+	$cookies = "";
     if ($cookie) {
         if (is_array($cookie)) {
-            $cookies = "Cookie: " . CookiesToStr($cookie) . $nn;
+			if (count($cookie) > 0) $cookies = "Cookie: " . CookiesToStr ( $cookie ) . $nn;
         } else {
             $cookies = "Cookie: " . trim($cookie) . $nn;
         }
@@ -590,8 +632,8 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
     if ($proxy) {
         list ( $proxyHost, $proxyPort ) = explode(":", $proxy);
-        $url = $scheme . $host . ":" . $port . $url;
-        $host = $host . ":" . $port;
+        $host = $host . ($port != 80 && $port != 443 ? ":" . $port : "");
+        $url = $scheme . $host . $url;
     }
 
     if ($scheme != "ssl://") {

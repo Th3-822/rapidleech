@@ -50,7 +50,7 @@ if (!file_exists($_REQUEST['filename']))
 	{
 		html_error(sprintf(lang(64),$filename));
 	}
-				
+
 if (is_readable($_REQUEST['filename']))
 	{
 		$lfile=$_REQUEST['filename'];
@@ -106,8 +106,8 @@ if ($download_link || $delete_link || $stat_link || $adm_link)
 				$tmp = cut_str($page,"http://lix.in/","'");
 				if (!empty($tmp)) $protect = "http://lix.in/".$tmp;
 			}
-			*/			
-			
+			*/
+
 			echo "\n<table width=100% border=0>";
 			echo ($download_link ? '<tr><td width="100" nowrap="nowrap" align="right"><b>'.lang(68).':</b><td width="80%"><input value="'.$download_link.'" class="upstyles-dllink" readonly="readonly" /></tr>' : '');
 			echo ($delete_link ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(69).':<td width="80%"><input value="'.$delete_link.'" class="upstyles-dellink" readonly="readonly" /></tr>' : '');
@@ -118,7 +118,7 @@ if ($download_link || $delete_link || $stat_link || $adm_link)
 			echo ($access_pass ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(74).':<td width="80%"><input value="'.$access_pass.'" class="upstyles-accesspass" readonly="readonly" /></tr>': '');
 			/*echo ($protect ? '<tr><td width="100" nowrap="nowrap" align="right">Protect link:<td width="80%"><input value="'.$protect.'" style="width:470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px" readonly /></tr>': '');*/
 			echo "</table>\n";
-			
+
 			if(!file_exists(trim($lfile).".upload.html") && !isset($_GET['auul']) && !$options['upload_html_disable'])
 			  {
 				$html_header = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

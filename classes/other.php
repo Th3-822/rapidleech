@@ -267,7 +267,7 @@ function file_data_size_time($file) {
 function _create_list() {
 	global $list, $_COOKIE, $options;
 	$glist = array ();
-	if (($options['show_all'] === true) & ($_COOKIE ["showAll"] == 1)) {
+	if (($options['show_all'] === true) && (isset($_COOKIE ["showAll"]) && $_COOKIE ["showAll"] == 1)) {
 		$dir = dir ( DOWNLOAD_DIR );
 		while ( false !== ($file = $dir->read ()) ) {
 			if (($tmp = file_data_size_time(DOWNLOAD_DIR.$file)) === false) { continue; }; list($size, $time) = $tmp;
@@ -289,7 +289,7 @@ function _create_list() {
 						$date = $value;
 				}
 				$glist [$date] = $listReformat [$key];
-				unset ( $glist [$key], $glistReformat [$key] );
+				unset ( $glist [$key], $listReformat [$key] );
 			}
 		}
 	}
@@ -386,44 +386,6 @@ function purge_files($delay) {
 		file_put_contents ( CONFIG_DIR . "files.lst", $files_new );
 	}
 }
-// PHP4 compatibility
-if (! function_exists ( "file_put_contents" ) && ! defined ( "FILE_APPEND" )) {
-	define ( "FILE_APPEND", 1 );
-	function file_put_contents($n, $d, $flag = false) {
-		$mode = ($flag == FILE_APPEND || strtoupper ( $flag ) == "FILE_APPEND") ? "a" : "w";
-		$f = @fopen ( $n, $mode );
-		if ($f === false) {
-			return 0;
-		} else {
-			if (is_array ( $d )) {
-				$d = implode ( $d );
-			}
-			$bytes_written = fwrite ( $f, $d );
-			fclose ( $f );
-			return $bytes_written;
-		}
-	}
-}
-if (! function_exists ( "file_get_contents" )) {
-	function file_get_contents($filename, $incpath = false) {
-		if (false === $fh = fopen ( $filename, "rb", $incpath )) {
-			trigger_error ( "file_get_contents() failed to open stream: No such file or directory", E_USER_WARNING );
-			return false;
-		}
-		clearstatcache ();
-		if ($fsize = @filesize ( $filename )) {
-			$data = fread ( $fh, $fsize );
-		} else {
-			$data = "";
-			while ( ! feof ( $fh ) ) {
-				$data .= fread ( $fh, 8192 );
-			}
-		}
-		fclose ( $fh );
-		return $data;
-	}
-}
-
 // Using this function instead due to some compatibility problems
 function is__writable($path) {
 	//will work in despite of Windows ACLs bug
@@ -448,8 +410,8 @@ function is__writable($path) {
 }
 
 function link_for_file($filename, $only_link = FALSE, $style = '') {
+	global $PHP_SELF;
 	$inCurrDir = strstr(dirname($filename), ROOT_DIR) ? TRUE : FALSE;
-	$PHP_SELF = !$PHP_SELF ? $_SERVER ["PHP_SELF"] : $PHP_SELF;
 	if ($inCurrDir) {
 		$Path = parse_url($PHP_SELF);
 		$Path = substr($Path["path"], 0, strlen($Path["path"]) - strlen(strrchr($Path["path"], "/")));
@@ -481,8 +443,9 @@ function link_for_file($filename, $only_link = FALSE, $style = '') {
 }
 
 function lang($id) {
-	global $options;
-	include('languages/'.basename($options['default_language']).'.php');
+	global $options, $lang;
+	if (basename($options['default_language']) != 'en' && file_exists('languages/en.php')) require_once('languages/en.php');
+	require_once('languages/'.basename($options['default_language']).'.php');
 	return $lang[$id];
 }
 
@@ -531,15 +494,31 @@ function decrypt($string)
  * @param int Column for variable display
  * @param int Rows for variable display
  * @param bool Options to continue or not process
+ * @param string Charset encoding for htmlentities
  */
-function textarea($var, $cols = 200, $rows = 30, $stop = false) {
-    $cols = ($cols == 0) ? 200 : $cols;
-    $rows = ($rows == 0) ? 30 : $rows;
-    echo "\n<br /><textarea cols='$cols' rows='$rows' readonly='readonly'>";
-    if (is_array($var)) echo htmlentities(print_r($var, true), ENT_QUOTES);
-    else echo htmlentities($var, ENT_QUOTES);
-    echo "</textarea><br />\n";
-    if ($stop) exit;
+function textarea($var, $cols = 100, $rows = 30, $stop = false, $char = 'UTF-8') {
+	$cols = ($cols == 0) ? 100 : $cols;
+	$rows = ($rows == 0) ? 30 : $rows;
+	echo "\n<br /><textarea cols='$cols' rows='$rows' readonly='readonly'>";
+	if (is_array($var)) echo htmlentities(print_r($var, true), ENT_QUOTES, $char);
+	else echo htmlentities($var, ENT_QUOTES, $char);
+	echo "</textarea><br />\n";
+	if ($stop) exit;
+}
+
+// Get time in miliseconds, like getTime() in javascript
+function jstime() {
+	list($u, $s) = explode(' ', microtime()); 
+	return sprintf('%d%03d', $s, $u*1000);
+}
+
+function check_referer() {
+	$refhost = !empty($_SERVER['HTTP_REFERER']) ? cut_str($_SERVER['HTTP_REFERER'], '://', '/') : false;
+	if ($refhost && !preg_match(str_replace('.', '\.', "@({$_SERVER['SERVER_NAME']})|({$_SERVER['SERVER_ADDR']})(:\d+)?$@i"), $refhost)) {
+		// Uncomment next line if you want rickroll the users from Form leechers.
+		// header("Location: http://www.youtube.com/watch?v=oHg5SJYRHA0");
+		html_error(sprintf(lang(7), $refhost, 'Referer not allowed.'));
+	}
 }
 
 ?>

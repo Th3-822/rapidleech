@@ -18,11 +18,17 @@ $UlTo['wupload']/*As*/ = array('user' => '', 'pass' => '', 'upload' => true);
 // Multiupload have added a new site and wanna set a default pass?: Copy the name showed in Upload to these hosts* and add it in a new line (Lowercase name).
 ###########################
 
+$domain = 'www.multiupload.com';
+
 // Using a function for get the sites supported - Warning: Don't Edit This Function
 function GetMUSites($page='') {
-	global $cookie;
+	global $cookie, $domain;
 	if (empty($page)) {
-		$page = geturl("www.multiupload.com", 80, "/", 0, $cookie);is_page($page);
+		$page = geturl($domain, 80, "/", 0, $cookie);is_page($page);
+		if (preg_match('@Location: http://([^/|\r|\n]+)/@i', $page, $rd)) {
+			$domain = $rd[1];
+			$page = geturl($domain, 80, "/", 0, $cookie);is_page($page);
+		}
 		$cookie = GetCookiesArr($page);
 	}
 	if (!preg_match_all("@showdetails\('(\w+)'\)@i", $page, $hosts)) html_error('Cannot Check Supported Sites [1]');
@@ -85,7 +91,7 @@ if ($continue_up) {
 		$post["username"] = $_REQUEST['up_login'];
 		$post["password"] = $_REQUEST['up_pass'];
 
-		$page = geturl("www.multiupload.com", 80, "/login", 0, $cookie, $post);is_page($page);
+		$page = geturl($domain, 80, "/login", 0, $cookie, $post);is_page($page);
 
 		is_present($page, "Invalid username and/or password", "Login Failed: Invalid username and/or password.");
 		$cookie = GetCookiesArr($page);
@@ -97,7 +103,7 @@ if ($continue_up) {
 	// Retrive upload ID
 	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retriving upload server</div>\n";
 
-	$page = geturl("www.multiupload.com", 80, "/", 0, $cookie);is_page($page);
+	$page = geturl($domain, 80, "/", 0, $cookie);is_page($page);
 
 	$post = array();
 	$post['UPLOAD_IDENTIFIER'] = cut_str($page, 'name="UPLOAD_IDENTIFIER" value="', '"');
@@ -117,15 +123,14 @@ if ($continue_up) {
 		$post['remember_'.$site['id']] = 0;
 	}
 
-	if (!preg_match('@action="(http://www\d+\.multiupload\.com/upload/[^"]+)"@i', $page, $up_loc)) html_error("Upload URL not found.", 0);
+	if (!preg_match('@action="(http://www\d+\.multiupload\.[^/]+/upload/[^"]+)"@i', $page, $up_loc)) html_error("Upload URL not found.", 0);
 	$up_loc = $up_loc[1];
-
 
 	// Uploading
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";unset($post['service_14']);// Shhh
 
 	$url = parse_url($up_loc);
-	$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), "http://www.multiupload.com/", $cookie, $post, $lfile, $lname, "file_0");
+	$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), "http://$domain/", $cookie, $post, $lfile, $lname, "file_0");
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>";
@@ -137,5 +142,6 @@ if ($continue_up) {
 
 //[21-11-2011]  Written by Th3-822.
 //[05-1-2012]  Fixed regexp in GetMUSites function. -Th3-822
+//[20-1-2012]  Added support for redirect to other multiupload's domain... -Th3-822
 
 ?>
