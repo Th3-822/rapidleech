@@ -119,7 +119,7 @@ include(TEMPLATE_DIR.'header.php');
 			document.getElementById('idownload<?php echo $i; ?>').style.display = 'none';
 		}
 	}
-	
+
 	function opennewwindow<?php echo $i; ?>(id) {
 		window.frames["idownload<?php echo $i; ?>"].location = start_link+links<?php echo $i; ?>[id]+'&auul=<?php echo $i; ?>';
 	}

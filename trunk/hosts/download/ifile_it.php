@@ -6,7 +6,7 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class ifile_it extends DownloadClass {
-	private $cookie, $_url, $_ukey, $dlreq, $captcha, $usecurl;
+	private $cookie, $_url, $_ukey, $dlreq, $captcha;
 	public function Download($link) {
 		global $premium_acc, $Referer;
 		$Referer = $link;
@@ -14,12 +14,11 @@ class ifile_it extends DownloadClass {
 		if (!function_exists('json_decode')) /* Load a class?... Or maybe we can add a 'json_decode' function in others.php... */ html_error("Error: Please enable JSON in php.");
 
 		// Check https support for login.
-		$this->usecurl = $cantlogin = false;
+		$cantlogin = false;
 		if (!extension_loaded('openssl')) {
 			if (extension_loaded('curl')) {
 				$cV = curl_version();
-				if (in_array('https', $cV['protocols'], true)) $this->usecurl = true;
-				else $cantlogin = true;
+				if (!in_array('https', $cV['protocols'], true)) $cantlogin = true;
 			} else $cantlogin = true;
 			if ($_REQUEST["premium_acc"] == "on" && !empty($premium_acc["ifile_it"]["apikey"])) $cantlogin = false;
 			if ($cantlogin) $this->changeMesg(lang(300)."<br /><br />Https support: NO<br />Login disabled.");
@@ -131,44 +130,6 @@ class ifile_it extends DownloadClass {
 		exit;
 	}
 
-	private function GetPageS($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0) {
-		if (!$referer) {
-			global $Referer;
-			$referer = $Referer;
-		}
-		$url = parse_url(trim($link));
-
-		if ($this->usecurl && $url['scheme'] == 'https') $page = $this->cURL($link, $cookie, $post, $referer, base64_decode($auth));
-		else $page = $this->GetPage($link, $cookie, $post, $referer, $auth);
-		return $page;
-	}
-
-	private function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0) {
-		if (is_array($cookie)) $cookie = CookiesToStr($cookie);
-		$opt = array(CURLOPT_HEADER => 1, CURLOPT_COOKIE => $cookie, CURLOPT_REFERER => $referer,
-			CURLOPT_SSL_VERIFYPEER => 0, CURLOPT_SSL_VERIFYHOST => 0, CURLOPT_RETURNTRANSFER => 1,
-			CURLOPT_USERAGENT => "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.6) Gecko/20050317 Firefox/1.0.2");
-		if ($post != '0') {
-			$opt[CURLOPT_POST] = 1;
-			$opt[CURLOPT_POSTFIELDS] = formpostdata($post);
-		}
-		if ($auth) {
-			$opt[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
-			$opt[CURLOPT_USERPWD] = $auth;
-		}
-		$ch = curl_init($link);
-		foreach ($opt as $O => $V) { // Using this instead of 'curl_setopt_array'
-			curl_setopt($ch, $O, $V);
-		}
-		$page = curl_exec($ch);
-		$errz = curl_errno($ch);
-		$errz2 = curl_error($ch);
-		curl_close($ch);
-
-		if ($errz != 0) html_error("IF:[cURL:$errz] $errz2");
-		return $page;
-	}
-
 	private function Login($link) {
 		global $premium_acc;
 
@@ -186,7 +147,7 @@ class ifile_it extends DownloadClass {
 			$post = array();
 			$post["username"] = urlencode($user);
 			$post["password"] = urlencode($pass);
-			$page = $this->GetPageS('https://secure.ifile.it/api-fetch_apikey.api', 0, $post);
+			$page = $this->GetPage('https://secure.ifile.it/api-fetch_apikey.api', 0, $post);
 			$rply = $this->Get_Reply($page);
 
 			if ($rply['status'] != 'ok') html_error("Login Failed: ".htmlentities($rply['message']));

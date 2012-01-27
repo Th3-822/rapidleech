@@ -14,7 +14,7 @@ class d2shared_com extends DownloadClass
 		is_present( $page, "File download limit has been exceeded.", "Free download limit has been exceeded. Try again later." );
 		$cookie = GetCookies($page);
 
-		if ($_GET ["step"] == "1") {
+		if (isset($_GET ["step"]) && $_GET ["step"] == "1") {
 			$post = Array();
 			$post["userPass2"] = $_POST['userPass2'];
 			$cookie = urldecode($_POST['cookie']);
@@ -50,6 +50,21 @@ class d2shared_com extends DownloadClass
 		{
 			$countDown = $count [1];
 			$this->CountDown($countDown);
+		}
+	}
+	public function CheckBack($headers) {
+		is_present($headers, '?errorMaxSessions=', 'User downloading session limit is reached. Please try again in few minutes.');
+		//is_present($headers, '?cau2=403tNull', 'Download link has expired.');
+		if (stristr($headers, '?cau2=403tNull')) {
+			global $PHP_SELF;
+			echo "<center><form action='$PHP_SELF' method='POST'>\n";
+			$post = $this->DefaultParamArr(cut_str($headers, 'Location: ', '?cau2='));
+			foreach ($post as $name => $input) {
+				echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
+			}
+			echo "<input type='submit' value='Download Again' />\n";
+			echo "</form></center><br />";
+			html_error('Download link has expired.');
 		}
 	}
 }
