@@ -429,7 +429,7 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		$header = array_filter(array_map('trim', $arr));
 	}
 	if (is_array($cookie)) {
-		if (count($cookie) == 0) $cookie = CookiesToStr($cookie);
+		if (count($cookie) > 0) $cookie = CookiesToStr($cookie);
 		else $cookie = '';
 	} else $cookie = trim($cookie);
 

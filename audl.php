@@ -217,7 +217,6 @@ function resetProgress()
 			$start_link.='&proxypass='.$_REQUEST['proxypass'];
 		}
 
-		$start_link.='&imageshack_tor='.$_REQUEST['imageshack_acc'].'&premium_acc='.$_REQUEST['premium_acc'];
 		if ($_POST['premium_acc'] == 'on') {
 			$start_link.='&premium_acc=on';
 			if (!empty($_POST["premium_user"]) && !empty($_POST["premium_pass"])) {
@@ -370,15 +369,6 @@ function resetProgress()
                             <tr><td><?php echo lang(37); ?>:</td><td><input name="proxyuser" size="25"<?php echo $_COOKIE["proxyuser"] ? ' value="'.$_COOKIE["proxyuser"].'"' : ''; ?> /></td></tr>
                             <tr><td><?php echo lang(38); ?>:</td><td><input name="proxypass" size="25"<?php echo $_COOKIE["proxypass"] ? ' value="'.$_COOKIE["proxypass"].'"' : ''; ?> /></td></tr>
                           </table>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <input type="checkbox" value="on" name="imageshack_acc" id="imageshack_acc"<?php if (is_array($imageshack_acc)) { echo ' checked="checked"'; } ?> />&nbsp;<?php echo lang(39); ?>
                         </td>
                       </tr>
 <?php if ($maysaveto === true) { ?>

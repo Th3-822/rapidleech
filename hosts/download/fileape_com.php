@@ -9,11 +9,12 @@ class fileape_com extends DownloadClass {
     public function Download($link) {
         global $premium_acc;
         if (!$_REQUEST['step']) {
-            $page = $this->GetPage($link);
-            if (preg_match('@Location: (http:\/\/fileape\.com\/index.php[^\r\n]+)@i', $page, $temp)) {
+            $this->page = $this->GetPage($link);
+            if (preg_match('@Location: (http:\/\/fileape\.com\/index.php[^\r\n]+)@i', $this->page, $temp)) {
                 $link = $temp[1];
+                $this->page = $this->GetPage($link);
             }
-            unset($page);
+            is_present($this->page,"This file is either temporarily unavailable or does not exist");
         }
         if (($_REQUEST['premium_acc'] == 'on' && $_REQUEST['premium_user'] && $_REQUEST['premium_pass']) || ($_REQUEST['premium_acc'] == 'on' && $premium_acc['fileape_com']['user'] && $premium_acc['fileape_com']['pass'])) {
             $this->Premium($link);
@@ -22,17 +23,12 @@ class fileape_com extends DownloadClass {
         }
     }
 
-    public function  CheckBack($content) {
-        if (!strpos($content, 'HTTP/1.1 200 OK')) {
-            html_error('Download link expired, please retry again!');
-        }
-        return;
+    public function  CheckBack($header) {
+        is_notpresent($header, 'HTTP/1.1 200 OK', 'Download link expired, please retry again!');
     }
 
     private function Free($link) {
-        $page = $this->GetPage($link);
-        is_present($page,"This file is either temporarily unavailable or does not exist");
-        if (!preg_match('@\/\?act=download[^"]+@', $page, $free)) html_error('Error: Free link not found!');
+        if (!preg_match('@\/\?act=download[^"]+@', $this->page, $free)) html_error('Error: Free link not found!');
         $flink = "http://fileape.com". $free[0];
         $page = $this->GetPage($flink, 0, 0, $link);
         if (!preg_match('@wait = (\d+)@', $page, $wait)) html_error('Error: Timer not found');
@@ -44,7 +40,6 @@ class fileape_com extends DownloadClass {
         $dlink = trim($dl[0]);
         $FileName = basename(parse_url($dlink, PHP_URL_PATH));
         $this->RedirectDownload($dlink, $FileName, 0, 0, $rlink);
-        $this->CheckBack($dlink);
         exit();
     }
 
@@ -63,7 +58,6 @@ class fileape_com extends DownloadClass {
         is_present($page, "Buy More Premium Bandwidth!", "You have reach your premium account bandwidth limit!");
 
         $page = $this->GetPage($link, $cookie);
-        is_present($page,"This file is either temporarily unavailable or does not exist");
         if (!preg_match('@Location: ([^|\r|\n]+)@i', $page, $dl)) html_error('Error: Premium Download link not found!');
         $dlink = trim($dl[1]);
         $FileName = basename(parse_url($dlink, PHP_URL_PATH));
