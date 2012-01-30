@@ -34,6 +34,7 @@ class bitshare_com extends DownloadClass {
             $post['recaptcha_response_field'] = $_POST['captcha'];
             $check = $this->GetPage($Url, $this->cookie, $post,  $link . "\r\nX-Requested-With: XMLHttpRequest");
         } else {
+            is_present($this->page, "Your Traffic is used up for today. Upgrade to premium to continue!");
             if (preg_match('@<span id="blocktimecounter">(\d+) seconds<\/span>@', $this->page, $wait) && !strpos($this->page, "var blocktime = 0;")) {
                 echo  ("<center><font color='red'><b>You reached your hourly traffic limit.</b></font></center>");
                 $this->JSCountdown($wait[1]);
@@ -44,7 +45,7 @@ class bitshare_com extends DownloadClass {
             $post['request'] = 'generateID';
             $post['ajaxid'] = $ajax[1];
             $check = $this->GetPage($rd[1], $this->cookie, $post,  $link . "\r\nX-Requested-With: XMLHttpRequest");
-            if (!preg_match('@\w+\:(\d+)\:[0-1]+@', $check, $wait)) html_error("Error: Timer not found!");
+            if (!preg_match('@file:(\d+)\:[0-1]+@', $check, $wait)) html_error("Error: Timer not found!");
             $this->CountDown($wait[1]);
             if (!preg_match('@\/challenge\?k=([^"]+)"@', $this->page, $cap) && !stristr($this->page, "var captcha = 1;")) html_error("Captcha image not found!");
             //download the captcha image (AGAIN!)
@@ -56,7 +57,6 @@ class bitshare_com extends DownloadClass {
             if (file_exists($imgfile)) unlink($imgfile);
             if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.", 0);
             // Captcha img downloaded
-
             
             $data = $this->DefaultParamArr($rd[1], $this->cookie);
             $data['step'] = '1';

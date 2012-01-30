@@ -149,6 +149,7 @@ class filepost_com extends DownloadClass {
             $posturl = "http://filepost.com/general/login_form/?SID={$this->sid}&JsHttpRequest={$this->tid}-xml";
             $check = $this->GetPage($posturl, $this->Cookies, $post, "http://filepost.com/");
         }
+        is_present($check, "This IP address has been blocked on our service due to some fraudulent activity.");
         if (preg_match('@"js":\{"(\w+)":\{?"([^"]+)"?:?(\w+)?\}?,?"?(\w+)?"?:?"?([^"]+)?"?\}@i', $check, $match)) {
             if ($match[1] == 'answer' && $match[4] !== 'error') {
                 switch ($match[2]) {
@@ -160,7 +161,7 @@ class filepost_com extends DownloadClass {
                         $this->Show_reCaptcha($cap[1], $data);
                         break;
                     case 'success':
-                        //check account, we need to get the SID cookies again since we have pass the captcha, I also made mistake, should be array_merge, not array_replace, stupid...
+                        //check account, we need to convert to array since we have pass the captcha, I also made mistake, should be array_merge, not array_replace, stupid...
                         if (!preg_match_all("@([^=]+)=([^;]+);?@", $this->Cookies, $cook)) html_error("Error: Cookie is empty?");
                         $this->CookiesArr = array_combine($cook[1], $cook[2]);
                         $this->Cookies = CookiesToStr(array_merge($this->CookiesArr, GetCookiesArr($check)));
