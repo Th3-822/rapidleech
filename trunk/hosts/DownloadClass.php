@@ -32,7 +32,7 @@ class DownloadClass {
 			global $Referer;
 			$referer = $Referer;
 		}
-		$cURL = extension_loaded('curl') ? true : false;
+		$cURL = extension_loaded('curl') && function_exists('curl_init') && function_exists('curl_exec') ? true : false;
 		$Url = parse_url(trim($link));
 		if ($Url ["scheme"] == 'https') {
 			$chttps = false;
@@ -41,7 +41,7 @@ class DownloadClass {
 				if (in_array('https', $cV['protocols'], true)) $chttps = true;
 			}
 			if (!extension_loaded('openssl') && !$chttps) html_error("This server doesn't support https connections.");
-			else $cURL = false;
+			elseif (!$chttps) $cURL = false;
 		}
 
 		if ($cURL) {

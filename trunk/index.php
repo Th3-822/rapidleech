@@ -223,7 +223,7 @@ if (empty($_GET ["filename"]) || empty($_GET ["host"]) || empty($_GET ["path"]))
 			foreach ($host as $site => $file)
 			{ 
 				// if ($Url["host"] == $site)
-				if (preg_match ("/^(.+\.)?" . $site . "$/i", $Url ["host"]))
+				if (preg_match ("/^(.+\.)?" . str_replace('.', '\.', $site) . "$/i", $Url ["host"]))
 				{
 					// print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />$nn";
 					// print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\" /></center><br /><br />$nn";
@@ -351,10 +351,11 @@ else
 			$_GET ["referer"] = $_GET ["link"];
 			$_GET ["link"] = $redirectto;
 			$purl = parse_url ($redirectto);
-			list ($_GET ["filename"], $tmp) = explode ('?', basename ($redirectto)); 
+			if (strstr(basename($redirectto), '?') !== false) list ($_GET ["filename"], $tmp) = explode ('?', basename($redirectto));
+			else $_GET ["filename"] = basename($redirectto);
 			// In case the redirect didn't include the host
 			$_GET ["host"] = ($purl ["host"]) ? $purl ["host"] : $_GET ["host"];
-			$_GET ["path"] = $purl ["path"] . ($purl ["query"] ? "?" . $purl ["query"] : "");
+			$_GET ["path"] = $purl ["path"] . (!empty($purl ["query"]) ? "?" . $purl ["query"] : "");
 			$_GET ['port'] = !empty($purl ['port']) ? $purl ['port'] : 80;
 			$_GET ['cookie'] = !empty($_GET ["cookie"]) ? urlencode(encrypt($_GET["cookie"])) : "";
 			$lastError = "";

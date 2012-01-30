@@ -92,7 +92,6 @@ function is_page($lpage) {
 function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveToFile = 0, $proxy = 0, $pauth = 0, $auth = 0, $scheme = "http", $resume_from = 0, $XMLRequest=0) {
 	global $nn, $lastError, $PHP_SELF, $AUTH, $IS_FTP, $FtpBytesTotal, $FtpBytesReceived, $FtpTimeStart, $FtpChunkSize, $Resume, $bytesReceived, $fs, $force_name, $options;
 	$scheme .= "://";
-	$HOST = $host;
 
 	if (($post !== 0) && ($scheme == "http://" || $scheme == "https://")) {
 		$method = "POST";
@@ -190,8 +189,8 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	$NoDownload = FALSE;
 	if ($saveToFile) {
 		foreach ($GLOBALS['host'] as $site => $file) {
-			if (preg_match ("/^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/", $HOST)) break;
-			if (preg_match ("/^(.+\.)?" . $site . "$/i", $HOST)) {
+			if (preg_match ("/^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}(:\d+)?$/", $host)) break;
+			if (preg_match ("/^(.+\.)?" . str_replace('.', '\.', $site) . "(:\d+)?$/i", $host)) {
 				require_once (HOST_DIR . "DownloadClass.php");
 				require_once (HOST_DIR . 'download/' . $file);
 				$class = substr($file, 0, -4);
@@ -421,6 +420,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0) {
 	global $pauth;
+	if (!extension_loaded('curl') || !function_exists('curl_init') || !function_exists('curl_exec')) html_error('cURL isn\'t enabled or cURL\'s functions are disabled');
 	$arr = explode("\r\n", $referer);
 	$header = array();
 	if (count($arr) > 1) {
@@ -448,7 +448,7 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		$opt[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
 		$opt[CURLOPT_USERPWD] = base64_decode($auth);
 	}
-	if (isset($_GET["useproxy"]) && $_GET["useproxy"] == 'on' && !empty($_GET["proxy"])) {
+	if (isset($_GET["useproxy"]) && !empty($_GET["proxy"])) {
 		$opt[CURLOPT_HTTPPROXYTUNNEL] = true;
 		$opt[CURLOPT_PROXY] = $_GET["proxy"];
 		if ($pauth) $opt[CURLOPT_PROXYUSERPWD] = base64_decode($pauth);
@@ -588,6 +588,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
     $bound = "--------" . md5(microtime());
     $saveToFile = 0;
 
+    $postdata = "";
     if ($post) {
         foreach ($post as $key => $value) {
             $postdata .= "--" . $bound . $nn;
@@ -640,12 +641,12 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
         $scheme = "";
     }
 
-    $http_auth = ($auth) ? "Authorization: Basic " . $auth . $nn : "";
-    $proxyauth = ($pauth) ? "Proxy-Authorization: Basic " . $pauth . $nn : "";
+    $http_auth = (!empty($auth)) ? "Authorization: Basic " . $auth . $nn : "";
+    $proxyauth = (!empty($pauth)) ? "Proxy-Authorization: Basic " . $pauth . $nn : "";
 
     $zapros = "POST " . str_replace(" ", "%20", $url) . " HTTP/1.0" . $nn . "Host: " . $host . $nn . $cookies . "Content-Type: multipart/form-data; boundary=" . $bound . $nn . "Content-Length: " . (strlen($postdata) + strlen($nn . "--" . $bound . "--" . $nn) + $fileSize) . $nn . "User-Agent: " . $upagent . $nn . "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5" . $nn . "Accept-Language: en-en,en;q=0.5" . $nn . "Accept-Charset: utf-8,windows-1251;koi8-r;q=0.7,*;q=0.7" . $nn . "Connection: Close" . $nn . $http_auth . $proxyauth . $referer . $nn . $postdata;
     $errno = 0; $errstr = "";
-    $posturl = ($proxyHost ? $scheme . $proxyHost : $scheme . $host) . ':' . ($proxyPort ? $proxyPort : $port);
+    $posturl = (!empty($proxyHost) ? $scheme . $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
     $fp = @stream_socket_client($posturl, $errno, $errstr, 120, STREAM_CLIENT_CONNECT);
     //$fp = @fsockopen ( $host, $port, $errno, $errstr, 150 );
     //stream_set_timeout ( $fp, 300 );
@@ -688,6 +689,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
     $local_sleep = $sleep_count;
     //echo('<script type="text/javascript">');
+    $totalsend = $time = $lastChunkTime = 0;
     while (!feof($fs)) {
         $data = fread($fs, $chunkSize);
         if ($data === false) {
@@ -730,6 +732,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
     fputs($fp, $nn . "--" . $bound . "--" . $nn);
     fflush($fp);
 
+    $page = "";
     while (!feof($fp)) {
         $data = fgets($fp, 16384);
         if ($data === false) {
