@@ -203,7 +203,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				}
             }
         }
-		if (preg_match('/^HTTP\/1\.0|1 ([0-9]+) .*/', $header, $responsecode) && ($responsecode[1] == 404 || $responsecode[1] == 403)) {
+		if (preg_match('/^HTTP\/1\.(?:0|1) ([0-9]+) .*/', $header, $responsecode) && ($responsecode[1] == 404 || $responsecode[1] == 403)) {
 			// Do some checking, please, at least tell them what error it was
 			if ($responsecode [1] == 403) {
 				$lastError = lang(92);
@@ -456,7 +456,7 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 	$opt[CURLOPT_CONNECTTIMEOUT] = $opt[CURLOPT_TIMEOUT] = 120;
 	if (is_array($opts) && count($opts) > 0) foreach ($opts as $O => $V) $opt[$O] = $V;
 
-	$ch = curl_init($link);
+	$ch = curl_init(str_replace(" ", "%20", $link));
 	foreach ($opt as $O => $V) { // Using this instead of 'curl_setopt_array'
 		curl_setopt($ch, $O, $V);
 	}
@@ -488,7 +488,7 @@ function CookiesToStr($cookie=array()) {
 	if (count($cookie) == 0) return '';
 	$cookies = "";
 	foreach ($cookie as $k => $v) {
-		$cookies .= "$k=$v;";
+		$cookies .= "$k=$v; ";
 	}
 	// Remove the last ';'
 	$cookies = substr($cookies, 0, -2);

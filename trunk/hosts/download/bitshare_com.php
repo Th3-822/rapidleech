@@ -32,7 +32,7 @@ class bitshare_com extends DownloadClass {
             $post['ajaxid'] = $ajaxid;
             $post['recaptcha_challenge_field'] = $_POST['challenge'];
             $post['recaptcha_response_field'] = $_POST['captcha'];
-            $check = $this->GetPage($Url, $this->cookie, $post,  $link . "\r\nX-Requested-With: XMLHttpRequest");
+            $check = $this->GetPage($Url, $this->cookie, $post,  $link , 0, 1);
         } else {
             is_present($this->page, "Your Traffic is used up for today. Upgrade to premium to continue!");
             if (preg_match('@<span id="blocktimecounter">(\d+) seconds<\/span>@', $this->page, $wait) && !strpos($this->page, "var blocktime = 0;")) {
@@ -44,11 +44,10 @@ class bitshare_com extends DownloadClass {
             
             $post['request'] = 'generateID';
             $post['ajaxid'] = $ajax[1];
-            $check = $this->GetPage($rd[1], $this->cookie, $post,  $link . "\r\nX-Requested-With: XMLHttpRequest");
+            $check = $this->GetPage($rd[1], $this->cookie, $post,  $link , 0, 1);
             if (!preg_match('@file:(\d+)\:[0-1]+@', $check, $wait)) html_error("Error: Timer not found!");
             $this->CountDown($wait[1]);
-            if (!preg_match('@\/challenge\?k=([^"]+)"@', $this->page, $cap) && !stristr($this->page, "var captcha = 1;")) html_error("Captcha image not found!");
-            //download the captcha image (AGAIN!)
+            if (!preg_match('@\/challenge\?k=([^"]+)"@', $this->page, $cap) && !stristr($this->page, "var captcha = 1;")) html_error("Error getting CAPTCHA Data!");
             $ch = cut_str($this->GetPage("http://www.google.com/recaptcha/api/challenge?k=$cap[1]"), "challenge : '", "'");
             $capt = $this->GetPage("http://www.google.com/recaptcha/api/image?c=" . $ch);
             $capt_img = substr($capt, strpos($capt, "\r\n\r\n") + 4);
@@ -56,7 +55,6 @@ class bitshare_com extends DownloadClass {
 
             if (file_exists($imgfile)) unlink($imgfile);
             if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.", 0);
-            // Captcha img downloaded
             
             $data = $this->DefaultParamArr($rd[1], $this->cookie);
             $data['step'] = '1';
@@ -72,7 +70,7 @@ class bitshare_com extends DownloadClass {
             
             $post['request'] = 'getDownloadURL';
             $post['ajaxid'] = $ajaxid;
-            $this->page = $this->GetPage($Url, $this->cookie, $post, $link . "\r\nX-Requested-With: XMLHttpRequest");
+            $this->page = $this->GetPage($Url, $this->cookie, $post, $link, 0, 1);
             is_present($this->page, "ERROR#SESSION ERROR!");
             if (!preg_match('@(http(s)?:\/\/\w+\.bitshare\.com\/[^\r\n]+)@i', $this->page, $dl)) html_error("Error: Download Link [FREE] not found!");
             $dlink = trim($dl[1]);
@@ -80,9 +78,8 @@ class bitshare_com extends DownloadClass {
             $this->RedirectDownload($dlink, $filename, $this->cookie, 0, $link);
             exit();
         } else {
-            echo  ("<center><font color='red'><b>".  cut_str($check, 'ERROR:', '\r\n')."</b></font></center>");
+            $this->changeMesg("<font color='red'><b>".  cut_str($check, 'ERROR:', '\r\n')."</b></font>");
             
-            //download the captcha image (AGAIN!)
             $ch = cut_str($this->GetPage("http://www.google.com/recaptcha/api/challenge?k=$recap"), "challenge : '", "'");
             $capt = $this->GetPage("http://www.google.com/recaptcha/api/image?c=" . $ch);
             $capt_img = substr($capt, strpos($capt, "\r\n\r\n") + 4);
@@ -90,7 +87,7 @@ class bitshare_com extends DownloadClass {
 
             if (file_exists($imgfile)) unlink($imgfile);
             if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.", 0);
-            // Captcha img downloaded
+            
             $data = $this->DefaultParamArr($Url, $this->cookie);
             $data['challenge'] = $ch;
             $data['step'] = '1';
@@ -126,11 +123,11 @@ class bitshare_com extends DownloadClass {
             unset($post);
             $post['request'] = 'generateID';
             $post['ajaxid'] = $ajax[1];
-            $check = $this->GetPage($rd[1], $this->cookie, $post, $link . "\r\nX-Requested-With: XMLHttpRequest");
+            $check = $this->GetPage($rd[1], $this->cookie, $post, $link, 0, 1);
             unset($post);
             $post['request'] = 'getDownloadURL';
             $post['ajaxid'] = $ajax[1];
-            $this->page = $this->GetPage($rd[1], $this->cookie, $post, $link . "\r\nX-Requested-With: XMLHttpRequest");
+            $this->page = $this->GetPage($rd[1], $this->cookie, $post, $link, 0, 1);
             if (!preg_match('@(http(s)?:\/\/\w+\.bitshare\.com\/[^\r\n]+)@i', $this->page, $dl)) html_error("Error: Download Link [PREMIUM] not found!");
         }
         $dlink = trim($dl[1]);

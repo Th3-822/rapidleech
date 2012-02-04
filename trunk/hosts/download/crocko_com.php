@@ -12,7 +12,7 @@ class crocko_com extends DownloadClass {
         if (strstr($link, "easy-share.com/")) {
             $link = str_replace("easy-share.com/", "crocko.com/", $link);
         }
-        if (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc["crocko_com"]["user"] && $premium_acc["crocko_com"]["pass"])) {
+        if ($_REQUEST ["premium_acc"] == "on" && (($_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($premium_acc["crocko_com"]["user"] && $premium_acc["crocko_com"]["pass"]))) {
             $this->DownloadPremium($link);
         } else {
             $this->DownloadFree($link);
@@ -37,13 +37,13 @@ class crocko_com extends DownloadClass {
             exit();
         }elseif ($_REQUEST['step'] == 'countdown') {
             $link = urldecode($_POST['link']);
-            $cookie = urldecode($_POST['cookie']);
+            $cookie = StrToCookies(urldecode($_POST['cookie']));
             $page = $this->GetPage($link, $cookie, 0, $Referer);
         } else {
             $page = $this->GetPage($link);
             is_present($page, 'Requested file is deleted.');
             is_present($page, 'There is another download in progress from your IP. Please try to downloading later.');
-            $cookie = GetCookies($page);
+            $cookie = GetCookiesArr($page);
             $FileName = trim(str_replace(" ", ".", cut_str($page, 'Download ', ',')));
             // first timer
             if (preg_match('/wf = (\d+);/', $page, $wait)) $this->CountDown($wait[1]);
@@ -64,12 +64,10 @@ class crocko_com extends DownloadClass {
         if (preg_match('%<form  method="post" action="([^"]+)">%', $page, $dl)) {
             $dlink = trim($dl[1]);
             if (!is_array($cookie)) {
-                if (!preg_match_all("@([^=]+)=([^;]+);?@", $cookie, $c)) html_error("Error: Cookie is empty???");
-                $tcookie = array_combine($c[1], $c[2]);
+                $cookie = StrToCookies($cookie, GetCookiesArr($page));
             } else {
-                $tcookie = $cookie;
+                $cookie = GetCookiesArr($page, $cookie);
             }
-            $cookie = CookiesToStr(array_merge($tcookie, GetCookiesArr($page)));
             if (!preg_match('/Recaptcha\.create\("([^"]+)/i', $page, $cid)) html_error('Can\'t find chaptcha id');
             $data = $this->DefaultParamArr($dlink, $cookie);
             $data['step'] = 'captcha';

@@ -8,6 +8,10 @@ class turbobit_net extends DownloadClass {
 
     public function Download($link) {
         global $premium_acc, $options;
+        $link=str_replace("www.", "", $link);
+        if (strpos($link, "download/free/")){
+            $link=  str_replace("download/free/", "", $link).".html";
+        }
         if (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc ["turbobit_net"] ["user"] && $premium_acc ["turbobit_net"] ["pass"])) {
             $this->DownloadPremium($link);
         } elseif ($_POST['step'] == "1") {
@@ -20,6 +24,8 @@ class turbobit_net extends DownloadClass {
     private function Retrieve($link) {
         global $options;
         $page = $this->GetPage($link, "set_user_lang_change=en", 0, $link);
+        is_present($page, "Please wait, searching file","Link is not available");
+        is_present($page, "This document was not found in System","Link is not available");
         preg_match_all("#[\w-]+: (\w+)=([^;]+)#", $page, $tmp);
         $arrCookies = array_combine($tmp[1], $tmp[2]);
         $Cookies = urldecode(http_build_query($arrCookies, "", "; "));
@@ -94,10 +100,7 @@ class turbobit_net extends DownloadClass {
         }
         insert_timer(60);
         $tmp = cut_str($page, '$("#timeoutBox").load("', '"');
-        if (!preg_match("#maxLimit : (\d+)#", $page, $maxlimit)) {
-            html_error("Error 0x12: Plugin is out of date");
-        }
-        $rlink = "http://turbobit.net" . $tmp . ($maxlimit[1]);
+        $rlink = "http://turbobit.net" . $tmp;
         $page = $this->GetPage($rlink, $Cookies, 0, $flink . "\r\nX-Requested-With: XMLHttpRequest", 0);
         if (!preg_match("#/download/[^']+#", $page, $tmp)) {
             html_error("Error 0x13: Plugin is out of date");
