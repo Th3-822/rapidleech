@@ -17,90 +17,79 @@ class wupload_com extends DownloadClass {
 	 */
 	public function Download($link) {
 		global $premium_acc;
-		
+
+		if ($_REQUEST["premium_acc"] == "on" && !empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) {
+			$user = $_REQUEST['premium_user'];
+			$pass = $_REQUEST['premium_pass'];
+		} else if ($_REQUEST["premium_acc"] == "on" && !empty($premium_acc["wupload_com"]["user"]) && !empty($premium_acc["wupload_com"]["pass"])) {
+			$user = $premium_acc["wupload_com"]['user'];
+			$pass = $premium_acc["wupload_com"]['pass'];
+		} else throw new Exception('WU: This download plugin only support Premium user.');
+
 		// Display error in case of trouble
 		try {
-			$url = parse_url($link);
-			
-			// Define credentials based on the url
-			$user = isset($url['user']) && trim($url['user']) != '' ? $url['user'] : null;
-			$pass = isset($url['pass']) && trim($url['pass']) != '' ? $url['pass'] : null;
-			
-			if ($user === null || $pass === null) {
-				if ($_REQUEST ["premium_acc"] == "on" &&  isset($_REQUEST['premium_user']) && trim($_REQUEST['premium_user']) != '' &&
-					isset($_REQUEST['premium_pass']) && trim($_REQUEST['premium_pass']) != '') {
-					$user = $_REQUEST['premium_user'];
-					$pass = $_REQUEST['premium_pass'];
-				} else if ($_REQUEST ["premium_acc"] == "on" &&  isset($premium_acc["wupload"]["user"]) && trim($premium_acc["wupload"]["user"]) != '' &&
-					isset($premium_acc["wupload"]["pass"]) && trim($premium_acc["wupload"]["pass"]) != '') {
-					$user = $premium_acc["wupload"]["user"];
-					$pass = $premium_acc["wupload"]["pass"];
-				}
+			//Get password
+			$lpass = '';
+			$arr = explode("|", $link, 2);
+			if (count($arr)>=2) {
+				$link = $arr[0];
+				$lpass = $arr[1];
 			}
-			
+
 			// Define the link ID
-	        $regex = '|/file/(([a-z][0-9]+/)?[0-9]+)(/.*)?$|';
-	        $matches = array();
-			preg_match($regex, $link, $matches);
-			if (!isset($matches[1])) throw new Exception("Invalid Wupload Link");
-			$linkId = str_replace('/', '-', $matches[1]);
-			
+			if (!preg_match('|/file/(([a-z][0-9]+/)?[0-9]+)(/.*)?$|', $link, $matches)) throw new Exception("Invalid Wupload Link");
+			$id = str_replace('/', '-', $matches[1]);
+
 			// Call the API to get a download link
-			$page = geturl("api.wupload.com", 80, '/link?method=getDownloadLink', 0, 0, array('u' => $user, 'p' => $pass, 'ids' => $linkId), 0, $_GET["proxy"]);
-			
-			// Check the API status code
-	        $regex = '|^HTTP\/[^\ ]+\ ([0-9]+)|';
-	        $matches = array();
-			preg_match($regex, $page, $matches);
-			
-			// If the response is not a 200, throw an exception
-			if (!isset($matches[1]) || (int)$matches[1] != 200) {
-				throw new Exception("Unable to contact the Wupload API. [DEBUG] $page");
-			}
-			
-			// Get the response as an object
+			$post = array('u' => urlencode($user), 'p' => urlencode($pass), 'ids' => $id, "passwords[$id]" => urlencode($lpass));
+			$page = $this->GetPage("http://api.wupload.com/link?method=getDownloadLink", 0, $post);
+			if (stristr($page, 'We have detected some suspicious behaviour') || stristr($page, 'blocked.wupload.com/')) throw new Exception("WU has blocked your IP.");
+
 			$body = substr($page, strpos($page,"\r\n\r\n") + 4);
 			$body = substr($body, strpos($body, "{"));
 			$body = substr($body, 0, strrpos($body, "}") + 1);
-			$response = json_decode($body);
-			
-			// Throw an exception if the response is not a json object
-			if (!$response) {
-				throw new Exception("Unable to read response from Wupload API. [DEBUG] $body");
+
+			$apiResponse = json_decode($body, true);
+
+			if (!$apiResponse || !isset($apiResponse['FSApi_Link']) || !isset($apiResponse['FSApi_Link']['getDownloadLink']) || !isset($apiResponse['FSApi_Link']['getDownloadLink']['status'])) {
+				throw new Exception("WU: Unable to get download link, unknown API response. [DEBUG]: " . htmlentities($page));
 			}
-			
-			if ($response->FSApi_Link->getDownloadLink->status != 'success') {
-				foreach($response->FSApi_Link->getDownloadLink->errors AS $key => $value) {
-					if ($key == 'FSApi_Auth_Exception') {
-						throw new Exception('This plugin require <a href="http://www.wupload.com/premium" style="background-color: white; color: red;">PREMIUM ACCOUNT</a>.');
+
+			if ($apiResponse['FSApi_Link']['getDownloadLink']['status'] == 'failed') {
+				$msg = '';
+				foreach ($apiResponse['FSApi_Link']['getDownloadLink']['errors'] AS $type => $errors) {
+					switch ($type) {
+						case 'FSApi_Auth_Exception':
+							$msg .= $errors . ' (user: ' . $user . ')' . "\n";
+							break;
+						default:
+							$msg .= $errors . "\n";
 					}
-					
-					throw new Exception($value);
 				}
+				throw new Exception("Failed to get download link with message: " . $msg);
 			}
-			
-			// Should be only one (1) link
-			foreach($response->FSApi_Link->getDownloadLink->response->links AS $link) {
-				$status = $link->status;
-				
-				// If the link is not available, throw an exception
-				if ($status != 'AVAILABLE') {
-					throw new Exception("The status of that file is: " . $status);
-				}
-				
-				$filename = $link->filename;
-				$downloadUrl = $link->url;
+
+			$download = $apiResponse['FSApi_Link']['getDownloadLink']['response']['links'];
+			$rid = array_keys($download);
+			$download = $download[$rid[0]];
+
+			if ($download['status'] == 'NOT_AVAILABLE') {
+				throw new Exception("This file was deleted");
 			}
-			
-			// If we was able to define the download link
-			if (isset($downloadUrl) && isset($filename)) {
-				// Start the download
-				$this->RedirectDownload($downloadUrl, $filename);
+			if ($download['status'] == 'WRONG_PASSWORD') {
+				if (empty($lpass)) throw new Exception("WU: Password protected link. Please input link with password: Link|Password.");
+				else throw new Exception("WU: Link password is incorrect. Please input link with password: Link|Password.");
 			}
-		
+			if ($download['status'] != 'AVAILABLE') {
+				throw new Exception("Unable to download this file: " . $download['status']);
+			}
+			$this->RedirectDownload($download['url'], $download['filename']);
 		} catch(Exception $e) {
-        	html_error ($e->getMessage());
+			html_error ($e->getMessage());
 		}
 	}
 }
+/* Edited by Th3-822:
+  Changed geturl() for GetPage() and more edits for make it look like fsc plugin.
+ */
 ?>

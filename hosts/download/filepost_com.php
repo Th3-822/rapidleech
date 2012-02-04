@@ -8,7 +8,7 @@ class filepost_com extends DownloadClass {
 
     public function Download($link) {
         global $premium_acc;
-        
+
         if (strstr($link, "fp.io/")) {
             $link = str_replace("fp.io/", "filepost.com/files/", $link);
         }
@@ -20,11 +20,9 @@ class filepost_com extends DownloadClass {
                 $this->page = $this->GetPage($this->link);
             }
             is_present($this->page, "File not found");
-            $this->CookiesArr = GetCookiesArr($this->page);
-            $this->Cookies = CookiesToStr($this->CookiesArr);
-            if (!preg_match("#SID=(\w+)#", $this->Cookies, $sid)) html_error("Error Cookie [SID] not found!");
-            $this->sid = $sid[1];
-            $this->tid = round(microtime(true) * 1000);
+            is_present($this->page, "This IP address has been blocked on our service due to some fraudulent activity.");
+            $this->Cookies = GetCookiesArr($this->page);
+            if ($this->Cookies['SID'] == '') html_error("Error Cookie [SID] not found!");
         }
         if ($_REQUEST ["premium_acc"] == "on" && (($_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($premium_acc ["filepost_com"] ["user"] && $premium_acc ["filepost_com"] ["pass"]))) {
             return $this->Login();
@@ -48,7 +46,7 @@ class filepost_com extends DownloadClass {
                 $Url = urldecode($_POST['link']);
                 $this->Cookies = urldecode($_POST['cookie']);
                 $recap = $_POST['recap'];
-                $this->page = $this->GetPage($Url, $this->Cookies, $post, $this->link);
+                $check = $this->GetPage($Url, $this->Cookies, $post, $this->link);
                 break;
             case 'password':
                 $post['code'] = $_POST['code'];
@@ -56,16 +54,17 @@ class filepost_com extends DownloadClass {
                 $post['token'] = $_POST['token'];
                 $Url = urldecode($_POST['link']);
                 $this->Cookies = urldecode($_POST['cookie']);
-                $this->page = $this->GetPage($Url, $this->Cookies, $post, $this->link);
+                $check = $this->GetPage($Url, $this->Cookies, $post, $this->link);
                 break;
             default:
                 is_present($this->page, "Files over 1024MB can be downloaded by premium<br/ >members only. Please upgrade to premium");
                 if (!preg_match("@code: '([^']+)',@", $this->page, $code) || !preg_match("@[({]token: '([^']+)',@", $this->page, $token)) html_error('Error: Post Data [FREE] not found!');
                 $code = $code[1];
                 $token = $token[1];
-                $Url = "http://filepost.com/files/get/?SID={$this->sid}&JsHttpRequest={$this->tid}-xml";
+                $Url = "http://filepost.com/files/get/?SID={$this->Cookies['SID']}&JsHttpRequest=" . jstime() . "-xml";
                 $post = array('action' => 'set_download', 'code' => $code, 'token' => $token);
                 $check = $this->GetPage($Url, $this->Cookies, $post, $this->link);
+                $this->Cookies = GetCookiesArr($check, $this->Cookies);
                 if (preg_match('@"js":\{"(\w+)":\{?"([a-z|\_]+)"?:?"?(\d+)"?@i', $check, $match)) $this->CountDown($match[3]);
                 if (strpos($this->page, 'var is_pass_exists = true') || strpos($this->page, 'var show_captcha = true')) {
                     $data = $this->DefaultParamArr($Url, $this->Cookies);
@@ -84,47 +83,44 @@ class filepost_com extends DownloadClass {
                     }
                 } else { // no captcha or password required, skip the form process
                     $post = array('code' => $code, 'file_pass' => '', 'token' => $token);
-                    $this->page = $this->GetPage($Url, $this->Cookies, $post, $this->link);
+                    $check = $this->GetPage($Url, $this->Cookies, $post, $this->link);
                 }
                 break;
         }
 
         // Let's play with the regex
-        if (preg_match('@"js":\{"(\w+)":\{?"(([^"]+)"?:?"?([^|\r|\n|\"]+)?)"\}@i', $this->page, $match)) {
-            switch ($match[1]) {
-                case 'answer':
-                    switch ($match[3]) {
-                        case 'link':
-                            $dlink = str_replace('\/', '/', $match[4]);
-                            $filename = basename(parse_url($dlink, PHP_URL_PATH));
-                            $this->RedirectDownload($dlink, $fileName, $this->Cookies, 0, $this->link);
-                            break;
-                    }
-                    break;
-                case 'error':
-                    echo ("<center><font color='red'><b>$match[2]</b></font></center>");
+        if (!preg_match('@"js":\{"(\w+)":\{?"([^"]+)"?:?"?([^|\r|\n|"]+)?"\}@i', $check, $match)) html_error("Error: Unknown Post Data [FREE] page response!");
+        switch ($match[1]) {
+            case 'error':
+                $this->changeMesg("<font color='red'><b>$match[2]</b></font>");
 
-                    $data = $this->DefaultParamArr($Url, $this->Cookies);
-                    $data['code'] = $_POST['code'];
-                    $data['token'] = $_POST['token'];
-                    switch ($match[2]) {
-                        case 'Wrong file password':
-                            $data['step'] = 'password';
-                            $this->EnterPassword($data);
-                            break;
-                        case 'You entered a wrong CAPTCHA code. Please try again.':
-                            $data['step'] = 'Captcha';
-                            $data['recap'] = $recap;
-                            $this->Show_reCaptcha($recap, $data);
-                            break;
-                    }
-                    break;
-                default:
-                    html_error("$match[1], $match[2]");
-                    break;
-            }
-        } else {
-            html_error("Error: Unknown Post Data [FREE] Page Response!");
+                $data = $this->DefaultParamArr($Url, $this->Cookies);
+                $data['code'] = $_POST['code'];
+                $data['token'] = $_POST['token'];
+                switch ($match[2]) {
+                    case 'Wrong file password':
+                        $data['step'] = 'password';
+                        $this->EnterPassword($data);
+                        break;
+                    case 'You entered a wrong CAPTCHA code. Please try again.':
+                        $data['step'] = 'Captcha';
+                        $data['recap'] = $recap;
+                        $this->Show_reCaptcha($recap, $data);
+                        break;
+                }
+                break;
+            case 'answer':
+                switch ($match[2]) {
+                    case 'link':
+                        $dlink = str_replace('\\', '', $match[3]);
+                        $filename = basename(parse_url($dlink, PHP_URL_PATH));
+                        $this->RedirectDownload($dlink, $filename, $this->Cookies, 0, $this->link);
+                        break;
+                }
+                break;
+            default:
+                html_error("$match[1], $match[2]");
+                break;
         }
     }
 
@@ -143,13 +139,12 @@ class filepost_com extends DownloadClass {
             $post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
             $post['recaptcha_response_field'] = $_POST['recaptcha_response_field'];
             $posturl = urldecode($_POST['link']);
-            $this->Cookies = urldecode($_POST['cookie']);
+            $this->Cookies = StrToCookies(urldecode($_POST['cookie']));
             $check = $this->GetPage($posturl, $this->Cookies, $post, "http://filepost.com/");
         } else {
-            $posturl = "http://filepost.com/general/login_form/?SID={$this->sid}&JsHttpRequest={$this->tid}-xml";
+            $posturl = "http://filepost.com/general/login_form/?SID={$this->Cookies['SID']}&JsHttpRequest=" . jstime() . "-xml";
             $check = $this->GetPage($posturl, $this->Cookies, $post, "http://filepost.com/");
         }
-        is_present($check, "This IP address has been blocked on our service due to some fraudulent activity.");
         if (!preg_match('@"js":\{"(\w+)":\{?"([^"]+)"?:?(\w+)?\}?,?"?(\w+)?"?:?"?([^"]+)?"?\}@i', $check, $match)) html_error("Error: Unknown Login Page Response, Plugin need to be updated!");
         if ($match[1] == 'answer' && $match[4] !== 'error') {
             switch ($match[2]) {
@@ -162,10 +157,8 @@ class filepost_com extends DownloadClass {
                     break;
                 case 'success':
                     //check account, we need to convert to array since we have pass the captcha, I also made mistake, should be array_merge, not array_replace, stupid...
-                    if (!preg_match_all("@([^=]+)=([^;]+);?@", $this->Cookies, $cook)) html_error("Error: Cookie is empty?");
-                    $this->CookiesArr = array_combine($cook[1], $cook[2]);
-                    $this->Cookies = CookiesToStr(array_merge($this->CookiesArr, GetCookiesArr($check)));
-                    $check = $this->GetPage("http://filepost.com/myaccount/dashboard/", $this->Cookies, 0, 'http://filepost.com/');
+                    $this->Cookies = GetCookiesArr($check, $this->Cookies);
+                    $check = $this->GetPage("http://filepost.com/partners/", $this->Cookies, 0, 'http://filepost.com/');
                     is_present($check, "Account type: <span>Free</span>");
                     break;
             }
@@ -184,44 +177,44 @@ class filepost_com extends DownloadClass {
             $Url = urldecode($_POST['link']);
             $this->Cookies = decrypt(urldecode($_POST['cookie']));
             $this->page = $this->GetPage($Url, $this->Cookies, $post, $this->link);
+            if (!preg_match('@"js":\{"(\w+)":\{?"([^"]+)"?:?"?([^|\r|\n|"]+)?"\}@i', $this->page, $match)) html_error("Error: Unknown Password Link [PREMIUM] page response, plugin need to be updated!");
+            switch ($match[1]) {
+                case 'error':
+                    $this->changeMesg("<font color='red'><b>$match[2]</b></font>");
+
+                    $data = $this->DefaultParamArr($Url, encrypt($this->Cookies), $this->link);
+                    $data['step'] = 'Passpre';
+                    $data['code'] = $_POST['code'];
+                    $data['token'] = $_POST['token'];
+                    $this->EnterPassword($data);
+                    break;
+                case 'answer':
+                    switch ($match[2]) {
+                        case 'link':
+                            $dlink = str_replace('\\', '', $match[3]);
+                            $filename = basename(parse_url($dlink, PHP_URL_PATH));
+                            $this->RedirectDownload($dlink, $filename, $this->Cookies);
+                            break;
+                    }
+                    break;
+            }
         } else {
             $this->page = $this->GetPage($this->link, $this->Cookies, 0, $this->link);
-            if (preg_match('@http(s)?:\/\/fs\d+\.filepost\.com\/get_file\/[^|\r|\n|\']+@i', $this->page, $dl)) {
-                $dlink = trim($dl[0]);
-                $filename = basename(parse_url($dlink, PHP_URL_PATH));
-                $this->RedirectDownload($dlink, $filename, $this->Cookies);            
-            } elseif (strpos($this->page, 'var is_pass_exists = true')) {
-                if (!preg_match("@code: '([^']+)',@", $this->page, $code) || !preg_match("@[({]token: '([^']+)',@", $this->page, $token)) html_error('Error: Post Password [Premium] Data not found!');
-                $Url = "http://filepost.com/files/get/?SID=" . cut_str($this->Cookies, 'SID=', ';') . "&JsHttpRequest=" . round(microtime(true) * 1000) . "-xml";
+            if (strpos($this->page, 'var is_pass_exists = true')) {
+                if (!preg_match("@code: '([^']+)',@", $this->page, $code) || !preg_match("@[({]token: '([^']+)',@", $this->page, $token)) html_error('Error: Post Password Data [Premium] not found!');
+                $Url = "http://filepost.com/files/get/?SID={$this->Cookies['SID']}&JsHttpRequest=" . jstime() . "-xml";
 
-                $data = $this->DefaultParamArr($Url, encrypt($this->Cookies), $this->link);
+                $data = $this->DefaultParamArr($Url, encrypt(CookiesToStr($this->Cookies)), $this->link);
                 $data['code'] = $code[1];
                 $data['token'] = $token[1];
                 $data['step'] = 'Passpre';
                 $this->EnterPassword($data);
                 exit();
             }
-        }
-        if (!preg_match('@"js":\{"(\w+)":\{?"([^"]+)"?:?"?([^|\r|\n|\"]+)?"\}@i', $this->page, $match)) html_error ("Error: Unknown Password Link [PREMIUM] page response, plugin need to be updated!");
-        switch ($match[1]) {
-            case 'error':
-                echo ("<center><font color='red'><b>$match[2]</b></font></center>");
-
-                $data = $this->DefaultParamArr($Url, encrypt($this->Cookies), $this->link);
-                $data['step'] = 'Passpre';
-                $data['code'] = $_POST['code'];
-                $data['token'] = $_POST['token'];
-                $this->EnterPassword($data);
-                break;
-            case 'answer':
-                switch ($match[2]) {
-                    case 'link':
-                        $dlink = str_replace('\\', '', $match[3]);
-                        $filename = basename(parse_url($dlink, PHP_URL_PATH));
-                        $this->RedirectDownload($dlink, $filename, $this->Cookies);
-                        break;
-                }
-                break;
+            if (!preg_match('@http(s)?:\/\/fs\d+\.filepost\.com\/get_file\/[^|\r|\n|\']+@i', $this->page, $dl)) html_error("Error: Download Link [PREMIUM] non password not found!");
+            $dlink = trim($dl[0]);
+            $filename = basename(parse_url($dlink, PHP_URL_PATH));
+            $this->RedirectDownload($dlink, $filename, $this->Cookies);
         }
     }
 
@@ -247,6 +240,9 @@ class filepost_com extends DownloadClass {
 
     private function EnterPassword($inputs) {
         global $PHP_SELF;
+        if (!is_array($inputs)) {
+            html_error("Error parsing password data.");
+        }
         echo "\n" . '<center><form action="' . $PHP_SELF . '" method="post" >' . "\n";
         foreach ($inputs as $name => $input) {
             echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
@@ -266,5 +262,7 @@ class filepost_com extends DownloadClass {
  * Small regex fix in free download by Ruud v.Tony 10-01-2012
  * Updated for including short link (fp.io) in check link by Ruud v.Tony 13-01-2012
  * Updated to support captcha also password protected files in premium by Ruud v.Tony 21-01-2012
+ * Small fix in checking account also free download code by Ruud v.Tony 01-02-2012
+ * Implement new function for an example by Ruud v.Tony 04-02-2012
  */
 ?>

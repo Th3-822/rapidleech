@@ -47,7 +47,7 @@ class netuploaded_com extends DownloadClass {
         unset($post);
         $form = cut_str($this->page, '<Form method="POST"', '</Form>');
         if (!preg_match("@action='([^']+)'@", $form, $dl)) html_error("Error: Download link [FREE] not found!");
-        if (!preg_match('<input type="([^"]+)" value="([^"]+)">', $form, $match)) html_error("Error: Post Data 3 [FREE] not found!");
+        if (!preg_match('%<input type="([^"]+)" value="([^"]+)">%', $form, $match)) html_error("Error: Post Data 3 [FREE] not found!");
         $dlink = trim($dl[1]);
         $filename = basename(parse_url($dlink, PHP_URL_PATH));
         $this->RedirectDownload($dlink, $filename, $this->cookie, array($match[1] => $match[2]), $this->link);
@@ -71,7 +71,7 @@ class netuploaded_com extends DownloadClass {
             unset($post);
             $form = cut_str($this->page, '<Form method="POST"', '</Form>');
             if (!preg_match("@action='([^']+)'@", $form, $dl)) html_error("Error: Download link [PREMIUM] non direct link not found!");
-            if (!preg_match('<input type="([^"]+)" value="([^"]+)">', $form, $match)) html_error("Error: Post Data 2 [PREMIUM] not found!");
+            if (!preg_match('%<input type="([^"]+)" value="([^"]+)">%', $form, $match)) html_error("Error: Post Data 2 [PREMIUM] not found!");
         }
         $dlink = trim($dl[1]);
         $filename = basename(parse_url($dlink, PHP_URL_PATH));

@@ -521,4 +521,9 @@ function check_referer() {
 	}
 }
 
+function rebuild_url($url) {
+	return $url['scheme'] . "://" . (!empty($url['user']) && !empty($url['pass']) ? $url['user'] . ":" . $url['pass'] . "@" : '') . $url['host'] . (!empty($url['port']) && $url['port'] != 80 && $url['port'] != 443 ? ":" . $url['port'] : "") . (empty($url['path']) ? "/" : $url['path']) . (!empty($url['query']) ? "?" . $url['query'] : "") . (!empty($url['fragment']) ? "#" . $url['fragment'] : "");
+}
+
+
 ?>

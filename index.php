@@ -178,32 +178,44 @@ if (empty($_GET ["filename"]) || empty($_GET ["host"]) || empty($_GET ["path"]))
 		}
 	}
 
-	$Referer = (!empty($_GET ["referer"]) ? trim (urldecode ($_GET ["referer"])) : $LINK);
 	$Url = parse_url ($LINK);
+
+	$Url['path'] = str_replace('%2F', '/', rawurlencode(urldecode($Url['path'])));
+	$LINK = rebuild_url($Url);
+	
+	if (empty($_GET ["referer"]))
+	{
+		$Referer = $Url;
+		// Remove login from Referer
+		unset($Referer['user'], $Referer['pass']);
+		$Referer = rebuild_url($Referer);
+	} else $Referer = trim (urldecode ($_GET ["referer"]));
+
 	if ($Url ['scheme'] != 'http' && $Url ['scheme'] != 'https' && $Url ['scheme'] != 'ftp')
 	{
 		html_error (lang(5));
 	}
 
+	if (empty($Url['user']) xor empty($Url['pass']))
+	{
+		unset($Url['user'], $Url['pass']);
+		$LINK = rebuild_url($Url);
+	}
+
 	if (isset($_GET['user_pass']) && $_GET['user_pass'] == "on" && !empty($_GET['iuser']) && !empty($_GET['ipass']))
 	{
-		$Url['user'] = $_GET['iuser'];
-		$Url['pass'] = $_GET['ipass']; 
+		$Url['user'] = rawurlencode($_GET['iuser']);
+		$Url['pass'] = rawurlencode($_GET['ipass']);
 		// Rebuild url
-		$query = "";
-		if (!empty($Url['query']))
-		{
-			$query = '?' . $Url['query'];
-		}
-		$LINK = $Url['scheme'] . "://" . $Url['user'] . ":" . $Url['pass'] . "@" . $Url['host'] . (!empty($Url['port']) && $Url['port'] != 80 && $Url['port'] != 443 ? ":" . $Url['port'] : "") . $Url['path'] . $query;
+		$LINK = rebuild_url($Url);
 	}
 
 	// If Url has user & pass, use them as premium login for plugins.
 	if (!empty($Url['user']) && !empty($Url['pass']))
 	{
 		if (!$_REQUEST['premium_acc']) $_GET['premium_user'] = $_POST['premium_user'] = $_REQUEST['premium_acc'] = 'on';
-		$_GET['premium_user'] = $_POST['premium_user'] = $_REQUEST['premium_user'] = $Url['user'];
-		$_GET['premium_pass'] = $_POST['premium_pass'] = $_REQUEST['premium_pass'] = $Url['user'];
+		$_GET['premium_user'] = $_POST['premium_user'] = $_REQUEST['premium_user'] = urldecode($Url['user']);
+		$_GET['premium_pass'] = $_POST['premium_pass'] = $_REQUEST['premium_pass'] = urldecode($Url['pass']);
 	}
 
 	if (!isset($_GET['dis_plug']) || $_GET ['dis_plug'] != "on")
@@ -211,7 +223,9 @@ if (empty($_GET ["filename"]) || empty($_GET ["host"]) || empty($_GET ["path"]))
 		// check Domain-Host
 		if (isset ($_GET ["vBulletin_plug"]))
 		{ 
-			// print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />$nn";
+			// Remove User and Pass from link.
+			unset($Url['user'], $Url['pass']);
+			$LINK = rebuild_url($Url);
 			include(TEMPLATE_DIR . '/header.php'); 
 			// print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\" /></center><br /><br />$nn";
 			require_once (CLASS_DIR . "http.php");
@@ -225,8 +239,10 @@ if (empty($_GET ["filename"]) || empty($_GET ["host"]) || empty($_GET ["path"]))
 				// if ($Url["host"] == $site)
 				if (preg_match ("/^(.+\.)?" . str_replace('.', '\.', $site) . "$/i", $Url ["host"]))
 				{
-					// print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />$nn";
-					// print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\" /></center><br /><br />$nn";
+					// Remove User and Pass from link.
+					unset($Url['user'], $Url['pass']);
+					$LINK = rebuild_url($Url);
+
 					include(TEMPLATE_DIR . '/header.php');
 					require_once (CLASS_DIR . "http.php");
 					require_once (HOST_DIR . "DownloadClass.php");
