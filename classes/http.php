@@ -129,8 +129,8 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		$scheme = "";
 	}
 
-	$http_auth = ($auth) ? "Authorization: Basic " . $auth . $nn : "";
-	$proxyauth = ($pauth) ? "Proxy-Authorization: Basic " . $pauth . $nn : "";
+	$http_auth = (!empty($auth)) ? "Authorization: Basic " . $auth . $nn : "";
+	$proxyauth = (!empty($pauth)) ? "Proxy-Authorization: Basic " . $pauth . $nn : "";
 
 	$request = $method . " " . str_replace ( " ", "%20", $url ) . " HTTP/1.1" . $nn . "Host: " . $host . $nn . "User-Agent: Opera/9.80 (Windows NT 6.1; U; en-US) Presto/2.10.229 Version/11.61" . $nn . "Accept: */*" . $nn . "Accept-Language: en-us;q=0.7,en;q=0.3" . $nn . "Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7" . $nn . "Pragma: no-cache" . $nn . "Cache-Control: no-cache" . $nn . ($Resume ["use"] === TRUE ? "Range: bytes=" . $Resume ["from"] . "-" . $nn : "") . $http_auth . $proxyauth . $referer .($XMLRequest ? "X-Requested-With: XMLHttpRequest" . $nn : ""). $cookies . "Connection: Close" . $nn . $content_tl . $nn . $postdata;
 
@@ -188,7 +188,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 	$NoDownload = FALSE;
 	if ($saveToFile) {
-		foreach ($GLOBALS['host'] as $site => $file) {
+		if (!isset($_GET['dis_plug']) || $_GET ['dis_plug'] != "on") foreach ($GLOBALS['host'] as $site => $file) {
 			if (preg_match ("/^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}(:\d+)?$/", $host)) break;
 			if (preg_match ("/^(.+\.)?" . str_replace('.', '\.', $site) . "(:\d+)?$/i", $host)) {
 				require_once (HOST_DIR . "DownloadClass.php");
@@ -438,8 +438,13 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		CURLOPT_SSL_VERIFYHOST => 0, CURLOPT_RETURNTRANSFER => 1,
 		CURLOPT_FOLLOWLOCATION => 0, CURLOPT_FAILONERROR => 0,
 		CURLOPT_FORBID_REUSE => 1, CURLOPT_FRESH_CONNECT => 1,
-		CURLOPT_USERAGENT => "Opera/9.80 (Windows NT 5.1; U; en-US) Presto/2.10.229 Version/11.61");
-	if (count($header) > 0) $opt[CURLOPT_HTTPHEADER] = $header;
+		CURLOPT_USERAGENT => "Opera/9.80 (Windows NT 6.1; U; en-US) Presto/2.10.229 Version/11.61");
+
+	// Send more headers...
+	$headers = array("Accept-Language: en-us;q=0.7,en;q=0.3", "Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7", "Pragma: no-cache", "Cache-Control: no-cache", "Connection: Close");
+	if (count($header) > 0) $headers = array_merge($headers, $header);
+	$opt[CURLOPT_HTTPHEADER] = $headers;
+	
 	if ($post != '0') {
 		$opt[CURLOPT_POST] = 1;
 		$opt[CURLOPT_POSTFIELDS] = formpostdata($post);
@@ -465,8 +470,9 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 	$errz2 = curl_error($ch);
 	curl_close($ch);
 
+	if (!empty($opt[CURLOPT_PROXY])) $page = preg_replace("@^(HTTP/1\.[0-1] \d+ [^\r|\n]+)\r\n\r\n(HTTP/1\.[0-1] \d+ [^\r|\n]+)@i", "$2\r\ncURL-Proxy: $1", $page, 1); // The proxy response header can break some functions in plugins, let move and rename it...
 	if ($errz != 0) html_error("[cURL:$errz] $errz2");
-	if (!empty($opt[CURLOPT_PROXY])) $page = preg_replace("@^(HTTP/1.[0-1] \d+ [^\r|\n]+)\r\n\r\n(HTTP/1.[0-1] \d+ [^\r|\n]+)@i", "$2\r\ncURL-Proxy: $1", $page, 1); // The proxy response header can break some functions in plugins, let rename it...
+	
 	return $page;
 }
 
