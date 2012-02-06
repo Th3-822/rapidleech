@@ -204,18 +204,28 @@ if (empty($_GET ["filename"]) || empty($_GET ["host"]) || empty($_GET ["path"]))
 
 	if (isset($_GET['user_pass']) && $_GET['user_pass'] == "on" && !empty($_GET['iuser']) && !empty($_GET['ipass']))
 	{
-		$Url['user'] = rawurlencode($_GET['iuser']);
-		$Url['pass'] = rawurlencode($_GET['ipass']);
+		$Url['user'] = $_GET['iuser'];
+		$Url['pass'] = $_GET['ipass'];
 		// Rebuild url
 		$LINK = rebuild_url($Url);
 	}
 
-	// If Url has user & pass, use them as premium login for plugins.
+	// If Url has user & pass, use them as premium login for plugins or set $auth for direct download.
 	if (!empty($Url['user']) && !empty($Url['pass']))
 	{
-		if (!$_REQUEST['premium_acc']) $_GET['premium_user'] = $_POST['premium_user'] = $_REQUEST['premium_acc'] = 'on';
-		$_GET['premium_user'] = $_POST['premium_user'] = $_REQUEST['premium_user'] = urldecode($Url['user']);
-		$_GET['premium_pass'] = $_POST['premium_pass'] = $_REQUEST['premium_pass'] = urldecode($Url['pass']);
+		if (!$_REQUEST['premium_acc']) $_GET['premium_acc'] = $_POST['premium_acc'] = $_REQUEST['premium_acc'] = 'on';
+		$_GET['premium_user'] = $_POST['premium_user'] = $_REQUEST['premium_user'] = $Url['user'];
+		$_GET['premium_pass'] = $_POST['premium_pass'] = $_REQUEST['premium_pass'] = $Url['pass'];
+
+		$auth = "&auth=" . urlencode (encrypt (base64_encode (rawurlencode($Url ["user"]) . ":" . rawurlencode($Url ["pass"]))));
+
+		// We have premium_acc and $auth setted, delete User and Pass from link.
+		unset($Url['user'], $Url['pass']);
+		$LINK = rebuild_url($Url);
+ 	}
+	else
+	{
+		$auth = "";
 	}
 
 	if (!isset($_GET['dis_plug']) || $_GET ['dis_plug'] != "on")
@@ -223,9 +233,6 @@ if (empty($_GET ["filename"]) || empty($_GET ["host"]) || empty($_GET ["path"]))
 		// check Domain-Host
 		if (isset ($_GET ["vBulletin_plug"]))
 		{ 
-			// Remove User and Pass from link.
-			unset($Url['user'], $Url['pass']);
-			$LINK = rebuild_url($Url);
 			include(TEMPLATE_DIR . '/header.php'); 
 			// print "<style type=\"text/css\">$nn<!--$nn@import url(\"" . IMAGE_DIR . "rl_style_pm.css\");$nn-->$nn</style>$nn</head>$nn<body>$nn<center><img src=\"" . IMAGE_DIR . "logo_pm.gif\" alt=\"RAPIDLEECH PLUGMOD\" /></center><br /><br />$nn";
 			require_once (CLASS_DIR . "http.php");
@@ -239,9 +246,6 @@ if (empty($_GET ["filename"]) || empty($_GET ["host"]) || empty($_GET ["path"]))
 				// if ($Url["host"] == $site)
 				if (preg_match ("/^(.+\.)?" . str_replace('.', '\.', $site) . "$/i", $Url ["host"]))
 				{
-					// Remove User and Pass from link.
-					unset($Url['user'], $Url['pass']);
-					$LINK = rebuild_url($Url);
 
 					include(TEMPLATE_DIR . '/header.php');
 					require_once (CLASS_DIR . "http.php");
@@ -275,8 +279,6 @@ if (empty($_GET ["filename"]) || empty($_GET ["host"]) || empty($_GET ["path"]))
 		html_error(sprintf(lang(7), $mydomain, $myip));
 	}
 
-	$auth = (!empty($Url ["user"]) && !empty($Url ["pass"])) ? "&auth=" . urlencode (encrypt (base64_encode ($Url ["user"] . ":" . $Url ["pass"]))) : ""; 
-
 	if (isset ($_GET ['cookieuse']))
 	{
 		if (strlen ($_GET ['cookie'] > 0))
@@ -289,7 +291,7 @@ if (empty($_GET ["filename"]) || empty($_GET ["host"]) || empty($_GET ["path"]))
 		}
 	}
 
-	insert_location ("$PHP_SELF?filename=" . urlencode ($FileName) . "&host=" . $Url ["host"] . "&port=" . (isset($Url ["port"]) ? $Url ["port"] : '') . "&path=" . (!empty($Url ["path"]) ? urlencode ($Url ["path"]) : '') . (!empty($Url ["query"]) ? "?" . $Url ["query"] : "") . "&referer=" . urlencode ($Referer) . "&email=" . (!empty($_GET ["domail"]) ? $_GET ["email"] : "") . "&partSize=" . (!empty($_GET ["split"]) ? $_GET ["partSize"] : "") . "&method=" . (!empty($_GET ["method"]) ? $_GET ["method"] : '') . (!empty($_GET ["proxy"]) ? "&useproxy=on&proxy=".$_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&link=" . urlencode ($LINK) . (isset($_GET ["add_comment"]) && $_GET ["add_comment"] == "on" && !empty($_GET ["comment"]) ? "&comment=" . urlencode ($_GET ["comment"]) : "") . $auth . ($pauth ? "&pauth=$pauth" : "") . (isset ($_GET ["audl"]) ? "&audl=doum" : "") . "&cookie=" . (!empty($_GET ["cookie"]) ? urlencode (encrypt ($_GET ['cookie'])) : ''));
+	insert_location ("$PHP_SELF?filename=" . urlencode ($FileName) . "&host=" . $Url ["host"] . "&port=" . (isset($Url ["port"]) ? $Url ["port"] : '') . "&path=" . (!empty($Url ["path"]) ? urlencode ($Url ["path"]) : '') . (!empty($Url ["query"]) ? urlencode("?" . $Url ["query"]) : "") . "&referer=" . urlencode ($Referer) . "&email=" . (!empty($_GET ["domail"]) ? $_GET ["email"] : "") . "&partSize=" . (!empty($_GET ["split"]) ? $_GET ["partSize"] : "") . "&method=" . (!empty($_GET ["method"]) ? $_GET ["method"] : '') . (!empty($_GET ["proxy"]) ? "&useproxy=on&proxy=".$_GET ["proxy"] : "") . "&saveto=" . $_GET ["path"] . "&link=" . urlencode ($LINK) . (isset($_GET ["add_comment"]) && $_GET ["add_comment"] == "on" && !empty($_GET ["comment"]) ? "&comment=" . urlencode ($_GET ["comment"]) : "") . $auth . ($pauth ? "&pauth=$pauth" : "") . (isset ($_GET ["audl"]) ? "&audl=doum" : "") . "&cookie=" . (!empty($_GET ["cookie"]) ? urlencode (encrypt ($_GET ['cookie'])) : '' . "&dis_plug=on"));
 }
 else
 {
@@ -317,7 +319,8 @@ else
 
 		$pauth = !empty($_GET ["pauth"]) ? urldecode (trim ($_GET ["pauth"])) : '';
 
-		if (isset($_GET['auth']) && $_GET['auth'] == 1)
+		$_GET['auth'] = isset($_GET['auth']) ? trim($_GET['auth']) : '';
+		if ($_GET['auth'] == "1")
 		{
 			if (!preg_match("|^(?:.+\.)?(.+\..+)$|i", $_GET ["host"], $hostmatch)) html_error('No valid hostname found for authorisation!');
 			$hostmatch = str_replace('.', '_', $hostmatch[1]);
@@ -329,9 +332,9 @@ else
 		}
 		elseif (!empty($_GET['auth']))
 		{
-			$auth = decrypt(urldecode(trim($_GET['auth'])));
+			$auth = decrypt(urldecode($_GET['auth']));
 			$AUTH ["use"] = true;
-			$AUTH ["str"] = decrypt(urldecode(trim($_GET ["auth"])));
+			$AUTH ["str"] = $auth;
 		}
 		else
 		{
