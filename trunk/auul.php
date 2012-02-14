@@ -26,8 +26,12 @@ require_once('classes/other.php');
 require_once(HOST_DIR.'download/hosts.php');
 require_once(CLASS_DIR.'http.php');
 
-// If you set password for your rapidleech site, this asks for the password
-login_check();
+if (!$options['auto_upload_disable']) {
+    login_check();
+} else {
+    require_once('deny.php');
+    exit();
+}
 
 include(TEMPLATE_DIR.'header.php');
 ?>

@@ -31,9 +31,9 @@ class fileflyer_com extends DownloadClass {
             is_notpresent($page, "Access enabled", "Invalid premium codes");
         }
         $cookie = GetCookies($page);
-        if (!preg_match('@http:\/\/.+fileflyer\.com\/d\/[^\"]+@', $page, $dl)) html_error ('Error: Download link not found, plugin need to be updated!');
+        if (!preg_match('@http:\/\/.+fileflyer\.com\/d\/[^"]+@', $page, $dl)) html_error ('Error: Download link not found, plugin need to be updated!');
         $dlink = trim($dl[0]);
-        $filename = parse_ul($dlink);
+        $filename = parse_url($dlink);
         $FileName = basename($filename['path']);
         $this->RedirectDownload($dlink, $FileName, $cookie, 0, $Referer);
         exit();

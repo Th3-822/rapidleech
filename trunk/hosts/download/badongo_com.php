@@ -8,7 +8,7 @@ class badongo_com extends DownloadClass {
 	private $page, $cookie, $step;
 	public function Download($link) {
 		global $premium_acc, $Referer;
-		$link = $Referer = str_ireplace('://badongo.com/', '://www.badongo.com/', $link);
+		$link = $Referer = str_ireplace(array('://badongo.com/', '.com/audio/'), array('://www.badongo.com/','.com/file/'), $link);
 		$Referer = str_ireplace('/cfile/', '/file/', $Referer);
 		$this->step = empty($_REQUEST['step']) ? false : $_REQUEST['step'];
 
@@ -83,7 +83,8 @@ class badongo_com extends DownloadClass {
 		if (preg_match('@window\.[a-z|0-9]+ = (\d+);@', $this->page, $CD) && $CD[1] > 0) $this->CountDown($CD[1]);
 
 		$posturl = 'http://www.badongo.com/ajax/prototype/ajax_api_filetemplate.php';
-		$page = $this->BD_cURL($posturl, $this->cookie, $post);
+		$ref = $link."\r\nX-Requested-With: XMLHttpRequest";
+		$page = $this->BD_cURL($posturl, $this->cookie, $post, $ref);
 
 		$post['f'] = 'download:check';
 		$post['z'] = urlencode(cut_str($page, "z': '", "'"));
@@ -92,10 +93,10 @@ class badongo_com extends DownloadClass {
 
 		if (preg_match("@window\['\w+'\] = \"(\d+)\";@i", $page, $CD) && $CD[1] > 0) $this->CountDown($CD[1]+10);
 
-		$page = $this->BD_cURL($posturl, $this->cookie, $post);
+		$page = $this->BD_cURL($posturl, $this->cookie, $post, $ref);
 		if (preg_match('@window\.[a-z|0-9]+ = (\d+);@', $page, $CD) && $CD[1] > 0) {
 			$this->CountDown($CD[1]+5);
-			$page = $this->BD_cURL($posturl, $this->cookie, $post);
+			$page = $this->BD_cURL($posturl, $this->cookie, $post, $ref);
 		}
 		is_notpresent($page, "window.getFileLinkCanDownload", "Error: Countdown bypassed?");
 

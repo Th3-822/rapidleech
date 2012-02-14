@@ -82,8 +82,8 @@ if ($continue_up) {
 	$post['searchable'] = ($_REQUEST['up_searchable'] == "yes") ? "yes" : "no";
 	$post['downloadProgressURL'] = urlencode(cut_str($page, 'name="downloadProgressURL" value="', '"'));
 
-	if (!preg_match("@init\('[^']+','[^']+','(\w+)','(\w+)','(\d+)','(\d+)'[^\)]+\)@i", $page, $ud)) html_error("Upload Query not found.", 0);
-	$up_loc = "http://www.megashares.com/uploader.php?tmp_sid={$ud[1]}&ups_sid={$ud[2]}&uld={$ud[3]}&uloc={$ud[4]}";
+	if (!preg_match("@init\('[^']+','([^']+)','(\w+)','(\w+)','(\d+)','(\d+)'[^\)]+\)@i", $page, $ud)) html_error("Upload Query not found.", 0);
+	$up_loc = "http://www.megashares.com/{$ud[1]}.php?tmp_sid={$ud[2]}&ups_sid={$ud[3]}&uld={$ud[4]}&uloc={$ud[5]}";
 
 	// Uploading
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
@@ -95,11 +95,16 @@ if ($continue_up) {
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>";
 
 	is_page($upfiles);
-	if (!preg_match('@http://\w+.megashares.com/dl/\w+/[^<|"|\']+@i', $upfiles, $dl)) html_error("Download link not found.", 0);
+
+	if (!preg_match('@\.location = "https?://([^\.|/]+\.)?megashares\.com(/upostproc\.php\?fid=\d+)"@i', $upfiles, $redir)) html_error("Redirect not found.", 0);
+	$page = geturl($redir[1]."megashares.com", 80, $redir[2], 0, $cookie);is_page($page);
+
+	if (!preg_match('@http://\w+.megashares.com/dl/\w+/[^<|"|\']+@i', $page, $dl)) html_error("Download link not found.", 0);
 	$download_link = $dl[0];
-	if (preg_match('@http://\w+.megashares.com/\?dl=\w+@i', $upfiles, $dlt)) $delete_link = $dlt[0];
+	if (preg_match('@http://\w+.megashares.com/\?dl=\w+@i', $page, $dlt)) $delete_link = $dlt[0];
 }
 
 //[25-6-2011]  Written by Th3-822.
+//[07-2-2012]  Regexp for $up_loc fixed, added redirect for getting download link. - Th3-822
 
 ?>

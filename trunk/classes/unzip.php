@@ -169,7 +169,7 @@ class dUnzip2{
 		
 		return $ret;
 	}
-	Function unzipAll($targetDir=false, $baseDir="", $maintainStructure=true, $applyChmod=0777){
+	Function unzipAll($targetDir=false, $baseDir="", $maintainStructure=false, $applyChmod=0777){
 		if($targetDir === false)
 			$targetDir = dirname(__FILE__)."/";
 		

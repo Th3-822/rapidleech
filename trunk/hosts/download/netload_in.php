@@ -65,9 +65,15 @@ class netload_in extends DownloadClass {
             if (!preg_match('%action="([^"]+)">%', $form, $temp) || !preg_match('%src="([^"]+)" alt="Sicherheitsbild" \/>%', $form, $cap)) html_error("Error[getCaptchaLink/Image]");
             if (!preg_match_all('@name="([^"]+)" type="(hidden|submit)" value="([^"]+)?"@', $form, $match)) html_error("Error[getCaptchaPostData]");
 
+            $capt = $this->GetPage('http://netload.in/' . $cap[1], $this->cookie);
+            $capt_img = substr($capt, strpos($capt, "\r\n\r\n") + 4);
+            $imgfile = DOWNLOAD_DIR . "netload_captcha.png";
+            if (file_exists($imgfile)) unlink($imgfile);
+            if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.", 0);
+            
             $data = array_merge($this->DefaultParamArr('http://netload.in/' . $temp[1], $this->cookie), array_combine($match[1], $match[3]));
             $data['step'] = 'captcha';
-            $this->EnterCaptcha('http://netload.in/' . $cap[1], $data);
+            $this->EnterCaptcha($imgfile, $data);
             exit();
         }
     }
@@ -103,7 +109,7 @@ class netload_in extends DownloadClass {
         $post['txtuser'] = $user;
         $post['txtpass'] = $pass;
         $post['txtcheck'] = 'login';
-        $post['txtlogin'] = '';
+        $post['txtlogin'] = 'Login';
         $this->page = $this->GetPage($posturl . 'index.php', 0, $post, $posturl);
         is_present($this->page, '/index.php?id=15', 'Login failed, invalid username or password???');
         $this->cookie = GetCookies($this->page);

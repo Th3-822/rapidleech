@@ -57,13 +57,13 @@ function login_check() {
 
 function is_present($lpage, $mystr, $strerror = "", $head = 0) {
 	$strerror = $strerror ? $strerror : $mystr;
-	if (stristr ( $lpage, $mystr )) {
+	if (stripos ( $lpage, $mystr ) !== false) {
 		html_error ( $strerror, $head );
 	}
 }
 
 function is_notpresent($lpage, $mystr, $strerror, $head = 0) {
-	if (! stristr ( $lpage, $mystr )) {
+	if (stripos ( $lpage, $mystr ) === false) {
 		html_error ( $strerror, $head );
 	}
 }
@@ -496,7 +496,7 @@ function decrypt($string)
  * @param bool Options to continue or not process
  * @param string Charset encoding for htmlentities
  */
-function textarea($var, $cols = 100, $rows = 30, $stop = false, $char = 'UTF-8') {
+function textarea($var, $cols = 100, $rows = 30, $stop = false, $char = '') {
 	$cols = ($cols == 0) ? 100 : $cols;
 	$rows = ($rows == 0) ? 30 : $rows;
 	echo "\n<br /><textarea cols='$cols' rows='$rows' readonly='readonly'>";

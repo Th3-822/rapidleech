@@ -56,9 +56,9 @@ class oron_com extends DownloadClass {
         if (preg_match('#(\d+)</span> seconds#', $this->page, $wait)) $this->CountDown($wait[1]);
         if (preg_match('@api\/challenge[?]k=([^"]+)@i', $this->page, $cap) && preg_match('@api\/noscript[?]k=([^"]+)@i', $this->page, $cap)) {
             //download the captcha image (AGAIN!)
-            $ch = cut_str($this->GetPage("http://www.google.com/recaptcha/api/challenge?k=$cap[1]"), "challenge : '", "'");
-            $cap = $this->GetPage("http://www.google.com/recaptcha/api/image?c=" . $ch);
-            $capt_img = substr($cap, strpos($cap, "\r\n\r\n") + 4);
+            $ch = cut_str($this->GetPage('http://www.google.com/recaptcha/api/challenge?k='.$cap[1]), "challenge : '", "'");
+            $capt = $this->GetPage("http://www.google.com/recaptcha/api/image?c=" . $ch);
+            $capt_img = substr($capt, strpos($capt, "\r\n\r\n") + 4);
             $imgfile = DOWNLOAD_DIR . "oron_captcha.jpg";
 
             if (file_exists($imgfile)) unlink($imgfile);
@@ -66,10 +66,11 @@ class oron_com extends DownloadClass {
             // Captcha img downloaded
 
             if (!preg_match_all('@<input type="hidden" name="([^"]+)" value="([^"]+)?">@', $this->page, $match)) html_error("Error: Post Data [FREE] 2 not found!");
-            $data = array_combine($match[1], $match[2]);
+            $data = array_merge($this->DefaultParamArr($this->link), array_combine($match[1], $match[2]));
+            $data['challenge'] = $ch;
+            
+            global $PHP_SELF;
             echo "\n<center><form name='dl' action='$PHP_SELF' method='post' ><br />\n";
-            echo '<input type="hidden" name="link" value="' . urlencode($this->link) . '" />' . "\n";
-            echo '<input type="hidden" name="challenge" value="' . $ch . '" />' . "\n";
             foreach ($data as $name => $value) {
                 echo '<input type="hidden" name="' . $name . '" value="' . $value . '" />' . "\n";
             }
@@ -112,12 +113,16 @@ class oron_com extends DownloadClass {
             $rand = cut_str($this->page, 'name="rand" value="', '"');
 
             if (stristr($this->page, 'Password: ')) {
+                $data = $this->DefaultParamArr($this->link, encrypt($this->cookie));
+                $data['id'] = $id;
+                $data['rand'] = $rand;
+                $data['step'] = 'Password';
+                
+                global $PHP_SELF;
                 echo "\n" . '<center><form action="' . $PHP_SELF . '" method="post" >' . "\n";
-                echo '<input type="hidden" name="link" value="' . urlencode($this->link) . '" />' . "\n";
-                echo '<input type="hidden" name="cookie" value="' . urlencode(encrypt($this->cookie)) . '" />' . "\n";
-                echo '<input type="hidden" name="id" value="' . $id . '" />' . "\n";
-                echo '<input type="hidden" name="rand" value="' . $rand . '" />' . "\n";
-                echo '<input type="hidden" name="step" value="Password" />' . "\n";
+                foreach ($data as $name => $value) {
+                    echo '<input type="hidden" name="' . $name . '" value="' . $value . '" />' . "\n";
+                }
                 echo '<h4>Enter password here: <input type="text" name="password" id="filepass" size="13" />&nbsp;&nbsp;<input type="submit" onclick="return check()" value="Submit" /></h4>' . "\n";
                 echo "<script type='text/javascript'>\nfunction check() {\nvar pass=document.getElementById('filepass');\nif (pass.value == '') { window.alert('You didn\'t enter the password'); return false; }\nelse { return true; }\n}\n</script>\n";
                 echo "\n</form></center>\n</body>\n</html>";
@@ -147,11 +152,12 @@ class oron_com extends DownloadClass {
         $post['password'] = $password;
         $post['op'] = "login";
         $post['redirect'] = "";
-        $post['rand'] = "";
         if ($captcha == true) {
             $post['rand'] = $_POST['rand'];
             $post['recaptcha_challenge_field'] = $_POST['challenge'];
             $post['recaptcha_response_field'] = $_POST['captcha'];
+        } else {
+            $post['rand'] = "";
         }
         $this->page = $this->GetPage("http://oron.com/login", 0, $post, "http://oron.com/login");
         is_present($this->page, "Incorrect Login or Password");

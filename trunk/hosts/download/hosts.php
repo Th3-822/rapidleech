@@ -43,6 +43,9 @@ while (false !== ($entry = $d->read())) {
                 }
                 $host['sharingmatrix.com'] = $host['filesonic.com'];
                 break;
+            case 'freakshare.com':
+                $host['freakshare.net'] = $host['freakshare.com'];
+                break;
         }
     }
 }

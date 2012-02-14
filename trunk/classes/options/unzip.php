@@ -81,7 +81,7 @@ function unzip_go() {
 					$any_file_unzippped = true;
 					echo '<b>'.htmlentities(basename($file["name"])).'</b>&nbsp;unzipped successfully<br /><br />';
 					foreach ($allf as $k => $properties) {
-						$efile = $options['download_dir'].basename($properties['file_name']);
+						$efile = realpath($options['download_dir']).'/'.basename($properties['file_name']); 
 						if (is_file($efile)) {
 							$time = filemtime($efile); while (isset($list[$time])) { $time++; }
 							$list[$time] = array("name" => $efile, "size" => bytesToKbOrMbOrGb(filesize($efile)), "date" => $time);

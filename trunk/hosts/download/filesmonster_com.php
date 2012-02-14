@@ -8,7 +8,7 @@ class filesmonster_com extends DownloadClass {
 
     public function Download($link) {
         global $premium_acc;
-        if ($_REQUEST['premium_acc'] == 'on' && (($_REQUEST['premium_user'] && $_REQUEST['premium_pass']) || ($premium_acc['filesmonster']['user'] && $premium_acc['filesmonster']['pass']))) {
+        if ($_REQUEST['premium_acc'] == 'on' && (($_REQUEST['premium_user'] && $_REQUEST['premium_pass']) || ($premium_acc['filesmonster_com']['user'] && $premium_acc['filesmonster_com']['pass']))) {
             $this->Premium($link);
         } elseif ($_POST['step'] == '1') {
             $this->DownloadFree($link);
@@ -89,8 +89,8 @@ class filesmonster_com extends DownloadClass {
 
         $post = array();
         $post['act'] = "login";
-        $post['user'] = $_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc ["filesmonster"] ["user"];
-        $post['pass'] = $_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["filesmonster"] ["pass"];
+        $post['user'] = $_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc ["filesmonster_com"] ["user"];
+        $post['pass'] = $_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["filesmonster_com"] ["pass"];
         $post['login'] = "Login";
         $page = $this->GetPage("http://filesmonster.com/login.php", 0, $post, "http://filesmonster.com/");
         is_present($page, 'Username/Password can not be found in our database!', 'Username/password invalid');

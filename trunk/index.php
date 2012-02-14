@@ -210,7 +210,7 @@ if (empty($_GET ["filename"]) || empty($_GET ["host"]) || empty($_GET ["path"]))
 		$LINK = rebuild_url($Url);
 	}
 
-	// If Url has user & pass, use them as premium login for plugins or set $auth for direct download.
+	// If Url has user & pass, use them as premium login for plugins and set $auth for direct download.
 	if (!empty($Url['user']) && !empty($Url['pass']))
 	{
 		if (!$_REQUEST['premium_acc']) $_GET['premium_acc'] = $_POST['premium_acc'] = $_REQUEST['premium_acc'] = 'on';

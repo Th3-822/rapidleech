@@ -92,7 +92,7 @@ class filepost_com extends DownloadClass {
         if (!preg_match('@"js":\{"(\w+)":\{?"([^"]+)"?:?"?([^|\r|\n|"]+)?"\}@i', $check, $match)) html_error("Error: Unknown Post Data [FREE] page response!");
         switch ($match[1]) {
             case 'error':
-                $this->changeMesg("<font color='red'><b>$match[2]</b></font>");
+                echo ("<center><font color='red'><b>$match[2]</b></font></center>");
 
                 $data = $this->DefaultParamArr($Url, $this->Cookies);
                 $data['code'] = $_POST['code'];
@@ -180,7 +180,7 @@ class filepost_com extends DownloadClass {
             if (!preg_match('@"js":\{"(\w+)":\{?"([^"]+)"?:?"?([^|\r|\n|"]+)?"\}@i', $this->page, $match)) html_error("Error: Unknown Password Link [PREMIUM] page response, plugin need to be updated!");
             switch ($match[1]) {
                 case 'error':
-                    $this->changeMesg("<font color='red'><b>$match[2]</b></font>");
+                    echo ("<center><font color='red'><b>$match[2]</b></font></center>");
 
                     $data = $this->DefaultParamArr($Url, encrypt($this->Cookies), $this->link);
                     $data['step'] = 'Passpre';
