@@ -1,140 +1,59 @@
 <?php
-if (! defined ( 'RAPIDLEECH' ))
-{
-	require_once ("index.html");
-	exit ();
+if (!defined('RAPIDLEECH')) {
+    require_once ('index.html');
+    exit();
 }
 
-class midupload_com extends DownloadClass 
-{
-	public function Download($link) 
-	{
-		global $premium_acc;
-		
-		if ( isset($_POST['step'] ) ) 
-		{
-			if ( $_POST['step'] == 1 ) 
-			{
-				return $this->DownloadFree($link);
-			} 
-			else 
-			{
-				return $this->EnterCaptchaCode($link);
-			}
-		} 
-		else 
-		{
-			return $this->EnterCaptchaCode($link);
-		}
-	}
-	
-	private function EnterCaptchaCode($link)
-	{
-		global $nn, $PHP_SELF, $pauth;
-		$page = $this->GetPage($link);
-		
-		//is_present ( $page, "Due to a violation of our terms of use, the file has been removed from the server." );
-
-		$cookie = "";
-		preg_match_all("/Set-Cookie: ([^;]+;)/", $page, $cook);
-		$arraySize = count($cook);
-
-		for ( $i=0;$i<$arraySize;$i++)
-		{
-			$cookie=$cookie.array_shift($cook[1]);
-		}
-
-		$op = trim ( cut_str ( $page, '<input type="hidden" name="op" value="', '"' ) );
-		$usr_login = trim ( cut_str ( $page, '<input type="hidden" name="usr_login" value="', '"' ) );
-		$id = trim ( cut_str ( $page, '<input type="hidden" name="id" value="', '"' ) );
-		$fname = trim ( cut_str ( $page, '<input type="hidden" name="fname" value="', '"' ) );
-		$referer = trim ( cut_str ( $page, '<input type="hidden" name="referer" value="', '"' ) );
-		$method_free = trim ( cut_str ( $page, '<input type="submit" name="method_free" value="', '"' ) );
-		
-		$post = array ();
-		$post ["op"] = $op;
-		$post ["usr_login"] = $usr_login;
-		$post ["id"] = $id;
-		$post ["fname"] = $fname;
-		$post ["referer"] = $referer;
-		$post ["method_free"] = $method_free;
-
-		$page = $this->GetPage($link,$cookie,$post,$link);
-		
-		$count = trim ( cut_str ( $page, '<span id="countdown">', '</span>' ) );
-		
-		$op = trim ( cut_str ( $page, '<input type="hidden" name="op" value="', '"' ) );
-		$id = trim ( cut_str ( $page, '<input type="hidden" name="id" value="', '"' ) );
-		$rand = trim ( cut_str ( $page, '<input type="hidden" name="rand" value="', '"' ) );
-		$referer = trim ( cut_str ( $page, '<input type="hidden" name="referer" value="', '"' ) );
-		$method_free = trim ( cut_str ( $page, '<input type="hidden" name="method_free" value="', '"' ) );
-		$method_premium = trim ( cut_str ( $page, '<input type="hidden" name="method_premium" value="', '"' ) );
-		$down_direct = trim ( cut_str ( $page, '<input type="hidden" name="down_direct" value="', '"' ) );		
-		
-		$captchaImage = trim ( cut_str ( $page, '<img src="http://www.midupload.com/captchas/', '">' ) );
-		$captcha_access_url = "http://www.midupload.com/captchas/".$captchaImage;
-		
-		insert_timer( $count, "Waiting link timelock");
-		
-		print "<form name=\"dl\" action=\"$PHP_SELF\" method=\"post\">\n";
-		print "<input type=\"hidden\" name=\"link\" value=\"" . urlencode ( $link ) . "\">\n";
-		
-		print "<input type=\"hidden\" name=\"op\" value=\"" . urlencode ( $op ) . "\">\n";
-		print "<input type=\"hidden\" name=\"id\" value=\"" . urlencode ( $id ) . "\">\n";
-		print "<input type=\"hidden\" name=\"rand\" value=\"" . urlencode ( $rand ) . "\">\n";
-		print "<input type=\"hidden\" name=\"referer\" value=\"" . urlencode ( $referer ) . "\">\n";
-		print "<input type=\"hidden\" name=\"method_free\" value=\"" . urlencode ( $method_free ) . "\">\n";
-		print "<input type=\"hidden\" name=\"method_premium\" value=\"" . urlencode ( $method_premium ) . "\">\n";
-		print "<input type=\"hidden\" name=\"down_direct\" value=\"" . urlencode ( $down_direct ) . "\">\n";
-		print "<input type=\"hidden\" name=\"step\" value=\"1\">\n";
-		print "<input type=\"hidden\" name=\"fname\" value=\"" . urlencode ( $fname ) . "\">\n";
-		
-		print "<input type=\"hidden\" name=\"comment\" id=\"comment\" value=\"" . $_GET ["comment"] . "\">\n";
-		print "<input type=\"hidden\" name=\"email\" id=\"email\" value=\"" . $_GET ["email"] . "\">\n";
-		print "<input type=\"hidden\" name=\"partSize\" id=\"partSize\" value=\"" . $_GET ["partSize"] . "\">\n";
-		print "<input type=\"hidden\" name=\"method\" id=\"method\" value=\"" . $_GET ["method"] . "\">\n";
-		print "<input type=\"hidden\" name=\"proxy\" id=\"proxy\" value=\"" . $_GET ["proxy"] . "\">\n";
-		print "<input type=\"hidden\" name=\"proxyuser\" id=\"proxyuser\" value=\"" . $_GET ["proxyuser"] . "\">\n";
-		print "<input type=\"hidden\" name=\"proxypass\" id=\"proxypass\" value=\"" . $_GET ["proxypass"] . "\">\n";
-		print "<input type=\"hidden\" name=\"path\" id=\"path\" value=\"" . $_GET ["path"] . "\">\n";
-		print "<h4>".lang(301)." <img src=\"$captcha_access_url\" > ".lang(302).": ";
-		print "<input type=\"text\" name=\"code\" size=\"4\">&nbsp;&nbsp;";
-		print "<input type=\"submit\" onclick=\"return check()\" value=\"".lang(303)."\"></h4>\n";
-		
-		print "<script language=\"JavaScript\">" . $nn . "function check() {" . $nn . "var imagecode=document.dl.code.value;" . $nn . 'if (imagecode == "") { window.alert("You didn\'t enter the image verification code"); return false; }' . $nn . 'else { return true; }' . $nn . '}' . $nn . '</script>' . $nn;
-		print "</form>\n</body>\n</html>";
-	}	
-		
-	private function DownloadFree($link)
-	{
-		global $Referer;
-		$FileName = $_GET ["fname"];
-		
-		if ( $_GET ["step"] == "1" ) 
-		{
-			$post = array ();
-			$post ["op"] = $_GET ["op"];
-			$post ["id"] = $_GET ["id"];
-			$post ["rand"] = $_GET ["rand"];
-			$post ["referer"] = $_GET ["referer"];
-			$post ["method_free"] = $_GET ["method_free"];
-			$post ["method_premium"] = $_GET ["method_premium"];
-			$post ["code"] = $_GET ["code"];
-			$post ["down_direct"] = $_GET ["down_direct"];			
-		} else
-		{
-			// error
-			html_error ( "Kindly execute catpcha step then this step come.", 0 );
-		}
-				
-		$page = $this->GetPage($link,$this->cookie,$post,$Referer);
-		
-		$Href_part = trim ( cut_str ( $page, '<a href="http://server', '"' ) );
-		$Href = "http://server".$Href_part;
-		
-		$this->RedirectDownload($Href,$FileName,$cookie, 0,$Referer);
-		exit ();
-	}
-}	
-// download plug-in writted by rajmalhotra  12 Dec 2009		
+class midupload_com extends DownloadClass {
+    
+    public function Download($link) {
+        $page = $this->GetPage($link, "lang=english");
+        is_present($page, 'The file you were looking for could not be found, sorry for any inconvenience.');
+        $form = cut_str($page, '<Form method="POST" action=\'\'>', '</Form>'); //test this with var_dump($form) or textarea($form), that post data we need to send to the filehost
+        if (!preg_match_all('%<input type="hidden" name="([^"]+)" value="([^"]+)?">%', $form, $one) || !preg_match_all('%<input class="btn" type="submit" name="(\w+_free)" value="([^"]+)">%', $form, $two)) html_error("Error [Post Data 1 not found!]");
+        $match = array_merge(array_combine($one[1], $one[2]), array_combine($two[1], $two[2]));
+        $post = array();
+        foreach ($match as $k => $v) {
+            $post[$k] = $v;
+        }
+        $page = $this->GetPage($link, "lang=english", $post, $link);
+        is_present($page, cut_str($page, '<p class="err">', '<br>')); // this will display "You have to wait bla...bla...bla..."
+        unset($post);
+        $form = cut_str($page, '<Form name="F1" method="POST"', '</Form>');
+        if (preg_match('/(\d+)<\/span> seconds/', $form, $w)) $this->CountDown ($w[1]);
+        if (!preg_match_all('%<input type="hidden" name="([^"]+)" value="([^"]+)?">%', $form, $ck)) html_error('Error [Post Data 2 not found!]');
+        if (!preg_match_all("#<span style='[^\d]+(\d+)[^\d]+\d+\w+;'>\W+(\d+);</span>#", $form, $temp)) html_error('Error [Captcha Data not found!]');
+        for ($i=0;$i<count($temp[1])-1;$i++){
+            for ($j=$i+1;$j<count($temp[1]);$j++){
+                if ($temp[1][$i]>$temp[1][$j]){
+                    $n=1;
+                    do {
+                        $tmp=$temp[$n][$i];
+                        $temp[$n][$i]=$temp[$n][$j];
+                        $temp[$n][$j]=$tmp;
+                        $n++;
+                    } while ($n<=2);
+                }
+            }
+        }
+        $captcha="";
+        foreach($temp[2] as $value) {
+            $captcha.=chr($value);
+        }
+        $match = array_merge(array_combine($ck[1], $ck[2]), array('code' => $captcha));
+        $post = array();
+        foreach ($match as $k => $v) {
+            $post[$k] = $v;
+        }
+        $page = $this->GetPage($link, "lang=english", $post, $link);
+        is_present($page, cut_str($page, '<p class="err">', '</p>')); // incase the captcha layout have been broken, we can fix that!
+        is_present($page, cut_str($page, '<font class="err">', '<br>')); // same error message "You have to wait bla...bla...bla..."
+        if (!preg_match('/Location: (http:\/\/[^\r\n]+)/i', $page, $dl)) html_error('Error [Download Link not found!]');
+        $filename = basename(parse_url($dl[1], PHP_URL_PATH));
+        $this->RedirectDownload($dl[1], $filename, "lang=english", 0, $link);
+        exit();
+    }
+}
+// download plug-in writted by rajmalhotra  12 Dec 2009
+// fixed by Ruud v.Tony 10-02-2012
 ?>

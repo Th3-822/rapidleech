@@ -21,7 +21,7 @@ class filefactory_com extends DownloadClass {
 
 	private function Prepare_Free($link) {
 		$page = $this->GetPage($link);
-		if (preg_match('/Location: .*(\/file\/.+)/i', $page, $RD)) {
+		if (preg_match('/Location: .*(\/file\/[^\r|\n]+)/i', $page, $RD)) {
 			$link = "http://www.filefactory.com" . $RD[1];
 			$page = $this->GetPage($link);
 		}
@@ -31,6 +31,11 @@ class filefactory_com extends DownloadClass {
 		is_present($page, "this file is no longer available", "The file is no longer available.");
 		is_present($page, "<strong>temporarily limited</strong>",
 			"Your access to the free download service has been <strong>temporarily limited</strong> to prevent abuse... Please wait 10 minutes or more and try again.");
+		if (preg_match('@Location: [^\r|\n]*/premium/index\.php\?e=([^&|\r|\n]+)@i', $page, $b64err)) {
+			$error = base64_decode(urldecode($b64err[1]));
+			is_present($error, "All free download slots on this server are currently in use.");
+			html_error("Unknown redirect to premium page.");
+		}
 
 		if (preg_match('/check:\'([^\']+)/i', $page, $ck) && preg_match('/Recaptcha\.create\("([^"]+)/i', $page,
 			$pid)) {
@@ -129,7 +134,7 @@ class filefactory_com extends DownloadClass {
 		$cookie = $this->login($email, $password);
 
 		$page = $this->GetPage($link);
-		if (preg_match('/Location: .*(\/file\/.+)/i', $page, $RD)) {
+		if (preg_match('/Location: .*(\/file\/[^\r|\n]+)/i', $page, $RD)) {
 			$link = "http://www.filefactory.com" . $RD[1];
 			$page = $this->GetPage($link);
 		}
@@ -180,5 +185,7 @@ class filefactory_com extends DownloadClass {
 }
 
 //[26-Nov-2010] Written by Th3-822.
-//[ 20-Feb-2011 ] Fixed regex for redirect & Fixed errors in filename & Changed captcha funtion for show reCaptcha. - Th3-822
+//[20-Feb-2011] Fixed regex for redirect & Fixed errors in filename & Changed captcha funtion for show reCaptcha. - Th3-822
+//[10-Feb-2012] Added error msg at freedl & 2 Regexps edited. -Th3-822
+
 ?>

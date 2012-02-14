@@ -1,55 +1,46 @@
 <?php
-if (!defined('RAPIDLEECH'))
-  {
-  require_once("index.html");
-  exit;
-  }
-$ft = $_POST['ft']; 
-if($ft == "ok"){
-	$post = array();
-	$post["txt_ccode"] = $_POST["txt_ccode"];
-	$cookie = $_POST["cookie"];
-	$Referer = $_POST["flink"];
-	$Href = $_POST["flink"];
-	
-	$Url = parse_url($Href);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, $post, 0, $_GET["proxy"],$pauth);
-	
-	preg_match('%(http://.*/dl/.*?)"%', $page, $final);
-	$Href = $final[1];
-	$Url = parse_url($Href);
-	$FileName = !$FileName ? basename($Url["path"]) : $FileName;
-	
-	insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&cookie=".urlencode($cookie)."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "")."&auth=".$auth.($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
-}else{
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-
-	preg_match_all('/Set-Cookie: *(.+);/', $page, $cook);
-	$cookie = implode(';', $cook[1]);
-	
-	preg_match('/action="(.*?)"/', $page, $sess);
-	$flink = $LINK.$sess[1];
-	
-	preg_match('%(http://.*PHPSESSID=.*?)"%', $page, $imglink);
-	$img = $imglink[1];
-	$Url = parse_url($img);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, 0, 0, $_GET["proxy"],$pauth);
-	
-	$headerend = strpos($page,"\r\n\r\n");
-	$pass_img = substr($page,$headerend+4);
-	write_file($options['download_dir']."files_to_captcha.jpg", $pass_img);
-	$randnum = rand(10000, 100000);
-	
-	
-	print 	"<form method=\"post\" action=\"".$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "")."\">$nn";
-	print	"<b>Please enter code:</b><br>$nn";
-	print	"<img src=\"{$options['download_dir']}files_to_captcha.jpg?id=".$randnum."\" >$nn";
-	print	"<input name=\"link\" value=\"$LINK\" type=\"hidden\">$nn";
-	print	"<input name=\"flink\" value=\"$flink\" type=\"hidden\">$nn";
-	print	"<input name=\"ft\" value=\"ok\" type=\"hidden\">$nn";
-	print	"<input name=\"cookie\" value=\"$cookie\" type=\"hidden\">$nn";
-	print	"<input name=\"txt_ccode\" type=\"text\" >";
-	print	"<input name=\"Submit\" value=\"Submit\" type=\"submit\"></form>";
+if (!defined('RAPIDLEECH')) {
+    require_once ('index.html');
+    exit();
 }
+
+class files_to extends DownloadClass {
+    
+    public function Download($link) {
+        if ($_REQUEST['step'] == '1') {
+            $post['txt_ccode'] = $_POST['captcha'];
+            $link = urldecode($_POST['link']);
+            $cookie = urldecode($_POST['cookie']);
+            $page = $this->GetPage($link, $cookie, $post, $link);
+        } else {
+            $page = $this->GetPage($link);
+            is_present($page, 'The requested file couldn\'t be found.');
+            $cookie = GetCookies($page);
+        }
+        if (strpos($page, 'To download the requested file, please retype the following numbers:')) {
+            $form = cut_str($page, '<form id="confirmform"', '</form>');
+            if (strpos($form, cut_str($form, '<span class="red">', '</span>'))) echo ("<center><font color='red'><b>Wrong Captcha, Please Retry!</b></font></center>");
+            //Download captcha img.
+            $cap = $this->GetPage(cut_str($form, '<img src="', '"'), $cookie);
+            $capt_img = substr($cap, strpos($cap, "\r\n\r\n") + 4);
+            $imgfile = DOWNLOAD_DIR . "files_to_captcha.png";
+
+            if (file_exists($imgfile)) unlink($imgfile);
+            if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.", 0);
+            // Captcha img downloaded
+            $data = $this->DefaultParamArr($link.  cut_str($form, 'action="', '"'), $cookie);
+            $data['step'] = '1';
+            $this->EnterCaptcha($imgfile, $data);
+            exit();
+        }
+        if (!preg_match('@http:\/\/\w+\.files\.to\/dl\/[^|\r|\n|"]+@', $page, $dl)) html_error('Error [Download Link not found!]');
+        $filename = basename(parse_url($dl[0], PHP_URL_PATH));
+        $this->RedirectDownload($dl[0], $filename, $cookie, 0, $link);
+        exit();
+    }
+}
+
+/*
+ * by Ruud v.Tony 10-02-2012
+ */
 ?>

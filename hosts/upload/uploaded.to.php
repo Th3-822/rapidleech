@@ -1,148 +1,140 @@
-<?php
-error_reporting(E_ALL);
-####### Free Account Info. ###########
-$uploaded_username = ""; //  Set you username
-$uploaded_password = ""; //  Set your password
+﻿<?php
+
+####### Account Info. ###########
+$uploaded_user = ""; //  Set you username
+$uploaded_pass = ""; //  Set your password
 ##############################
 
-$not_done = true;
-$continue_up = false;
-if ($uploaded_username & $uploaded_password)
-{
-    $_REQUEST['my_login'] = $uploaded_username;
-    $_REQUEST['my_pass'] = $uploaded_password;
-    $_REQUEST['action'] = "FORM";
-    echo "<b><center>Use Default login/pass.</center></b>\n";
-}
-if ($_REQUEST['action'] == "FORM")
-    $continue_up = true;
-else
-{
+	$not_done = true;
+	$continue_up = false;
+				if ($uploaded_user & $uploaded_pass)
+				{
+					$_REQUEST['ud_user'] = $uploaded_user;
+					$_REQUEST['ud_pass'] = $uploaded_pass;
+					$_REQUEST['action'] = "FORM";
+					echo "<b><center>Automatic Login Uploaded.to.</center></b>\n";
+				}
+				if ($_REQUEST['action'] == "FORM")
+					$continue_up = true;
+				else{
 ?>
+					<script>document.getElementById('info').style.display='none';</script>
+                    <div id='info' width='100%' align='center' style="font-weight:bold; font-size:16px">Login</div>
     <table border=0 style="width:270px;" cellspacing=0 align=center>
         <form method=post>
-            <input type=hidden name=action value='FORM' />
-            <tr><td nowrap>&nbsp;Username*<td>&nbsp;<input type=text name=my_login value='' style="width:160px;" />&nbsp;</tr>
-            <tr><td nowrap>&nbsp;Password*<td>&nbsp;<input type=password name=my_pass value='' style="width:160px;" />&nbsp;</tr>
-            <tr><td colspan=2 align=center><input type=submit value='Upload' /></tr>
+            <input type='hidden' name='action' value='FORM' />
+            <tr><td nowrap> Username*<td> <input type='text' name='ud_user' value='' style="width:160px;" /> </tr>
+            <tr><td nowrap> Password*<td> <input type='password' name='ud_pass' value='' style="width:160px;" /> </tr>
+            <tr><td colspan=2 align=center><input type='submit' value='Upload' /></tr>
             <tr><td colspan=2 align=center><small>*You can set it as default in <b><?php echo $page_upload["uploaded.to"]; ?></b></small></tr>
     </table>
     </form>
 
 <?php
 }
-
-if ($continue_up)
-{
+if ($continue_up){
     $not_done = false;
 ?>
     <table width=600 align=center>
     </td></tr>
     <tr><td align=center>
-            <div id=info width=100% align=center>Retrive upload ID</div>
-        <?php
-        $usr = $_REQUEST['my_login'];
-        $pass = $_REQUEST['my_pass'];
+        	<script>document.getElementById('info').style.display='none';</script>
+            <div id='info' width='100%' align='center'>Login to Uploaded.to</div>
+<?php
+		if (!empty($_REQUEST['ud_user']) && !empty($_REQUEST['ud_pass'])){
+        $usr = trim($_REQUEST['ud_user']);
+        $pass = trim($_REQUEST['ud_pass']);
         $referrer = "http://uploaded.to/";
         $Url = parse_url('http://uploaded.to/io/login');
         $post['id'] = $usr;
         $post['pw'] = $pass;
         $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), $referrer, 0, $post, 0, $_GET["proxy"], $pauth);
-        is_page($page);
+        is_page($page);  
         $cookie = GetCookies($page) . ';lang=en';
-
-        $Url = parse_url("http://uploaded.to/home");
-        $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), $referrer, $cookie, 0, 0, $_GET["proxy"], $pauth);
-        is_page($page);
-        is_notpresent($page, "Logout", "Not logged in. Check your login details in uploaded.to.php");
-        //Get url of the upload server
+		if(empty($cookie)){
+		html_error('Problem during login.');
+		}
+		if(!preg_match('#login=([^=]+);#',$cookie,$pwid)){
+			html_error('User and password do not match!');
+		}
+		if($pwid[1] == '0'){
+			html_error('Error during login, check username and password. Error 01');
+		}
+		if($pwid[1] == ''){
+			htm_error('Error during login, check username and password. Error 02');
+		}
+		if($pwid[1] == 'deleted'){
+			html_error('Plugin needs updating.');
+		}
+		}else{
+		html_error ('Error, user and/or password is empty, please go back and try again!');
+	}
+?>
+<script>document.getElementById('info').style.display='none';</script>
+<div id=info width=100% align=center>Retrive upload ID</div> 
+<?php
+		$decode = decode($pwid[1]); 
+		$va = explode('/', $decode);
+		if(!empty($va[2]) && !empty($va[4])){
+			$uid  = $va[2];
+			$upas = $va[4];
+		}else{
+			html_error('Error get User ID and/or User Password.');
+		}
         $Url = parse_url("http://uploaded.to/js/script.js");
         $script = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), $referrer, $cookie, 0, 0, $_GET["proxy"], $pauth);
-        //Generate edit code
         $editKey = generate(6);
-        $serverUrl = cut_str($script, 'uploadServer = \'', '\'') . 'upload?admincode=' . $editKey . '&id=' . $usr . '&pw=' . sha1($pass);
-        //Precheck with file info, editKey and a random fileID (to avoid collision when uploading simultaneus file)
+        $serverUrl = cut_str($script, 'uploadServer = \'', '\'').'upload?admincode='.$editKey.'&id='.$uid.'&pw='.$upas;
         $Url = parse_url("http://uploaded.to/io/upload/precheck");
-        $id = mt_rand(0, 15);
-        $fileInfo['id'] = 'file' . $id;
-        $fileInfo['editKey'] = $editKey;
+        $id = rand(1,15);
         $fileInfo['size'] = filesize($lfile);
+        $fileInfo['id'] = 'file'.$id;
         $fileInfo['name'] = $lname;
-        geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 'http://uploaded.to/upload', $cookie, $fileInfo, 0, $_GET["proxy"], $pauth);
-        //Duplicity check with same info as precheck
-        $Url = parse_url("http://uploaded.to/io/upload/duplicity");
-        geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 'http://uploaded.to/upload', $cookie, $fileInfo, 0, $_GET["proxy"], $pauth);
-        ?>
+        $fileInfo['editKey'] = $editKey;
+		geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 'http://uploaded.to/upload', $cookie, $fileInfo, 0, $_GET["proxy"], $pauth);
+?>
         <script>document.getElementById('info').style.display='none';</script>
-
-        <table width=600 align=center>
-    </td>
-</tr>
-<tr>
-    <td align=center>
-        <?php
+<?php
         $url = parse_url($serverUrl);
         $upagent = "Shockwave Flash";
         $fpost['Filename'] = $lname;
         $fpost['Upload'] = 'Submit Query';
-        $upfiles = upfile($url["host"], $url["port"] ? $url["port"] : 80, $url["path"] . ($url["query"] ? "?" . $url["query"] : ""), '', 'lang=en', $fpost, $lfile, $lname, "Filedata");
-        ?>
+		$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), "http://uploaded.to/", $cookie, $fpost, $lfile, $lname, "Filedata", 0, 0, 0, $upagent); 
+?>
         <script>document.getElementById('progressblock').style.display='none';</script>
-        <?php
-        insert_timer(10, 'Wait for the host to update file list.');
-        //Get the link from the list of all uploaded file.
-        /* $Url = parse_url("http://uploaded.to/me/files/list");
-          $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), $referrer, $cookie, 0, 0, $_GET["proxy"], $pauth);
-          is_page($page);
-          preg_match('#http://(.+)'.str_replace(array('[',']','.'), array('\[','\]','\.'), $lname).'#', $page,$links);
-          $download_link=$links[0]; */
-        $download_link = getDlLink($cookie, $lname);
-        //print_r($links);
-        if (empty($download_link))
-        {
-            insert_timer(5, 'Try Again to read the file list');
-            $download_link = getDlLink($cookie, $lname);
-        }
-        if (empty($download_link))
-            html_error('There was a problem with the upload server (maybe overloaded). Please try later.');
-        $adm_link = $editKey;
+<?php
+       if(preg_match('#close\s+([A-Za-z0-9]+),#',$upfiles,$links)){
+		   $download_link = "http://ul.to/".$links[1]."/".$lname."";
+		   $adm_link = $editKey;
+	   }else{
+		   html_error("Didn't find download link!");
+	   }
     }
 
+		function decode($str){
+				$str = str_replace('%3D', '/', $str);
+				$str = str_replace('%26', '/', $str);
+				return $str;
+			//function by simplesdescarga 09/02/2012
+		}
     function generate($len) {
         $pwd = '';
         $con = Array('b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z');
         $voc = Array('a', 'e', 'i', 'o', 'u');
-
-        for ($i = 0; $i < $len / 2; $i++)
-        {
+        for ($i = 0; $i < $len / 2; $i++){
             $c = mt_rand(0, 19);
             $v = mt_rand(0, 4);
             $pwd .= $con[$c] . $voc[$v];
         }
-
         return $pwd;
     }
 
-    function getDlLink($cookie, $lname) {
-        $referrer = "http://uploaded.to/me";
-        $Url = parse_url("http://uploaded.to/io/me/list/files");
-        $search['dir'] = 'desc';
-        $search['page'] = 0;
-        $search['limit'] = 11;
-        $search['order'] = 'date';
-        $search['search'] = $lname;
-        $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), $referrer, $cookie, $search, 0, $_GET["proxy"], $pauth);
-        is_page($page);
-        $id = substr($page, strpos($page, '"id":'),strpos($page,',"date"')-strpos($page, '"id":'));
-        $id=substr($id,6,-1);
-        if(strpos($page, '"id":')!==false)
-            return 'http://ul.to/' . $id;
-        else
-            return null;
-    }
-
-    /**     * **********************\
+    /*
       written by kaox 14/06/2009
-     * edited by Balor 15/03/2010 (new Layout with YUI uploader)
-      \************************ */
-        ?>
+      edited by Balor 15/03/2011 (new Layout with YUI uploader)
+      fixed by defport 27/04/2011
+	  fixed user id and password by simplesdescarga 09/02/2012
+	  fixed messages error at login and to get user id and password by simplesdescarga 09/02/2012
+	  added support for IPs American by simplesdescarga 09/02/2012
+    */
+?>

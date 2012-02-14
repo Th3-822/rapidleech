@@ -308,6 +308,9 @@ else {
                                                 	<option value="1000">1000</option>
                                                 	<option value="other">Other</option>
                                                   </select></td></tr>
+          <tr><td>Disable auto download feature</td><td><input type="checkbox" value="1" name="opt_auto_download_disable" id="opt_auto_download_disable" /></td></tr>
+          <tr><td>Disable auto upload feature</td><td><input type="checkbox" value="1" name="opt_auto_upload_disable" id="opt_auto_upload_disable" /></td></tr>
+          <tr><td>Disable notes feature</td><td><input type="checkbox" value="1" name="opt_notes_disable" id="opt_notes_disable" /></td></tr>
           <tr><td>Disable *.upload.html creation</td><td><input type="checkbox" value="1" name="opt_upload_html_disable" id="opt_upload_html_disable" /></td></tr>
           <tr><td>Disable myuploads.txt creation</td><td><input type="checkbox" value="1" name="opt_myuploads_disable" id="opt_myuploads_disable" /></td></tr>
         </table>
@@ -459,6 +462,7 @@ $d->close();
           <tr id="opt_rename_these_filetypes_to_0"><td>Rename forbidden file types to</td><td><input type="text" size="8" value="" name="opt_rename_these_filetypes_to" id="opt_rename_these_filetypes_to" /></td></tr>
           <tr><td>Block forbidden file types for file actions</td><td><input type="checkbox" value="1" name="opt_check_these_before_unzipping" id="opt_check_these_before_unzipping" /></td></tr>
           <tr><td>Images via php</td><td><input type="checkbox" value="1" name="opt_images_via_php" id="opt_images_via_php" /></td></tr>
+          <tr><td>Use curl as an alternatif for stream socket client</td><td><input type="checkbox" value="1" name="opt_use_curl" id="opt_use_curl" /></td></tr>
           <tr><td>Redirect passive method</td><td><input type="checkbox" value="1" name="opt_redir" id="opt_redir" /></td></tr>
           <tr><td>No cache</td><td><input type="checkbox" value="1" name="opt_no_cache" id="opt_no_cache" /></td></tr>
           <tr><td>fgc</td><td><input type="text" value="" size="2" name="opt_fgc" id="opt_fgc" /></td></tr>

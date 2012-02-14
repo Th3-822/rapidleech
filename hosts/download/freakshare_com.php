@@ -1,186 +1,137 @@
 <?php
-if (!defined('RAPIDLEECH'))
-  {
-  require_once("index.html");
-  exit;
-  }
-
-$post = Array();
-
-$FileName = !$FileName ? basename($Url["path"]) : $FileName;
-$FileName = str_replace(".html", "", $FileName);
-
-if (($_GET["premium_acc"] == "on" && $_GET["premium_user"] && $_GET["premium_pass"]) || ($_GET["premium_acc"] == "on" && $premium_acc["freakshare_com"]["user"] && $premium_acc["freakshare_com"]["pass"]))
-{
-	$Url =  parse_url("http://freakshare.com/login.html");
-	$post["user"] = ($_GET["premium_user"] ? $_GET["premium_user"] : $premium_acc["freakshare_com"]["user"]);
-	$post["pass"] = ($_GET["premium_pass"] ? $_GET["premium_pass"] : $premium_acc["freakshare_com"]["pass"]);
-	$post["submit"] = "Login";
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, $post, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-
-	is_notpresent($page, "Set-Cookie: login=", "Wrong Username or Password!");
-
-	$cookie = GetCookies($page);
-
-	$Url =  parse_url("http://freakshare.com/?language=EN");
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-	is_present($page,"Member (free)", "Accounttype: <b>Member (free)</b>", 0);
-	insert_timer(5, "Please wait", true);
-
-	$Url =  parse_url($LINK);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-	is_present($page,"Your Traffic is used up for today!");
-	is_present($page,"This file does not exist!");
-
-	if (stristr($page, "Location:")) {
-		$Href = trim(cut_str($page, "Location:","\n"));
-		$Url =  parse_url($Href);
-	} else {
-		html_error ("Cannot get download link!", 0 );
-	}
-
-} else {
-
-if ($_GET ["step"] != "second") {
-if ($_GET ["step"]!= "cu") {
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-
-	$info = cut_str($page, '<h1 style="text-align:center;" class="box_heading">','</h1>');
-	if(!$info){$info = cut_str($page, '<h1 class="box_heading" style="text-align:center;">','</h1>');}
-	echo "<center><b>$info</b></center>";
-	$cookie = GetCookies($page);
-	is_present($page,"This file does not exist!");
-	$countdowntime = trim(cut_str($page, "var time = ",";"));
-	?>
-<center><div id="cnt"><h4>ERROR: Please enable JavaScript.</h4></div></center>
-<form action="<?php echo $PHP_SELF; ?>" method="post">
-<input type="hidden" name="link" value="<?php echo $LINK; ?>">
-<input type="hidden" name="step" value="cu">
-<input type="hidden" name="cookies" value="<?php echo $cookie; ?>">
-<script language="JavaScript">
-var cu = <?php echo $countdowntime; ?>;
-fcu();
-function fcu() {
-	if(cu>0) {
-		if(cu>60){dt ="<font color=red>You reached your traffic limit.</font>";}else{dt ="<font color=yellow>FreakShare Free User</font>";}
-		document.getElementById("cnt").innerHTML = "<b>" + dt + "</b><br>Please wait <b>" + cu + "</b> seconds";
-		cu = cu - 1;
-		setTimeout("fcu()", 1000);
-		}
-	else {
-		document.getElementById("cnt").style.display="none";
-		void(document.forms[0].submit());
-		}
-	}
-</script>
-</form></body></html>
-<?php
-exit;
-}else{
-$cookie = $_GET ["cookies"];
-}
-	$post = Array();
-	$post["section"] = 'benefit';
-	$post["did"] = '0';
-	$post["submit"] = 'Free Download';
-
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, $post, 0, $_GET["proxy"],$pauth);
-	is_page($page);
-
-	$k = trim(cut_str($page, 'challenge?k=','"'));
-	preg_match('%input type="hidden" value="(.*)" name="did"%U', $page, $dids);
-	$did = $dids[1];
-
-	$post["section"] = 'waitingtime';
-	$post["submit"] = 'Download';
-if($k){
-//$k = "6Le1iwoAAAAAANwh1QwMQkA0eGvqbHkaKZO8FxFy";
-	$post["did"] = $did;
-	$post["recaptcha_response_field"] = 'manual_challenge';
-if(!$options["download_dir"]){$options["download_dir"] = $download_dir;}
-$arcapt = apireca($k, $options["download_dir"], $cookie, "freakshare");
-$post['recaptcha_challenge_field'] = $arcapt[rcf];
-
-	$code = '<center>';
-	$code .= '<form id="regularForm" method="post" action="'.$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "").'">'.$nn;
-	$code .= '<input type="hidden" name="step" value="second">'.$nn;
-	$code .= '<input type="hidden" name="post" value="'.urlencode(serialize($post)).'">'.$nn;
-	$code .= '<input type="hidden" name="link" value="'.urlencode($LINK).'">'.$nn;
-	$code .= '<input type="hidden" name="cookie" value="'.urlencode($arcapt[cookie]).'">'.$nn;
-	$code .= '<h4>Enter the code shown below<br><img src="'.$arcapt[capfile].'"><br>here: <input type="text" name="captcha"><br>'.$nn;
-	$code .= '<input type="submit" value="Download">'.$nn;
-	$code .= '</form></h4></center>';
-	echo ($code) ;exit;
+if (!defined('RAPIDLEECH')) {
+    require_once("index.html");
+    exit;
 }
 
-		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, $post, 0, $_GET["proxy"],$pauth);
+class freakshare_com extends DownloadClass {
 
-	$cookie .= "; " . GetCookies($page);
+    public function Download($link) {
+        global $premium_acc;
 
-	if(preg_match('/Location: *(.+)/i', $page, $redir )){
-	$dowlink = trim( $redir[1] );
-	$Url = parse_url( $dowlink );
-	}else{html_error( "Error getting download link" , 0 );}
+        if (!$_REQUEST['submit']) {
+            $link = str_replace('freakshare.net/', 'freakshare.com/', $link);
+            $this->page = $this->GetPage($link);
+            is_present($this->page, "This file does not exist!");
+            $this->cookie = GetCookiesArr($this->page);
+        }
+        if ($_REQUEST['premium_acc'] == 'on' && (($_REQUEST['premium_user'] && $_REQUEST['premium_pass']) || (!empty($premium_acc['freakshare_com']['user']) && !empty($premium_acc['freakshare_com']['pass'])))) {
+            return $this->Login($link);
+        } else {
+            return $this->Free($link);
+        }
+    }
 
-}else{
+    private function Free($link) {
+        global $PHP_SELF;
 
-	$post = array();
-		$post = unserialize(urldecode($_POST['post']));
-		$post['recaptcha_response_field'] = $_POST['captcha'];
-		$cookie = urldecode($_POST["cookie"]);
-		$LINK = urldecode($_POST[link]);
-		$Url = parse_url( $LINK );
-		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $LINK, $cookie, $post, 0, $_GET["proxy"],$pauth);
+        switch ($_REQUEST['submit']) {
+            case 'Enter Captcha':
+                $post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
+                $post['recaptcha_response_field'] = $_POST['recaptcha_response_field'];
+                $post['section'] = $_POST['section'];
+                $post['did'] = $_POST['did'];
+                $link = urldecode($_POST['link']);
+                $this->cookie = urldecode($_POST['cookie']);
+                $page = $this->GetPage($link, $this->cookie, $post, $link);
+                break;
+            case 'Free Download':
+                $post['section'] = $_POST['section'];
+                $post['did'] = $_POST['did'];
+                $link = urldecode($_POST['link']);
+                $this->cookie = urldecode($_POST['cookie']);
+                $page = $this->GetPage($link, $this->cookie, $post, $link);
+                break;
+            default:
+                if (!preg_match('@var time = (\d+)\.?[0-9]?@', $this->page, $w)) html_error("Error [Timer not found!]");
+                $wait = trim($w[1]);
+                $form = cut_str($this->page, '<td width="138" height="10"', '</form>');
+                if (!preg_match('@<form action="([^"]+)"@', $form, $fl)) html_error('Error [Post Link - FREE not found!]');
+                if (!preg_match_all('@<input type="hidden" value="([^"]+)" name="([^"]+)" \/>@', $form, $ck)) html_error("Error [Post Data 1 FREE not found!]");
+                $match = array_combine($ck[2], $ck[1]);
+                if ($wait > 60) {
+                    $data = array_merge($this->DefaultParamArr($fl[1], $this->cookie), $match);
+                    $data['submit'] = 'Free Download';
+                    $this->JSCountdown($wait, $data);
+                } else {
+                    $link = trim($fl[1]);
+                    $this->CountDown($wait);
+                    $post = array();
+                    foreach ($match as $key => $value) {
+                        $post[$key] = $value;
+                    }
+                    $post['submit'] = 'Free Download';
+                    $page = $this->GetPage($link, $this->cookie, $post, $link);
+                }
+                break;
+        }
+        if (preg_match('@\/challenge\?k=([^"]+)"@', $page, $cap) && preg_match('@\/noscript\?k=([^"]+)"@', $page, $cap) || strpos($page, 'Wrong Captcha!')) {
+            if (!preg_match_all('@<input type="hidden" value="([^"]+)" name="([^"]+)" \/>@', $page, $ck)) html_error("Error [Post Data 2 FREE not found!]");
+            $data = array_merge($this->DefaultParamArr($link, $this->cookie), array_combine($ck[2], $ck[1]));
+            echo "<script language='JavaScript'>var RecaptchaOptions={theme:'white', lang:'en'};</script>\n";
+            echo "\n<center><form name='dl' action='$PHP_SELF' method='post' ><br />\n";
+            foreach ($data as $name => $input) {
+                echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
+            }
+            echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$cap[1]'></script>";
+            echo "<noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$cap[1]' height='300' width='500' frameborder='0'></iframe><br />";
+            echo "<textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br />";
+            echo "<input type='submit' name='submit' onclick='javascript:return checkc();' value='Enter Captcha' />\n";
+            echo "<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n";
+            echo "</form></center>\n</body>\n</html>";
+            exit();
+        }
+        if (!preg_match('@Location: (http:\/\/[^\r\n]+)@i', $page, $dl)) html_error('Error [Download Link FREE not found!]');
+        $dlink = trim($dl[1]);
+        $filename = basename(parse_url($dlink, PHP_URL_PATH));
+        $this->RedirectDownload($dlink, $filename, $this->cookie, 0, $link);
+        exit();
+    }
 
-	is_present($page,"Captcha Incorrect!");
-	$cookie .= "; " . GetCookies($page);
+    private function Login($link) {
+        global $premium_acc;
 
-	if(preg_match('/Location: *(.+)/i', $page, $redir )){
-	$dowlink = cut_str ($page ,"Location: ","\r");
-	$Url = parse_url( $dowlink );
-	}else{html_error( "Error getting download link" , 0 );}
-}
-}
+        $user = ($_REQUEST["premium_user"] ? $_REQUEST["premium_user"] : $premium_acc["freakshare_com"]["user"]);
+        $pass = ($_REQUEST["premium_pass"] ? $_REQUEST["premium_pass"] : $premium_acc["freakshare_com"]["pass"]);
+        if (empty($user) || empty($pass)) html_error("Login Failed: Username[$user] or Password[$pass] is empty. Please check login data.");
 
-	if (function_exists(encrypt) && $cookie!=""){$cookie=encrypt($cookie);}
-insert_location("$PHP_SELF?filename=". urlencode($FileName)."&force_name=".urlencode($FileName)."&host=".$Url["host"]."&port=".$Url["port"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&cookie=".urlencode($cookie)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+        $posturl = 'http://freakshare.com/';
+        $post['user'] = $user;
+        $post['pass'] = $pass;
+        $post['submit'] = 'Login';
+        $check = $this->GetPage($posturl . "login.html", $this->cookie, $post, $posturl . "login.html");
+        $this->cookie = GetCookiesArr($check, $this->cookie);
+        if (!stripos($check, 'Location:') || !array_key_exists('login', $this->cookie)) html_error("Wrong Username or Password!");
 
+        //check account
+        $check = $this->GetPage($posturl, $this->cookie, 0, $posturl . "login.html");
+        if (strpos($check, 'Member (free)')) { //freakshare give only 60 second delay time for free user, so free account is useful too...
+            $this->changeMesg(lang(300) . "<br />Freakshare.com Free Account");
+            $this->page = $this->GetPage($link, $this->cookie, 0, $link);
 
-function apireca($k, $optionsd, $cookies, $sr){
-		$Url = parse_url("http://api.recaptcha.net/challenge?k=$k");
-		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
-		is_page($page);
-	if(preg_match('/Location: *(.+)/i', $page, $redir )){
-	$newreca = trim( $redir[1] );
-	$Url = parse_url( $newreca );
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookies, 0, 0, $_GET["proxy"], $pauth);
-	is_page($page);
-		$rcf = cut_str ( $page ,"challenge:'" ,"'" );
-		if(!$rcf){$rcf = cut_str ( $page ,"challenge : '" ,"'" );}
-		$Url = parse_url("http://www.google.com/recaptcha/api/image?c=".$rcf);
-	}else{
-		$rcf = cut_str ( $page ,"challenge : '" ,"'" );	
-		$cookie = GetCookies($page);
-		$Url = parse_url("http://api.recaptcha.net/image?c=".$rcf);
-		}
-		$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
-		$headerend = strpos($page,"\r\n\r\n");
-		$cap_img = substr($page,$headerend+4);
-		$capfile = $optionsd.$sr."_captcha.jpg";
-		if (file_exists($capfile)){unlink($capfile);} 
-		write_file($capfile, $cap_img);
-if(!$rcf){html_error("Error getting captcha", 0);}
-	$cookies .= "; " . $cookie;
-$arcapt = array();
-$arcapt[cookie] = $cookies;
-$arcapt[rcf] = $rcf;
-$arcapt[capfile] = $capfile;
-return $arcapt;
+            return $this->Free($link);
+        } else {
+            $this->changeMesg(lang(300) . "<br />Freakshare.com Premium Account");
+            $this->page = $this->GetPage($link, $this->cookie, $post, $link);
+
+            return $this->Premium($link);
+        }
+    }
+
+    private function Premium($link) {
+
+        is_present($this->page, "Your Traffic is used up for today!");
+        //there is option for disable direct link, seem rd27 forget to check this, since I dont have premium account, I cant check this setting, sorry...
+        if (!preg_match('@Location: (http:\/\/[^\r\n]+)@i', $this->page, $dl)) html_error("Error [Download Link PREMIUM not found! Please try to enable direct download setting in your premium account!]");
+        $dlink = trim($dl[1]);
+        $filename = basename(parse_url($dlink, PHP_URL_PATH));
+        $this->RedirectDownload($dlink, $filename, $this->cookie);
+    }
 
 }
 
+/*
+ * originally written by rd27
+ * converted into OOP format also add support for free account by Ruud v.Tony 07-02-2012
+ */
 ?>

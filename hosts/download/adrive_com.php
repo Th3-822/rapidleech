@@ -1,37 +1,24 @@
 <?php
-if (!defined('RAPIDLEECH'))
-  {
-  require_once("index.html");
-  exit;
-  }
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], 0, 0, 0, 0, $_GET["proxy"],$pauth);
-is_page($page);
-if(preg_match('/Location: *(.*)/i', $page, $redir)){
-	$href = trim($redir[1]);
-	$Url = parse_url($href);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], 0, 0, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
+if (!defined('RAPIDLEECH')) {
+    require_once ('index.html');
+    exit();
 }
-if(preg_match('/location="(.*)"/i', $page, $redir)){
-	$href = 'http://www.adrive.com'.trim($redir[1]);
-	$Url = parse_url($href);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"], 0, 0, 0, 0, $_GET["proxy"],$pauth);
-	is_page($page);
+
+class adrive_com extends DownloadClass {
+    
+    public function Download($link) {
+        $page = $this->GetPage($link);
+        is_present($page, 'The file you are trying to access is no longer available publicly.');
+        $cookie = GetCookies($page);
+        if (!preg_match('%<a href="(http:\/\/[^\r\n"]+)">here</a>%', $page, $dl)) html_error('Error [Download Link not found!]');
+        $dlink = trim($dl[1]);
+        $filename = basename(parse_url($dlink, PHP_URL_PATH));
+        $this->RedirectDownload($dlink, $filename, $cookie);
+        exit();
+    }
 }
-if(preg_match_all('/Set-Cookie: *(.+?);/', $page, $cook)){
-	$cookie = implode(";", $cook[1]);
-}else{
-	html_error("Cookie not found.", 0);
-}
-if(preg_match('/location\.href *= *"(.+)"/i', $page, $redir)){
-    $href = trim($redir[1]);
-}else{
-	html_error("URL not found.", 0);
-}
-$Url = parse_url($href);
-$FileName = !$FileName ? basename($Url["path"]) : $FileName;
-if (function_exists('encrypt')) {
-        $cookie = encrypt($cookie);
-}
-insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&cookie=".urlencode($cookie)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
+
+/*
+ * Converted & fixed into OOP format by Ruud v.Tony 10-02-2012
+ */
 ?>

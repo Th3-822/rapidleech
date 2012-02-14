@@ -72,12 +72,13 @@ class bitshare_com extends DownloadClass {
             $post['ajaxid'] = $ajaxid;
             $this->page = $this->GetPage($Url, $this->cookie, $post, $link, 0, 1);
             is_present($this->page, "ERROR#SESSION ERROR!");
-            if (!preg_match('@(http(s)?:\/\/\w+\.bitshare\.com\/[^\r\n]+)@i', $this->page, $dl)) html_error("Error: Download Link [FREE] not found!");
+            if (!preg_match('@(http(s)?:\/\/\w+\.bitshare\.com(:\d+)?\/[^\r\n]+)@i', $this->page, $dl)) html_error("Error: Download Link [FREE] not found!");
             $dlink = trim($dl[1]);
             $filename = basename(parse_url($dlink, PHP_URL_PATH));
             $this->RedirectDownload($dlink, $filename, $this->cookie, 0, $link);
             exit();
         } else {
+            echo ("<center><font color='red'><b>".  cut_str($check, 'ERROR:', '\r\n')."</b></font></center>");
             $this->changeMesg("<font color='red'><b>".  cut_str($check, 'ERROR:', '\r\n')."</b></font>");
             
             $ch = cut_str($this->GetPage("http://www.google.com/recaptcha/api/challenge?k=$recap"), "challenge : '", "'");
@@ -128,7 +129,7 @@ class bitshare_com extends DownloadClass {
             $post['request'] = 'getDownloadURL';
             $post['ajaxid'] = $ajax[1];
             $this->page = $this->GetPage($rd[1], $this->cookie, $post, $link, 0, 1);
-            if (!preg_match('@(http(s)?:\/\/\w+\.bitshare\.com\/[^\r\n]+)@i', $this->page, $dl)) html_error("Error: Download Link [PREMIUM] not found!");
+            if (!preg_match('@(http(s)?:\/\/\w+\.bitshare\.com(:\d+)?\/[^\r\n]+)@i', $this->page, $dl)) html_error("Error: Download Link [PREMIUM] not found!");
         }
         $dlink = trim($dl[1]);
         $filename = basename(parse_url($dlink, PHP_URL_PATH));

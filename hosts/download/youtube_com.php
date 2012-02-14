@@ -8,7 +8,10 @@ if (!defined('RAPIDLEECH')) {
 class youtube_com extends DownloadClass {
 	private $page, $cookie, $fmts, $fmturlmaps;
 	public function Download($link) {
-		$this->cookie = isset($_REQUEST['yt_QS']) && !empty($_POST['cookie']) ? StrToCookies(decrypt(urldecode($_POST['cookie']))) : array();
+		$this->cookie = isset($_REQUEST['yt_QS']) && !empty($_POST['cookie']) ? decrypt(urldecode($_POST['cookie'])) : array();
+		if (!is_array($this->cookie) && (stripos($this->cookie, 'SID=') === false && stripos($this->cookie, 'goojf=') === false)) {
+			$this->cookie = array();
+		}
 		$this->page = $this->GetPage($link, $this->cookie);
 
 		if (preg_match('#^HTTP/1.(0|1) 403 Forbidden#i', $this->page)) {
@@ -42,6 +45,7 @@ class youtube_com extends DownloadClass {
 		$this->fmts = array(38,37,22,45,35,44,34,43,18,5,17);
 		$yt_fmt = empty($_REQUEST['yt_fmt']) ? '' : $_REQUEST['yt_fmt'];
 		$this->fmturlmaps = $this->GetVideosArr($fmt_url_maps);
+		textarea(array_keys($this->fmturlmaps));
 
 		if (empty($yt_fmt) && !isset($_GET["audl"])) return $this->QSelector($link);
 		elseif (isset($_REQUEST['ytube_mp4']) && $_REQUEST['ytube_mp4'] == 'on' && !empty($yt_fmt)) {
@@ -69,7 +73,7 @@ class youtube_com extends DownloadClass {
 		else $ext = '.flv';
 
 		if (!preg_match('#<title>(.*)\s+-\sYouTube[\r|\n|\t|\s]*</title>#Us', $this->page, $title)) html_error('No video title found! Download halted.');
-		if (!preg_match ('/video_id=(.+?)("|&|(\\\u0026))/', $this->page, $video_id)) html_error('Video id not found.');
+		if (!preg_match ('/video_id=(.+?)(\\\|"|&|(\\\u0026))/', $this->page, $video_id)) html_error('Video id not found.');
 
 		$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode(trim($title[1]), ENT_QUOTES)) . "-[{$video_id[1]}][f$fmt]$ext";
 
@@ -127,13 +131,11 @@ class youtube_com extends DownloadClass {
 
 	private function login($link) {
 		global $premium_acc;
+		if (!is_array($this->cookie) && stripos($this->cookie, 'SID=') !== false) return;
 
 		if (!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) {
 			$user = $_REQUEST["premium_user"];
 			$pass = $_REQUEST["premium_pass"];
-		} else if (!empty($_REQUEST["iuser"]) && !empty($_REQUEST["ipass"])) {
-			$user = $_REQUEST["iuser"];
-			$pass = $_REQUEST["ipass"];
 		} else {
 			$user = $premium_acc["youtube_com"]['user'];
 			$pass = $premium_acc["youtube_com"]['pass'];
@@ -160,7 +162,7 @@ class youtube_com extends DownloadClass {
 
 		$this->cookie["SID"] = $sid[1];
 		$this->page = $this->GetPage($link, $this->cookie);
-		$this->cookie = GetCookiesArr($this->page, $this->cookie);
+		$this->cookie = array_merge($this->cookie, GetCookiesArr($this->page));
 	}
 
 	private function verify_age($link) {
@@ -198,9 +200,22 @@ class youtube_com extends DownloadClass {
 	private function GetVideosArr($fmtmaps) {
 		$fmturls = array();
 		foreach ($fmtmaps as $fmtlist) {
-			$furlmap = explode('&type=', urldecode($fmtlist), 2);
-			$furlmap[1] = str_replace('=', '', substr($furlmap[1], - 2));
-			$fmturls[$furlmap[1]] = str_replace('url=', '', $furlmap[0]);
+			$arr1 = explode('&', $fmtlist);
+			$fmtlist = $arr3 = array();
+			foreach ($arr1 as $key => $val) {
+				$arr2 = explode('=', $val);
+				foreach ($arr2 as $key2 => $val2) {
+					$arr3[] = $val2;
+				}
+			}
+			for ($i = 0; $i <= count($arr3); $i += 2) {
+				if (array_key_exists($i, $arr3)) {
+					if ($arr3[$i] != "") {
+						$fmtlist[trim($arr3[$i])] = $arr3[$i+1];
+					}
+				}
+			}
+			$fmturls[$fmtlist['itag']] = urldecode($fmtlist['url']);
 		}
 		return $fmturls;
 	}
@@ -211,10 +226,11 @@ class youtube_com extends DownloadClass {
 
 		echo "\n<br /><br /><h3 style='text-align: center;'>".lang(216).".</h4>";
 		echo "\n<center><form name='dl' action='$PHP_SELF' method='post'>\n";
+		echo "<input type='hidden' name='yt_QS' value='on' />\n";
 		echo '<input type="checkbox" name="ytdirect" /><small>&nbsp;'.lang(217).'</small><br />';
-		echo "<select name='yt_fmt' id='vbb_qs'>\n"; //  
+		echo "<select name='yt_fmt' id='vbb_qs'>\n";
 		foreach ($this->fmturlmaps as $fmt => $url) {
-			echo "<option ".($fmt == 18 ? "selected='selected' " : '')."value='$fmt'>".lang($fmtlangs[$fmt])."</option>\n";
+			if (in_array($fmt, $this->fmts)) echo "<option ".($fmt == 18 ? "selected='selected' " : '')."value='$fmt'>".lang($fmtlangs[$fmt])."</option>\n";
 		}
 		echo "</select>\n";
 		if (count($this->cookie) > 0) $this->cookie = encrypt(CookiesToStr($this->cookie));
@@ -237,7 +253,7 @@ class youtube_com extends DownloadClass {
 // [12-8-2011]  Added support for videos that need login for verify age & Changed fmt order by quality & Fixed regexps for fileext. - Th3-822
 // [13-8-2011]  Some fixes & removed not working code & fixed verify_age function. - Th3-822
 // [17-9-2011]  Added function for skip 'verify_controversy' on youtube && Fixed cookies after captcha && Little changes. - Th3-822
-// [28-12-2011] Added support for taking username and password from User & Pass (HTTP/FTP) option - Raj Malhotra
 // [26-1-2012]  Fixed regexp for get title, added a quality selector (if the one in template is removed) and some changes in the code. - Th3-822
+// [12-4-2012]  Added edits from the updated plugin from lastest svn plugin (With some functions changed for work). - Th3-822
 
 ?>

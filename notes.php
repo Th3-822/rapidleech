@@ -6,7 +6,12 @@ define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 // Include other useful functions
 require_once('classes/other.php');
 
-login_check();
+if (!$options['notes_disable']) {
+    login_check();
+} else {
+    require_once('deny.php');
+    exit();
+}
 
 include(TEMPLATE_DIR.'header.php'); ?>
 <br />

@@ -13,6 +13,9 @@ $default_options = array(
 'rename_underscore' => true, # true, replace spaces for underscores in file names
 'bw_save' => true, # Bandwidth Saving
 'file_size_limit' => 0, # 0 - Disabled, limit file size in MiB
+'auto_download_disable' => false, # true - Disable auto download feature
+'auto_upload_disable' => false, # true - Disable auto download feature
+'notes_disable' => false, # true - Disable notes feature
 'upload_html_disable' => false, # true - Disable *.upload.html creation
 'myuploads_disable' => false, # true - Disabled, limit file size in MiB
 //Authorization
@@ -58,6 +61,7 @@ $default_options = array(
 'check_these_before_unzipping' => true, # true - Don't allow extraction/creation of these filetypes from file actions
 'no_cache' => true, # true - Prohibition by Browser; otherwise allowed
 'images_via_php' => false, # true - RapidShare images are downloaded through the script, but it requires ssl support; turn it off if you can't see the image.
+'use_curl' => false, # true - Will use curl instead stream socket client(especially in ssl connection), disable this if filehost refuse data sended by curl. Need curl exec/extension enable in your server
 'redir' => true, # true - Redirect passive method
 'fgc' => 0
 );

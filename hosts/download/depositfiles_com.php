@@ -25,10 +25,10 @@ class depositfiles_com extends DownloadClass {
                 $cookie = urldecode($_POST['cookie']);
                 return $this->DownloadFree($link, $cookie, $this->GetPage($link, $cookie, $post, $Referer));
             }
-        } elseif (($_REQUEST["cookieuse"] == "on" && preg_match("/autologin\s?=\s?(\w{32})/i", $_REQUEST["cookie"], $c)) || ($_REQUEST["premium_acc"] == "on" && $premium_acc["depositfiles"]["cookie"])) {
-            $cookie = (empty($c[1]) ? $premium_acc["depositfiles"]["cookie"] : $c[1]);
+        } elseif (($_REQUEST["cookieuse"] == "on" && preg_match("/autologin\s?=\s?(\w{32})/i", $_REQUEST["cookie"], $c)) || ($_REQUEST["premium_acc"] == "on" && $premium_acc["depositfiles_com"]["cookie"])) {
+            $cookie = (empty($c[1]) ? $premium_acc["depositfiles_com"]["cookie"] : $c[1]);
             return $this->Login($link, $cap, $cookie);
-        } elseif (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc ["depositfiles"] ["user"] && $premium_acc ["depositfiles"] ["pass"])) {
+        } elseif (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc ["depositfiles_com"] ["user"] && $premium_acc ["depositfiles_com"] ["pass"])) {
             return $this->Login($link, $cap);
         } elseif ($_POST['step'] == 'CaptchaPre') {
             return $this->Login($link, 1);
@@ -49,13 +49,8 @@ class depositfiles_com extends DownloadClass {
         if (preg_match('/Your IP ([\d.]+) is already downloading a file from our system/', $page, $msg)) html_error($msg[0]);
         if (preg_match('%html_download_api-limit_interval">(\d+)<\/span>%', $page, $limit)) html_error("Download limit exceeded. Try again in " . round($limit[1] / 60) . " minutes");
         if (stristr($page, 'Please, enter the password for this file')) {
-            echo "\n" . '<center><form action="' . $PHP_SELF . '" method="post" >' . "\n";
-            echo '<input type="hidden" name="link" value="' . urlencode($link) . '" />' . "\n";
-            echo '<input type="hidden" name="cookie" value="' . urlencode($cookie) . '" />' . "\n";
-            echo '<input type="hidden" name="step" value="password" />' . "\n";
-            echo '<h4>Enter password here: <input type="text" name="file_password" id="password" size="13" />&nbsp;&nbsp;<input type="submit" onclick="return check()" value="Continue" /></h4>' . "\n";
-            echo "<script type='text/javascript'>\nfunction check() {\nvar pass=document.getElementById('password');\nif (pass.value == '') { window.alert('You didn\'t enter the password'); return false; }\nelse { return true; }\n}\n</script>\n";
-            echo "\n</form></center>\n</body>\n</html>";
+            $data = array_merge($this->DefaultParamArr($link, $cookie), array('step' => 'password'));
+            $this->EnterPassword($data);
             exit();
         }
         if (!preg_match('%<span id="download_waiter_remain">(\d+)<\/span>%', $page, $wait)) html_error('Error 0x01:Plugin is out of date');
@@ -97,38 +92,37 @@ class depositfiles_com extends DownloadClass {
         exit();
     }
 
-    private function Login($link, $cap, $autolog = false) {
-        global $premium_acc, $Referer;
-
+    private function Login($link, $cap = 0, $autolog = false) {
+        global $premium_acc;
+        
+        $posturl = 'http://depositfiles.com/';
         if (!$autolog) {
-            $user = ($_REQUEST["premium_user"] ? $_REQUEST["premium_user"] : $premium_acc["depositfiles"]["user"]);
-            $pass = ($_REQUEST["premium_pass"] ? $_REQUEST["premium_pass"] : $premium_acc["depositfiles"]["pass"]);
-            if (empty($user) || empty($pass)) {
-                html_error("Login Failed: Username or Password is empty. Please check login data.");
-            }
+            $user = ($_REQUEST["premium_user"] ? $_REQUEST["premium_user"] : $premium_acc["depositfiles_com"]["user"]);
+            $pass = ($_REQUEST["premium_pass"] ? $_REQUEST["premium_pass"] : $premium_acc["depositfiles_com"]["pass"]);
+            if (empty($user) || empty($pass)) html_error("Login Failed: Username[$user] or Password[$pass] is empty. Please check login data.");
 
-            $postlog = 'http://depositfiles.com/login.php?return=%2F';
             $post['go'] = "1";
             $post['login'] = $user;
             $post['password'] = $pass;
             if ($cap == 1) {
                 $post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
                 $post['recaptcha_response_field'] = $_POST['recaptcha_response_field'];
+                $loginurl = urldecode($_POST['link']);
+            } else {
+                $loginurl = $posturl."login.php?return=/";
             }
-            $page = $this->GetPage($postlog, "lang_current=en", $post, 'http://depositfiles.com/');
-            if (strpos($page, 'Enter security code') && ($cap == 0)) {
-                if (preg_match('@api\/challenge[?]k=([^"]+)@i', $page, $cap) && preg_match('@api\/noscript[?]k=([^"]+)@i', $page, $cap)) {
-                    $k = $cap[1];
-                }
-                $data = $this->DefaultParamArr($postlog);
+            $page = $this->GetPage($loginurl, "lang_current=en", $post, $posturl);
+            if (strpos($page, 'Enter security code')) {
+                if (!preg_match('@api\/challenge[?]k=([^"]+)@i', $page, $cap) && !preg_match('@api\/noscript[?]k=([^"]+)@i', $page, $cap)) html_error('Error [Captcha Data Login not found!]');
+                $data = $this->DefaultParamArr($loginurl);
                 $data['step'] = 'CaptchaPre';
-                $this->Show_reCaptcha($k, $data);
+                $this->Show_reCaptcha($cap[1], $data);
                 exit();
             }
             $cookie = GetCookies($page) . '; lang_current=en';
             // WANNA GET YOUR PREMIUM COOKIE? UNCOMMENT THE CODE BELOW, COPY THE COOKIE VALUE IN THE TEXTAREA!
             // $autolog = cut_str($cookie, 'autologin=', ';');
-            // textarea($autolog, $cols, $rows, true);
+            // textarea($autolog, 0, 0, true);
             is_notpresent($cookie, "autologin", "Login Failed , Bad username/password combination");
         } elseif (strlen($autolog) == 32) {
             $cookie = "autologin=$autolog; lang_current=en";
@@ -137,33 +131,26 @@ class depositfiles_com extends DownloadClass {
         }
 
         //IMPORTANT, WE NEED TO CHECK THIS FIRST!
-        $page = $this->GetPage('http://depositfiles.com/gold/', $cookie, 0, 'http://depositfiles.com/gold/payment.php');
+        $page = $this->GetPage($posturl.'gold/', $cookie, 0, $posturl.'gold/payment.php');
         is_present($page, 'FREE - member', 'Account free, login not validated!');
         is_notpresent($page, '<div class="goldmembership">', 'Login failed, account is not valid?');
 
-        return $this->DownloadPremium($link, $cookie, $this->GetPage($link, $cookie, 0, $Referer));
+        return $this->DownloadPremium($link, $cookie, $this->GetPage($link, $cookie));
     }
 
     private function DownloadPremium($link, $cookie, $page) {
-        global $Referer;
 
-        is_present($page, "You have exceeded the 15 GB 24-hour limit");
+        is_present($page, "You have exceeded the 20 GB 24-hour limit");
         is_present($page, "Such file does not exist or it has been removed for infringement of copyrights.");
         if (stristr($page, 'Please, enter the password for this file')) {
-            echo "\n" . '<center><form action="' . $PHP_SELF . '" method="post" >' . "\n";
-            echo '<input type="hidden" name="link" value="' . urlencode($link) . '" />' . "\n";
-            echo '<input type="hidden" name="cookie" value="' . urlencode(encrypt($cookie)) . '" />' . "\n";
-            echo '<input type="hidden" name="step" value="password" />' . "\n";
-            echo '<input type="hidden" name="pass" value="premium" />' . "\n";
-            echo '<h4>Enter password here: <input type="text" name="file_password" id="password" size="13" />&nbsp;&nbsp;<input type="submit" onclick="return check()" value="Continue" /></h4>' . "\n";
-            echo "<script type='text/javascript'>\nfunction check() {\nvar pass=document.getElementById('password');\nif (pass.value == '') { window.alert('You didn\'t enter the password'); return false; }\nelse { return true; }\n}\n</script>\n";
-            echo "\n</form></center>\n</body>\n</html>";
+            $data = array_merge($this->DefaultParamArr($link, encrypt($cookie)), array('step' => 'password', 'pass' => 'premium'));
+            $this->EnterPassword($data);
             exit();
         }
         if (!preg_match('@http:\/\/.+depositfiles\.com\/auth-[^|\r|\n|\'"]+@i', $page, $dl)) html_error("Error 0x06:Plugin is out of date");
         $dlink = trim($dl[0]);
         $FileName = basename(parse_url($dlink, PHP_URL_PATH));
-        $this->RedirectDownload($dlink, $FileName, $cookie, 0, $Referer);
+        $this->RedirectDownload($dlink, $FileName, $cookie);
     }
 
     private function Show_reCaptcha($pid, $inputs) {
@@ -187,6 +174,20 @@ class depositfiles_com extends DownloadClass {
         exit();
     }
 
+    private function EnterPassword($inputs) {
+        global $PHP_SELF;
+        if (!is_array($inputs)) {
+            html_error("Error parsing password data.");
+        }
+        echo "\n" . '<center><form action="' . $PHP_SELF . '" method="post" >' . "\n";
+        foreach ($inputs as $name => $input) {
+            echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
+        }
+        echo '<h4>Enter password here: <input type="text" name="password" id="filepass" size="13" />&nbsp;&nbsp;<input type="submit" onclick="return check()" value="Submit" /></h4>' . "\n";
+        echo "<script type='text/javascript'>\nfunction check() {\nvar pass=document.getElementById('filepass');\nif (pass.value == '') { window.alert('You didn\'t enter the password'); return false; }\nelse { return true; }\n}\n</script>\n";
+        echo "\n</form></center>\n</body>\n</html>";
+        exit();
+    }
 }
 
 //Written by VinhNhaTrang 12-08-2010

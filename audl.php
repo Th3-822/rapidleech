@@ -23,7 +23,12 @@ require_once("classes/other.php");
 define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 define('IMAGE_DIR', TEMPLATE_DIR . 'images/');
 
-login_check();
+if (!$options['auto_download_disable']) {
+    login_check();
+} else {
+    require_once('deny.php');
+    exit();
+}
 
 require(TEMPLATE_DIR.'/header.php');
 ?>
