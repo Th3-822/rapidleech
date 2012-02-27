@@ -43,7 +43,6 @@
 	$del=cut_str($page,'killcode=','"');
 	
 	$download_link=$ddl;
-	$delete_link= $ddl.'?killcode='.$del;
-	}
+	$delete_link = $ddl.'?killcode='.$del;
 // Made by Baking & Modified by Tranzemaniac [www.dewesh.com]
 ?>

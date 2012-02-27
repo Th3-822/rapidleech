@@ -1,50 +1,24 @@
 <?php
-
-if (!defined('RAPIDLEECH'))
-  {
-  require_once("index.html");
-  exit;
-  }
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"],$pauth);
-is_page($page);
-$locat=cut_str ($page ,"Location: ","\r");
-
-if($locat){
-$snap = cut_str ( $page ,"&code=" ,"\r" );
-if($snap== "DL_FileNotFound"){
-html_error( "Your requested file is not found" , 0 );
-}else{
-html_error( "The file cannot be downloaded , please check it in your browser for detail" , 0 );
+if (!defined('RAPIDLEECH')) {
+    require_once("index.html");
+    exit;
 }
-} 
-$cookie = GetCookies($page);
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, $cookie, 0, 0, $_GET["proxy"],$pauth);
-is_page($page);
 
-$dwn = cut_str ( $page ,"downloadlink = '" ,"'" );
-$FileName= urldecode(cut_str( $dwn ,"name=" ,"\r" ));
-insert_timer(10);
-$Url=parse_url($dwn);
-
-$loc = "$PHP_SELF?filename=" . urlencode ( $FileName ) . 
-	"&force_name=".urlencode($FileName) .
-	"&host=" . $Url ["host"] . 
-	"&port=" . $Url ["port"] . 
-	"&path=" . urlencode ( $Url ["path"] . ($Url ["query"] ? "?" . $Url ["query"] : "") ) . 
-	"&referer=" . urlencode ( $Referer ) . 
-	"&email=" . ($_GET ["domail"] ? $_GET ["email"] : "") . 
-	"&partSize=" . ($_GET ["split"] ? $_GET ["partSize"] : "") . 
-	"&method=" . $_GET ["method"] . 
-	"&proxy=" . ($_GET ["useproxy"] ? $_GET ["proxy"] : "") . 
-	"&saveto=" . $_GET ["path"] . 
-	"&link=" . urlencode ( $LINK ) . 
-	           ($_GET ["add_comment"] == "on" ? "&comment=" . urlencode ( $_GET ["comment"] ) : "") .
-	            $auth . 
-	           ($pauth ? "&pauth=$pauth" : "") . 
-	"&cookie=" . urlencode($cookie) ;
-insert_location ( $loc );
-
-/*************************\
- WRITTEN BY KAOX 07-oct-09
-\*************************/
+class supershare_pl extends DownloadClass {
+    
+    public function Download($link) {
+        $page = $this->GetPage($link);
+        is_present($page, 'DL_FileNotFound', 'File not found!');
+        $cookie = GetCookies($page);
+        if (preg_match('/var odl = (\d+);/', $page, $w)) $this->CountDown ($w[1]);
+        if (!preg_match("@var downloadlink = '([^\r\n']+)'@", $page, $dl)) html_error('Error [Download Link not found!]');
+        $filename = urldecode(cut_str($dl[1], "name=", "\r\n"));
+        $this->RedirectDownload($dl[1], $filename, $cookie, 0, $link);
+        exit();
+    }
+}
+/****************************************************\
+  WRITTEN BY KAOX 07-oct-09
+  CONVERTED INTO OOP FORMAT BY Ruud v.Tony 14-02-2012
+\****************************************************/
 ?>

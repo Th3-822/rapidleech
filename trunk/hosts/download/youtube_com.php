@@ -8,10 +8,7 @@ if (!defined('RAPIDLEECH')) {
 class youtube_com extends DownloadClass {
 	private $page, $cookie, $fmts, $fmturlmaps;
 	public function Download($link) {
-		$this->cookie = isset($_REQUEST['yt_QS']) && !empty($_POST['cookie']) ? decrypt(urldecode($_POST['cookie'])) : array();
-		if (!is_array($this->cookie) && (stripos($this->cookie, 'SID=') === false && stripos($this->cookie, 'goojf=') === false)) {
-			$this->cookie = array();
-		}
+		$this->cookie = isset($_REQUEST['yt_QS']) && !empty($_POST['cookie']) ? StrToCookies(decrypt(urldecode($_POST['cookie']))) : array();
 		$this->page = $this->GetPage($link, $this->cookie);
 
 		if (preg_match('#^HTTP/1.(0|1) 403 Forbidden#i', $this->page)) {
@@ -45,7 +42,6 @@ class youtube_com extends DownloadClass {
 		$this->fmts = array(38,37,22,45,35,44,34,43,18,5,17);
 		$yt_fmt = empty($_REQUEST['yt_fmt']) ? '' : $_REQUEST['yt_fmt'];
 		$this->fmturlmaps = $this->GetVideosArr($fmt_url_maps);
-		textarea(array_keys($this->fmturlmaps));
 
 		if (empty($yt_fmt) && !isset($_GET["audl"])) return $this->QSelector($link);
 		elseif (isset($_REQUEST['ytube_mp4']) && $_REQUEST['ytube_mp4'] == 'on' && !empty($yt_fmt)) {
@@ -131,7 +127,7 @@ class youtube_com extends DownloadClass {
 
 	private function login($link) {
 		global $premium_acc;
-		if (!is_array($this->cookie) && stripos($this->cookie, 'SID=') !== false) return;
+		if (!empty($this->cookie["SID"])) return;
 
 		if (!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) {
 			$user = $_REQUEST["premium_user"];
@@ -162,7 +158,7 @@ class youtube_com extends DownloadClass {
 
 		$this->cookie["SID"] = $sid[1];
 		$this->page = $this->GetPage($link, $this->cookie);
-		$this->cookie = array_merge($this->cookie, GetCookiesArr($this->page));
+		$this->cookie = GetCookiesArr($this->page, $this->cookie);
 	}
 
 	private function verify_age($link) {
@@ -254,6 +250,5 @@ class youtube_com extends DownloadClass {
 // [13-8-2011]  Some fixes & removed not working code & fixed verify_age function. - Th3-822
 // [17-9-2011]  Added function for skip 'verify_controversy' on youtube && Fixed cookies after captcha && Little changes. - Th3-822
 // [26-1-2012]  Fixed regexp for get title, added a quality selector (if the one in template is removed) and some changes in the code. - Th3-822
-// [12-4-2012]  Added edits from the updated plugin from lastest svn plugin (With some functions changed for work). - Th3-822
 
 ?>

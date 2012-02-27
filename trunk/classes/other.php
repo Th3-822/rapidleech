@@ -380,7 +380,6 @@ function purge_files($delay) {
 				} else {
 					$files_new .= $files_line;
 				}
-			} else {
 			}
 		}
 		file_put_contents ( CONFIG_DIR . "files.lst", $files_new );
@@ -496,9 +495,10 @@ function decrypt($string)
  * @param bool Options to continue or not process
  * @param string Charset encoding for htmlentities
  */
-function textarea($var, $cols = 100, $rows = 30, $stop = false, $char = '') {
+function textarea($var, $cols = 100, $rows = 30, $stop = false, $char = 'UTF-8') {
 	$cols = ($cols == 0) ? 100 : $cols;
 	$rows = ($rows == 0) ? 30 : $rows;
+	if ($char === false) $char = 'ISO-8859-1';
 	echo "\n<br /><textarea cols='$cols' rows='$rows' readonly='readonly'>";
 	if (is_array($var)) echo htmlentities(print_r($var, true), ENT_QUOTES, $char);
 	else echo htmlentities($var, ENT_QUOTES, $char);
@@ -525,5 +525,33 @@ function rebuild_url($url) {
 	return $url['scheme'] . "://" . (!empty($url['user']) && !empty($url['pass']) ? rawurlencode($url['user']) . ":" . rawurlencode($url['pass']) . "@" : '') . $url['host'] . (!empty($url['port']) && $url['port'] != 80 && $url['port'] != 443 ? ":" . $url['port'] : "") . (empty($url['path']) ? "/" : $url['path']) . (!empty($url['query']) ? "?" . $url['query'] : "") . (!empty($url['fragment']) ? "#" . $url['fragment'] : "");
 }
 
+if (!function_exists('http-chunked-decode')) {
+	// Added implementation from a comment at php.net's function page
+	function http_chunked_decode($chunk) {
+		$pos = 0;
+		$len = strlen($chunk);
+		$dechunk = null;
+
+		while(($pos < $len) && ($chunkLenHex = substr($chunk, $pos, ($newlineAt = strpos($chunk, "\n", $pos + 1)) - $pos))) {
+			if (!is_hex($chunkLenHex)) {
+				trigger_error('Value is not properly chunk encoded_', E_USER_WARNING);
+				return false;
+			}
+
+			$pos = $newlineAt + 1;
+			$chunkLen = hexdec(rtrim($chunkLenHex, "\r\n"));
+			$dechunk .= substr($chunk, $pos, $chunkLen);
+			$pos = strpos($chunk, "\n", $pos + $chunkLen) + 1;
+		}
+		return $dechunk;
+	}
+
+	function is_hex($hex) {
+		$hex = strtolower(trim(ltrim($hex, "0")));
+		if (empty($hex)) $hex = 0;
+		$dec = hexdec($hex);
+		return ($hex == dechex($dec));
+	}
+}
 
 ?>
