@@ -38,22 +38,11 @@ if ($continue_up)
 <div id="login" style="width:100%;text-align:center;">Login to letitbit.net</div>
 <?php
 	if (empty($_REQUEST['login']) || empty($_REQUEST['password'])) html_error("Login failed: User/Password empty.", 0);
-	$post = array();
-	$post['act'] = "login";
-	$post['login'] = urlencode($_REQUEST['login']);
-	$post['password'] = urlencode($_REQUEST['password']);
-
-	$page = geturl('letitbit.net', 80, '/ajax/auth.php', 'http://letitbit.net/', 'lang=en', $post, 0, $_GET["proxy"], $pauth);is_page($page);
-	is_present($page, "Authorization data is invalid", "Login failed: User/Password incorrect.");
-	is_notpresent($page, 'Set-Cookie: log=', 'Login failed: Cannot find login cookie.');
-	is_notpresent($page, 'Set-Cookie: pas=', 'Login failed: Cannot find paswword cookie.');
-	$cookie = GetCookiesArr($page);
-	$cookie['lang'] = 'en';
+	$page = SkipLoginC(strtolower($_REQUEST['login']), $_REQUEST['password']);
 ?>
 <script type="text/javascript">document.getElementById('login').style.display='none';</script>
 <div id="info" style="width:100%;text-align:center;">Retrive upload ID</div>
 <?php
-	$page = geturl("letitbit.net", 80, "/", 'http://letitbit.net/', $cookie, 0, 0, $_GET["proxy"], $pauth);is_page($page);
 	if (!preg_match("@var\s+ACUPL_UPLOAD_SERVER\s*=\s*'([^\']+)'\s*;@i",$page, $up)) html_error('Error: Cannot find upload server.', 0);
 
 	function rndStr($lg, $num = false){
@@ -77,7 +66,7 @@ if ($continue_up)
 	$post['base'] = cut_str($page, 'name="base" type="hidden" value="', '"');
 	$post['host'] = cut_str($page, 'name="host" type="hidden" value="', '"');
 
-	$up_url = "http://{$up[1]}/marker=$UID";
+	$up_url = "http://{$up[1]}/marker=$UID";textarea($up_url,0,0,1);
 ?>
 <script type="text/javascript">document.getElementById('info').style.display='none';</script>
 <?php
@@ -102,6 +91,91 @@ if ($continue_up)
 	} else {
 		html_error("Error: Download link not found.", 0);
 	}
+}
+
+function login($user, $pass) {
+	global $cookie;
+	$post = array();
+	$post['act'] = "login";
+	$post['login'] = $user;
+	$post['password'] = $pass;
+
+	$page = geturl('letitbit.net', 80, '/ajax/auth.php', 'http://letitbit.net/', 'lang=en', $post, 0, $_GET["proxy"], $pauth);is_page($page);
+	is_present($page, "Authorization data is invalid", "Login failed: User/Password incorrect.");
+	is_notpresent($page, 'Set-Cookie: log=', 'Login failed: Cannot find login cookie.');
+	is_notpresent($page, 'Set-Cookie: pas=', 'Login failed: Cannot find paswword cookie.');
+	$cookie = GetCookiesArr($page);
+	$cookie['lang'] = 'en';
+
+	SaveCookies($user, $pass);
+
+	$page = geturl("letitbit.net", 80, "/", 'http://letitbit.net/', $cookie, 0, 0, $_GET["proxy"], $pauth);is_page($page);
+	return $page;
+}
+
+function IWillNameItLater($cookie, $decrypt=true) {
+	if (!is_array($cookie)) {
+		if (!empty($cookie)) return $decrypt ? decrypt(urldecode($cookie)) : urlencode(encrypt($cookie));
+		return "";
+	}
+	if (count($cookie) < 1) return $cookie;
+	$keys = array_keys($cookie);
+	$values = array_values($cookie);
+	$keys = $decrypt ? array_map('decrypt', array_map('urldecode', $keys)) : array_map('urlencode', array_map('encrypt', $keys));
+	$values = $decrypt ? array_map('decrypt', array_map('urldecode', $values)) : array_map('urlencode', array_map('encrypt', $values));
+	return array_combine($keys, $values);
+}
+
+function SkipLoginC($user, $pass, $filename = 'letitbit_ul.php') {
+	global $cookie, $hash, $maxdays, $secretkey;
+	$maxdays = 3; // Max days to keep cookies saved
+	if (!defined('DOWNLOAD_DIR')) {
+		global $options;
+		if (substr ($options['download_dir'], - 1) != '/') $options['download_dir'] .= '/';
+		define ('DOWNLOAD_DIR', (substr ($options['download_dir'], 0, 6) == "ftp://" ? '' : $options['download_dir']));
+	}
+
+	$filename = DOWNLOAD_DIR.basename($filename);
+	if (!file_exists($filename)) return login($user, $pass);
+
+	$file = file($filename);
+	$savedcookies = unserialize($file[1]);
+	unset($file);
+
+	$hash = hash('crc32b', $user.':'.$pass);
+	if (array_key_exists($hash, $savedcookies)) {
+		if (time() - $savedcookies[$hash]['time'] >= ($maxdays * 24 * 60 * 60)) return login($user, $pass); // Ignore old cookies
+		$_secretkey = $secretkey;
+		$secretkey = sha1($user.':'.$pass);
+		$cookie = IWillNameItLater($savedcookies[$hash]['cookie']);
+		$secretkey = $_secretkey;
+
+		$page = geturl("letitbit.net", 80, "/", 'http://letitbit.net/', $cookie, 0, 0, $_GET["proxy"], $pauth);is_page($page);
+		if (stripos($page, 'title="Logout">Logout</a>') === false) return login($user, $pass);
+		SaveCookies($user, $pass); // Update cookies file
+		return $page;
+	}
+	return login($user, $pass);
+}
+
+function SaveCookies($user, $pass, $filename = 'letitbit_ul.php') {
+	global $cookie, $maxdays, $secretkey;
+	$filename = DOWNLOAD_DIR.basename($filename);
+	if (file_exists($filename)) {
+		$file = file($filename);
+		$savedcookies = unserialize($file[1]);
+		unset($file);
+
+		// Remove old cookies
+		foreach ($savedcookies as $k => $v) if (time() - $v['time'] >= ($maxdays * 24 * 60 * 60)) unset($savedcookies[$k]);
+	} else $savedcookies = array();
+	$hash = hash('crc32b', $user.':'.$pass);
+	$_secretkey = $secretkey;
+	$secretkey = sha1($user.':'.$pass);
+	$savedcookies[$hash] = array('time' => time(), 'cookie' => IWillNameItLater($cookie, false));
+	$secretkey = $_secretkey;
+
+	write_file($filename, "<?php exit(); ?>\r\n" . serialize($savedcookies));
 }
 
 //[01-1-2012] Written by Th3-822. // Happy New Year!

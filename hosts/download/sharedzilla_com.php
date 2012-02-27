@@ -1,40 +1,45 @@
 <?php
-if (!defined('RAPIDLEECH'))
-{
-	require_once("index.html");
-	exit;
+if (!defined('RAPIDLEECH')) {
+    require_once ('index.html');
+    exit;
 }
 
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"],$pauth);
-//file_put_contents("sharedzilla_1.txt", $page);
-is_page($page);
-is_present($page, "            Upload not found", "File not found");
-is_present($page, '<input type="password" name="upload_password" id="upload_password" value="">', "The file is password protected");
-is_present($page, "File has expired.");
-
-if(preg_match('/<form action="(.+?)" name="download" method="POST"/', $page, $nextPageArray))
-{
-	$Referer = $LINK;
-	$nextPage = $nextPageArray[1];
+class sharedzilla_com extends DownloadClass {
+    
+    public function Download($link) {
+        $page = $this->GetPage($link);
+        is_present($page, 'File not found');
+        if (!preg_match_all('%<a href="([^"]+)" target="_blank">%', $page, $rdl)) html_error('Files still queued for uploading!');
+        // get filehost redirect link
+        foreach ($rdl[1] as $k => $v) {
+            $temp .= $this->GetPage($v); 
+        }
+        if (!preg_match_all('@Location: (http:\/\/[^\r\n]+)@i', $temp, $redir)) html_error('No mirror link found!');
+        $this->Submit($redir[1]);
+        exit();
+    }
+    
+    private function Submit($links) {
+        global $PHP_SELF;
+        if (!is_array($links) && count($links) < 1) html_error("No links found or \$links isn't an array.");
+        echo "\n<center><form name='multilink_form' action='$PHP_SELF' method='post' >\n";
+        echo "\n<h4>Select a host for download this file:</h4><br />\n";
+        echo "<select name='link' style='width:160px;height:20px;'>\n";
+        foreach ($links as $Name => $Link) echo "\t<option value='" . urlencode($Link) . "'>" . htmlentities($Link) . "</option>\n";
+        echo "</select><br />\n";
+        $defdata = $this->DefaultParamArr($link);
+        foreach ($defdata as $name => $val) {
+            echo "<input type='hidden' name='$name' id='$name' value='$val' />\n";
+        }
+        echo '<br /><input type="checkbox" name="premium_acc" id="premium_acc" onclick="javascript:var displ=this.checked?\'\':\'none\';document.getElementById(\'premiumblock\').style.display=displ;" checked="checked" />&nbsp;' . lang(249) . '<br /><div id="premiumblock" style="display: none;"><br /><table width="150" border="0"><tr><td>' . lang(250) . ':&nbsp;</td><td><input type="text" name="premium_user" id="premium_user" size="15" value="" /></td></tr><tr><td>' . lang(251) . ':&nbsp;</td><td><input type="password" name="premium_pass" id="premium_pass" size="15" value="" /></td></tr></table></div><br />';
+        echo "<input type='submit' value='Download File' />\n";
+        echo "\n</form></center>\n</body>\n</html>";
+        exit;
+    }
 }
-else
-{
-	html_error("Could not find download form.", 0);
-}
-preg_match('/<input type="hidden" name="id" value="(.+?)">/', $page, $idArray);
 
-$post = Array();
-$post["id"] = $idArray[1];
+/*
+ * by Ruud v.Tony 13-02-2012 (taken multiform submit link by Th3-822)
+ */
 
-$Url = parse_url($nextPage);
-$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, $post, 0, $_GET["proxy"],$pauth);
-//file_put_contents("sharedzilla_2.txt", $page);
-is_page($page);
-
-preg_match('/Location: (.*)/i', $page, $nextPageArray);
-$nextPage = trim($nextPageArray[1]);
-$Url = parse_url($nextPage);
-$FileName = basename($Url["path"]);
-
-insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&port=".$Url["port"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".urlencode($LINK).($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
 ?>

@@ -8,7 +8,7 @@ class sendspace_com extends DownloadClass {
 
     public function Download($link) {
         global $premium_acc;
-        if (($_REQUEST['premium_acc'] == 'on' && $_REQUEST['premium_user'] && $_REQUEST['premium_pass']) || ($_REQUEST['premium_acc'] == 'on' && $premium_acc['sendspace']['user'] && $premium_acc['sendspace']['pass'])) {
+        if (($_REQUEST['premium_acc'] == 'on' && $_REQUEST['premium_user'] && $_REQUEST['premium_pass']) || ($_REQUEST['premium_acc'] == 'on' && $premium_acc['sendspace_com']['user'] && $premium_acc['sendspace_com']['pass'])) {
             $this->Premium($link);
         } else {
             $this->Free($link);
@@ -52,8 +52,8 @@ class sendspace_com extends DownloadClass {
 
     private function Login($pA = false) {
         global $premium_acc;
-        $user = ($pA ? $_REQUEST["premium_user"] : $premium_acc["sendspace"]["user"]);
-        $pass = ($pA ? $_REQUEST["premium_pass"] : $premium_acc["sendspace"]["pass"]);
+        $user = ($pA ? $_REQUEST["premium_user"] : $premium_acc["sendspace_com"]["user"]);
+        $pass = ($pA ? $_REQUEST["premium_pass"] : $premium_acc["sendspace_com"]["pass"]);
         if (empty($user) || empty($pass)) {
             html_error("Login Failed: email or password is empty. Please check login data.");
         }

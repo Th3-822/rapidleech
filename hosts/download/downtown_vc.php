@@ -1,57 +1,40 @@
 <?php
-if (!defined('RAPIDLEECH'))
-  {
-  require_once("index.html");
-  exit;
-  }
-  
-	$vc = $_POST['vc'];
-  if($vc == "ok"){
-	$post = array();
-	$post["code"] = $_POST["code"];
-	$post["sc"] = $_POST["sc"];
-	$post["rand"] = $_POST["rand"];
-	$post["fname"] = $_POST["fname"];
-	$post["id"] = $_POST["id"];
-	$post["act"] = $_POST["act"];
-	$Referer = $_POST["link"];
-	$host = "http://downtown.vc/";
-	$Url = parse_url($host);
-	$FileName = $_POST["fname"];
 
-  insert_location("$PHP_SELF?filename=".urlencode($FileName)."&host=".$Url["host"]."&path=".urlencode($Url["path"].($Url["query"] ? "?".$Url["query"] : ""))."&referer=".urlencode($Referer)."&email=".($_GET["domail"] ? $_GET["email"] : "")."&partSize=".($_GET["split"] ? $_GET["partSize"] : "")."&post=".urlencode(serialize($post))."&method=".$_GET["method"]."&proxy=".($_GET["useproxy"] ? $_GET["proxy"] : "")."&saveto=".$_GET["path"]."&link=".$_POST["link"].($_GET["add_comment"] == "on" ? "&comment=".urlencode($_GET["comment"]) : "").($pauth ? "&pauth=$pauth" : "").(isset($_GET["audl"]) ? "&audl=doum" : ""));
-
-}else{
- 
- $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), $Referer, 0, 0, 0, $_GET["proxy"],$pauth);
-  is_page($page);
-
-  insert_timer(20, "Waiting link timelock");
-  
-if(preg_match('%(http://downtown\.vc/captchas/.+?)"%', $page, $img)){
-	$img_link = $img[1];
-}else{
-	html_error("Error[getImagecode]", 0);
+if (!defined('RAPIDLEECH')) {
+    require_once ('index.html');
+    exit();
 }
-preg_match('/name="act" value="(.+)">/', $page, $actdl);
-preg_match('/name="id" value="(.+)">/', $page, $iddl);
-preg_match('/name="fname" value="(.+)">/', $page, $namedl);
-preg_match('/name="rand" value="(.+)">/', $page, $randdl);
-preg_match('/name="sc" value="(.+)">/', $page, $scdl);
 
-$mlink = "http://".$Url["host"].$Url["path"];
+class downtown_vc extends DownloadClass {
 
-	print 	"<form method=\"post\" action=\"".$PHP_SELF.(isset($_GET["audl"]) ? "?audl=doum" : "")."\">$nn";
-	print	"<b>Please enter code:</b><br>$nn";
-	print	"<img src=\"$img_link\">$nn";
-	print	"<input type=\"text\" name=\"code\">$nn";
-	print	"<input name=\"link\" value=\"$mlink\" type=\"hidden\">$nn";
-	print	"<input name=\"vc\" value=\"ok\" type=\"hidden\">$nn";
-	print	"<input name=\"act\" value=\"$actdl[1]\" type=\"hidden\">$nn";
-	print	"<input name=\"id\" value=\"$iddl[1]\" type=\"hidden\">$nn";
-	print	"<input name=\"fname\" value=\"$namedl[1]\" type=\"hidden\">$nn";
-	print	"<input name=\"rand\" value=\"$randdl[1]\" type=\"hidden\">$nn";
-	print	"<input name=\"sc\" value=\"$scdl[1]\" type=\"hidden\">$nn";
-	print	"<input name=\"Submit\" value=\"Submit\" type=\"submit\"></form>";
+    public function Download($link) {
+        $page = $this->GetPage($link);
+        $form = cut_str($page, '<div class="links">', '<p class="description-tit">');
+        if (!preg_match_all('%<p class="address">(http:\/\/[^\r\n]+)<\/p>%', $form, $rd)) html_error("Error [No filehost redirect link or files still queued for uploading or this link set to private!]");
+        $this->Submit($rd[1]);
+        exit();
+    }
+
+    private function Submit($links) {
+        global $PHP_SELF;
+        if (!is_array($links) && count($links) < 1) html_error("No links found or \$links isn't an array.");
+        echo "\n<center><form name='multilink_form' action='$PHP_SELF' method='post' >\n";
+        echo "\n<h4>Select a host for download this file:</h4><br />\n";
+        echo "<select name='link' style='width:160px;height:20px;'>\n";
+        foreach ($links as $Name => $Link) echo "\t<option value='" . urlencode($Link) . "'>" . htmlentities($Link) . "</option>\n";
+        echo "</select><br />\n";
+        $defdata = $this->DefaultParamArr($link);
+        foreach ($defdata as $name => $val) {
+            echo "<input type='hidden' name='$name' id='$name' value='$val' />\n";
+        }
+        echo '<br /><input type="checkbox" name="premium_acc" id="premium_acc" onclick="javascript:var displ=this.checked?\'\':\'none\';document.getElementById(\'premiumblock\').style.display=displ;" checked="checked" />&nbsp;' . lang(249) . '<br /><div id="premiumblock" style="display: none;"><br /><table width="150" border="0"><tr><td>' . lang(250) . ':&nbsp;</td><td><input type="text" name="premium_user" id="premium_user" size="15" value="" /></td></tr><tr><td>' . lang(251) . ':&nbsp;</td><td><input type="password" name="premium_pass" id="premium_pass" size="15" value="" /></td></tr></table></div><br />';
+        echo "<input type='submit' value='Download File' />\n";
+        echo "\n</form></center>\n</body>\n</html>";
+        exit;
+    }
 }
+
+/*
+ * by Ruud v.Tony 10-02-2012 (taken multiform submit link by Th3-822)
+ */
 ?>

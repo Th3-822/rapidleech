@@ -172,7 +172,7 @@ if (empty($_GET ["filename"]) || empty($_GET ["host"]) || empty($_GET ["path"]))
 	if (! empty ($_GET ["domail"]) && ! checkmail ($_GET ["email"]))
 	{
 		html_error (lang(3));
-		if (empty($_GET ["split"]) && ! is_numeric ($_GET ["partSize"]))
+		if (!empty($_GET ["split"]) && ! is_numeric ($_GET ["partSize"]))
 		{
 			html_error (lang(4));
 		}

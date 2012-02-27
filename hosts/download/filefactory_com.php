@@ -7,7 +7,7 @@ if (!defined('RAPIDLEECH')) {
 class filefactory_com extends DownloadClass {
 	public function Download($link) {
 		global $premium_acc;
-
+                
 		if (($_REQUEST["premium_acc"] == "on" && $_REQUEST["premium_user"] && $_REQUEST["premium_pass"]) ||
 			($_REQUEST["premium_acc"] == "on" && $premium_acc["filefactory_com"]["user"] && $premium_acc["filefactory_com"]["pass"])) {
 			$this->Download_Premium($link);
@@ -142,6 +142,9 @@ class filefactory_com extends DownloadClass {
 		is_present($page, "this file is no longer available", "The file is no longer available.");
 
 		$page = $this->GetPage($link, 0, 0, 0, $auth);
+		if (!stripos($page, 'ff_membership=')) {
+			$page = $this->GetPage($link, $cookie);
+		}
 
 		if (stristr($page, "Location:")) {
 			$dllink = trim(cut_str($page, "Location:", "\n"));

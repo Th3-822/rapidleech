@@ -19,11 +19,11 @@ class DownloadClass {
 
     /*
      * You can use this function to retrieve pages without parsing the link
-     * @param string $link  The link of the page to retrieve
-     * @param string $cookie  The cookie value if you need
-     * @param array $post name=>value of the post data
-     * @param string $referer The referer of the page, it might be the value you are missing if you can't get plugin to work
-     * @param string $auth Page authentication, unneeded in most circumstances
+     * @param string $link -> The link of the page to retrieve
+     * @param string $cookie -> The cookie value if you need
+     * @param array $post -> Array name=>value of the post data
+     * @param string $referer -> The referer of the page, it might be the value you are missing if you can't get plugin to work
+     * @param string $auth -> Page authentication, unneeded in most circumstances
      */
 
     public function GetPage($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $XMLRequest=0) {
@@ -32,12 +32,7 @@ class DownloadClass {
             global $Referer;
             $referer = $Referer;
         }
-        if ($options['use_curl']) {
-            if (extension_loaded('curl') && function_exists('curl_init') && function_exists('curl_exec')) $cURL = true;
-            else $cURL = false;
-        } else {
-            $cURL = false;
-        }            
+        $cURL = $options['use_curl'] && (extension_loaded('curl') && function_exists('curl_init') && function_exists('curl_exec')) ? true : false;
         $Url = parse_url(trim($link));
         if ($Url ["scheme"] == 'https') {
             $chttps = false;
@@ -62,13 +57,13 @@ class DownloadClass {
 
     /*
      * Use this function instead of insert_location so that we can improve this feature in the future
-     * @param string $link   The download link of the file
-     * @param string $FileName   The name of the file
-     * @param string $cookie   The cookie value
-     * @param array $post   The post value will be serialized here
-     * @param string $referer   The page that refered to this link
-     * @param string $auth   In format username:password
-     * @param array $params   This parameter allows you to add extra _GET values to be passed on
+     * @param string $link -> The download link of the file
+     * @param string $FileName -> The name of the file
+     * @param string $cookie -> The cookie value
+     * @param array $post -> The post value will be serialized here
+     * @param string $referer -> The page that refered to this link
+     * @param string $auth -> In format username:password
+     * @param array $params -> This parameter allows you to add extra _GET values to be passed on
      */
 
     public function RedirectDownload($link, $FileName, $cookie = 0, $post = 0, $referer = 0, $force_name = 0, $auth = "", $params = array()) {
@@ -119,7 +114,7 @@ class DownloadClass {
 
     /*
      * Use this function to move your multiples links array to auto downloader
-     * @param array $link_array   Normal array containing all download links
+     * @param array $link_array -> Normal array containing all download links
      */
 
     public function moveToAutoDownloader($link_array) {
@@ -154,9 +149,9 @@ class DownloadClass {
 
     /*
      * Use this function to create Captcha display form
-     * @param string $captchaImg   The link of the captcha image or downloaded captcha image on server
-     * @param array $inputs   Key Value pairs for html form input elements ( these elements will be hidden form elements )
-     * @param string $captchaSize   The size of captcha text box
+     * @param string $captchaImg -> The link of the captcha image or downloaded captcha image on server
+     * @param array $inputs -> Key Value pairs for html form input elements ( these elements will be hidden form elements )
+     * @param string $captchaSize -> The size of captcha text box
      */
 
     public function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5') {
@@ -228,9 +223,9 @@ class DownloadClass {
     }
 
     /* Use this function for filehost longer timelock
-     * Param int $secs   The number of seconds to count down
-     * Param array $post   Array variable (name=>value)to include as POST so you dont need to start over the process
-     * Param $string $text   Default text you want to display when counting down
+     * Param int $secs -> The number of seconds to count down
+     * Param array $post -> Variable array to include as POST so you dont need to start over the process
+     * Param $string $text -> Default text you want to display when counting down
      */
 
     public function JSCountdown($secs, $post = 0, $text='Waiting link timelock', $stop = 1) {
@@ -260,8 +255,7 @@ class DownloadClass {
         }
         function fc2(){if(c>120){if(c2<=20){a2.innerHTML=a2.innerHTML+".";c2=c2+1}else{c2=10;a2.innerHTML=""}setTimeout("fc2()",100)}else{dl2.style.display="none"}}<?php
         echo "</script></form><br />";
-        if ($stop)
-            exit("</body></html>");
+        if ($stop) exit("</body></html>");
     }
 
     public function changeMesg($mesg) {
@@ -280,6 +274,6 @@ class DownloadClass {
   Moved JSCountdown function for future use by Th3-822
   Add CheckBack function to test correctly download link by vdhdevil
   Remove declaration of checkback function, it automatically signed in the plugin itself
-  Add new limitation options by Ruud v.Tony 
+  Add new limitation options by Ruud v.Tony
  **********************************************************/
 ?>

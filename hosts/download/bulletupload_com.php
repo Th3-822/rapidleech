@@ -14,9 +14,9 @@ class bulletupload_com extends DownloadClass {
             is_present($this->page, "The file you were looking for could not be found, sorry for any inconvenience.");
         }
         if ($_REQUEST['premium_acc'] == 'on' && (($_REQUEST['premium_user'] && $_REQUEST['premium_pass'])||($premium_acc['bulletupload_com']['user'] && $premium_acc['bulletupload_com']['pass']))) {
-            html_error("Not supported [PREMIUM] now!");
+            return $this->Premium($link);
         } else {
-            $this->Free($link);
+            return $this->Free($link);
         }
     }
     
@@ -46,6 +46,7 @@ class bulletupload_com extends DownloadClass {
         }
         if (strpos($page, "Type the two words:")) {
             $form = cut_str($page, '<Form name="F1" method="POST"', '</Form>');
+            is_present($form, 'Password', 'This file is password protected!');
             if (!preg_match('@(\d+)<\/span> seconds@', $form, $wait)) html_error("Error: Timer not found!");
             $this->CountDown($wait[1]);
             if (!preg_match_all('@<input type="hidden" name="([^"]+)" value="([^"]+)?">@', $form, $match)) html_error("Error: Post Data 2 [FREE] not found!");
@@ -71,9 +72,55 @@ class bulletupload_com extends DownloadClass {
         $this->RedirectDownload($dlink, $filename, 0, 0, $link);
         exit();
     }
+    
+    private function Premium($link) {
+        
+        $cookie = $this->login();
+        $page = $this->GetPage($link, $cookie, 0, $link);
+        if (!preg_match('/http:\/\/[\w.]+(:\d+)?\/d\/[^\r\n]+/', $page, $dl)) {
+            $form = cut_str($page, '<Form name="F1" method="POST"', '</Form>');
+            is_present($form, 'Password', 'This file is password protected!');
+            if (!preg_match_all('%<input type="hidden" name="([^"]+)" value="([^"]+)?">%', $form, $ck)) html_error('Error [Post Data PREMIUM not found!]');
+            $match = array_combine($ck[1], $ck[2]);
+            $post = array();
+            foreach ($match as $k => $v) {
+                $post[$k] = $v;
+            }
+            $page = $this->GetPage($link, $cookie, $post, $link);
+            if (!preg_match('/http:\/\/[\w.]+(:\d+)?\/d\/[^\r\n"]+/', $page, $dl)) html_error('Error [Download Link PREMIUM not found!]');
+        }
+        $dlink = trim($dl[0]);
+        $filename = basename(parse_url($dlink, PHP_URL_PATH));
+        $this->RedirectDownload($dlink, $filename, $cookie, 0, $link);
+    }
+    
+    private function login() {
+        global $premium_acc;
+        
+        $user = ($_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc ["bulletupload_com"] ["user"]);
+        $pass = ($_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["bulletupload_com"] ["pass"]);
+        if (empty($user) || empty($pass)) html_error("Login failed, $user [user] or $pass [password] is empty!");
+        
+        $url = 'http://bulletupload.com/';
+        $post['op'] = 'login';
+        $post['redirect'] = $url;
+        $post['login'] = $user;
+        $post['password'] = $pass;
+        $page = $this->GetPage($url, 'lang=english', $post, $url."login.html");
+        is_present($page, cut_str($page, "<b class='err'>", "</b>"));
+        $cookie = GetCookies($page).'; lang=english';
+        
+        //check account
+        $page = $this->GetPage($url."?op=my_account", $cookie, 0, $url);
+        is_notpresent($page, '<TD>Username:</TD>', 'Invalid account!');
+        is_notpresent($page, '<TD>Premium account expire:</TD>', 'Account not premium???');
+        
+        return $cookie;
+    }
 }
 
 /*
  * by Ruud v.Tony 28-01-2012
+ * updated to support premium by Ruud v.Tony 20-02-2012
  */
 ?>

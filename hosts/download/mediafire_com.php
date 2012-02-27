@@ -28,38 +28,13 @@ class mediafire_com extends DownloadClass {
             echo $html;
             exit;
         }
-        if (preg_match('@Location: (http:\/\/[^\r\n]+)@i', $page, $dl) || preg_match('%<div class="download_link" style=".*" id=".*" name=".*"> <a href="(http:\/\/[^\r\n]+)" onclick=%U', $page, $dl)) {
+        if (preg_match('@Location: (http:\/\/[^\r\n]+)@i', $page, $dl) || preg_match('@<a [^>]*href="(https?://[^\"]+)"[^>]*>Download@i', $page, $dl)) {
             $dlink = trim($dl[1]);
             $this->RedirectDownload($dlink, "Mediafire.com", $Cookies);
             exit;
         } else {
             html_error("Error: Download link [FREE] not found!");
         }
-    }
-
-    private function get_mf($page) {
-        preg_match_all('%<div class="download_link" style=".*" id=".*" name=".*"> <a href="(.*)" onclick=%U', $page, $match);
-        $dl = array();
-        $index = array();
-        $re = '';
-        $page = explode(';', trim(cut_str($page, 'unescape', 'eval')));
-        $a = trim(cut_str($page[0], "('", "')"));
-        $b = explode('=', $page[1]);
-        $b = intval($b[1]);
-        $c = (cut_str($page[4], '16)', '))'));
-        for ($i = 0; $i < $b; $i++) {
-            $d = HexDec(substr($a, $i * 2, 2));
-            eval("\$d = \$d" . $c . ";");
-            $re .= chr($d);
-        }
-        $pro = cut_str($re, "parseInt(\$oThis.css('z-index')) ", "));");
-        for ($o = 0; $o < count($match[1]); $o++) {
-            eval("\$key = \$match[1][\$o]" . $pro . ";");
-            $dl[$key] = $match[2][$o];
-            $index[] = $key;
-        }
-        sort($index);
-        return $dl[$index[count($index) - 1]];
     }
 }
 
@@ -68,5 +43,6 @@ class mediafire_com extends DownloadClass {
  * by vdhdevil
  * remove additional function for temporary fix until get finished - Ruud v.Tony 06-01-2011
  * fix for shared premium link by Ruud v.Tony 23-01-2012
+ * regex fix for download link not found by Th3-822 24-02-2012
  */
 ?>

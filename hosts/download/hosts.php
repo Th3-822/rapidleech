@@ -5,6 +5,7 @@ while (false !== ($entry = $d->read())) {
     if (stristr($entry, '.php') && !stristr($entry, '.JD')) {
         $hostname = substr($entry, 0, -4);
         $hostname = str_replace('_', '.', $hostname);
+        if ($hostname == 'file.upload.net') $hostname = 'file-upload.net';
         if ($hostname == 'share.online.biz') $hostname = 'share-online.biz';
         if ($hostname == 'cash.file.net') $hostname = 'cash-file.net';
         if ($hostname == 'i.filez.com') $hostname = 'i-filez.com';
@@ -45,6 +46,9 @@ while (false !== ($entry = $d->read())) {
                 break;
             case 'freakshare.com':
                 $host['freakshare.net'] = $host['freakshare.com'];
+                break;
+            case 'speedyshare.com':
+                $host['speedy.sh'] = $host['speedyshare.com'];
                 break;
         }
     }
