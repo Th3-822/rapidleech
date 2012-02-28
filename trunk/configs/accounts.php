@@ -53,6 +53,8 @@ $premium_acc = array();
 //$premium_acc["jumbofiles_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["fileserving_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["file4sharing_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["bulletupload_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["speedyshare_com"] = array('user' => 'your username', 'pass' => 'your password');
 
 ###Premium cookie configuration, dont use this if you have already set another premium account config
 //$premium_acc["depositfiles_com"] = array('cookie' => 'your premium cookie');
