@@ -525,7 +525,7 @@ function rebuild_url($url) {
 	return $url['scheme'] . "://" . (!empty($url['user']) && !empty($url['pass']) ? rawurlencode($url['user']) . ":" . rawurlencode($url['pass']) . "@" : '') . $url['host'] . (!empty($url['port']) && $url['port'] != 80 && $url['port'] != 443 ? ":" . $url['port'] : "") . (empty($url['path']) ? "/" : $url['path']) . (!empty($url['query']) ? "?" . $url['query'] : "") . (!empty($url['fragment']) ? "#" . $url['fragment'] : "");
 }
 
-if (!function_exists('http-chunked-decode')) {
+if (!function_exists('http_chunked_decode')) {
 	// Added implementation from a comment at php.net's function page
 	function http_chunked_decode($chunk) {
 		$pos = 0;
