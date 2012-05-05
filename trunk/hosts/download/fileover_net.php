@@ -7,7 +7,10 @@ if (!defined('RAPIDLEECH')) {
 
 class fileover_net extends DownloadClass {
 	public function Download($link) {
-		if ($_POST['step'] == 1) {
+		global $premium_acc;
+		if ($_REQUEST["premium_acc"] == "on" && ((!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) || ($premium_acc["fileover_net"]["user"] && $premium_acc["fileover_net"]["pass"]))) {
+			return $this->Download_Premium($link);
+		} elseif ($_POST['step'] == 1) {
 			return $this->Download_Free($link);
 		} else {
 			return $this->Prepare_Free($link);
@@ -80,7 +83,41 @@ class fileover_net extends DownloadClass {
 
 		$this->RedirectDownload($downl[1], $downl[2], $cookie);
 	}
+
+	private function Download_Premium($link) {
+		$page = $this->GetPage($link);
+		is_present($page, "Location: /deleted/", 'Error: File not found.');
+
+		$cookie = $this->Login();
+		$page = $this->GetPage($link, $cookie);
+
+		if (!preg_match('@Location: (https?://(?:[^/|\r|\n]+\.)?fileover.net/[^\r|\n]+)@i', $page, $dllink)) html_error("Error: Download-link not found.");
+
+		$FileName = urldecode(basename(parse_url($dllink[1], PHP_URL_PATH)));
+		$this->RedirectDownload($dllink[1], $FileName, $cookie);
+	}
+
+	private function Login() {
+		global $premium_acc;
+		$pA = (empty($_REQUEST["premium_user"]) || empty($_REQUEST["premium_pass"])) ? false : true;
+		$email = ($pA ? $_REQUEST["premium_user"] : $premium_acc["fileover_net"]["user"]);
+		$pass = ($pA ? $_REQUEST["premium_pass"] : $premium_acc["fileover_net"]["pass"]);
+		if (empty($email) || empty($pass)) html_error("Login Failed: EMail or Password is empty. Please check login data.");
+
+		$post = array();
+		$post["email"] = urlencode($email);
+		$post["password"] = urlencode($pass);
+		$page = $this->GetPage("http://fileover.net/api/users/login/", 0, $post);
+		is_notpresent($page, "Set-Cookie: email=", "Login failed: Check your login details.");
+		$cookie = GetCookiesArr($page);
+
+		$page = $this->GetPage("http://fileover.net/user/account", $cookie);
+		is_notpresent($page, "<h2>Expires</h2>", "Login error: Account isn't premium?.");
+		return $cookie;
+	}
 }
 
 //[13-6-2011]  Written by Th3-822 (Free download only).
+//[18-4-2012]  Added premium download support. - Th3-822
+
 ?>

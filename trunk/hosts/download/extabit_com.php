@@ -19,9 +19,10 @@ class extabit_com extends DownloadClass {
 
     private function DownloadFree($link) {
         $captcha = $_POST['captcha'];
+		$challenge = $_POST['challenge'];
         $link = urldecode($_POST['link']);
         $cookie = StrToCookies(urldecode($_POST['cookie']));
-        $page = $this->GetPage("$link?capture=$captcha", $cookie, 0, $link, 0, 1);
+        $page = $this->GetPage("$link?type=recaptcha&challenge=$challenge&capture=$captcha", $cookie, 0, $link, 0, 1);
         $cookie = GetCookiesArr($page, $cookie);
         if (preg_match('@\{"(\w+)":(\w+)?,?"?(\w+)?"?:?"([^"]+)"\}@', $page, $ck)) {
             if ($ck[1] == 'ok') {
@@ -50,16 +51,20 @@ class extabit_com extends DownloadClass {
         is_present($page, "File not found");
         is_present($page, "Only premium users can download this file");
         is_notpresent($page, 'I have no money', cut_str($page, '<div class="b-download-free download-link">', '<a class="b-get-premium" href="/premium.jsp">'));
-        if (stristr($page, '<div id="download_link_captcha"')) {
+		if (stripos($page, 'Please wait until download starts')) {
+			if (!preg_match('/<div id="\w+">(\d+)<\/div>/', $page, $wait)) html_error('Error [Timer not found!]');
+			$this->CountDown($wait[1]);
+		}
+        if (stripos($page, '<div id="download_link_captcha"')) {
             $form = cut_str($page, 'class="download_link_captcha_en">', '</form>');
             $Url = 'http://extabit.com' . cut_str($form, '<form action="', '"');
-            $img = 'http://extabit.com' . cut_str($form, ' <img src="', '"');
+			if (!preg_match('/api\/challenge\?k=([^"]+)/', $form, $k) && !preg_match('/api\/noscript\?k=([^"]+)/', $form, $k)) html_error('Error [Captcha Data not found!]');
 
             //Download captcha img.
-            $cap = $this->GetPage($img, $cookie);
-            $cookie = GetCookiesArr($page, $cookie);
+            $ch = cut_str($this->GetPage('http://www.google.com/recaptcha/api/challenge?k='. $k[1], $cookie),  "challenge : '", "'");
+            $cap = $this->GetPage("http://www.google.com/recaptcha/api/image?c=" . $ch);
             $capt_img = substr($cap, strpos($cap, "\r\n\r\n") + 4);
-            $imgfile = DOWNLOAD_DIR . "extabit_captcha.gif";
+            $imgfile = DOWNLOAD_DIR . "extabit_captcha.jpg";
 
             if (file_exists($imgfile)) unlink($imgfile);
             if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.", 0);
@@ -67,6 +72,7 @@ class extabit_com extends DownloadClass {
 
             $data = $this->DefaultParamArr($Url, $cookie);
             $data['step'] = '1';
+			$data['challenge'] = $ch;
             $this->EnterCaptcha($imgfile, $data);
             exit();
         }
@@ -93,7 +99,8 @@ class extabit_com extends DownloadClass {
         if (!preg_match('#http://\w+\d+.extabit.com/[^"]+#', $page, $dlink)) {
             html_error("Error 1x01: Plugin is out of date");
         }
-        $this->RedirectDownload($dlink[0], "Extabit", $Cookies, 0, trim($tmp[1]));
+		$filename = basename(parse_url($dlink[0], PHP_URL_PATH));
+        $this->RedirectDownload($dlink[0], $filename, $Cookies, 0, trim($tmp[1]));
         exit;
     }
 }
@@ -101,6 +108,7 @@ class extabit_com extends DownloadClass {
 /*
  * by vdhdevil
  * fixed captcha also redirect link by Ruud v.Tony 06-02-2012
+ * fixed filename error in premium also recaptcha in free by Ruud v.Tony 28-03-2012
  */
 
 ?>

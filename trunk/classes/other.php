@@ -183,6 +183,9 @@ function html_error($msg, $head = 1) {
 	}
 	echo ('<div align="center">');
 	echo ('<span class="htmlerror"><b>' . $msg . '</b></span><br /><br />');
+	if (isset ($_GET ["audl"])) {
+		echo '<script type="text/javascript">parent.nextlink();</script>';
+	}	
 	if ($options['new_window']) { echo '<a href="javascript:window.close();">'.lang(378).'</a>'; }
 	else { echo '<a href="'.$PHP_SELF.'">'.lang(13).'</a>'; }
 
@@ -514,10 +517,15 @@ function jstime() {
 
 function check_referer() {
 	$refhost = !empty($_SERVER['HTTP_REFERER']) ? cut_str($_SERVER['HTTP_REFERER'], '://', '/') : false;
-	if ($refhost && !preg_match(str_replace('.', '\.', "@({$_SERVER['SERVER_NAME']})|({$_SERVER['SERVER_ADDR']})(:\d+)?$@i"), $refhost)) {
+	if (!$refhost) return;
+
+	if (!empty($_SERVER['HTTP_HOST'])) $httphost = preg_replace('@(:\d+)$@', '', $_SERVER['HTTP_HOST']);
+	$httphost = !empty($httphost) && $httphost != $_SERVER['SERVER_NAME'] ? "|($httphost)" : '';
+
+	if (!preg_match(str_replace('.', '\.', "@({$_SERVER['SERVER_NAME']})|({$_SERVER['SERVER_ADDR']})$httphost(:\d+)?$@i"), $refhost)) {
 		// Uncomment next line if you want rickroll the users from Form leechers.
 		// header("Location: http://www.youtube.com/watch?v=oHg5SJYRHA0");
-		html_error(sprintf(lang(7), $refhost, 'Referer not allowed.'));
+		html_error(sprintf(lang(7), $refhost, 'External referer not allowed.'));
 	}
 }
 

@@ -25,7 +25,10 @@ class ifile_it extends DownloadClass {
 		}
 
 		if (!$cantlogin && $_REQUEST["premium_acc"] == "on" && (((!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) || ($premium_acc["ifile_it"]["user"] && $premium_acc["ifile_it"]["pass"])) || !empty($premium_acc["ifile_it"]["apikey"]))) $this->Login($link);
-		elseif ($_POST["skip"] == "true") $this->chkcaptcha($link);
+		elseif (!empty($_POST["skip"]) && $_POST["skip"] == "true") {
+			$this->_ukey = urldecode($_POST['_ukey']);
+			$this->chkcaptcha($link, true);
+		}
 		else $this->Prepare($link);
 	}
 
@@ -35,28 +38,31 @@ class ifile_it extends DownloadClass {
 		$this->cookie = array_merge($this->cookie, GetCookiesArr($page));
 		$_s = '[\s|\t]'; // I'm too lazy :D
 
-		if (!preg_match("@var$_s+_url$_s*=$_s*'([^']+)'@i", $page, $this->_url)) html_error("Error: Cannot find url for post.");
+		if (!preg_match("@var$_s+__url$_s*=$_s*'([^']+)'@i", $page, $this->_url)) html_error("Error: Cannot find url for post.");
 		$this->_url = $this->_url[1];
 
 		if (!preg_match("@var$_s+__ukey$_s*=$_s*'([^']+)'@i", $page, $this->_ukey)) html_error("Error: File id not found.");
 		$this->_ukey = $this->_ukey[1];
 
-		if (!preg_match("@var$_s+__site$_s*=$_s*'([^']+)'@i", $page, $_site)) $_site = array('','http://ifile.it/');
-		$this->dlreq = $_site[1]."download-request.json?ukey=".$this->_ukey;
+		//if (!preg_match("@var$_s+__site$_s*=$_s*'([^']+)'@i", $page, $_site)) $_site = array('','http://ifile.it/');
+		$this->dlreq = $this->_url."new_download-request.json";
 
 		if (!preg_match("@var$_s+__recaptcha_public$_s*=$_s*'([^']+)'@i", $page, $this->captcha)) $this->captcha = false;
 		$this->captcha = $this->captcha[1];
 
-		$this->chkcaptcha($this->_url);
+		$this->chkcaptcha($link);
 	}
 
-	private function FreeDL($link) {
-		$this->GetPage($link, $this->cookie, 0, $link);
-		$page = $this->GetPage($link, $this->cookie, 0, $this->_url);
+	private function FreeDL($rply) {
+		if ($rply['dl'] != '1') {
+			$err = (!empty($rply['message'])) ? ': '.htmlentities($rply['message']) : '.';
+			html_error("Error getting download-link$err");
+		}
 
-		if (!preg_match('@href="(http://i\d+.ifile.it/'.$this->_ukey.'[^"]+)"@i', $page, $dllink)) html_error("Error: Download-link not found.");
-		$filename = parse_url($dllink[1]);$filename = urldecode(basename($filename["path"]));
-		return $this->RedirectDownload($dllink[1], $filename, $this->cookie);
+		if (!preg_match('@^https?://i\d+.ifile.it/'.$this->_ukey.'.+@i', $rply['ticket_url'], $dllink)) html_error("Error: Download-link not found.");
+
+		$filename = urldecode(basename(parse_url($dllink[0], PHP_URL_PATH)));
+		return $this->RedirectDownload($dllink[0], $filename, $this->cookie);
 	}
 
 	private function Get_Reply($page) {
@@ -68,13 +74,16 @@ class ifile_it extends DownloadClass {
 		return $rply;
 	}
 
-	private function chkcaptcha($link) {
-		if ($_POST["skip"] == "true") {
+	private function chkcaptcha($link, $send=false) {
+		$post = array();
+		$post['ukey'] = $this->_ukey;
+		$post['ab'] = 0; // Ad-block trap
+		if ($send) {
 			if (empty($_POST['captcha'])) html_error("You didn't enter the image verification code.");
-			$post = array();
 			$post['ctype'] = 'recaptcha';
 			$post['recaptcha_response'] = $_POST['captcha'];
 			$post['recaptcha_challenge'] = $_POST['challenge'];
+
 			$this->_url = urldecode($_POST['_link']);
 			$this->dlreq = urldecode($_POST['_dlreq']);
 			$this->cookie = urldecode($_POST['cookie']);
@@ -82,21 +91,22 @@ class ifile_it extends DownloadClass {
 			$page = $this->GetPage($this->dlreq, $this->cookie, $post);
 			$rply = $this->Get_Reply($page);
 
-			if ($rply['captcha'] == 0) $this->FreeDL($link);
+			if ($rply['captcha'] == 0) $this->FreeDL($rply);
 			else {
 				if ($rply['retry'] == 1) html_error("Error: Wrong Captcha Entered.");
 				html_error("Error Sending Captcha.");
 			}
 		} else {
-			$page = $this->GetPage($this->dlreq, $this->cookie);
+			$page = $this->GetPage($this->dlreq, $this->cookie, $post);
 			$rply = $this->Get_Reply($page);
 
 			if ($rply['status'] == 'ok') {
 				if ($rply['captcha'] == 0) {
-					$this->FreeDL($link);
+					$this->FreeDL($rply);
 				} else {
 					if (!$this->captcha || empty($this->captcha)) html_error("Error: Captcha not found.");
 					$data = $this->DefaultParamArr($link, CookiesToStr($this->cookie));
+					$data['_ukey'] = urlencode($this->_ukey);
 					$data['_link'] = urlencode($this->_url);
 					$data['_dlreq'] = urlencode($this->dlreq);
 					$data['skip'] = 'true';
@@ -185,7 +195,7 @@ class ifile_it extends DownloadClass {
 		if ($rply['status'] != 'ok') html_error("Error getting premium dlink: ".htmlentities($rply['message']));
 		if (empty($rply['download_url'])) html_error("Error getting premium dlink... Empty?");
 
-		$filename = parse_url($rply['download_url']);$filename = urldecode(basename($filename["path"]));
+		$filename = urldecode(basename(parse_url($rply['download_url'], PHP_URL_PATH)));
 		return $this->RedirectDownload($rply['download_url'], $filename);
 	}
 }
@@ -193,5 +203,6 @@ class ifile_it extends DownloadClass {
 //[16-Oct-2011] Written by Th3-822.
 //[21-Nov-2011] Captcha now doesn't allow hotlinking, fixed. - Th3-822
 //[09-Dec-2011] Added premium acc support (non tested) & apikey support. - Th3-822
+//[20-Apr-2012] Fixed free download + small edits. - Th3-822
 
 ?>
