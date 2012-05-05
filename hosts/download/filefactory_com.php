@@ -7,7 +7,7 @@ if (!defined('RAPIDLEECH')) {
 class filefactory_com extends DownloadClass {
 	public function Download($link) {
 		global $premium_acc;
-                
+
 		if (($_REQUEST["premium_acc"] == "on" && $_REQUEST["premium_user"] && $_REQUEST["premium_pass"]) ||
 			($_REQUEST["premium_acc"] == "on" && $premium_acc["filefactory_com"]["user"] && $premium_acc["filefactory_com"]["pass"])) {
 			$this->Download_Premium($link);
@@ -33,12 +33,11 @@ class filefactory_com extends DownloadClass {
 			"Your access to the free download service has been <strong>temporarily limited</strong> to prevent abuse... Please wait 10 minutes or more and try again.");
 		if (preg_match('@Location: [^\r|\n]*/premium/index\.php\?e=([^&|\r|\n]+)@i', $page, $b64err)) {
 			$error = base64_decode(urldecode($b64err[1]));
-			is_present($error, "All free download slots on this server are currently in use.");
+			is_present($error, "All free download slots are in use.");
 			html_error("Unknown redirect to premium page.");
 		}
 
-		if (preg_match('/check:\'([^\']+)/i', $page, $ck) && preg_match('/Recaptcha\.create\("([^"]+)/i', $page,
-			$pid)) {
+		if (preg_match('/check\s*:\s*\'([^\']+)/i', $page, $ck) && preg_match('/Recaptcha\.create\s?\([\s|\t|\r|\n]*"([^"]+)/i', $page, $pid)) {
 			$data = $this->DefaultParamArr($link, $cookie);
 			$data['check'] = $ck[1];
 			$data['step'] = '1';
@@ -86,7 +85,7 @@ class filefactory_com extends DownloadClass {
 		is_present($page, "<strong>temporarily limited</strong>",
 			"Your access to the free download service has been <strong>temporarily limited</strong> to prevent abuse... Please wait 10 minutes or more and try again.");
 
-		if (preg_match('/href="([^"]+)" id="downloadLinkTarget"/i', $page, $D)) {
+		if (preg_match('/href="([^"]+)"[^>]*>Click here to download now/i', $page, $D)) {
 			$dllink = $D[1];
 		} else {
 			html_error("Download-link not found.");
@@ -111,12 +110,12 @@ class filefactory_com extends DownloadClass {
 
 	private function checkcaptcha($post, $cookie) {
 		$page = $this->GetPage("http://www.filefactory.com/file/checkCaptcha.php", $cookie, $post);
-		if (!preg_match('/\{status:"([^"]+)",(path|message):"([^"]+)"\}/i', $page, $stat)) {
+		if (!preg_match('/\{"status":"([^"]+)","(path|message)":"([^"]+)"\}/i', $page, $stat)) {
 			html_error("Error validating CAPTCHA.");
 		}
 
 		if ($stat[1] == 'ok') {
-			return $this->GetPage("http://www.filefactory.com/" . $stat[3], $cookie);
+			return $this->GetPage("http://www.filefactory.com/" . str_replace('\\', '', $stat[3]), $cookie);
 		} elseif (stristr($stat[3], 'incorrect')) {
 			html_error("Entered code was incorrect.");
 		}
@@ -125,44 +124,42 @@ class filefactory_com extends DownloadClass {
 	}
 
 	private function Download_Premium($link) {
-		global $premium_acc;
-
-		$email = $_REQUEST["premium_user"] ? $_REQUEST["premium_user"] : $premium_acc["filefactory_com"]["user"];
-		$password = $_REQUEST["premium_pass"] ? $_REQUEST["premium_pass"] : $premium_acc["filefactory_com"]["pass"];
-		$auth = base64_encode($email . ":" . $password);
-
-		$cookie = $this->login($email, $password);
+		$cookie = $this->login();
 
 		$page = $this->GetPage($link);
 		if (preg_match('/Location: .*(\/file\/[^\r|\n]+)/i', $page, $RD)) {
 			$link = "http://www.filefactory.com" . $RD[1];
 			$page = $this->GetPage($link);
 		}
-		is_present($page, "This file has been deleted", "File deleted.");
-		is_present($page, "this file is no longer available", "The file is no longer available.");
 
-		$page = $this->GetPage($link, 0, 0, 0, $auth);
-		if (!stripos($page, 'ff_membership=')) {
-			$page = $this->GetPage($link, $cookie);
+		$page = $this->GetPage($link, $cookie);
+		$headers = substr($page, 0, strpos($page, "\r\n\r\n")); // $headers = strstr($page, "\r\n\r\n", true);
+
+		if (!preg_match('@Location: (https?://(?:[^/]+\.)?filefactory\.com/dlp/[^\r|\n]+)@i', $headers, $dl)) {
+			is_present($headers, "\r\nLocation: ", "Direct-link not found.");
+			is_present($page, "This file has been deleted", "File deleted.");
+			is_present($page, "this file is no longer available", "The file is no longer available.");
+
+			if (!preg_match('@<a href="(https?://(?:[^/]+\.)?filefactory\.com/dlp/[^\"]+)">Download with FileFactory Premium@i', $page, $dl))html_error("Download-link not found.");
 		}
 
-		if (stristr($page, "Location:")) {
-			$dllink = trim(cut_str($page, "Location:", "\n"));
-		} else {
-			html_error("Download-link not found.");
-		}
-
-		$filename = parse_url($dllink);
+		$filename = parse_url($dl[1]);
 		$filename = html_entity_decode(basename($filename["path"]));
 
-		if (stristr($dllink, ";")) {
-			$dllink = str_replace(array('&',';'), '', $dllink);
+		if (stristr($dl[1], ";")) {
+			$dl[1] = str_replace(array('&',';'), '', $dl[1]);
 		}
 
-		$this->RedirectDownload($dllink, $filename, $cookie, 0, 0, $filename);
+		$this->RedirectDownload($dl[1], $filename, $cookie, 0, 0, $filename);
 	}
 
-	private function login($email, $password, $chkprem = true) {
+	private function login($chkprem = true) {
+		global $premium_acc;
+
+		$pA = !empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"]) ? true : false;
+		$email = $pA ? $_REQUEST["premium_user"] : $premium_acc["filefactory_com"]["user"];
+		$password = $pA ? $_REQUEST["premium_pass"] : $premium_acc["filefactory_com"]["pass"];
+
 		if (empty($email) || empty($password)) {
 			html_error("Login Failed: Email or Password is empty. Please check login data.");
 		}
@@ -178,7 +175,7 @@ class filefactory_com extends DownloadClass {
 		is_notpresent($cookie, "ff_membership=", "Login Failed.");
 
 		if ($chkprem) {
-			$page = $this->GetPage("http://www.filefactory.com/?login=1", $cookie);
+			$page = $this->GetPage("http://www.filefactory.com/member/?login=1", $cookie);
 			is_present($page, '<span>Free <a href="/premium/"', "Login Failed: The account isn't premium.");
 		}
 
@@ -190,5 +187,7 @@ class filefactory_com extends DownloadClass {
 //[26-Nov-2010] Written by Th3-822.
 //[20-Feb-2011] Fixed regex for redirect & Fixed errors in filename & Changed captcha funtion for show reCaptcha. - Th3-822
 //[10-Feb-2012] Added error msg at freedl & 2 Regexps edited. -Th3-822
+//[11-Mar-2012] Fixed getting dlink in premium account (Sometimes the request it's redirected to freedl error page) && Fixed login function. - Th3-822
+//[23-Mar-2012] Fixed free dl regexps. - Th3-822
 
 ?>

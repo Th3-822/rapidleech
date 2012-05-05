@@ -10,7 +10,7 @@ $premium_acc = array();
 //$premium_acc["cramit_in"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["megashare_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["gigasize_com"] = array('user' => 'your username', 'pass' => 'your password');
-//$premium_acc["shareonline_biz"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["share-online_biz"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["megashares_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["vBulletin_acc"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["uploaded_to"] = array('user' => 'your username', 'pass' => 'your password');
@@ -23,8 +23,6 @@ $premium_acc = array();
 //$premium_acc["ifile_it"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["filesonic_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["uploading_com"] = array('user' => 'your username', 'pass' => 'your password');
-//$premium_acc["x7"] = array('user' => 'your username', 'pass' => 'your password');
-//$premium_acc["megaporn_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["ugotfile_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["freakshare_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["oron_com"] = array('user' => 'your username', 'pass' => 'your password');
@@ -55,6 +53,7 @@ $premium_acc = array();
 //$premium_acc["file4sharing_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["bulletupload_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["speedyshare_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["filegaze_com"] = array('user' => 'your username', 'pass' => 'your password');
 
 ###Premium cookie configuration, dont use this if you have already set another premium account config
 //$premium_acc["depositfiles_com"] = array('cookie' => 'your premium cookie');
@@ -62,6 +61,7 @@ $premium_acc = array();
 //$premium_acc["rapidshare_com"] = array('cookie' => 'your premium cookie');
 //$premium_acc["uploaded_to"] = array('cookie' => 'your premium cookie');
 //$premium_acc["uploading_com"] = array('cookie' => 'your premium cookie');
+//$premium_acc["netload_in"] = array('cookie' => 'your premium cookie');
 
 ###Premium key configuration, dont use this if you have already set another premium account config
 //$premium_acc["letitbit_net"] = array('pass' => 'your password');

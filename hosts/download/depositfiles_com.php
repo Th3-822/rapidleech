@@ -25,7 +25,7 @@ class depositfiles_com extends DownloadClass {
                 $cookie = urldecode($_POST['cookie']);
                 return $this->DownloadFree($link, $cookie, $this->GetPage($link, $cookie, $post, $Referer));
             }
-        } elseif (($_REQUEST["cookieuse"] == "on" && preg_match("/autologin\s?=\s?(\w{32})/i", $_REQUEST["cookie"], $c)) || ($_REQUEST["premium_acc"] == "on" && $premium_acc["depositfiles_com"]["cookie"])) {
+        } elseif (($_REQUEST["cookieuse"] == "on" && preg_match("/autologin\s?=\s?([^\r\n;);?/i", $_REQUEST["cookie"], $c)) || ($_REQUEST["premium_acc"] == "on" && $premium_acc["depositfiles_com"]["cookie"])) {
             $cookie = (empty($c[1]) ? $premium_acc["depositfiles_com"]["cookie"] : $c[1]);
             return $this->Login($link, $cap, $cookie);
         } elseif (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc ["depositfiles_com"] ["user"] && $premium_acc ["depositfiles_com"] ["pass"])) {
@@ -124,10 +124,8 @@ class depositfiles_com extends DownloadClass {
             // $autolog = cut_str($cookie, 'autologin=', ';');
             // textarea($autolog, 0, 0, true);
             is_notpresent($cookie, "autologin", "Login Failed , Bad username/password combination");
-        } elseif (strlen($autolog) == 32) {
-            $cookie = "autologin=$autolog; lang_current=en";
         } else {
-            html_error("[Cookie] Invalid cookie (" . strlen($autolog) . " != 32).");
+            $cookie = "autologin=$autolog; lang_current=en";
         }
 
         //IMPORTANT, WE NEED TO CHECK THIS FIRST!

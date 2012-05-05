@@ -11,7 +11,7 @@ class speedyshare_com extends DownloadClass {
         
         if (!$_REQUEST['step']) {
             $this->page = $this->GetPage($link);
-            if (preg_match('@Location: (http:\/\/www\.speedyshare\.com\/[^\r\n]+)@i', $this->page, $redir)) {
+            if (preg_match('@Location: (http:\/\/speedy.sh\/[^\r\n]+)@i', $this->page, $redir)) {
                 $link = trim($redir[1]);
                 $this->page = $this->GetPage($link);
             }
@@ -29,7 +29,7 @@ class speedyshare_com extends DownloadClass {
         is_present($this->page, 'Private file ACCESS DISABLED');
         is_present($this->page, 'This file is not available for public download.');
         if (!preg_match("%<a class=downloadfilename href='([^']+)'>%", $this->page, $rd)) html_error('Error [Redirect Link FREE not found!]');
-        $rlink = 'http://www.speedyshare.com'.$rd[1];
+        $rlink = 'http://speedy.sh'.$rd[1];
         $page = $this->GetPage($rlink, $this->cookie, 0, $link);
         if (!preg_match('/Location: (http:\/\/[^\r\n]+)/i', $page, $dl)) html_error('Error [Download Link FREE not found!]');
         $dlink = trim($dl[1]);
@@ -45,7 +45,7 @@ class speedyshare_com extends DownloadClass {
         is_present($page, 'File not found. It has been deleted or it never existed at all.');
         if (!stripos($page, 'Location:')) {
             if (!preg_match("%<a class=downloadfilename href='([^']+)'>%", $this->page, $rd)) html_error('Error [Redirect Link PREMIUM not found!]');
-            $rlink = 'http://www.speedyshare.com'.$rd[1];
+            $rlink = 'http://speedy.sh'.$rd[1];
             $page = $this->GetPage($rlink, $cookie);
         }
         $dlink = trim(cut_str($page, "ocation: ", "\r\n"));
@@ -61,7 +61,7 @@ class speedyshare_com extends DownloadClass {
         $pass = ($_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["speedyshare_com"] ["pass"]);
         if (empty($user) || empty($pass)) html_error("Login failed, $user [user] or $pass [password] is empty!");
         
-        $post['redir'] = urlencode(cut_str($link, "http://www.speedyshare.com", "\r\n"));
+        $post['redir'] = urlencode(cut_str($link, "http://speedy.sh", "\r\n"));
         $post['login'] = $user;
         $post['pass'] = $pass;
         $post['remember'] = 'on';
@@ -77,4 +77,5 @@ class speedyshare_com extends DownloadClass {
 
 // Created by rajmalhotra on 20 Jan 2010
 // rebuild by Ruud v.Tony 15-02-2012
+// small fix in redirect link, now it pointed to speedy.sh, not speedyshare no more
 ?>

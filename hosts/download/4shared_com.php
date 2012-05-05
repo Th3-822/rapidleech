@@ -6,43 +6,54 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class d4shared_com extends DownloadClass {
-	private $cookie;
+	private $page, $cookie, $pA;
+	public $link;
 	public function Download($link) {
 		global $premium_acc;
+		$this->cookie = array('4langcookie' => 'en');
 
 		if (stristr($link, ".com/get/")) {
 			$link = str_replace('.com/get/', '.com/file/', $link);
 		}
-		$page = $this->GetPage($link, "4langcookie=en");
-		$this->cookie = GetCookies($page) . "; 4langcookie=en"; //Keep page in english
-		is_present($page, "The file link that you requested is not valid.");
-		is_present($page, "The file is suspected of illegal or copyrighted content.");
+		$this->link = $link;
+		$this->page = $this->GetPage($this->link, $this->cookie);
+		$this->cookie = GetCookiesArr($this->page, $this->cookie);
+		is_present($this->page, "The file link that you requested is not valid.");
+		is_present($this->page, "The file is suspected of illegal or copyrighted content.");
 
-		if ($_REQUEST["premium_acc"] == "on" && (($_REQUEST["premium_user"] && $_REQUEST["premium_pass"]) || ($premium_acc["4shared_com"]["user"] && $premium_acc["4shared_com"]["pass"]))) {
-			return $this->PremiumDownload($link);
+		if ($_REQUEST["premium_acc"] == "on" && ((!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) || ($premium_acc["4shared_com"]["user"] && $premium_acc["4shared_com"]["pass"]))) {
+			$this->pA = (!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"]) ? true : false);
+			return $this->login();
 		} else {
-			return $this->FreeDownload($page, $link);
+			return $this->FreeDownload();
 		}
 	}
 
-	private function FreeDownload($page, $link) {
-		$page = $this->CheckForPass($page, $link);
+	private function FreeDownload() {
+		$this->CheckForPass();
 
-		preg_match('/.com\/[^\/]+\/([^\/]+)\/?(.*)/i', $link, $L);
-		$page = $this->GetPage("http://www.4shared.com/get/{$L[1]}/{$L[2]}", $this->cookie);
+		if (preg_match('@<a [^>]*href="(http://dc\d+\.4shared\.com/download/[^/]+/(?:tsid[^/|"]+/)?[^/|"]+)"[^>]*>[\r|\n|\t|\s]*(?:<[b-z][^>]*>)*Download Now(?:(?:</?[b-z][^>]*>)|[^<|>])*</a>@i', $this->page, $DL)) { // Long regexp is long. XD
+			if (preg_match('/(?:\?|&)dirPwdVerified=(\w+)/i', $this->link, $pwd)) $DL[1] .= "&dirPwdVerified=".$pwd[1];
+			$FileName = urldecode(basename(parse_url($DL[1], PHP_URL_PATH)));
+			return $this->RedirectDownload($DL[1], $FileName, $this->cookie);
+		}
 
-		if (preg_match('/href=\'(http:\/\/dc[^\']+)\'[^>]*>Download file now/i', $page, $D)) {
-			$this->cookie = $this->cookie."; ".GetCookies($page);
+		if (!preg_match('/.com\/[^\/]+\/([^\/]+)\/?(.*)/i', $this->link, $L)) html_error("Invalid link?");
+		$this->page = $this->GetPage("http://www.4shared.com/get/{$L[1]}/{$L[2]}", $this->cookie);
+
+		if (preg_match('/href=\'(http:\/\/dc[^\']+)\'[^>]*>Download file now/i', $this->page, $D)) {
+			$this->cookie = GetCookiesArr($this->page, $this->cookie);
 			$dllink = $D[1];
-			if (preg_match('/(?:\?|&)dirPwdVerified=(\w+)/i', $link, $pwd)) $dllink .= "&dirPwdVerified=".$pwd[1];
+			if (preg_match('/(?:\?|&)dirPwdVerified=(\w+)/i', $this->link, $pwd)) $dllink .= "&dirPwdVerified=".$pwd[1];
 		} else {
+			if (stripos($this->page, "?err=not-logged\r\n") !== false || stripos($this->page, "Login</a> to download this file") !== false)
+				html_error("You need to be logged in for download this file.");
 			html_error("Download-link not found.");
 		}
 
-		$url = parse_url($dllink);
-		$FileName = basename($url["path"]);
+		$FileName = urldecode(basename(parse_url($dllink, PHP_URL_PATH)));
 
-		if (!preg_match('/var c = (\d+)/', $page, $count)) html_error("Timer not found.");
+		if (!preg_match('/var c = (\d+)/', $this->page, $count)) html_error("Timer not found.");
 
 		if ($count[1] <= 120) $this->CountDown($count[1]);
 		else {
@@ -58,97 +69,87 @@ class d4shared_com extends DownloadClass {
 		$this->RedirectDownload($dllink, $FileName, $this->cookie);
 	}
 
-	private function CheckForPass($page, $link, $predl=false, $pA=false) {
-		global $Referer, $PHP_SELF;
-		if ($_GET["step"] == "1") {
+	private function CheckForPass($predl=false) {
+		global $PHP_SELF;
+		if (isset($_GET["step"]) && $_GET["step"] == "1") {
 			$post = array();
 			$post["userPass2"] = $_POST['userPass2'];
-			$post["dsid"] = $_POST['dsid'];
-			$page = $this->GetPage($link, $this->cookie, $post, $link);
-			is_present($page, "Please enter a password to access this file", "The password you have entered is not valid.");
-			$this->cookie = $this->cookie."; ".GetCookies($page);
-			return $page;
-		} elseif (stristr($page, 'Please enter a password to access this file')) {
+			$post["dsid"] = trim($_POST['dsid']);
+			$this->page = $this->GetPage($this->link, $this->cookie, $post, $this->link);
+			is_present($this->page, "Please enter a password to access this file", "The password you have entered is not valid.");
+		} elseif (stristr($this->page, 'Please enter a password to access this file')) {
 			echo "\n" . '<center><form name="dl_password" action="' . $PHP_SELF . '" method="post" >' . "\n";
-			echo '<input type="hidden" name="link" value="' . urlencode($link) . '" />' . "\n";
-			echo '<input type="hidden" name="referer" value="' . urlencode($Referer) . '" />' . "\n";
-			echo '<input type="hidden" name="step" value="1" />' . "\n";
-
-			$defdata = array("comment" => $_GET ["comment"], "email" => $_GET ["email"], "partSize" => $_GET ["partSize"], "method" => $_GET ["method"], "proxy" => $_GET ["proxy"], "proxyuser" => $_GET ["proxyuser"], "proxypass" => $_GET ["proxypass"], "path" => $_GET ["path"]);
-			foreach ($defdata as $name => $val) {
-				echo "<input type='hidden' name='$name' id='$name' value='$val' />\n";
-			}
-			echo '<input type="hidden" name="dsid" value="' . trim(cut_str($page, 'name="dsid" value="', '"')) . '" />' . "\n";
-			if ($predl) echo '<br /><input type="checkbox" name="premium_acc" id="premium_acc" onclick="javascript:var displ=this.checked?\'\':\'none\';document.getElementById(\'premiumblock\').style.display=displ;" '.(!$pA?'checked="checked"':'').' />&nbsp;'.lang(249).'<br /><div id="premiumblock" style="display: none;"><br /><table width="150" border="0"><tr><td>'.lang(250).':&nbsp;</td><td><input type="text" name="premium_user" id="premium_user" size="15" value="" /></td></tr><tr><td>'.lang(251).':&nbsp;</td><td><input type="password" name="premium_pass" id="premium_pass" size="15" value="" /></td></tr></table></div><br />';
+			$data = $this->DefaultParamArr($this->link);
+			$data['step'] = 1;
+			$data['dsid'] = cut_str($this->page, 'name="dsid" value="', '"');
+			foreach ($data as $name => $val) echo "<input type='hidden' name='$name' id='$name' value='$val' />\n";
+			if ($predl) echo '<br /><input type="checkbox" name="premium_acc" id="premium_acc" onclick="javascript:var displ=this.checked?\'\':\'none\';document.getElementById(\'premiumblock\').style.display=displ;" '.(!$this->pA?'checked="checked"':'').' />&nbsp;'.lang(249).'<br /><div id="premiumblock" style="display: none;"><br /><table width="150" border="0"><tr><td>'.lang(250).':&nbsp;</td><td><input type="text" name="premium_user" id="premium_user" size="15" value="" /></td></tr><tr><td>'.lang(251).':&nbsp;</td><td><input type="password" name="premium_pass" id="premium_pass" size="15" value="" /></td></tr></table></div><br />';
 			echo '<h4>Enter password here: <input type="text" name="userPass2" id="filepass" size="13" />&nbsp;&nbsp;<input type="submit" onclick="return check()" value="Download File" /></h4>' . "\n";
 			echo "<script type='text/javascript'>\nfunction check() {\nvar pass=document.getElementById('filepass');\nif (pass.value == '') { window.alert('You didn\'t enter the password'); return false; }\nelse { return true; }\n}\n</script>\n";
 			echo "\n</form></center>\n</body>\n</html>";
 			exit;
-		} else {
-			return $page;
 		}
+		$this->cookie = GetCookiesArr($this->page, $this->cookie, true, array('','deleted','""'));
 	}
 
-	private function PremiumDownload($link) {
-		$pA = ($_REQUEST["premium_user"] && $_REQUEST["premium_pass"] ? true : false);
-		$this->cookie = $this->login($pA);
-		$page = $this->CheckForPass($this->GetPage($link, $this->cookie), $link, true, $pA);
-		$this->cookie = GetCookies($page);
+	private function PremiumDownload() {
+		$this->page = $this->GetPage($this->link, $this->cookie);
+		$this->CheckForPass(true);
 
-		if (stristr($page, "\r\nContent-Length: 0\r\n")) {
-			is_notpresent($page, "\r\nLocation:", "Error: Direct link not found.");
-			if (!preg_match('@Location: (http://dc\d+.4shared.com/download/[^\r|\n]+)@i', $page, $dl)) html_error("Error: Download-link not found 2.");
-		} elseif (!preg_match('@type="text" value="(http://dc\d+.4shared.com/download/[^"]+)"@i', $page, $dl)) {
+		if (stripos($this->page, "\r\nContent-Length: 0\r\n") !== false) {
+			is_notpresent($this->page, "\r\nLocation:", "Error: Direct link not found.");
+			if (!preg_match('@Location: (http://dc\d+.4shared.com/download/[^\r|\n]+)@i', $this->page, $dl)) html_error("Error: Download-link not found 2.");
+		} elseif (!preg_match('@type="text" value="(http://dc\d+.4shared.com/download/[^"]+)"@i', $this->page, $dl)) {
 			html_error("Error: Download-link not found.");
 		}
 		$dllink = $dl[1];
-		if (preg_match('/(?:\?|&)dirPwdVerified=(\w+)/i', $link, $pwd)) $dllink .= "&dirPwdVerified=".$pwd[1];
+		if (preg_match('/(?:\?|&)dirPwdVerified=(\w+)/i', $this->link, $pwd)) $dllink .= "&dirPwdVerified=".$pwd[1];
 
-		$url = parse_url($dllink);
-		$FileName = basename($url["path"]);
-
+		$FileName = urldecode(basename(parse_url($dllink, PHP_URL_PATH)));
 		$this->RedirectDownload($dllink, $FileName, $this->cookie);
 	}
 
-	private function login($pA=false) {
+	private function login() {
 		global $premium_acc;
-		$email = ($pA ? $_REQUEST["premium_user"] : $premium_acc["4shared_com"]["user"]);
-		$pass = ($pA ? $_REQUEST["premium_pass"] : $premium_acc["4shared_com"]["pass"]);
-
-		if (empty($email) || empty($pass)) {
-			html_error("Login Failed: EMail or Password is empty. Please check login data.");
-		}
+		$email = ($this->pA ? $_REQUEST["premium_user"] : $premium_acc["4shared_com"]["user"]);
+		$pass = ($this->pA ? $_REQUEST["premium_pass"] : $premium_acc["4shared_com"]["pass"]);
+		if (empty($email) || empty($pass)) html_error("Login Failed: EMail or Password is empty. Please check login data.");
 
 		$postURL = "http://www.4shared.com/login";
-		$post["login"] = $email;
-		$post["password"] = $pass;
+		$post["login"] = urlencode($email);
+		$post["password"] = urlencode($pass);
 		$post["remember"] = "false";
 		$post["doNotRedirect"] = "true";
-		$page = $this->GetPage($postURL, "4langcookie=en", $post, $postURL);
-		$cookie = GetCookies($page) . "; 4langcookie=en";
+		$page = $this->GetPage($postURL, $this->cookie, $post, $postURL);
+		$this->cookie = GetCookiesArr($page, $this->cookie, true, array('','deleted','""'));
 
 		is_present($page, "Invalid e-mail address or password", "Login Failed: Invalid Username/Email or Password.");
-		if (stristr($page, '"ok":false') && $err=cut_str($page, '"rejectReason":"', '"')) html_error("Login Failed: 4S says: '$err'.");
-		is_notpresent($cookie, "Login=", "Login Failed. Cookie 'Login' not found.");
-		is_notpresent($cookie, "Password=", "Login Failed. Cookie 'Password' not found.");
+		if (stripos($page, '"ok":false') !== false) {
+			if ($err=cut_str($page, '"rejectReason":"', '"')) html_error("Login Failed: 4S says: '$err'.");
+			else html_error("Login Failed.");
+		}
 
 		// Chk Acc.
-		$redir = cut_str($page, '"loginRedirect":"', '"');
-		if (!$redir) html_error("Redirection 1 not found.");
-		$page = $this->GetPage($redir, $cookie, 0, "http://www.4shared.com/");
-		if (!preg_match('@Location: (http://(www\.)?4shared\.com/[^\r|\n]+)@i', $page, $rloc)) html_error("Redirection 2 not found.");
-		$cookie = "$cookie; " . GetCookies($page);
-		$page = $this->GetPage($rloc[1], $cookie, 0, $redir);
-		is_present($page, "HTTP/1.1 302 Moved Temporarily", "Error: Unknown redirect found.");
+		$page = $this->GetPage("http://www.4shared.com/account/home.jsp", $this->cookie);
+		$this->cookie = GetCookiesArr($page, $this->cookie, true, array('','deleted','""'));
+
 		$quota = cut_str($page, 'Bandwidth:', "</div>");
-		if (!preg_match('/"quota(?:(?:usagebar" title=")|(?:count">))([\d|\.]+)% of ([\d|\.]+) (\w+)/i', $quota, $qm)) html_error("Cannot get Bandwidth info. Acc. is not premium?");
+
+		if ($quota === false || !preg_match('/"quota(?:(?:usagebar" title=")|(?:count">))([\d|\.]+)% of ([\d|\.]+) (\w+)/i', $quota, $qm)) {
+			$this->changeMesg(lang(300)."<br /><b>Account isn\\\'t premium?</b><br />Using it as member.");
+
+			$this->page = $this->GetPage($this->link, $this->cookie);
+			return $this->FreeDownload();
+		}
+
 		$used = floatval($qm[1]);
 		$total = floatval($qm[2]);
+
 		// I have to check the BW... I will show it too :)
 		$this->changeMesg(lang(300)."<br />4S Premium Download<br />Bandwidth: $used% of $total {$qm[3]}.");
 		if ($used >= 95) html_error("Bandwidth limit trigered: Bandwidth: $used% - Limit: 95%");
 
-		return $cookie;
+		return $this->PremiumDownload();
 	}
 }
 
@@ -160,5 +161,7 @@ class d4shared_com extends DownloadClass {
 //[12-Sep-2011] Fixed regex for get BW usage in Premium && Password in files can be skiped with '?dirPwdVerified=xxxxxxxx' in the url. -Th3-822
 //[15-Oct-2011] JSCountdown was added in DownloadClass.php... Removed declaration from plugin. - Th3-822
 //[21-Nov-2011] Fixed regexp for get dlink in FreeDL. - Th3-822
+//[23-Mar-2012] Added support for member (its needed for some links) & some changes & small fixes. - Th3-822
+//[18-Apr-2012] Fixed login needed msg, direct download link regexp (freedl) && removed 2 error msgs from login function. - Th3-822
 
 ?>

@@ -200,6 +200,7 @@ class filepost_com extends DownloadClass {
             }
         } else {
             $this->page = $this->GetPage($this->link, $this->Cookies, 0, $this->link);
+			is_present($this->page, "You can only download 50GB a day");
             if (strpos($this->page, 'var is_pass_exists = true')) {
                 if (!preg_match("@code: '([^']+)',@", $this->page, $code) || !preg_match("@[({]token: '([^']+)',@", $this->page, $token)) html_error('Error: Post Password Data [Premium] not found!');
                 $Url = "http://filepost.com/files/get/?SID={$this->Cookies['SID']}&JsHttpRequest=" . jstime() . "-xml";
