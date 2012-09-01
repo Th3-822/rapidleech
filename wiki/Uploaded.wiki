@@ -1,4 +1,3 @@
-#labels Featured
 Uploaded.to / Uploaded.net
 
 = Info =
