@@ -16,6 +16,7 @@ function upload() {
 		sort ( $upload_services );
 		reset ( $upload_services );
 		$cc = 0;
+		$uploadtype = '';
 		foreach ( $upload_services as $upl ) {
 			$uploadtype .= "\tupservice[" . ($cc ++) . "]=new Array('" . $upl . "','" . (str_replace ( "_", " ", $upl ) . " (" . ($max_file_size [$upl] == false ? "Unlim" : $max_file_size [$upl] . "Mb") . ")") . "');\n";
 		}

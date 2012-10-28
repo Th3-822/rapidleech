@@ -74,14 +74,14 @@ $lang[65] = 'El archivo %1$s no puede ser leído por el script.'; // %1$s = nomb
 $lang[66] = 'Tamaño del archivo demasiado grande para subir al host.';
 $lang[67] = 'Servicio de subida no permitido';
 $lang[68] = 'Enlace de descarga';
-$lang[69] = 'Enlance para eliminar';
+$lang[69] = 'Enlace para eliminar';
 $lang[70] = 'Enlace de estado';
 $lang[71] = 'Enlace de admin';
 $lang[72] = 'ID de Usuario';
 $lang[73] = 'Subida por FTP';
 $lang[74] = 'Contraseña';
 $lang[75] = 'Rapidleech PlugMod - Enlaces de Subida';
-$lang[76] = 'Subir class="linktitle"><div Enlaces para <strong>%1$s</strong> - <span class="bluefont"> Tamaño: <strong>%2$s</strong> </span> </div> '; //%1$s = nombre de archivo %2$s = tamaño de archivo
+$lang[76] = '<div class="linktitle"> Enlaces para <strong>%1$s</strong> - <span class="bluefont"> Tamaño: <strong>%2$s</strong> </span> </div> '; //%1$s = nombre de archivo %2$s = tamaño de archivo
 $lang[77] = 'Terminado';
 $lang[78] = 'Regresar';
 $lang[79] = 'No se pudo establecer una conexión con el servidor %1$s.'; // %1$s = nombre de servidor FTP

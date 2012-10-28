@@ -143,11 +143,6 @@ if (!$options['notes_disable']) {
 </tr>
 <tr>
 <td align="left">
-<label><input type="checkbox" name="vBulletin_plug" />&nbsp;<small><?php echo lang(234); ?></small></label>
-</td>
-</tr>
-<tr>
-<td align="left">
 <label><input type="checkbox" name="cookieuse" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('cookieblock').style.display=displ;" />&nbsp;<small><?php echo lang(235); ?></small></label>
 <table width="150" border="0" id="cookieblock" style="display: none;">
 <tr><td><?php echo lang(236); ?>;</td><td><input type="text" name="cookie" id="cookie" size="25" value="" /></td></tr>
@@ -161,11 +156,13 @@ if (!$options['notes_disable']) {
 <tr>
 <td align="center">
 <table align="center" style="text-align: justify;">
+<?php if (!$options['disable_email']) { ?>
 <tr>
-<td><input type="checkbox" name="domail" id="domail" onclick="document.getElementById('emailtd').style.display=document.getElementById('splittd').style.display=this.checked?'':'none';document.getElementById('methodtd').style.display=(document.getElementById('splitchkbox').checked ? (this.checked ? '' : 'none') : 'none');"<?php echo isset($_COOKIE["domail"]) ? ' checked="checked"' : ''; ?> />&nbsp;<?php echo lang(237); ?></td>
+<td><input type="checkbox" name="domail" id="domail" onclick="document.getElementById('emailtd').style.display=document.getElementById('splittd').style.display=this.checked?'':'none';document.getElementById('methodtd').style.display=(document.getElementById('splitchkbox').checked ? (this.checked ? '' : 'none') : 'none');"<?php echo isset($_COOKIE['domail']) ? ' checked="checked"' : ''; ?> />&nbsp;<?php echo lang(237); ?></td>
 <td>&nbsp;</td>
-<td id="emailtd"<?php echo isset($_COOKIE["domail"]) ? '' : ' style="display: none;"'; ?>><?php echo lang(238); ?>:&nbsp;<input type="text" name="email" id="email"<?php echo !empty($_COOKIE["email"]) ? ' value="'.$_COOKIE["email"].'"' : ''; ?> /></td>
+<td id="emailtd"<?php echo isset($_COOKIE['domail']) ? '' : ' style="display: none;"'; ?>><?php echo lang(238); ?>:&nbsp;<input type="text" name="email" id="email"<?php echo !empty($_COOKIE['email']) ? ' value="'.$_COOKIE['email'].'"' : ''; ?> /></td>
 </tr>
+<?php } ?>
 <tr>
 <td></td>
 </tr>
@@ -384,16 +381,9 @@ $(document).ready(function() {
 	<div align="center"><b><?php echo lang(267); ?></b></div>
 <?php
 // Print out workable sites for link checker
-$name = array();
-foreach ($sites as $i=>$v) {
-	$name[] = $v['name'];
-}
+$name = array_keys($sites);
 sort($name);
-$workswith = '';
-foreach ($name as $v) {
-	$workswith .= $v.' | ';
-}
-$workswith = substr($workswith,0,-3);
+$workswith = implode(' | ', $name);
 ?>
 <div class="workswith"><?php echo $workswith; ?>
 <br /><b><?php echo lang(268); ?></b><br />
