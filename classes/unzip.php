@@ -1,16 +1,4 @@
 <?php
-if(!function_exists('file_put_contents')){
-	// If not PHP5, creates a compatible function
-	Function file_put_contents($file, $data){
-		if($tmp = fopen($file, "w")){
-			fwrite($tmp, $data);
-			fclose($tmp);
-			return true;
-		}
-		echo "<b>file_put_contents:</b> Cannot create file $file<br />";
-		return false;
-	}
-}
 
 class dUnzip2{
 	Function getVersion(){

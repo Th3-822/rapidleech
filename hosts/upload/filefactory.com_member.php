@@ -34,7 +34,7 @@ if ($continue_up) {
 	$cookie = "rPopHome=1";
 	if (!empty($_REQUEST['up_login']) && !empty($_REQUEST['up_pass'])) {
 		$post = array();
-		$post["redirect"] = "/";
+		$post["redirect"] = "/member/";
 		$post["email"] = $_REQUEST['up_login'];
 		$post["password"] = $_REQUEST['up_pass'];
 

@@ -1,8 +1,8 @@
 <?php
 
 if (!defined('RAPIDLEECH')) {
-	require_once ("index.html");
-	exit ();
+	require_once ('index.html');
+	exit();
 }
 
 class youtube_com extends DownloadClass {
@@ -10,28 +10,30 @@ class youtube_com extends DownloadClass {
 	public function Download($link) {
 		$this->cookie = isset($_REQUEST['yt_QS']) && !empty($_POST['cookie']) ? StrToCookies(decrypt(urldecode($_POST['cookie']))) : array();
 		$this->page = $this->GetPage($link, $this->cookie);
+		if (preg_match('@Location: ((https?://(?:[^/\r\n]+\.)?youtube\.com)?/watch\?[^\r\n]+)@i', $this->page, $redir)) {
+			$link = (empty($redir[2])) ? 'http://www.youtube.com'.$redir[1] : $redir[1];
+			$this->page = $this->GetPage($link, $this->cookie);
+		}
 
-		if (preg_match('#^HTTP/1.(0|1) 403 Forbidden#i', $this->page)) {
-			is_present($this->page, "This video contains content from", "This video has content with copyright and it's blocked in this server's country.");
+		if (preg_match('@^HTTP/1\.[01] 403 Forbidden@i', $this->page)) {
+			$this->CheckErrors();
 			html_error('403 Forbidden');
-		}
-		if (preg_match('#^HTTP/1.(0|1) 404 Not Found#i', $this->page)) {
-			is_present($this->page, "The video you have requested is not available.");
-			is_present($this->page, "This video has been removed by the user.");
+		} else if (preg_match('@^HTTP/1\.[01] 404 Not Found@i', $this->page)) {
+			$this->CheckErrors();
 			html_error('404 Page Not Found');
-		}
+		} else $this->CheckErrors();
 
-		if (isset($_REQUEST["step"]) || preg_match('#Location: http://(www.)?youtube.com/das_captcha#i', $this->page)) {
+		if (isset($_REQUEST['step']) || preg_match('@Location: https?://(www\.)?youtube\.com/das_captcha@i', $this->page)) {
 			$this->captcha($link);
 		}
 		$Mesg = lang(300);
-		if (preg_match('#Location: http://(www.)?youtube.com/verify_age#i', $this->page)) {
-			$Mesg .= "<br /><br />Verify_age page found:<br />This video may contain content that is inappropriate for some users<br /><br />Logging in to Youtube...<br />Direct Link option may not work.";
+		if (preg_match('#Location: https?://(www\.)?youtube\.com/verify_age#i', $this->page)) {
+			$Mesg .= '<br /><br />Verify_age page found:<br />This video may contain content that is inappropriate for some users<br /><br />Logging in to Youtube...<br />Direct Link option may not work.';
 			$this->changeMesg($Mesg);
 			$this->verify_age($link);
 		}
-		if (preg_match('#Location: http://(www.)?youtube.com/verify_controversy#i', $this->page)) {
-			$Mesg .= "<br /><br />Verify_controversy page found:<br />The following content has been identified by the YouTube community as being potentially offensive or inappropriate. Viewer discretion is advised.";
+		if (preg_match('#Location: https?://(www\.)?youtube\.com/verify_controversy#i', $this->page)) {
+			$Mesg .= '<br /><br />Verify_controversy page found:<br />The following content has been identified by the YouTube community as being potentially offensive or inappropriate. Viewer discretion is advised.';
 			$this->changeMesg($Mesg);
 			$this->verify_controversy($link);
 		}
@@ -62,101 +64,115 @@ class youtube_com extends DownloadClass {
 			$furl = $this->fmturlmaps[$fmt];
 		}
 
-		if (preg_match ('%^5|34|35$%', $fmt)) $ext = '.flv';
-		elseif (preg_match ('%^17$%', $fmt)) $ext = '.3gp';
-		elseif (preg_match ('%^18|22|37|38$%', $fmt)) $ext = '.mp4';
-		elseif (preg_match ('%^43|44|45$%', $fmt)) $ext = '.webm';
-		else $ext = '.flv';
-
-		if (!preg_match('#<title>(.*)\s+-\sYouTube[\r|\n|\t|\s]*</title>#Us', $this->page, $title)) html_error('No video title found! Download halted.');
-		if (!preg_match ('/video_id=(.+?)(\\\|"|&|(\\\u0026))/', $this->page, $video_id)) html_error('Video id not found.');
-
-		$FileName = str_replace (Array ("\\", "/", ":", "*", "?", "\"", "<", ">", "|"), "_", html_entity_decode(trim($title[1]), ENT_QUOTES)) . "-[{$video_id[1]}][f$fmt]$ext";
-
-		if (stristr($furl, '|')) {
-			$u_arr = explode('|', $furl);
-			$furl = preg_replace('#://([^/]+)#', "://".$u_arr[2], $u_arr[0]);
+		$ext = '.flv';
+		$fmtexts = array('.3gp' => array(17), '.mp4' => array(18,22,37,38), '.webm' => array(43,44,45));
+		foreach ($fmtexts as $k => $v) {
+			if (!is_array($v)) $v = array($v);  
+			if (in_array($fmt, $v)) {
+				$ext = $k;
+				break;
+			}
 		}
-		if (isset($_REQUEST['ytdirect']) && $_REQUEST['ytdirect'] == 'on')
-		{
+
+		$_s = '[\r\n\t\s]';
+		if (!preg_match("#<title>$_s*(.*)$_s+-$_s+YouTube$_s*</title>#Us", $this->page, $title) && !preg_match("#<title>$_s*YouTube\s+-\s+(.*)$_s*</title>#Us", $this->page, $title)) html_error('No video title found! Download halted.');
+		if (!preg_match('/video_id=(.+?)(\\\|"|&|(\\\u0026))/', $this->page, $video_id)) html_error('Video id not found.');
+		$FileName = str_replace(str_split('\\/:*?"<>|'), '_', html_entity_decode(trim($title[1]), ENT_QUOTES)) . "-[YT-$fmt][{$video_id[1]}]$ext";
+
+		if (isset($_REQUEST['ytdirect']) && $_REQUEST['ytdirect'] == 'on') {
 			echo "<br /><br /><h4><a style='color:yellow' href='" . urldecode($furl) . "'>Click here or copy the link to your download manager to download</a></h4>";
 			echo "<input name='dlurl' style='width: 1000px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px' value='" . urldecode($furl) . "' onclick='javascript:this.select();' readonly></input>";
-		}
-		else
-		{
-			$this->RedirectDownload (urldecode($furl), $FileName, $this->cookie, 0, 0, $FileName);
+		} else {
+			$this->RedirectDownload ($furl, $FileName, $this->cookie, 0, 0, $FileName);
 		}
 	}
 
 	private function captcha($link) {
-		$url = "http://www.youtube.com/das_captcha?next=" . urlencode($link);
-		if (isset($_REQUEST["step"]) && $_REQUEST["step"] == 1) {
-			$post['challenge_enc'] = $_POST['challenge_enc'];
+		$url = 'http://www.youtube.com/das_captcha?next=' . urlencode($link);
+		if (isset($_REQUEST['step']) && $_REQUEST['step'] == '1') {
+			if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
+			$post = array('recaptcha_challenge_field' => $_POST['recaptcha_challenge_field'], 'recaptcha_response_field' => $_POST['recaptcha_response_field']);
 			$post['next'] = $_POST['next'];
-			$post['response'] = $_POST['captcha'];
-			$post['action_verify'] = $_POST['action_verify'];
-			$post['submit'] = $_POST['submit'];
+			$post['action_recaptcha_verify'] = $_POST['action_recaptcha_verify'];
+			$post['submit'] = $_POST['_submit'];
 			$post['session_token'] = $_POST['session_token'];
 			$cookie = urldecode($_POST['cookie']);
 
 			$page = $this->GetPage($url, $cookie, $post, $url);
-			is_present($page, "The verification code was invalid", "The verification code was invalid or has timed out, please try again.");
-			is_present($page, "\r\n\r\nAuthorization Error.", "Error sending captcha.");
-			is_notpresent($page, "Set-Cookie: goojf=", "Cannot get captcha cookie.");
+			is_present($page, 'The verification code was invalid', 'The verification code was invalid or has timed out, please try again.');
+			is_present($page, "\r\n\r\nAuthorization Error.", 'Error sending captcha.');
+			is_notpresent($page, 'Set-Cookie: goojf=', 'Cannot get captcha cookie.');
 
 			$this->cookie = GetCookiesArr($page);
 			$this->page = $this->GetPage($link, $this->cookie);
 		} else {
 			$page = $this->GetPage($url);
+			if (!preg_match('@//(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w|\-]+)@i', $page, $pid)) html_error('Error: reCAPTCHA not found.');
 
 			$data = $this->DefaultParamArr($link, GetCookies($page));
-			$data['challenge_enc'] = urlencode(cut_str($page, 'name="challenge_enc" value="', '"'));
-			$data['next'] = urlencode(cut_str($page, 'name="next" value="', '"'));
-			$data['action_verify'] = urlencode(cut_str($page, 'name="action_verify" value="', '"'));
-			$data['submit'] = urlencode(cut_str($page, 'type="submit" name="submit" value="', '"'));
+			$data['next'] = urlencode(html_entity_decode(cut_str($page, 'name="next" value="', '"')));
+			$data['action_recaptcha_verify'] = urlencode(cut_str($page, 'name="action_recaptcha_verify" value="', '"'));
+			$data['_submit'] = urlencode(cut_str($page, 'type="submit" name="submit" value="', '"'));
 			$data['session_token'] = urlencode(cut_str($page, "'XSRF_TOKEN': '", "'"));
 			if (isset($_REQUEST['ytube_mp4'])) $data['ytube_mp4'] = $_REQUEST['ytube_mp4'];
 			if (isset($_REQUEST['ytdirect'])) $data['ytdirect'] = $_REQUEST['ytdirect'];
 			if (isset($_REQUEST['yt_fmt'])) $data['yt_fmt'] = $_REQUEST['yt_fmt'];
 			$data['step'] = 1;
 
-			$this->EnterCaptcha("http://www.youtube.com" . cut_str($page, 'img name="verificationImg" src="', '"'), $data, 20);
-			exit;
+			$this->Show_reCaptcha($pid[1], $data);
 		}
+	}
+
+	private function Show_reCaptcha($pid, $inputs) {
+		global $PHP_SELF;
+		if (!is_array($inputs)) html_error('Error parsing captcha data.');
+
+		// Themes: 'red', 'white', 'blackglass', 'clean'
+		echo "<script language='JavaScript'>var RecaptchaOptions={theme:'red', lang:'en'};</script>\n";
+
+		echo "\n<center><form name='dl' action='$PHP_SELF' method='post'><br />\n";
+		foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
+		echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script>";
+		echo "<noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br />";
+		echo "<textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br />";
+		echo "<input type='submit' name='submit' onclick='javascript:return checkc();' value='Download File' />\n";
+		echo "<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n";
+		echo "</form></center>\n</body>\n</html>";
+		exit;
 	}
 
 	private function login($link) {
 		global $premium_acc;
-		if (!empty($this->cookie["SID"])) return;
+		if (!empty($this->cookie['SID'])) return;
 
-		if (!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) {
-			$user = $_REQUEST["premium_user"];
-			$pass = $_REQUEST["premium_pass"];
+		if (!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) {
+			$user = $_REQUEST['premium_user'];
+			$pass = $_REQUEST['premium_pass'];
 		} else {
-			$user = $premium_acc["youtube_com"]['user'];
-			$pass = $premium_acc["youtube_com"]['pass'];
+			$user = $premium_acc['youtube_com']['user'];
+			$pass = $premium_acc['youtube_com']['pass'];
 		}
-		if (empty($user) || empty($pass)) html_error("Login Failed: Login Empty.", 0);
+		if (empty($user) || empty($pass)) html_error('Login Failed: Login Empty.', 0);
 
 		$post = array();
-		$post["Email"] = urlencode($user);
-		$post["Passwd"] = urlencode($pass);
-		$post["service"] = 'youtube';
+		$post['Email'] = urlencode($user);
+		$post['Passwd'] = urlencode($pass);
+		$post['service'] = 'youtube';
 
-		$page = $this->GetPage("https://www.google.com/accounts/ClientLogin", 0, $post, "https://www.google.com/accounts/ClientLogin");
-		is_present($page, "Error=BadAuthentication", "Login Failed: The login/password entered are incorrect.");
-		is_present($page, "Error=NotVerified", "Login Failed: The account has not been verified.");
-		is_present($page, "Error=TermsNotAgreed", "Login Failed: The account has not agreed to terms.");
-		is_present($page, "Error=CaptchaRequired", "Login Failed: Need CAPTCHA. (Not supported yet)... Or check you login and try again.");
-		is_present($page, "Error=Unknown", "Login Failed.");
-		is_present($page, "Error=AccountDeleted", "Login Failed: The user account has been deleted.");
-		is_present($page, "Error=AccountDisabled", "Login Failed: The user account has been disabled.");
-		is_present($page, "Error=ServiceDisabled", "Login Failed: The user's access to the specified service has been disabled.");
-		is_present($page, "Error=ServiceUnavailable", "Login Failed: Service is not available; try again later.");
+		$page = $this->GetPage('https://www.google.com/accounts/ClientLogin', 0, $post, 'https://www.google.com/accounts/ClientLogin');
+		is_present($page, 'Error=BadAuthentication', 'Login Failed: The login/password entered are incorrect.');
+		is_present($page, 'Error=NotVerified', 'Login Failed: The account has not been verified.');
+		is_present($page, 'Error=TermsNotAgreed', 'Login Failed: The account has not agreed to terms.');
+		is_present($page, 'Error=CaptchaRequired', 'Login Failed: Need CAPTCHA. (Not supported yet)... Or check you login and try again.');
+		is_present($page, 'Error=Unknown', 'Login Failed.');
+		is_present($page, 'Error=AccountDeleted', 'Login Failed: The user account has been deleted.');
+		is_present($page, 'Error=AccountDisabled', 'Login Failed: The user account has been disabled.');
+		is_present($page, 'Error=ServiceDisabled', 'Login Failed: The user\'s access to the specified service has been disabled.');
+		is_present($page, 'Error=ServiceUnavailable', 'Login Failed: Service is not available; try again later.');
 
-		if (!preg_match('@SID=([^\r|\n]+)@i', $page, $sid)) html_error("Login Failed: SessionID token not found.", 0);
+		if (!preg_match('@SID=([^\r|\n]+)@i', $page, $sid)) html_error('Login Failed: SessionID token not found.', 0);
 
-		$this->cookie["SID"] = $sid[1];
+		$this->cookie['SID'] = $sid[1];
 		$this->page = $this->GetPage($link, $this->cookie);
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
 	}
@@ -164,9 +180,9 @@ class youtube_com extends DownloadClass {
 	private function verify_age($link) {
 		$this->login($link);
 
-		if (!preg_match('#Location: http://(www.)?youtube.com/verify_age#i', $this->page)) return;
+		if (!preg_match('@Location: https?://(www\.)?youtube\.com/verify_age@i', $this->page)) return;
 
-		$url = "http://www.youtube.com/verify_age?next_url=" . urlencode($link);
+		$url = 'http://www.youtube.com/verify_age?next_url=' . urlencode($link);
 		$page = $this->GetPage($url, $this->cookie);
 
 		$post = array();
@@ -174,13 +190,13 @@ class youtube_com extends DownloadClass {
 		$post['set_racy'] = 'true';
 		$post['session_token'] = urlencode(cut_str($page, "'XSRF_TOKEN': '", "'"));
 
-		$urlc = "http://www.youtube.com/verify_age?action_confirm=true";
+		$urlc = 'http://www.youtube.com/verify_age?action_confirm=true';
 		$page = $this->GetPage($urlc, $this->cookie, $post, $url);
 		$this->page = $this->GetPage("$link&has_verified=1", $this->cookie, 0, $urlc);
 	}
 
 	private function verify_controversy($link) {
-		$url = "http://www.youtube.com/verify_controversy?next_url=" . urlencode($link);
+		$url = 'http://www.youtube.com/verify_controversy?next_url=' . urlencode($link);
 		$page = $this->GetPage($url, $this->cookie);
 
 		$post = array();
@@ -188,7 +204,7 @@ class youtube_com extends DownloadClass {
 		// $post['ignorecont'] = 'on';
 		$post['session_token'] = urlencode(cut_str($page, "'XSRF_TOKEN': '", "'"));
 
-		$urlc = "http://www.youtube.com/verify_controversy?action_confirm=1";
+		$urlc = 'http://www.youtube.com/verify_controversy?action_confirm=1';
 		$page = $this->GetPage($urlc, $this->cookie, $post, $url);
 		$this->page = $this->GetPage("$link&skipcontrinter=1", $this->cookie, 0, $urlc);
 	}
@@ -211,22 +227,40 @@ class youtube_com extends DownloadClass {
 					}
 				}
 			}
-			$fmturls[$fmtlist['itag']] = urldecode($fmtlist['url']);
+			$fmtlist = array_map('urldecode', $fmtlist);
+			$fmturls[$fmtlist['itag']] = $fmtlist['url'];
+			if (stripos($fmtlist['url'], '&signature=') === false) $fmturls[$fmtlist['itag']] .= '&signature='.$fmtlist['sig'];
 		}
 		return $fmturls;
+	}
+
+	private function CheckErrors() {
+		$page = cut_str($this->page, 'class="yt-alert-message">', '</');
+		if (empty($page)) $page = $this->page;
+		$servw = (isset($_GET['useproxy']) && !empty($_GET['proxy'])) ? 'proxy' : 'server';
+		$errors = array();
+		$errors[] = array('find' => 'The video you have requested is not available.'); // Empty or no 'error' key will show 'find'.
+		$errors[] = array('find' => 'This video has been removed by the user.');
+		$errors[] = array('find' => 'The uploader has not made this video available in your country.', 'error' => "The uploader has not made this video available in this $servw's country.");
+		$errors[] = array('find' => ', who has blocked it in your country on copyright grounds.', 'error' => "This video has content with copyright and it's blocked in this $servw's country.");
+		$errors[] = array('find' => 'This video is no longer available because the uploader has closed their YouTube account.');
+		$errors[] = array('find' => 'This video is no longer available because the YouTube account associated with this video has been terminated.');
+		foreach ($errors as $err) {
+			if (empty($err['find'])) continue;
+			is_present($page, $err['find'], (!empty($err['error']) ? $err['error'] : ''));
+		}
 	}
 
 	private function QSelector($link) {
 		global $PHP_SELF;
 		$fmtlangs = array(38 => 377, 37 => 228, 22 => 227, 45 => 225, 35 => 223, 44 => 389, 34 => 222, 43 => 224, 18 => 226, 5 => 221, 17 => 220);
-
 		echo "\n<br /><br /><h3 style='text-align: center;'>".lang(216).".</h4>";
 		echo "\n<center><form name='dl' action='$PHP_SELF' method='post'>\n";
 		echo "<input type='hidden' name='yt_QS' value='on' />\n";
 		echo '<input type="checkbox" name="ytdirect" /><small>&nbsp;'.lang(217).'</small><br />';
 		echo "<select name='yt_fmt' id='vbb_qs'>\n";
 		foreach ($this->fmturlmaps as $fmt => $url) {
-			if (in_array($fmt, $this->fmts)) echo "<option ".($fmt == 18 ? "selected='selected' " : '')."value='$fmt'>".lang($fmtlangs[$fmt])."</option>\n";
+			if (in_array($fmt, $this->fmts)) echo '<option '.($fmt == 18 ? "selected='selected' " : '')."value='$fmt'>".lang($fmtlangs[$fmt]).(!empty($sizes[$fmt]) ? ' ('.$sizes[$fmt].')' : '')."</option>\n";
 		}
 		echo "</select>\n";
 		if (count($this->cookie) > 0) $this->cookie = encrypt(CookiesToStr($this->cookie));
@@ -250,5 +284,8 @@ class youtube_com extends DownloadClass {
 // [13-8-2011]  Some fixes & removed not working code & fixed verify_age function. - Th3-822
 // [17-9-2011]  Added function for skip 'verify_controversy' on youtube && Fixed cookies after captcha && Little changes. - Th3-822
 // [26-1-2012]  Fixed regexp for get title, added a quality selector (if the one in template is removed) and some changes in the code. - Th3-822
+// [17-5-2012]  Fixed captcha (Now uses reCaptcha). - Th3-822
+// [14-9-2012]  Fixed Download links & small changes. - Th3-822
+// [07-10-2012]  Fixed for redirect at link. - Th3-822
 
 ?>

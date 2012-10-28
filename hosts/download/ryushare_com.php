@@ -5,16 +5,16 @@ if (!defined('RAPIDLEECH')) {
 	exit();
 }
 
-class easybytez_com extends DownloadClass {
+class ryushare_com extends DownloadClass {
 	private $page, $cookie;
 	public function Download($link) {
 		global $premium_acc;
 		$this->cookie = array('lang' => 'english');
 		$this->page = $this->GetPage($link, $this->cookie);
 		is_present($this->page, "The file you were looking for could not be found");
-		is_present($this->page, "The file of the above link no longer exists");
+		//is_present($this->page, "No such file with this filename", 'Error: Invalid filename, check your link and try again.');
 
-		if ($_REQUEST["premium_acc"] == "on" && ((!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) || (!empty($premium_acc["easybytez_com"]["user"]) && !empty($premium_acc["easybytez_com"]["pass"])))) {
+		if ($_REQUEST["premium_acc"] == "on" && ((!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) || (!empty($premium_acc["ryushare_com"]["user"]) && !empty($premium_acc["ryushare_com"]["pass"])))) {
 			$this->Login($link);
 		} else {
 			$this->FreeDL($link);
@@ -43,16 +43,16 @@ class easybytez_com extends DownloadClass {
 		$post['method_free'] = cut_str($page2, 'name="method_free" value="', '"');
 		$post['down_script'] = 1;
 
-		if (!preg_match('@<span id="countdown_str">[^<|>]+<span[^>]*>(\d+)</span>[^<|>]+</span>@i', $page2, $count)) $count = array(1=>60);
+		if (!preg_match('@<span id="countdown_str">[^<|>]+<span[^>]*>(\d+)</span>[^<|>]+</span>@i', $page2, $count)) $count = array(1=>30);
 		if ($count[1] > 0) $this->CountDown($count[1]);
 
 		$page = $this->GetPage($link, $this->cookie, $post);
 		is_present($page, ">Skipped countdown", "Error: Skipped countdown?.");
 		if (preg_match('@You can download files up to \d+ [K|M|G]b only.@i', $page, $err)) html_error("Error: ".$err[0]);
-		if (!preg_match('@https?://[^/|\r|\n|\"|\'|<|>]+/(?:(?:files)|(?:cgi-bin/dl\.cgi))/[^\r|\n|\"|\'|<|>]+@i', $page, $dlink)) html_error('Error: Download link not found.');
+		if (!preg_match('@href="(https?://[^/|\"]+/files/[^\"|>]+)"@i', $page, $dlink)) html_error('Error: Download link not found.');
 
-		$FileName = urldecode(basename(parse_url($dlink[0], PHP_URL_PATH)));
-		$this->RedirectDownload($dlink[0], $FileName);
+		$FileName = urldecode(basename(parse_url($dlink[1], PHP_URL_PATH)));
+		$this->RedirectDownload($dlink[1], $FileName);
 	}
 
 	private function PremiumDL($link) {
@@ -70,18 +70,18 @@ class easybytez_com extends DownloadClass {
 
 			$page = $this->GetPage($link, $this->cookie, $post);
 
-			if (!preg_match('@https?://[^/|\r|\n|\"|\'|<|>]+/(?:(?:files)|(?:cgi-bin/dl\.cgi))/[^\r|\n|\"|\'|<|>]+@i', $page, $dlink)) html_error('Error: Download-link not found.');
+			if (!preg_match('@href="(https?://[^/|\"]+/files/[^\"|>]+)"@i', $page, $dlink)) html_error('Error: Download-link not found.');
 		}
 
-		$FileName = urldecode(basename(parse_url($dlink[0], PHP_URL_PATH)));
-		$this->RedirectDownload($dlink[0], $FileName);
+		$FileName = urldecode(basename(parse_url($dlink[1], PHP_URL_PATH)));
+		$this->RedirectDownload($dlink[1], $FileName);
 	}
 
 	private function Login($link) {
 		global $premium_acc;
 		$pA = (!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"]) ? true : false);
-		$user = ($pA ? $_REQUEST["premium_user"] : $premium_acc["easybytez_com"]["user"]);
-		$pass = ($pA ? $_REQUEST["premium_pass"] : $premium_acc["easybytez_com"]["pass"]);
+		$user = ($pA ? $_REQUEST["premium_user"] : $premium_acc["ryushare_com"]["user"]);
+		$pass = ($pA ? $_REQUEST["premium_pass"] : $premium_acc["ryushare_com"]["pass"]);
 
 		if (empty($user) || empty($pass)) html_error("Login Failed: User or Password is empty. Please check login data.", 0);
 		$post = array();
@@ -90,7 +90,7 @@ class easybytez_com extends DownloadClass {
 		$post['op'] = "login";
 		$post['redirect'] = "";
 
-		$purl = 'http://easybytez.com/';
+		$purl = 'http://ryushare.com/';
 		$page = $this->GetPage($purl, $this->cookie, $post, $purl);
 		is_present($page, "Incorrect Login or Password", "Login Failed: User/Password incorrect.");
 
@@ -99,7 +99,8 @@ class easybytez_com extends DownloadClass {
 		$this->cookie['lang'] = 'english';
 
 		$page = $this->GetPage("$purl?op=my_account", $this->cookie, 0, $purl);
-		if (stripos($page, '/?op=logout') === false && stripos($page, '/logout') === false) html_error('Login Error.');
+		//is_notpresent($page, '/?op=logout', 'Login Error.');
+		is_notpresent($page, '/logout', 'Login Error.');
 
 		if (stripos($page, "Premium account expire") === false) {
 			$this->changeMesg(lang(300)."<br /><b>Account isn\\\'t premium</b><br />Using it as member.");
@@ -108,6 +109,7 @@ class easybytez_com extends DownloadClass {
 	}
 }
 
-// [19-6-2012]  Written by Th3-822. (XFS... XFS everywhere. :D)
+// [07-5-2012]  Written by Th3-822. (XFS... XFS everywhere. :D)
+// [11-5-2012]  Added premium support. - Th3-822
 
 ?>

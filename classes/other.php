@@ -4,32 +4,25 @@ if (!defined('RAPIDLEECH')) {
 	exit;
 }
 
-function create_hosts_file($host_file = "hosts.php") {
-	$fp = opendir ( HOST_DIR . 'download/' );
-	while ( ($file = readdir ( $fp )) !== false ) {
-		if (substr ( $file, - 4 ) == ".inc") {
-			require_once (HOST_DIR . 'download/' . $file);
-		}
+function create_hosts_file($host_file = 'hosts.php') { // To be rewritten or deleted
+	$fp = opendir(HOST_DIR . 'download/');
+	while (($file = readdir($fp)) !== false) {
+		if (substr($file, -4) == '.inc') require_once (HOST_DIR . "download/$file");
 	}
-	if (! is_array ( $host )) {
-		print lang(127);
-	} else {
-		$fs = fopen ( HOST_DIR . 'download/' . $host_file, "wb" );
-		if (! $fs) {
-			print lang(128);
-		} else {
-			fwrite ( $fs, "<?php\r\n\$host = array(\r\n" );
+	if (!is_array($host)) html_error(lang(127));
+	else {
+		$fs = fopen(HOST_DIR . "download/$host_file", 'wb');
+		if (!$fs) html_error(lang(128));
+		else {
+			fwrite($fs, "<?php\r\n\$host = array(\r\n");
 			$i = 0;
-			foreach ( $host as $site => $file ) {
-				if ($i != (count ( $host ) - 1)) {
-					fwrite ( $fs, "'" . $site . "' => '" . $file . "',\r\n" );
-				} else {
-					fwrite ( $fs, "'" . $site . "' => '" . $file . "');\r\n?>" );
-				}
-				$i ++;
+			foreach ($host as $site => $file) {
+				if ($i != (count($host) - 1)) fwrite($fs, "'" . $site . "' => '" . $file . "',\r\n");
+				else fwrite($fs, "'" . $site . "' => '" . $file . "');\r\n?>");
+				$i++;
 			}
-			closedir ( $fp );
-			fclose ( $fs );
+			closedir($fp);
+			fclose($fs);
 		}
 	}
 }
@@ -39,88 +32,84 @@ function login_check() {
 	if ($options['login']) {
 		function logged_user($ul) {
 			foreach ($ul as $user => $pass) {
-				if ($_SERVER['PHP_AUTH_USER'] == $user && $_SERVER['PHP_AUTH_PW'] == $pass) { return true; }
+				if ($_SERVER['PHP_AUTH_USER'] == $user && $_SERVER['PHP_AUTH_PW'] == $pass) return true;
 			}
 			return false;
 		}
 		if ($options['login_cgi']) {
-			list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = @explode(':', base64_decode(substr((isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : $_SERVER['REDIRECT_HTTP_AUTHORIZATION']), 6)), 2);      
+			list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = @explode(':', base64_decode(substr((isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : $_SERVER['REDIRECT_HTTP_AUTHORIZATION']), 6)), 2);
 		}
 		if (empty($_SERVER['PHP_AUTH_USER']) || !logged_user($options['users'])) {
-			header ( 'WWW-Authenticate: Basic realm="RAPIDLEECH PLUGMOD"' );
-			header ( "HTTP/1.0 401 Unauthorized" );
+			header('WWW-Authenticate: Basic realm="RAPIDLEECH PLUGMOD"');
+			header('HTTP/1.0 401 Unauthorized');
 			include('deny.php');
 			exit;
 		}
 	}
 }
 
-function is_present($lpage, $mystr, $strerror = "", $head = 0) {
-	$strerror = $strerror ? $strerror : $mystr;
-	if (stripos ( $lpage, $mystr ) !== false) {
-		html_error ( $strerror, $head );
-	}
+function is_present($lpage, $mystr, $strerror = '', $head = 0) {
+	$strerror = !empty($strerror) ? $strerror : $mystr;
+	if (stripos($lpage, $mystr) !== false) html_error($strerror, $head);
 }
 
 function is_notpresent($lpage, $mystr, $strerror, $head = 0) {
-	if (stripos ( $lpage, $mystr ) === false) {
-		html_error ( $strerror, $head );
-	}
+	if (stripos($lpage, $mystr) === false) html_error($strerror, $head);
 }
 
-function insert_location($newlocation) {
-	if (isset ( $_GET ["GO"] ) && $_GET ["GO"] == "GO") {
-		list ( $location, $list ) = explode ( "?", $newlocation );
-		$list = explode ( "&", $list );
-		foreach ( $list as $l ) {
-			list ( $name, $value ) = explode ( "=", $l );
-			$_GET [$name] = $value;
+function insert_location($inputs, $action = 0) {
+	if (!is_array($inputs)) {
+		if (strpos($inputs, '?') !== false) list($action, $inputs) = explode('?', $inputs, 2);
+		$query = explode('&', $inputs);
+		$inputs = array();
+		foreach($query as $q) {
+			list($name, $value) = explode('=', $q, 2);
+			if (empty($name) || empty($value)) continue;
+			$inputs[$name] = $value;
 		}
-	} else {
-		global $nn;
-		list ( $location, $list ) = explode ( "?", $newlocation );
-		$list = explode ( "&", $list );
-		print '<form action="'.$location.'" method="post">' . $nn;
-		foreach ( $list as $l ) {
-			list ( $name, $value ) = explode ( "=", $l );
-			print '<input type="hidden" name="'.$name.'" value="'.$value.'" />' . $nn;
-		}
-		echo ('<script type="text/javascript">void(document.forms[0].submit());</script>');
-		echo ('</form>');
-		echo ('</body>');
-		echo ('</html>');
-		flush ();
+		unset($query);
+	}
+	if (isset($_GET['GO']) && $_GET['GO'] == 'GO') $_GET = array_merge($_GET, $inputs);
+	else {
+		if ($action === 0) $action = $_SERVER['SCRIPT_NAME'];
+		$fname = 'r'.time().'l';
+		echo "\n<form name='$fname' ".(!empty($action) ? "action='$action' " : '')."method='POST'>\n";
+		foreach($inputs as $name => $value) echo "\t<input type='hidden' name='$name' value='$value' />\n";
+		echo "</form>\n";
+		echo "<script type='text/javascript'>void(document.$fname.submit());</script>\n";
+		echo "</body>\n";
+		echo '</html>';
+		flush();
 	}
 }
 
 function pause_download() {
 	global $pathWithName, $PHP_SELF, $_GET, $nn, $bytesReceived, $fs, $fp;
-	$status = connection_status ();
+	$status = connection_status();
 	if (($status == 2 || $status == 3) && $pathWithName && $bytesReceived > - 1) {
-		flock ( $fs, LOCK_UN );
-		fclose ( $fs );
-		fclose ( $fp );
+		flock($fs, LOCK_UN);
+		fclose($fs);
+		fclose($fp);
 	}
 }
 
 function cut_str($str, $left, $right) {
-	$str = substr ( stristr ( $str, $left ), strlen ( $left ) );
-	$leftLen = strlen ( stristr ( $str, $right ) );
-	$leftLen = $leftLen ? - ($leftLen) : strlen ( $str );
-	$str = substr ( $str, 0, $leftLen );
+	$str = substr( stristr($str, $left), strlen($left));
+	$leftLen = strlen( stristr($str, $right)); 
+	$leftLen = $leftLen ? -($leftLen) : strlen($str);
+	$str = substr($str, 0, $leftLen);
 	return $str;
 }
 
 // tweaked cutstr with pluresearch functionality
-function cutter($str, $left, $right,$cont=1)
-	{
-    for($iii=1;$iii<=$cont;$iii++){
+function cutter($str, $left, $right, $cont = 1) {
+	for($iii=1;$iii<=$cont;$iii++){
 	$str = substr ( stristr ( $str, $left ), strlen ( $left ) );
 	}
-    $leftLen = strlen ( stristr ( $str, $right ) );
-    $leftLen = $leftLen ? - ($leftLen) : strlen ( $str );
-    $str = substr ( $str, 0, $leftLen );
-    return $str;
+	$leftLen = strlen ( stristr ( $str, $right ) );
+	$leftLen = $leftLen ? - ($leftLen) : strlen ( $str );
+	$str = substr ( $str, 0, $leftLen );
+	return $str;
 }
 
 function write_file($file_name, $data, $trunk = 1) {
@@ -166,32 +155,28 @@ function read_file($file_name, $count = -1) {
 
 function pre($var) {
 	echo "<pre>";
-	print_r ( $var );
+	print_r($var);
 	echo "</pre>";
 }
 
 function getmicrotime() {
-	list ( $usec, $sec ) = explode ( " ", microtime () );
-	return (( float ) $usec + ( float ) $sec);
+	list ($usec, $sec) = explode(' ', microtime());
+	return ((float)$usec + (float)$sec);
 }
 
 function html_error($msg, $head = 1) {
 	global $PHP_SELF, $options;
 	//if ($head == 1)
-	if (! headers_sent ()) {
-		include(TEMPLATE_DIR.'header.php');
-	}
-	echo ('<div align="center">');
-	echo ('<span class="htmlerror"><b>' . $msg . '</b></span><br /><br />');
-	if (isset ($_GET ["audl"])) {
-		echo '<script type="text/javascript">parent.nextlink();</script>';
-	}	
-	if ($options['new_window']) { echo '<a href="javascript:window.close();">'.lang(378).'</a>'; }
-	else { echo '<a href="'.$PHP_SELF.'">'.lang(13).'</a>'; }
+	if (!headers_sent()) include(TEMPLATE_DIR.'header.php');
+	echo '<div align="center">';
+	echo '<span class="htmlerror"><b>' . $msg . '</b></span><br /><br />';
+	if (isset($_GET['audl'])) echo '<script type="text/javascript">parent.nextlink();</script>';
+	if ($options['new_window']) echo '<a href="javascript:window.close();">'.lang(378).'</a>';
+	else echo '<a href="'.$PHP_SELF.'">'.lang(13).'</a>';
 
-	echo ('</div>');
+	echo '</div>';
 	include(TEMPLATE_DIR.'footer.php');
-	exit ();
+	exit();
 }
 
 function sec2time($time) {
@@ -283,8 +268,7 @@ function _create_list() {
 		$dir->close ();
 		@uasort ( $glist, "_cmp_list_enums" );
 	} else {
-		if (@file_exists ( CONFIG_DIR . "files.lst" )) {
-			$glist = file ( CONFIG_DIR . "files.lst" );
+		if (@file_exists ( CONFIG_DIR . "files.lst" ) && ($glist = file ( CONFIG_DIR . "files.lst" )) !== false) {
 			foreach ( $glist as $key => $record ) {
 				foreach ( unserialize ( $record ) as $field => $value ) {
 					$listReformat [$key] [$field] = $value;
@@ -311,23 +295,23 @@ function checkmail($mail) {
 /* Fixed Shell exploit by: icedog */
 function fixfilename($fname, $fpach = '') {
 	$f_name = basename ( $fname );
-	$f_dir = dirname ( preg_replace ( "@\.\./@i", "", $fname ) );
+	$f_dir = dirname ( preg_replace ( '@\.\./@i', '', $fname ) );
 	$f_dir = ($f_dir == '.') ? '' : $f_dir;
-	$f_dir = preg_replace ( "@\.\./@i", "", $f_dir );
-	$fpach = preg_replace ( "@\.\./@i", "", $fpach );
-	$f_name = preg_replace ( "@\.(php|hta|pl|cgi|sph)@i", ".xxx", $f_name );
+	$f_dir = preg_replace ( '@\.\./@i', '', $f_dir );
+	$fpach = preg_replace ( '@\.\./@i', '', $fpach );
+	$f_name = preg_replace ( '@\.(((s|\d)?php)|(hta)|(p[l|y])|(cgi)|(sph))@i', '.xxx', $f_name );
 	$ret = ($fpach) ? $fpach . DIRECTORY_SEPARATOR . $f_name : ($f_dir ? $f_dir . DIRECTORY_SEPARATOR : '') . $f_name;
 	return $ret;
 }
 function getfilesize($f) {
 	global $is_windows;
 	$stat = stat ( $f );
-	
+
 	if ($is_windows)
 		return sprintf ( "%u", $stat [7] );
 	if (($stat [11] * $stat [12]) < 4 * 1024 * 1024 * 1024)
 		return sprintf ( "%u", $stat [7] );
-	
+
 	global $max_4gb;
 	if ($max_4gb === false) {
 		$tmp_ = trim ( @shell_exec ( " ls -Ll " . @escapeshellarg ( $f ) ) );
@@ -339,53 +323,49 @@ function getfilesize($f) {
 	} else {
 		$size_ = - 1;
 	}
-	
+
 	return $size_;
 }
 function bytesToKbOrMb($bytes) {
-	$size = ($bytes >= (1024 * 1024 * 1024 * 1024)) ? round ( $bytes / (1024 * 1024 * 1024 * 1024), 2 ) . " TB" : (($bytes >= (1024 * 1024 * 1024)) ? round ( $bytes / (1024 * 1024 * 1024), 2 ) . " GB" : (($bytes >= (1024 * 1024)) ? round ( $bytes / (1024 * 1024), 2 ) . " MB" : round ( $bytes / 1024, 2 ) . " KB"));
+	$size = ($bytes >= (1024 * 1024 * 1024 * 1024)) ? round ( $bytes / (1024 * 1024 * 1024 * 1024), 2 ) . ' TB' : (($bytes >= (1024 * 1024 * 1024)) ? round ( $bytes / (1024 * 1024 * 1024), 2 ) . ' GB' : (($bytes >= (1024 * 1024)) ? round ( $bytes / (1024 * 1024), 2 ) . ' MB' : round ( $bytes / 1024, 2 ) . ' KB'));
 	return $size;
 }
 function defport($urls) {
-	if ($urls ["port"] !== '' && isset ( $urls ["port"] ))
-		return $urls ["port"];
-	
-	switch (strtolower ( $urls ["scheme"] )) {
-		case "http" :
+	if (!empty($urls['port'])) return $urls['port'];
+	switch(strtolower($urls['scheme'])) {
+		case 'http' :
 			return '80';
-		case "https" :
+		case 'https' :
 			return '443';
-		case "ftp" :
+		case 'ftp' :
 			return '21';
 	}
 }
 function getSize($file) {
-	$size = filesize ( $file );
-	if ($size < 0)
-		if (! (strtoupper ( substr ( PHP_OS, 0, 3 ) ) == 'WIN'))
-			$size = trim ( `stat -c%s $file` );
+	$size = filesize($file);
+	if ($size < 0) {
+		if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN')
+			$size = trim(`stat -c%s $file`);
 		else {
-			$fsobj = new COM ( "Scripting.FileSystemObject" );
-			$f = $fsobj->GetFile ( $file );
+			$fsobj = new COM('Scripting.FileSystemObject');
+			$f = $fsobj->GetFile($file);
 			$size = $file->Size;
 		}
+	}
 	return $size;
 }
 function purge_files($delay) {
-	if (file_exists ( CONFIG_DIR . "files.lst" ) && is_numeric ( $delay ) && $delay > 0) {
-		$files_lst = file ( CONFIG_DIR . "files.lst" );
-		$files_new = "";
-		foreach ( $files_lst as $files_line ) {
-			$files_data = unserialize ( trim ( $files_line ) );
-			if (file_exists ( $files_data ["name"] ) && is_file ( $files_data ["name"] )) {
-				if (time () - $files_data ["date"] >= $delay) {
-					@unlink ( $files_data ["name"] );
-				} else {
-					$files_new .= $files_line;
-				}
+	if (file_exists(CONFIG_DIR . 'files.lst') && is_numeric($delay) && $delay > 0) {
+		$files_lst = file(CONFIG_DIR . 'files.lst');
+		$files_new = '';
+		foreach ($files_lst as $files_line) {
+			$files_data = unserialize(trim($files_line));
+			if (file_exists($files_data['name']) && is_file($files_data['name'])) {
+				if (time() - $files_data['date'] >= $delay) @unlink ($files_data['name']);
+				else $files_new .= $files_line;
 			}
 		}
-		file_put_contents ( CONFIG_DIR . "files.lst", $files_new );
+		file_put_contents(CONFIG_DIR . 'files.lst', $files_new);
 	}
 }
 // Using this function instead due to some compatibility problems
@@ -394,33 +374,26 @@ function is__writable($path) {
 	//NOTE: use a trailing slash for folders!!!
 	//see http://bugs.php.net/bug.php?id=27609
 	//see http://bugs.php.net/bug.php?id=30931
-	
 
-	if ($path {strlen ( $path ) - 1} == '/') // recursively return a temporary file path
-		return is__writable ( $path . uniqid ( mt_rand () ) . '.tmp' );
-	else if (is_dir ( $path ))
-		return is__writable ( $path . '/' . uniqid ( mt_rand () ) . '.tmp' );
-		// check tmp file for read/write capabilities
-	$rm = file_exists ( $path );
-	$f = @fopen ( $path, 'a' );
-	if ($f === false)
-		return false;
-	fclose ( $f );
-	if (! $rm)
-		unlink ( $path );
+	if ($path[strlen($path) - 1] == '/') return is__writable($path . uniqid(mt_rand()) . '.tmp');// recursively return a temporary file path
+	else if (is_dir($path)) return is__writable($path . '/' . uniqid(mt_rand()) . '.tmp');
+	// check tmp file for read/write capabilities
+	$rm = file_exists($path);
+	$f = @fopen($path, 'a');
+	if ($f === false) return false;
+	fclose($f);
+	if (!$rm) unlink($path);
 	return true;
 }
 
 function link_for_file($filename, $only_link = FALSE, $style = '') {
-	global $PHP_SELF;
-	$inCurrDir = strstr(dirname($filename), ROOT_DIR) ? TRUE : FALSE;
+	$inCurrDir = strpos(dirname($filename), ROOT_DIR) !== FALSE ? TRUE : FALSE;
 	if ($inCurrDir) {
-		$Path = parse_url($PHP_SELF);
-		$Path = substr($Path["path"], 0, strlen($Path["path"]) - strlen(strrchr($Path["path"], "/")));
+		$Path = parse_url($_SERVER ['SCRIPT_NAME']);
+		$Path = substr($Path['path'], 0, strlen($Path['path']) - strlen(strrchr($Path['path'], '/')));
 		$Path = str_replace('\\', '/', $Path.substr(dirname($filename), strlen(ROOT_DIR)));
-	}
-	elseif (dirname($PHP_SELF.'safe') != '/') {
-		$in_webdir_path = dirname(str_replace('\\', '/', $PHP_SELF.'safe'));
+	} elseif (dirname($_SERVER ['SCRIPT_NAME'].'safe') != '/') {
+		$in_webdir_path = dirname(str_replace('\\', '/', $_SERVER ['SCRIPT_NAME'].'safe'));
 		$in_webdir_sub = substr_count($in_webdir_path, '/');
 		$in_webdir_root = ROOT_DIR.'/';
 		for ($i=1; $i <= $in_webdir_sub; $i++) {
@@ -432,28 +405,27 @@ function link_for_file($filename, $only_link = FALSE, $style = '') {
 				break;
 			}
 		}
-	}
-	else {
+	} else {
 		$Path = FALSE;
-		if ($only_link) { return ''; }
+		if ($only_link) return '';
 	}
 	$basename = htmlentities(basename($filename));
 	$Path = htmlentities($Path).'/'.rawurlencode(basename($filename));
-	if ($only_link) { return 'http://'.urldecode($_SERVER['HTTP_HOST']).$Path; }
-	elseif ($Path === FALSE) { return '<span>'.$basename.'</span>'; }
-	else { return '<a href="'.$Path.'"'.($style !== '' ? ' '.$style : '').'>'.$basename.'</a>'; }
+	if ($only_link) return 'http://'.urldecode($_SERVER['HTTP_HOST']).$Path;
+	elseif ($Path === FALSE) return '<span>'.$basename.'</span>';
+	else return '<a href="'.$Path.'"'.($style !== '' ? ' '.$style : '').'>'.$basename.'</a>';
 }
 
 function lang($id) {
 	global $options, $lang;
+	if (!is_array($lang)) $lang = array();
 	if (basename($options['default_language']) != 'en' && file_exists('languages/en.php')) require_once('languages/en.php');
 	require_once('languages/'.basename($options['default_language']).'.php');
 	return $lang[$id];
 }
 
 #need to keep premium account cookies safe!
-function encrypt($string)
-{
+function encrypt($string) {
 	global $secretkey;
 	if (!$secretkey) return html_error('Value for $secretkey is empty, please create a random one (56 chars max) in accounts.php!');
 	require_once 'class.pcrypt.php';
@@ -471,8 +443,7 @@ function encrypt($string)
 	return $ciphertext;
 }
 
-function decrypt($string)
-{
+function decrypt($string) {
 	global $secretkey;
 	if (!$secretkey) return html_error('Value for $secretkey is empty, please create a random one (56 chars max) in accounts.php!');
 	require_once 'class.pcrypt.php';
@@ -503,9 +474,14 @@ function textarea($var, $cols = 100, $rows = 30, $stop = false, $char = 'UTF-8')
 	$rows = ($rows == 0) ? 30 : $rows;
 	if ($char === false) $char = 'ISO-8859-1';
 	echo "\n<br /><textarea cols='$cols' rows='$rows' readonly='readonly'>";
-	if (is_array($var)) echo htmlentities(print_r($var, true), ENT_QUOTES, $char);
-	else echo htmlentities($var, ENT_QUOTES, $char);
-	echo "</textarea><br />\n";
+	if (is_array($var)) $text = htmlentities(print_r($var, true), ENT_QUOTES, $char);
+	else $text = htmlentities($var, ENT_QUOTES, $char);
+	if (empty($text) && !empty($var)) { // Fix "empty?" textarea bug
+		$char = ($char == 'ISO-8859-1') ? '' : 'ISO-8859-1';
+		if (is_array($var)) $text = htmlentities(print_r($var, true), ENT_QUOTES, $char);
+		else $text = htmlentities($var, ENT_QUOTES, $char);
+	}
+	echo "$text</textarea><br />\n";
 	if ($stop) exit;
 }
 
@@ -517,12 +493,24 @@ function jstime() {
 
 function check_referer() {
 	$refhost = !empty($_SERVER['HTTP_REFERER']) ? cut_str($_SERVER['HTTP_REFERER'], '://', '/') : false;
-	if (!$refhost) return;
+	if (empty($refhost)) return;
 
-	if (!empty($_SERVER['HTTP_HOST'])) $httphost = preg_replace('@(:\d+)$@', '', $_SERVER['HTTP_HOST']);
-	$httphost = !empty($httphost) && $httphost != $_SERVER['SERVER_NAME'] ? "|($httphost)" : '';
+	//Remove the port.
+	$httphost = ($pos = strpos($_SERVER['HTTP_HOST'], ':')) !== false ? substr($_SERVER['HTTP_HOST'], 0, $pos) : $_SERVER['HTTP_HOST'];
+	$refhost = ($pos = strpos($refhost, ':')) !== false ? substr($refhost, 0, $pos) : $refhost;
+	// If there is a login on the referer, remove it.
+	$refhost = ($pos = strpos($refhost, '@')) !== false ? substr($refhost, $pos+1) : $refhost;
 
-	if (!preg_match(str_replace('.', '\.', "@({$_SERVER['SERVER_NAME']})|({$_SERVER['SERVER_ADDR']})$httphost(:\d+)?$@i"), $refhost)) {
+	$whitelist = array($httphost, 'localhost', 'rapidleech.com');
+	$is_ext = ($refhost == $_SERVER['SERVER_ADDR'] ? false : true);
+	if ($is_ext)
+		foreach ($whitelist as $host)
+			if (host_matchs($host, $refhost)) {
+				$is_ext = false;
+				break;
+			}
+
+	if ($is_ext) {
 		// Uncomment next line if you want rickroll the users from Form leechers.
 		// header("Location: http://www.youtube.com/watch?v=oHg5SJYRHA0");
 		html_error(sprintf(lang(7), $refhost, 'External referer not allowed.'));
@@ -530,7 +518,7 @@ function check_referer() {
 }
 
 function rebuild_url($url) {
-	return $url['scheme'] . "://" . (!empty($url['user']) && !empty($url['pass']) ? rawurlencode($url['user']) . ":" . rawurlencode($url['pass']) . "@" : '') . $url['host'] . (!empty($url['port']) && $url['port'] != 80 && $url['port'] != 443 ? ":" . $url['port'] : "") . (empty($url['path']) ? "/" : $url['path']) . (!empty($url['query']) ? "?" . $url['query'] : "") . (!empty($url['fragment']) ? "#" . $url['fragment'] : "");
+	return $url['scheme'] . '://' . (!empty($url['user']) && !empty($url['pass']) ? rawurlencode($url['user']) . ':' . rawurlencode($url['pass']) . '@' : '') . $url['host'] . (!empty($url['port']) && $url['port'] != 80 && $url['port'] != 443 ? ':' . $url['port'] : '') . (empty($url['path']) ? '/' : $url['path']) . (!empty($url['query']) ? '?' . $url['query'] : '') . (!empty($url['fragment']) ? '#' . $url['fragment'] : '');
 }
 
 if (!function_exists('http_chunked_decode')) {
@@ -560,6 +548,32 @@ if (!function_exists('http_chunked_decode')) {
 		$dec = hexdec($hex);
 		return ($hex == dechex($dec));
 	}
+}
+
+function host_matchs($site, $host) {
+	if (empty($site) || empty($host)) return false;
+	if (strtolower($site) == strtolower($host)) return true;
+	$slen = strlen($site);
+	$hlen = strlen($host);
+	if (($pos = strripos($host, $site)) !== false && ($pos + $slen == $hlen) && $pos > 1 && substr($host, $pos - 1, 1) == '.') return true;
+	return false;
+}
+
+function GetDefaultParams() {
+	global $options;
+	$DParam = array();
+	if (isset($_GET['useproxy']) && $_GET['useproxy'] == 'on' && !empty($_GET['proxy'])) {
+		global $pauth;
+		$DParam['useproxy'] = 'on';
+		$DParam['proxy'] = $_GET['proxy'];
+		if ($pauth) $DParam['pauth'] = urlencode(encrypt($pauth));
+	}
+	if (isset($_GET['autoclose'])) $DParam['autoclose'] = 1;
+	if (isset($_GET['audl'])) $DParam['audl'] = 'doum';
+	if ($options['download_dir_is_changeable'] && !empty($_GET['path'])) $DParam['saveto'] = urlencode($_GET['path']);
+	$params = array('add_comment', 'domail', 'comment', 'email', 'split', 'partSize', 'method', 'uploadlater', 'uploadtohost');
+	foreach ($params as $key) if (!empty($_GET[$key])) $DParam[$key] = $_GET [$key];
+	return $DParam;
 }
 
 ?>

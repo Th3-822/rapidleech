@@ -12,11 +12,16 @@ class bayfiles_com extends DownloadClass {
 		$this->link = $link;
 		$this->cookie = array();
 
-		if (empty($_REQUEST["step"]) || $_REQUEST['step'] != 1) { // Check link
+		if (empty($_REQUEST['step']) || $_REQUEST['step'] != 1) { // Check link
 			$this->page = $this->GetPage($link);
-			is_present($this->page, "Invalid security token", "The link is incorrect or it has been deleted.");
-			is_present($this->page, "The requested file could not be found.", "The requested file could not be found. Please check the download link.");
+			is_present($this->page, 'Invalid security token', 'The link is incorrect or it has been deleted.');
+			is_present($this->page, 'The requested file could not be found.', 'The requested file could not be found. Please check the download link.');
 			$this->cookie = GetCookiesArr($this->page);
+			// Check direct link:
+			if (preg_match('@https?://([^/\'\"<>\r\n\s\t]+\.)?baycdn\.com/dl/[^\'\"<>\r\n\s\t]+@i', $this->page, $dlink)) {
+				$FileName = urldecode(basename(parse_url(html_entity_decode($dlink[0]), PHP_URL_PATH)));
+				return $this->RedirectDownload($dlink[0], $FileName, $this->cookie);
+			}
 		}
 
 		if ($_REQUEST["premium_acc"] == "on" && ((!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) || (!empty($premium_acc["bayfiles_com"]["user"]) && !empty($premium_acc["bayfiles_com"]["pass"])))) {
@@ -98,20 +103,18 @@ class bayfiles_com extends DownloadClass {
 		$post = array('action' => $act, 'vfid' => $this->fid, 'token' => $this->token);
 		$page = $this->GetPage('http://bayfiles.com/ajax_download', $this->cookie, $post);
 
-		if (!preg_match('@https?://([^/]+\.)?baycdn\.com/dl/[^\'|\"|<|>|\r|\n]+@i', $page, $dlink)) html_error("Error: Download link not found");
+		if (!preg_match('@https?://([^/\'\"<>\r\n\s\t]+\.)?baycdn\.com/dl/[^\'\"<>\r\n\s\t]+@i', $page, $dlink)) html_error('Error: Download link not found');
 
-		$url = parse_url(html_entity_decode($dlink[0]));
-		$FileName = urldecode(basename($url["path"]));
+		$FileName = urldecode(basename(parse_url(html_entity_decode($dlink[0]), PHP_URL_PATH)));
 		$this->RedirectDownload($dlink[0], $FileName, $this->cookie);
 	}
 
 	private function PremiumDL() {
 		$page = $this->GetPage($this->link, $this->cookie);
 
-		if (!preg_match('@https?://([^/]+\.)?baycdn\.com/dl/[^\'|\"|<|>|\r|\n]+@i', $page, $dlink)) html_error("Error: Download link not found.");
+		if (!preg_match('@https?://([^/\'\"<>\r\n\s\t]+\.)?baycdn\.com/dl/[^\'\"<>\r\n\s\t]+@i', $page, $dlink)) html_error('Error: Download link not found.');
 
-		$url = parse_url(html_entity_decode($dlink[0]));
-		$FileName = urldecode(basename($url["path"]));
+		$FileName = urldecode(basename(parse_url(html_entity_decode($dlink[0]), PHP_URL_PATH)));
 		$this->RedirectDownload($dlink[0], $FileName, $this->cookie);
 	}
 
@@ -141,9 +144,55 @@ class bayfiles_com extends DownloadClass {
 		}
 		return $this->PremiumDL();
 	}
+
+	public function CheckBack($header) {
+		$statuscode = intval(substr($header, 9, 3));
+		if ($statuscode == 302) {
+			$length = trim(cut_str($header, "\r\nContent-Length: ", "\r\n"));
+			if (empty($length) || (strlen($length) <= 6 && intval($length) <= 102400)) {
+				global $fp, $PHP_SELF;
+				$page = '';
+				while(strlen($data = @fread($fp, 16384)) > 0) $page .= $data;
+				if (stripos($header, "\r\nTransfer-Encoding: chunked") !== false && function_exists('http_chunked_decode')) {
+					$dechunked = http_chunked_decode($page);
+					if ($dechunked !== false) $page = $dechunked;
+					unset($dechunked);
+				}
+				$page = $header.$page;
+				if (stripos($page, "\nyou need to wait 5 minutes between downloads") !== false) {
+					insert_timer(10, 'Auto retry download:');//echo '<script type="text/javascript">location.reload();</script>';
+					echo "<center><form name='retryf' action='$PHP_SELF' method='POST'>\n";
+					if (!empty($_GET['proxy'])) $_GET['useproxy'] = 'on';
+					$post = array(); // I can't reload because firefox shows an anoying alertbox.
+					$post['filename'] = $_GET['filename'];
+					if (!empty($_GET['force_name'])) $post['force_name'] = $_GET['force_name'];
+					$post['host'] = $_GET['host'];
+					$post['path'] = $_GET['path'];
+					if (!empty($_GET['link'])) $post['link'] = $_GET['link'];
+					if (!empty($_GET['referer'])) $post['referer'] = $_GET['referer'];
+					if (!empty($_GET['post'])) $post['post'] = $_GET['post'];
+					$post = array_merge($this->DefaultParamArr(), array_map('urlencode', $post));
+					foreach ($post as $name => $input) echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
+					echo "<input type='submit' value='Try Again' />\n";
+					echo "</form></center><script type='text/javascript'>document.retryf.submit();</script><br />\n";
+					html_error('You need to wait 5 minutes between downloads.');
+				} elseif (stripos($page, "\ndownload link expired") !== false) {
+					echo "<center><form action='$PHP_SELF' method='POST'>\n";
+					$post = $this->DefaultParamArr(cut_str($header, 'Location: ', "\r\n"));
+					$post['premium_acc'] = 'on';
+					foreach ($post as $name => $input) echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
+					echo "<input type='submit' value='Download Again' />\n";
+					echo "</form></center><br />\n";
+					html_error('Download link has expired.');
+				}
+			}
+		}
+	}
 }
 
 //[28-Jan-2012]  Written by Th3-822.
 //[01-Feb-2012]  Added premium support. -Th3-822
+//[17-Jul-2012]  Added support for direct links. - Th3-822
+//[10-Oct-2012]  Added checkback for show 2 error msgs and a autoretry/retry button. - Th3-822
 
 ?>
