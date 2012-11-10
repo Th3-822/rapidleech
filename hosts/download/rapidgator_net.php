@@ -101,6 +101,8 @@ class rapidgator_net extends DownloadClass {
 			$post = array('DownloadCaptchaForm%5Bcaptcha%5D' => '', 'adcopy_challenge' => urlencode($gibberish[1]), 'adcopy_response' => 'manual_challenge');
 			$page = $this->GetPage($capt_url, $this->cookie, $post);
 
+			is_present($page, "\r\nSet-Cookie: failed_on_captcha=1", 'Captcha expired. Try again in 15 minutes.');
+
 			if (!preg_match('@https?://pr\d+\.rapidgator\.net/[^\r|\n|\"|\'|<|>|\s|\t]+@i', $page, $dlink)) html_error('Error: Download link not found.');
 			$this->RedirectDownload($dlink[0], 'rapidgatorfr');
 		}
@@ -128,7 +130,7 @@ class rapidgator_net extends DownloadClass {
 		$post['LoginForm%5Bpassword%5D'] = urlencode($pass);
 
 		$purl = 'http://rapidgator.net/';
-		$page = $this->GetPage($purl.'auth/login', $this->cookie, $post, $purl);
+		$page = $this->GetPage('https://rapidgator.net/auth/login', $this->cookie, $post, $purl);
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 
 		// There are more of those redirects at login

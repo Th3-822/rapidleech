@@ -222,24 +222,24 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			return false;
 		}
 		//$bytesTotal = intval ( trim ( cut_str ( $header, "Content-Length:", "\n" ) ) );
-		$bytesTotal = trim(cut_str($header, "\r\nContent-Length: ", "\r\n"));
+		$bytesTotal = trim(cut_str($header, "\nContent-Length: ", "\n"));
 
 		global $options;
 		if ($options['file_size_limit'] > 0 && ($bytesTotal > ($options['file_size_limit'] * 1024 * 1024))) {
 			$lastError = lang(336) . bytesToKbOrMbOrGb ($options['file_size_limit'] * 1024 * 1024) . '.';
 			return false;
 		}
-		if (stripos($header, "\r\nLocation: ") !== false && preg_match('/\r\nLocation: ([^\r\n]+)/i', $header, $redir)) {
+		if (stripos($header, "\nLocation: ") !== false && preg_match('/\nLocation: ([^\r\n]+)/i', $header, $redir)) {
 			$redirect = trim($redir[1]);
 			$lastError = sprintf(lang(95), $redirect);
 			return FALSE;
 		}
-		if (in_array(cut_str($header, "\r\nWWW-Authenticate: ", ' '), array('Basic', 'Digest'))) {
+		if (in_array(cut_str($header, "\nWWW-Authenticate: ", ' '), array('Basic', 'Digest'))) {
 			$lastError = lang(96);
 			return FALSE;
 		}
-		//$ContentType = trim (cut_str($header, "Content-Type:", "\r\n")); // Unused
-		if ($Resume['use'] === TRUE && stripos($header, "\r\nContent-Range: ") === false) {
+		//$ContentType = trim (cut_str($header, "\nContent-Type:", "\n")); // Unused
+		if ($Resume['use'] === TRUE && stripos($header, "\nContent-Range: ") === false) {
 			$lastError = (stripos($header, '503 Limit Exceeded') !== false) ? lang(97) : lang(98);
 			return FALSE;
 		}
@@ -248,7 +248,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			$FileName = $force_name;
 			$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $FileName;
 		} else {
-			$ContentDisposition = trim(cut_str($header, "\r\nContent-Disposition: ", "\r\n")) . "\n";
+			$ContentDisposition = trim(cut_str($header, "\nContent-Disposition: ", "\n")) . "\n";
 			if ($ContentDisposition && stripos($ContentDisposition, 'filename=') !== false) {
 				$FileName = trim(trim(trim(trim(trim(cut_str($ContentDisposition, 'filename=', "\n")), '='), '?'), ';'), '"');
 				if (strpos($FileName, '/') !== false) $FileName = basename($FileName);
@@ -303,8 +303,8 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		}
 
 		flock($fs, LOCK_EX);
-		if ($Resume['use'] === TRUE && stripos($header, "\r\nContent-Range: ") !== false) {
-			list($temp, $Resume['range']) = explode(' ', trim(cut_str($header, "\r\nContent-Range: ", "\r\n")));
+		if ($Resume['use'] === TRUE && stripos($header, "\nContent-Range: ") !== false) {
+			list($temp, $Resume['range']) = explode(' ', trim(cut_str($header, "\nContent-Range: ", "\n")));
 			list($Resume['range'], $fileSize) = explode('/', $Resume['range']);
 			$fileSize = bytesToKbOrMbOrGb($fileSize);
 		} else $fileSize = bytesToKbOrMbOrGb($bytesTotal);
@@ -367,7 +367,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	if ($saveToFile) {
 		return array('time' => sec2time(round($time)), 'speed' => @round($bytesTotal / 1024 / (getmicrotime() - $timeStart), 2), 'received' => true, 'size' => $fileSize, 'bytesReceived' => ($bytesReceived + $Resume['from']), 'bytesTotal' => ($bytesTotal + $Resume ['from']), 'file' => $saveToFile);
 	} else {
-		if (stripos($header, "\r\nTransfer-Encoding: chunked") !== false && function_exists('http_chunked_decode')) {
+		if (stripos($header, "\nTransfer-Encoding: chunked") !== false && function_exists('http_chunked_decode')) {
 			$dechunked = http_chunked_decode($page);
 			if ($dechunked !== false) $page = $dechunked;
 			unset($dechunked);
@@ -457,10 +457,10 @@ function CookiesToStr($cookie=array()) {
 
 function GetCookies($content) {
 	if (($hpos = strpos($content, "\r\n\r\n")) > 0) $content = substr($content, 0, $hpos); // We need only the headers
-	if (empty($content) || stripos($content, "\r\nSet-Cookie: ") === false) return '';
+	if (empty($content) || stripos($content, "\nSet-Cookie: ") === false) return '';
 	// The U option will make sure that it matches the first character
 	// So that it won't grab other information about cookie such as expire, domain and etc
-	preg_match_all('/\r\nSet-Cookie: (.*)(;|\r\n)/U', $content, $temp);
+	preg_match_all('/\nSet-Cookie: (.*)(;|\r\n)/U', $content, $temp);
 	$cookie = $temp[1];
 	$cookie = implode('; ', $cookie);
 	return $cookie;
@@ -476,7 +476,7 @@ function GetCookies($content) {
 function GetCookiesArr($content, $cookie=array(), $del=true, $dval=array('','deleted')) {
 	if (!is_array($cookie)) $cookie = array();
 	if (($hpos = strpos($content, "\r\n\r\n")) > 0) $content = substr($content, 0, $hpos); // We need only the headers
-	if (empty($content) || stripos($content, "\r\nSet-Cookie: ") === false || !preg_match_all ('/\r\nSet-Cookie: (.*)(;|\r\n)/U', $content, $temp)) return $cookie;
+	if (empty($content) || stripos($content, "\nSet-Cookie: ") === false || !preg_match_all ('/\nSet-Cookie: (.*)(;|\r\n)/U', $content, $temp)) return $cookie;
 	foreach ($temp[1] as $v) {
 		$v = explode('=', $v, 2);
 		$cookie[$v[0]] = $v[1];
@@ -614,7 +614,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		echo '</p>';
 	}
 
-	echo(lang(104) . ' <b>' . $filename . '</b>, ' . lang(56) . ' <b>' . bytesToKbOrMb($fileSize) . '</b>...<br />');
+	echo(lang(104) . ' <b>' . $filename . '</b>, ' . lang(56) . ' <b>' . bytesToKbOrMbOrGb($fileSize) . '</b>...<br />');
 	global $id;
 	$id = md5(time() * rand(0, 10));
 	require (TEMPLATE_DIR . '/uploadui.php');
@@ -666,7 +666,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		$lastChunkTime = $time;
 		$speed = round($sendbyte / 1024 / $chunkTime, 2);
 		$percent = round($totalsend / $fileSize * 100, 2);
-		echo '<script type="text/javascript">pr(' . "'" . $percent . "', '" . bytesToKbOrMb($totalsend) . "', '" . $speed . "');</script>\n";
+		echo '<script type="text/javascript">pr(' . "'" . $percent . "', '" . bytesToKbOrMbOrGb($totalsend) . "', '" . $speed . "');</script>\n";
 		flush();
 	}
 	//echo('</script>');

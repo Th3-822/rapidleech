@@ -2,6 +2,9 @@
 
 ####### Account Info. ###########
 $upload_acc['filecloud_io']['apikey'] = ""; //Set your filecloud.io apikey here.
+
+$upload_acc['filecloud_io']['user'] = ""; // Or you can use login...
+$upload_acc['filecloud_io']['pass'] = ""; // (Requires https support.)
 ##############################
 
 $not_done = true;
@@ -21,6 +24,14 @@ if ($upload_acc['filecloud_io']['apikey']) {
 	$_REQUEST['up_apikey'] = $upload_acc['filecloud_io']['apikey'];
 	$_REQUEST['action'] = 'FORM';
 	echo "<p style='text-align:center;font-weight:bold;'>Using Default Apikey.</p>\n";
+}
+
+if (!$cantlogin && !empty($upload_acc['filecloud_io']['user']) && !empty($upload_acc['filecloud_io']['pass'])) {
+	$_REQUEST['up_uselogin'] = 'yes';
+	$_REQUEST['up_login'] = $upload_acc['filecloud_io']['user'];
+	$_REQUEST['up_pass'] = $upload_acc['filecloud_io']['pass'];
+	$_REQUEST['action'] = 'FORM';
+	echo "<p style='text-align:center;font-weight:bold;'>Using Default Login.</p>\n";
 }
 
 if (!empty($_REQUEST['action']) && $_REQUEST['action'] == 'FORM') $continue_up=true;
@@ -54,6 +65,8 @@ if ($continue_up) {
 	$not_done = $uselogin = false;
 	$login = true;
 
+	if ($fsize < 5120) html_error('The file is too small for upload.'); // They don't accept files under 5 KB :D
+
 	// Ping api
 	$page = geturl ('api.filecloud.io', 80, '/api-ping.api');is_page($page);
 	is_notpresent($page, '"message":"pong"', 'Error: filecloud.io api is down?.');
@@ -68,9 +81,7 @@ if ($continue_up) {
 		if (!$usecurl) {
 		$page = geturl ('secure.filecloud.io', 0, '/api-fetch_apikey.api', 'https://secure.filecloud.io/api-fetch_apikey.api', 0, $post, 0, 0, 0, 0, 'https'); // Port is overridden to 443 .
 		is_page($page);
-		} else {
-			$page = cURL ('https://secure.filecloud.io/api-fetch_apikey.api', $post);
-		}
+		} else $page = cURL ('https://secure.filecloud.io/api-fetch_apikey.api', $post);
 
 		is_present($page, '"status":"error"', 'Login Failed: "'.str_replace('\\','',cut_str($page, '"message":"','"')).'"');
 		is_notpresent($page, '"akey":"', "Login Failed: Akey not found.");
@@ -105,13 +116,13 @@ if ($continue_up) {
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
 
 	$url = parse_url($up_loc);
-	$upfiles = upfile($url['host'],$url['port'] ? $url['port'] : 80, $url['path'].($url['query'] ? '?'.$url['query'] : ''), '', 0, $post, $lfile, $lname, 'Filedata');
+	$upfiles = upfile($url['host'], !empty($url['port']) ? $url['port'] : 80, $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), '', 0, $post, $lfile, $lname, 'Filedata');
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>";
 
 	is_page($upfiles);
-	is_present($page, 'status: error', 'Upload Error: "'.htmlentities(cut_str($page, 'message: ',"\n")).'"');
+	is_present($upfiles, 'status: error', 'Upload Error: "'.htmlentities(cut_str($upfiles, 'message: ',"\n")).'"');
 
 	if (preg_match('@ukey: (\w+)@i', $upfiles, $dl)) {
 		$download_link = 'http://filecloud.io/'.$dl[1];
@@ -121,5 +132,6 @@ if ($continue_up) {
 }
 
 //[09-8-2012]  (Re)Written by Th3-822.
+//[05-11-2012]  Fixed post-upload error msg && added check for min filesize. - Th3-822
 
 ?>

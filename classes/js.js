@@ -79,7 +79,7 @@ function clearSettings() {
 	document.cookie = 'clearsettings = 1;';
 }
 
-function clear(name) {
+function clear() {
 	for (var i = 0; i < arguments.length; i++) document.cookie = arguments[i] + ' = ' + '; expires=Thu, 01-Jan-70 00:00:01 GMT';
 }
 
