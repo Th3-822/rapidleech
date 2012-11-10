@@ -44,13 +44,13 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		$post['LoginForm%5Bpassword%5D'] = $_REQUEST['up_pass'];
 		$post['LoginForm%5BrememberMe%5D'] = 1;
 
-		$page = geturl($domain, 80, '/auth/login', $referer, $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);
+		$page = geturl($domain, 80, '/auth/login', $referer, $cookie, $post, 0, $_GET['proxy'], $pauth, 0, 'https');is_page($page);
 		$cookie = GetCookiesArr($page, $cookie);
 
 		//Redirects
 		$rdc = 0;
 		while (($redir = ChkRGRedirs($page, true, ($upload_acc['rapidgator_net']['user'] && $upload_acc['rapidgator_net']['pass']))) && $rdc < 5) {
-			$page = geturl($redir['host'], 80, $redir['path'].(!empty($redir['query']) ? '?'.$redir['query'] : ''), $referer, $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);
+			$page = geturl($redir['host'], 80, $redir['path'].(!empty($redir['query']) ? '?'.$redir['query'] : ''), $referer, $cookie, $post, 0, $_GET['proxy'], $pauth, 0, $redir['scheme']);is_page($page);
 			$cookie = GetCookiesArr($page, $cookie);
 			$rdc++;
 		}
@@ -154,5 +154,6 @@ function ChkRGRedirs($page, $login = false, $default_login = false) { // Edited 
 
 // [09-9-2012] Written by Th3-822.
 // [02-10-2012] Fixed for new weird redirect code. - Th3-822
+// [31-10-2012] Fixed for https on login/redirects. - Th3-822
 
 ?>
