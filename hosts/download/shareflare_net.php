@@ -1,96 +1,111 @@
 <?php
+
 if (!defined('RAPIDLEECH')) {
-    require_once("index.html");
-    exit;
+	require_once("index.html");
+	exit;
 }
 
 class shareflare_net extends DownloadClass {
 
-    public function Download($link) {
-        global $premium_acc;
-        
-        if (($_REQUEST['premium_acc'] == 'on' && $_REQUEST['premium_pass']) || ($_REQUEST['premium_acc'] == 'on' && $premium_acc['shareflare_net']['pass'])) {
-            html_error('Not supported now!');
-        } else {
-            $this->Free($link);
-        }
-    }
+	public function Download($link) {
+		global $premium_acc;
 
-    private function Free($link) {
+		if (!$_REQUEST['step']) {
+			$this->cookie['lang'] = 'en';
+			$this->page = $this->GetPage($link, $this->cookie);
+			if (preg_match('/Location: (https?:\/\/[^\r\n]+)/i', $this->page, $rd)) {
+				$link = trim($rd[1]);
+				$this->cookie = GetCookiesArr($this->page, $this->cookie);
+				$this->page = $this->GetPage($link, $this->cookie);
+			}
+			is_present($this->page, 'File not found');
+			$this->cookie = GetCookiesArr($this->page, $this->cookie);
+		}
+		$this->link = $link;
+		if ($_REQUEST['premium_acc'] == 'on' && (($_REQUEST['premium_pass']) || ($premium_acc['shareflare_net']['pass']))) {
+			html_error('Not supported now!');
+		} else {
+			$this->Free();
+		}
+	}
 
-        $page = $this->GetPage($link);
-        is_present($page, 'File not found');
-        $cookie = GetCookies($page);
-        if (!preg_match('%<form action="(.*)" method="post" id="dvifree">%', $page, $free)) html_error('Error: Free link can\'t be found!');
-        $flink = "http://shareflare.net".$free[1];
-        $post['uid5'] = cut_str($page, 'name="uid5" value="', '"');
-        $post['uid'] = cut_str($page, 'name="uid" value="', '"');
-        $post['name'] = cut_str($page, 'name="name" value="', '"');
-        $post['pin'] = cut_str($page, 'name="pin" value="', '"');
-        $post['realuid'] = cut_str($page, 'name="realuid" value="', '"');
-        $post['realname'] = cut_str($page, 'name="realname" value="', '"');
-        $post['host'] = cut_str($page, 'name="host" value="', '"');
-        $post['ssserver'] = cut_str($page, 'name="ssserver" value="', '"');
-        $post['sssize'] = cut_str($page, 'name="sssize" value="', '"');
-        $post['dir'] = cut_str($page, 'name="dir" value="', '"');
-        $post['optiondir'] = cut_str($page, 'name="optiondir" value="', '"');
-        $post['lsarrserverra'] = cut_str($page, 'name="lsarrserverra" value="', '"');
-        $post['page_url'] = cut_str($page, 'name="page_url" value="', '"');
-        $post['return_error'] = '1';
-        $post['md5crypt'] = cut_str($page, 'name="md5crypt" value="', '"');
-        $post['tarif'] = 'default';
-        $post['realuid_free'] = cut_str($page, 'name="realuid_free" value="', '"');
-        $post['submit_ifree'] = 'Download file';
-        $page = $this->GetPage($flink, $cookie, $post, $link);
-        if (!preg_match('%<form action="(.*)" method="post" id="dvifree">%', $page, $redir)) html_error ('Error: Redirect link 1 can\'t be found!');
-        $rlink = trim($redir[1]);
-        $t = explode(";", GetCookies($page));
-        $cookie .=";" . $t[0] . ";" . $t[2];
-        unset($post);
-        $post['frameset'] = 'Download file.';
-        $post['md5crypt'] = cut_str($page, 'name="md5crypt" value="', '"');
-        $post['uid5'] = cut_str($page, 'name="uid5" value="', '"');
-        $post['uid'] = cut_str($page, 'name="uid" value="', '"');
-        $post['name'] = cut_str($page, 'name="name" value="', '"');
-        $post['pin'] = cut_str($page, 'name="pin" value="', '"');
-        $post['realuid'] = cut_str($page, 'name="realuid" value="', '"');
-        $post['realname'] = cut_str($page, 'name="realname" value="', '"');
-        $post['host'] = cut_str($page, 'name="host" value="', '"');
-        $post['ssserver'] = cut_str($page, 'name="ssserver" value="', '"');
-        $post['sssize'] = cut_str($page, 'name="sssize" value="', '"');
-        $post['optiondir'] = cut_str($page, 'name="optiondir" value="', '"');
-        $post['tarif'] = 'default';
-        $page = $this->GetPage($rlink, $cookie, $post, $flink);
-        if (!preg_match('%<frame src="(.*)" name="topFrame"%', $page, $redir)) html_error ('Error: Redirect link 2 can\'t be found!');
-        $tlink = "http://shareflare.net".$redir[1];
+	private function Free() {
 
-        return $this->BeforeDownload($tlink, $cookie, $this->GetPage($tlink, $cookie, 0, $rlink));
-    }
+		if ($_REQUEST['step'] == '1') {
+			$post = array();
+			$post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
+			$post['recaptcha_response_field'] = $_POST['recaptcha_response_field'];
+			$post['recaptcha_control_field'] = rawurlencode(rawurldecode($_POST['recaptcha_control_field']));
+			$this->link = urldecode($_POST['link']);
+			$this->cookie = urldecode($_POST['cookie']);
+			$page = $this->GetPage($this->link, $this->cookie, $post, $this->link, 0, 1);
+		} else {
+			if (!preg_match('/https?:\/\/([^\/]+)\/download\/[^\r\n]+/', $this->link, $sv)) html_error('Error[Shareflare server not found!]');
+			$server = trim($sv[1]);
+			if (!preg_match('/<form action="(.*)" method="post" id="dvifree">/i', $this->page, $rl)) html_error('Error[Shareflare free link not found!]');
+			$form = cut_str($this->page, "<form action=\"$rl[1]\"", "</form>");
+			$post = $this->AutomatePost($form);
+			$this->link = 'http://' . $server . $rl[1];
+			$page = $this->GetPage($this->link, $this->cookie, $post, $this->link);
+			$this->cookie = GetCookiesArr($page, $this->cookie);
+			unset($post);
+			if (!preg_match('/<form action="(.*)" method="post" id="dvifree">/i', $page, $rl)) html_error('Error: Redirect link 1 can\'t be found!');
+			$this->link = trim($rl[1]);
+			$form = cut_str($page, "<form action=\"$rl[1]\"", "</form>");
+			$post = $this->AutomatePost($form);
+			$post['frameset'] = cut_str($form, '<input class="clink lid-download" name="frameset" type="submit" value=\'', '\'/>');
+			$page = $this->GetPage($this->link, $this->cookie, $post, $this->link);
+			if (!preg_match('/(\d+)<\/span> seconds/', $page, $wait)) html_error('Error[Timer not found!]');
+			$this->CountDown($wait[1]);
+			$checklink = 'http://shareflare.net' . cut_str($page, "ajax_check_url = '", "'");
+			$this->GetPage($checklink, $this->cookie, array(), $this->link, 0, 1); //empty array in post variable needed...
 
-    private function BeforeDownload($link, $cookie, $page) {
+			if (!preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w|\-]+)@i', $page, $pid)) html_error('reCAPTCHA not found.');
+			if (!preg_match('@var[\s\t]+recaptcha_control_field[\s\t]*=[\s\t]*\'([^\'\;]+)\'@i', $page, $ctrl)) html_error('Captcha control field not found.');
 
-        if (!preg_match('@(\d+)<\/span> seconds@', $page, $wait)) html_error ('Error: Timer not found!');
-        $this->CountDown($wait[1]);
-        if (!preg_match('@window\.location\.href="(.*)"@', $page, $redir)) html_error('Error: Redirect link 3 can\'t be found!');
-        $rlink = trim($redir[1]);
+			$data = $this->DefaultParamArr("http://shareflare.net/ajax/check_recaptcha.php", $this->cookie);
+			$data['step'] = '1';
+			$data['recaptcha_control_field'] = rawurlencode($ctrl[1]);
+			$this->Show_reCaptcha($pid[1], $data);
+			exit;
+		}
+		is_present($page, 'error_wrong_captcha', 'Error: Wrong Captcha Entered.');
+		is_present($page, 'error_free_download_blocked', 'Error: FreeDL limit reached.');
+		if (!preg_match('/https?:\/\/[\w.]+\/d\/[^\r\n]+/', $page, $dl)) html_error('Error[Download Link - FREE not found!]');
+		$dlink = trim($dl[0]);
+		$filename = basename(parse_url($dlink, PHP_URL_PATH));
+		$this->RedirectDownload($dlink, $filename, $this->cookie, 0, $this->link);
+		exit;
+	}
 
-        return $this->ContinueDownload($rlink, $cookie, $this->GetPage($rlink, $cookie, 0, $link));
-    }
+	private function AutomatePost($form) {
+		if (!preg_match_all('/<input type="hidden" name="([^"]+)" value="([^"]+)?" \/>/i', $form, $match)) html_error("Error: Post Data not found!");
+		$post = array();
+		$match = array_combine($match[1], $match[2]);
+		foreach ($match as $k => $v) $post[$k] = $v;
+		return $post;
+	}
 
-    private function ContinueDownload($link, $cookie, $page) {
+	private function Show_reCaptcha($pid, $inputs, $sname = 'Download File') {
+		global $PHP_SELF;
+		if (!is_array($inputs)) html_error('Error parsing captcha data.');
 
-        if (stristr($page, 'Wait your turn')) {
-            return $this->BeforeDownload($link, $cookie, $this->GetPage($link, $cookie, 0, $link));
-        }
-        
-        if (!preg_match('@http:\/\/.+download(\d+)?\/sha(\d+)?\/[^\'"]+@i', $page, $dl)) html_error('Error: Download link not found, plugin need to be updated!');
-        $dlink = trim($dl[0]);
-        $filename = parse_url($dlink);
-        $FileName = basename($filename['path']);
-        $this->RedirectDownload($dlink, $FileName, $cookie, 0, $link);
-        exit();
-    }
+		// Themes: 'red', 'white', 'blackglass', 'clean'
+		echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n";
+
+		echo "\n<center><form name='recaptcha' action='$PHP_SELF' method='post'><br />\n";
+		foreach ($inputs as $name => $input)
+			echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
+		echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script>";
+		echo "<noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br />";
+		echo "<input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n";
+		echo "<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n";
+		echo "</form></center>\n</body>\n</html>";
+		exit;
+	}
+
 }
 
 //shareflare.net free download plugin by Ruud v.Tony 14-10-2011
+//fixed by Tony Fauzi Wihana/Ruud v.Tony 11-01-2013, some recaptcha code taken in letitbit plugin code by Th3-822
 ?>

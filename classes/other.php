@@ -505,7 +505,7 @@ function check_referer() {
 	$is_ext = ($refhost == $_SERVER['SERVER_ADDR'] ? false : true);
 	if ($is_ext)
 		foreach ($whitelist as $host)
-			if (host_matchs($host, $refhost)) {
+			if (host_matches($host, $refhost)) {
 				$is_ext = false;
 				break;
 			}
@@ -550,7 +550,7 @@ if (!function_exists('http_chunked_decode')) {
 	}
 }
 
-function host_matchs($site, $host) {
+function host_matches($site, $host) {
 	if (empty($site) || empty($host)) return false;
 	if (strtolower($site) == strtolower($host)) return true;
 	$slen = strlen($site);

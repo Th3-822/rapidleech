@@ -8,10 +8,10 @@ class letitbit_net extends DownloadClass {
 	private $page, $cookie;
 	public $link;
 	public function Download($link) {
-		global $premium_acc, $Referer;
+		global $premium_acc;
 		$this->cookie = array('lang' => 'en');
 		// Check link
-		if (!$_REQUEST['step']) {
+		if (empty($_REQUEST['step']) || $_REQUEST['step'] != '1') {
 			$this->page = $this->GetPage($link, $this->cookie);
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
 			if (preg_match('@Location: ((https?://[^/\r\n]+)?/[^\r\n]+)@i', $this->page, $redir)) {
@@ -33,7 +33,7 @@ class letitbit_net extends DownloadClass {
 		} elseif ($_REQUEST['premium_acc'] == 'on' && (($_REQUEST['premium_pass'])||(!empty($premium_acc['letitbit_net']['pass'])))) {
 			$key = ($_REQUEST ["premium_pass"] ? trim($_REQUEST ["premium_pass"]) : $premium_acc["letitbit_net"]["pass"]);
 			return $this->Premium($key);
-		} elseif ($_REQUEST['step'] == '1') {
+		} elseif (!empty($_REQUEST['step']) && $_REQUEST['step'] == '1') {
 			return $this->Free();
 		} else {
 			return $this->Retrieve();
@@ -41,13 +41,11 @@ class letitbit_net extends DownloadClass {
 	}
 
 	private function Retrieve() {
-		global $Referer;
-
 		$form = cut_str($this->page, '<form id="ifree_form"', '<div class="wrapper-centered">');
 		if (empty($form)) html_error("Error: Empty Free Form 1!");
 		$post = $this->AutomatePost($form);
 		$this->link = "http://letitbit.net" . cut_str($form, 'action="', '"');
-		$page = $this->GetPage($this->link, $this->cookie, $post, $Referer);
+		$page = $this->GetPage($this->link, $this->cookie, $post);
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 		unset($post);
         if (!preg_match("/ajax_check_url = '((http:\/\/[a-z0-9]+\.[\w.]+)\/[^\r\n']+)';/", $page, $check)) html_error("Error: Redirect link [Free] not found!");
@@ -56,34 +54,50 @@ class letitbit_net extends DownloadClass {
 		// If you want, you can skip the countdown...
 		if (preg_match('@(\d+)<\/span> seconds@', $page, $wait)) $this->CountDown($wait[1]);
 		// end countdown timer...
-		$page = $this->GetPage($this->link, $this->cookie, array(), $Referer, 0, 1); //empty array in post variable needed...
-		//Download captcha img.
-		$cap = $this->GetPage($this->server . '/captcha_new.php?rand='.rand(1111,9999), $this->cookie); // Yes, the cookie is needed
-		$capt_img = substr($cap, strpos($cap, "\r\n\r\n") + 4);
-		$imgfile = DOWNLOAD_DIR . "letitbit_captcha.png";
+		$this->GetPage($this->link, $this->cookie, array(), 0, 0, 1); //empty array in post variable needed...
 
-		if (file_exists($imgfile)) unlink($imgfile);
-		if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.", 0);
-		// Captcha img downloaded
-		$data = $this->DefaultParamArr($this->server . "/ajax/check_captcha.php", $this->cookie);
+		if (!preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w|\-]+)@i', $page, $pid)) html_error('reCAPTCHA not found.');
+		if (!preg_match('@var[\s\t]+recaptcha_control_field[\s\t]*=[\s\t]*\'([^\'\;]+)\'@i', $page, $ctrl)) html_error('Captcha control field not found.');
+ 
+		$data = $this->DefaultParamArr($this->server . "/ajax/check_recaptcha.php", $this->cookie);
 		$data['step'] = '1';
-		$this->EnterCaptcha($imgfile, $data);
-		exit();
+		$data['recaptcha_control_field'] = rawurlencode($ctrl[1]);
+		$this->Show_reCaptcha($pid[1], $data);
 	}
 
 	private function Free() {
-		global $Referer;
+		if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
+		$post = array();
+		$post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
+		$post['recaptcha_response_field'] = $_POST['recaptcha_response_field'];
+		$post['recaptcha_control_field'] = rawurlencode(rawurldecode($_POST['recaptcha_control_field']));
 
-		$post['code'] = $_POST['captcha'];
-		$this->link = urldecode($_POST['link']);
 		$this->cookie = urldecode($_POST['cookie']);
-		$page = $this->GetPage($this->link, $this->cookie, $post, $Referer, 0, 1); //too many XML request needed so I used default http.php function in geturl...
-		is_present($page, "Content-Length: 0", "Error: Wrong Captcha Entered.");
-		if (!preg_match_all('/"(http(s)?:[^|\r|\n|"]+)",?/', $page, $dl)) html_error("Error: Download link [Free] not found.");
-		$dlink = str_replace('\\', '', trim($dl[1][0]));
+		$page = $this->GetPage($this->link, $this->cookie, $post, 0, 0, 1); //too many XML request needed so I used default http.php function in geturl...
+		is_present($page, 'error_wrong_captcha', 'Error: Wrong Captcha Entered.');
+		is_present($page, 'error_free_download_blocked', 'Error: FreeDL limit reached.');
+		if (!preg_match_all('/"(https?:[^\|\r\n\"\']+)"?/', $page, $dl)) html_error('Error: Download link [Free] not found.');
+		$dlink = str_replace('\\', '', trim($dl[1][array_rand($dl[1])]));
 		$FileName = urldecode(basename(parse_url($dlink, PHP_URL_PATH)));
-		$this->RedirectDownload($dlink, $FileName, $this->cookie, 0, $Referer);
+		$this->RedirectDownload($dlink, $FileName, $this->cookie, 0);
 		exit();
+	}
+
+	private function Show_reCaptcha($pid, $inputs, $sname = 'Download File') {
+		global $PHP_SELF;
+		if (!is_array($inputs)) html_error('Error parsing captcha data.');
+
+		// Themes: 'red', 'white', 'blackglass', 'clean'
+		echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n";
+
+		echo "\n<center><form name='recaptcha' action='$PHP_SELF' method='post'><br />\n";
+		foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
+		echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script>";
+		echo "<noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br />";
+		echo "<input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n";
+		echo "<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n";
+		echo "</form></center>\n</body>\n</html>";
+		exit;
 	}
 
 	private function Premium($premiumkey = false) {
@@ -214,5 +228,7 @@ class letitbit_net extends DownloadClass {
   Fix new login policy & free download code from letitbit by Ruud v.Tony & Th3-822 18-02-2012
   Fixed free download code by Ruud v.Tony 16-04-2012
   Fixed for redirects in download links by Th3-822 16-10-2012
+  reCaptcha support added at freedl by Th3-822 24-11-2012
 \***********************************************************************************************/
+
 ?>

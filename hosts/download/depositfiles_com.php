@@ -1,198 +1,265 @@
 <?php
+
 if (!defined('RAPIDLEECH')) {
-    require_once ("index.html");
-    exit ();
+	require_once('index.html');
+	exit;
 }
 
 class depositfiles_com extends DownloadClass {
+	public $link, $page;
+	private $cookie, $pA, $DLregexp, $TryFreeDLTricks;
+	public function Download($link) {
+		global $premium_acc;
+		$this->pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
+		$this->link = $link;
+		$this->cookie = array('lang_current' => 'en');
+		$this->DLregexp = '@https?://fileshare\d+\.depositfiles\.com/auth-[^\r\n\t\"\'<>]+@i';
+		$this->TryFreeDLTricks = true;
+		if (empty($_REQUEST['step'])) {
+			$this->page = $this->GetPage($this->link);
+			is_present($this->page, 'This file does not exist', 'The requested file is not found');
+		}
 
-    public function Download($link) {
-        global $premium_acc, $Referer;
-        if (preg_match('@http:\/\/depositfiles\.com\/folders\/[^|\r|\n]+@i', $link, $dir)) {
-            if (!$dir[0]) html_error('Invalid depositfiles folder link!');
-            $page = $this->GetPage($link, "lang_current=en");
-            preg_match_all('/<a class="hrefs" href="(.*)">/i', $page, $check);
-            if (!$check[1]) html_error('Can\'t find any depositfiles single link!');
-            $this->moveToAutoDownloader($check[1]);
-        }
-        if ($_POST['step'] == 'password') {
-            $post['file_password'] = $_POST['file_password'];
-            $link = urldecode($_POST['link']);
-            if ($_POST['pass'] == 'premium') {
-                $cookie = decrypt(urldecode($_POST['cookie']));
-                return $this->DownloadPremium($link, $cookie, $this->GetPage($link, $cookie, $post, $Referer));
-            } else {
-                $cookie = urldecode($_POST['cookie']);
-                return $this->DownloadFree($link, $cookie, $this->GetPage($link, $cookie, $post, $Referer));
-            }
-        } elseif (($_REQUEST["cookieuse"] == "on" && preg_match("/autologin\s?=\s?([^\r\n;);?/i", $_REQUEST["cookie"], $c)) || ($_REQUEST["premium_acc"] == "on" && $premium_acc["depositfiles_com"]["cookie"])) {
-            $cookie = (empty($c[1]) ? $premium_acc["depositfiles_com"]["cookie"] : $c[1]);
-            return $this->Login($link, $cap, $cookie);
-        } elseif (($_REQUEST ["premium_acc"] == "on" && $_REQUEST ["premium_user"] && $_REQUEST ["premium_pass"]) || ($_REQUEST ["premium_acc"] == "on" && $premium_acc ["depositfiles_com"] ["user"] && $premium_acc ["depositfiles_com"] ["pass"])) {
-            return $this->Login($link, $cap);
-        } elseif ($_POST['step'] == 'CaptchaPre') {
-            return $this->Login($link, 1);
-        } elseif ($_POST['step'] == 'CaptchaFree') {
-            return $this->DownloadFree($link);
-        } else {
-            $page = $this->GetPage($link, "lang_current=en");
-            $cookie = GetCookies($page) . "; lang_current=en";
-            return $this->Retrieve($link, $cookie, $this->GetPage($link, $cookie, array('gateway_result' => '1'), $Referer));
-        }
-    }
+		if (($_REQUEST['premium_acc'] == 'on' && ($this->pA || (!empty($premium_acc['depositfiles_com']['user']) && !empty($premium_acc['depositfiles_com']['pass']))))) {
+			$user = ($this->pA ? $_REQUEST['premium_user'] : $premium_acc['depositfiles_com']['user']);
+			$pass = ($this->pA ? $_REQUEST['premium_pass'] : $premium_acc['depositfiles_com']['pass']);
+			if ($this->pA && !empty($_POST['pA_encrypted'])) {
+				$user = decrypt(urldecode($user));
+				$pass = decrypt(urldecode($pass));
+				unset($_POST['pA_encrypted']);
+			}
+			$this->CookieLogin($user, $pass);
+		} else {
+			$this->cookie = GetCookiesArr($this->page, $this->cookie);
+			$this->FreeDL();
+		}
+	}
 
-    private function Retrieve($link, $cookie, $page) {
-        global $Referer;
+	private function FreeDL() {
+		if (!empty($_POST['step']) && $_POST['step'] == 1) {
+			if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
+			$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
+			if (empty($_POST['fid'])) html_error('FileID not found after POST.');
 
-        is_present($page, "Such file does not exist or it has been removed for infringement of copyrights.");
-        is_present($page, "all downloading slots for your country are busy", "All download slots for your country are busy!");
-        if (preg_match('/Your IP ([\d.]+) is already downloading a file from our system/', $page, $msg)) html_error($msg[0]);
-        if (preg_match('%html_download_api-limit_interval">(\d+)<\/span>%', $page, $limit)) html_error("Download limit exceeded. Try again in " . round($limit[1] / 60) . " minutes");
-        if (stristr($page, 'Please, enter the password for this file')) {
-            $data = array_merge($this->DefaultParamArr($link, $cookie), array('step' => 'password'));
-            $this->EnterPassword($data);
-            exit();
-        }
-        if (!preg_match('%<span id="download_waiter_remain">(\d+)<\/span>%', $page, $wait)) html_error('Error 0x01:Plugin is out of date');
-        $this->CountDown($wait[1]);
-        $cookie = $cookie . '; ' . GetCookies($page);
-        if (!preg_match("@var fid = '([^|']+)@i", $page, $fid)) html_error('Error 0x02:Plugin is out of date');
-        if (!preg_match("@Recaptcha\.create\('([^|']+)@i", $page, $cid)) html_error('Error 0x03:Plugin is out of date');
-        if (!preg_match("@\/get_file\.php[^|']+@i", $page, $temp)) html_error('Error 0x04:Plugin is out of date');
+			$query = array('fid' => $_POST['fid'], 'challenge' => $_POST['recaptcha_challenge_field'], 'response' => $_POST['recaptcha_response_field']);
+			$page = $this->GetPage('http://depositfiles.com/get_file.php?'.http_build_query($query), $this->cookie);
+			is_present($page, 'load_recaptcha()', 'Error: Wrong CAPTCHA entered.');
 
-        $data = $this->DefaultParamArr("http://depositfiles.com$temp[0]", $cookie);
-        $data['step'] = 'CaptchaFree';
-        $data['fid'] = $fid[1];
-        $data['check'] = $cid[1];
-        $this->Show_reCaptcha($cid[1], $data);
-        exit();
-    }
+			if (!preg_match($this->DLregexp, $page, $dlink)) html_error('Download link Not Found.');
+			$this->RedirectDownload($dlink[0], basename(urldecode(parse_url($dlink[0], PHP_URL_PATH))));
+		} else {
+			$page = $this->GetPage($this->link, $this->cookie, array('gateway_result' => '1'));
+			$this->cookie = GetCookiesArr($this->page, $this->cookie);
+			if ($this->TryFreeDLTricks) $Mesg = lang(300);
 
-    private function DownloadFree($link) {
-        global $Referer;
+			if (stripos($page, 'Connection limit has been exhausted for your IP address!') !== false) {
+				if (preg_match('@<span class="html_download_api-limit_interval">[\s\t\r\n]*(\d+)[\s\t\r\n]*</span>@i', $page, $limit)) {
+					$x = 0;
+					if ($this->TryFreeDLTricks && $limit[1] > 45) while ($x < 3) {
+						$page = $this->GetPage('http://depositfiles.com/get_file.php?fd=clearlimit', $this->cookie);
+						if (($fd2 = cut_str($page, 'name="fd2" value="', '"')) == false) break;
+						insert_timer(30, 'Trying to reduce ip-limit waiting time.');
+						$page = $this->GetPage('http://depositfiles.com/get_file.php?fd2='.urlencode($fd2), $this->cookie);
+						$page = $this->GetPage($this->link, $this->cookie, array('gateway_result' => '1'));
+						if (!preg_match('@<span class="html_download_api-limit_interval">[\s\t\r\n]*(\d+)[\s\t\r\n]*</span>@i', $page, $_limit)) {
+							$Mesg .= '<br /><br />Skipped the remaining '.($limit[1] - 30).' secs of ip-limit wait time.';
+							$this->changeMesg($Mesg);
+							$limit[1] = 0;
+							break;
+						}
+						$diff = ($limit[1] - 30) - $_limit[1];
+						$limit[1] = $_limit[1];
+						$Mesg .= "<br /><br />Skipped $diff secs of ip-limit wait time.";
+						$this->changeMesg($Mesg);
+						if ($diff < 1) break; // Error?
+						$x++;
+					}
+					if ($limit[1] > 0) return $this->JSCountdown($limit[1], $this->DefaultParamArr($this->link), 'Connection limit has been exhausted for your IP address');
+				} else html_error('Connection limit has been exhausted for your IP address. Please try again later.');
+			}
 
-        $fid = $_POST['fid'];
-        $check = $_POST['check'];
-        $challenge = $_POST['recaptcha_challenge_field'];
-        $response = $_POST['recaptcha_response_field'];
-        $link = urldecode($_POST['link']);
-        $cookie = urldecode($_POST['cookie']);
-        $page = $this->GetPage($link . "$fid&challenge=$challenge&response=$response", $cookie, 0, $Referer);
-        if (preg_match("@check_recaptcha\('$fid'@i", $page)) {
-            $data = $this->DefaultParamArr($link, $cookie);
-            $data['step'] = 'CaptchaFree';
-            $data['fid'] = $fid;
-            $this->Show_reCaptcha($check, $data);
-            exit();
-        }
-        if (!preg_match('%<form action="(.*)" method="get"%U', $page, $dl)) html_error("Error 0x05:Plugin is out of date");
-        $dlink = trim($dl[1]);
-        $FileName = basename(parse_url($dlink, PHP_URL_PATH));
-        $this->RedirectDownload($dlink, $FileName, $cookie, 0, $Referer);
-        exit();
-    }
+			if (!preg_match('@var[\s\t]+fid[\s\t]*=[\s\t]*\'(\w+)\'@i', $page, $fid)) html_error('FileID not found.');
+			if (!preg_match('@Recaptcha\.create[\s\t]*\([\s\t]*[\'\"]([\w\-]+)[\'\"]@i', $page, $cpid)) html_error('reCAPTCHA Not Found.');
+			if (!preg_match('@setTimeout\(\'load_form\(fid, msg\)\',[\s\t]*(\d+)\);@i', $page, $cd)) html_error('Countdown not found.');
+			$cd = $cd[1] / 1000;
+			if ($cd > 0) $this->CountDown($cd);
 
-    private function Login($link, $cap = 0, $autolog = false) {
-        global $premium_acc;
-        
-        $posturl = 'http://depositfiles.com/';
-        if (!$autolog) {
-            $user = ($_REQUEST["premium_user"] ? $_REQUEST["premium_user"] : $premium_acc["depositfiles_com"]["user"]);
-            $pass = ($_REQUEST["premium_pass"] ? $_REQUEST["premium_pass"] : $premium_acc["depositfiles_com"]["pass"]);
-            if (empty($user) || empty($pass)) html_error("Login Failed: Username[$user] or Password[$pass] is empty. Please check login data.");
+			if ($this->TryFreeDLTricks) {
+				$page = $this->GetPage('http://depositfiles.com/get_file.php?fd2='.urlencode($fid[1]), $this->cookie);
+				if (preg_match($this->DLregexp, $page, $dlink)) return $this->RedirectDownload($dlink[0], basename(urldecode(parse_url($dlink[0], PHP_URL_PATH))));
+				$Mesg .= '<br /><br /><b>Cannot skip captcha.</b>';
+				$this->changeMesg($Mesg);
+			}
 
-            $post['go'] = "1";
-            $post['login'] = $user;
-            $post['password'] = $pass;
-            if ($cap == 1) {
-                $post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
-                $post['recaptcha_response_field'] = $_POST['recaptcha_response_field'];
-                $loginurl = urldecode($_POST['link']);
-            } else {
-                $loginurl = $posturl."login.php?return=/";
-            }
-            $page = $this->GetPage($loginurl, "lang_current=en", $post, $posturl);
-            if (strpos($page, 'Enter security code')) {
-                if (!preg_match('@api\/challenge[?]k=([^"]+)@i', $page, $cap) && !preg_match('@api\/noscript[?]k=([^"]+)@i', $page, $cap)) html_error('Error [Captcha Data Login not found!]');
-                $data = $this->DefaultParamArr($loginurl);
-                $data['step'] = 'CaptchaPre';
-                $this->Show_reCaptcha($cap[1], $data);
-                exit();
-            }
-            $cookie = GetCookies($page) . '; lang_current=en';
-            // WANNA GET YOUR PREMIUM COOKIE? UNCOMMENT THE CODE BELOW, COPY THE COOKIE VALUE IN THE TEXTAREA!
-            // $autolog = cut_str($cookie, 'autologin=', ';');
-            // textarea($autolog, 0, 0, true);
-            is_notpresent($cookie, "autologin", "Login Failed , Bad username/password combination");
-        } else {
-            $cookie = "autologin=$autolog; lang_current=en";
-        }
+			$page = $this->GetPage('http://depositfiles.com/get_file.php?fid='.urlencode($fid[1]), $this->cookie);
+			is_notpresent($page, 'load_recaptcha()', 'Error: Countdown skipped?.');
 
-        //IMPORTANT, WE NEED TO CHECK THIS FIRST!
-        $page = $this->GetPage($posturl.'gold/', $cookie, 0, $posturl.'gold/payment.php');
-        is_present($page, 'FREE - member', 'Account free, login not validated!');
-        is_notpresent($page, '<div class="goldmembership">', 'Login failed, account is not valid?');
+			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+			$data['step'] = '1';
+			$data['fid'] = urlencode($fid[1]);
+			$this->Show_reCaptcha($cpid[1], $data);
+		}
+	}
 
-        return $this->DownloadPremium($link, $cookie, $this->GetPage($link, $cookie));
-    }
+	private function PremiumDL() {
+		$page = $this->GetPage($this->link, $this->cookie);
 
-    private function DownloadPremium($link, $cookie, $page) {
+		if (!preg_match_all($this->DLregexp, $page, $dlink)) html_error('Download-link Not Found.');
+		$dlink = $dlink[0][array_rand($dlink[0])];
+		$fname = basename(urldecode(parse_url($dlink, PHP_URL_PATH)));
+		$this->RedirectDownload($dlink, $fname);
+	}
 
-        is_present($page, "You have exceeded the 20 GB 24-hour limit");
-        is_present($page, "Such file does not exist or it has been removed for infringement of copyrights.");
-        if (stristr($page, 'Please, enter the password for this file')) {
-            $data = array_merge($this->DefaultParamArr($link, encrypt($cookie)), array('step' => 'password', 'pass' => 'premium'));
-            $this->EnterPassword($data);
-            exit();
-        }
-        if (!preg_match('@http:\/\/.+depositfiles\.com\/auth-[^|\r|\n|\'"]+@i', $page, $dl)) html_error("Error 0x06:Plugin is out of date");
-        $dlink = trim($dl[0]);
-        $FileName = basename(parse_url($dlink, PHP_URL_PATH));
-        $this->RedirectDownload($dlink, $FileName, $cookie);
-    }
+	private function Login($user, $pass) {
+		$purl = 'http://depositfiles.com/';
+		$errors = array('CaptchaInvalid' => 'Wrong CAPTCHA entered.', 'InvalidLogIn' => 'Invalid Login/Pass.', 'CaptchaRequired' => 'Captcha Required.');
+		if (!empty($_POST['step']) && $_POST['step'] == '1') {
+			if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
+			$post = array('recaptcha_challenge_field' => $_POST['recaptcha_challenge_field'], 'recaptcha_response_field' => $_POST['recaptcha_response_field']);
+			$post['login'] = urlencode($user);
+			$post['password'] = urlencode($pass);
 
-    private function Show_reCaptcha($pid, $inputs) {
-        global $PHP_SELF;
+			$page = $this->GetPage($purl.'api/user/login', $this->cookie, $post, $purl.'login.php?return=%2F');
+			$json = $this->Get_Reply($page);
+			if (!empty($json['error'])) html_error('Login Error'. (!empty($errors[$json['error']]) ? ': ' . $errors[$json['error']] : '..'));
+			elseif ($json['status'] != 'OK') html_error('Login Failed');
 
-        if (!is_array($inputs)) {
-            html_error("Error parsing captcha data.");
-        }
-        // Themes: 'red', 'white', 'blackglass', 'clean'
-        echo "<script language='JavaScript'>var RecaptchaOptions={theme:'white', lang:'en'};</script>\n";
-        echo "\n<center><form name='dl' action='$PHP_SELF' method='post' ><br />\n";
-        foreach ($inputs as $name => $input) {
-            echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
-        }
-        echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script>";
-        echo "<noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br />";
-        echo "<textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br />";
-        echo "<input type='submit' name='submit' onclick='javascript:return checkc();' value='Enter Captcha' />\n";
-        echo "<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n";
-        echo "</form></center>\n</body>\n</html>";
-        exit();
-    }
+			$this->cookie = GetCookiesArr($page, $this->cookie);
+			if (empty($this->cookie['autologin'])) html_error('Login Error: Cannot find "autologin" cookie');
 
-    private function EnterPassword($inputs) {
-        global $PHP_SELF;
-        if (!is_array($inputs)) {
-            html_error("Error parsing password data.");
-        }
-        echo "\n" . '<center><form action="' . $PHP_SELF . '" method="post" >' . "\n";
-        foreach ($inputs as $name => $input) {
-            echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
-        }
-        echo '<h4>Enter password here: <input type="text" name="password" id="filepass" size="13" />&nbsp;&nbsp;<input type="submit" onclick="return check()" value="Submit" /></h4>' . "\n";
-        echo "<script type='text/javascript'>\nfunction check() {\nvar pass=document.getElementById('filepass');\nif (pass.value == '') { window.alert('You didn\'t enter the password'); return false; }\nelse { return true; }\n}\n</script>\n";
-        echo "\n</form></center>\n</body>\n</html>";
-        exit();
-    }
+			$this->SaveCookies($user, $pass); // Update cookies file
+			if ($json['data']['mode'] == 'free') html_error('Login Error: Account isn\'t gold');
+
+			return $this->PremiumDL();
+		} else {
+			$post = array();
+			$post['login'] = urlencode($user);
+			$post['password'] = urlencode($pass);
+
+			$page = $this->GetPage($purl.'api/user/login', $this->cookie, $post, $purl.'login.php?return=%2F');
+			$json = $this->Get_Reply($page);
+			if (!empty($json['error']) && $json['error'] != 'CaptchaRequired') html_error('Login Error'. (!empty($errors[$json['error']]) ? ': ' . $errors[$json['error']] : '.'));
+			elseif ($json['status'] == 'OK') {
+				$this->cookie = GetCookiesArr($page, $this->cookie);
+				if (empty($this->cookie['autologin'])) html_error('Login Error: Cannot find "autologin" cookie.');
+				$this->SaveCookies($user, $pass); // Update cookies file
+				if ($json['data']['mode'] == 'free') html_error('Login Error: Account isn\'t gold.');
+				return $this->PremiumDL();
+			} elseif (empty($json['error']) || $json['error'] != 'CaptchaRequired') html_error('Login Failed.');
+
+			// Captcha Required
+			$page = $this->GetPage($purl.'login.php?return=%2F', $this->cookie, 0, $purl);
+			$this->cookie = GetCookiesArr($page, $this->cookie);
+
+			if (!preg_match('@(https?://([^/\r\n\t\s\'\"<>]+\.)?depositfiles\.com(?:\:\d+)?)?/js/base2\.js@i', $page, $jsurl)) html_error('Cannot find captcha.');
+			$jsurl = (empty($jsurl[1])) ? 'http://depositfiles.com'.$jsurl[0] : $jsurl[0];
+			$page = $this->GetPage($jsurl, $this->cookie, 0, $purl.'login.php?return=%2F');
+
+			if (!preg_match('@recaptcha_public_key\s*=\s*[\'\"]([\w\-]+)@i', $page, $cpid)) html_error('reCAPTCHA Not Found.');
+
+			$data = $this->DefaultParamArr($this->link);
+			$data['step'] = '1';
+			$data['premium_acc'] = 'on';
+			if ($this->pA) {
+				$data['pA_encrypted'] = 'true';
+				$data['premium_user'] = urlencode(encrypt($user));
+				$data['premium_pass'] = urlencode(encrypt($pass));
+			}
+			$this->Show_reCaptcha($cpid[1], $data, 'Login');
+		}
+	}
+
+	private function Get_Reply($page) {
+		if (!function_exists('json_decode')) html_error('Error: Please enable JSON in php.');
+		$json = substr($page, strpos($page, "\r\n\r\n") + 4);
+		$json = substr($json, strpos($json, '{'));$json = substr($json, 0, strrpos($json, '}') + 1);
+		$rply = json_decode($json, true);
+		if (!$rply || count($rply) == 0) html_error('Error reading json.');
+		return $rply;
+	}
+
+	private function Show_reCaptcha($pid, $inputs, $sname = 'Download File') {
+		global $PHP_SELF;
+		if (!is_array($inputs)) html_error('Error parsing captcha data.');
+
+		// Themes: 'red', 'white', 'blackglass', 'clean'
+		echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n\n<center><form name='recaptcha' action='$PHP_SELF' method='POST'><br />\n";
+		foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='$input' />\n";
+		echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script><noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br /><input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n</form></center>\n</body>\n</html>";
+		exit;
+	}
+
+	private function IWillNameItLater($cookie, $decrypt=true) {
+		if (!is_array($cookie)) {
+			if (!empty($cookie)) return $decrypt ? decrypt(urldecode($cookie)) : urlencode(encrypt($cookie));
+			return '';
+		}
+		if (count($cookie) < 1) return $cookie;
+		$keys = array_keys($cookie);
+		$values = array_values($cookie);
+		$keys = $decrypt ? array_map('decrypt', array_map('urldecode', $keys)) : array_map('urlencode', array_map('encrypt', $keys));
+		$values = $decrypt ? array_map('decrypt', array_map('urldecode', $values)) : array_map('urlencode', array_map('encrypt', $values));
+		return array_combine($keys, $values);
+	}
+
+	private function CookieLogin($user, $pass, $filename = 'depositfiles_dl.php') {
+		global $secretkey;
+		if (empty($user) || empty($pass)) html_error('Login Failed: User or Password is empty.');
+
+		$filename = DOWNLOAD_DIR . basename($filename);
+		if (!file_exists($filename) || (!empty($_POST['step']) && $_POST['step'] == '1')) return $this->Login($user, $pass);
+
+		$file = file($filename);
+		$savedcookies = unserialize($file[1]);
+		unset($file);
+
+		$hash = hash('crc32b', $user.':'.$pass);
+		if (array_key_exists($hash, $savedcookies)) {
+			$_secretkey = $secretkey;
+			$secretkey = sha1($user.':'.$pass);
+			$this->cookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? $this->IWillNameItLater($savedcookies[$hash]['cookie']) : '';
+			$secretkey = $_secretkey;
+			if (empty($this->cookie) || (is_array($this->cookie) && count($this->cookie) < 1)) return $this->Login($user, $pass);
+
+			$page = $this->GetPage('http://depositfiles.com/', $this->cookie);
+			if (stripos($page, '/logout.php">Logout</a>') === false) return $this->Login($user, $pass);
+			is_present($page, 'user_icon user_member', 'Account isn\'t premium');
+			$this->SaveCookies($user, $pass); // Update cookies file
+			return $this->PremiumDL();
+		}
+		return $this->Login($user, $pass);
+	}
+
+	private function SaveCookies($user, $pass, $filename = 'depositfiles_dl.php') {
+		global $secretkey;
+		$maxdays = 7; // Max days to keep cookies saved
+		$filename = DOWNLOAD_DIR . basename($filename);
+		if (file_exists($filename)) {
+			$file = file($filename);
+			$savedcookies = unserialize($file[1]);
+			unset($file);
+
+			// Remove old cookies
+			foreach ($savedcookies as $k => $v) if (time() - $v['time'] >= ($maxdays * 24 * 60 * 60)) unset($savedcookies[$k]);
+		} else $savedcookies = array();
+		$hash = hash('crc32b', $user.':'.$pass);
+		$_secretkey = $secretkey;
+		$secretkey = sha1($user.':'.$pass);
+		$savedcookies[$hash] = array('time' => time(), 'enc' => urlencode(encrypt('OK')), 'cookie' => $this->IWillNameItLater($this->cookie, false));
+		$secretkey = $_secretkey;
+
+		file_put_contents($filename, "<?php exit(); ?>\r\n" . serialize($savedcookies), LOCK_EX);
+	}
+
+	public function CheckBack($header) {
+		$statuscode = intval(substr($header, 9, 3));
+		if ($statuscode == 400) {
+			if (stripos($header, "\nGuest-Limit: Wait") !== false) html_error('[Depositfiles] FreeDL Limit Reached, try downloading again for countdown.');
+			else html_error('Error: 400 Bad Request');
+		}
+	}
 }
 
-//Written by VinhNhaTrang 12-08-2010
-//Updated by vdhdevil & Ruud v.Tony 19-3-2011
-//Updated by vdhdevil 30-April-2011: Updated Download Premium
-//Updated by Ruud v.Tony 16-May-2011: Updated Download Free
-//Updated by Ruud v.Tony 03-Okt-2011: Updated for depositfiles new layout, support captcha in login, password protected file, folder file
-//Updated by Ruud v.Tony 05-Okt-2011: Updated in password protected files so we dont need to start over the page :D
-//Updated by Ruud v.Tony 26-Okt-2011: Add captcha function in free download
+//[13-1-2012]  Written by Th3-822.
+
 ?>

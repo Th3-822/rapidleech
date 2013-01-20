@@ -13,7 +13,7 @@ $premium_acc = array();
 //$premium_acc["share-online_biz"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["megashares_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["vBulletin_acc"] = array('user' => 'your username', 'pass' => 'your password');
-//$premium_acc["uploaded_to"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["uploaded_net"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["filefactory_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["filedude_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["sendspace_com"] = array('user' => 'your username', 'pass' => 'your password');
@@ -54,12 +54,14 @@ $premium_acc = array();
 //$premium_acc["bulletupload_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["speedyshare_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["filegaze_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc ["necroupload_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc ["filemates_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc ["luckyshare_net"] = array('user' => 'your username', 'pass' => 'your password');
 
 ###Premium cookie configuration, dont use this if you have already set another premium account config
-//$premium_acc["depositfiles_com"] = array('cookie' => 'your premium cookie');
 //$premium_acc["hotfile_com"] = array('cookie' => 'your premium cookie');
 //$premium_acc["rapidshare_com"] = array('cookie' => 'your premium cookie');
-//$premium_acc["uploaded_to"] = array('cookie' => 'your premium cookie');
+//$premium_acc["uploaded_net"] = array('cookie' => 'your premium cookie');
 //$premium_acc["uploading_com"] = array('cookie' => 'your premium cookie');
 //$premium_acc["netload_in"] = array('cookie' => 'your premium cookie');
 
@@ -68,6 +70,7 @@ $premium_acc = array();
 //$premium_acc["vip_file_com"] = array('pass' => 'your password');
 //$premium_acc["shareflare_net"] = array('pass' => 'your password');
 //$premium_acc["fileflyer_com"] = array('pass' => 'your password');
+//$premium_acc["livefile_org"] = array('key' => 'your password');
 
 
 ###Auto Download Premium Account###

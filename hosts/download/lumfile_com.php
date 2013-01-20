@@ -29,6 +29,7 @@ class lumfile_com extends DownloadClass {
 		$post['method_free'] = cut_str($page2, 'name="method_free" value="', '"');
 
 		$page = $this->GetPage($link, $this->cookie, $post);
+		is_present($page, cut_str($page, '<p class="err">', '</p>'));
 		if (preg_match('@You have to wait (?:\d+ \w+,\s)?\d+ \w+ till next download@', $page, $err)) html_error('Error: '.$err[0]);
 
 		$page2 = cut_str($page, '<form name="F1" method="POST"', '</form>'); //Cutting page
@@ -117,5 +118,6 @@ class lumfile_com extends DownloadClass {
 }
 
 // [28-8-2012]  Written by Th3-822. (XFS, XFS everywhere. D:)
+// Added some error message if link for premium only by Tony Fauzi Wihana/Ruud v.Tony 15-01-2013
 
 ?>
