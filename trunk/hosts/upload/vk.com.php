@@ -18,6 +18,8 @@ if (!defined('ROOT_DIR')) define('ROOT_DIR', realpath('./'));
 $return_url = link_for_file(realpath(basename($PHP_SELF)), true).'?uploaded='.urlencode($_REQUEST['uploaded']).'&filename='.urlencode(base64_encode($lname));
 if (!empty($_GET['proxy'])) $return_url .= '&useuproxy=on&uproxy='.urlencode($_GET['proxy']);
 if (!empty($_REQUEST['pauth'])) $return_url .= '&upauth='.urlencode($pauth);
+if (!empty($_GET['save_style'])) $return_url .= '&save_style='.urlencode($_GET['save_style']);
+if (isset($_GET['auul'])) $return_url .= '&auul='.urlencode($_GET['auul']);
 
 $videxts = array('.avi', '.mp4', '.3gp', '.mpg', '.mpeg', '.mov', '.flv', '.wmv');
 $video = true;
@@ -42,6 +44,7 @@ $auth_url = 'https://oauth.vk.com/authorize?client_id='.urlencode($app['id']).'&
 
 if (empty($_REQUEST['code'])) {
 	echo "\n<script type='text/javascript'>document.location = '$auth_url';</script>\n<h1 style='text-align:center'>You are being redirected to VK's auth dialog...</h1><div style='text-align:center'>It doesn't redirect?, Click <a href='$auth_url'>here</a>.</div>\n";
+	exit("</body>\n</html>");
 } else {
 	$not_done = false;
 
@@ -108,8 +111,9 @@ if (empty($_REQUEST['code'])) {
 		else html_error('Save Error: '. $rply['error']);
 	}
 
-	if (!$video && !empty($rply['response']['url'])) $download_link = $rply['response']['url'];
+	if ($video && !empty($upsrv['response']['vid'])) $download_link = 'http://vk.com/video' . $json['user_id'] . '_' . $upsrv['response']['vid'];
 	elseif ($video) html_error('Your video will appear in your VK account after a while.', 0);
+	elseif (!$video && !empty($rply['response']['url'])) $download_link = $rply['response']['url'];
 	else html_error('Check your VK account for see the new uploaded file.', 0);
 }
 
@@ -137,6 +141,7 @@ function Get_Reply($page) {
 }
 
 //[30-8-2012] Written by Th3-822.
-//[28-10-2012] Small fixes tha i don't remember. - Th3-822
+//[28-10-2012] Small fixes that i don't remember. - Th3-822
+//[24-11-2012] Now it shows video url & Fixed auul for this plugin. - Th3-822
 
 ?>

@@ -36,6 +36,10 @@ while (false !== ($entry = $d->read())) {
 			case 'speedyshare.com':
 				$host['speedy.sh'] = $host['speedyshare.com'];
 				break;
+			case 'uploaded.net':
+				$uploaded_domain = array('ul.to', 'uploaded.to');
+				foreach ($uploaded_domain as $uploaded) $host["$uploaded"] = $host['uploaded.net'];
+				break;
 		}
 	}
 }

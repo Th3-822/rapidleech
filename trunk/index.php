@@ -169,7 +169,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 	if (empty($_GET['dis_plug']) || $_GET ['dis_plug'] != 'on') {
 		// check Domain-Host
 		foreach ($host as $site => $file) {
-			if (host_matchs($site, $Url['host'])) {
+			if (host_matches($site, $Url['host'])) {
 				include(TEMPLATE_DIR . '/header.php');
 				require_once (CLASS_DIR . 'http.php');
 				require_once (HOST_DIR . 'DownloadClass.php');
@@ -190,7 +190,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 
 	$FileName = isset($Url['path']) ? basename($Url['path']) : '';
 	$mydomain = ($pos = strpos($_SERVER['HTTP_HOST'], ':')) !== false ? substr($_SERVER['HTTP_HOST'], 0, $pos) : $_SERVER['HTTP_HOST'];
-	if ($options['bw_save'] && ($Url['host'] == $_SERVER['SERVER_ADDR'] || host_matchs($mydomain, $Url['host']))) html_error(sprintf(lang(7), $mydomain, $_SERVER['SERVER_ADDR']));
+	if ($options['bw_save'] && ($Url['host'] == $_SERVER['SERVER_ADDR'] || host_matches($mydomain, $Url['host']))) html_error(sprintf(lang(7), $mydomain, $_SERVER['SERVER_ADDR']));
 
 	$redir = GetDefaultParams();
 	$redir['dis_plug'] = 'on';

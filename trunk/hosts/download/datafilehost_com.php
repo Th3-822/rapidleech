@@ -10,8 +10,8 @@ class datafilehost_com extends DownloadClass {
         $page = $this->GetPage($link);
         is_present($page, cut_str($page, '<div style="text-align:center">', '<br>'));
         $cookie = GetCookiesArr($page);
-        if (!preg_match('@Download: <a href="([^"]+)">Click Here@', $page, $dl)) html_error("Error[DownloadLink] not found!");
-        $dlink = trim($dl[1]);
+        if (!preg_match('/https?:\/\/www\.datafilehost\.com\/get.php\?file=[^\r\n\'"]+/', $page, $dl)) html_error("Error[DownloadLink] not found!");
+        $dlink = trim($dl[0]);
         $filename = basename(parse_url($dlink, PHP_URL_PATH));
         $this->RedirectDownload($dlink, $filename, $cookie, 0, $link);
         exit();
@@ -20,5 +20,6 @@ class datafilehost_com extends DownloadClass {
 
 /*
  * by Ruud v.Tony 06-02-2012 (while chatting with Palooo & Th3-822, :D)
+ * fix small regex by Tony Fauzi Wihana/Ruud v.Tony 04/01/2013
  */
 ?>

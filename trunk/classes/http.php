@@ -192,8 +192,8 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			} else $chkref = false;
 			$found = false;
 			if ($chkhost || $chkref) foreach ($GLOBALS['host'] as $site => $file) {
-				if ($chkhost && host_matchs($site, $cbhost)) $found = true;
-				elseif ($chkref && host_matchs($site, $cbrefhost)) $found = true;
+				if ($chkhost && host_matches($site, $cbhost)) $found = true;
+				elseif ($chkref && host_matches($site, $cbrefhost)) $found = true;
 				if ($found) {
 					require_once(HOST_DIR . 'DownloadClass.php');
 					require_once(HOST_DIR . "download/$file");
@@ -444,7 +444,7 @@ function formpostdata($post=array()) {
 	return $postdata;
 }
 
-// function to convert a array of cookies into a string
+// function to convert an array of cookies into a string
 function CookiesToStr($cookie=array()) {
 	if (count($cookie) == 0) return '';
 	$cookies = '';
@@ -490,10 +490,10 @@ function GetCookiesArr($content, $cookie=array(), $del=true, $dval=array('','del
 
 /**
  * Function to convert a string of cookies into an array
- * @param string $cookies
- * @param array $cookie
- * @param bool $del
- * @param mixed $dval
+ * @param string The existing string cookie value
+ * @param array The existing array cookie value that we want to merged/updated [optional]
+ * @param bool Options to remove temporary cookie (usually it named as 'deleted') [optional]
+ * @param mixed The default name for temporary cookie, values are accepted in a array [optional]
  */
 function StrToCookies($cookies, $cookie=array(), $del=true, $dval=array('','deleted')) {
 	if (!is_array($cookie)) $cookie = array();

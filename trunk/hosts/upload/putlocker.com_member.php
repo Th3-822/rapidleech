@@ -1,97 +1,209 @@
 ﻿<?php
-####### Account Info. ###########
-$put_cookie = ""; //set value your cookie auth of putlocker.com. Example: auth=Mffggdvgvdgvgh8j67-0jhhMTI5ZjZhNmU5MTgwYTQx place only Mffggdvgvdgvgh8j67-0jhhMTI5ZjZhNmU5MTgwYTQx
-##############################
+######## Account Info ########
+$upload_acc['putlocker_com']['user'] = ''; //Set your login
+$upload_acc['putlocker_com']['pass'] = ''; //Set your password
+########################
 
-				$not_done=true;
-				$continue_up=false;
-				if ($put_cookie){
-					$_REQUEST['cookie'] = $put_cookie;
-					$_REQUEST['action'] = "FORM";
-					echo "<b><center>Automatic Login to Putlocker.com</center></b>\n";
-				}
-				if ($_REQUEST['action'] === "FORM")
-					$continue_up=true;
-				else{
-?>
-						<script>document.getElementById('info').style.display='none';</script>
-            <div id='info' width='100%' align='center' style="font-weight:bold; font-size:16px">LOGIN</div>
-        <form method="post">
-        <input type='hidden' name='action' value='FORM' />
-        <table border="0" style="width:300px;" cellspacing="0" align="center">
-        <tr><td nowrap>&nbsp;Cookie Value<td>&nbsp;<input type="text" name="cookie" style="width:195px;">&nbsp;</tr>
-        <tr><td colspan="2" align="center"><input type="submit" value="Upload"></tr>
-        <tr><td colspan="2" align="center">Example: Mffggdvgvdgvgh8j67H0jhhMTI5ZjZhNmU5MTgwYTQx</tr>
-        </table>
-        </form>
-<?php
+$_GET['proxy'] = isset($_GET['proxy']) ? $_GET['proxy'] : '';
+$not_done = true;
+
+if ($upload_acc['putlocker_com']['user'] && $upload_acc['putlocker_com']['pass']) {
+	$_REQUEST['up_login'] = $upload_acc['putlocker_com']['user'];
+	$_REQUEST['up_pass'] = $upload_acc['putlocker_com']['pass'];
+	$_REQUEST['up_convert'] = 'no';
+	$_REQUEST['action'] = 'FORM';
+	echo "<b><center>Using Default Login.</center></b>\n";
 }
 
-if ($continue_up)
-	{
-		$not_done=false;
-?>
-<table width=600 align=center> 
-</td></tr> 
-<tr><td align=center> 
-		<script>document.getElementById('info').style.display='none';</script>
-		<div id='info' width='100%' align='center'>Login to Putlocker.com</div>
-<?php
-			if (!empty($_REQUEST['cookie']) && $_REQUEST['action'] == "FORM"){
-            $Url=parse_url('http://www.putlocker.com/profile.php');
-			$cookie = 'auth='.$_REQUEST['cookie'];
-			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://www.putlocker.com", $cookie, 0, 0, $_GET["proxy"], $pauth);
-			if(preg_match('#ocation: (.*)#', $page)){
-				html_error('Invalid cookie');
-			}
-			$cookies = $cookie.'; '.GetCookies($page);
-			}else{
-				html_error('Is empty User and/or Password');
-			}
-?>
-			
-            <script>document.getElementById('info').style.display='none';</script>
-					<div id=info width=100% align=center>Connecting Upload</div> 
-<?php
-	$page = geturl("www.putlocker.com", 80, "/upload_form.php", 0, $cookies);
-	is_page($page);
-	$cookies .= "; ".GetCookies($page);
-	if(!preg_match("#'auth_hash':'([0-9a-zA-Z%=]+)'#",$page,$GetID)){
-		html_error('Error in upload [0*01]');
-	}
-	if(!preg_match("#'session':[\r|\n|\s]+'([0-9a-zA-Z%]+)'#",$page,$session)){
-		html_error('Error in upload [0*02]');
-	}
-	if(!preg_match("#'script'[\r|\n|\s]+:+[\r|\n|\s]+'([0-9a-zA-Z./:]+)'#",$page,$urlup)){
-		html_error('Error in upload [0*03]');
-	}
-	$post['upload_folder'] = '';
-	$post['auth_hash'] = $GetID[1];
-	$post['session']= $session[1];
-	$post['do_convert'] = 1;
-	$url = parse_url($urlup[1]);
-	$upfiles = upfile($url["host"], $url["port"] ? $url["port"] : 80, $url["path"] . ($url["query"] ? "?" . $url["query"] : ""), 'http://www.putlocker.com/upload_form.php', $cookies, $post, $lfile, $lname, 'Filedata');
-	?>
-    			<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>
-	<?php 
+if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
+	echo "<table border='0' style='width:270px;' cellspacing='0' align='center'>
+	<form method='POST'>
+	<input type='hidden' name='action' value='FORM' />
+	<tr><td style='white-space:nowrap;'>&nbsp;Login*</td><td>&nbsp;<input type='text' name='up_login' value='' style='width:160px;' /></td></tr>
+	<tr><td style='white-space:nowrap;'>&nbsp;Password*</td><td>&nbsp;<input type='password' name='up_pass' value='' style='width:160px;' /></td></tr>\n";
+	echo "<tr><td colspan='2' align='center'><br />Upload options *<br /></td></tr>\r\n<tr><td colspan='2' align='center'><input type='checkbox' name='up_convert' value='yes' />&nbsp; Convert for Streaming</td></tr>";
+	echo "<tr><td colspan='2' align='center'><br /><input type='submit' value='Upload' /></td></tr>\n";
+	echo "<tr><td colspan='2' align='center'><small>*You can set it as default in <b>".basename(__FILE__)."</b></small></td></tr>\n";
+	echo "</table>\n</form>\n";
+} else {
+	$login = $not_done = false;
+	$domain = 'www.putlocker.com';
+	$referer = "http://$domain/";
+
+	// Login
+	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='login' width='100%' align='center'>Login to $domain</div>\n";
+
+	$cookie = array();
+	if (!empty($_REQUEST['up_login']) && !empty($_REQUEST['up_pass'])) {
+		CookieLogin(strtolower($_REQUEST['up_login']), $_REQUEST['up_pass']);
+		$login = true;
+	} else html_error('Login failed: User/Password empty.');
+
+	// Retrive upload ID
+	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Preparing upload</div>\n";
+
+	$post = array();
+	$post['user'] = urlencode(strtolower($_REQUEST['up_login']));
+	$post['password'] = urlencode($_REQUEST['up_pass']);
+	$post['convert'] = ((!empty($_REQUEST['up_convert']) && $_REQUEST['up_convert'] == 'yes') ? '1' : '0');;
+
+	$up_url = 'http://upload.putlocker.com/uploadapi.php';
+
+	// Uploading
+	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
+
+	$url = parse_url($up_url);
+	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), 0, 0, $post, $lfile, $lname, 'file', '', $_GET['proxy'], $pauth);
+
+	// Upload Finished
+	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";
+
 	is_page($upfiles);
-	if(!preg_match("#upload_hash=([0-9a-zA-Z%]+)#",$cookies,$upID)){
-		html_error('Cannot get upload hash');
+
+	$dlnk = trim(cut_str($upfiles, '<link>', '</link>'));
+	if (!empty($dlnk)) $download_link = $dlnk;
+	else {
+		$rmsg = trim(cut_str($upfiles, '<message>', '</message>'));
+		html_error('Upload error: Msg: '. htmlentities($rmsg));
 	}
-	$Url = parse_url('http://www.putlocker.com/upload_form.php?done='.$upID[1]);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://www.putlocker.com/upload_form.php",$cookies, 0, 0, $_GET["proxy"], $pauth);
-	$Url = parse_url('http://www.putlocker.com/cp.php?uploaded='.$upID[1]);
-	$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), 'http://www.putlocker.com/cp.php?uploaded='.$upID[1], $cookies, 0, 0, $_GET["proxy"], $pauth);
-	if(!preg_match('#http\:\/\/www\.putlocker\.com\/file\/([^"]+)#',$page,$link)){
-		html_error('Nothing has been uploaded.');
+}
+
+
+// Edited For upload.php usage.
+function EnterCaptcha($captchaImg, $inputs, $default_login, $captchaSize = '5') {
+	echo "\n<center><form name='dl' method='POST'>\n";
+	foreach ($inputs as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='$input' />\n";
+	if (!$default_login) echo "\t<table border='0' style='width:270px;' cellspacing='0' align='center'>\n\t\t<tr><td style='white-space:nowrap;'>&nbsp;Login</td><td>&nbsp;<input type='text' id='up_login' name='up_login' value='".htmlentities($_REQUEST['up_login'])."' style='width:160px;' /></td></tr>\n\t\t<tr><td style='white-space:nowrap;'>&nbsp;Password</td><td>&nbsp;<input type='password' id='up_password' name='up_pass' value='' style='width:160px;' /></td></tr>\n\t</table><br /><br />";
+	echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input type='text' name='captcha' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='Enter Captcha' />\n\t</h4>\n";
+	echo "<script type='text/javascript'>\n\tfunction check() {\n\t\tvar captcha=document.dl.captcha.value;\n\t\tif (captcha == '') {\n\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\treturn false;\n\t\t} ".($default_login ? '' : "else if ($('#up_login').val() == '' || $('#up_password').val() == '') {\n\t\t\twindow.alert('Please fill login fields.');\n\t\t\treturn false;\n\t\t} ") . "else return true;\n\t}\n</script>";
+	echo "</form></center>\n</body\n</html>";
+}
+
+function Login($user, $pass) {
+	global $upload_acc, $cookie, $domain, $referer, $pauth;
+	if (!empty($_POST['step']) && $_POST['step'] == '1') {
+		if (empty($_POST['captcha'])) html_error('You didn\'t enter the image verification code.');
+		$cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
+
+		$post = array();
+		$post['user'] = urlencode($user);
+		$post['pass'] = urlencode($pass);
+		$post['captcha_code'] = urlencode($_POST['captcha']);
+		$post['remember'] = 1;
+		$post['login_submit'] = 'Login';
+
+		$page = geturl($domain, 80, '/authenticate.php?login', $referer.'authenticate.php?login', $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);
+		$cookie = GetCookiesArr($page, $cookie);
+
+		if (stripos(substr($page, 0, strpos($page, "\r\n\r\n")), "\nLocation: ") !== false && preg_match('@\nLocation: ((https?://[^/\r\n]+)?/authenticate\.php[^\r\n]*)@i', substr($page, 0, strpos($page, "\r\n\r\n")), $redir)) {
+			$url = parse_url((empty($redir[2]) ? 'http://www.putlocker.com'.$redir[1] : $redir[1]));
+			$page = geturl($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer.'authenticate.php?login', $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+			$cookie = GetCookiesArr($page, $cookie);
+		}
+
+		is_present($page, 'No such username or wrong password', 'Login Failed: Email/Password incorrect.');
+		is_present($page, 'Please re-enter the captcha code', 'Login Failed: Wrong CAPTCHA entered.');
+
+		if (empty($cookie['auth'])) html_error('Login Error: Cannot find "auth" cookie.');
+
+		SaveCookies($user, $pass); // Update cookies file
+		return true;
+	} else {
+		$page = geturl($domain, 80, '/authenticate.php?login', $referer.'authenticate.php?login', $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		$cookie = GetCookiesArr($page, $cookie);
+
+		if (!preg_match('@(https?://[^/\r\n\t\s\'\"<>]+)?/include/captcha\.php\?[^/\r\n\t\s\'\"<>]+@i', $page, $imgurl)) html_error('CAPTCHA not found.');
+		$imgurl = (empty($imgurl[1])) ? 'http://www.putlocker.com'.$imgurl[0] : $imgurl[0];
+		$imgurl = html_entity_decode($imgurl);
+
+		//Download captcha img.
+		$url = parse_url($imgurl);
+		$page = geturl($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer.'authenticate.php?login', $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		$capt_img = substr($page, strpos($page, "\r\n\r\n") + 4);
+		$imgfile = DOWNLOAD_DIR . 'putlocker_captcha.png';
+
+		if (file_exists($imgfile)) unlink($imgfile);
+		if (!write_file($imgfile, $capt_img)) html_error('Error getting CAPTCHA image.');
+
+		$data = array();
+		$data['action'] = 'FORM';
+		$data['step'] = 1;
+		$data['cookie'] = urlencode(encrypt(CookiesToStr($cookie)));
+		$data['up_convert'] = ((!empty($_REQUEST['up_convert']) && $_REQUEST['up_convert'] == 'yes') ? 'yes' : 'no');
+		EnterCaptcha($imgfile.'?'.time(), $data, ($upload_acc['putlocker_com']['user'] && $upload_acc['putlocker_com']['pass']));
+		exit;
 	}
-	$download_link = 'http://www.putlocker.com/file/'.$link[1];
-			}
-/**
-written by SD-88 12.01.2012
-Fixed Login by SD-88 07.04.2012
-Add support for cookie in login by SD-88 07.04.2012
-Add support streaming for video by SD-88 08.04.2012
-Fixed error get download link by SD-88 08.042012
-**/   
+}
+
+function IWillNameItLater($cookie, $decrypt=true) {
+	if (!is_array($cookie)) {
+		if (!empty($cookie)) return $decrypt ? decrypt(urldecode($cookie)) : urlencode(encrypt($cookie));
+		return '';
+	}
+	if (count($cookie) < 1) return $cookie;
+	$keys = array_keys($cookie);
+	$values = array_values($cookie);
+	$keys = $decrypt ? array_map('decrypt', array_map('urldecode', $keys)) : array_map('urlencode', array_map('encrypt', $keys));
+	$values = $decrypt ? array_map('decrypt', array_map('urldecode', $values)) : array_map('urlencode', array_map('encrypt', $values));
+	return array_combine($keys, $values);
+}
+
+function CookieLogin($user, $pass) {
+	global $cookie, $domain, $referer, $hash, $maxdays, $secretkey, $pauth;
+	$filename = 'putlocker_ul.php';
+	$maxdays = 7; // Max days to keep cookies saved
+	if (!defined('DOWNLOAD_DIR')) {
+		global $options;
+		if (substr($options['download_dir'], -1) != '/') $options['download_dir'] .= '/';
+		define('DOWNLOAD_DIR', (substr($options['download_dir'], 0, 6) == 'ftp://' ? '' : $options['download_dir']));
+	}
+
+	$filename = DOWNLOAD_DIR.basename($filename);
+	if (!file_exists($filename)) return Login($user, $pass);
+
+	$file = file($filename);
+	$savedcookies = unserialize($file[1]);
+	unset($file);
+
+	$hash = hash('crc32b', $user.':'.$pass);
+	if (array_key_exists($hash, $savedcookies)) {
+		if (time() - $savedcookies[$hash]['time'] >= ($maxdays * 24 * 60 * 60)) return Login($user, $pass); // Ignore old cookies
+		$_secretkey = $secretkey;
+		$secretkey = sha1($user.':'.$pass);
+		$cookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? IWillNameItLater($savedcookies[$hash]['cookie']) : '';
+		$secretkey = $_secretkey;
+		if ((is_array($cookie) && count($cookie) < 1) || empty($cookie)) return Login($user, $pass);
+
+		$page = geturl($domain, 80, '/', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		if (stripos($page, '>Sign Out</a>') === false) return Login($user, $pass);
+		$cookie = GetCookiesArr($page, $cookie); // Update cookies
+		SaveCookies($user, $pass); // Update cookies file
+		return true;
+	}
+	return Login($user, $pass);
+}
+
+function SaveCookies($user, $pass) {
+	global $cookie, $maxdays, $secretkey;
+	$filename = 'putlocker_ul.php';
+	$filename = DOWNLOAD_DIR.basename($filename);
+	if (file_exists($filename)) {
+		$file = file($filename);
+		$savedcookies = unserialize($file[1]);
+		unset($file);
+
+		// Remove old cookies
+		foreach ($savedcookies as $k => $v) if (time() - $v['time'] >= ($maxdays * 24 * 60 * 60)) unset($savedcookies[$k]);
+	} else $savedcookies = array();
+	$hash = hash('crc32b', $user.':'.$pass);
+	$_secretkey = $secretkey;
+	$secretkey = sha1($user.':'.$pass);
+	$savedcookies[$hash] = array('time' => time(), 'enc' => urlencode(encrypt('OK')), 'cookie' => IWillNameItLater($cookie, false));
+	$secretkey = $_secretkey;
+
+	write_file($filename, "<?php exit(); ?>\r\n" . serialize($savedcookies));
+}
+
+//[14-11-2012] Written by Th3-822.
+
 ?>
