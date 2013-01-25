@@ -17,12 +17,19 @@ while (false !== ($entry = $d->read())) {
 				$d1fichier_domains = array('alterupload.com', 'cjoint.net', 'desfichiers.com', 'dfichiers.com', 'megadl.fr', 'mesfichiers.org', 'piecejointe.net', 'pjointe.com', 'tenvoi.com', 'dl4free.com');
 				foreach ($d1fichier_domains as $d1fichier) $host["$d1fichier"] = $host['1fichier.com'];
 				break;
+			case 'cloudzer.net':
+				$host['clz.to'] = $host['cloudzer.net'];
+				break;
 			case 'cramit.in':
 				$cramit_domains = array('cramitin.eu', 'cramitin.net', 'cramitin.us');
 				foreach ($cramit_domains as $cramit) $host["$cramit"] = $host['cramit.in'];
 				break;
 			case 'crocko.com':
 				$host['easy-share.com'] = $host['crocko.com'];
+				break;
+			case 'depositfiles.com':
+				$depositfiles_domains = array('depositfiles.in', 'depositfiles.mobi', 'depositfiles.net', 'depositfiles.net.cn', 'depositfiles.org', 'depositfiles.co.uk', 'depositfiles.info', 'dfiles.eu', 'dfiles.ru', 'dfiles.co', 'dfiles.co.uk');
+				foreach ($depositfiles_domains as $depositfiles) $host["$depositfiles"] = $host['depositfiles.com'];
 				break;
 			case 'filepost.com':
 				$host['fp.io'] = $host['filepost.com'];
@@ -39,6 +46,9 @@ while (false !== ($entry = $d->read())) {
 			case 'uploaded.net':
 				$uploaded_domain = array('ul.to', 'uploaded.to');
 				foreach ($uploaded_domain as $uploaded) $host["$uploaded"] = $host['uploaded.net'];
+				break;
+			case 'uppit.com':
+				$host['up.ht'] = $host['uppit.com'];
 				break;
 		}
 	}

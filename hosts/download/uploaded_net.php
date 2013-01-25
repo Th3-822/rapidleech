@@ -10,12 +10,8 @@ class uploaded_net extends DownloadClass {
 	public $link;
 	public function Download($link) {
 		global $premium_acc;
-
-		if (stristr($link, '/folder/')) {
-			$link = str_replace(array('ul.to/folder/', 'uploaded.to/folder/'), 'uploaded.net/folder/', $link);
-		} else {
-			$link = str_replace(array('ul.to/', 'uploaded.to/file/'), 'uploaded.net/file/', $link);
-		}
+		
+		$link = str_replace(array('ul.to/folder/', 'ul.to/', 'uploaded.to/'), array('uploaded.net/folder/', 'uploaded.net/file/', 'uploaded.net/'), $link);
 		$this->link = $link;
 		if (!$_REQUEST['step']) {
 			$this->page = $this->GetPage($this->link);
@@ -63,7 +59,7 @@ class uploaded_net extends DownloadClass {
 		$page = $this->GetPage($posturl . 'me', $this->cookie, 0, $posturl);
 		$this->cookie = GetCookiesArr($page, $this->cookie, true, array('', 'deleted', '""'));
 		is_present($page, '<em>Free</em>', 'Error[Account isn\'t Premium!]');
-		is_present($page, 'ocation: http://uploaded.to', 'Error[Cookie Failed!]');
+		is_present($page, 'ocation: http://uploaded.net', 'Error[Cookie Failed!]');
 
 		$quota = cut_str($page, '<div id="traffic"', '</table>');
 		if (!preg_match_all('/class="cB">(\d.+)\s? (\wB)<\/\w+><\/th>/i', $quota, $tr)) html_error('Error[Form account profile may have changed!]');
