@@ -1,5 +1,4 @@
 <?php
-
 if (!defined('RAPIDLEECH')) {
 	require_once("index.html");
 	exit;
@@ -82,7 +81,8 @@ class shareflare_net extends DownloadClass {
 		if (!preg_match_all('/<input type="hidden" name="([^"]+)" value="([^"]+)?" \/>/i', $form, $match)) html_error("Error: Post Data not found!");
 		$post = array();
 		$match = array_combine($match[1], $match[2]);
-		foreach ($match as $k => $v) $post[$k] = $v;
+		foreach ($match as $k => $v)
+			$post[$k] = $v;
 		return $post;
 	}
 

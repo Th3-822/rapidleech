@@ -130,10 +130,10 @@ class DownloadClass {
 	}
 
 	/*
-	 * This function will return a array with the Default Key Value pairs including proxy, method, email, etc.
+	 * This function will return an array with the Default Key Value pairs including proxy, method, email, etc.
 	 * @param string $link -> Adds the link value to the array url encoded if you need it.
 	 * @param string $cookie -> Adds the cookie value to the array url encoded if you need it.
-	 * @param string $referer -> Adds the referer value to the array url encoded if you need it. If isn't set, it will load $Referer value. (Set as 0 or false for don't add it in the array.)
+	 * @param string $referer -> Adds the referer value to the array url encoded if you need it. If isn't set, it will load $Referer value. (Set as 0 or false for not add it in the array.)
 	 */
 
 	public function DefaultParamArr($link = 0, $cookie = 0, $referer = 1) {

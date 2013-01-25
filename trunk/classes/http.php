@@ -469,9 +469,9 @@ function GetCookies($content) {
 /**
  * Function to get cookies & converted into array
  * @param string The content you want to get the cookie from
- * @param array Array of cookies for be updated [optional]
+ * @param array Array of cookies to be updated [optional]
  * @param bool Options to remove temporary cookie (usually it named as 'deleted') [optional]
- * @param mixed The default name for temporary cookie, values are accepted in a array [optional]
+ * @param mixed The default name for temporary cookie, values are accepted in an array [optional]
  */
 function GetCookiesArr($content, $cookie=array(), $del=true, $dval=array('','deleted')) {
 	if (!is_array($cookie)) $cookie = array();
@@ -493,7 +493,7 @@ function GetCookiesArr($content, $cookie=array(), $del=true, $dval=array('','del
  * @param string The existing string cookie value
  * @param array The existing array cookie value that we want to merged/updated [optional]
  * @param bool Options to remove temporary cookie (usually it named as 'deleted') [optional]
- * @param mixed The default name for temporary cookie, values are accepted in a array [optional]
+ * @param mixed The default name for temporary cookie, values are accepted in an array [optional]
  */
 function StrToCookies($cookies, $cookie=array(), $del=true, $dval=array('','deleted')) {
 	if (!is_array($cookie)) $cookie = array();
