@@ -49,8 +49,7 @@ function login_check() {
 }
 
 function is_present($lpage, $mystr, $strerror = '', $head = 0) {
-	$strerror = !empty($strerror) ? $strerror : $mystr;
-	if (stripos($lpage, $mystr) !== false) html_error($strerror, $head);
+	if (stripos($lpage, $mystr) !== false) html_error((!empty($strerror) ? $strerror : $mystr), $head);
 }
 
 function is_notpresent($lpage, $mystr, $strerror, $head = 0) {
@@ -75,10 +74,7 @@ function insert_location($inputs, $action = 0) {
 		$fname = 'r'.time().'l';
 		echo "\n<form name='$fname' ".(!empty($action) ? "action='$action' " : '')."method='POST'>\n";
 		foreach($inputs as $name => $value) echo "\t<input type='hidden' name='$name' value='$value' />\n";
-		echo "</form>\n";
-		echo "<script type='text/javascript'>void(document.$fname.submit());</script>\n";
-		echo "</body>\n";
-		echo '</html>';
+		echo "</form>\n<script type='text/javascript'>void(document.$fname.submit());</script>\n</body>\n</html>";
 		flush();
 	}
 }
@@ -86,7 +82,7 @@ function insert_location($inputs, $action = 0) {
 function pause_download() {
 	global $pathWithName, $PHP_SELF, $_GET, $nn, $bytesReceived, $fs, $fp;
 	$status = connection_status();
-	if (($status == 2 || $status == 3) && $pathWithName && $bytesReceived > - 1) {
+	if (($status == 2 || $status == 3) && $pathWithName && $bytesReceived > -1) {
 		flock($fs, LOCK_UN);
 		fclose($fs);
 		fclose($fp);
@@ -94,8 +90,8 @@ function pause_download() {
 }
 
 function cut_str($str, $left, $right) {
-	$str = substr( stristr($str, $left), strlen($left));
-	$leftLen = strlen( stristr($str, $right)); 
+	$str = substr(stristr($str, $left), strlen($left));
+	$leftLen = strlen(stristr($str, $right)); 
 	$leftLen = $leftLen ? -($leftLen) : strlen($str);
 	$str = substr($str, 0, $leftLen);
 	return $str;
@@ -103,53 +99,28 @@ function cut_str($str, $left, $right) {
 
 // tweaked cutstr with pluresearch functionality
 function cutter($str, $left, $right, $cont = 1) {
-	for($iii=1;$iii<=$cont;$iii++){
-	$str = substr ( stristr ( $str, $left ), strlen ( $left ) );
-	}
-	$leftLen = strlen ( stristr ( $str, $right ) );
-	$leftLen = $leftLen ? - ($leftLen) : strlen ( $str );
-	$str = substr ( $str, 0, $leftLen );
+	for($iii = 1; $iii <= $cont; $iii++) $str = substr(stristr($str, $left), strlen($left));
+	$leftLen = strlen(stristr($str, $right));
+	$leftLen = $leftLen ? -($leftLen) : strlen($str);
+	$str = substr($str, 0, $leftLen);
 	return $str;
 }
 
 function write_file($file_name, $data, $trunk = 1) {
-	if ($trunk == 1) {
-		$mode = "wb";
-	} elseif ($trunk == 0) {
-		$mode = "ab";
-	}
-	$fp = fopen ( $file_name, $mode );
-	if (! $fp) {
-		return FALSE;
-	} else {
-		if (! flock ( $fp, LOCK_EX )) {
-			return FALSE;
-		} else {
-			if (! fwrite ( $fp, $data )) {
-				return FALSE;
-			} else {
-				if (! flock ( $fp, LOCK_UN )) {
-					return FALSE;
-				} else {
-					if (! fclose ( $fp )) {
-						return FALSE;
-					}
-				}
-			}
-		}
-	}
+	if ($trunk == 1) $mode = 'wb';
+	elseif ($trunk == 0) $mode = 'ab';
+	$fp = fopen($file_name, $mode);
+	if (!$fp || !flock($fp, LOCK_EX) || !fwrite($fp, $data) || !flock($fp, LOCK_UN) || !fclose($fp)) return FALSE;
 	return TRUE;
 }
 
 function read_file($file_name, $count = -1) {
-	if ($count == - 1) {
-		$count = filesize ( $file_name );
-	}
-	$fp = fopen ( $file_name, "rb" );
-	flock ( $fp, LOCK_SH );
-	$ret = fread ( $fp, $count );
-	flock ( $fp, LOCK_UN );
-	fclose ( $fp );
+	if ($count == -1) $count = filesize($file_name);
+	$fp = fopen($file_name, 'rb');
+	flock($fp, LOCK_SH);
+	$ret = fread($fp, $count);
+	flock($fp, LOCK_UN);
+	fclose($fp);
 	return $ret;
 }
 
@@ -166,71 +137,66 @@ function getmicrotime() {
 
 function html_error($msg, $head = 1) {
 	global $PHP_SELF, $options;
-	//if ($head == 1)
-	if (!headers_sent()) include(TEMPLATE_DIR.'header.php');
-	echo '<div align="center">';
-	echo '<span class="htmlerror"><b>' . $msg . '</b></span><br /><br />';
-	if (isset($_GET['audl'])) echo '<script type="text/javascript">parent.nextlink();</script>';
-	if ($options['new_window']) echo '<a href="javascript:window.close();">'.lang(378).'</a>';
-	else echo '<a href="'.$PHP_SELF.'">'.lang(13).'</a>';
 
-	echo '</div>';
+	if (strtolower(basename($PHP_SELF)) == 'audl.php' && isset($_REQUEST['GO']) && $_REQUEST['GO'] == 'GO' && $_REQUEST['server_side'] == 'on' && !empty($GLOBALS['isHost'])) throw new Exception($msg); // Audl-Server Side, called from a plugin.
+	else {
+		//if ($head == 1)
+		if (!headers_sent()) include(TEMPLATE_DIR.'header.php');
+		echo '<div align="center">';
+		echo "<span class='htmlerror'><b>$msg</b></span><br /><br />";
+		if (isset($_GET['audl'])) echo '<script type="text/javascript">parent.nextlink();</script>';
+		if (!empty($options['new_window'])) echo '<a href="javascript:window.close();">'.lang(378).'</a>';
+		else echo '<a href="'.$PHP_SELF.'">'.lang(13).'</a>';
+		echo '</div>';
+	}
 	include(TEMPLATE_DIR.'footer.php');
 	exit();
 }
 
 function sec2time($time) {
-	$hour = round ( $time / 3600, 2 );
+	$hour = round($time / 3600, 2);
 	if ($hour >= 1) {
-		$hour = floor ( $hour );
+		$hour = floor($hour);
 		$time -= $hour * 3600;
 	}
-	$min = round ( $time / 60, 2 );
+	$min = round($time / 60, 2);
 	if ($min >= 1) {
-		$min = floor ( $min );
+		$min = floor($min);
 		$time -= $min * 60;
 	}
 	$sec = $time;
-	$hour = ($hour > 1) ? $hour . " ".lang(129)." " : ($hour == 1) ? $hour . " ".lang(130)." " : "";
-	$min = ($min > 1) ? $min . " ".lang(131)." " : ($min == 1) ? $min . " ".lang(132)." " : "";
-	$sec = ($sec > 1) ? $sec . " ".lang(133) : ($sec == 1 || $sec == 0) ? $sec . " ".lang(134) : "";
+	$hour = ($hour > 1) ? $hour . ' ' . lang(129) . ' ' : ($hour == 1) ? $hour . ' ' . lang(130).' ' : '';
+	$min = ($min > 1) ? $min . ' ' . lang(131) . ' ' : ($min == 1) ? $min . ' ' . lang(132).' ' : '';
+	$sec = ($sec > 1) ? $sec . ' ' . lang(133) : ($sec == 1 || $sec == 0) ? $sec . ' ' . lang(134) : '';
 	return $hour . $min . $sec;
 }
 
 // Updated function to be able to format up to Yotabytes!
 function bytesToKbOrMbOrGb($bytes) {
-	if (is_numeric ( $bytes )) {
-		$s = array ('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB' );
-		$e = floor ( log ( $bytes ) / log ( 1024 ) );
-		
-		return sprintf ( '%.2f ' . $s [$e], @($bytes / pow ( 1024, floor ( $e ) )) );
-	} else {
-		$size = "Unknown";
-	}
+	if (is_numeric($bytes)) {
+		$s = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+		$e = floor(log($bytes) / log(1024));
+		return sprintf('%.2f ' . $s[$e], @($bytes / pow(1024, floor($e))));
+	} else $size = 'Unknown';
 	return $size;
 }
 
 function updateListInFile($list) {
-	if (count ( $list ) > 0) {
-		foreach ( $list as $key => $value ) {
-			$list [$key] = serialize ( $value );
-		}
-		if (! @write_file ( CONFIG_DIR . "files.lst", implode ( "\r\n", $list ) . "\r\n" ) && count ( $list ) > 0) {
-			return FALSE;
-		} else {
-			return TRUE;
-		}
-	} elseif (@file_exists ( CONFIG_DIR . "files.lst" )) {
+	if (count($list) > 0) {
+		foreach($list as $key => $value) $list[$key] = serialize($value);
+		if (!@write_file(CONFIG_DIR . 'files.lst', implode("\r\n", $list) . "\r\n") && count($list) > 0) return FALSE;
+		else return TRUE;
+	} elseif (@file_exists(CONFIG_DIR . 'files.lst')) {
 		// Truncate files.lst instead of removing it since we don't have full
 		// read/write permission on the configs folder
-		$fh = fopen(CONFIG_DIR.'files.lst','w');
+		$fh = fopen(CONFIG_DIR . 'files.lst','w');
 		fclose($fh);
 		return true;
 	}
 }
 
 function _cmp_list_enums($a, $b) {
-	return strcmp ( $a ["name"], $b ["name"] );
+	return strcmp($a['name'], $b['name']);
 }
 
 function file_data_size_time($file) {
@@ -241,11 +207,11 @@ function file_data_size_time($file) {
 		$time = @filemtime($file);
 	}
 	if ($size === false && $options['2gb_fix'] && file_exists($file) && !is_dir($file) && !is_link($file)) {
-		if (substr(PHP_OS, 0, 3) !== "WIN") {
-			@exec('stat'.(stristr(@php_uname('s'), 'bsd') !== false ? '-f %m ' : ' -c %Y ').escapeshellarg($file), $time, $tmp);
-			if ($tmp == 0) { $time = trim(implode($time)); }
-			@exec('stat'.(stristr(@php_uname('s'), 'bsd') !== false ? '-f %z ' : ' -c %s ').escapeshellarg($file), $size, $tmp);
-			if ($tmp == 0) { $size = trim(implode($size)); }
+		if (substr(PHP_OS, 0, 3) !== 'WIN') {
+			@exec('stat' . (stripos(@php_uname('s'), 'bsd') !== false ? '-f %m ' : ' -c %Y ') . escapeshellarg($file), $time, $tmp);
+			if ($tmp == 0) $time = trim(implode($time));
+			@exec('stat' . (stripos(@php_uname('s'), 'bsd') !== false ? '-f %z ' : ' -c %s ') . escapeshellarg($file), $size, $tmp);
+			if ($tmp == 0) $size = trim(implode($size));
 		}
 	}
 	if ($size === false || $time === false) { return false; }
@@ -254,29 +220,29 @@ function file_data_size_time($file) {
 
 function _create_list() {
 	global $list, $_COOKIE, $options;
-	$glist = array ();
-	if (($options['show_all'] === true) && (isset($_COOKIE ["showAll"]) && $_COOKIE ["showAll"] == 1)) {
-		$dir = dir ( DOWNLOAD_DIR );
-		while ( false !== ($file = $dir->read ()) ) {
-			if (($tmp = file_data_size_time(DOWNLOAD_DIR.$file)) === false) { continue; }; list($size, $time) = $tmp;
-			if ($file != "." && $file != ".." && (! is_array ( $options['forbidden_filetypes'] ) || ! in_array ( strtolower ( strrchr ( $file, "." ) ), $options['forbidden_filetypes'] ))) {
+	$glist = array();
+	if (($options['show_all'] === true) && (isset($_COOKIE['showAll']) && $_COOKIE['showAll'] == 1)) {
+		$dir = dir(DOWNLOAD_DIR);
+		while(false !== ($file = $dir->read())) {
+			if (($tmp = file_data_size_time(DOWNLOAD_DIR.$file)) === false) continue;
+			list($size, $time) = $tmp;
+			if ($file != '.' && $file != '..' && (!is_array($options['forbidden_filetypes']) || !in_array(strtolower(strrchr($file, '.')), $options['forbidden_filetypes']))) {
 				$file = DOWNLOAD_DIR . $file;
-				while (isset($glist[$time])) { $time ++; }
-				$glist [$time] = array ("name" => realpath($file), "size" => bytesToKbOrMbOrGb($size), "date" => $time );
+				while(isset($glist[$time])) $time++;
+				$glist[$time] = array('name' => realpath($file), 'size' => bytesToKbOrMbOrGb($size), 'date' => $time);
 			}
 		}
-		$dir->close ();
-		@uasort ( $glist, "_cmp_list_enums" );
+		$dir->close();
+		@uasort($glist, '_cmp_list_enums');
 	} else {
-		if (@file_exists ( CONFIG_DIR . "files.lst" ) && ($glist = file ( CONFIG_DIR . "files.lst" )) !== false) {
-			foreach ( $glist as $key => $record ) {
-				foreach ( unserialize ( $record ) as $field => $value ) {
-					$listReformat [$key] [$field] = $value;
-					if ($field == "date")
-						$date = $value;
+		if (@file_exists(CONFIG_DIR . 'files.lst') && ($glist = file(CONFIG_DIR . 'files.lst')) !== false) {
+			foreach($glist as $key => $record) {
+				foreach(unserialize($record) as $field => $value) {
+					$listReformat[$key][$field] = $value;
+					if ($field == 'date') $date = $value;
 				}
-				$glist [$date] = $listReformat [$key];
-				unset ( $glist [$key], $listReformat [$key] );
+				$glist[$date] = $listReformat[$key];
+				unset($glist[$key], $listReformat[$key]);
 			}
 		}
 	}
@@ -284,52 +250,44 @@ function _create_list() {
 }
 
 function checkmail($mail) {
-	if (strlen ( $mail ) == 0) {
-		return false;
-	}
-	if (! preg_match ( "/^[a-z0-9_\.-]{1,20}@(([a-z0-9-]+\.)+(com|net|org|mil|" . "edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-" . "9]{1,3}\.[0-9]{1,3})$/is", $mail )) {
-		return false;
-	}
+	if (strlen($mail) == 0 || strpos($mail, '@') === false || strpos($mail, '.') === false || !preg_match('/^[a-z0-9_\.-]{1,20}@(([a-z0-9-]+\.)+(com|net|org|mil|edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/is', $mail)) return false;
 	return true;
 }
+
 /* Fixed Shell exploit by: icedog */
 function fixfilename($fname, $fpach = '') {
-	$f_name = basename ( $fname );
-	$f_dir = dirname ( preg_replace ( '@\.\./@i', '', $fname ) );
+	$f_name = basename($fname);
+	$f_dir = dirname(preg_replace('@\.\./@i', '', $fname));
 	$f_dir = ($f_dir == '.') ? '' : $f_dir;
-	$f_dir = preg_replace ( '@\.\./@i', '', $f_dir );
-	$fpach = preg_replace ( '@\.\./@i', '', $fpach );
-	$f_name = preg_replace ( '@\.(((s|\d)?php)|(hta)|(p[l|y])|(cgi)|(sph))@i', '.xxx', $f_name );
+	$f_dir = preg_replace('@\.\./@i', '', $f_dir);
+	$fpach = preg_replace('@\.\./@i', '', $fpach);
+	$f_name = preg_replace('@\.(((s|\d)?php)|(hta)|(p[l|y])|(cgi)|(sph))@i', '.xxx', $f_name);
 	$ret = ($fpach) ? $fpach . DIRECTORY_SEPARATOR . $f_name : ($f_dir ? $f_dir . DIRECTORY_SEPARATOR : '') . $f_name;
 	return $ret;
 }
+
 function getfilesize($f) {
 	global $is_windows;
-	$stat = stat ( $f );
+	$stat = stat($f);
 
-	if ($is_windows)
-		return sprintf ( "%u", $stat [7] );
-	if (($stat [11] * $stat [12]) < 4 * 1024 * 1024 * 1024)
-		return sprintf ( "%u", $stat [7] );
+	if ($is_windows || (($stat[11] * $stat[12]) < 4 * 1024 * 1024 * 1024)) return sprintf('%u', $stat[7]);
 
 	global $max_4gb;
 	if ($max_4gb === false) {
-		$tmp_ = trim ( @shell_exec ( " ls -Ll " . @escapeshellarg ( $f ) ) );
-		while ( strstr ( $tmp_, '  ' ) ) {
-			$tmp_ = @str_replace ( '  ', ' ', $tmp_ );
-		}
-		$r = @explode ( ' ', $tmp_ );
-		$size_ = $r [4];
-	} else {
-		$size_ = - 1;
-	}
+		$tmp_ = trim(@shell_exec(' ls -Ll ' . @escapeshellarg($f)));
+		while(strstr($tmp_, '  ')) $tmp_ = @str_replace('  ', ' ', $tmp_);
+		$r = @explode(' ', $tmp_);
+		$size_ = $r[4];
+	} else $size_ = -1;
 
 	return $size_;
 }
+
 function bytesToKbOrMb($bytes) {
-	$size = ($bytes >= (1024 * 1024 * 1024 * 1024)) ? round ( $bytes / (1024 * 1024 * 1024 * 1024), 2 ) . ' TB' : (($bytes >= (1024 * 1024 * 1024)) ? round ( $bytes / (1024 * 1024 * 1024), 2 ) . ' GB' : (($bytes >= (1024 * 1024)) ? round ( $bytes / (1024 * 1024), 2 ) . ' MB' : round ( $bytes / 1024, 2 ) . ' KB'));
+	$size = ($bytes >= (1024 * 1024 * 1024 * 1024)) ? round($bytes / (1024 * 1024 * 1024 * 1024), 2) . ' TB' : (($bytes >= (1024 * 1024 * 1024)) ? round($bytes / (1024 * 1024 * 1024), 2) . ' GB' : (($bytes >= (1024 * 1024)) ? round($bytes / (1024 * 1024), 2) . ' MB' : round($bytes / 1024, 2) . ' KB'));
 	return $size;
 }
+
 function defport($urls) {
 	if (!empty($urls['port'])) return $urls['port'];
 	switch(strtolower($urls['scheme'])) {
@@ -341,12 +299,14 @@ function defport($urls) {
 			return '21';
 	}
 }
+
 function getSize($file) {
 	$size = filesize($file);
 	if ($size < 0) {
-		if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN')
+		if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
+			$size = @escapeshellarg($file);
 			$size = trim(`stat -c%s $file`);
-		else {
+		} else {
 			$fsobj = new COM('Scripting.FileSystemObject');
 			$f = $fsobj->GetFile($file);
 			$size = $file->Size;
@@ -354,6 +314,7 @@ function getSize($file) {
 	}
 	return $size;
 }
+
 function purge_files($delay) {
 	if (file_exists(CONFIG_DIR . 'files.lst') && is_numeric($delay) && $delay > 0) {
 		$files_lst = file(CONFIG_DIR . 'files.lst');
@@ -368,6 +329,7 @@ function purge_files($delay) {
 		file_put_contents(CONFIG_DIR . 'files.lst', $files_new);
 	}
 }
+
 // Using this function instead due to some compatibility problems
 function is__writable($path) {
 	//will work in despite of Windows ACLs bug
@@ -435,7 +397,7 @@ function encrypt($string) {
 	ALGO: BLOWFISH
 	KEY:  Your secret key :) (max lenght: 56)
 	*/
-	$crypt = new pcrypt(MODE_CBC, "BLOWFISH", "$secretkey");
+	$crypt = new pcrypt(MODE_CBC, 'BLOWFISH', "$secretkey");
 
 	// to encrypt
 	$ciphertext = $crypt->encrypt($string);
@@ -447,16 +409,16 @@ function decrypt($string) {
 	global $secretkey;
 	if (!$secretkey) return html_error('Value for $secretkey is empty, please create a random one (56 chars max) in accounts.php!');
 	require_once 'class.pcrypt.php';
-	
+
 	/*
 	MODE: MODE_ECB or MODE_CBC
 	ALGO: BLOWFISH
 	KEY:  Your secret key :) (max lenght: 56)
 	*/
-	$crypt = new pcrypt(MODE_CBC, "BLOWFISH", "$secretkey");
+	$crypt = new pcrypt(MODE_CBC, 'BLOWFISH', "$secretkey");
 
 	// to decrypt
-	$decrypted  = $crypt->decrypt($string);
+	$decrypted = $crypt->decrypt($string);
 
 	return $decrypted;
 }
@@ -543,7 +505,7 @@ if (!function_exists('http_chunked_decode')) {
 	}
 
 	function is_hex($hex) {
-		$hex = strtolower(trim(ltrim($hex, "0")));
+		$hex = strtolower(trim(ltrim($hex, '0')));
 		if (empty($hex)) $hex = 0;
 		$dec = hexdec($hex);
 		return ($hex == dechex($dec));
@@ -568,7 +530,7 @@ function GetDefaultParams() {
 		$DParam['proxy'] = $_GET['proxy'];
 		if ($pauth) $DParam['pauth'] = urlencode(encrypt($pauth));
 	}
-	if (isset($_GET['autoclose'])) $DParam['autoclose'] = 1;
+	if (isset($_GET['autoclose'])) $DParam['autoclose'] = '1';
 	if (isset($_GET['audl'])) $DParam['audl'] = 'doum';
 	if ($options['download_dir_is_changeable'] && !empty($_GET['path'])) $DParam['saveto'] = urlencode($_GET['path']);
 	$params = array('add_comment', 'domail', 'comment', 'email', 'split', 'partSize', 'method', 'uploadlater', 'uploadtohost');

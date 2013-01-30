@@ -12,7 +12,8 @@ class youtube_com extends DownloadClass {
 		$url = parse_url($link);
 		$this->vid = array();
 
-		if (empty($url['query']) || ($this->vid[1] = cut_str('&'.$url['query'], '&v=', '&')) === false || !preg_match('@^[\w\-\.]{11}$@i', $this->vid[1])) preg_match('@/(?:v|(?:embed))/([\w\-\.]{11})@i', $url['path'], $this->vid);
+		if (host_matchs('youtu.be', $url['host'])) preg_match('@/([\w\-\.]{11})@i', $url['path'], $this->vid);
+		elseif (empty($url['query']) || ($this->vid[1] = cut_str('&'.$url['query'].'&', '&v=', '&')) === false || !preg_match('@^[\w\-\.]{11}$@i', $this->vid[1])) preg_match('@/(?:v|(?:embed))/([\w\-\.]{11})@i', $url['path'], $this->vid);
 
 		if (empty($this->vid[1])) html_error('Video ID not found.');
 		$this->vid = $this->vid[1];
@@ -144,8 +145,9 @@ class youtube_com extends DownloadClass {
 			if (!empty($this->cookie)) $opt[CURLOPT_COOKIE] = CookiesToStr($this->cookie);
 			foreach ($this->fmturlmaps as $fmt => $url) {
 				if (!in_array($fmt, $this->fmts)) continue;
-				$headers = cURL($url, $this->cookie, 0, 0, 0, $opt);
-				if (substr($headers, 9, 3) == '200' && ($CL = cut_str($headers, 'Content-Length: ', "\r\n")) && $CL > 1024) $sizes[$fmt] = bytesToKbOrMbOrGb($CL);
+				$headers = explode("\r\n\r\n", cURL($url, $this->cookie, 0, 0, 0, $opt));
+				$headers = ((count($headers) > 2) ? $headers[count($headers) - 2] : $headers[0]) . "\r\n\r\n";
+				if (substr($headers, 9, 3) == '200' && ($CL = cut_str($headers, "\nContent-Length: ", "\n")) && $CL > 1024) $sizes[$fmt] = bytesToKbOrMbOrGb(trim($CL));
 			}
 			unset($headers, $CL);
 		} //*/

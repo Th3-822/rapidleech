@@ -4,15 +4,20 @@ $upload_acc['rapidgator_net']['user'] = ''; //Set your user
 $upload_acc['rapidgator_net']['pass'] = ''; //Set your password
 ##########################
 
+if (!defined('DOWNLOAD_DIR')) {
+	if (substr($options['download_dir'], -1) != '/') $options['download_dir'] .= '/';
+	define('DOWNLOAD_DIR', (substr($options['download_dir'], 0, 6) == 'ftp://' ? '' : $options['download_dir']));
+}
 $_GET['proxy'] = !empty($proxy) ? $proxy : (!empty($_GET['proxy']) ? $_GET['proxy'] : '');
 $not_done = true;
 
-if ($upload_acc['rapidgator_net']['user'] && $upload_acc['rapidgator_net']['pass']) {
+if (!empty($upload_acc['rapidgator_net']['user']) && !empty($upload_acc['rapidgator_net']['pass'])) {
+	$default_acc = true;
 	$_REQUEST['up_login'] = $upload_acc['rapidgator_net']['user'];
 	$_REQUEST['up_pass'] = $upload_acc['rapidgator_net']['pass'];
 	$_REQUEST['action'] = 'FORM';
 	echo "<b><center>Using Default Login.</center></b>\n";
-}
+} else $default_acc = false;
 
 if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	echo "<table border='0' style='width:270px;' cellspacing='0' align='center'>
@@ -40,9 +45,14 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 			unset($_REQUEST['A_encrypted']);
 		}
 		$post = array();
-		$post['LoginForm%5Bemail%5D'] = $_REQUEST['up_login'];
-		$post['LoginForm%5Bpassword%5D'] = $_REQUEST['up_pass'];
+		$post['LoginForm%5Bemail%5D'] = urlencode($_REQUEST['up_login']);
+		$post['LoginForm%5Bpassword%5D'] = urlencode($_REQUEST['up_pass']);
 		$post['LoginForm%5BrememberMe%5D'] = 1;
+		if (!empty($_POST['step']) && $_POST['step'] == '1') {
+			if (empty($_POST['captcha'])) html_error('You didn\'t enter the image verification code.');
+			$cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
+			$post['LoginForm%5BverifyCode%5D'] = urlencode($_POST['captcha']);
+		}
 
 		$page = geturl($domain, 80, '/auth/login', $referer, $cookie, $post, 0, $_GET['proxy'], $pauth, 0, 'https');is_page($page);
 		$cookie = GetCookiesArr($page, $cookie);
@@ -56,6 +66,34 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		}
 
 		is_present($page, 'Error e-mail or password', 'Login Failed: Invalid Email or Password.');
+		is_present($page, 'E-mail is not a valid email address.', 'Login Failed: Login isn\'t an email address.');
+		if (stripos($page, 'The code from a picture does not coincide') !== false) {
+			if (!empty($_POST['step']) && $_POST['step'] == '1') html_error('Login Failed: Incorrect CAPTCHA response.');
+			if (!preg_match('@(https?://(?:[^\./\r\n\'\"\t\:]+\.)?rapidgator\.net(?:\:\d+)?)?/auth/captcha/\w+/\w+@i', $page, $imgurl)) html_error('Error: CAPTCHA not found.');
+			$imgurl = (empty($imgurl[1])) ? 'http://rapidgator.net'.$imgurl[0] : $imgurl[0];
+			$imgurl = parse_url($imgurl);
+			//Download captcha img.
+			$capt_page = geturl($imgurl['host'], defport($imgurl), $imgurl['path'].(!empty($imgurl['query']) ? '?'.$imgurl['query'] : ''), $referer, $cookie, 0, 0, $_GET['proxy'], $pauth, 0, $imgurl['scheme']);is_page($capt_page);
+			$capt_img = substr($capt_page, strpos($capt_page, "\r\n\r\n") + 4);
+			$imgfile = DOWNLOAD_DIR . 'rapidgator_captcha.png';
+
+			if (file_exists($imgfile)) unlink($imgfile);
+			if (!write_file($imgfile, $capt_img)) html_error('Error getting CAPTCHA image.');
+			unset($capt_page, $capt_img);
+
+			$data = array();
+			$data['step'] = '1';
+			$data['cookie'] = urlencode(encrypt(CookiesToStr($cookie)));
+			$data['action'] = 'FORM'; // I should add 'premium_acc' to DefaultParamArr()
+			if (!$default_acc) {
+				$data['A_encrypted'] = 'true';
+				$data['up_login'] = urlencode(encrypt($_REQUEST['up_login'])); // encrypt() will keep this safe.
+				$data['up_pass'] = urlencode(encrypt($_REQUEST['up_pass'])); // And this too.
+			}
+			EnterCaptcha($imgfile.'?'.time(), $data);
+			exit;
+		}
+		//is_present($page, 'The code from a picture does not coincide', 'Login Failed: Captcha... (T8: I will add it later)');
 		is_present($page, 'The code from a picture does not coincide', 'Login Failed: Captcha... (T8: I will add it later)');
 
 		if (empty($cookie['user__'])) html_error("Login Error: Cannot find 'user__' cookie.");
@@ -114,6 +152,13 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	} else html_error("Download link not found ({$resp['state']}).", 0);
 }
 
+// Edited For upload.php usage.
+function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5') {
+	echo "\n<form name='captcha' method='POST'>\n";
+	foreach ($inputs as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='$input' />\n";
+	echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input type='text' name='captcha' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='Enter Captcha' />\n\t</h4>\n\t<script type='text/javascript'>/* <![CDATA[ */\n\t\tfunction check() {\n\t\t\tvar captcha=document.dl.captcha.value;\n\t\t\tif (captcha == '') {\n\t\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\t\treturn false;\n\t\t\t} else return true;\n\t\t}\n\t/* ]]> */</script>\n</form>\n</body>\n</html>";
+}
+
 // 4 RG: You don't have nothing to read here :D
 function ChkRGRedirs($page, $login = false, $default_login = false) { // Edited for upload plugin usage.
 	$hpos = strpos($page, "\r\n\r\n");
@@ -155,5 +200,6 @@ function ChkRGRedirs($page, $login = false, $default_login = false) { // Edited 
 // [09-9-2012] Written by Th3-822.
 // [02-10-2012] Fixed for new weird redirect code. - Th3-822
 // [31-10-2012] Fixed for https on login/redirects. - Th3-822
+// [28-1-2013] Added Login captcha support. - Th3-822
 
 ?>

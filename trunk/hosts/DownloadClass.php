@@ -10,7 +10,8 @@ class DownloadClass {
 	 * @return void
 	 */
 
-	public function __construct() {
+	public function __construct($echo = true) {
+		if (!$echo) return;
 		echo('<table width="600" align="center">');
 		echo('<tr>');
 		echo('<td align="center">');
@@ -49,7 +50,7 @@ class DownloadClass {
 			$page = cURL($link, $cookie, $post, $referer, $auth);
 		} else {
 			global $pauth;
-			$page = geturl($Url ['host'], !empty($Url ['port']) ? $Url ['port'] : 80, $Url ['path'] . (!empty($Url ['query']) ? '?' . $Url ['query'] : ''), $referer, $cookie, $post, 0, !empty($_GET ['proxy']) ? $_GET ['proxy'] : '', $pauth, $auth, $Url ['scheme'], 0, $XMLRequest);
+			$page = geturl($Url['host'], defport($Url), $Url['path'] . (!empty($Url['query']) ? '?' . $Url['query'] : ''), $referer, $cookie, $post, 0, !empty($_GET['proxy']) ? $_GET['proxy'] : '', $pauth, $auth, $Url['scheme'], 0, $XMLRequest);
 			is_page($page);
 		}
 		return $page;
@@ -79,8 +80,8 @@ class DownloadClass {
 		$params['host'] = urlencode($url['host']);
 		if (!empty($url['port'])) $params['port'] = urlencode($url['port']);
 		$params['path'] = urlencode($url['path'] . (!empty($url['query']) ? '?' . $url['query'] : ''));
-		if (!empty($post)) $params['post'] = encrypt(serialize($post));
-		if (!empty($auth)) $params['auth'] = ($auth == 1 ? 1 : urlencode($auth));
+		if (!empty($post)) $params['post'] = urlencode(encrypt(serialize($post)));
+		if (!empty($auth)) $params['auth'] = urlencode($auth);
 		if (!empty($addon)) {
 			if (!is_array($addon)) html_error('Plugin problem! Please report, error: "The parameter passed must be an array"'); // Some problems with the plugin, quit it
 			foreach ($addon as $name => $value) $params[$name] = (is_array($value) ? urlencode(serialize($value)) : urlencode($value));
@@ -111,6 +112,7 @@ class DownloadClass {
 	}
 
 	public function CountDown($countDown) {
+		if ($countDown <= 0) return;
 		insert_timer($countDown, "Waiting link timelock");
 	}
 
@@ -122,11 +124,9 @@ class DownloadClass {
 	 */
 
 	public function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5') {
-		echo "\n<form name='dl' action='{$_SERVER['SCRIPT_NAME']}' method='POST'>\n";
+		echo "\n<form name='captcha' action='{$_SERVER['SCRIPT_NAME']}' method='POST'>\n";
 		foreach ($inputs as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='$input' />\n";
-		echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input type='text' name='captcha' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='Enter Captcha' />\n\t</h4>\n";
-		echo "<script type='text/javascript'>\n\tfunction check() {\n\t\tvar captcha=document.dl.captcha.value;\n\t\tif (captcha == '') {\n\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\treturn false;\n\t\t} else return true;\n\t}\n</script>";
-		echo "</form>\n</body\n</html>";
+		echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input type='text' name='captcha' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='Enter Captcha' />\n\t</h4>\n\t<script type='text/javascript'>/* <![CDATA[ */\n\t\tfunction check() {\n\t\t\tvar captcha=document.dl.captcha.value;\n\t\t\tif (captcha == '') {\n\t\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\t\treturn false;\n\t\t\t} else return true;\n\t\t}\n\t/* ]]> */</script>\n</form>\n</body>\n</html>";
 	}
 
 	/*
@@ -160,12 +160,8 @@ class DownloadClass {
 		global $PHP_SELF;
 		echo "<p><center><span id='dl' class='htmlerror'><b>ERROR: Please enable JavaScript. (Countdown)</b></span><br /><span id='dl2'>Please wait</span></center></p>\n";
 		echo "<form action='$PHP_SELF' name='cdwait' method='POST'>\n";
-		if ($post) {
-			foreach ($post as $name => $input) {
-				echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
-			}
-		}
-		?> <script type="text/javascript">
+		if (!empty($post) && is_array($post)) foreach ($post as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='$input' />\n";
+		?> <script type="text/javascript">/* <![CDATA[ */
 		var c = <?php echo $secs; ?>;var text = "<?php echo $text; ?>";var c2 = 0;var dl = document.getElementById("dl");var a2 = document.getElementById("dl2");fc();fc2();
 		function fc() {
 			if (c > 0) {
@@ -178,16 +174,16 @@ class DownloadClass {
 				setTimeout("fc()", 1000);
 			} else {
 				dl.style.display="none";
-				void(<?php if ($post) echo 'document.forms.cdwait.submit()';else echo 'location.reload()'; ?>);
+				void(<?php if (!empty($post)) echo 'document.forms.cdwait.submit()';else echo 'location.reload()'; ?>);
 			}
 		}
 		function fc2(){if(c>120){if(c2<=20){a2.innerHTML=a2.innerHTML+".";c2=c2+1}else{c2=10;a2.innerHTML=""}setTimeout("fc2()",100)}else{dl2.style.display="none"}}<?php
-		echo "</script></form><br />";
+		echo "/* ]]> */</script></form><br />";
 		if ($stop) exit("</body></html>");
 	}
 
 	public function changeMesg($mesg) {
-		echo('<script>document.getElementById(\'mesg\').innerHTML=\'' . stripslashes($mesg) . '\';</script>');
+		echo('<script type="text/javascript">document.getElementById(\'mesg\').innerHTML="' . stripslashes($mesg) . '";</script>');
 	}
 
 }
