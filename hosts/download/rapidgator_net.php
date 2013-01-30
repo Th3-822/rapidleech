@@ -40,6 +40,7 @@ class rapidgator_net extends DownloadClass {
 	private function FreeDL() {
 		$capt_url = 'http://rapidgator.net/download/captcha';
 		if (empty($_POST['step']) || $_POST['step'] != '1') {
+			is_present($this->page, 'This file can be downloaded by premium only', 'Only Premium users can download this file.'); // F##### PPS
 			is_present($this->page, 'download not more than 1 file at a time in free mode.', 'You can\'t download not more than 1 file at a time. Wait 15 minutes and try again.');
 			if (preg_match('@You can download files up to \d+ MB in free mode@i', $this->page, $err)) html_error($err[0].'.');
 			if (!preg_match('@fid\s*=\s*(\d+)\s*;@i', $this->page, $fid)) html_error('File-id not found.');
@@ -120,6 +121,11 @@ class rapidgator_net extends DownloadClass {
 
 	private function Login() {
 		global $premium_acc;
+		if (!empty($_REQUEST['pA_encrypted']) && !empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) {
+			$_REQUEST['premium_user'] = decrypt(urldecode($_REQUEST['premium_user']));
+			$_REQUEST['premium_pass'] = decrypt(urldecode($_REQUEST['premium_pass']));
+			unset($_REQUEST['pA_encrypted']);
+		}
 		$pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
 		$user = ($pA ? $_REQUEST['premium_user'] : $premium_acc['rapidgator_net']['user']);
 		$pass = ($pA ? $_REQUEST['premium_pass'] : $premium_acc['rapidgator_net']['pass']);
@@ -128,6 +134,12 @@ class rapidgator_net extends DownloadClass {
 		$post = array();
 		$post['LoginForm%5Bemail%5D'] = urlencode($user);
 		$post['LoginForm%5Bpassword%5D'] = urlencode($pass);
+		$post['LoginForm%5BrememberMe%5D'] = '1';
+		if (!empty($_POST['step']) && $_POST['step'] == '1') {
+			if (empty($_POST['captcha'])) html_error('You didn\'t enter the image verification code.');
+			$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
+			$post['LoginForm%5BverifyCode%5D'] = urlencode($_POST['captcha']);
+		}
 
 		$purl = 'http://rapidgator.net/';
 		$page = $this->GetPage('https://rapidgator.net/auth/login', $this->cookie, $post, $purl);
@@ -142,7 +154,32 @@ class rapidgator_net extends DownloadClass {
 		}
 
 		is_present($page, 'Error e-mail or password.', 'Login Failed: Email/Password incorrect.');
-		is_present($page, 'The code from a picture does not coincide', 'Login Failed: Captcha... (T8: I will add it later)');
+		is_present($page, 'E-mail is not a valid email address.', 'Login Failed: Login isn\'t an email address.');
+		if (stripos($page, 'The code from a picture does not coincide') !== false) {
+			if (!empty($_POST['step']) && $_POST['step'] == '1') html_error('Login Failed: Incorrect CAPTCHA response.');
+			if (!preg_match('@(https?://(?:[^\./\r\n\'\"\t\:]+\.)?rapidgator\.net(?:\:\d+)?)?/auth/captcha/\w+/\w+@i', $page, $imgurl)) html_error('Error: CAPTCHA not found.');
+			$imgurl = (empty($imgurl[1])) ? 'http://rapidgator.net'.$imgurl[0] : $imgurl[0];
+			//Download captcha img.
+			$capt_page = $this->GetPage($imgurl, $this->cookie);
+			$capt_img = substr($capt_page, strpos($capt_page, "\r\n\r\n") + 4);
+			$imgfile = DOWNLOAD_DIR . 'rapidgator_captcha.png';
+
+			if (file_exists($imgfile)) unlink($imgfile);
+			if (!write_file($imgfile, $capt_img)) html_error('Error getting CAPTCHA image.');
+			unset($capt_page, $capt_img);
+
+			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+			$data['step'] = '1';
+			$data['premium_acc'] = 'on'; // I should add 'premium_acc' to DefaultParamArr()
+			if ($pA) {
+				$data['pA_encrypted'] = 'true';
+				$data['premium_user'] = urlencode(encrypt($user)); // encrypt() will keep this safe.
+				$data['premium_pass'] = urlencode(encrypt($pass)); // And this too.
+			}
+			$this->EnterCaptcha($imgfile.'?'.time(), $data);
+			exit;
+		}
+		//is_present($page, 'The code from a picture does not coincide', 'Login Failed: Captcha... (T8: I will add it later)');
 
 		if (empty($this->cookie['user__'])) html_error("Login Error: Cannot find 'user__' cookie.");
 		$this->cookie['lang'] = 'en';
@@ -157,12 +194,6 @@ class rapidgator_net extends DownloadClass {
 	private function ChkRGRedirs($page, $rgpath = '/') {
 		$hpos = strpos($page, "\r\n\r\n");
 		$headers = empty($hpos) ? $page : substr($page, 0, $hpos);
-
-		if (!empty($_REQUEST['pA_encrypted']) && !empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) {
-			$_REQUEST['premium_user'] = decrypt(urldecode($_REQUEST['premium_user']));
-			$_REQUEST['premium_pass'] = decrypt(urldecode($_REQUEST['premium_pass']));
-			unset($_REQUEST['pA_encrypted']);
-		}
 
 		if (stripos($headers, "\r\nLocation: ") === false && stripos($page, "\r\nSet-Cookie: ") === false && !(cut_str($page, '<title>', '</title>'))) {
 			if (empty($_GET['rgredir'])) {
@@ -206,6 +237,7 @@ class rapidgator_net extends DownloadClass {
 // [26-8-2012]  Fixed regexp on redirect code. -Th3-822
 // [04-9-2012]  Added error msg in free dl. -Th3-822
 // [09-9-2012]  Fixed redirect issues, more code added & small edits. -Th3-822
-// [02-10-2012] Fixed for new weird redirect code. - Th3-822
+// [02-10-2012]  Fixed for new weird redirect code. - Th3-822
+// [28-1-2013]  Added Login captcha support. - Th3-822
 
 ?>

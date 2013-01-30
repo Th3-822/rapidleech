@@ -18,8 +18,10 @@ class turbobit_net extends DownloadClass {
 
 		if (empty($_POST['step'])) {
 			$this->page = $this->GetPage($this->link);
+			is_present($this->page, '>Our service is currently unavailable in your country.<', 'Turbobit is not available in your server\'s country.');
 			is_present($this->page, 'This document was not found in System', 'File Not Found.'); // 404
-			is_present($this->page, 'File was not found. It could possibly be deleted.', 'The requested file is not found.');
+			is_present($this->page, 'File not found. Probably it was deleted.', 'The requested file is not found.');
+			is_present($this->page, 'File was not found. It could possibly be deleted.', 'The requested file is not found');
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		}
 
@@ -105,7 +107,7 @@ class turbobit_net extends DownloadClass {
 		}
 	}
 
-	private function PremiumDL($usercookie = false) {
+	private function PremiumDL() {
 		$page = $this->GetPage($this->link, $this->cookie);
 		if (preg_match($this->RDregexp, $page, $redir)) {
 			$redir = (empty($redir[1])) ? 'http://turbobit.net'.$redir[0] : $redir[0];
@@ -143,10 +145,11 @@ class turbobit_net extends DownloadClass {
 			}
 
 			is_present($page, 'Incorrect login or password', 'Login Failed: Login/Password incorrect.');
+			is_present($page, 'E-Mail address appears to be invalid.', 'Login Failed: Invalid E-Mail.');
 			is_present($page, 'Incorrect verification code', 'Login Failed: Wrong CAPTCHA entered.');
 
-			if(empty($redir) || $redir != $purl) $page = $this->GetPage($purl, $this->cookie, 0, $purl);
-			if (stripos($page, '/user/logout">Logout<') === false) html_error('Login Failed.');
+			if (empty($redir) || $redir != $purl) $page = $this->GetPage($purl, $this->cookie, 0, $purl);
+			is_notpresent($page, '/user/logout">Logout<', 'Login Failed.');
 
 			$this->SaveCookies($user, $pass); // Update cookies file
 			is_present($page, '<u>Turbo Access</u> denied', 'Login Failed: Account isn\'t premium.');
@@ -177,6 +180,7 @@ class turbobit_net extends DownloadClass {
 			if ($x < 1) html_error('Login redirect not found');
 
 			is_present($page, 'Incorrect login or password', 'Login Failed: Login/Password incorrect');
+			is_present($page, 'E-Mail address appears to be invalid.', 'Login Failed: Invalid E-Mail');
 
 			if (!preg_match('@(https?://[^/\r\n\t\s\'\"<>]+)?/captcha/[^\r\n\t\s\'\"<>]+@i', $page, $imgurl)) {
 				if (stripos($page, '/user/logout">Logout<') !== false) {

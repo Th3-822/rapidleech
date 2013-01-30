@@ -6,11 +6,10 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class rapidshare_com extends DownloadClass {
-	public $apiurl, $fileid, $filename, $skipcheck;
+	public $apiurl, $fileid, $filename;
 	private $cookie;
 	public function Download($link) {
 		global $premium_acc, $Referer;
-		$this->skipcheck = false; // Change to true after reading the warning at: http://www.rapidleech.com/index.php/topic/11781-fixedrapidsharecom-download-plugin/
 		$this->cookie = '';
 		$this->apiurl = array('scheme' => 'http'); // Add 's' for https :D
 		$this->apiurl['host'] = 'api.rapidshare.com';
@@ -24,17 +23,17 @@ class rapidshare_com extends DownloadClass {
 
 		if (($_REQUEST['cookieuse'] == 'on' && preg_match('@enc\s?=\s?(\w+)@i', $_REQUEST['cookie'], $c)) || ($_REQUEST['premium_acc'] == 'on' && !empty($premium_acc['rapidshare_com']['cookie']))) {
 			$this->cookie = (empty($c[1]) ? $premium_acc['rapidshare_com']['cookie'] : $c[1]);
-			$this->CheckRLVer();
+			$this->CheckLogin();
 		} elseif ($_REQUEST['premium_acc'] == 'on' && (($pA = (!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass']))) || (!empty($premium_acc['rapidshare_com']['user']) && !empty($premium_acc['rapidshare_com']['pass'])))) {
 			$user = ($pA ? $_REQUEST['premium_user'] : $premium_acc['rapidshare_com']['user']);
 			$pass = ($pA ? $_REQUEST['premium_pass'] : $premium_acc['rapidshare_com']['pass']);
-			$this->CheckRLVer(urlencode($user), urlencode($pass));
+			$this->CheckLogin(rawurlencode($user), rawurlencode($pass));
 		} else $this->StartDL();
 	}
 
 	private function StartDL() {
-		$this->apiurl['query'] = 'sub=download&try=1&fileid=' . $this->fileid . '&filename=' . urlencode($this->filename);
-		if (!empty($this->cookie)) $this->apiurl['query'] .= '&cookie=' . urlencode($this->cookie);
+		$this->apiurl['query'] = 'sub=download&try=1&fileid=' . $this->fileid . '&filename=' . rawurlencode($this->filename);
+		if (!empty($this->cookie)) $this->apiurl['query'] .= '&cookie=' . rawurlencode($this->cookie);
 		$page = $this->GetPage(rebuild_url($this->apiurl));
 
 		$err1 = array('ERROR: File owner\'s public traffic exhausted.' => 'File owner\'s public traffic exhausted.', 'ERROR: Download permission denied by uploader.' => 'Download permission denied by uploader.', 'ERROR: Filename invalid.' => 'Filename invalid. Please check the download link.', 'ERROR: File ID invalid.' => 'File ID invalid. Please check the download link.', 'ERROR: Server under repair.' => 'Server under repair. Please try again later');
@@ -60,15 +59,10 @@ class rapidshare_com extends DownloadClass {
 		} elseif ($data[0] == 'ERROR') html_error('Error: ' . htmlentities($data[1]));
 		else html_error('Unknown reply while checking link.');
 	}
-	
-	private function CheckRLVer($user = '', $pass = '') {
-		if (!$this->skipcheck && (!function_exists('GetDefaultParams') || !function_exists('host_matches'))) html_error('This plugin requires* rapidleech r416 + a small patch. For more info check: http://www.rapidleech.com/index.php/topic/11781-fixedrapidsharecom-download-plugin/');
-		$this->CheckLogin($user, $pass);
-	}
 
 	private function CheckLogin($user = '', $pass = '') {
 		if (!empty($this->cookie)) {
-			$this->apiurl['query'] = 'sub=getaccountdetails&cookie=' . urlencode($this->cookie);
+			$this->apiurl['query'] = 'sub=getaccountdetails&cookie=' . rawurlencode($this->cookie);
 			$page = $this->GetPage(rebuild_url($this->apiurl));
 			$t1 = 'Cookie';$t2 = 'cookie';
 		} elseif (!empty($user) && !empty($pass)) {

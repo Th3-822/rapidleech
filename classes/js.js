@@ -3,14 +3,12 @@ if (top != self) {
 	try {
 		if (top.location.host != self.location.host) throw 1;
 	} catch (err) {
-		var pos = self.location.href.search(/\?/);
-		top.location.href = (pos > 0) ? self.location.href.substr(0, pos) : self.location.href;
+		top.location.replace(self.location.protocol + '//' + self.location.host + self.location.pathname);
 	}
 }
 
 function new_transload_window() {
-	var tmp = new Date();
-	tmp = tmp.getTime();
+	var tmp = (new Date()).getTime();
 	$('form[name=transload]').attr('target', 'rapidleech_' + tmp);
 	var options = 'width=700,height=320,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=no,copyhistory=no';
 	window.open('', 'rapidleech_' + tmp, options);

@@ -41,7 +41,7 @@ class ddlstorage_com extends DownloadClass {
 			is_present($page, '>Wrong captcha<', 'Error: Wrong Captcha Entered.');
 			if (preg_match('@You can download files up to \d+ [KMG]b only.@i', $page, $err)) html_error('Error: '.$err[0]);
 
-			if (!preg_match('@https?://[^/\r\n]+/(?:(?:files)|(?:dl?))/[^\'\"\t<>\r\n]+@i', $page, $dlink)) html_error('Error: Download link not found.');
+			if (!preg_match('@https?://[^/\r\n\:]+(?:\:\d+)?/(?:(?:files)|(?:dl?))/[^\'\"\t<>\r\n]+@i', $page, $dlink)) html_error('Error: Download link not found.');
 
 			$FileName = urldecode(basename(parse_url($dlink[0], PHP_URL_PATH)));
 			$this->RedirectDownload($dlink[0], $FileName);
@@ -97,7 +97,7 @@ class ddlstorage_com extends DownloadClass {
 
 	private function PremiumDL($link) {
 		$page = $this->GetPage($link, $this->cookie);
-		if (!preg_match('@https?://[^/\r\n]+/(?:(?:files)|(?:dl?))/[^\'\"\t<>\r\n]+@i', $page, $dlink)) {
+		if (!preg_match('@https?://[^/\r\n\:]+(?:\:\d+)?/(?:(?:files)|(?:dl?))/[^\'\"\t<>\r\n]+@i', $page, $dlink)) {
 			$page2 = cut_str($page, '<form name="F1" method="POST"', '</form>'); //Cutting page
 
 			$post = array();
@@ -110,7 +110,7 @@ class ddlstorage_com extends DownloadClass {
 
 			$page = $this->GetPage($link, $this->cookie, $post);
 
-			if (!preg_match('@https?://[^/\r\n]+/(?:(?:files)|(?:dl?))/[^\'\"\t<>\r\n]+@i', $page, $dlink)) html_error('Error: Download-link not found.');
+			if (!preg_match('@https?://[^/\r\n\:]+(?:\:\d+)?/(?:(?:files)|(?:dl?))/[^\'\"\t<>\r\n]+@i', $page, $dlink)) html_error('Error: Download-link not found.');
 		}
 
 		$FileName = urldecode(basename(parse_url($dlink[0], PHP_URL_PATH)));

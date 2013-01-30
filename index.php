@@ -14,8 +14,8 @@ $rev_num = '43';
 $plusrar_v = '4.1';
 $PHP_SELF = $_SERVER['SCRIPT_NAME'];
 define('RAPIDLEECH', 'yes');
-define('ROOT_DIR', realpath ('./'));
-define('PATH_SPLITTER', ((strpos(ROOT_DIR, "\\") !== false) ? "\\" : '/'));
+define('ROOT_DIR', realpath('./'));
+define('PATH_SPLITTER', ((strpos(ROOT_DIR, '\\') !== false) ? '\\' : '/'));
 define('HOST_DIR', 'hosts/');
 define('CLASS_DIR', 'classes/');
 define('CONFIG_DIR', 'configs/');
@@ -25,7 +25,7 @@ define('CREDITS', '<a href="http://www.rapidleech.com/" class="rl-link"><b>Rapid
 require_once(CONFIG_DIR . 'setup.php');
 // $options['download_dir'] should always end with a '/'
 if (substr($options['download_dir'], - 1) != '/') $options['download_dir'] .= '/';
-define('DOWNLOAD_DIR', (substr ($options['download_dir'], 0, 6) == 'ftp://' ? '' : $options['download_dir']));
+define('DOWNLOAD_DIR', (substr($options['download_dir'], 0, 6) == 'ftp://' ? '' : $options['download_dir']));
 
 define('TEMPLATE_DIR', 'templates/' . $options['template_used'] . '/');
 define('IMAGE_DIR', TEMPLATE_DIR . 'images/');
@@ -36,14 +36,6 @@ if ($options['no_cache']) {
 	header('Cache-Control: no-cache, must-revalidate');
 	header('Pragma: no-cache');
 }
-if (!defined('CRLF')) define ('CRLF', "\r\n");
-if (!defined('FTP_AUTOASCII')) define('FTP_AUTOASCII', -1);
-if (!defined('FTP_BINARY')) define('FTP_BINARY', 1);
-if (!defined('FTP_ASCII')) define('FTP_ASCII', 0);
-if (!defined('FTP_FORCE')) define('FTP_FORCE', true);
-define('FTP_OS_Unix', 'u');
-define('FTP_OS_Windows', 'w');
-define('FTP_OS_Mac', 'm');
 
 require_once(CLASS_DIR . 'other.php');
 
@@ -52,7 +44,7 @@ require_once(TEMPLATE_DIR . 'functions.php');
 if (!is__writable(CONFIG_DIR . 'files.lst')) html_error(lang(304));
 
 // If the download path is not writable, show error
-if (!is__writable (DOWNLOAD_DIR)) html_error(DOWNLOAD_DIR . lang(305));
+if (!is__writable(DOWNLOAD_DIR)) html_error(DOWNLOAD_DIR . lang(305));
 
 purge_files($options['delete_delay']);
 
@@ -71,8 +63,7 @@ if (!$_COOKIE) {
 			list ($var, $val) = explode('=', $value);
 			$_COOKIE[$var] = $val;
 		}
-	}
-	else if (!empty($_SERVER['HTTP_COOKIE'])) {
+	} elseif (!empty($_SERVER['HTTP_COOKIE'])) {
 		list($var, $val) = @explode('=', $_SERVER['HTTP_COOKIE']);
 		$_COOKIE[$var] = $val;
 	}
@@ -91,12 +82,9 @@ if (!empty ($_GET['image'])) {
 	exit();
 }
 
-if (isset($_GET['useproxy']) && (empty($_GET['proxy']) || strpos($_GET['proxy'], ':') === false)) {
-	html_error(lang(324));
-} else {
-	if (!empty($_GET['pauth'])) $pauth = decrypt(urldecode(trim($_GET['pauth'])));
-	else $pauth = (!empty($_GET['proxyuser']) && !empty($_GET['proxypass'])) ? base64_encode($_GET['proxyuser'] . ':' . $_GET['proxypass']) : '';
-}
+if (isset($_GET['useproxy']) && (empty($_GET['proxy']) || strpos($_GET['proxy'], ':') === false)) html_error(lang(324));
+if (!empty($_GET['pauth'])) $pauth = decrypt(urldecode(trim($_GET['pauth'])));
+else $pauth = (!empty($_GET['proxyuser']) && !empty($_GET['proxypass'])) ? base64_encode($_GET['proxyuser'] . ':' . $_GET['proxypass']) : '';
 
 if (empty($_GET['path']) || $options['download_dir_is_changeable'] == false) {
 	if (empty($_GET['host'])) $_GET['path'] = (substr($options['download_dir'], 0, 6) != 'ftp://') ? realpath(DOWNLOAD_DIR) : $options['download_dir'];
@@ -171,9 +159,9 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 		foreach ($host as $site => $file) {
 			if (host_matches($site, $Url['host'])) {
 				include(TEMPLATE_DIR . '/header.php');
-				require_once (CLASS_DIR . 'http.php');
-				require_once (HOST_DIR . 'DownloadClass.php');
-				require_once (HOST_DIR . 'download/' . $file);
+				require_once(CLASS_DIR . 'http.php');
+				require_once(HOST_DIR . 'DownloadClass.php');
+				require_once(HOST_DIR . 'download/' . $file);
 				$class = substr($file, 0, -4);
 				$firstchar = substr($file, 0, 1);
 				if ($firstchar > 0) $class = "d$class";
@@ -215,7 +203,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 		$_GET['saveto'] = urldecode(trim($_GET['saveto']));
 		$_GET['host'] = urldecode(trim($_GET['host']));
 		$_GET['path'] = urldecode(trim($_GET['path']));
-		$_GET['port'] = !empty($_GET['port']) ? urldecode(trim($_GET['port'])) : 80;
+		$_GET['port'] = !empty($_GET['port']) ? urldecode(trim($_GET['port'])) : 0;
 		$_GET['referer'] = !empty($_GET['referer']) ? urldecode(trim($_GET['referer'])) : 0;
 		$_GET['link'] = urldecode(trim($_GET['link']));
 
@@ -228,35 +216,32 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 
 		$pauth = !empty($_GET['pauth']) ? decrypt(urldecode(trim($_GET['pauth']))) : '';
 
+		$AUTH = array();
 		$_GET['auth'] = !empty($_GET['auth']) ? trim($_GET['auth']) : '';
 		if ($_GET['auth'] == '1') {
 			if (!preg_match('|^(?:.+\.)?(.+\..+)$|i', $_GET['host'], $hostmatch)) html_error('No valid hostname found for authorisation!');
 			$hostmatch = str_replace('.', '_', $hostmatch[1]);
 			if (isset($premium_acc["$hostmatch"]) && is_array($premium_acc["$hostmatch"]) && !empty($premium_acc["$hostmatch"]['user']) && !empty($premium_acc["$hostmatch"]['pass'])) {
-				$auth = base64_encode($premium_acc["$hostmatch"]['user'] . ":" . $premium_acc["$hostmatch"]['pass']);
+				$auth = base64_encode($premium_acc["$hostmatch"]['user'] . ':' . $premium_acc["$hostmatch"]['pass']);
 			} else html_error('No usable premium account found for this download - please set one in accounts.php');
 		} elseif (!empty($_GET['auth'])) {
 			$auth = decrypt(urldecode($_GET['auth']));
-			$AUTH['use'] = true;
-			$AUTH['str'] = $auth;
-		} else $auth = $AUTH = false;
+			list($AUTH['user'], $AUTH['pass']) = array_map('rawurldecode', explode(':', base64_decode($auth), 2));
+		} else $auth = false;
 
-		$pathWithName = $_GET['saveto'] . PATH_SPLITTER . $_GET['filename'];
-		while (stripos($pathWithName, "\\\\") !== false) {
-			$pathWithName = str_replace("\\\\", "\\", $pathWithName);
-		}
-
+		$pathWithName = $_GET['saveto'] . PATH_SPLITTER . basename(urldecode($_GET['filename']));
+		while (strpos($pathWithName, "\\\\") !== false) $pathWithName = str_replace("\\\\", "\\", $pathWithName);
 		if (strpos($pathWithName, '?') !== false) $pathWithName = substr($pathWithName, 0, strpos($pathWithName, '?'));
 
 		$url = parse_url($_GET['link']);
+		if (empty($url['port'])) $url['port'] = $_GET['port'];
 		if (isset($url['scheme']) && $url['scheme'] == 'ftp' && empty($_GET['proxy'])) {
-			$AUTH['ftp'] = array('login' => !empty($url['user']) ? $url['user'] : 'anonymous', 'password' => !empty($url['pass']) ? $url['pass'] : 'anonymous@leechget.com');
 			require_once(CLASS_DIR . 'ftp.php');
-			$file = getftpurl($_GET['host'], !empty($url['port']) ? $url['port'] : 21, $_GET['path'], $pathWithName);
+			$file = getftpurl($_GET['host'], defport($url), urldecode($_GET['path']), $pathWithName);
 		} else {
 			require_once(CLASS_DIR . 'http.php');
 			!empty($_GET['force_name']) ? $force_name = urldecode($_GET['force_name']) : '';
-			$file = geturl($_GET['host'], $_GET['port'], $_GET['path'], $_GET['referer'], $_GET['cookie'], $_GET['post'], $pathWithName, $_GET['proxy'], $pauth, $auth, $url['scheme']);
+			$file = geturl($_GET['host'], defport($url), $_GET['path'], $_GET['referer'], $_GET['cookie'], $_GET['post'], $pathWithName, $_GET['proxy'], $pauth, $auth, $url['scheme']);
 		}
 
 		if ($options['redir'] && $lastError && strpos($lastError, substr(lang(95), 0, strpos(lang(95), '%1$s'))) !== false) {

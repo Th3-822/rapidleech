@@ -20,7 +20,7 @@ function rl_split() {
 					<tr>
 						<td><?php echo lang(143); ?>:&nbsp;<input type="text" name="partSize[]"
 							size="2"
-							value="<?php echo ($_COOKIE ["partSize"] ? $_COOKIE ["partSize"] : 10); ?>" />&nbsp;MB
+							value="<?php echo ((!empty($_COOKIE['partSize']) && is_numeric($_COOKIE['partSize'])) ? $_COOKIE['partSize'] : 10); ?>" />&nbsp;MB
 						</td>
 					</tr>
 <?php

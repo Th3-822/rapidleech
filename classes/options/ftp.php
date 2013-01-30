@@ -125,7 +125,7 @@ function ftp_go() {
 						$file = $list [$_POST ["files"] [$i]];
 						echo '<script type="text/javascript">pr(0,0,0);changeStatus('."'" . addslashes(basename ( $file ["name"] )) . "', '" . $file ["size"] . "');</script>";
 						$FtpUpload = true;
-						$FtpBytesTotal = filesize ( $file ["name"] );
+						$FtpBytesTotal = filesize($file['name']);
 						$FtpChunkSize = round($FtpBytesTotal/333);
 						$FtpTimeStart = getmicrotime ();
 						$FtpUploadBytesSent = $FtpLastChunkTime = $FtpLast = 0;

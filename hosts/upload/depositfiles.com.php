@@ -30,13 +30,13 @@ else {
 
 if ($continue_up) {
 	$login = $not_done = false;
-	$domain = 'depositfiles.com';
+	$cookie = array('lang_current' => 'en');
+	$domain = CheckDomain('depositfiles.com');
 	$referer = "http://$domain/";
 
 	// Login
 	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='login' width='100%' align='center'>Login to $domain</div>\n";
 
-	$cookie = array('lang_current' => 'en');
 	if (!empty($_REQUEST['up_login']) && !empty($_REQUEST['up_pass'])) {
 		if (!$default_acc && !empty($_POST['up_encrypted']) && $_POST['up_encrypted'] == 'true') {
 			$_REQUEST['up_login'] = decrypt(urldecode($_REQUEST['up_login']));
@@ -55,7 +55,7 @@ if ($continue_up) {
 		$cookie = GetCookiesArr($page, $cookie);
 	}
 
-	if (!preg_match('@https?://fileshare\d+\.depositfiles\.com(?:\:\d+)?/[\w\-]+/[^\?\'"\r\n\<>;\s\t]*@i', $page, $up)) html_error('Error: Cannot find upload server.', 0);
+	if (!preg_match('@https?://fileshare\d+\.(?:depositfiles|dfiles)\.[^/:\r\n\t\"\'<>]+(?:\:\d+)?/[\w\-]+/[^\?\'"\r\n\<>;\s\t]*@i', $page, $up)) html_error('Error: Cannot find upload server.', 0);
 
 	$post = array();
 	$post['MAX_FILE_SIZE'] = cut_str($page, 'name="MAX_FILE_SIZE" value="', '"');
@@ -76,10 +76,22 @@ if ($continue_up) {
 
 	is_page($upfiles);
 
-	if (preg_match('@https?://(?:[^/\'"\r\n\s\t<>;]\.)?depositfiles\.com/files/[^\'"\r\n\s\t<>;]+@i', $upfiles, $dl)) {
+	if (preg_match('@https?://(?:[^/\'"\r\n\s\t<>;]\.)?(?:depositfiles|dfiles)\.[^/\r\n\t\"\'<>]+/files/[^\'"\r\n\s\t<>;]+@i', $upfiles, $dl)) {
 		$download_link = $dl[0];
-		if (preg_match('@https?://(?:[^/\'"\r\n\s\t<>;]\.)?depositfiles\.com/rmv/[^\'"\r\n\s\t<>;]+@i', $upfiles, $del)) $delete_link = $del[0];
+		if (preg_match('@https?://(?:[^/\'"\r\n\s\t<>;]\.)?(?:depositfiles|dfiles)\.[^/\r\n\t\"\'<>]+/rmv/[^\'"\r\n\s\t<>;]+@i', $upfiles, $del)) $delete_link = $del[0];
 	} else html_error('Download link not found.', 0);
+}
+
+function CheckDomain($domain) {
+	global $cookie, $pauth;
+	$domain = strtolower($domain);
+	$page = geturl($domain, 80, '/', "http://$domain/", $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+	if (($hpos = strpos($page, "\r\n\r\n")) > 0) $page = substr($page, 0, $hpos);
+	if (stripos($page, "\nLocation: ") !== false && preg_match('@\nLocation: https?://(?:[^/\r\n]+\.)?((?:depositfiles|dfiles)\.[^/:\r\n\t\"\'<>]+)(?:\:\d+)?/@i', $page, $redir_domain)) {
+		$redir_domain = strtolower($redir_domain[1]);
+		if ($domain != $redir_domain) $domain = $redir_domain;
+	}
+	return $domain;
 }
 
 function generate_upload_id() {
@@ -147,8 +159,8 @@ function Login($user, $pass) {
 		$page = geturl($domain, 80, '/login.php?return=%2F', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 		$cookie = GetCookiesArr($page, $cookie);
 
-		if (!preg_match('@(https?://([^/\r\n\t\s\'\"<>]+\.)?depositfiles\.com(?:\:\d+)?)?/js/base2\.js@i', $page, $jsurl)) html_error('Cannot find captcha.');
-		$jsurl = (empty($jsurl[1])) ? 'http://depositfiles.com'.$jsurl[0] : $jsurl[0];
+		if (!preg_match('@(https?://([^/\r\n\t\s\'\"<>]+\.)?(?:depositfiles|dfiles)\.[^/:\r\n\t\"\'<>]+(?:\:\d+)?)/js/base2\.js@i', $page, $jsurl)) html_error('Cannot find captcha.');
+		$jsurl = (empty($jsurl[1])) ? 'http://' . $domain . $jsurl[0] : $jsurl[0];
 		$jsurl = parse_url($jsurl);
 		$page = geturl($jsurl['host'], defport($jsurl), $jsurl['path'].(!empty($jsurl['query']) ? '?'.$jsurl['query'] : ''), $referer.'login.php?return=%2F', $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 
@@ -179,16 +191,14 @@ function IWillNameItLater($cookie, $decrypt=true) {
 }
 
 function SkipLoginC($user, $pass) {
-	global $cookie, $domain, $referer, $hash, $maxdays, $secretkey, $pauth;
-	$filename = 'depositfiles_ul.php';
-	$maxdays = 3; // Max days to keep cookies saved
+	global $cookie, $domain, $referer, $secretkey, $pauth;
 	if (!defined('DOWNLOAD_DIR')) {
 		global $options;
 		if (substr($options['download_dir'], -1) != '/') $options['download_dir'] .= '/';
 		define('DOWNLOAD_DIR', (substr($options['download_dir'], 0, 6) == 'ftp://' ? '' : $options['download_dir']));
 	}
 
-	$filename = DOWNLOAD_DIR.basename($filename);
+	$filename = DOWNLOAD_DIR.basename('depositfiles_ul.php');
 	if (!file_exists($filename)) return Login($user, $pass);
 
 	$file = file($filename);
@@ -197,7 +207,6 @@ function SkipLoginC($user, $pass) {
 
 	$hash = hash('crc32b', $user.':'.$pass);
 	if (array_key_exists($hash, $savedcookies)) {
-		if (time() - $savedcookies[$hash]['time'] >= ($maxdays * 24 * 60 * 60)) return Login($user, $pass); // Ignore old cookies
 		$_secretkey = $secretkey;
 		$secretkey = sha1($user.':'.$pass);
 		$cookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? IWillNameItLater($savedcookies[$hash]['cookie']) : '';
@@ -213,9 +222,9 @@ function SkipLoginC($user, $pass) {
 }
 
 function SaveCookies($user, $pass) {
-	global $cookie, $maxdays, $secretkey;
-	$filename = 'depositfiles_ul.php';
-	$filename = DOWNLOAD_DIR.basename($filename);
+	global $cookie, $secretkey;
+	$maxdays = 7; // Max days to keep cookies saved
+	$filename = DOWNLOAD_DIR.basename('depositfiles_ul.php');
 	if (file_exists($filename)) {
 		$file = file($filename);
 		$savedcookies = unserialize($file[1]);
@@ -235,5 +244,6 @@ function SaveCookies($user, $pass) {
 
 //[06-9-2012] Written by Th3-822.
 //[01-1-2013] Fixed login. - Th3-822 (Happy New Year)
+//[20-1-2013] Updated for df's new domains. - Th3-822
 
 ?>

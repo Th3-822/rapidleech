@@ -30,7 +30,7 @@ class billionuploads_com extends DownloadClass {
 		is_present($page, '>Skipped countdown', 'Error: Skipped countdown?.');
 		if (preg_match('@You have to wait (?:\d+ \w+,\s)?\d+ \w+ till next download@', $page, $err) || preg_match('@You can download files up to \d+ [KMG]?b only.@i', $page, $err)) html_error('Error: '.$err[0]);
 
-		if (!preg_match('@https?://[^/\'\"\t<>\r\n\:]+(?:\:\d+)?/(?:(?:files)|(?:dl?))/[^\'\"\t<>\r\n]+@i', $page, $dlink)) html_error('Error: Download link not found.');
+		if (!preg_match('@https?://[^/\'\"\t<>\r\n\:]+(?:\:\d+)?/(?:(?:files)|(?:dl?)|(?:cgi\-bin/dl\.cgi))/[^\'\"\t<>\r\n]+@i', $page, $dlink)) html_error('Error: Download link not found.');
 
 		$FileName = urldecode(basename(parse_url($dlink[0], PHP_URL_PATH)));
 		$this->RedirectDownload($dlink[0], $FileName);

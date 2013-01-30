@@ -14,13 +14,13 @@ class letitbit_net extends DownloadClass {
 		if (empty($_REQUEST['step']) || $_REQUEST['step'] != '1') {
 			$this->page = $this->GetPage($link, $this->cookie);
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
-			if (preg_match('@Location: ((https?://[^/\r\n]+)?/[^\r\n]+)@i', $this->page, $redir)) {
+			if (preg_match('@Location: ((https?://(?:[^/\r\n]+\.)?letitbit\.net)?/[^\r\n]+)@i', $this->page, $redir)) {
 				$link = (empty($redir[2])) ? 'http://letitbit.net'.$redir[1] : $redir[1];
 				$this->page = $this->GetPage($link, $this->cookie);
 				$this->cookie = GetCookiesArr($this->page, $this->cookie);
 			}
 			if (stripos($this->page, 'File not found') !== false) {
-				// if ($this->cookie['country'] == 'US') html_error('The requested file was not found or isn\'t downloadable in your server\'s country.'); // It seems that lib blocks downloads from usa... I will check this later and add the error msg if it's true. - T8
+				if ($this->cookie['country'] == 'US') html_error('The requested file was not found or isn\'t downloadable in your server\'s country.'); // It seems that lib blocks downloads from usa... I will check this later and add the error msg if it's true. - T8
 				html_error('The requested file was not found.');
 			}
 		}

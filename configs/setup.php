@@ -9,16 +9,16 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-$PHP_SELF = $_SERVER ['SCRIPT_NAME'];
-define('RAPIDLEECH', 'yes');
-define ('CONFIG_DIR', 'configs/');
+$PHP_SELF = $_SERVER['SCRIPT_NAME'];
+if (!defined('RAPIDLEECH')) define('RAPIDLEECH', 'yes');
+if (!defined('CONFIG_DIR')) define('CONFIG_DIR', 'configs/');
 
 //Default options file
-require_once (CONFIG_DIR.'default.php');
+require_once(CONFIG_DIR.'default.php');
 //Exit setup if config file exists and is complete
 if (is_file(CONFIG_DIR.'config.php')) {
-  require_once (CONFIG_DIR.'config.php');  
-  if (count($options) == count($default_options)) { return; }
+	require_once(CONFIG_DIR.'config.php');  
+	if (count($options) == count($default_options)) return;
 }
 
 define('TEMPLATE_DIR', 'templates/plugmod/');
