@@ -33,7 +33,7 @@ class DownloadClass {
 			global $Referer;
 			$referer = $Referer;
 		}
-		$cURL = ($options['use_curl'] && extension_loaded('curl') && function_exists('curl_init') && function_exists('curl_exec')) ? true : false;
+		$cURL = $options['use_curl'] && extension_loaded('curl') && function_exists('curl_init') && function_exists('curl_exec') ? true : false;
 		$Url = parse_url(trim($link));
 		if ($Url ['scheme'] == 'https') {
 			$chttps = false;

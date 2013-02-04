@@ -12,7 +12,7 @@ class youtube_com extends DownloadClass {
 		$url = parse_url($link);
 		$this->vid = array();
 
-		if (host_matchs('youtu.be', $url['host'])) preg_match('@/([\w\-\.]{11})@i', $url['path'], $this->vid);
+		if (host_matches('youtu.be', $url['host'])) preg_match('@/([\w\-\.]{11})@i', $url['path'], $this->vid);
 		elseif (empty($url['query']) || ($this->vid[1] = cut_str('&'.$url['query'].'&', '&v=', '&')) === false || !preg_match('@^[\w\-\.]{11}$@i', $this->vid[1])) preg_match('@/(?:v|(?:embed))/([\w\-\.]{11})@i', $url['path'], $this->vid);
 
 		if (empty($this->vid[1])) html_error('Video ID not found.');

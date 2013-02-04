@@ -118,7 +118,7 @@ function resetProgress() {
 				$isHost = false;
 				$redir = $lastError = '';
 				foreach ($host as $site => $file) {
-					if (host_matchs($site, $Url['host'])) { //if (preg_match("/^(.+\.)?".$site."$/i", $Url['host'])) {
+					if (host_matches($site, $Url['host'])) { //if (preg_match("/^(.+\.)?".$site."$/i", $Url['host'])) {
 						$isHost = true;
 						try {
 							require_once(HOST_DIR . 'DownloadClass.php');

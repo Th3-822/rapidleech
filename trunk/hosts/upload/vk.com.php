@@ -75,7 +75,10 @@ if (empty($_REQUEST['code'])) {
 	}
 
 	$upsrv = Get_Reply($page);
-	if (!empty($upsrv['error'])) html_error("Error: [{$upsrv['error']['error_code']}] {$upsrv['error']['error_msg']}");
+	if (!empty($upsrv['error'])) {
+		if ($upsrv['error'] == '204') html_error('Your account is banned for uploading.');
+		html_error("Error: [{$upsrv['error']['error_code']}] {$upsrv['error']['error_msg']}");
+	}
 
 	$post = array();
 	// if ($video) $post['is_private'] = '1'; // Uncomment for upload videos as private

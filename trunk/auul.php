@@ -22,16 +22,15 @@ define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
 define('IMAGE_DIR', TEMPLATE_DIR . 'images/');
 
 // Include other useful functions
-require_once('classes/other.php');
+require_once(CLASS_DIR.'other.php');
 require_once(HOST_DIR.'download/hosts.php');
 require_once(CLASS_DIR.'http.php');
 
-if (!$options['auto_upload_disable']) {
-    login_check();
-} else {
-    require_once('deny.php');
-    exit();
+if ($options['auto_upload_disable']) {
+	require_once('deny.php');
+	exit();
 }
+login_check();
 
 include(TEMPLATE_DIR.'header.php');
 ?>
