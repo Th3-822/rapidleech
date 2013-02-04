@@ -9,7 +9,7 @@ class putlocker_com extends DownloadClass {
 	private $link, $page, $cookie, $pA, $Getregexp, $DLregexp;
 	public function Download($link) {
 		global $premium_acc;
-		$this->link = str_ireplace(array('://putlocker.com/', '/mobile/file/'), array('://www.putlocker.com', '/file/'), $link);
+		$this->link = str_ireplace(array('://putlocker.com/', '/mobile/file/'), array('://www.putlocker.com/', '/file/'), $link);
 		$this->Getregexp = '@(https?://(?:[^/\r\n\t\s\'\"<>]+\.)?putlocker\.com)?/get_file\.php\?(?:(?:id)|(?:file)|(stream))=[^\r\n\t\s\'\"<>]+@i';
 		$this->DLregexp = '@Location: (https?://(?:(?:[^/\r\n]+/(?:(?:download)|(?:premium)))|(?:cdn\.[^/\r\n]+))/[^\r\n]*)@i';
 		$this->pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
@@ -247,8 +247,7 @@ class putlocker_com extends DownloadClass {
 	}
 
 	private function CookieLogin($user, $pass, $filename = 'putlocker_dl.php') {
-		global $maxdays, $secretkey;
-		$maxdays = 3; // Max days to keep cookies saved
+		global $secretkey;
 		if (empty($user) || empty($pass)) html_error('Login Failed: User or Password is empty.');
 
 		$filename = DOWNLOAD_DIR . basename($filename);
@@ -260,7 +259,6 @@ class putlocker_com extends DownloadClass {
 
 		$hash = hash('crc32b', $user.':'.$pass);
 		if (array_key_exists($hash, $savedcookies)) {
-			if (time() - $savedcookies[$hash]['time'] >= ($maxdays * 24 * 60 * 60)) return $this->Login($user, $pass); // Ignore old cookies
 			$_secretkey = $secretkey;
 			$secretkey = sha1($user.':'.$pass);
 			$this->cookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? $this->IWillNameItLater($savedcookies[$hash]['cookie']) : '';
@@ -277,7 +275,8 @@ class putlocker_com extends DownloadClass {
 	}
 
 	private function SaveCookies($user, $pass, $filename = 'putlocker_dl.php') {
-		global $maxdays, $secretkey;
+		global $secretkey;
+		$maxdays = 7; // Max days to keep cookies saved
 		$filename = DOWNLOAD_DIR . basename($filename);
 		if (file_exists($filename)) {
 			$file = file($filename);
@@ -298,5 +297,6 @@ class putlocker_com extends DownloadClass {
 }
 
 //[16-9-2012]  Written by Th3-822.
+//[01-4-2013]  Added missing / to str_ireplace & Small changes. - Th3-822
 
 ?>
