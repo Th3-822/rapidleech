@@ -1,7 +1,7 @@
 <?php
 $host = array();
 $d = dir(HOST_DIR . 'download/');
-$HostnamesToFix = array('easy.share.com' => 'easy-share.com', 'share.online.biz' => 'share-online.biz', 'cash.file.net' => 'cash-file.net');
+$HostnamesToFix = array('cash.file.net' => 'cash-file.net', 'dev.host.org' => 'dev-host.org', 'easy.share.com' => 'easy-share.com', 'share.now.net' => 'share-now.net','share.online.biz' => 'share-online.biz');
 $HostnamesToIgnore = array('generic.minifilehost', 'youtube.com(1)', 'vBulletin.plug', 'hosts');
 while (false !== ($entry = $d->read())) {
 	if (strtolower(strrchr($entry, '.')) == '.php' && stripos($entry, '.JD') === false) {
@@ -39,6 +39,12 @@ while (false !== ($entry = $d->read())) {
 				break;
 			case 'freakshare.com':
 				$host['freakshare.net'] = $host['freakshare.com'];
+				break;
+			case 'filecloud.io':
+				$host['ifile.it'] = $host['filecloud.io'];
+				break;
+			case 'multiupload.nl':
+				$host['multiupload.com'] = $host['multiupload.nl'];
 				break;
 			case 'speedyshare.com':
 				$host['speedy.sh'] = $host['speedyshare.com'];

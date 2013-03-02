@@ -13,12 +13,13 @@ class letitbit_net extends DownloadClass {
 		// Check link
 		if (empty($_REQUEST['step']) || $_REQUEST['step'] != '1') {
 			$this->page = $this->GetPage($link, $this->cookie);
+			$headers = substr($this->page, 0, strpos($this->page, "\r\n\r\n"));
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
-			if (preg_match('@Location: ((https?://(?:[^/\r\n]+\.)?letitbit\.net)?/[^\r\n]+)@i', $this->page, $redir)) {
+			if (preg_match('@\nLocation: ((https?://(?:[a-zA-Z\d\-]+\.)*letitbit\.net)?/[^\r\n]+)@i', $headers, $redir)) {
 				$link = (empty($redir[2])) ? 'http://letitbit.net'.$redir[1] : $redir[1];
 				$this->page = $this->GetPage($link, $this->cookie);
 				$this->cookie = GetCookiesArr($this->page, $this->cookie);
-			}
+			} elseif (preg_match('@\nLocation: https?://[^/\r\n]+/[^\r\n]+)@i', $headers)) html_error('Error: Non Acceptable Redirect.');
 			if (stripos($this->page, 'File not found') !== false) {
 				if ($this->cookie['country'] == 'US') html_error('The requested file was not found or isn\'t downloadable in your server\'s country.'); // It seems that lib blocks downloads from usa... I will check this later and add the error msg if it's true. - T8
 				html_error('The requested file was not found.');
@@ -41,14 +42,24 @@ class letitbit_net extends DownloadClass {
 	}
 
 	private function Retrieve() {
-		$form = cut_str($this->page, '<form id="ifree_form"', '<div class="wrapper-centered">');
-		if (empty($form)) html_error("Error: Empty Free Form 1!");
+		if (!preg_match("@<form (?:[^<>]*)[\s\t]*id=\"ifree_form\"(?:[^<>]*)>@i", $this->page, $form_tag)) html_error('Error: Free Form 1 Tag Not Found!');
+		$form = trim(cut_str($this->page, $form_tag[0], '</form>'));
+		if (empty($form)) html_error('Error: Empty Free Form 1!');
 		$post = $this->AutomatePost($form);
-		$this->link = "http://letitbit.net" . cut_str($form, 'action="', '"');
+		$form_action = trim(cut_str($form_tag[0], 'action="', '"'));
+		if (stripos($form_action, 'born_iframe') !== false) {
+			$page = $this->GetPage('http://letitbit.net' . cut_str($form_tag[0], 'action="', '"'), $this->cookie, $post);
+			if (!preg_match("@<form (?:[^<>]*)[\s\t]*id=\"d3_form\"(?:[^<>]*)>@i", $page, $form_tag)) html_error('Error: Free Form 2 Tag Not Found!');
+			$form = trim(cut_str($page, $form_tag[0], '</form>'));
+			if (empty($form)) html_error('Error: Empty Free Form 2!');
+			$post = $this->AutomatePost($form);
+			$form_action = trim(cut_str($form_tag[0], 'action="', '"'));
+		}
+		$this->link = 'http://letitbit.net' . cut_str($form_tag[0], 'action="', '"');
 		$page = $this->GetPage($this->link, $this->cookie, $post);
 		$this->cookie = GetCookiesArr($page, $this->cookie);
-		unset($post);
-        if (!preg_match("/ajax_check_url = '((http:\/\/[a-z0-9]+\.[\w.]+)\/[^\r\n']+)';/", $page, $check)) html_error("Error: Redirect link [Free] not found!");
+		unset($post, $form_tag, $form_action);
+		if (!preg_match("/ajax_check_url = '((http:\/\/[a-z0-9]+\.[\w.]+)\/[^\r\n']+)';/", $page, $check)) html_error("Error: Redirect link [Free] not found!");
 		$this->link = $check[1];
 		$this->server = $check[2];
 		// If you want, you can skip the countdown...
@@ -58,7 +69,7 @@ class letitbit_net extends DownloadClass {
 
 		if (!preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w|\-]+)@i', $page, $pid)) html_error('reCAPTCHA not found.');
 		if (!preg_match('@var[\s\t]+recaptcha_control_field[\s\t]*=[\s\t]*\'([^\'\;]+)\'@i', $page, $ctrl)) html_error('Captcha control field not found.');
- 
+
 		$data = $this->DefaultParamArr($this->server . "/ajax/check_recaptcha.php", $this->cookie);
 		$data['step'] = '1';
 		$data['recaptcha_control_field'] = rawurlencode($ctrl[1]);
@@ -157,8 +168,6 @@ class letitbit_net extends DownloadClass {
 
 	private function SkipLoginC($user, $pass, $filename = 'letitbit_dl.php') {
 		global $secretkey;
-		$this->maxdays = 3; // Max days to keep cookies saved
-
 		$filename = DOWNLOAD_DIR . basename($filename);
 		if (!file_exists($filename)) return $this->login($user, $pass);
 
@@ -168,7 +177,6 @@ class letitbit_net extends DownloadClass {
 
 		$hash = hash('crc32b', $user . ':' . $pass);
 		if (array_key_exists($hash, $savedcookies)) {
-			if (time() - $savedcookies[$hash]['time'] >= ($this->maxdays * 24 * 60 * 60)) return $this->login($user, $pass); // Ignore old cookies
 			$_secretkey = $secretkey;
 			$secretkey = sha1($user . ':' . $pass);
 			$this->cookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? $this->IWillNameItLater($savedcookies[$hash]['cookie']) : '';
@@ -188,6 +196,7 @@ class letitbit_net extends DownloadClass {
 
 	private function SaveCookies($user, $pass, $filename = 'letitbit_dl.php') {
 		global $secretkey;
+		$maxdays = 7; // Max days to keep cookies saved
 		$filename = DOWNLOAD_DIR . basename($filename);
 		if (file_exists($filename)) {
 			$file = file($filename);
@@ -195,7 +204,7 @@ class letitbit_net extends DownloadClass {
 			unset($file);
 
 			// Remove old cookies
-			foreach ($savedcookies as $k => $v) if (time() - $v['time'] >= ($this->maxdays * 24 * 60 * 60)) unset($savedcookies[$k]);
+			foreach ($savedcookies as $k => $v) if (time() - $v['time'] >= ($maxdays * 24 * 60 * 60)) unset($savedcookies[$k]);
 		} else $savedcookies = array();
 		$hash = hash('crc32b', $user . ':' . $pass);
 		$_secretkey = $secretkey;
@@ -229,6 +238,7 @@ class letitbit_net extends DownloadClass {
   Fixed free download code by Ruud v.Tony 16-04-2012
   Fixed for redirects in download links by Th3-822 16-10-2012
   reCaptcha support added at freedl by Th3-822 24-11-2012
+  Fixed free dl for extra form on some locations. - Th3-822
 \***********************************************************************************************/
 
 ?>
