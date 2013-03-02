@@ -5,6 +5,7 @@
 /*Default Options Start*/
 $default_options = array(
 //General
+'secretkey' => '', #Secret key for cookie encryption
 'download_dir' => 'files/', # This is where your downloaded files are saved
 'download_dir_is_changeable' => false, # true - Allow users to change the download dir
 'delete_delay' => 0, # 0 - Disabled, time in SECONDS before downloaded files are deleted
@@ -56,7 +57,7 @@ $default_options = array(
 //Advanced
 '2gb_fix' => true, # true - Try to list files bigger than 2gb on 32 bit o.s.
 'forbidden_filetypes' => array('.htaccess', '.htpasswd', '.php', '.php3', '.php4', '.php5', '.phtml', '.asp', '.aspx', '.cgi'), # Enter the forbidden filetypes in the given way
-'forbidden_filetypes_block' => false, # false - rename forbidden_filetypes, true - completely block them 
+'forbidden_filetypes_block' => false, # false - rename forbidden_filetypes, true - completely block them
 'rename_these_filetypes_to' => '.xxx', # If forbidden_filetypes_block = false then rename those filetypes to this
 'check_these_before_unzipping' => true, # true - Don't allow extraction/creation of these filetypes from file actions
 'no_cache' => true, # true - Prohibition by Browser; otherwise allowed

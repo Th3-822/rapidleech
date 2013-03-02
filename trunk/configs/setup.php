@@ -17,7 +17,7 @@ if (!defined('CONFIG_DIR')) define('CONFIG_DIR', 'configs/');
 require_once(CONFIG_DIR.'default.php');
 //Exit setup if config file exists and is complete
 if (is_file(CONFIG_DIR.'config.php')) {
-	require_once(CONFIG_DIR.'config.php');  
+	require_once(CONFIG_DIR.'config.php');
 	if (count($options) == count($default_options)) return;
 }
 
@@ -57,7 +57,7 @@ foreach ($options as $k => $v) {
   elseif (is_numeric($default_options[$k])) {
     $v = floor($v);
     echo "  set_element_val('opt_{$k}', '".($k == 'delete_delay' ? $v."', '".floor($v/60) : $v)."');\n";
-  }  
+  }
   else { echo "  set_element_val('opt_{$k}', '{$v}');\n"; }
 }
 ?>
@@ -209,7 +209,7 @@ if (isset($_POST['setup_save']) && $_POST['setup_save'] == 1) {
 
   $options = array();
   foreach ($default_options as $k => $v) { if (!array_key_exists($k, $options)) { $options[$k] = $v; } }
-  
+
   foreach($default_options as $k => $v) {
     if (is_array($default_options[$k])) { continue; }
     if (is_bool($default_options[$k])) {
@@ -217,12 +217,12 @@ if (isset($_POST['setup_save']) && $_POST['setup_save'] == 1) {
     }
     elseif (is_numeric($default_options[$k])) {
       $options[$k] = (isset($_POST['opt_'.$k]) && $_POST['opt_'.$k] ? floor($_POST['opt_'.$k]) : 0);
-    }  
+    }
     else {
       $options[$k] = (isset($_POST['opt_'.$k]) && $_POST['opt_'.$k] ? stripslashes($_POST['opt_'.$k]) : '');
     }
   }
-  
+
   function array_trim(&$v) { $v = trim($v); }
   $tmp = (isset($_POST['opt_forbidden_filetypes']) ? stripslashes($_POST['opt_forbidden_filetypes']) : '');
   $tmp = explode(',', $tmp);
@@ -247,7 +247,7 @@ if (isset($_POST['setup_save']) && $_POST['setup_save'] == 1) {
   }
 
   $options['users'] = array();
-  if (isset($_POST['users']) && isset($_POST['passwords']) && 
+  if (isset($_POST['users']) && isset($_POST['passwords']) &&
   count($_POST['users']) > 0 && count($_POST['users']) == count($_POST['passwords'])) {
     foreach ($_POST['users'] as $k => $u) {
       $u = stripslashes($u); $p = stripslashes($_POST['passwords'][$k]);
@@ -256,12 +256,12 @@ if (isset($_POST['setup_save']) && $_POST['setup_save'] == 1) {
     }
   }
   else { echo 'There was a problem with users and passwords<br /><br />'; }
-  
+
   ob_start(); var_export($options); $opt = ob_get_contents(); ob_end_clean();
   $opt = (strpos($opt, "\r\n") === false ? str_replace(array("\r", "\n"), "\r\n", $opt) : $opt);
   $opt = "<?php\r\n if (!defined('RAPIDLEECH')) { require_once('index.html'); exit; }\r\n\r\n\$options = ".
         $opt.
-        "; \r\n\r\nrequire_once('site_checker.php');\r\nrequire_once('accounts.php');\r\n?>";
+        "; \r\n\r\n\$secretkey = \$options['secretkey'];\r\n\r\nrequire_once('site_checker.php');\r\nrequire_once('accounts.php');\r\n?>";
   if (!@write_file(CONFIG_DIR."config.php", $opt, 1)) { echo '<div class="div_error">It was not possible to write the configuration<br />Set permissions of "configs" folder to 0777 and try again</div>'; }
   else {
     if (is_file(CONFIG_DIR.'config_old.php')) { if (@!unlink(CONFIG_DIR.'config_old.php') && is_file(CONFIG_DIR.'config_old.php')) { '<div class="div_message">It was not possible to delete the old configuration.<br />Manually delete "configs/config_old.php"</div><br />'; } }
@@ -284,6 +284,7 @@ else {
       <div class="div_title">General Options</div>
       <div class="div_opt">
         <table class="table_opt">
+          <tr><td>Secret key for cookie encryption<br />Make up a random one to protect your premium cookies (max length: 56)</td><td><input type="text" value="" size="56" id="opt_secretkey" name="opt_secretkey" /></td></tr>
           <tr><td>Download Directory</td><td><input type="text" id="opt_download_dir" name="opt_download_dir" /></td></tr>
           <tr><td>Allow users to change<br />download directory</td><td><input type="checkbox" value="1" name="opt_download_dir_is_changeable" id="opt_download_dir_is_changeable" /></td></tr>
           <tr><td>Auto Delete in minutes</td><td> <select size="1" name="opt_delete_delay" id="opt_delete_delay">
@@ -469,7 +470,7 @@ $d->close();
         </table>
       </div>
     </div>
-    
+
   </td></tr>
 </table>
 
