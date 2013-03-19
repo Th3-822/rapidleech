@@ -19,7 +19,7 @@ $premium_acc = array();
 //$premium_acc["depositfiles_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["crocko_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["hotfile_com"] = array('user' => 'your username', 'pass' => 'your password');
-//$premium_acc["ifile_it"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc["filecloud_io"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["uploading_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["ugotfile_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc["freakshare_com"] = array('user' => 'your username', 'pass' => 'your password');
@@ -54,6 +54,8 @@ $premium_acc = array();
 //$premium_acc ["necroupload_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc ["filemates_com"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc ["luckyshare_net"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc ["cyberlocker_ch"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc ["nowvideo_eu"] = array('user' => 'your username', 'pass' => 'your password');
 
 ###Premium cookie configuration, dont use this if you have already set another premium account config
 //$premium_acc["hotfile_com"] = array('cookie' => 'your premium cookie');

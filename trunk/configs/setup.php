@@ -261,7 +261,7 @@ if (isset($_POST['setup_save']) && $_POST['setup_save'] == 1) {
   $opt = (strpos($opt, "\r\n") === false ? str_replace(array("\r", "\n"), "\r\n", $opt) : $opt);
   $opt = "<?php\r\n if (!defined('RAPIDLEECH')) { require_once('index.html'); exit; }\r\n\r\n\$options = ".
         $opt.
-        "; \r\n\r\n\$secretkey = \$options['secretkey'];\r\n\r\nrequire_once('site_checker.php');\r\nrequire_once('accounts.php');\r\n?>";
+        "; \r\n\r\nrequire_once('site_checker.php');\r\nrequire_once('accounts.php');\r\n\r\n\$secretkey = \$options['secretkey'];\r\n?>";
   if (!@write_file(CONFIG_DIR."config.php", $opt, 1)) { echo '<div class="div_error">It was not possible to write the configuration<br />Set permissions of "configs" folder to 0777 and try again</div>'; }
   else {
     if (is_file(CONFIG_DIR.'config_old.php')) { if (@!unlink(CONFIG_DIR.'config_old.php') && is_file(CONFIG_DIR.'config_old.php')) { '<div class="div_message">It was not possible to delete the old configuration.<br />Manually delete "configs/config_old.php"</div><br />'; } }
