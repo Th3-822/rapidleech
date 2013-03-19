@@ -18,7 +18,7 @@ class zippyshare_com extends DownloadClass {
 		}
 
 		$this->page = $this->GetPage($this->link, $this->cookie);
-		is_present('>File does not exist on this server<', 'File does not exist.');
+		is_present($this->page, '>File does not exist on this server<', 'File does not exist.');
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
 
 		if (($pos = stripos($this->page, 'getElementById(\'dlbutton\').href')) !== false || ($pos = stripos($this->page, 'getElementById("dlbutton").href')) !== false) return $this->GetJSEncodedLink($pos);

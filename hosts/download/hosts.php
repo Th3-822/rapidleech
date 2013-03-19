@@ -1,7 +1,7 @@
 <?php
 $host = array();
 $d = dir(HOST_DIR . 'download/');
-$HostnamesToFix = array('cash.file.net' => 'cash-file.net', 'dev.host.org' => 'dev-host.org', 'easy.share.com' => 'easy-share.com', 'share.now.net' => 'share-now.net','share.online.biz' => 'share-online.biz');
+$HostnamesToFix = array('cash.file.net' => 'cash-file.net', 'd.h.st' => 'd-h.st', 'share.now.net' => 'share-now.net','share.online.biz' => 'share-online.biz');
 $HostnamesToIgnore = array('generic.minifilehost', 'youtube.com(1)', 'vBulletin.plug', 'hosts');
 while (false !== ($entry = $d->read())) {
 	if (strtolower(strrchr($entry, '.')) == '.php' && stripos($entry, '.JD') === false) {
@@ -30,6 +30,9 @@ while (false !== ($entry = $d->read())) {
 			case 'depositfiles.com':
 				$depositfiles_domains = array('depositfiles.in', 'depositfiles.mobi', 'depositfiles.net', 'depositfiles.net.cn', 'depositfiles.org', 'depositfiles.co.uk', 'depositfiles.info', 'dfiles.eu', 'dfiles.ru', 'dfiles.co', 'dfiles.co.uk');
 				foreach ($depositfiles_domains as $depositfiles) $host["$depositfiles"] = $host['depositfiles.com'];
+				break;
+			case 'd-h.st':
+				$host['dev-host.org'] = $host['d-h.st'];
 				break;
 			case 'filepost.com':
 				$host['fp.io'] = $host['filepost.com'];
