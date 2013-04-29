@@ -39,13 +39,19 @@ class zippyshare_com extends DownloadClass {
 		$script = substr(strstr(substr($this->page, strripos(substr($this->page, 0, $pos), '<script ')), '>'), 1);
 		$script = rtrim(str_replace(array(').href', "'dlbutton'", '"dlbutton"', '    '), array(').value', "'T8_dllink'", '"T8_dllink"', "\t\t"), substr($script, 0, strpos($script, '</script>'))));
 		if (empty($script)) html_error('Error while getting js code.');
+		$T8 = '';
+		if (preg_match_all('@getElementById[\s\t]*\([\s\t]*[\"\']([a-z][\w\.\-]*)[\"\'][\s\t]*\)@i', $script, $ids) && count($ids[0]) > 1) foreach ($ids[1] as $id) {
+			if ($id == 'T8_dllink') continue;
+			if (!preg_match("@<([a-z][a-z\d]*)\s*(?:\w+\s*=\s*[\"\'][^\"\']*[\"\']\s*)*(?:\s*id\s*=[\"\']{$id}[\"\']\s*)(?:\w+\s*=\s*[\"\'][^\"\']*[\"\']\s*)*(?:(>[^<>]*</)|/[\s\t]*>)@i", $this->page, $tag)) break; // If it doesn't found the tag the decode will fail, im not sure if break or continue...
+			$T8 .= (!empty($tag[2]) ? $tag[0].$tag[1].'>' : $tag[0]);
+		}
 
 		$data = $this->DefaultParamArr($this->link, $this->cookie);
 		$data['step'] = '2';
 		$data['dllink'] = '';
-		echo "\n<form name='zs_dcode' action='$PHP_SELF' method='POST'><br />\n";
+		echo "\n<div style='display:none;'>$T8</div>\n<form name='zs_dcode' action='$PHP_SELF' method='POST'><br />\n";
 		foreach ($data as $name => $input) echo "<input type='hidden' name='$name' id='T8_$name' value='$input' />\n";
-		echo("</form>\n<span id='T8_emsg' class='htmlerror' style='text-align: center;display: none;'></span>\n<noscript><span class='htmlerror'><b>Sorry, this code needs JavaScript enabled to work.</b></span></noscript>\n<script type='text/javascript'>/* <![CDATA[ */\n\ttry {{$script}\n\t} catch(e) {\n\t\t$('#T8_emsg').html('<b>Cannot decode link: ['+e.name+'] '+e.message+'</b>').show();\n\t}\n\twindow.setTimeout(\"$('form[name=zs_dcode]').submit();\", 300); // 300 µs to make sure that the value was decoded and added.\n/* ]]> */</script>\n\n</body>\n</html>");
+		echo("</form>\n<span id='T8_emsg' class='htmlerror' style='text-align:center;display:none;'></span>\n<noscript><span class='htmlerror'><b>Sorry, this code needs JavaScript enabled to work.</b></span></noscript>\n<script type='text/javascript'>/* <![CDATA[ */\n\tvar T8 = true;\n\ttry {{$script}\n\t} catch(e) {\n\t\t$('#T8_emsg').html('<b>Cannot decode link: ['+e.name+'] '+e.message+'</b>').show();\n\t\tT8 = false;\n\t}\n\tif (T8) window.setTimeout(\"$('form[name=zs_dcode]').submit();\", 300); // 300 µs to make sure that the value was decoded and added.\n/* ]]> */</script>\n\n</body>\n</html>");
 		exit;
 	}
 
@@ -97,5 +103,7 @@ class zippyshare_com extends DownloadClass {
 
 // [24-11-2012]  Written by Th3-822. (Only for rev43 :D)
 // [05-2-2013]  Added support for links that need user-side decoding of the link. - Th3-822
+// [04-3-2013]  Fixed File doesn't exists error msg... - Th3-822
+// [17-4-2013]  Fixed link decoder function. - Th3-822
 
 ?>

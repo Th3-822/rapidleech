@@ -74,7 +74,7 @@ class uploaded_net extends DownloadClass {
 
 		$page = $this->GetPage($this->link, $this->cookie);
 		is_present($page, "Traffic exhausted", "Premium account is out of Bandwidth");
-		if (!preg_match('/https?:\/\/stor\d+\.uploaded\.net(:\d+)?\/dl\/[^\r\n\'"]+/', $page, $dl)) html_error('Error[Download link - PREMIUM not found!]');
+		if (!preg_match('/https?:\/\/.+\.uploaded\.net(:\d+)?\/dl\/[^\r\n\'"]+/', $page, $dl)) html_error('Error[Download link - PREMIUM not found!]');
 		$dlink = trim($dl[0]);
 		$this->RedirectDownload($dlink, "uploaded", $this->cookie);
 	}

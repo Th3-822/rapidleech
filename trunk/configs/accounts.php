@@ -56,6 +56,9 @@ $premium_acc = array();
 //$premium_acc ["luckyshare_net"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc ["cyberlocker_ch"] = array('user' => 'your username', 'pass' => 'your password');
 //$premium_acc ["nowvideo_eu"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc ["upstore_net"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc ["ex-load_com"] = array('user' => 'your username', 'pass' => 'your password');
+//$premium_acc ["datafile_com"] = array('user' => 'your username', 'pass' => 'your password');
 
 ###Premium cookie configuration, dont use this if you have already set another premium account config
 //$premium_acc["hotfile_com"] = array('cookie' => 'your premium cookie');
@@ -71,7 +74,12 @@ $premium_acc = array();
 //$premium_acc["fileflyer_com"] = array('pass' => 'your password');
 //$premium_acc["livefile_org"] = array('key' => 'your password');
 
-
 ###Auto Download Premium Account###
 //$premium_acc["au_dl"] = array('user' => 'your username', 'pass' => 'your password'); # Remove '//' from the beginning and enter your username and password for rapidshare.de premium account
+
+#Secret key for cookie encryption
+#Make up a random one to protect your premium cookies (max length: 56). Example: 'secretkey' = 'UijSY5wjP1Ii'; - DO NOT use this example 'secretkey', or your premium accounts/cookies could be stolen!!
+#IF THIS IS NOT SET BEFORE YOU USE PREMIUM SERVICES, YOU WILL BE WARNED BY THE RAPIDLEECH SCRIPT. OTHERWISE YOUR PREMIUM ACCOUNTS AND/OR COOKIES COULD BE COMPROMISED!
+$secretkey = '';
+
 ?>
