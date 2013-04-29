@@ -47,42 +47,38 @@ if (is_file(CONFIG_DIR."config.php")) { include(CONFIG_DIR."config.php"); $old_o
 elseif (is_file(CONFIG_DIR."config_old.php")) { include(CONFIG_DIR."config_old.php"); $old_options = true; }
 
 foreach ($default_options as $k => $v) { if (!array_key_exists($k, $options)) { $options[$k] = $v; } }
+?>
+	var options = jQuery.parseJSON(<?php echo json_encode(json_encode($options))?>);
+	var default_options = jQuery.parseJSON(<?php echo json_encode(json_encode($default_options))?>);
 
-foreach ($options as $k => $v) {
-  if (!array_key_exists($k, $default_options) || is_array($default_options[$k])) { continue; }
-  $v = js_special_chars($v);
-  if (is_bool($default_options[$k])) {
-    echo "  $('#opt_{$k}').".($v ? "attr('checked', 'checked')" : "removeAttr('checked')").";\n";
-  }
-  elseif (is_numeric($default_options[$k])) {
-    $v = floor($v);
-    echo "  set_element_val('opt_{$k}', '".($k == 'delete_delay' ? $v."', '".floor($v/60) : $v)."');\n";
-  }
-  else { echo "  set_element_val('opt_{$k}', '{$v}');\n"; }
-}
-?>
-  $('#opt_forbidden_filetypes').val('<?php
-foreach ($options['forbidden_filetypes'] as $k => $v) {
-  echo js_special_chars($v).(count($options['forbidden_filetypes'])-1 == $k ? '' : ', ');
-}
-?>');
-  while ($('#opt_login_table tbody>tr').size() < <?php echo count($options['users']); ?>) { $("#opt_login_add").click(); }
-  while ($('#opt_login_table tbody>tr').size() > <?php echo max(1, count($options['users'])); ?>) { $('#opt_login_table tbody>tr:last').remove(); }
-<?php
-$i = 0;
-foreach ($options['users'] as $k => $v) {
-  $k = js_special_chars($k); $v = js_special_chars($v);
-  echo "  $('#opt_login_table [name=users[]]').eq({$i}).val('{$k}');\n";
-  echo "  $('#opt_login_table [name=passwords[]]').eq({$i}).val('{$v}');\n";
-  $i++;
-}
-?>
-  if ($('#opt_forbidden_filetypes_block').attr('checked')) { $('#opt_rename_these_filetypes_to_0').hide(); }
-  else { $('#opt_rename_these_filetypes_to_0').show(); }
-  if ($('#opt_login').attr('checked')) { $('#opt_login_0').show(); }
-  else { $('#opt_login_0').hide(); }
-  if ($('#opt_new_window').attr('checked')) { $('#opt_new_window_0').show(); }
-  else { $('#opt_new_window_0').hide(); }
+	$.each(options, function(k, v){
+		if (jQuery.type(default_options[k]) === 'object') { return; }
+		if (jQuery.type(default_options[k]) === 'array') {
+			$('#opt_'+k+'').val(v);
+		} else if (jQuery.type(default_options[k]) === 'boolean') {
+			$('#opt_'+k+'').prop('checked', v ? true : false);
+		} else if (jQuery.type(default_options[k]) === 'number') {
+			set_element_val('opt_'+ k, k === 'delete_delay' ? (v, Math.floor(v/60)) : v);
+		} else {
+			set_element_val('opt_'+ k, v);
+		}
+	});
+	while ($('#opt_login_table tbody>tr').size() < <?php echo count($options['users']); ?>) { $("#opt_login_add").click(); }
+	while ($('#opt_login_table tbody>tr').size() > <?php echo max(1, count($options['users'])); ?>) { $('#opt_login_table tbody>tr:last').remove(); }
+
+	var i = 0;
+	$.each(options['users'], function(u, p){
+		$('#opt_login_table [name="users[]"]').eq(i).val(u);
+		$('#opt_login_table [name="passwords[]"]').eq(i).val(p);
+		i++;
+	});
+
+	if ($('#opt_forbidden_filetypes_block').prop('checked')) { $('#opt_rename_these_filetypes_to_0').hide(); }
+	else { $('#opt_rename_these_filetypes_to_0').show(); }
+	if ($('#opt_login').prop('checked')) { $('#opt_login_0').show(); }
+	else { $('#opt_login_0').hide(); }
+	if ($('#opt_new_window').prop('checked')) { $('#opt_new_window_0').show(); }
+	else { $('#opt_new_window_0').hide(); }
 }
 
 function set_element_val(id, value, display) {
@@ -96,8 +92,8 @@ function save_config() {
 }
 
 $(document).ready(function() {
-  $("#save").removeAttr("disabled");
-  $("#reset").removeAttr("disabled");
+  $("#save").prop("disabled", false);
+  $("#reset").prop("disabled", false);
   $('#save').click(function() { save_config(); });
   $('#reset').click(function() { load_current_config(); });
 
@@ -110,17 +106,17 @@ $(document).ready(function() {
   $('#div_main_advanced').click();
 
   $('#opt_login_cgi').click(function() {
-    if ($(this).attr('checked')) { alert('Verify that main .htaccess is writeable before saving the config so the CGI fix can be applied correctly.'); }
+    if ($(this).prop('checked')) { alert('Verify that main .htaccess is writeable before saving the config so the CGI fix can be applied correctly.'); }
   });
   $('#opt_disable_actions').click(function() {
-    if ($(this).attr('checked')) { $('#opt_actions_table :checkbox:not(#opt_disable_deleting)').each(function() { $(this).attr('checked', 'checked'); }); }
-    else { $('#opt_actions_table :checkbox:not(#opt_disable_deleting)').removeAttr('checked'); }
+    if ($(this).prop('checked')) { $('#opt_actions_table :checkbox:not(#opt_disable_deleting)').each(function() { $(this).prop('checked', true); }); }
+    else { $('#opt_actions_table :checkbox:not(#opt_disable_deleting)').prop('checked', false); }
   });
   $('#opt_disable_deleting').click(function() {
-    if ($(this).attr('checked')) {
-      $('#opt_disable_delete').attr('checked', 'checked');
+    if ($(this).prop('checked')) {
+      $('#opt_disable_delete').prop('checked', true);
     }
-    else { $('#opt_disable_delete').removeAttr('checked'); }
+    else { $('#opt_disable_delete').prop('checked', false); }
   });
   $("#opt_forbidden_filetypes_block").click(function() { $('#opt_rename_these_filetypes_to_0').toggle(); } );
   $("#opt_new_window").click(function() { $('#opt_new_window_0').toggle(); } );
@@ -257,7 +253,7 @@ if (isset($_POST['setup_save']) && $_POST['setup_save'] == 1) {
   }
   else { echo 'There was a problem with users and passwords<br /><br />'; }
 
-  ob_start(); var_export($options); $opt = ob_get_contents(); ob_end_clean();
+  $opt = var_export($options, true);
   $opt = (strpos($opt, "\r\n") === false ? str_replace(array("\r", "\n"), "\r\n", $opt) : $opt);
   $opt = "<?php\r\n if (!defined('RAPIDLEECH')) { require_once('index.html'); exit; }\r\n\r\n\$options = ".
         $opt.

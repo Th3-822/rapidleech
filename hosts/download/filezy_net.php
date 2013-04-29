@@ -4,7 +4,7 @@ if (!defined('RAPIDLEECH')) {
     exit();
 }
 
-class upafile_com extends DownloadClass {
+class filezy_net extends DownloadClass {
 	public function Download($link) {
         global $options;
         if ($_REQUEST['captcha'] != '') {
@@ -12,7 +12,7 @@ class upafile_com extends DownloadClass {
             $post['id'] = $_POST['id'];
             $post['rand'] = $_POST['rand'];
             $post['referer'] = $_POST['referer'];
-            $post['method_free'] = 'Free Download';
+            $post['method_free'] = 'Slow Download';
 			$post['method_premium'] = '';
             $post['down_direct'] = '1';
             $post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
@@ -22,11 +22,17 @@ class upafile_com extends DownloadClass {
             $page = $this->GetPage($link, $cookies, $post);
         } else {
             $page = $this->GetPage($link);
-		    is_present($page, 'http://www.hugefiles.net/404.html', 'File Not Found');
+            is_present($page, cut_str($page, '<div class="err"', '</div>'));
+            is_present($page, 'File Not Found');
 			$cookies = GetCookies($page);
+            $form = cut_str($page, '<Form method="POST"', '</Form>');
+            if (!preg_match_all('#<input type="hidden" name="([^"]+)" value="([^"]+)">#', $form, $dt)) html_error ("Error get Data of Download");
+			$post = array_combine($dt[1], $dt[2]);
+			$post['method_free'] = "Slow Download";
+            $page = $this->GetPage($link, $cookies, $post, $link);
         }
         if (strpos($page, 'Type the two words:') || strpos($page, 'Wrong captcha')) {
-            if (preg_match('#(\d+)<\/span> seconds#', $page, $wait)) $this->CountDown ($wait[1]);
+            //if (preg_match('#(\d+)</span>[\r|\n|\s]+<!--seconds-->#', $page, $wait)) echo $wait[1]; $this->CountDown ($wait[1]);
             if(strpos($page, 'Wrong captcha'))echo '<br><div style="color:#F00; font-size:16px; font-weight:bold;">Wrong Captcha</div>';
             $form = cut_str($page, '<Form name="F1" method="POST"', '</Form>');
             if (!preg_match('#api\/challenge\?k=([^"]+)"#', $page, $cp)) html_error("Error get Data Captcha");
@@ -38,15 +44,15 @@ class upafile_com extends DownloadClass {
             $page = $this->GetPage($img);
             $head = strpos($page, "\r\n\r\n");
             $img = substr($page, $head + 4);
-            write_file($options['download_dir'] . "upafile_captcha.jpg", $img);
+            write_file($options['download_dir'] . "filezy_captcha.jpg", $img);
             $data['recaptcha_challenge_field'] = $sr;
 			$data['link'] = urlencode($link);
 			$data['cookies'] = urlencode($cookies);
-            $this->EnterCaptcha($options['download_dir'] . "upafile_captcha.jpg", $data, 20);
+            $this->EnterCaptcha($options['download_dir'] . "filezy_captcha.jpg", $data, 20);
             exit();
         }
-        is_present($page, cut_str($page, '<div class="err">', '</div>'));
-        if (!preg_match('#http://(\w+).upafile.com:([^\'|"]+)#', $page, $dl)) html_error("Cannot find Download Link");
+        is_present($page, cut_str($page, '<div class="err"', '</div>'));
+        if (!preg_match('#https?://(\w+).filezy.net:([^\'|"|\r|\n|\s]+)#', $page, $dl)) html_error("Cannot find Download Link");
         $dlink = trim($dl[0]);
         $filename = basename(parse_url($dlink, PHP_URL_PATH));
         $this->RedirectDownload($dlink, $filename, 0, 0, $link);

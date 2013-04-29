@@ -19,7 +19,7 @@ class letitbit_net extends DownloadClass {
 				$link = (empty($redir[2])) ? 'http://letitbit.net'.$redir[1] : $redir[1];
 				$this->page = $this->GetPage($link, $this->cookie);
 				$this->cookie = GetCookiesArr($this->page, $this->cookie);
-			} elseif (preg_match('@\nLocation: https?://[^/\r\n]+/[^\r\n]+)@i', $headers)) html_error('Error: Non Acceptable Redirect.');
+			} elseif (preg_match('@\nLocation: https?://[^/\r\n]+/[^\r\n]+@i', $headers)) html_error('Error: Non Acceptable Redirect.');
 			if (stripos($this->page, 'File not found') !== false) {
 				if ($this->cookie['country'] == 'US') html_error('The requested file was not found or isn\'t downloadable in your server\'s country.'); // It seems that lib blocks downloads from usa... I will check this later and add the error msg if it's true. - T8
 				html_error('The requested file was not found.');
@@ -43,19 +43,20 @@ class letitbit_net extends DownloadClass {
 
 	private function Retrieve() {
 		if (!preg_match("@<form (?:[^<>]*)[\s\t]*id=\"ifree_form\"(?:[^<>]*)>@i", $this->page, $form_tag)) html_error('Error: Free Form 1 Tag Not Found!');
+		$form_action = trim(cut_str($form_tag[0], 'action="', '"'));
+		if (!preg_match("@<form (?:[^<>]*)[\s\t]*id=\"enter_premium_form\"(?:[^<>]*)>@i", $this->page, $form_tag)) html_error('Error: Free Form 1 Tag Not Found!');
 		$form = trim(cut_str($this->page, $form_tag[0], '</form>'));
 		if (empty($form)) html_error('Error: Empty Free Form 1!');
 		$post = $this->AutomatePost($form);
-		$form_action = trim(cut_str($form_tag[0], 'action="', '"'));
 		if (stripos($form_action, 'born_iframe') !== false) {
-			$page = $this->GetPage('http://letitbit.net' . cut_str($form_tag[0], 'action="', '"'), $this->cookie, $post);
+			$page = $this->GetPage("http://letitbit.net$form_action", $this->cookie, $post);
 			if (!preg_match("@<form (?:[^<>]*)[\s\t]*id=\"d3_form\"(?:[^<>]*)>@i", $page, $form_tag)) html_error('Error: Free Form 2 Tag Not Found!');
 			$form = trim(cut_str($page, $form_tag[0], '</form>'));
 			if (empty($form)) html_error('Error: Empty Free Form 2!');
 			$post = $this->AutomatePost($form);
 			$form_action = trim(cut_str($form_tag[0], 'action="', '"'));
 		}
-		$this->link = 'http://letitbit.net' . cut_str($form_tag[0], 'action="', '"');
+		$this->link = "http://letitbit.net$form_action";
 		$page = $this->GetPage($this->link, $this->cookie, $post);
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 		unset($post, $form_tag, $form_action);
@@ -113,16 +114,14 @@ class letitbit_net extends DownloadClass {
 
 	private function Premium($premiumkey = false) {
 		if ($premiumkey) {
-			$form = cut_str($this->page, '<div class="hide-block" id="password_area">', '<div class="column label" style="width:200px">');
+			$form = cut_str($this->page, '<div class="hide-block password_area">', '<div class="column label" style="width:200px">');
 			if (empty($form)) html_error("Error: Empty Premium Key Form!");
 			$post = $this->AutomatePost($form);
 			$post['pass'] = $premiumkey;
 			$post['submit_sms_ways_have_pass'] = 'Download file';
 			$this->link = "http://letitbit.net" . cut_str($form, '<form action="', '"');
-			$this->page = $this->GetPage($this->link, $this->cookie, $post, $Referer);
-		} else {
-			$this->page = $this->GetPage($this->link, $this->cookie, 0, $this->link);
-		}
+			$this->page = $this->GetPage($this->link, $this->cookie, $post);
+		} else $this->page = $this->GetPage($this->link, $this->cookie, 0, $this->link);
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		if (preg_match('@Location: (http(s)?:\/\/[^\r\n]+)@i', $this->page, $redir)) {
 			$this->link = trim($redir[1]);
@@ -239,6 +238,7 @@ class letitbit_net extends DownloadClass {
   Fixed for redirects in download links by Th3-822 16-10-2012
   reCaptcha support added at freedl by Th3-822 24-11-2012
   Fixed free dl for extra form on some locations. - Th3-822
+  FreeDl & PremiumKeyDl fixed. - Th3-822 | [19-4-2013]
 \***********************************************************************************************/
 
 ?>

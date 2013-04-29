@@ -1,7 +1,7 @@
 <?php
 $host = array();
 $d = dir(HOST_DIR . 'download/');
-$HostnamesToFix = array('cash.file.net' => 'cash-file.net', 'd.h.st' => 'd-h.st', 'share.now.net' => 'share-now.net','share.online.biz' => 'share-online.biz');
+$HostnamesToFix = array('cash.file.net' => 'cash-file.net', 'd.h.st' => 'd-h.st', 'ex.load.com' => 'ex-load.com', 'share.now.net' => 'share-now.net','share.online.biz' => 'share-online.biz');
 $HostnamesToIgnore = array('generic.minifilehost', 'youtube.com(1)', 'vBulletin.plug', 'hosts');
 while (false !== ($entry = $d->read())) {
 	if (strtolower(strrchr($entry, '.')) == '.php' && stripos($entry, '.JD') === false) {
@@ -58,6 +58,9 @@ while (false !== ($entry = $d->read())) {
 				break;
 			case 'uppit.com':
 				$host['up.ht'] = $host['uppit.com'];
+				break;
+			case 'upstore.net':
+				$host['upsto.re'] = $host['upstore.net'];
 				break;
 		}
 	}
