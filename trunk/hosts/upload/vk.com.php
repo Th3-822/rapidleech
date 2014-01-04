@@ -8,8 +8,9 @@
 $app = array();
 $app['id'] = ''; //Application ID
 $app['secret'] = ''; //Application SecretKey
+$upload_mp3_as_video = false; // Upload Mp3 files to "My Videos"...
 ########################
-if (empty($app['id']) || empty($app['secret'])) html_error('Application ID or SecretKey Empty. Please create a VK app and add them at '.HOST_DIR.'upload/'.basename(__FILE__));
+if (empty($app['id']) || empty($app['secret'])) html_error('Application ID or SecretKey Empty. Please create a VK\'s app and add them at '.HOST_DIR.'upload/'.basename(__FILE__));
 
 $not_done = true;
 $_GET['proxy'] = isset($proxy) ? $proxy : (isset($_GET['proxy']) ? $_GET['proxy'] : '');
@@ -20,10 +21,11 @@ if (!empty($_GET['proxy'])) $return_url .= '&useuproxy=on&uproxy='.urlencode($_G
 if (!empty($_REQUEST['pauth'])) $return_url .= '&upauth='.urlencode($pauth);
 if (!empty($_GET['save_style'])) $return_url .= '&save_style='.urlencode($_GET['save_style']);
 if (isset($_GET['auul'])) $return_url .= '&auul='.urlencode($_GET['auul']);
-
+$return_url = parse_url($return_url);
+unset($return_url['user'], $return_url['pass']);
+$return_url = rebuild_url($return_url);
 $videxts = array('.avi', '.mp4', '.3gp', '.mpg', '.mpeg', '.mov', '.flv', '.wmv');
 $video = true;
-$upload_mp3_as_video = true; // Upload Mp3 files to "My Videos"... I don't know why "saveAudio" always gives error 121... So you should let this in true. (But, if you change it to false and it works, send me a msg.)
 if (strtolower(strrchr($lname, '.')) == '.mp3') {
 	if ($fsize > 20*1024*1024) html_error('You only can upload mp3 files up to 20 MB.');
 	$video = $upload_mp3_as_video;
@@ -64,8 +66,8 @@ if (empty($_REQUEST['code'])) {
 
 	sleep(1); // They have a limit of 3 Request/Second... Let's wait a second :D
 
-	if ($video) $data = array('api_id'=>$app['id'], 'method'=>'video.save', 'name'=>urlencode($lname), 'description'=>'Uploaded+With+Rapidleech');
-	else $data = array('api_id'=>$app['id'], 'method'=>'audio.getUploadServer');
+	if ($video) $data = array('method'=>'video.save', 'name'=>$lname, 'description'=>'Uploaded with Rapidleech');
+	else $data = array('method'=>'audio.getUploadServer');
 	$req = SigAndReq($data, '/method/'.$data['method'].'?');
 
 	if ($usecurl) $page = cURL ('https://api.vk.com'.$req);
@@ -82,7 +84,7 @@ if (empty($_REQUEST['code'])) {
 
 	$post = array();
 	// if ($video) $post['is_private'] = '1'; // Uncomment for upload videos as private
-	$up_url = $upsrv['response']['upload_url'];// .'&api_id='.$app['id'].'&access_token='.$json['access_token'];
+	$up_url = $upsrv['response']['upload_url'];
 
 	// Uploading
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
@@ -99,11 +101,11 @@ if (empty($_REQUEST['code'])) {
 
 	if (!$video) {
 		sleep(1); // Let's wait another second :D
-		$data = array('api_id'=>$app['id'], 'method'=>'audio.save', 'audio'=>$upres['audio'], 'hash'=>$upres['hash'], 'server'=>$upres['server']);
+		$data = array('method'=>'audio.save', 'server'=>$upres['server'], 'audio'=>$upres['audio'], 'hash'=>$upres['hash']);
 		$req = SigAndReq($data, '/method/'.$data['method'].'?');
 		if ($usecurl) $page = cURL ('https://api.vk.com'.$req);
 		else {
-			$page = geturl('api.vk.com', 0, $req, 0, 0, array('hash'=>$upres['hash']), 0, $_GET['proxy'], $pauth, 0, 'https'); // Port is overridden to 443
+			$page = geturl('api.vk.com', 0, $req, 0, 0, 0, 0, $_GET['proxy'], $pauth, 0, 'https'); // Port is overridden to 443
 			is_page($page);
 		}
 		$rply = Get_Reply($page);
@@ -116,21 +118,20 @@ if (empty($_REQUEST['code'])) {
 
 	if ($video && !empty($upsrv['response']['vid'])) $download_link = 'http://vk.com/video' . $json['user_id'] . '_' . $upsrv['response']['vid'];
 	elseif ($video) html_error('Your video will appear in your VK account after a while.', 0);
-	elseif (!$video && !empty($rply['response']['url'])) $download_link = $rply['response']['url'];
 	else html_error('Check your VK account for see the new uploaded file.', 0);
 }
 
 function SigAndReq($data, $req) {
+	global $app;
+	$data['api_id'] = $app['id'];
 	$data['format'] = 'json';
 	$data['v'] = '3.0';
 	$sig = '';
 	ksort($data);
-	foreach ($data as $k => $v) {
-		$sig .= "$k=$v";
-		if ($k != 'method') $req .= "$k=$v&";
-	}
-	$sig = md5($sig.$GLOBALS['app']['secret']);
-	$req .= "sig=$sig&access_token=".$GLOBALS['json']['access_token'];
+	foreach ($data as $k => $v) $sig .= "$k=$v";
+	$sig = md5($sig.$app['secret']);
+	unset($k, $v, $data['method']);
+	$req .= http_build_query($data) . "&sig=$sig&access_token=".$GLOBALS['json']['access_token'];
 	return $req;
 }
 
@@ -146,5 +147,6 @@ function Get_Reply($page) {
 //[30-8-2012] Written by Th3-822.
 //[28-10-2012] Small fixes that i don't remember. - Th3-822
 //[24-11-2012] Now it shows video url & Fixed auul for this plugin. - Th3-822
+//[22-9-2013] Fixed mp3 upload & Other issues. - Th3-822
 
 ?>

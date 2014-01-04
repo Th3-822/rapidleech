@@ -81,7 +81,7 @@ class DownloadClass {
 		if (!empty($url['port'])) $params['port'] = urlencode($url['port']);
 		$params['path'] = urlencode($url['path'] . (!empty($url['query']) ? '?' . $url['query'] : ''));
 		if (!empty($post)) $params['post'] = urlencode(encrypt(serialize($post)));
-		if (!empty($auth)) $params['auth'] = urlencode($auth);
+		if (!empty($auth)) $params['auth'] = ($auth == '1' ? '1' : urlencode(encrypt(base64_encode($auth))));
 		if (!empty($addon)) {
 			if (!is_array($addon)) html_error('Plugin problem! Please report, error: "The parameter passed must be an array"'); // Some problems with the plugin, quit it
 			foreach ($addon as $name => $value) $params[$name] = (is_array($value) ? urlencode(serialize($value)) : urlencode($value));
@@ -126,7 +126,9 @@ class DownloadClass {
 	public function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5') {
 		echo "\n<form name='captcha' action='{$_SERVER['SCRIPT_NAME']}' method='POST'>\n";
 		foreach ($inputs as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='$input' />\n";
-		echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input type='text' name='captcha' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='Enter Captcha' />\n\t</h4>\n\t<script type='text/javascript'>/* <![CDATA[ */\n\t\tfunction check() {\n\t\t\tvar captcha=document.dl.captcha.value;\n\t\t\tif (captcha == '') {\n\t\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\t\treturn false;\n\t\t\t} else return true;\n\t\t}\n\t/* ]]> */</script>\n</form>\n</body>\n</html>";
+		echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input type='text' name='captcha' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='Enter Captcha' />\n\t</h4>\n\t<script type='text/javascript'>/* <![CDATA[ */\n\t\tfunction check() {\n\t\t\tvar captcha=document.dl.captcha.value;\n\t\t\tif (captcha == '') {\n\t\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\t\treturn false;\n\t\t\t} else return true;\n\t\t}\n\t/* ]]> */</script>\n</form>\n";
+		include(TEMPLATE_DIR.'footer.php');
+		exit();
 	}
 
 	/*
@@ -136,12 +138,13 @@ class DownloadClass {
 	 * @param string $referer -> Adds the referer value to the array url encoded if you need it. If isn't set, it will load $Referer value. (Set as 0 or false for not add it in the array.)
 	 */
 
-	public function DefaultParamArr($link = 0, $cookie = 0, $referer = 1) {
-		if ($referer == 1) {
+	public function DefaultParamArr($link = 0, $cookie = 0, $referer = 1, $encrypt = 0) {
+		if ($referer === 1 || $referer === true) {
 			global $Referer;
 			$referer = $Referer;
 		}
 		if (is_array($cookie)) $cookie = CookiesToStr($cookie);
+		if ($encrypt) $cookie = encrypt($cookie);
 
 		$DParam = GetDefaultParams();
 		if ($link) $DParam['link'] = urlencode($link);
@@ -161,7 +164,7 @@ class DownloadClass {
 		echo "<p><center><span id='dl' class='htmlerror'><b>ERROR: Please enable JavaScript. (Countdown)</b></span><br /><span id='dl2'>Please wait</span></center></p>\n";
 		echo "<form action='$PHP_SELF' name='cdwait' method='POST'>\n";
 		if (!empty($post) && is_array($post)) foreach ($post as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='$input' />\n";
-		?> <script type="text/javascript">/* <![CDATA[ */
+		?><script type="text/javascript">/* <![CDATA[ */
 		var c = <?php echo $secs; ?>;var text = "<?php echo $text; ?>";var c2 = 0;var dl = document.getElementById("dl");var a2 = document.getElementById("dl2");fc();fc2();
 		function fc() {
 			if (c > 0) {
@@ -179,11 +182,14 @@ class DownloadClass {
 		}
 		function fc2(){if(c>120){if(c2<=20){a2.innerHTML=a2.innerHTML+".";c2=c2+1}else{c2=10;a2.innerHTML=""}setTimeout("fc2()",100)}else{dl2.style.display="none"}}<?php
 		echo "/* ]]> */</script></form><br />";
-		if ($stop) exit("</body></html>");
+		if ($stop) {
+			include(TEMPLATE_DIR.'footer.php');
+			exit();
+		}
 	}
 
-	public function changeMesg($mesg) {
-		echo('<script type="text/javascript">document.getElementById(\'mesg\').innerHTML="' . stripslashes($mesg) . '";</script>');
+	public function changeMesg($mesg, $add=false) {
+		echo("\n<script type='text/javascript'>document.getElementById('mesg').innerHTML = " . ($add ? "document.getElementById('mesg').innerHTML + " : '') . "unescape('" . rawurlencode($mesg) . "');</script>");
 	}
 
 }

@@ -1,4 +1,4 @@
-﻿<?php 
+<?php 
 
 $upload_services[] = "filesflash.com_member";
 

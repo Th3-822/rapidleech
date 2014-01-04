@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Default Account Info =================
 $Filesin_user = ''; //  Set you username
 $Filesin_pass = ''; //  Set your password

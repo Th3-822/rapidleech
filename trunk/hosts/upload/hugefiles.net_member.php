@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Default Account Info =================
 $hugefiles_user = ''; //  Set you username
 $hugefiles_pass = ''; //  Set your password

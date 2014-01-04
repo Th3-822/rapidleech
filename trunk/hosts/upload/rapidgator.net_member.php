@@ -29,7 +29,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	echo "<tr><td colspan='2' align='center'><small>*You can set it as default in <b>".basename(__FILE__)."</b></small></td></tr>\n";
 	echo "</table>\n</form>\n";
 } else {
-	$not_done = false;
+	$not_done = $login = false;
 	$domain = 'rapidgator.net';
 	$referer = "http://$domain/";
 
@@ -54,13 +54,14 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 			$post['LoginForm%5BverifyCode%5D'] = urlencode($_POST['captcha']);
 		}
 
-		$page = geturl($domain, 80, '/auth/login', $referer, $cookie, $post, 0, $_GET['proxy'], $pauth, 0, 'https');is_page($page);
+		$page = geturl($domain, 80, '/auth/login', $referer, $cookie, $post, 0, $_GET['proxy'], $pauth, 0);is_page($page);
 		$cookie = GetCookiesArr($page, $cookie);
 
 		//Redirects
 		$rdc = 0;
-		while (($redir = ChkRGRedirs($page, true, ($upload_acc['rapidgator_net']['user'] && $upload_acc['rapidgator_net']['pass']))) && $rdc < 5) {
-			$page = geturl($redir['host'], 80, $redir['path'].(!empty($redir['query']) ? '?'.$redir['query'] : ''), $referer, $cookie, $post, 0, $_GET['proxy'], $pauth, 0, $redir['scheme']);is_page($page);
+		$redir = parse_url("http://$domain/auth/login");
+		while (($redir = ChkRGRedirs($page, $redir, true, ($upload_acc['rapidgator_net']['user'] && $upload_acc['rapidgator_net']['pass']))) && $rdc < 5) {
+			$page = geturl($redir['host'], defport($redir), $redir['path'].(!empty($redir['query']) ? '?'.$redir['query'] : ''), $referer, $cookie, $post, 0, $_GET['proxy'], $pauth, 0, $redir['scheme']);is_page($page);
 			$cookie = GetCookiesArr($page, $cookie);
 			$rdc++;
 		}
@@ -99,26 +100,23 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		if (empty($cookie['user__'])) html_error("Login Error: Cannot find 'user__' cookie.");
 		$cookie['lang'] = 'en';
 		$login = true;
-	} else {
-		echo "<b><center>Login not found or empty, using non member upload.</center></b>\n";
-		$login = false;
-	}
+	} else html_error('Login failed: User/Password empty.');
 
 	// Retrive upload ID
 	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrive upload ID</div>\n";
 
 	$page = geturl($domain, 80, '/', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
-	if (!$login) {
-		$cookie = GetCookiesArr($page, $cookie);
+	if (!$login) $cookie = GetCookiesArr($page, $cookie);
 
-		//Redirects
-		$rdc = 0;
-		while (($redir = ChkRGRedirs($page)) && $rdc < 5) {
-			$page = geturl($redir['host'], 80, $redir['path'].(!empty($redir['query']) ? '?'.$redir['query'] : ''), $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
-			$cookie = GetCookiesArr($page, $cookie);
-			$rdc++;
-		}
+	//Redirects
+	$rdc = 0;
+	$redir = parse_url("http://$domain/");
+	while (($redir = ChkRGRedirs($page, $redir)) && $rdc < 5) {
+		$page = geturl($redir['host'], 80, $redir['path'].(!empty($redir['query']) ? '?'.$redir['query'] : ''), $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		$cookie = GetCookiesArr($page, $cookie);
+		$rdc++;
 	}
+
 	if (!preg_match('@var\s+form_url\s*=\s*"(https?://[^/|\"]+/[^\"]+)"\s*;@i', $page, $form_url) || !preg_match('@var\s+progress_url_web\s*=\s*"(https?://[^/|\"]+/[^\"]+)"\s*;@i', $page, $prog_url)) html_error('Error: Cannot find upload url.', 0);
 
 	$starttime = time();
@@ -142,6 +140,15 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	$url = parse_url($prog_url[1]."&data%5B0%5D%5Buuid%5D=$uuid&data%5B0%5D%5Bstart_time%5D=$starttime");
 	$page = geturl($url['host'], 80, $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 
+	//Redirects
+	$rdc = 0;
+	$redir = $url;
+	while ((stripos($page, "\nLocation: ") !== false) && ($redir = ChkRGRedirs($page, $redir)) && $rdc < 5) {
+		$page = geturl($redir['host'], 80, $redir['path'].(!empty($redir['query']) ? '?'.$redir['query'] : ''), $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		$cookie = GetCookiesArr($page, $cookie);
+		$rdc++;
+	}
+
 	$body = substr($page, strpos($page, "\r\n\r\n") + 4);
 	if (!preg_match_all('@"([^\"]*)":"([^\"]*)"@i', $body, $resp)) html_error("Unknown reply from server.");
 	$resp = array_combine($resp[1], array_map('stripcslashes', $resp[2]));
@@ -160,7 +167,7 @@ function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5') {
 }
 
 // 4 RG: You don't have nothing to read here :D
-function ChkRGRedirs($page, $login = false, $default_login = false) { // Edited for upload plugin usage.
+function ChkRGRedirs($page, $lasturl, $login = false, $default_login = false) { // Edited for upload plugin usage.
 	$hpos = strpos($page, "\r\n\r\n");
 	$headers = empty($hpos) ? $page : substr($page, 0, $hpos);
 
@@ -180,6 +187,26 @@ function ChkRGRedirs($page, $login = false, $default_login = false) { // Edited 
 				$js = preg_replace('@^[\s\t]*\w+\([^\;]+;@i', '', $js);
 				$js = preg_replace('@document\.body\.onmousemove[\s\t]*=[\s\t]*function[\s\t]*\(\)[\s\t]*\{@i', '', $js);
 				$js = preg_replace('@document\.body\.onmousemove[\s\t]*=[\s\t]*\'\';?\};[\s\t]*window\.setTimeout\([\s\t]*((\"[^\"]+\")|(\'[^\']+\'))[^\;]+;[\s\t\r\n]*$@i', '', $js);
+			} elseif (($funcPos = stripos($js, 'function WriteA(')) !== false) { // JS + aaaaaaaaaaaaaaaaaaaaaaaaa
+				$links = array();
+				if (preg_match_all('@<a\s*[^>]*\shref="((?:https?://(?:www\.)?rapidgator\.net)?/[^\"]+)"[^>]*\sid="([A-Za-z][\w\.\-]*)"@i', $body, $a)) $links = array_merge($links, array_combine($a[2], $a[1]));
+				if (preg_match_all('@<a\s*[^>]*\sid="([A-Za-z][\w\.\-]*)"[^>]*\shref="((?:https?://(?:www\.)?rapidgator\.net)?/[^\"]+)"@i', $body, $a)) $links = array_merge($links, array_combine($a[1], $a[2]));
+				if (empty($links)) html_error('Cannot get the redirect fields');
+				unset($a);
+
+				$jsLinks = '';
+				foreach ($links as $key => $link) {
+					if (strpos($link, '://') === false) $link = (!empty($lasturl['scheme']) && strtolower($lasturl['scheme']) == 'https' ? 'https' : 'http').'://rapidgator.net' . $link;
+					$jsLinks .= "$key: '".addslashes($link)."', ";
+				}
+				unset($links, $key, $link);
+				$jsLinks = '{' . substr($jsLinks, 0, -2) . '}';
+				$func = substr($js, $funcPos);
+				if (!preg_match('@\.getElementById\(([\$_A-Za-z][\$\w]*)\)@i', $func, $linkVar)) html_error('Cannot edit redirect JS');
+				$linkVar = $linkVar[1];
+				unset($func);
+				$js = substr($js, 0, $funcPos)."\nvar T8RGLinks = $jsLinks;\nif ($linkVar in T8RGLinks) document.getElementById('rgredir').value = T8RGLinks[$linkVar];";
+				unset($jsLinks, $funcPos, $linkVar);
 			}
 			echo "\n<form name='rg_redir' method='POST'><br />\n";
 			foreach ($data as $name => $input) echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
@@ -190,9 +217,9 @@ function ChkRGRedirs($page, $login = false, $default_login = false) { // Edited 
 			$_REQUEST['rgredir'] = rawurldecode($_REQUEST['rgredir']);
 			if (strpos($_REQUEST['rgredir'], '://')) $_REQUEST['rgredir'] = parse_url($_REQUEST['rgredir'], PHP_URL_PATH);
 			if (empty($_REQUEST['rgredir']) || substr($_REQUEST['rgredir'], 0, 1) != '/') html_error('Invalid redirect value.');
-			$redir = 'http://rapidgator.net'.$_REQUEST['rgredir'];
+			$redir = (!empty($lasturl['scheme']) && strtolower($lasturl['scheme']) == 'https' ? 'https' : 'http').'://rapidgator.net'.$_REQUEST['rgredir'];
 		}
-	} elseif (preg_match('@Location: ((https?://(?:[^/|\r|\n]+\.)?rapidgator\.net)?'.($login ? '/auth/login' : '/').'[^\r|\n]*)@i', $headers, $redir)) $redir = (empty($redir[2])) ? 'http://rapidgator.net'.$redir[1] : $redir[1];
+	} elseif (preg_match('@Location: ((https?://(?:[^/\r\n]+\.)?rapidgator\.net)?'.($login ? '/auth/login' : '/').'[^\r\n]*)@i', $headers, $redir)) $redir = (empty($redir[2])) ? (!empty($lasturl['scheme']) && strtolower($lasturl['scheme']) == 'https' ? 'https' : 'http').'://rapidgator.net'.$redir[1] : $redir[1];
 
 	return (empty($redir) ? false : parse_url($redir));
 }
@@ -201,5 +228,9 @@ function ChkRGRedirs($page, $login = false, $default_login = false) { // Edited 
 // [02-10-2012] Fixed for new weird redirect code. - Th3-822
 // [31-10-2012] Fixed for https on login/redirects. - Th3-822
 // [28-1-2013] Added Login captcha support. - Th3-822
+// [14-6-2013] Removed https from first login try, for avoid block. - Th3-822
+// [10-8-2013] Fixed redirects (again). - Th3-822
+// [05-10-2013] Removed anon user support. - Th3-822
+// [25-11-2013] Fixed redirects function (aagain :D ). - Th3-822
 
 ?>

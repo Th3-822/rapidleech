@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Default Account Info =================
 $shragle_user = ''; //  Set you username
 $shragle_pass = ''; //  Set your password

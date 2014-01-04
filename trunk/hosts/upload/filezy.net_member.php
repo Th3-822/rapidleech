@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Default Account Info =================
 $filezy_user = ''; //  Set you username
 $filezy_pass = ''; //  Set your password

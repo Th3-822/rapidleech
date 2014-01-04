@@ -5,11 +5,11 @@ if (!defined('RAPIDLEECH')) {
 	exit;
 }
 
-class bayfiles_com extends DownloadClass {
+class bayfiles_net extends DownloadClass {
 	private $link, $page, $cookie, $fid, $token;
 	public function Download($link) {
 		global $premium_acc;
-		$this->link = $link;
+		$this->link = str_ireplace('bayfiles.com', 'bayfiles.net', $link);
 		$this->cookie = array();
 
 		if (empty($_REQUEST['step']) || $_REQUEST['step'] != 1) { // Check link
@@ -24,7 +24,7 @@ class bayfiles_com extends DownloadClass {
 			}
 		}
 
-		if ($_REQUEST["premium_acc"] == "on" && ((!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) || (!empty($premium_acc["bayfiles_com"]["user"]) && !empty($premium_acc["bayfiles_com"]["pass"])))) {
+		if ($_REQUEST["premium_acc"] == "on" && ((!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) || (!empty($premium_acc["bayfiles_net"]["user"]) && !empty($premium_acc["bayfiles_net"]["pass"])))) {
 			$this->Login();
 		} elseif (isset($_REQUEST['step']) && $_REQUEST['step'] == 1) {
 			$this->Captcha();
@@ -38,7 +38,7 @@ class bayfiles_com extends DownloadClass {
 		if (!preg_match('@var vfid = (\d+);@i', $this->page, $fid)) html_error("Error: Fileid not found");
 		$this->fid = $fid[1];
 
-		$page = $this->GetPage('http://bayfiles.com/ajax_download?action=startTimer&vfid='.$this->fid);
+		$page = $this->GetPage('http://bayfiles.net/ajax_download?action=startTimer&vfid='.$this->fid);
 
 		if (!preg_match('@"token":"([^\"]+)"@i', $page, $token)) html_error("Error: Countdown token not found");
 		$this->token = $token[1];
@@ -66,7 +66,7 @@ class bayfiles_com extends DownloadClass {
 			$post['token'] = $this->token = $_POST['token'];
 			$this->fid = $_POST['fid'];
 
-			$page = $this->GetPage('http://bayfiles.com/ajax_captcha', $this->cookie, $post);
+			$page = $this->GetPage('http://bayfiles.net/ajax_captcha', $this->cookie, $post);
 			is_present($page, 'Invalid captcha', 'Error: Wrong Captcha Entered.');
 
 			if (!preg_match('@"token":"([^\"]+)"@i', $page, $token)) html_error("Error: Captcha token not found");
@@ -74,7 +74,7 @@ class bayfiles_com extends DownloadClass {
 
 			return $this->FreeDL();
 		} else {
-			$page = $this->GetPage('http://bayfiles.com/ajax_captcha', $this->cookie, array('action' => 'getCaptcha'));
+			$page = $this->GetPage('http://bayfiles.net/ajax_captcha', $this->cookie, array('action' => 'getCaptcha'));
 			if (!preg_match('@Recaptcha\.create\s*\(\s*[\"|\']([^\"|\'|\)]+)[\"|\']@i', $page, $pid)) html_error("Error: reCaptcha not found");
 
 			$page = $this->GetPage("http://www.google.com/recaptcha/api/challenge?k=" . $pid[1]);
@@ -101,7 +101,7 @@ class bayfiles_com extends DownloadClass {
 
 	private function FreeDL($act='getLink') {
 		$post = array('action' => $act, 'vfid' => $this->fid, 'token' => $this->token);
-		$page = $this->GetPage('http://bayfiles.com/ajax_download', $this->cookie, $post);
+		$page = $this->GetPage('http://bayfiles.net/ajax_download', $this->cookie, $post);
 
 		if (!preg_match('@https?://([^/\'\"<>\r\n\s\t]+\.)?baycdn\.com/dl/[^\'\"<>\r\n\s\t]+@i', $page, $dlink)) html_error('Error: Download link not found');
 
@@ -122,21 +122,21 @@ class bayfiles_com extends DownloadClass {
 		global $premium_acc;
 		if (!empty($_REQUEST["premium_user"]) && !empty($_REQUEST["premium_pass"])) $pA = true;
 		else $pA = false;
-		$user = ($pA ? $_REQUEST["premium_user"] : $premium_acc["bayfiles_com"]["user"]);
-		$pass = ($pA ? $_REQUEST["premium_pass"] : $premium_acc["bayfiles_com"]["pass"]);
+		$user = ($pA ? $_REQUEST["premium_user"] : $premium_acc["bayfiles_net"]["user"]);
+		$pass = ($pA ? $_REQUEST["premium_pass"] : $premium_acc["bayfiles_net"]["pass"]);
 		if (empty($user) || empty($pass)) html_error("Login Failed: Username or Password are empty. Please check login data.");
 
 		$post = array('action'=>'login','next'=>'%252F');
 		$post["username"] = urlencode($user);
 		$post["password"] = urlencode($pass);
 
-		$page = $this->GetPage('http://bayfiles.com/ajax_login', $this->cookie, $post, 'http://bayfiles.com/');
+		$page = $this->GetPage('http://bayfiles.net/ajax_login', $this->cookie, $post, 'http://bayfiles.net/');
 		is_present($page, 'Login failed. Please try again', 'Login Failed: Invalid username and/or password.');
 		if ($err = cut_str($page, '"error":"', '"')) html_error("Login Failed: $err.");
 		is_notpresent($page, 'Set-Cookie: SESSID=', 'Login Failed: Cannot get cookie.');
 		$this->cookie = array_merge($this->cookie, GetCookiesArr($page));
 
-		$page = $this->GetPage('http://bayfiles.com/account', $this->cookie, 0, 'http://bayfiles.com/');
+		$page = $this->GetPage('http://bayfiles.net/account', $this->cookie, 0, 'http://bayfiles.net/');
 		if (preg_match('@<div class="account-content">[\s|\t|\r|\n]+<p>((Normal)|(Premium))</p>@i', $page, $acctype) && $acctype[1] == 'Normal') {
 			$this->changeMesg(lang(300)."<br /><br /><b>Account isn\\\'t premium</b><br />Using Free Download.");
 			$this->page = $this->GetPage($this->link, $this->cookie);
@@ -194,5 +194,6 @@ class bayfiles_com extends DownloadClass {
 //[01-Feb-2012]  Added premium support. -Th3-822
 //[17-Jul-2012]  Added support for direct links. - Th3-822
 //[10-Oct-2012]  Added checkback for show 2 error msgs and a autoretry/retry button. - Th3-822
+//[17-Jul-2013]  Updated for .net domain. - Th3-822
 
 ?>

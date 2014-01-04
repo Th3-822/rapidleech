@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 ####### Account Info. ###########
 $videozer_login = '';
 $videozer_pass = '';

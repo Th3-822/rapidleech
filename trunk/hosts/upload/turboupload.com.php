@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 ####### Account Info. ###########
 $turboupload_login = "";
 $turboupload_pass = "";

@@ -27,6 +27,7 @@ sorttable = {
   },
   
   makeSortable: function(table) {
+    if (!table) { return; }
     if (table.getElementsByTagName('thead').length === 0) {
       // table doesn't have a tHead. Since it should have, create one and
       // put the first table row in it.

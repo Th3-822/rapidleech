@@ -1,24 +1,11 @@
 <?php
-define('RAPIDLEECH', 'yes');
-define('CONFIG_DIR', 'configs/');
-define('HOST_DIR', 'hosts/');
-error_reporting(0);
-set_time_limit(0);
-@ini_alter("memory_limit", "1024M");
-@ob_end_clean();
-ob_implicit_flush(TRUE);
-ignore_user_abort(1);
-clearstatcache();
-error_reporting(6135);
-$nn = "\r\n";
-require_once(CONFIG_DIR.'setup.php');
-require_once("classes/other.php");
-define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
-define('IMAGE_DIR', TEMPLATE_DIR . 'images/');
+
+require_once('rl_init.php');
+ignore_user_abort(true);
 
 login_check();
 
-include("classes/http.php");
+include(CLASS_DIR.'http.php');
 
 if(!defined('CRLF')) define('CRLF',"\r\n");
 $_REQUEST['filename']=base64_decode($_REQUEST['filename']);
@@ -48,7 +35,7 @@ require(TEMPLATE_DIR.'/header.php');
 <?php
 if (!file_exists($_REQUEST['filename']))
 	{
-		html_error(sprintf(lang(64),$filename));
+		html_error(sprintf(lang(64),$_REQUEST['filename']));
 	}
 
 if (is_readable($_REQUEST['filename']))
@@ -61,7 +48,9 @@ if (is_readable($_REQUEST['filename']))
 		html_error(sprintf(lang(65),$filename));
 	}
 
-if (isset ( $_REQUEST ["useuproxy"] ) && (! $_REQUEST ["uproxy"] || ! strstr ( $_REQUEST ["uproxy"], ":" )))
+	$_GET['proxy'] = isset($_GET['proxy']) ? $_GET['proxy'] : ''; // EDIT HERE
+
+if (isset ( $_REQUEST ["useuproxy"] ) && (empty($_REQUEST ["uproxy"]) || ! strstr ( $_REQUEST ["uproxy"], ":" )))
 {
 	html_error ( lang(324) );
 }
@@ -70,13 +59,13 @@ else
 	$proxy = $_REQUEST ["uproxy"];
 }
 
-if ($_REQUEST ["upauth"])
+if (!empty($_REQUEST ["upauth"]))
 {
 	$pauth = $_REQUEST ["upauth"];
 }
 else
 {
-	$pauth = ($_REQUEST ["uproxyuser"] && $_REQUEST ["uproxypass"]) ? base64_encode ( $_REQUEST ["uproxyuser"] . ":" . $_REQUEST ["uproxypass"] ) : "";
+	$pauth = (!empty($_REQUEST ["uproxyuser"]) && !empty($_REQUEST ["uproxypass"])) ? base64_encode ( $_REQUEST ["uproxyuser"] . ":" . $_REQUEST ["uproxypass"] ) : "";
 }
 
 $fsize = getSize($lfile);
@@ -92,7 +81,7 @@ if (file_exists("hosts/upload/".$_REQUEST['uploaded'].".php")){
 }
 else html_error(lang(67));
 
-if ($download_link || $delete_link || $stat_link || $adm_link)
+if (!empty($download_link) || !empty($delete_link) || !empty($stat_link) || !empty($adm_link))
 	{
 			//Protect down link with http://lix.in/
 			/*
@@ -109,14 +98,14 @@ if ($download_link || $delete_link || $stat_link || $adm_link)
 			*/
 
 			echo "\n<table width=100% border=0>";
-			echo ($download_link ? '<tr><td width="100" nowrap="nowrap" align="right"><b>'.lang(68).':</b><td width="80%"><input value="'.$download_link.'" class="upstyles-dllink" readonly="readonly" /></tr>' : '');
-			echo ($delete_link ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(69).':<td width="80%"><input value="'.$delete_link.'" class="upstyles-dellink" readonly="readonly" /></tr>' : '');
-			echo ($stat_link ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(70).':<td width="80%"><input value="'.$stat_link.'" class="upstyles-statlink" readonly="readonly" /></tr>' : '');
-			echo ($adm_link ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(71).':<td width="80%"><input value="'.$adm_link.'" class="upstyles-admlink" readonly="readonly" /></tr>': '');
-			echo ($user_id ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(72).':<td width="80%"><input value="'.$user_id.'" class="upstyles-userid" readonly="readonly" /></tr>': '');
-			echo ($ftp_uplink ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(73).':<td width="80%"><input value="'.$ftp_uplink.'" class="upstyles-ftpuplink" readonly="readonly" /></tr>': '');
-			echo ($access_pass ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(74).':<td width="80%"><input value="'.$access_pass.'" class="upstyles-accesspass" readonly="readonly" /></tr>': '');
-			/*echo ($protect ? '<tr><td width="100" nowrap="nowrap" align="right">Protect link:<td width="80%"><input value="'.$protect.'" style="width:470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px" readonly /></tr>': '');*/
+			echo (!empty($download_link) ? '<tr><td width="100" nowrap="nowrap" align="right"><b>'.lang(68).':</b><td width="80%"><input value="'.htmlspecialchars($download_link).'" class="upstyles-dllink" readonly="readonly" /></tr>' : '');
+			echo (!empty($delete_link) ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(69).':<td width="80%"><input value="'.htmlspecialchars($delete_link).'" class="upstyles-dellink" readonly="readonly" /></tr>' : '');
+			echo (!empty($stat_link) ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(70).':<td width="80%"><input value="'.htmlspecialchars($stat_link).'" class="upstyles-statlink" readonly="readonly" /></tr>' : '');
+			echo (!empty($adm_link) ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(71).':<td width="80%"><input value="'.htmlspecialchars($adm_link).'" class="upstyles-admlink" readonly="readonly" /></tr>': '');
+			echo (!empty($user_id) ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(72).':<td width="80%"><input value="'.htmlspecialchars($user_id).'" class="upstyles-userid" readonly="readonly" /></tr>': '');
+			echo (!empty($ftp_uplink) ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(73).':<td width="80%"><input value="'.htmlspecialchars($ftp_uplink).'" class="upstyles-ftpuplink" readonly="readonly" /></tr>': '');
+			echo (!empty($access_pass) ? '<tr><td width="100" nowrap="nowrap" align="right">'.lang(74).':<td width="80%"><input value="'.htmlspecialchars($access_pass).'" class="upstyles-accesspass" readonly="readonly" /></tr>': '');
+			/*echo ($protect ? '<tr><td width="100" nowrap="nowrap" align="right">Protect link:<td width="80%"><input value="'.htmlspecialchars($protect).'" style="width:470px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px" readonly /></tr>': '');*/
 			echo "</table>\n";
 
 			if(!file_exists(trim($lfile).".upload.html") && !isset($_GET['auul']) && !$options['upload_html_disable'])
@@ -227,13 +216,13 @@ hr {
 			if (!$options['upload_html_disable']) {
 				$html_content = '<div class="host"><div class="title"><strong>'.$_REQUEST['uploaded'].'</strong> - <span class="bluefont">'.date("Y-m-d H:i:s").'</span></div>
 				<div class="links">'.
-				($download_link ? '<strong>'.lang(68).': <a href="'.$download_link.'" target="_blank">'.$download_link.' </a></strong>' : '').
-				($delete_link ? '<br />'.lang(69).': <a href="'.$delete_link.'" target="_blank">'.$delete_link.' </a>' : '').
-				($stat_link ? '<br />'.lang(70).': <a href="'.$stat_link.'" target="_blank">'.$stat_link.' </a>' : '').
-				($adm_link ? '<br />'.lang(71).': <a href="'.$adm_link.'" target="_blank">'.$adm_link.' </a>' : '').
-				($user_id ? '<br />'.lang(72).': <a href="'.$user_id.'" target="_blank">'.$user_id.' </a>' : '').
-				($access_pass ? '<br />'.lang(74).': <a href="'.$access_pass.'" target="_blank">'.$access_pass.' </a>' : '').
-				($ftp_uplink ? '<br />'.lang(73).': <a href="'.$ftp_uplink.'" target="_blank">'.$ftp_uplink.' </a>' : '').
+				(!empty($download_link) ? '<strong>'.lang(68).': <a href="'.htmlspecialchars($download_link).'" target="_blank">'.htmlspecialchars($download_link).' </a></strong>' : '').
+				(!empty($delete_link) ? '<br />'.lang(69).': <a href="'.htmlspecialchars($delete_link).'" target="_blank">'.htmlspecialchars($delete_link).' </a>' : '').
+				(!empty($stat_link) ? '<br />'.lang(70).': <a href="'.htmlspecialchars($stat_link).'" target="_blank">'.htmlspecialchars($stat_link).' </a>' : '').
+				(!empty($adm_link) ? '<br />'.lang(71).': <a href="'.htmlspecialchars($adm_link).'" target="_blank">'.htmlspecialchars($adm_link).' </a>' : '').
+				(!empty($user_id) ? '<br />'.lang(72).': <a href="'.htmlspecialchars($user_id).'" target="_blank">'.htmlspecialchars($user_id).' </a>' : '').
+				(!empty($access_pass) ? '<br />'.lang(74).': <a href="'.htmlspecialchars($access_pass).'" target="_blank">'.htmlspecialchars($access_pass).' </a>' : '').
+				(!empty($ftp_uplink) ? '<br />'.lang(73).': <a href="'.htmlspecialchars($ftp_uplink).'" target="_blank">'.htmlspecialchars($ftp_uplink).' </a>' : '').
 				'</div></div>';
 				write_file(trim($lfile).".upload.html", $html_content, 0);
 			}
@@ -247,17 +236,17 @@ echo $not_done ? "" : '<p><center><b><a href="javascript:window.close();">'.lang
 if (isset($_GET['auul'])) {
 ?><script type="text/javascript">parent.nextlink<?php echo $_GET['auul']; ?>();</script><?php
 	// Write links to a file
-	$file = $options['download_dir']."myuploads.txt";	// Obviously it was a mistake not making it a variable earlier
+	$file = DOWNLOAD_DIR.'myuploads.txt';	// Obviously it was a mistake not making it a variable earlier
 	if (!$options['myuploads_disable']) {
-		if (!$_GET['save_style'] && $_GET['save_style'] !== lang(51)) {
+		if (!isset($_GET['save_style']) || $_GET['save_style'] !== lang(51)) {
 			$dash = "";
 			for ($i=0;$i<=80;$i++) $dash.="=";
-			write_file($file, $lname."\r\n".$dash."\r\n".$download_link."\r\n\r\n", 0);
+			write_file($file, "$lname$nn$dash$nn$download_link$nn$nn", 0);
 		} else {
 			$save_style = base64_decode($_GET['save_style']);
 			$save_style = str_replace('{link}',$download_link,$save_style);
 			$save_style = str_replace('{name}',$lname,$save_style);
-			write_file($file, $save_style."\r\n", 0);
+			write_file($file, "$save_style$nn", 0);
 		}
 	}
 }

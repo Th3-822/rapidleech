@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Default Account Info =================
 $filewinds_user = ''; //  Set you username
 $filewinds_pass = ''; //  Set your password

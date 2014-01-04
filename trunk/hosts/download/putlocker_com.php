@@ -9,8 +9,9 @@ class putlocker_com extends DownloadClass {
 	private $link, $page, $cookie, $pA, $Getregexp, $DLregexp;
 	public function Download($link) {
 		global $premium_acc;
-		$this->link = str_ireplace(array('://putlocker.com/', '/mobile/file/'), array('://www.putlocker.com/', '/file/'), $link);
-		$this->Getregexp = '@(https?://(?:[^/\r\n\t\s\'\"<>]+\.)?putlocker\.com)?/get_file\.php\?(?:(?:id)|(?:file)|(stream))=[^\r\n\t\s\'\"<>]+@i';
+		$this->link = str_ireplace(array('://putlocker.com/', '://sockshare.com/', '/mobile/file/'), array('://www.putlocker.com/', '://www.sockshare.com/', '/file/'), $link);
+		$this->domain = parse_url($this->link, PHP_URL_HOST);
+		$this->Getregexp = '@(https?://(?:[^/\r\n\t\s\'\"<>]+\.)?(?:putlocker|sockshare)\.com)?/get_file\.php\?(?:(?:id)|(?:file)|(stream))=[^\r\n\t\s\'\"<>]+@i';
 		$this->DLregexp = '@Location: (https?://(?:(?:[^/\r\n]+/(?:(?:download)|(?:premium)))|(?:cdn\.[^/\r\n]+))/[^\r\n]*)@i';
 		$this->pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
 		if (empty($_REQUEST['step'])) {
@@ -29,7 +30,7 @@ class putlocker_com extends DownloadClass {
 			$cookie = (empty($c[1]) ? urldecode($premium_acc['putlocker_com']['cookie']) : urldecode($c[1]));
 			if (strpos($cookie, '%')) $cookie = urldecode($cookie);
 			$this->cookie = array('auth' => urlencode($cookie));
-			$page = $this->GetPage('http://www.putlocker.com/', $this->cookie);
+			$page = $this->GetPage('http://'.$this->domain.'/', $this->cookie);
 			is_notpresent($page, '>Sign Out</a>', 'Cookie Error: Invalid Cookie?.');
 			is_present($page, '>( Free )<', 'Cookie Error: Account isn\'t premium');
 			$this->cookie = GetCookiesArr($page, $this->cookie);
@@ -50,8 +51,8 @@ class putlocker_com extends DownloadClass {
 
 	private function FreeDL() {
 		if (!preg_match($this->Getregexp, $this->page, $DL)) {
-			if (!preg_match('@var\scountdownNum\s?=\s?(\d+);@i', $this->page, $wait)) html_error('Countdown not found.');
-			elseif ($wait[1] > 0) $this->CountDown($wait[1]);
+			if (!preg_match('@var\scountdownNum\s?=\s?(\d+);@i', $this->page, $wait)) $wait = array(1 => 1);
+			$this->CountDown($wait[1]);
 
 			if (!preg_match('@<input type="hidden" value="(\w+)" name="hash"@i', $this->page, $hash)) html_error('Filehash not found.');
 			$post = array();
@@ -72,14 +73,14 @@ class putlocker_com extends DownloadClass {
 			if (stripos($page, 'Content-Disposition: attachment;') !== false) {
 				$fname = cut_str($page, 'Content-Disposition: attachment; filename=', "\r\n");
 				if (!empty($fname)) {
-					$fname = trim(str_replace(str_split('\\:*?"<>|=;'."\t\r\n"), '', $fname));
+					$fname = trim(str_replace(str_split('\\:*?"<>|=;/'."\t\r\n"), '', $fname));
 					if(strpos($fname, '/') !== false) $fname = basename($fname);
 				}
 			}
 			if (empty($fname)) {
 				if (preg_match('@<title>([^<>\r\n\t\"]+)\s\|\sPutLocker@i', $this->page, $title)) {
 					$title = trim(html_entity_decode($title[1]));
-					$fname = str_replace(str_split('\\:*?"<>|=;'."\t\r\n"), '', $title);
+					$fname = str_replace(str_split('\\:*?"<>|=;/'."\t\r\n"), '', $title);
 				} else $fname = urldecode(basename(parse_url($dlink[1], PHP_URL_PATH)));
 			}
 		} else { // Stream
@@ -298,5 +299,6 @@ class putlocker_com extends DownloadClass {
 
 //[16-9-2012]  Written by Th3-822.
 //[01-4-2013]  Added missing / to str_ireplace & Small changes. - Th3-822
+//[20-9-2013]  Allow freedl of files with 1 seg countdown. - Th3-822
 
 ?>

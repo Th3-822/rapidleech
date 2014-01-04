@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Default Account Info =================
 $filegaze_user = ''; //  Set you username
 $filegaze_pass = ''; //  Set your password

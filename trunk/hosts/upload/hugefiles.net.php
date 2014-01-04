@@ -1,4 +1,4 @@
-﻿<table width=600 align=center>
+<table width=600 align=center>
     </td></tr>
     <tr><td align=center>
 <script>document.getElementById('info').style.display='none';</script>

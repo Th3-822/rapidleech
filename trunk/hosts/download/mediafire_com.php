@@ -7,23 +7,24 @@ if (!defined('RAPIDLEECH')) {
 
 class mediafire_com extends DownloadClass {
 	public function Download($link) {
+		$Cookies = array();
 		if (!empty($_POST['mfpassword'])) {
-			$Cookies = urldecode($_POST['cookie']);
-			$link = urldecode($_POST['link']);
-			$page = $this->GetPage($link, $Cookies, array("downloadp" => $_POST['mfpassword']), $link);
-		} else {
-			$link = preg_replace('@https?://([^/]+\.)?mediafire\.com/((download\.php)|(file/))?\??@i', 'http://www.mediafire.com/?', $link);
-			$page = $this->GetPage($link);
-			if (preg_match('@/error\.php\?errno=\d+@i', $page, $redir)) {
-				$page = $this->GetPage('http://www.mediafire.com'.$redir[0]);
-				if (preg_match('@error_msg_title">\s*([^\r\n<>]+)\s*<@i', $page, $err)) html_error($err[1]);
-				html_error('Link is not available');
-			}
-			$Cookies = GetCookiesArr($page);
+			$Cookies = StrToCookies(urldecode($_POST['cookie']));
+			$page = $this->GetPage($link, $Cookies, array('downloadp' => urlencode($_POST['mfpassword'])), $link);
 		}
+
+		$link = preg_replace('@https?://([^/]+\.)?mediafire\.com/(?!download/)((download\.php)|(file/)|(view/))?\??@i', 'http://www.mediafire.com/download/', $link);
+		$page = $this->GetPage($link, $Cookies);
+		if (preg_match('@/error\.php\?errno=\d+@i', $page, $redir)) {
+			$page = $this->GetPage('http://www.mediafire.com'.$redir[0]);
+			if (preg_match('@error_msg_title">\s*([^\r\n<>]+)\s*<@i', $page, $err)) html_error($err[1]);
+			html_error('Link is not available');
+		}
+		$Cookies = GetCookiesArr($page);
+
 		$this->MF_Captcha($link, $page);
 		if (strpos($page, 'name="downloadp" id="downloadp"')) {
-			$DefaultParam = $this->DefaultParamArr($link, $Cookies);
+			$DefaultParam = $this->DefaultParamArr(preg_replace('@/download/([^/]+)/?.*@i', '/?$1', $link), $Cookies);
 			$html = '<form action="index.php" method="POST">';
 			foreach ($DefaultParam as $key => $value) $html.='<input type="hidden" name="' . $key . '" value="' . $value . '"/>';
 			$html.='Enter your password here </br><input type="text" name="mfpassword" value="" placeholder="Enter your password here" autofocus="autofocus" required="required" /><input type="submit" name="action" value="Submit"/></form>';
@@ -60,8 +61,9 @@ class mediafire_com extends DownloadClass {
 
 				$post = array('adcopy_challenge' => urlencode($gibberish[1]), 'adcopy_response' => 'manual_challenge');
 			}
-			$page = $this->GetPage($link, 0, $post);
+			$page = $this->GetPage(str_ireplace('mediafire.com/download/', 'mediafire.com/?', $link), 0, $post);
 			is_present($page, 'Your entry was incorrect, please try again!');
+			$page = $this->GetPage($link, 0, $post);
 		} else {
 			if (!preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w|\-]+)@i', $page, $pid) && !preg_match('@http://api\.solvemedia\.com/papi/challenge\.noscript\?k=[\w\.-]+@i', $page, $spid)) html_error('Error: CAPTCHA not found.');
 			$data = $this->DefaultParamArr($link);
@@ -117,6 +119,8 @@ class mediafire_com extends DownloadClass {
  * freedl regexp fixed again by Th3-822 10-05-2012
  * incomplete fix for getting dllink by Th3-822 14-05-2012
  * added solvemedia captcha support && fixed dead link msgs by Th3-822 06-10-2012
+ * quick fix for new format/redirect for share links && fixed capcha submit url by Th3-822 24-05-2013
+ * fixed password post url by Th3-822 27-07-2013
  */
  
 ?>

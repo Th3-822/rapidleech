@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Default Account Info =================
 $crocko_user = ""; //  Set you username
 $crocko_pass = ""; //  Set your password

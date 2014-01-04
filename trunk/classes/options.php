@@ -69,9 +69,21 @@ if ($all_act_files_exist) {
 			break;
 
 		case 'md5' :
-			if (!empty($options['disable_md5'])) break;
+			if (!empty($options['disable_hashing'])) break;
 			require(CLASS_DIR . 'options/md5.php');
 			rl_md5();
+			break;
+
+		case 'crc32' :
+			if (!empty($options['disable_hashing'])) break;
+			require(CLASS_DIR . 'options/crc32.php');
+			rl_crc32();
+			break;
+
+		case 'sha1' :
+			if (!empty($options['disable_hashing'])) break;
+			require(CLASS_DIR . 'options/sha1.php');
+			rl_sha1();
 			break;
 
 		case 'md5_change' :

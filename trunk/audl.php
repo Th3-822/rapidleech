@@ -1,33 +1,13 @@
 <?php
-define('RAPIDLEECH', 'yes');
-error_reporting(0);
-//ini_set('display_errors', 1);
-@set_time_limit(0);
-ini_alter('memory_limit', '1024M');
-if (ob_get_level()) ob_end_clean();
-ob_implicit_flush(true);
-ignore_user_abort(true);
-clearstatcache();
-$PHP_SELF = $_SERVER['SCRIPT_NAME'];
-$nn = "\r\n";
-define('HOST_DIR', 'hosts/');
-define('CLASS_DIR', 'classes/');
-define('CONFIG_DIR', 'configs/');
-define('ROOT_DIR', realpath('./'));
-define('PATH_SPLITTER', ((strpos(ROOT_DIR, '\\') !== false) ? '\\' : '/'));
-require_once(CONFIG_DIR . 'setup.php');
-if (substr($options['download_dir'], - 1) != '/') $options['download_dir'] .= '/';
-define('DOWNLOAD_DIR', (substr($options['download_dir'], 0, 6) == 'ftp://' ? '' : $options['download_dir']));
 
-require_once(CLASS_DIR . 'other.php');
-
-define('TEMPLATE_DIR', 'templates/' . $options['template_used'] . '/');
-define('IMAGE_DIR', TEMPLATE_DIR . 'images/');
-
+require_once('rl_init.php');
 if ($options['auto_download_disable']) {
 	require_once('deny.php');
 	exit();
 }
+error_reporting(0);
+ignore_user_abort(true);
+
 login_check();
 
 require(TEMPLATE_DIR . '/header.php');
@@ -80,6 +60,7 @@ function resetProgress() {
 
 			$LINK = $getlinks[$i];
 			$Url = parse_url($LINK);
+			$Url['scheme'] = strtolower($Url['scheme']);
 			$Url['path'] = (empty($Url['path'])) ? '/' :str_replace('%2F', '/', rawurlencode(rawurldecode($Url['path'])));
 
 			$Referer = $Url;
@@ -393,21 +374,16 @@ function resetProgress() {
 											<label><input type="checkbox" name="ytube_mp4" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;" checked="checked" />&nbsp;<?php echo lang(206); ?></label>
 											<table width="150" border="0" id="ytubeopt" style="display: none;">
 												<tr>
-													<td><small><?php echo lang(218); ?></small></td>
+													<td>&nbsp;<label><input type="checkbox" name="cleanname" checked="checked" /><small>&nbsp;Remove non-supported characters from filename</small></label></td>
+												</tr>
+												<tr>
 													<td>
 														<select name="yt_fmt" id="yt_fmt">
 															<option value="highest" selected="selected"><?php echo lang(219); ?></option>
-															<option value="38"><?php echo lang(377); ?></option>
-															<option value="37"><?php echo lang(228); ?></option>
-															<option value="22"><?php echo lang(227); ?></option>
-															<option value="45"><?php echo lang(225); ?></option>
-															<option value="35"><?php echo lang(223); ?></option>
-															<option value="44"><?php echo lang(389); ?></option>
-															<option value="34"><?php echo lang(222); ?></option>
-															<option value="43"><?php echo lang(224); ?></option>
-															<option value="18"><?php echo lang(226); ?></option>
-															<option value="5"><?php echo lang(221); ?></option>
-															<option value="17"><?php echo lang(220); ?></option>
+															<option value='22'>[22] Video: MP4 720p | Audio: AAC ~192 kbps</option>
+															<option value='43'>[43] Video: WebM 360p | Audio: Vorbis ~128 kbps</option>
+															<option value='18'>[18] Video: MP4 360p | Audio: AAC ~96 kbps</option>
+															<option value='5'>[5] Video: FLV 240p | Audio: MP3 ~64 kbps</option>
 														</select>
 													</td>
 												</tr>

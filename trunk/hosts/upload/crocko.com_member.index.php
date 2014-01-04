@@ -1,4 +1,4 @@
-﻿<?php 
+<?php 
 
 $upload_services[] = "crocko.com_member";
 

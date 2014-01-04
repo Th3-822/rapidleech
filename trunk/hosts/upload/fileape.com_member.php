@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 ####### Account Info. ###########
 $fileape_login = '';
 $fileape_pass = '';

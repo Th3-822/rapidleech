@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 ######## Account Info ########
 $upload_acc['putlocker_com']['user'] = ''; //Set your login
 $upload_acc['putlocker_com']['pass'] = ''; //Set your password

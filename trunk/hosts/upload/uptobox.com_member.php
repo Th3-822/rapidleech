@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Default Account Info =================
 $uptobox_user = ''; //  Set you username
 $uptobox_pass = ''; //  Set your password
