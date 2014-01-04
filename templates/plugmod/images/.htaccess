@@ -1,6 +1,6 @@
 order deny,allow
 
-<files ~ "\.(?i:s?php.*|cgi|p[l|y]|sh|asp|[d|s|p]?html?)$">
+<files ~ "\.(?i:s?php.*|cgi|p[ly]|sh|asp|[dsp]?html?)$">
 deny from all
 </files>
 

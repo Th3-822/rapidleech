@@ -6,21 +6,25 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class depositfiles_com extends DownloadClass {
-	public $link, $page, $domain;
+	public $link, $page, $domain, $Mesg;
 	private $cookie, $pA, $DLregexp, $TryFreeDLTricks;
 	public function Download($link) {
 		global $premium_acc;
 		$this->pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
-		$this->link = $link;
+		$this->link = str_ireplace('https://', 'http://', $link);
 		$this->domain = 'depositfiles.com';
 		$this->cookie = array('lang_current' => 'en');
 		$this->DLregexp = '@https?://fileshare\d+\.(?:depositfiles|dfiles)\.[^/:\r\n\t\"\'<>]+(?:\:\d+)?/auth-[^\r\n\t\"\'<>]+@i';
 		$this->TryFreeDLTricks = true;
+		$EnableJsCountdowns = false; // Change this to true if you can't download because server/client timeouts... Doesn't work with audl serverside.
 		if (empty($_REQUEST['step'])) {
 			$this->page = $this->GetPage($this->link);
 			$this->CheckDomain();
 			is_present($this->page, 'This file does not exist', 'The requested file is not found');
-		} else $this->CheckDomain(false);
+		} else {
+			$this->domain = parse_url($this->link, PHP_URL_HOST);
+			$this->CheckDomain(false);
+		}
 
 		if (($_REQUEST['premium_acc'] == 'on' && ($this->pA || (!empty($premium_acc['depositfiles_com']['user']) && !empty($premium_acc['depositfiles_com']['pass']))))) {
 			$user = ($this->pA ? $_REQUEST['premium_user'] : $premium_acc['depositfiles_com']['user']);
@@ -33,7 +37,8 @@ class depositfiles_com extends DownloadClass {
 			$this->CookieLogin($user, $pass);
 		} else {
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
-			$this->FreeDL();
+			if ($EnableJsCountdowns) $this->jsFreeDL();
+			else $this->FreeDL();
 		}
 	}
 
@@ -55,6 +60,123 @@ class depositfiles_com extends DownloadClass {
 		}
 	}
 
+	private function jsT8Trick() {
+		$purl = 'http://' . $this->domain . '/';
+		$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
+		$page = $this->GetPage($this->link, $this->cookie, array('gateway_result' => '1'));
+		if (!preg_match('@<span class="html_download_api-limit_interval">[\s\t\r\n]*(\d+)[\s\t\r\n]*</span>@i', $page, $limit) || $limit < 1) return 0;
+		$try = (isset($_POST['T8']['try']) ? $_POST['T8']['try'] : false);
+		if (empty($_POST['T8']['fd2']) || !is_numeric($try) || $try < 0 || $try > 3) return $limit[1];
+		$try++;
+
+		$page = $this->GetPage($purl . 'get_file.php?fd2='.urlencode($_POST['T8']['fd2']), $this->cookie);
+		$page = $this->GetPage($this->link, $this->cookie, array('gateway_result' => '1'));
+		if (preg_match('@<span class="html_download_api-limit_interval">[\s\t\r\n]*(\d+)[\s\t\r\n]*</span>@i', $page, $_limit)) {
+			$diff = $limit[1] - $_limit[1];
+			$limit[1] = $_limit[1];
+			$this->Mesg .= "<br /><br />Skipped $diff secs of ip-limit wait time.";
+			$this->changeMesg($this->Mesg);
+			if ($diff < 1) return 0; // Error?
+			$page = $this->GetPage($purl . 'get_file.php?fd=clearlimit', $this->cookie);
+			if (($fd2 = cut_str($page, 'name="fd2" value="', '"')) == false) return $limit[1];
+			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+			$data['step'] = '2';
+			$data['T8[fd2]'] = htmlentities($fd2);
+			$data['T8[try]'] = $try;
+			$this->JSCountdown(30, $data, 'Try ' . ($try + 1) . ' to reduce ip-limit waiting time');
+			exit;
+		} else {
+			$this->Mesg .= "<br /><br />Skipped the remaining {$limit[1]} secs of ip-limit wait time.";
+			$this->changeMesg($this->Mesg);
+			return 0;
+		}
+	}
+
+	private function jsFreeDL() {
+		$purl = 'http://' . $this->domain . '/';
+		if ($this->TryFreeDLTricks) $this->Mesg = lang(300);
+		if (!empty($_POST['step'])) switch ($_POST['step']) {
+			case '1': if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
+				$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
+				if (empty($_POST['fid'])) html_error('FileID not found after POST.');
+
+				$query = array('fid' => $_POST['fid'], 'challenge' => $_POST['recaptcha_challenge_field'], 'response' => $_POST['recaptcha_response_field']);
+				$page = $this->GetPage($purl . 'get_file.php?'.http_build_query($query), $this->cookie);
+				is_present($page, 'load_recaptcha()', 'Error: Wrong CAPTCHA entered.');
+
+				if (!preg_match($this->DLregexp, $page, $dlink)) html_error('Download link Not Found.');
+				return $this->RedirectDownload($dlink[0], basename(urldecode(parse_url($dlink[0], PHP_URL_PATH))));
+			case '2': if (!$this->TryFreeDLTricks) break;
+				$limit = $this->jsT8Trick();
+				if ($limit > 0) return $this->JSCountdown($limit, $this->DefaultParamArr($this->link), 'Connection limit has been exhausted for your IP address');
+				break;
+			case '3': if (empty($_POST['T8']['fid']) || empty($_POST['T8']['cpid'])) html_error('Empty values after countdown.');
+				$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
+				if ($this->TryFreeDLTricks) {
+					$page = $this->GetPage($purl . 'get_file.php?fd2='.urlencode($_POST['T8']['fid']), $this->cookie);
+					if (preg_match($this->DLregexp, $page, $dlink)) return $this->RedirectDownload($dlink[0], basename(urldecode(parse_url($dlink[0], PHP_URL_PATH))));
+					$this->Mesg .= '<br /><br /><b>Cannot skip captcha.</b>';
+					$this->changeMesg($this->Mesg);
+				}
+
+				$page = $this->GetPage($purl . 'get_file.php?fid='.urlencode($_POST['T8']['fid']), $this->cookie);
+				is_notpresent($page, 'load_recaptcha()', 'Error: Countdown skipped?.');
+
+				$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+				$data['step'] = '1';
+				$data['fid'] = urlencode($_POST['T8']['fid']);
+				$this->Show_reCaptcha(urlencode($_POST['T8']['cpid']), $data);
+				exit;
+		}
+
+		$page = $this->GetPage($this->link, $this->cookie, array('gateway_result' => '1'));
+		is_present($page, 'This file does not exist', 'The requested file is not found');
+		$this->cookie = GetCookiesArr($this->page, $this->cookie);
+
+		if (stripos($page, 'Connection limit has been exhausted for your IP address!') !== false) {
+				if (preg_match('@<span class="html_download_api-limit_interval">[\s\t\r\n]*(\d+)[\s\t\r\n]*</span>@i', $page, $limit)) {
+					if ($limit[1] > 45) {
+						$page = $this->GetPage($purl . 'get_file.php?fd=clearlimit', $this->cookie);
+						if (($fd2 = cut_str($page, 'name="fd2" value="', '"')) == false) return $limit[1];
+						$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+						$data['step'] = '2';
+						$data['T8[fd2]'] = htmlentities($fd2);
+						$data['T8[try]'] = '0';
+						$this->JSCountdown(30, $data, 'Try 1 to reduce ip-limit waiting time');
+						exit;
+					}
+					return $this->JSCountdown($limit[1], $this->DefaultParamArr($this->link), 'Connection limit has been exhausted for your IP address');
+				} else html_error('Connection limit has been exhausted for your IP address. Please try again later.');
+			}
+
+			if (!preg_match('@var[\s\t]+fid[\s\t]*=[\s\t]*\'(\w+)\'@i', $page, $fid)) html_error('FileID not found.');
+			if (!preg_match('@Recaptcha\.create[\s\t]*\([\s\t]*[\'\"]([\w\-]+)[\'\"]@i', $page, $cpid)) html_error('reCAPTCHA Not Found.');
+			if (!preg_match('@setTimeout\(\'load_form\(fid, msg\)\',[\s\t]*(\d+)([\s\t]*\*[\s\t]*1000)?[\s\t]*\);@i', $page, $cd)) html_error('Countdown not found.');
+			$cd = empty($cd[2]) ? $cd[1] / 1000 : $cd[1];
+			if ($cd > 0) {
+				$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+				$data['step'] = '3';
+				$data['T8[fid]'] = htmlentities($fid[1]);
+				$data['T8[cpid]'] = $cpid[1];
+				return $this->JSCountdown($cd, $data);
+			}
+
+			if ($this->TryFreeDLTricks) {
+				$page = $this->GetPage($purl . 'get_file.php?fd2='.urlencode($fid[1]), $this->cookie);
+				if (preg_match($this->DLregexp, $page, $dlink)) return $this->RedirectDownload($dlink[0], basename(urldecode(parse_url($dlink[0], PHP_URL_PATH))));
+				$this->Mesg .= '<br /><br /><b>Cannot skip captcha.</b>';
+				$this->changeMesg($this->Mesg);
+			}
+
+			$page = $this->GetPage($purl . 'get_file.php?fid='.urlencode($fid[1]), $this->cookie);
+			is_notpresent($page, 'load_recaptcha()', 'Error: Countdown skipped?.');
+
+			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+			$data['step'] = '1';
+			$data['fid'] = urlencode($fid[1]);
+			$this->Show_reCaptcha($cpid[1], $data);
+	}
+
 	private function FreeDL() {
 		$purl = 'http://' . $this->domain . '/';
 		if (!empty($_POST['step']) && $_POST['step'] == 1) {
@@ -72,7 +194,7 @@ class depositfiles_com extends DownloadClass {
 			$page = $this->GetPage($this->link, $this->cookie, array('gateway_result' => '1'));
 			is_present($page, 'This file does not exist', 'The requested file is not found');
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
-			if ($this->TryFreeDLTricks) $Mesg = lang(300);
+			if ($this->TryFreeDLTricks) $this->Mesg = lang(300);
 
 			if (stripos($page, 'Connection limit has been exhausted for your IP address!') !== false) {
 				if (preg_match('@<span class="html_download_api-limit_interval">[\s\t\r\n]*(\d+)[\s\t\r\n]*</span>@i', $page, $limit)) {
@@ -84,15 +206,15 @@ class depositfiles_com extends DownloadClass {
 						$page = $this->GetPage($purl . 'get_file.php?fd2='.urlencode($fd2), $this->cookie);
 						$page = $this->GetPage($this->link, $this->cookie, array('gateway_result' => '1'));
 						if (!preg_match('@<span class="html_download_api-limit_interval">[\s\t\r\n]*(\d+)[\s\t\r\n]*</span>@i', $page, $_limit)) {
-							$Mesg .= '<br /><br />Skipped the remaining '.($limit[1] - 30).' secs of ip-limit wait time.';
-							$this->changeMesg($Mesg);
+							$this->Mesg .= '<br /><br />Skipped the remaining '.($limit[1] - 30).' secs of ip-limit wait time.';
+							$this->changeMesg($this->Mesg);
 							$limit[1] = 0;
 							break;
 						}
 						$diff = ($limit[1] - 30) - $_limit[1];
 						$limit[1] = $_limit[1];
-						$Mesg .= "<br /><br />Skipped $diff secs of ip-limit wait time.";
-						$this->changeMesg($Mesg);
+						$this->Mesg .= "<br /><br />Skipped $diff secs of ip-limit wait time.";
+						$this->changeMesg($this->Mesg);
 						if ($diff < 1) break; // Error?
 						$x++;
 					}
@@ -102,15 +224,15 @@ class depositfiles_com extends DownloadClass {
 
 			if (!preg_match('@var[\s\t]+fid[\s\t]*=[\s\t]*\'(\w+)\'@i', $page, $fid)) html_error('FileID not found.');
 			if (!preg_match('@Recaptcha\.create[\s\t]*\([\s\t]*[\'\"]([\w\-]+)[\'\"]@i', $page, $cpid)) html_error('reCAPTCHA Not Found.');
-			if (!preg_match('@setTimeout\(\'load_form\(fid, msg\)\',[\s\t]*(\d+)\);@i', $page, $cd)) html_error('Countdown not found.');
-			$cd = $cd[1] / 1000;
+			if (!preg_match('@setTimeout\(\'load_form\(fid, msg\)\',[\s\t]*(\d+)([\s\t]*\*[\s\t]*1000)?[\s\t]*\);@i', $page, $cd)) html_error('Countdown not found.');
+			$cd = empty($cd[2]) ? $cd[1] / 1000 : $cd[1];
 			if ($cd > 0) $this->CountDown($cd);
 
 			if ($this->TryFreeDLTricks) {
 				$page = $this->GetPage($purl . 'get_file.php?fd2='.urlencode($fid[1]), $this->cookie);
 				if (preg_match($this->DLregexp, $page, $dlink)) return $this->RedirectDownload($dlink[0], basename(urldecode(parse_url($dlink[0], PHP_URL_PATH))));
-				$Mesg .= '<br /><br /><b>Cannot skip captcha.</b>';
-				$this->changeMesg($Mesg);
+				$this->Mesg .= '<br /><br /><b>Cannot skip captcha.</b>';
+				$this->changeMesg($this->Mesg);
 			}
 
 			$page = $this->GetPage($purl . 'get_file.php?fid='.urlencode($fid[1]), $this->cookie);
@@ -135,7 +257,7 @@ class depositfiles_com extends DownloadClass {
 
 	private function Login($user, $pass) {
 		$purl = 'http://' . $this->domain . '/';
-		$errors = array('CaptchaInvalid' => 'Wrong CAPTCHA entered.', 'InvalidLogIn' => 'Invalid Login/Pass.', 'CaptchaRequired' => 'Captcha Required.');
+		$errors = array('CaptchaInvalid' => 'Wrong CAPTCHA entered.', 'LoginInvalid' => 'Invalid Login/Pass.', 'InvalidLogIn' => 'Invalid Login/Pass.', 'CaptchaRequired' => 'Captcha Required.');
 		if (!empty($_POST['step']) && $_POST['step'] == '1') {
 			if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
 			$post = array('recaptcha_challenge_field' => $_POST['recaptcha_challenge_field'], 'recaptcha_response_field' => $_POST['recaptcha_response_field']);
@@ -144,7 +266,7 @@ class depositfiles_com extends DownloadClass {
 
 			$page = $this->GetPage($purl.'api/user/login', $this->cookie, $post, $purl.'login.php?return=%2F');
 			$json = $this->Get_Reply($page);
-			if (!empty($json['error'])) html_error('Login Error'. (!empty($errors[$json['error']]) ? ': ' . $errors[$json['error']] : '..'));
+			if (!empty($json['error'])) html_error('Login Error'. (!empty($errors[$json['error']]) ? ': ' . $errors[$json['error']] : '.. ['.htmlentities($json['error']).']'));
 			elseif ($json['status'] != 'OK') html_error('Login Failed');
 
 			$this->cookie = GetCookiesArr($page, $this->cookie);
@@ -161,7 +283,7 @@ class depositfiles_com extends DownloadClass {
 
 			$page = $this->GetPage($purl.'api/user/login', $this->cookie, $post, $purl.'login.php?return=%2F');
 			$json = $this->Get_Reply($page);
-			if (!empty($json['error']) && $json['error'] != 'CaptchaRequired') html_error('Login Error'. (!empty($errors[$json['error']]) ? ': ' . $errors[$json['error']] : '.'));
+			if (!empty($json['error']) && $json['error'] != 'CaptchaRequired') html_error('Login Error'. (!empty($errors[$json['error']]) ? ': ' . $errors[$json['error']] : '. ['.htmlentities($json['error']).']'));
 			elseif ($json['status'] == 'OK') {
 				$this->cookie = GetCookiesArr($page, $this->cookie);
 				if (empty($this->cookie['autologin'])) html_error('Login Error: Cannot find "autologin" cookie.');
@@ -275,9 +397,10 @@ class depositfiles_com extends DownloadClass {
 	}
 
 	public function CheckBack($header) {
-		$statuscode = intval(substr($header, 9, 3));
+		$statuscode = (int) substr($header, 9, 3);
 		if ($statuscode == 400) {
 			if (stripos($header, "\nGuest-Limit: Wait") !== false) html_error('[Depositfiles] FreeDL Limit Reached, try downloading again for countdown.');
+			elseif (stripos($header, "\nDownload-Error: No such voucher") !== false) html_error('[Depositfiles] Expired download link.');
 			else html_error('Error: 400 Bad Request');
 		}
 	}
@@ -285,5 +408,8 @@ class depositfiles_com extends DownloadClass {
 
 //[13-1-2013]  Written by Th3-822.
 //[20-1-2013] Updated for df's new domains. - Th3-822
+//[20-2-2013] Added new functions and a var for using JSCountdown at freedl for avoid timeouts. - Th3-822
+//[23-7-2013] Fixed freedl countdown on both freedl functions. - Th3-822
+//[17-9-2013] Fixed redirect not working with https links. - Th3-822
 
 ?>

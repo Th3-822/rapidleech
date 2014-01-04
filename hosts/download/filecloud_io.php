@@ -22,6 +22,10 @@ class filecloud_io extends DownloadClass {
 				$this->cookie = GetCookiesArr($this->page, $this->cookie);
 				$Referer = $this->redir;
 			} else $Referer = $link;
+			if (preg_match('@\nLocation: (https?://s\d+\.filecloud\.io/[^\r\n]+)@i', $this->page, $dllink)) {
+				$filename = urldecode(basename(parse_url($dllink[1], PHP_URL_PATH)));
+				return $this->RedirectDownload($dllink[1], $filename);
+			}
 		}
 
 		// Check https support for login.
@@ -31,7 +35,6 @@ class filecloud_io extends DownloadClass {
 				$cV = curl_version();
 				if (!in_array('https', $cV['protocols'], true)) $cantlogin = true;
 			} else $cantlogin = true;
-			if ($_REQUEST['premium_acc'] == 'on' && !empty($premium_acc['filecloud_io']['apikey'])) $cantlogin = false;
 			if ($cantlogin) $this->changeMesg(lang(300).'<br /><br />Https support: NO<br />Login disabled.');
 		}
 
@@ -158,42 +161,44 @@ class filecloud_io extends DownloadClass {
 		$page = $this->GetPage('http://api.filecloud.io/api-ping.api');
 		is_notpresent($page, '"message":"pong"', 'Error: filecloud.io api is down?.');
 
-		if (empty($premium_acc['filecloud_io']['apikey'])) {
-			if (!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) $pA = true;
-			else $pA = false;
+		if (!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) $pA = true;
+		else $pA = false;
+		if (empty($premium_acc['filecloud_io']['apikey']) || $pA) {
 			$user = ($pA ? $_REQUEST['premium_user'] : $premium_acc['filecloud_io']['user']);
 			$pass = ($pA ? $_REQUEST['premium_pass'] : $premium_acc['filecloud_io']['pass']);
 			if (empty($user) || empty($pass)) html_error('Login Failed: Username or Password are empty. Please check login data.');
 
 			$post = array();
-			$post['username'] = urlencode($user);
+			$post['username'] = urlencode(strtolower($user));
 			$post['password'] = urlencode($pass);
 			$page = $this->GetPage('https://secure.filecloud.io/api-fetch_apikey.api', 0, $post);
 			$rply = $this->Get_Reply($page);
 
 			if ($rply['status'] != 'ok') html_error('Login Failed: '.htmlentities($rply['message']));
 			if (empty($rply['akey'])) html_error('Login Failed: Akey not found.');
-		} else $rply = array('akey' => $premium_acc['filecloud_io']['apikey']);
+		} else $rply = array('akey' => urldecode($premium_acc['filecloud_io']['apikey']));
 
 		$this->cookie = array('auth' => urlencode($rply['akey']));
 		return $this->PremiumDL();
 	}
 
 	private function PremiumDL() {
-		if (!preg_match('@\r\nLocation: (https?://s\d+\.filecloud\.io/[^\r\n]+)@i', $this->page, $dllink)) {
+		if (!preg_match('@\nLocation: (https?://s\d+\.filecloud\.io/[^\r\n]+)@i', $this->page, $dllink)) {
 			if (!preg_match("@[\s\t]'ukey'[\s\t]*:[\s\t]*'([^']+)'@i", $this->page, $_ukey)) html_error('Error: FileID not found.');
 			$page = $this->GetPage('http://api.filecloud.io/api-fetch_download_url.api', 0, array('akey' => $this->cookie['auth'], 'ukey' => $_ukey[1]));
 			$rply = $this->Get_Reply($page);
 
 			if ($rply['status'] != 'ok') html_error('Error getting premium dlink: '.htmlentities($rply['message']));
 			if (empty($rply['download_url'])) html_error('Error getting premium dlink... Empty?');
-		} else $rply = array('download_url' => $dllink);
+		} else $rply = array('download_url' => $dllink[1]);
 
 		$filename = urldecode(basename(parse_url($rply['download_url'], PHP_URL_PATH)));
 		return $this->RedirectDownload($rply['download_url'], $filename);
 	}
 }
 
-//[26-Oct-2012] (Re)Written by Th3-822. // If you can't login, try wih your username in lowercase.
+//[26-Oct-2012] (Re)Written by Th3-822.
+//[17-Feb-2013] Login Fixes. - Th3-822
+//[16-Oct-2013] Fixed support for direct-links. - Th3-822
 
 ?>

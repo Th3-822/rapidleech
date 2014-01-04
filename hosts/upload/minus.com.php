@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 ####### Account Info. ###########
 $minus_user = "";
 $minus_pass = "";

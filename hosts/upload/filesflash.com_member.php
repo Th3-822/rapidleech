@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Default Account Info =================
 $filesflash_email = ""; //  Set you mail user
 $filesflash_pass = ""; //  Set your password

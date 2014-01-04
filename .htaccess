@@ -1,6 +1,6 @@
 order deny,allow
 
-<files ~ "\.(?i:s?php.*|cgi|p[l|y]|sh|asp|[d|s|p]?html?)$">
+<files ~ "\.(?i:s?php.*|cgi|p[ly]|sh|asp|[dsp]?html?)$">
 deny from all
 </files>
 
@@ -29,10 +29,6 @@ allow from all
 allow from all
 </files>
 
-<files ~ "\.upload.html$">
-allow from all
-</files>
-
 <files auul.php>
 allow from all
 </files>
@@ -44,3 +40,11 @@ allow from all
 <files ~ "^\.">
 deny from all
 </files>
+
+#CGI Auth Fix
+<IfModule mod_rewrite.c>
+	Options +SymLinksIfOwnerMatch
+	RewriteEngine on
+	RewriteCond %{HTTP:Authorization} !^$
+	RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>

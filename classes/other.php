@@ -32,12 +32,14 @@ function login_check() {
 	if ($options['login']) {
 		function logged_user($ul) {
 			foreach ($ul as $user => $pass) {
-				if ($_SERVER['PHP_AUTH_USER'] == $user && $_SERVER['PHP_AUTH_PW'] == $pass) return true;
+				if ($_SERVER['PHP_AUTH_USER'] == $user && isset($_SERVER['PHP_AUTH_PW']) && $_SERVER['PHP_AUTH_PW'] == $pass) return true;
 			}
 			return false;
 		}
-		if ($options['login_cgi']) {
-			list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = @explode(':', base64_decode(substr((isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : $_SERVER['REDIRECT_HTTP_AUTHORIZATION']), 6)), 2);
+		if (empty($_SERVER['PHP_AUTH_USER']) && (!empty($_SERVER['HTTP_AUTHORIZATION']) || !empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION']))) {
+			$auth = !empty($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+			if (stripos($auth, 'Basic ') === 0 && strpos(($auth = base64_decode(substr($auth, 6))), ':') > 0) list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':', $auth, 2);
+			unset($auth);
 		}
 		if (empty($_SERVER['PHP_AUTH_USER']) || !logged_user($options['users'])) {
 			header('WWW-Authenticate: Basic realm="RAPIDLEECH PLUGMOD"');
@@ -79,12 +81,16 @@ function insert_location($inputs, $action = 0) {
 	}
 }
 
-function pause_download() {
-	global $pathWithName, $PHP_SELF, $_GET, $nn, $bytesReceived, $fs, $fp;
-	$status = connection_status();
-	if (($status == 2 || $status == 3) && $pathWithName && $bytesReceived > -1) {
+function pause_download() { // To make sure that the files pointers and streams are closed and unlocked.
+	global $PHP_SELF, $fs, $fp, $file, $pathWithName;
+	if (!empty($fs) && is_resource($fs)) {
 		flock($fs, LOCK_UN);
+		if (get_resource_type($fs) == 'stream') stream_socket_shutdown($fs, STREAM_SHUT_RDWR);
 		fclose($fs);
+	}
+	if (!empty($fp) && is_resource($fp)) {
+		flock($fp, LOCK_UN);
+		if (get_resource_type($fp) == 'stream') stream_socket_shutdown($fp, STREAM_SHUT_RDWR);
 		fclose($fp);
 	}
 }
@@ -149,6 +155,7 @@ function html_error($msg, $head = 1) {
 		else echo '<a href="'.$PHP_SELF.'">'.lang(13).'</a>';
 		echo '</div>';
 	}
+	pause_download();
 	include(TEMPLATE_DIR.'footer.php');
 	exit();
 }
@@ -274,7 +281,7 @@ function getfilesize($f) {
 
 	global $max_4gb;
 	if ($max_4gb === false) {
-		$tmp_ = trim(@shell_exec(' ls -Ll ' . @escapeshellarg($f)));
+		$tmp_ = trim(@shell_exec('ls -Ll ' . @escapeshellarg($f)));
 		while(strstr($tmp_, '  ')) $tmp_ = @str_replace('  ', ' ', $tmp_);
 		$r = @explode(' ', $tmp_);
 		$size_ = $r[4];
@@ -304,7 +311,7 @@ function getSize($file) {
 	$size = filesize($file);
 	if ($size < 0) {
 		if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
-			$size = @escapeshellarg($file);
+			$file = @escapeshellarg($file);
 			$size = trim(`stat -c%s $file`);
 		} else {
 			$fsobj = new COM('Scripting.FileSystemObject');
@@ -371,10 +378,10 @@ function link_for_file($filename, $only_link = FALSE, $style = '') {
 		$Path = FALSE;
 		if ($only_link) return '';
 	}
-	$basename = htmlentities(basename($filename));
-	$Path = htmlentities($Path).'/'.rawurlencode(basename($filename));
+	$basename = htmlspecialchars(basename($filename));
+	$Path = htmlspecialchars($Path).'/'.rawurlencode(basename($filename));
 	if ($only_link) return 'http://'.urldecode($_SERVER['HTTP_HOST']).$Path;
-	elseif ($Path === FALSE) return '<span>'.$basename.'</span>';
+	elseif ($Path === FALSE) return "<span>$basename</span>";
 	else return '<a href="'.$Path.'"'.($style !== '' ? ' '.$style : '').'>'.$basename.'</a>';
 }
 
@@ -389,7 +396,7 @@ function lang($id) {
 #need to keep premium account cookies safe!
 function encrypt($string) {
 	global $secretkey;
-	if (!$secretkey) return html_error('Value for $secretkey is empty, please create a random one (56 chars max) in accounts.php!');
+	if (!$secretkey) return html_error('Value for $secretkey is empty, please create a random one (56 chars max) in config.php!');
 	require_once 'class.pcrypt.php';
 
 	/*
@@ -407,7 +414,7 @@ function encrypt($string) {
 
 function decrypt($string) {
 	global $secretkey;
-	if (!$secretkey) return html_error('Value for $secretkey is empty, please create a random one (56 chars max) in accounts.php!');
+	if (!$secretkey) return html_error('Value for $secretkey is empty, please create a random one (56 chars max) in config.php!');
 	require_once 'class.pcrypt.php';
 
 	/*
@@ -429,19 +436,19 @@ function decrypt($string) {
  * @param int Column for variable display
  * @param int Rows for variable display
  * @param bool Options to continue or not process
- * @param string Charset encoding for htmlentities
+ * @param string Charset encoding for htmlspecialchars
  */
 function textarea($var, $cols = 100, $rows = 30, $stop = false, $char = 'UTF-8') {
 	$cols = ($cols == 0) ? 100 : $cols;
 	$rows = ($rows == 0) ? 30 : $rows;
 	if ($char === false) $char = 'ISO-8859-1';
 	echo "\n<br /><textarea cols='$cols' rows='$rows' readonly='readonly'>";
-	if (is_array($var)) $text = htmlentities(print_r($var, true), ENT_QUOTES, $char);
-	else $text = htmlentities($var, ENT_QUOTES, $char);
+	if (is_array($var)) $text = htmlspecialchars(print_r($var, true), ENT_QUOTES, $char);
+	else $text = htmlspecialchars($var, ENT_QUOTES, $char);
 	if (empty($text) && !empty($var)) { // Fix "empty?" textarea bug
 		$char = ($char == 'ISO-8859-1') ? '' : 'ISO-8859-1';
-		if (is_array($var)) $text = htmlentities(print_r($var, true), ENT_QUOTES, $char);
-		else $text = htmlentities($var, ENT_QUOTES, $char);
+		if (is_array($var)) $text = htmlspecialchars(print_r($var, true), ENT_QUOTES, $char);
+		else $text = htmlspecialchars($var, ENT_QUOTES, $char);
 	}
 	echo "$text</textarea><br />\n";
 	if ($stop) exit;
@@ -515,9 +522,7 @@ if (!function_exists('http_chunked_decode')) {
 function host_matches($site, $host) {
 	if (empty($site) || empty($host)) return false;
 	if (strtolower($site) == strtolower($host)) return true;
-	$slen = strlen($site);
-	$hlen = strlen($host);
-	if (($pos = strripos($host, $site)) !== false && ($pos + $slen == $hlen) && $pos > 1 && substr($host, $pos - 1, 1) == '.') return true;
+	if (($pos = strripos($host, $site)) !== false && ($pos + strlen($site) == strlen($host)) && $pos > 1 && substr($host, $pos - 1, 1) == '.') return true;
 	return false;
 }
 
@@ -534,7 +539,7 @@ function GetDefaultParams() {
 	if (isset($_GET['audl'])) $DParam['audl'] = 'doum';
 	if ($options['download_dir_is_changeable'] && !empty($_GET['path'])) $DParam['saveto'] = urlencode($_GET['path']);
 	$params = array('add_comment', 'domail', 'comment', 'email', 'split', 'partSize', 'method', 'uploadlater', 'uploadtohost');
-	foreach ($params as $key) if (!empty($_GET[$key])) $DParam[$key] = $_GET [$key];
+	foreach ($params as $key) if (!empty($_GET[$key])) $DParam[$key] = $_GET[$key];
 	return $DParam;
 }
 

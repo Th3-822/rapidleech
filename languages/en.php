@@ -396,4 +396,8 @@ $lang[386] = 'Ignore case';
 $lang[387] = 'Put each file on a separated archive';
 $lang[388] = 'OpenSSL';
 $lang[389] = '44 [Video: WebM 854x480 | Audio: Vorbis 2ch 44.10kHz]';
+$lang[390] = 'CRC32 Hash';
+$lang[391] = 'CRC32 found in file\'s name is valid';
+$lang[392] = 'CRC32 found in file\'s name (&quot;%1$s&quot;) doesn\'t match calculated CRC32';
+$lang[393] = 'SHA1 Hash';
 ?>

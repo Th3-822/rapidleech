@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Default Account Info =================
 $filevelocity_user = ''; //  Set you username
 $filevelocity_pass = ''; //  Set your password

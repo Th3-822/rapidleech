@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 ####### Account Info. ###########
 $ok2upload_login = ""; //Set you username
 $ok2upload_pass = ""; //Set your password

@@ -118,16 +118,39 @@ class turbobit_net extends DownloadClass {
 		$this->RedirectDownload(html_entity_decode($dllink[0]), 'turbobit_pr', $this->cookie);
 	}
 
+	private function Show_reCaptcha($pid, $inputs, $sname = 'Download File') {
+		global $PHP_SELF;
+		if (!is_array($inputs)) html_error('Error parsing captcha data.');
+
+		// Themes: 'red', 'white', 'blackglass', 'clean'
+		echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n";
+
+		echo "\n<center><form name='recaptcha' action='$PHP_SELF' method='post'><br />\n";
+		foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
+		echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script>";
+		echo "<noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br />";
+		echo "<input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n";
+		echo "<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n";
+		echo "</form></center>\n</body>\n</html>";
+		exit;
+	}
+
 	private function Login($user, $pass) {
 		$purl = 'http://turbobit.net/';
-		if (!empty($_POST['step']) && $_POST['step'] == '1') {
-			if (empty($_POST['captcha'])) html_error('You didn\'t enter the image verification code.');
+		if (!empty($_POST['step']) && ($_POST['step'] == '1' || $_POST['step'] == '2')) {
 			$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
 
 			$post = array();
 			$post['user%5Blogin%5D'] = urlencode($user);
 			$post['user%5Bpass%5D'] = urlencode($pass);
-			$post['user%5Bcaptcha_response%5D'] = urlencode($_POST['captcha']);
+			if ($_POST['step'] == '1') {
+				if (empty($_POST['captcha'])) html_error('You didn\'t enter the image verification code.');
+				$post['user%5Bcaptcha_response%5D'] = urlencode($_POST['captcha']);
+			} else {
+				if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
+				$post['recaptcha_challenge_field'] = urlencode($_POST['recaptcha_challenge_field']);
+				$post['recaptcha_response_field'] = urlencode($_POST['recaptcha_response_field']);
+			}
 			$post['user%5Bcaptcha_type%5D'] = urlencode($_POST['c_type']);
 			$post['user%5Bcaptcha_subtype%5D'] = (!empty($_POST['c_subtype']) ? urlencode($_POST['c_subtype']) : '');
 			$post['user%5Bmemory%5D'] = 'on';
@@ -147,6 +170,8 @@ class turbobit_net extends DownloadClass {
 			is_present($page, 'Incorrect login or password', 'Login Failed: Login/Password incorrect.');
 			is_present($page, 'E-Mail address appears to be invalid.', 'Login Failed: Invalid E-Mail.');
 			is_present($page, 'Incorrect verification code', 'Login Failed: Wrong CAPTCHA entered.');
+			is_present($page, 'Incorrect captcha code', 'Login Failed: Wrong Recaptcha entered.');
+			// is_present($page, 'Limit of login attempts exceeded for your account. It has been temporarily locked.', 'Login Failed: Account Temporally Locked.');
 
 			if (empty($redir) || $redir != $purl) $page = $this->GetPage($purl, $this->cookie, 0, $purl);
 			is_notpresent($page, '/user/logout">Logout<', 'Login Failed.');
@@ -160,7 +185,7 @@ class turbobit_net extends DownloadClass {
 			$post['user%5Bpass%5D'] = urlencode($pass);
 			$post['user%5Bmemory%5D'] = 'on';
 			$post['user%5Bsubmit%5D'] = 'Login';
-			$page = $this->GetPage($purl.'user/login', $this->cookie, $post, $purl);
+			$page = $this->GetPage($purl.'user/login', $this->cookie, $post, $purl.'login');
 			$this->cookie = GetCookiesArr($page, $this->cookie);
 
 			if (!empty($this->cookie['user_isloggedin']) && $this->cookie['user_isloggedin'] == '1') {
@@ -181,41 +206,53 @@ class turbobit_net extends DownloadClass {
 
 			is_present($page, 'Incorrect login or password', 'Login Failed: Login/Password incorrect');
 			is_present($page, 'E-Mail address appears to be invalid.', 'Login Failed: Invalid E-Mail');
+			// is_present($page, 'Limit of login attempts exceeded for your account. It has been temporarily locked.', 'Login Failed: Account Temporally Locked');
 
-			if (!preg_match('@(https?://[^/\r\n\t\s\'\"<>]+)?/captcha/[^\r\n\t\s\'\"<>]+@i', $page, $imgurl)) {
-				if (stripos($page, '/user/logout">Logout<') !== false) {
-					$this->SaveCookies($user, $pass); // Update cookies file
-					is_present($page, '<u>Turbo Access</u> denied', 'Login Failed: Account isn\'t premium');
-					return $this->PremiumDL();
-				} else html_error('CAPTCHA not found.');
-			}
-			$imgurl = (empty($imgurl[1])) ? 'http://turbobit.net'.$imgurl[0] : $imgurl[0];
-			$imgurl = html_entity_decode($imgurl);
+			if (preg_match('@(https?://[^/\r\n\t\s\'\"<>]+)?/captcha/[^\r\n\t\s\'\"<>]+@i', $page, $imgurl)) {
+				$imgurl = (empty($imgurl[1])) ? 'http://turbobit.net'.$imgurl[0] : $imgurl[0];
+				$imgurl = html_entity_decode($imgurl);
 
-			if (!preg_match('@\Wvalue\s*=\s*[\'\"]([^\'\"\r\n<>]+)[\'\"]\s+name\s*=\s*[\'\"]user\[captcha_type\][\'\"]@i', $page, $c_type) || !preg_match('@\Wvalue\s*=\s*[\'\"]([^\'\"\r\n<>]*)[\'\"]\s+name\s*=\s*[\'\"]user\[captcha_subtype\][\'\"]@i', $page, $c_subtype)) html_error('CAPTCHA data not found.');
+				if (!preg_match('@\Wvalue\s*=\s*[\'\"]([^\'\"\r\n<>]+)[\'\"]\s+name\s*=\s*[\'\"]user\[captcha_type\][\'\"]@i', $page, $c_type) || !preg_match('@\Wvalue\s*=\s*[\'\"]([^\'\"\r\n<>]*)[\'\"]\s+name\s*=\s*[\'\"]user\[captcha_subtype\][\'\"]@i', $page, $c_subtype)) html_error('CAPTCHA data not found.');
 
 
-			//Download captcha img.
-			$capt_page = $this->GetPage($imgurl, $this->cookie);
-			$capt_img = substr($capt_page, strpos($capt_page, "\r\n\r\n") + 4);
-			$imgfile = DOWNLOAD_DIR . 'turbobit_captcha.png';
+				//Download captcha img.
+				$capt_page = $this->GetPage($imgurl, $this->cookie);
+				$capt_img = substr($capt_page, strpos($capt_page, "\r\n\r\n") + 4);
+				$imgfile = DOWNLOAD_DIR . 'turbobit_captcha.png';
 
-			if (file_exists($imgfile)) unlink($imgfile);
-			if (!write_file($imgfile, $capt_img)) html_error('Error getting CAPTCHA image.');
-			unset($capt_page, $capt_img);
+				if (file_exists($imgfile)) unlink($imgfile);
+				if (!write_file($imgfile, $capt_img)) html_error('Error getting CAPTCHA image.');
+				unset($capt_page, $capt_img);
 
-			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
-			$data['step'] = '1';
-			$data['c_type'] = urlencode($c_type[1]);
-			$data['c_subtype'] = urlencode($c_subtype[1]);
-			$data['premium_acc'] = 'on'; // I should add 'premium_acc' to DefaultParamArr()
-			if ($this->pA) {
-				$data['pA_encrypted'] = 'true';
-				$data['premium_user'] = urlencode(encrypt($user)); // encrypt() will keep this safe.
-				$data['premium_pass'] = urlencode(encrypt($pass)); // And this too.
-			}
-			$this->EnterCaptcha($imgfile.'?'.time(), $data);
-			exit;
+				$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+				$data['step'] = '1';
+				$data['c_type'] = urlencode($c_type[1]);
+				$data['c_subtype'] = urlencode($c_subtype[1]);
+				$data['premium_acc'] = 'on'; // I should add 'premium_acc' to DefaultParamArr()
+				if ($this->pA) {
+					$data['pA_encrypted'] = 'true';
+					$data['premium_user'] = urlencode(encrypt($user)); // encrypt() will keep this safe.
+					$data['premium_pass'] = urlencode(encrypt($pass)); // And this too.
+				}
+				$this->EnterCaptcha($imgfile.'?'.time(), $data);
+				exit;
+			} elseif (preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w|\-]+)@i', $page, $pid)) {
+				$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+				$data['step'] = '2';
+				$data['c_type'] = 'recaptcha';
+				$data['premium_acc'] = 'on'; // I should add 'premium_acc' to DefaultParamArr()
+				if ($this->pA) {
+					$data['pA_encrypted'] = 'true';
+					$data['premium_user'] = urlencode(encrypt($user)); // encrypt() will keep this safe.
+					$data['premium_pass'] = urlencode(encrypt($pass)); // And this too.
+				}
+				$this->Show_reCaptcha($pid[1], $data, 'Login');
+				exit;
+			} elseif (stripos($page, '/user/logout">Logout<') !== false) {
+				$this->SaveCookies($user, $pass); // Update cookies file
+				is_present($page, '<u>Turbo Access</u> denied', 'Login Failed: Account isn\'t premium');
+				return $this->PremiumDL();
+			} else html_error('CAPTCHA not found.');
 		}
 	}
 
@@ -282,6 +319,7 @@ class turbobit_net extends DownloadClass {
 	}
 }
 
-//[9-01-2013] Written by Th3-822.
+//[09-1-2013] Written by Th3-822.
+//[07-6-2013] Added login recaptcha support. - Th3-822
 
 ?>

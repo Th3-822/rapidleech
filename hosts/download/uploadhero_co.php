@@ -5,33 +5,37 @@ if (!defined('RAPIDLEECH')) {
 	exit();
 }
 
-class uploadhero_com extends DownloadClass {
+class uploadhero_co extends DownloadClass {
 	private $page, $cookie;
 	public function Download($link) {
 		global $premium_acc;
 		$this->cookie = array('lang' => 'en');
+		$link = str_ireplace('uploadhero.com/', 'uploadhero.co/', $link);
 		if (empty($_POST['step']) || $_POST['step'] != 1) {
 			$this->page = $this->GetPage($link, $this->cookie);
 			is_present($this->page, 'The link file above no longer exists.', 'File not found.');
+			is_present($this->page, 'uploadhero.co/maintenance.html', 'File not available, site or server in maintenance.');
+			is_present($this->page, "\nLocation: http://uploadhero.co/forbbiden", 'Dedicated server blocked.');
+			is_present($this->page, "\nLocation: /forbbiden", 'Dedicated server blocked.');
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		}
 
-		if ($_REQUEST['premium_acc'] == 'on' && ((!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) || (!empty($premium_acc['uploadhero_com']['user']) && !empty($premium_acc['uploadhero_com']['pass'])))) $this->Login($link);
+		if ($_REQUEST['premium_acc'] == 'on' && ((!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) || (!empty($premium_acc['uploadhero_co']['user']) && !empty($premium_acc['uploadhero_co']['pass'])))) $this->Login($link);
 		else $this->FreeDL($link);
 	}
 
 	private function FreeDL($link) {
 		if (empty($_POST['step']) || $_POST['step'] != 1) {
 			if (preg_match('@/lightbox_block_download\.php\?(min=-?\d+&)?sec=\d+@i', $this->page)) {
-				$page = $this->GetPage('http://uploadhero.com/lightbox_block_download.php', $this->cookie);
+				$page = $this->GetPage('http://uploadhero.co/lightbox_block_download.php', $this->cookie);
 				if (!preg_match('@(?:id="minn">(\d+)</span>[\r\n\s\r]*)*<span [^<>]*id="secondss">(\d+)</span>@i', $page, $timer)) html_error('The last download was performed fewer than 30 minutes, you have to wait.');
 				$wait = $timer[2];
 				if (!empty($timer[1])) $wait += ($timer[1] * 60);
 				$data = $this->DefaultParamArr($link);
 				return $this->JSCountdown($wait, $data, 'You have to wait before downloading again');
 			}
-			if (!preg_match('@<img src="((https?://(?:[^/\r\n<>\"]+\.)?uploadhero\.com)?/captchadl\.php\?[^\r\n<>\"]+)"@i', $this->page, $cimg)) html_error('Error: CAPTCHA not found.');
-			$cimg = (empty($cimg[2])) ? 'http://uploadhero.com'.$cimg[1] : $cimg[1];
+			if (!preg_match('@<img src="((https?://(?:[^/\r\n<>\"]+\.)?uploadhero\.com?)?/captchadl\.php\?[^\r\n<>\"]+)"@i', $this->page, $cimg)) html_error('Error: CAPTCHA not found.');
+			$cimg = (empty($cimg[2])) ? 'http://uploadhero.co'.$cimg[1] : $cimg[1];
 
 			//Download captcha img.
 			$page = $this->GetPage($cimg, $this->cookie);
@@ -76,15 +80,15 @@ class uploadhero_com extends DownloadClass {
 	private function Login($link) {
 		global $premium_acc;
 		$pA = (!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass']) ? true : false);
-		$user = ($pA ? $_REQUEST['premium_user'] : $premium_acc['uploadhero_com']['user']);
-		$pass = ($pA ? $_REQUEST['premium_pass'] : $premium_acc['uploadhero_com']['pass']);
+		$user = ($pA ? $_REQUEST['premium_user'] : $premium_acc['uploadhero_co']['user']);
+		$pass = ($pA ? $_REQUEST['premium_pass'] : $premium_acc['uploadhero_co']['pass']);
 
 		if (empty($user) || empty($pass)) html_error('Login Failed: User or Password is empty. Please check login data.');
 		$post = array();
 		$post['pseudo_login'] = urlencode($user);
 		$post['password_login'] = urlencode($pass);
 
-		$purl = 'http://uploadhero.com/';
+		$purl = 'http://uploadhero.co/';
 		$page = $this->GetPage($purl.'lib/connexion.php', $this->cookie, $post, $purl);
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 
@@ -105,10 +109,12 @@ class uploadhero_com extends DownloadClass {
 	}
 
 	public function CheckBack($headers) {
-		if (preg_match('@\r\nLocation: https?://(www\.)?uploadhero\.com/optmizing@i', $headers)) html_error('[UploadHero] Server in Maintenance.');
+		if (preg_match('@\nLocation: https?://(www\.)?uploadhero\.com?/optmizing@i', $headers)) html_error('[UploadHero] Server in Maintenance.');
 	}
 }
 
 // [08-11-2012]  Written by Th3-822.
+// [04-4-2013]  Updated for .co tld + Small updates. - Th3-822
+// [24-11-2013]  Added server blocked msg. - Th3-822
 
 ?>

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Default Account Info =================
 $GRupload_user = ''; //  Set you username
 $GRupload_pass = ''; //  Set your password

@@ -19,7 +19,7 @@ class youtube_com extends DownloadClass {
 		$this->vid = $this->vid[1];
 		$link = 'http://www.youtube.com/watch?v='.$this->vid;
 
-		$this->page = $this->GetPage('http://www.youtube.com/get_video_info?video_id='.$this->vid.'&asv=3&el=detailpage&hl=en_US', $this->cookie);
+		$this->page = $this->GetPage('http://www.youtube.com/get_video_info?video_id='.$this->vid.'&asv=3&el=detailpage&hl=en_US&s'.'t'.'s'.'=0', $this->cookie);
 		$response = array_map('urldecode', $this->FormToArr(substr($this->page, strpos($this->page, "\r\n\r\n") + 4)));
 		if (!empty($response['reason'])) html_error('['.htmlentities($response['errorcode']).'] '.htmlentities($response['reason']));
 
@@ -28,7 +28,7 @@ class youtube_com extends DownloadClass {
 		if (empty($response['url_encoded_fmt_stream_map'])) html_error('Video links not found.');
 		$fmt_url_maps = explode(',', $response['url_encoded_fmt_stream_map']);
 
-		$this->fmts = array(38,37,22,45,35,44,34,43,18,5,17);
+		$this->fmts = array(38,37,46,22,45,44,35,43,34,18,6,5);
 		$yt_fmt = empty($_REQUEST['yt_fmt']) ? '' : $_REQUEST['yt_fmt'];
 		$this->fmturlmaps = $this->GetVideosArr($fmt_url_maps);
 
@@ -48,7 +48,7 @@ class youtube_com extends DownloadClass {
 		}
 
 		$ext = '.flv';
-		$fmtexts = array('.3gp' => array(17), '.mp4' => array(18,22,37,38), '.webm' => array(43,44,45));
+		$fmtexts = array('.mp4' => array(18,22,37,38), '.webm' => array(43,44,45,46));
 		foreach ($fmtexts as $k => $v) {
 			if (!is_array($v)) $v = array($v);  
 			if (in_array($fmt, $v)) {
@@ -58,12 +58,11 @@ class youtube_com extends DownloadClass {
 		}
 
 		if (empty($response['title'])) html_error('No video title found! Download halted.');
-		$FileName = str_replace(str_split('\\/:*?"<>|'), '_', html_entity_decode(trim($response['title']), ENT_QUOTES)) . "-[YT-f$fmt][{$this->vid}]$ext";
+		$FileName = str_replace(str_split('\\:*?"<>|=;'."\t\r\n\f"), '_', html_entity_decode(trim($response['title']), ENT_QUOTES));
+		if (!empty($_REQUEST['cleanname'])) $FileName = preg_replace('@[^ A-Za-z_\-\d\.,\(\)\[\]\{\}&\!\'\@\%\#]@u', '_', $FileName);
+		$FileName .= " [YT-f$fmt][{$this->vid}]$ext";
 
-		if (isset($_REQUEST['ytdirect']) && $_REQUEST['ytdirect'] == 'on') {
-			echo "<br /><br /><h4><a style='color:yellow' href='" . urldecode($furl) . "'>Click here or copy the link to your download manager to download</a></h4> (This may not work)";
-			echo "<input name='dlurl' style='width: 1000px; border: 1px solid #55AAFF; background-color: #FFFFFF; padding:3px' value='" . urldecode($furl) . "' onclick='javascript:this.select();' readonly></input>";
-		} else $this->RedirectDownload($furl, $FileName, $this->cookie, 0, 0, $FileName);
+		$this->RedirectDownload($furl, $FileName, $this->cookie, 0, 0, $FileName);
 	}
 
 	private function FormToArr($content, $v1 = '&', $v2 = '=') {
@@ -113,36 +112,47 @@ class youtube_com extends DownloadClass {
 	}
 
 	private function Show_reCaptcha($pid, $inputs, $sname = 'Download File') {
-		global $PHP_SELF;
 		if (!is_array($inputs)) html_error('Error parsing captcha data.');
 
 		// Themes: 'red', 'white', 'blackglass', 'clean'
-		echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n\n<center><form name='recaptcha' action='$PHP_SELF' method='POST'><br />\n";
+		echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n\n<center><form name='recaptcha' action='{$GLOBALS['PHP_SELF']}' method='POST'><br />\n";
 		foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='$input' />\n";
 		echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script><noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br /><input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n</form></center>\n</body>\n</html>";
 		exit;
+	}
+
+	private function sigDecode($sig) {
+		html_error('Encoded signature found D:');
 	}
 
 	private function GetVideosArr($fmtmaps) {
 		$fmturls = array();
 		foreach ($fmtmaps as $fmtlist) {
 			$fmtlist = array_map('urldecode', $this->FormToArr($fmtlist));
-			$fmturls[$fmtlist['itag']] = $fmtlist['url'];
-			if (stripos($fmtlist['url'], '&signature=') === false) $fmturls[$fmtlist['itag']] .= '&signature='.$fmtlist['sig'];
+			if (!in_array($fmtlist['itag'], $this->fmts)) continue;
+			$fmtlist['url'] = parse_url($fmtlist['url']);
+			$fmtlist['url']['query'] = array_map('urldecode', $this->FormToArr($fmtlist['url']['query']));
+			if (empty($fmtlist['url']['query']['signature'])) $fmtlist['url']['query']['signature'] = (!empty($fmtlist['s']) ? $this->sigDecode($fmtlist['s']) : $fmtlist['sig']);
+			foreach (array_diff(array_keys($fmtlist), array('signature', 'sig', 's', 'url')) as $k) $fmtlist['url']['query'][$k] = $fmtlist[$k];
+			ksort($fmtlist['url']['query']);
+			$fmtlist['url']['query'] = http_build_query($fmtlist['url']['query']);
+			$fmturls[$fmtlist['itag']] = rebuild_url($fmtlist['url']);
 		}
 		return $fmturls;
 	}
 
 	private function QSelector($link) {
-		global $PHP_SELF;
-		$fmtlangs = array(38 => 377, 37 => 228, 22 => 227, 45 => 225, 35 => 223, 44 => 389, 34 => 222, 43 => 224, 18 => 226, 5 => 221, 17 => 220);
+		$VR = array('>1080', 1080, 720, 480, 360, 270, 240);
+		$VC = array('MP4', 'WebM', 'FLV');
+		$AC = array('AAC', 'Vorbis', 'MP3');
+		$AB = array(192, 128, 96, 64);
+		$vinfo = array(38=>'0000',37=>'1000',46=>'1110',22=>'2000',45=>'2110',44=>'3111',35=>'3201',43=>'4111',34=>'4201',18=>'4002',6=>'5223',5=>'6223'); // VR VC AC AB
 
 		$sizes = array();
 		/* Add a // at the start of this line for enable this code.
 		if (extension_loaded('curl') && function_exists('curl_init') && function_exists('curl_exec')) {
 			$sizes = array();
 			$opt = array(CURLOPT_FOLLOWLOCATION => true, CURLOPT_MAXREDIRS => 5, CURLOPT_NOBODY => true); // Redirects may fail with open_basedir enabled
-			if (!empty($this->cookie)) $opt[CURLOPT_COOKIE] = CookiesToStr($this->cookie);
 			foreach ($this->fmturlmaps as $fmt => $url) {
 				if (!in_array($fmt, $this->fmts)) continue;
 				$headers = explode("\r\n\r\n", cURL($url, $this->cookie, 0, 0, 0, $opt));
@@ -153,18 +163,18 @@ class youtube_com extends DownloadClass {
 		} //*/
 
 		echo "\n<br /><br /><h3 style='text-align: center;'>".lang(216).".</h4>";
-		echo "\n<center><form name='YT_QS' action='$PHP_SELF' method='POST'>\n";
+		echo "\n<center><form name='YT_QS' action='{$GLOBALS['PHP_SELF']}' method='POST'>\n";
 		echo "<input type='hidden' name='yt_QS' value='on' />\n";
-		echo '<input type="checkbox" name="ytdirect" /><small>&nbsp;'.lang(217).'</small><br />';
+		echo '<label><input type="checkbox" name="cleanname" checked="checked" /><small>&nbsp;Remove non-supported characters from filename</small></label><br />';
 		echo "<select name='yt_fmt' id='QS_fmt'>\n";
-		foreach ($this->fmturlmaps as $fmt => $url) if (in_array($fmt, $this->fmts)) echo '<option '.($fmt == 18 ? "selected='selected' " : '')."value='$fmt'>".lang($fmtlangs[$fmt]).(!empty($sizes[$fmt]) ? ' ('.$sizes[$fmt].')' : '')."</option>\n";
+		foreach ($this->fmturlmaps as $fmt => $url) if (in_array($fmt, $this->fmts) && ($I = str_split($vinfo[$fmt]))) echo '<option '.($fmt == 18 ? "selected='selected' " : '')."value='$fmt'>[$fmt] Video: {$VC[$I[1]]} {$VR[$I[0]]}p | Audio: {$AC[$I[2]]} ~{$AB[$I[3]]} kbps".(!empty($sizes[$fmt]) ? ' ('.$sizes[$fmt].')' : '')."</option>\n";
 		echo "</select>\n";
 		if (count($this->cookie) > 0) $this->cookie = encrypt(CookiesToStr($this->cookie));
 		$data = $this->DefaultParamArr($link, $this->cookie);
 		$data['ytube_mp4'] = 'on';
 		foreach ($data as $n => $v) echo("<input type='hidden' name='$n' id='QS_$n' value='$v' />\n");
 
-		echo "<input type='submit' name='submit' value='".lang(209)."' />\n";
+		echo "<input type='submit' name='Th3-822' value='".lang(209)."' />\n";
 		echo "</form></center>\n</body>\n</html>";
 		exit;
 	}
@@ -184,5 +194,6 @@ class youtube_com extends DownloadClass {
 // [14-9-2012]  Fixed Download links & small changes. - Th3-822
 // [07-10-2012]  Fixed for redirect at link. - Th3-822
 // [02-1-2013]  Using new way for getting links and video info, now it doesn't need login for restricted videos. - Th3-822
+// [02-10-2013]  Fixed issues with videos with ciphered signature & Rewritten quality selector (Now it doesn't use lang) & Remove direct-link option & Added option for sanitize filenames & small changes. - Th3-822
 
 ?>

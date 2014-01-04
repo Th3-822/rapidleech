@@ -1,45 +1,9 @@
 <?php
-// ini_set('display_errors', 0);
-@set_time_limit(0);
-ini_alter('memory_limit', '1024M');
-if (ob_get_level()) ob_end_clean();
-ob_implicit_flush(true);
+
+require_once('rl_init.php');
 ignore_user_abort(true);
-clearstatcache();
-error_reporting(6135);
-$nn = "\r\n";
-$fromaddr = 'RapidLeech';
-$dev_name = 'Development Stage';
-$rev_num = '43';
-$plusrar_v = '4.1';
-$PHP_SELF = $_SERVER['SCRIPT_NAME'];
-define('RAPIDLEECH', 'yes');
-define('ROOT_DIR', realpath('./'));
-define('PATH_SPLITTER', ((strpos(ROOT_DIR, '\\') !== false) ? '\\' : '/'));
-define('HOST_DIR', 'hosts/');
-define('CLASS_DIR', 'classes/');
-define('CONFIG_DIR', 'configs/');
-define('BUILD', '30May2011');
-define('CREDITS', '<a href="http://www.rapidleech.com/" class="rl-link"><b>RapidLeech</b></a>&nbsp;<b class="rev-dev">PlugMod (eqbal) rev. ' . $rev_num . '</b> <span class="rev-dev">' . $dev_name . '</span><br><small class="small-credits">Credits to Pramode &amp; Checkmate &amp; Kloon</small><br /><p class="rapidleechhost"><a href="http://www.rapidleechhost.com/aff.php?aff=001" target="_blank">RapidleechHost Offical Hosting</a></p>');
+login_check();
 
-require_once(CONFIG_DIR . 'setup.php');
-// $options['download_dir'] should always end with a '/'
-if (substr($options['download_dir'], - 1) != '/') $options['download_dir'] .= '/';
-define('DOWNLOAD_DIR', (substr($options['download_dir'], 0, 6) == 'ftp://' ? '' : $options['download_dir']));
-
-define('TEMPLATE_DIR', 'templates/' . $options['template_used'] . '/');
-define('IMAGE_DIR', TEMPLATE_DIR . 'images/');
-
-if ($options['no_cache']) {
-	header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-	header('Last-Modified: ' . gmdate ("D, d M Y H:i:s") . 'GMT');
-	header('Cache-Control: no-cache, must-revalidate');
-	header('Pragma: no-cache');
-}
-
-require_once(CLASS_DIR . 'other.php');
-
-require_once(TEMPLATE_DIR . 'functions.php');
 // If configs/files.lst is not writable, give a warning
 if (!is__writable(CONFIG_DIR . 'files.lst')) html_error(lang(304));
 
@@ -47,18 +11,14 @@ if (!is__writable(CONFIG_DIR . 'files.lst')) html_error(lang(304));
 if (!is__writable(DOWNLOAD_DIR)) html_error(DOWNLOAD_DIR . lang(305));
 
 purge_files($options['delete_delay']);
-
 register_shutdown_function('pause_download');
 
-login_check();
-
-$_REQUEST['premium_acc'] = $_POST['premium_acc'] = isset($_REQUEST['premium_acc']) && $_REQUEST['premium_acc'] == 'on' ? 'on' : false;
-$_REQUEST['cookieuse'] = $_POST['cookieuse'] = isset($_REQUEST['cookieuse']) && $_REQUEST['cookieuse'] == 'on' ? 'on' : false;
-
-foreach($_POST as $key => $value) $_GET[$key] = $value;
+$_REQUEST = $_GET = array_merge($_GET, $_POST);
+$_REQUEST['premium_acc'] = $_POST['premium_acc'] = $_GET['premium_acc'] = isset($_REQUEST['premium_acc']) && $_REQUEST['premium_acc'] == 'on' ? 'on' : false;
+$_REQUEST['cookieuse'] = $_POST['cookieuse'] = $_GET['cookieuse'] = isset($_REQUEST['cookieuse']) && $_REQUEST['cookieuse'] == 'on' ? 'on' : false;
 
 if (!$_COOKIE) {
-	if (isset($_SERVER['HTTP_COOKIE']) && strpos ($_SERVER['HTTP_COOKIE'], ';') !== false) {
+	if (isset($_SERVER['HTTP_COOKIE']) && strpos($_SERVER['HTTP_COOKIE'], ';') !== false) {
 		foreach(explode('; ', $_SERVER['HTTP_COOKIE']) as $key => $value) {
 			list ($var, $val) = explode('=', $value);
 			$_COOKIE[$var] = $val;
@@ -76,7 +36,7 @@ if (!@file_exists(HOST_DIR . 'download/hosts.php')) html_error(lang(127));
 // require "hosts.php";
 require_once(HOST_DIR . 'download/hosts.php');
 
-if (!empty ($_GET['image'])) {
+if (!empty($_GET['image'])) {
 	require_once(CLASS_DIR . 'http.php');
 	require_once(CLASS_DIR . 'image.php');
 	exit();
@@ -98,10 +58,10 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 		exit();
 	}
 
-	check_referer();
+	if ($options['ref_check']) check_referer();
 
 	// Detect if it doesn't have a protocol assigned
-	if (stripos($LINK, '://') === false || (substr($LINK, 0, 7) != 'http://' && substr($LINK, 0, 6) != 'ftp://' && substr($LINK, 0, 6) != 'ssl://' && substr($LINK, 0, 8) != 'https://')) {
+	if (stripos($LINK, '://') === false || (strtolower(substr($LINK, 0, 7)) != 'http://' && strtolower(substr($LINK, 0, 6)) != 'ftp://' && strtolower(substr($LINK, 0, 6)) != 'ssl://' && strtolower(substr($LINK, 0, 8)) != 'https://')) {
 		// Automatically assign http://
 		$LINK = 'http://' . $LINK;
 	}
@@ -116,18 +76,20 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 	}
 
 	$Url = parse_url($LINK);
+	$Url['scheme'] = strtolower($Url['scheme']);
 
 	$Url['path'] = (empty($Url['path'])) ? '/' :str_replace('%2F', '/', rawurlencode(rawurldecode($Url['path'])));
 	$LINK = rebuild_url($Url);
 
 	if (empty($_GET['referer'])) {
 		$Referer = $Url;
+		$Referer['scheme'] = strtolower($Referer['scheme']);
 		// Remove login from Referer
 		unset($Referer['user'], $Referer['pass']);
 		$Referer = rebuild_url($Referer);
 	} else $Referer = trim(rawurldecode($_GET['referer']));
 
-	if ($Url['scheme'] != 'http' && $Url['scheme'] != 'https' && $Url['scheme'] != 'ftp') html_error(lang(5));
+	if (!in_array($Url['scheme'], array('http', 'https', 'ftp'))) html_error(lang(5));
 
 	if (empty($Url['user']) xor empty($Url['pass'])) {
 		unset($Url['user'], $Url['pass']);
@@ -159,9 +121,10 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 		foreach ($host as $site => $file) {
 			if (host_matches($site, $Url['host'])) {
 				include(TEMPLATE_DIR . '/header.php');
+				error_reporting(E_ERROR | E_PARSE | error_reporting()); // Make sure to show any critical error while loading the plugin.
 				require_once(CLASS_DIR . 'http.php');
 				require_once(HOST_DIR . 'DownloadClass.php');
-				require_once(HOST_DIR . 'download/' . $file);
+				require_once(HOST_DIR . "download/$file");
 				$class = substr($file, 0, -4);
 				$firstchar = substr($file, 0, 1);
 				if ($firstchar > 0) $class = "d$class";
@@ -193,8 +156,9 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 
 	insert_location($redir);
 } else {
+	require_once(TEMPLATE_DIR . 'functions.php');
 	include(TEMPLATE_DIR . '/header.php');
-	check_referer();
+	if ($options['ref_check']) check_referer();
 	echo('<div align="center">');
 
 	do {
@@ -213,6 +177,12 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 		// $resume_from = $_GET["resume"] ? intval(urldecode(trim($_GET["resume"]))) : 0;
 		// if ($_GET["resume"]) {unset($_GET["resume"]);}
 		$redirectto = '';
+
+		if ($options['bw_save']) {
+			$mydomain = ($pos = strpos($_SERVER['HTTP_HOST'], ':')) !== false ? substr($_SERVER['HTTP_HOST'], 0, $pos) : $_SERVER['HTTP_HOST'];
+			if (($_GET['host'] == $_SERVER['SERVER_ADDR'] || host_matches($mydomain, $_GET['host']))) html_error(sprintf(lang(7), $mydomain, $_SERVER['SERVER_ADDR']));
+			unset($mydomain);
+		}
 
 		$pauth = !empty($_GET['pauth']) ? decrypt(urldecode(trim($_GET['pauth']))) : '';
 
@@ -246,10 +216,10 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 
 		if ($options['redir'] && $lastError && strpos($lastError, substr(lang(95), 0, strpos(lang(95), '%1$s'))) !== false) {
 			$redirectto = trim(cut_str($lastError, substr(lang(95), 0, strpos(lang(95), '%1$s')), ']'));
-			print lang(8) . " <b>$redirectto</b> ... <br />$nn";
+			print lang(8) . ' <b>' . htmlspecialchars($redirectto) . "</b> ... <br />$nn";
 			$_GET['referer'] = urlencode($_GET['link']);
-			if (strpos($redirectto, '://') === false) { // If redirect doesn't have the host
-				$ref = parse_url(urldecode($_GET['referer']));
+			if (!preg_match('@^(?:https?|ftp)\://@i', $redirectto)) { // If redirect doesn't have the host
+				$ref = parse_url($_GET['link']);
 				unset($ref['user'], $ref['pass'], $ref['query'], $ref['fragment']);
 				if (substr($redirectto, 0, 1) != '/') $redirectto = "/$redirectto";
 				$purl = array_merge($ref, parse_url($redirectto));
@@ -258,19 +228,19 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 			$_GET['filename'] = urlencode(basename($purl['path']));
 			$_GET['host'] = urlencode($purl['host']);
 			$_GET['path'] = urlencode($purl['path'] . (!empty($purl['query']) ? '?' . $purl['query'] : ''));
-			$_GET['port'] = !empty($purl['port']) ? $purl['port'] : 80;
+			$_GET['port'] = !empty($purl['port']) ? $purl['port'] : 0;
 			$_GET['cookie'] = !empty($_GET['cookie']) ? urlencode(encrypt($_GET['cookie'])) : '';
-			if (is_array($_GET['post'])) $_GET['post'] = urlencode(encrypt(serialize($_GET['post'])));
+			if (is_array($_GET['post'])) $_GET['post'] = false;//$_GET['post'] = urlencode(encrypt(serialize($_GET['post'])));
 			if (!empty($_GET['proxy'])) {
 				$_GET['proxy'] = urlencode($_GET['proxy']);
 				if (!empty($pauth)) $_GET['pauth'] = urlencode(encrypt($pauth));
 			}
-			$lastError = $_GET['auth'] = ''; // With $_GET['auth'] empty it will still using the $auth
+			$lastError = $_GET['auth'] = '';
 			unset($ref, $purl);
 		}
 	} while ($redirectto && !$lastError);
 
-	if ($lastError) html_error($lastError, 0);
+	if ($lastError) html_error(htmlspecialchars($lastError), 0);
 	elseif ($file['bytesReceived'] == $file['bytesTotal'] || $file['size'] == 'Unknown') {
 		echo '<script type="text/javascript">' . "pr(100, '" . $file['size'] . "', '" . $file['speed'] . "')</script>\r\n";
 		echo sprintf(lang(10), link_for_file(dirname($pathWithName) . '/' . basename($file['file'])), $file['size'], $file['time'], $file['speed']);
@@ -301,7 +271,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 		if (!empty($_GET['audl'])) {
 			echo $nn . '<script type="text/javascript">parent.nextlink();</script>';
 		}
-		echo '<script type="text/javascript">location.reload();</script>';
+		//echo '<script type="text/javascript">location.reload();</script>';
 	}
 	echo "\n</div>\n</body>\n</html>";
 }

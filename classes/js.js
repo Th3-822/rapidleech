@@ -9,10 +9,10 @@ if (top != self) {
 
 function new_transload_window() {
 	var tmp = (new Date()).getTime();
-	$('form[name="transload"]').attr('target', 'rapidleech_' + tmp);
+	$('form[name=transload]').attr('target', 'rapidleech_' + tmp);
 	var options = 'width=700,height=320,toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=no,copyhistory=no';
 	window.open('', 'rapidleech_' + tmp, options);
-	window.setTimeout('$(\'form[name="transload"]\').submit();', 200);
+	window.setTimeout('$(\'form[name=transload]\').submit();', 200);
 }
 
 function table_filelist_refresh_headers() {
@@ -70,7 +70,7 @@ function deleteCookie(name, path, domain) {
 }
 
 function clearSettings() {
-	clear('domail', 'email', 'split', 'method', 'partSize', 'useproxy', 'proxy', 'saveto', 'path', 'savesettings');
+	clear('domail', 'email', 'saveto', 'path', 'useproxy', 'proxy', 'proxyuser', 'proxypass', 'split', 'partSize', 'savesettings', 'clearsettings', 'premium_acc', 'premium_user', 'premium_pass');
 	$('#domail, #splitchkbox, #useproxy, #premium_acc, #saveto, #savesettings').prop('checked', false);
 	$('#email, #proxyproxy, #proxyuser, #proxypass, #premium_user, #premium_pass').val('');
 	$('#emailtd, #splittd, #methodtd, #proxy, #premiumblock, #path, #clearsettings').hide();
@@ -78,7 +78,7 @@ function clearSettings() {
 }
 
 function clear() {
-	for (var i = 0; i < arguments.length; i++) document.cookie = arguments[i] + ' = ' + '; expires=Thu, 01-Jan-70 00:00:01 GMT';
+	for (var i = 0; i < arguments.length; i++) document.cookie = arguments[i] + ' = ; expires=Thu, 01-Jan-70 00:00:01 GMT';
 }
 
 //Match text
@@ -172,11 +172,8 @@ function changeStatus(file, size) {
 }
 
 function checkFile(id) {
-	if (document.getElementById('files' + id).checked == true) {
-		document.getElementById('files' + id).checked = false;
-	} else {
-		document.getElementById('files' + id).checked = true;
-	}
+	if (document.getElementById('files' + id).checked == true) document.getElementById('files' + id).checked = false;
+	else document.getElementById('files' + id).checked = true;
 	return false;
 }
 
@@ -199,8 +196,8 @@ function startLinkCheck() {
 		data: ({
 			submit: 'Check Links',
 			links: $('#links').val(),
-			k: ($('#chk_k').is(':checked')) ? 1 : 0,
-			d: ($('#chk_d').is(':checked')) ? 1 : 0
+			k: ($('#chk_k').prop('checked')) ? 1 : 0,
+			d: ($('#chk_d').prop('checked')) ? 1 : 0
 		}),
 		beforeSend: function () {
 			$('#linkchecker-results').hide();

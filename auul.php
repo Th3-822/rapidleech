@@ -1,37 +1,19 @@
 <?php
-$id=1;
-// A work of Chaza and TheOnly92!
-// Presents auto-upload script!
-// We define some constants here, essential for some parts in rapidleech
-define('RAPIDLEECH', 'yes');
-define('HOST_DIR', 'hosts/');
-define('CLASS_DIR', 'classes/');
-define('CONFIG_DIR', 'configs/');
-// Some configuration
-error_reporting(0);	// This sets error reporting to none, which means no errors will be reported
-//ini_set('display_errors', 1);	// This sets error reporting to all, all errors will be reported
-set_time_limit(0);	// Removes the time limit, so it can upload as many as possible
-ini_alter("memory_limit", "1024M");	// Set memory limit, in case it runs out when processing large files
-ob_end_clean();	// Cleans any previous outputs
-ob_implicit_flush(TRUE);	// Sets so that we can update the page without refreshing
-ignore_user_abort(1);	// Continue executing the script even if the page was stopped or closed
-clearstatcache();	// Clear caches created by PHP
-require_once(CONFIG_DIR.'setup.php');	// Reads the configuration file, so we can pick up any accounts needed to use
-define('DOWNLOAD_DIR', (substr($options['download_dir'], 0, 6) == "ftp://" ? '' : $options['download_dir']));	// Set the download directory constant
-define ( 'TEMPLATE_DIR', 'templates/'.$options['template_used'].'/' );
-define('IMAGE_DIR', TEMPLATE_DIR . 'images/');
 
-// Include other useful functions
-require_once(CLASS_DIR.'other.php');
-require_once(HOST_DIR.'download/hosts.php');
-require_once(CLASS_DIR.'http.php');
+require_once('rl_init.php');
 
 if ($options['auto_upload_disable']) {
 	require_once('deny.php');
 	exit();
 }
+error_reporting(0);
+ignore_user_abort(true);
+
 login_check();
 
+$id = 1;
+require_once(HOST_DIR.'download/hosts.php');
+require_once(CLASS_DIR.'http.php');
 include(TEMPLATE_DIR.'header.php');
 ?>
 <br />

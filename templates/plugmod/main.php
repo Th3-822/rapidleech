@@ -64,21 +64,15 @@ if ( !empty ( $premium_acc ) )
 
 <?php
 if (!$options['auto_download_disable']) {
-?>    
+?>
 <input class="button-auto" type="button" value="<?php echo lang(334); ?>" onclick="window.open('audl.php');return false;" />
 <?php
-}
-?>
-<br />
-<?php
+} echo "\n<br />\n";
 if (!$options['auto_upload_disable']) {
-?>    
+?>
 <input class="button-auto" type="button" value="<?php echo lang(335); ?>" onclick="window.open('auul.php');return false;" />
 <?php
-}
-?>
-<br />
-<?php
+} echo "\n<br />\n";
 if (!$options['notes_disable']) {
 ?>
 [ <a href="javascript:openNotes();"><?php echo lang(327); ?>.txt</a> ]

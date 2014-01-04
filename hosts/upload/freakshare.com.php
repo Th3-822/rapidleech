@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 ####### Account Info. ###########
 $freakshare_user = "";
 $freakshare_pass = "";

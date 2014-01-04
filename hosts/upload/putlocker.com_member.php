@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 ######## Account Info ########
 $upload_acc['putlocker_com']['user'] = ''; //Set your login
 $upload_acc['putlocker_com']['pass'] = ''; //Set your password
@@ -63,6 +63,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	$dlnk = trim(cut_str($upfiles, '<link>', '</link>'));
 	if (!empty($dlnk)) $download_link = $dlnk;
 	else {
+		is_present($upfiles, 'Uploading is current disabled');
 		$rmsg = trim(cut_str($upfiles, '<message>', '</message>'));
 		html_error('Upload error: Msg: '. htmlentities($rmsg));
 	}

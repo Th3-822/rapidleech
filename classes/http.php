@@ -83,25 +83,20 @@ function is_page($lpage) {
 
 function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveToFile = 0, $proxy = 0, $pauth = 0, $auth = 0, $scheme = 'http', $resume_from = 0, $XMLRequest = 0) {
 	global $nn, $lastError, $Resume, $bytesReceived, $fp, $fs, $force_name, $options;
-	$scheme .= '://';
+	$scheme = strtolower($scheme) . '://';
 
 	if (($post !== 0) && ($scheme == 'http://' || $scheme == 'https://')) {
 		$method = 'POST';
 		$postdata = is_array($post) ? formpostdata($post) : $post;
-		$length = strlen($postdata);
-		$content_tl = "Content-Type: application/x-www-form-urlencoded$nn" . "Content-Length: $length$nn";
 	} else {
 		$method = 'GET';
-		$content_tl = $postdata = '';
+		$postdata = '';
 	}
 
-	$cookies = '';
 	if (!empty($cookie)) {
-		if (is_array ($cookie)) {
-			if (count($cookie) > 0) $cookies = 'Cookie: ' . CookiesToStr($cookie) . $nn;
-		} else $cookies = 'Cookie: ' . trim($cookie) . $nn;
+		if (is_array($cookie)) $cookies = (count($cookie) > 0) ? CookiesToStr($cookie) : 0;
+		else $cookies = trim($cookie);
 	}
-	$referer = $referer ? "Referer: $referer$nn" : '';
 
 	if ($scheme == 'https://') {
 		$scheme = 'ssl://';
@@ -111,27 +106,33 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	if ($proxy) {
 		list($proxyHost, $proxyPort) = explode(':', $proxy, 2);
 		$host = $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
-		$url = $scheme . $host . $url;
+		$url = "$scheme$host$url";
 	}
 
 	if ($scheme != 'ssl://') $scheme = '';
 
-	$http_auth = (!empty($auth)) ? "Authorization: Basic $auth$nn" : '';
-	$proxyauth = (!empty($pauth)) ? "Proxy-Authorization: Basic $pauth$nn" : '';
-
 	$request = array();
 	$request[] = $method . ' ' . str_replace(' ', '%20', $url) . ' HTTP/1.1';
 	$request[] = "Host: $host";
-	$request[] = 'User-Agent: Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.12';
+	$request[] = 'User-Agent: Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.16';
 	$request[] = 'Accept: */*';
+	if (!empty($referer)) $request[] = "Referer: $referer";
+	if (!empty($cookies)) $request[] = "Cookie: $cookies";
 	$request[] = 'Accept-Language: en-US;q=0.7,en;q=0.3';
 	$request[] = 'Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7';
 	$request[] = 'Pragma: no-cache';
 	$request[] = 'Cache-Control: no-cache';
-	if ($Resume ['use'] === TRUE) $request[] = 'Range: bytes=' . $Resume ['from'] . '-';
+	if ($Resume['use'] === TRUE) $request[] = 'Range: bytes=' . $Resume['from'] . '-';
+	if (!empty($auth)) $request[] = "Authorization: Basic $auth";
+	if (!empty($pauth)) $request[] = "Proxy-Authorization: Basic $pauth";
+	if ($method == 'POST') {
+		if (!empty($referer) && stripos($referer, "\nContent-Type: ") === false) $request[] = 'Content-Type: application/x-www-form-urlencoded';
+		$request[] = 'Content-Length: ' . strlen($postdata);
+	}
 	if ($XMLRequest) $request[] = 'X-Requested-With: XMLHttpRequest';
+	$request[] = 'Connection: Close';
 
-	$request = implode($nn, $request) . $nn . $http_auth . $proxyauth . $referer . $cookies . $content_tl . 'Connection: Close' . $nn . $nn . $postdata;
+	$request = implode($nn, $request). $nn . $nn . $postdata;
 
 	$errno = 0;
 	$errstr = '';
@@ -141,6 +142,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 
 	if (!$fp) {
+		if (!function_exists('stream_socket_client')) html_error('[ERROR] stream_socket_client() is disabled.');
 		$dis_host = !empty($proxyHost) ? $proxyHost : $host;
 		$dis_port = !empty($proxyPort) ? $proxyPort : $port;
 		html_error(sprintf(lang(88), $dis_host, $dis_port));
@@ -174,6 +176,8 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		$len = strlen($header);
 		if (!$header || $len == $llen) {
 			$lastError = lang(91);
+			stream_socket_shutdown($fp, STREAM_SHUT_RDWR);
+			fclose($fp);
 			return false;
 		}
 		$llen = $len;
@@ -192,18 +196,23 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			} else $chkref = false;
 			$found = false;
 			if ($chkhost || $chkref) foreach ($GLOBALS['host'] as $site => $file) {
-				if ($chkhost && host_matches($site, $cbhost)) $found = true;
-				elseif ($chkref && host_matches($site, $cbrefhost)) $found = true;
+				if ($chkhost && host_matches($site, $cbhost)) {
+					$found = true;
+					break;
+				} elseif ($chkref && host_matches($site, $cbrefhost)) {
+					$found = true;
+					break;
+				}
+			}
 				if ($found) {
 					require_once(HOST_DIR . 'DownloadClass.php');
 					require_once(HOST_DIR . "download/$file");
 					$class = substr($file, 0, -4);
 					$firstchar = substr($file, 0, 1);
 					if ($firstchar > 0) $class = "d$class";
-					if (!class_exists($class) || !method_exists($class, 'CheckBack')) break; // is_callable(array($class , 'CheckBack'))
+				if (class_exists($class) && method_exists($class, 'CheckBack')) { // is_callable(array($class , 'CheckBack'))
 					$hostClass = new $class(false);
 					$hostClass->CheckBack($header);
-					break;
 				}
 			}
 			unset($cbhost, $cbrefhost, $chkhost, $chkref, $found);
@@ -243,17 +252,15 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			return FALSE;
 		}
 
-		if ($force_name) {
-			$FileName = $force_name;
-			$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $FileName;
-		} else {
+		if ($force_name) $FileName = $force_name;
+		else {
 			$ContentDisposition = trim(cut_str($header, "\nContent-Disposition: ", "\n")) . "\n";
 			if ($ContentDisposition && stripos($ContentDisposition, 'filename=') !== false) {
 				$FileName = trim(trim(trim(trim(trim(cut_str($ContentDisposition, 'filename=', "\n")), '='), '?'), ';'), '"');
-				if (strpos($FileName, '/') !== false) $FileName = basename($FileName);
-				$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $FileName;
-			}
+			} else $FileName = $saveToFile;
 		}
+		$FileName = str_replace(array_merge(range(chr(0), chr(31)), str_split("<>:\"/|?*\x5C\x7F")), '', basename(trim($FileName)));
+				$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $FileName;
 
 		if (!empty($options['rename_prefix'])) {
 			$File_Name = $options['rename_prefix'] . '_' . basename($saveToFile);
@@ -308,14 +315,14 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			$fileSize = bytesToKbOrMbOrGb($fileSize);
 		} else $fileSize = bytesToKbOrMbOrGb($bytesTotal);
 		$chunkSize = GetChunkSize($bytesTotal);
-		echo(lang(104) . ' <b>' . basename($saveToFile) . '</b>, ' . lang(56) . ' <b>' . $fileSize . '</b>...<br />');
+		echo(lang(104) . ' <b>' . basename($saveToFile) . '</b>, ' . lang(56) . " <b>$fileSize</b>...<br />");
 
 		//$scriptStarted = false;
 		require_once(TEMPLATE_DIR . '/transloadui.php');
 		if ($Resume['use'] === TRUE) {
 			$received = bytesToKbOrMbOrGb(filesize($saveToFile));
 			$percent = round($Resume['from'] / ($bytesTotal + $Resume['from']) * 100, 2);
-			echo '<script type="text/javascript">pr(' . "'" . $percent . "', '" . $received . "', '0');</script>";
+			echo "<script type='text/javascript'>pr('$percent', '$received', '0');</script>";
 			//$scriptStarted = true;
 			flush();
 		}
@@ -331,7 +338,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				$bytesReceived += $bytesSaved;
 			} else {
 				$lastError = sprintf(lang(105), basename($saveToFile));
-				unlink($saveToFile);
+				// unlink($saveToFile);
 				return false;
 			}
 			if ($bytesReceived >= $bytesTotal) $percent = 100;
@@ -340,29 +347,27 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				$received = bytesToKbOrMbOrGb($bytesReceived + $Resume['from']);
 				$time = getmicrotime() - $timeStart;
 				$chunkTime = $time - $lastChunkTime;
-				$chunkTime = $chunkTime ? $chunkTime : 1;
+				$chunkTime = (!($chunkTime < 0) && $chunkTime > 0) ? $chunkTime : 1;
 				$lastChunkTime = $time;
-				$speed = @round($chunkSize / 1024 / $chunkTime, 2);
-				/*if (!$scriptStarted) {
-					echo('<script type="text/javascript">');
-					$scriptStarted = true;
-				}*/
-				echo '<script type="text/javascript">pr('."'" . $percent . "', '" . $received . "', '" . $speed . "');</script>";
+				$speed = @round(($bytesReceived - $last) /*$chunkSize*/ / 1024 / $chunkTime, 2);
+				echo "<script type='text/javascript'>pr('$percent', '$received', '$speed');</script>";
 				$last = $bytesReceived;
 			}
+			if (!empty($bytesTotal) && ($bytesReceived + $chunkSize) > $bytesTotal) $chunkSize = $bytesTotal - $bytesReceived;
 		} else $page .= $data;
-	} while (strlen($data) > 0);
-	//echo('</script>');
+	} while (!feof($fp) && strlen($data) > 0);
 
 	if ($saveToFile) {
 		flock($fs, LOCK_UN);
 		fclose($fs);
 		if ($bytesReceived <= 0) {
 			$lastError = lang(106);
+			stream_socket_shutdown($fp, STREAM_SHUT_RDWR);
 			fclose($fp);
 			return FALSE;
 		}
 	}
+	stream_socket_shutdown($fp, STREAM_SHUT_RDWR);
 	fclose($fp);
 	if ($saveToFile) {
 		return array('time' => sec2time(round($time)), 'speed' => @round($bytesTotal / 1024 / (getmicrotime() - $timeStart), 2), 'received' => true, 'size' => $fileSize, 'bytesReceived' => ($bytesReceived + $Resume['from']), 'bytesTotal' => ($bytesTotal + $Resume ['from']), 'file' => $saveToFile);
@@ -379,6 +384,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0) {
 	global $pauth;
+	static $ch;
 	if (empty($link) || !is_string($link)) html_error(lang(24));
 	if (!extension_loaded('curl') || !function_exists('curl_init') || !function_exists('curl_exec')) html_error('cURL isn\'t enabled or cURL\'s functions are disabled');
 	$arr = explode("\r\n", $referer);
@@ -388,16 +394,18 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		unset($arr[0]);
 		$header = array_filter(array_map('trim', $arr));
 	}
+	$link = str_replace(array(' ', "\r", "\n"), array('%20'), $link);
 	$opt = array(CURLOPT_HEADER => 1, CURLOPT_SSL_VERIFYPEER => 0,
 		CURLOPT_SSL_VERIFYHOST => 0, CURLOPT_RETURNTRANSFER => 1,
 		CURLOPT_FOLLOWLOCATION => 0, CURLOPT_FAILONERROR => 0,
-		CURLOPT_FORBID_REUSE => 1, CURLOPT_FRESH_CONNECT => 1,
-		CURLINFO_HEADER_OUT => 1, CURLOPT_USERAGENT => 'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.12');
+		CURLOPT_FORBID_REUSE => 0, CURLOPT_FRESH_CONNECT => 0,
+		CURLINFO_HEADER_OUT => 1, CURLOPT_URL => $link,
+		CURLOPT_USERAGENT => 'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.16');
 	if (!empty($referer)) $opt[CURLOPT_REFERER] = $referer;
 	if (!empty($cookie)) $opt[CURLOPT_COOKIE] = (is_array($cookie) ? CookiesToStr($cookie) : trim($cookie));
 
 	// Send more headers...
-	$headers = array('Accept-Language: en-US;q=0.7,en;q=0.3', 'Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7', 'Pragma: no-cache', 'Cache-Control: no-cache', 'Connection: Close');
+	$headers = array('Accept-Language: en-US;q=0.7,en;q=0.3', 'Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7', 'Pragma: no-cache', 'Cache-Control: no-cache', 'Connection: Keep-Alive');
 	if (count($header) > 0) $headers = array_merge($headers, $header);
 	$opt[CURLOPT_HTTPHEADER] = $headers;
 
@@ -409,7 +417,6 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		$opt[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
 		$opt[CURLOPT_USERPWD] = base64_decode($auth);
 	}
-
 	if (isset($_GET['useproxy']) && !empty($_GET['proxy'])) {
 		$opt[CURLOPT_HTTPPROXYTUNNEL] = false;
 		$opt[CURLOPT_PROXY] = $_GET['proxy'];
@@ -418,16 +425,16 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 	$opt[CURLOPT_CONNECTTIMEOUT] = $opt[CURLOPT_TIMEOUT] = 120;
 	if (is_array($opts) && count($opts) > 0) foreach ($opts as $O => $V) $opt[$O] = $V;
 
-	$link = str_replace(array(' ', "\r", "\n"), array('%20'), $link);
-	$ch = curl_init($link);
+	if (!isset($ch)) $ch = curl_init();
+
 	foreach ($opt as $O => $V) curl_setopt($ch, $O, $V); // Using this instead of 'curl_setopt_array'
 	$page = curl_exec($ch);
 	$info = curl_getinfo($ch);
 	$errz = curl_errno($ch);
 	$errz2 = curl_error($ch);
-	curl_close($ch);
+	// curl_close($ch);
 
-	if (substr($page, 9, 3) == '100') $page = preg_replace("@^HTTP/1\.1 100 Continue\r\n\r\n(HTTP/1\.1 \d+ [^\r|\n]+)@i", "$1", $page, 1); // The "100 Continue" can break some functions in plugins, lets remove it...
+	if (substr($page, 9, 3) == '100' || !empty($opt[CURLOPT_HTTPPROXYTUNNEL])) $page = preg_replace("@^HTTP/1\.[01] \d{3}(?:\s[^\r\n]+)?\r\n\r\n(HTTP/1\.[01] \d+ [^\r\n]+)@i", "$1", $page, 1); // The "100 Continue" or "200 Connection established" can break some functions in plugins, lets remove it...
 	if ($errz != 0) html_error("[cURL:$errz] $errz2");
 
 	return $page;
@@ -470,19 +477,25 @@ function GetCookies($content) {
  * Function to get cookies & converted into array
  * @param string The content you want to get the cookie from
  * @param array Array of cookies to be updated [optional]
- * @param bool Options to remove temporary cookie (usually it named as 'deleted') [optional]
+ * @param bool Options to remove "deleted" or expired cookies (usually it named as 'deleted') [optional]
  * @param mixed The default name for temporary cookie, values are accepted in an array [optional]
  */
 function GetCookiesArr($content, $cookie=array(), $del=true, $dval=array('','deleted')) {
 	if (!is_array($cookie)) $cookie = array();
 	if (($hpos = strpos($content, "\r\n\r\n")) > 0) $content = substr($content, 0, $hpos); // We need only the headers
-	if (empty($content) || stripos($content, "\nSet-Cookie: ") === false || !preg_match_all ('/\nSet-Cookie: (.*)(;|\r\n)/U', $content, $temp)) return $cookie;
+	if (empty($content) || stripos($content, "\nSet-Cookie: ") === false || !preg_match_all ('/\nSet-Cookie: ([^\r\n]+)/', $content, $temp)) return $cookie;
 	foreach ($temp[1] as $v) {
+		if (strpos($v, ';') !== false) list($v, $p) = explode(';', $v, 2);
+		else $p = false;
 		$v = explode('=', $v, 2);
 		$cookie[$v[0]] = $v[1];
 		if ($del) {
 			if (!is_array($dval)) $dval = array($dval);
 			if (in_array($v[1], $dval)) unset($cookie[$v[0]]);
+			elseif (!empty($p)) {
+				if (stripos($p, 'Max-Age=') !== false && preg_match('/[ \;]?Max-Age=(-?\d+)/i', $p, $P) && (int)$P[1] < 1) unset($cookie[$v[0]]);
+				elseif (stripos($p, 'expires=') !== false && preg_match('/[ \;]?expires=([a-zA-Z]{3}, \d{1,2} [a-zA-Z]{3} \d{4} \d{1,2}:\d{1,2}:\d{1,2} GMT)/i', $p, $P) && ($P = strtotime($P[1])) !== false && $P <= time()) unset($cookie[$v[0]]);
+			}
 		}
 	}
 	return $cookie;
@@ -511,6 +524,8 @@ function StrToCookies($cookies, $cookie=array(), $del=true, $dval=array('','dele
 }
 
 function GetChunkSize($fsize) {
+	if ($fsize <= 0) return 4096;
+	if ($fsize < 4096) return (int)$fsize;
 	if ($fsize <= 1024 * 1024) return 4096;
 	if ($fsize <= 1024 * 1024 * 10) return 4096 * 10;
 	if ($fsize <= 1024 * 1024 * 40) return 4096 * 30;
@@ -527,9 +542,9 @@ function GetChunkSize($fsize) {
 }
 
 function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, $fieldname, $field2name = '', $proxy = 0, $pauth = 0, $upagent = 0, $scheme = 'http') {
-	global $nn, $lastError, $sleep_time, $sleep_count;
+	global $nn, $lastError, $sleep_time, $sleep_count, $fp, $fs;
 
-	if (empty($upagent)) $upagent = 'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.12';
+	if (empty($upagent)) $upagent = 'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.16';
 	$scheme .= '://';
 
 	$bound = '--------' . md5(microtime());
@@ -577,7 +592,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 	if ($proxy) {
 		list($proxyHost, $proxyPort) = explode(':', $proxy, 2);
 		$host = $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
-		$url = $scheme . $host . $url;
+		$url = "$scheme$host$url";
 	}
 
 	if ($scheme != 'ssl://') $scheme = '';
@@ -661,10 +676,11 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		$time = getmicrotime() - $timeStart;
 		$chunkTime = $time - $lastChunkTime;
 		$chunkTime = $chunkTime ? $chunkTime : 1;
+		$chunkTime = (!($chunkTime < 0) && $chunkTime > 0) ? $chunkTime : 1;
 		$lastChunkTime = $time;
 		$speed = round($sendbyte / 1024 / $chunkTime, 2);
 		$percent = round($totalsend / $fileSize * 100, 2);
-		echo '<script type="text/javascript">pr(' . "'" . $percent . "', '" . bytesToKbOrMbOrGb($totalsend) . "', '" . $speed . "');</script>\n";
+		echo "<script type='text/javascript'>pr('$percent', '" . bytesToKbOrMbOrGb($totalsend) . "', '$speed');</script>\n";
 		flush();
 	}
 	//echo('</script>');

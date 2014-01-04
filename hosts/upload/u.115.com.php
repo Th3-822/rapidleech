@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 ####### Account Info. ###########
 $u_115_login = ""; //Set you username

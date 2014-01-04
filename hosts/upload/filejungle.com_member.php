@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 ####### Account Info. ###########
 $fj_login = "";//Set you username
 $fj_pass = "";//Set your password

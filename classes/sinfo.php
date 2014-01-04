@@ -41,8 +41,9 @@ function checkos() {
 }
 function winosname() {
 	$wUnameB = php_uname ( "v" );
-	$wUnameBM = php_uname ( "r" );
-	$wUnameB = preg_replace ( "@build @i", "", $wUnameB );
+	$wUnameBM = trim( php_uname ( "r" ) );
+	if (preg_match ("@build (\d+)@i", $wUnameB, $build)) $wUnameB = $build[1];
+
 	if ($wUnameBM == "5.0" && ($wUnameB == "2195")) {
 		$wVer = "Windows 2000";
 	}
@@ -52,10 +53,10 @@ function winosname() {
 	if ($wUnameBM == "5.2" && ($wUnameB == "3790")) {
 		$wVer = "Windows Server 2003";
 	}
-	if ($wUnameBM == "6.0" && (php_uname ( "v" ) == "build 6000")) {
+	if ($wUnameBM == "6.0" && ($wUnameB == "6000")) {
 		$wVer = "Windows Vista";
 	}
-	if ($wUnameBM == "6.0" && (php_uname ( "v" ) == "build 6001")) {
+	if ($wUnameBM == "6.0" && ($wUnameB == "6001")) {
 		$wVer = "Windows Vista SP1";
 	}
 	return $wVer;
@@ -93,10 +94,13 @@ $prozent_belegt = 100 * $belegt / $insgesamt;
 		$wmi = new COM ( "Winmgmts://" );
 		$cpus = $wmi->execquery ( "SELECT * FROM Win32_Processor" );
 		$cpu_string = lang(136).':';
+		$cpu_load = 0;
 		foreach ( $cpus as $cpu ) {
+			$cpu_load += $cpu->loadpercentage;
 			$cpu_string .= "" . $cpu->loadpercentage;
 		}
-		$cpu_string .= '%<br /><img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpu->loadpercentage, "2" ) . '" border="0" /><br />';
+		$cpu_load /= count($cpus);
+		$cpu_string .= '%<br /><img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpu_load, "2" ) . '" border="0" /><br />';
 	} elseif ($os == "linux") {
 		function getStat($_statPath) {
 			if (trim ( $_statPath ) == '') {

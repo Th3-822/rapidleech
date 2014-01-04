@@ -1,21 +1,20 @@
 <?php
 
 if (!defined('RAPIDLEECH')) {
-	require_once ("index.html");
+	require_once('index.html');
 	exit();
 }
 
 class d4shared_com extends DownloadClass {
-	private $page, $cookie, $pA, $long_regexp;
+	private $page, $cookie, $pA, $long_regexp, $noTrafficFreeDl;
 	public $link;
 	public function Download($link) {
 		global $premium_acc;
-		$this->long_regexp = '@http://dc\d+\.4shared\.com/download/[^/|\"|\'|\r|\n|<|>|\s|\t]+/(?:tsid[^/|\"|\'|\r|\n|<|>|\s|\t]+/)?[^/|\"|\'|\r|\n|<|>|\s|\t]+@i';
+		$this->long_regexp = '@https?://dc\d+\.4shared\.com/download/[^/\"\'\r\n<>\s\t]+/(?:tsid[^/\"\'\r\n<>\s\t]+/)?[^/\"\'\r\n<>\s\t]+@i';
 		$this->cookie = array('4langcookie' => 'en');
+		$this->noTrafficFreeDl = true; // Set to true to switch to free download when premium traffic used is over the limit.
 
-		if (stristr($link, '.com/get/')) {
-			$link = str_replace('.com/get/', '.com/file/', $link);
-		}
+		if (stristr($link, '.com/get/')) $link = str_ireplace('.com/get/', '.com/file/', $link);
 		$this->link = $link;
 		$this->page = $this->GetPage($this->link, $this->cookie);
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
@@ -26,31 +25,29 @@ class d4shared_com extends DownloadClass {
 		if ($_REQUEST['premium_acc'] == 'on' && ((!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) || (!empty($premium_acc['4shared_com']['user']) && !empty($premium_acc['4shared_com']['pass'])))) {
 			$this->pA = (!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass']) ? true : false);
 			return $this->login();
-		} else {
-			return $this->FreeDownload();
-		}
+		} else return $this->FreeDownload();
 	}
 
 	private function FreeDownload() {
 		$this->CheckForPass();
 
-		if (preg_match('@window.location = "(http://dc\d+\.4shared\.com/download/[^/|\"|\'|;]+/[^/|\"|\'|\?|;]+)"@i', $this->page, $DL)) { // Direct link downloadable without login and countdown...
-			if (preg_match('/(?:\?|&)dirPwdVerified=(\w+)/i', $this->link, $pwd)) $DL[1] .= '&dirPwdVerified='.$pwd[1];
-			$FileName = urldecode(basename(parse_url($DL[1], PHP_URL_PATH)));
-			return $this->RedirectDownload($DL[1], $FileName, $this->cookie);
+		// Direct link downloadable without login or countdown...
+		if (preg_match('@window\.location[\s\t]*=[\s\t]*"(https?://dc\d+\.4shared\.com/download/[^/\"\';]+/[^/\"\'\?;]+)"@i', $this->page, $DL)) {
+			if (preg_match('/[\?&]dirPwdVerified=(\w+)/i', $this->link, $pwd)) $DL[1] .= '&dirPwdVerified='.$pwd[1];
+			return $this->RedirectDownload($DL[1], urldecode(basename(parse_url($DL[1], PHP_URL_PATH))), $this->cookie);
 		}
 
-		if (preg_match('@if[\s|\t]?\(true\)[\r|\n|\s|\t]*return[\s|\t]\w*download\w*\(\)[\s|\t]?&&[\s|\t]?authenticate[\s|\t]*\(@i', $this->page)) html_error('You need to be logged in for download this file.');
+		is_present($this->page, "You should log in to download this file. Sign up for free if you don\'t have an account yet.", 'You need to be logged in for download this file.');
 
-		if (!preg_match('/.com\/[^\/]+\/([^\/]+)\/?(.*)/i', $this->link, $L)) html_error('Invalid link?');
+		if (!preg_match('@\.com/[^/]+/([^/]+)/?(.*)@i', $this->link, $L)) html_error('Invalid link?');
 		$page = $this->GetPage("http://www.4shared.com/get/{$L[1]}/{$L[2]}", $this->cookie);
 
 		if (!preg_match($this->long_regexp, $page, $DL)) html_error('Download-link not found.');
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 		$dllink = $DL[0];
-		if (preg_match('/(?:\?|&)dirPwdVerified=(\w+)/i', $this->link, $pwd)) $dllink .= '&dirPwdVerified='.$pwd[1];
+		if (preg_match('/[\?&]dirPwdVerified=(\w+)/i', $this->link, $pwd)) $dllink .= '&dirPwdVerified='.$pwd[1];
 
-		if (!preg_match('@id="secondsLeft"[\s|\t]+value="(\d+)"@i', $page, $count) && !preg_match('@id="downloadDelayTimeSec"[^<|>|/]*>(\d+)<@i', $page, $count)) html_error('Timer not found.');
+		if (!preg_match('@id="secondsLeft"[\s\t]+value="(\d+)"@i', $page, $count) && !preg_match('@id="downloadDelayTimeSec"[^<>/]*>(\d+)<@i', $page, $count)) html_error('Timer not found.');
 
 		$FileName = urldecode(basename(parse_url($dllink, PHP_URL_PATH)));
 		if ($count[1] <= 120) $this->CountDown($count[1]);
@@ -92,12 +89,13 @@ class d4shared_com extends DownloadClass {
 
 	private function PremiumDownload() {
 		$page = $this->GetPage($this->link, $this->cookie);
+		$this->GetPage('http://www.4shared.com/get/gebpvkQ6/doberman_plays_hide_and_seek.html', $this->cookie);
 		$this->CheckForPass(true);
 
-		if (stripos($page, "\r\nContent-Length: 0\r\n") !== false) is_notpresent($page, "\r\nLocation:", 'Error: Direct link not found.');
+		if (stripos($page, "\nContent-Length: 0\n") !== false) is_notpresent($page, "\nLocation: ", 'Error: Direct link not found.');
 		if (!preg_match($this->long_regexp, $page, $DL)) html_error('Error: Download link not found.');
 		$dllink = $DL[0];
-		if (preg_match('/(?:\?|&)dirPwdVerified=(\w+)/i', $this->link, $pwd)) $dllink .= '&dirPwdVerified='.$pwd[1];
+		if (preg_match('/[\?&]dirPwdVerified=(\w+)/i', $this->link, $pwd)) $dllink .= '&dirPwdVerified='.$pwd[1];
 
 		$FileName = urldecode(basename(parse_url($dllink, PHP_URL_PATH)));
 		$this->RedirectDownload($dllink, $FileName, $this->cookie);
@@ -128,9 +126,11 @@ class d4shared_com extends DownloadClass {
 		$this->cookie = GetCookiesArr($page, $this->cookie, true, array('','deleted','""'));
 
 		$quota = cut_str($page, 'Premium Traffic:</div>', '</div>');
+		$Mesg = lang(300);
 
 		if (empty($quota) || !preg_match('@>([\d|\.]+)\s?(%|(?:\wB)) of ([\d|\.]+)\s?(\wB)@i', $quota, $qm)) {
-			$this->changeMesg(lang(300)."<br /><b>Account isn\\\'t premium?</b><br />Using it as member.");
+			$Mesg .= "<br /><b>Account isn\\\'t premium?</b><br />Using it as member.";
+			$this->changeMesg($Mesg);
 
 			$this->page = $this->GetPage($this->link, $this->cookie);
 			return $this->FreeDownload();
@@ -140,9 +140,18 @@ class d4shared_com extends DownloadClass {
 		$total = floatval($qm[3]);
 
 		// I have to check the BW... I will show it too :)
-		$this->changeMesg(lang(300)."<br />4S Premium Download<br />Bandwidth: $used {$qm[2]} of $total {$qm[4]}.");
+		$Mesg .= "<br />4S Premium Download<br />Bandwidth: $used {$qm[2]} of $total {$qm[4]}.";
+		$this->changeMesg($Mesg);
 		if ($qm[2] != '%' && $total != 100) $used = ($used * 100)/$total;
-		if ($used >= 95) html_error("Bandwidth limit trigered: Bandwidth: $used% - Limit: 95%");
+		if ($used >= 95) {
+			if ($this->noTrafficFreeDl) {
+				$Mesg .= "<br /><b>Bandwidth limit trigered: $used% - Limit: 95%</b><br />Switching to FreeDL.";
+				$this->changeMesg($Mesg);
+				$this->page = $this->GetPage($this->link, $this->cookie);
+				return $this->FreeDownload();
+			}
+			html_error("Bandwidth limit trigered: Bandwidth: $used% - Limit: 95%");
+		}
 
 		return $this->PremiumDownload();
 	}

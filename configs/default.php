@@ -22,7 +22,6 @@ $default_options = array(
 //Authorization
 'login' => false, # false - Authorization mode is off, true - on
 'users' => array('test' => 'test'), # false - Authorization mode is off, enter the username and password in the given way
-'login_cgi' => false, # true - Will try to workaround CGI authorization
 //Presentation
 'template_used' => 'plugmod',
 'default_language' => 'en',
@@ -51,19 +50,19 @@ $default_options = array(
 'disable_unzip' => false,
 'disable_rar' => false,
 'disable_unrar' => false,
-'disable_md5' => false,
+'disable_hashing' => false,
 'disable_md5_change' => false,
 'disable_list' => false,
 //Advanced
+'use_curl' => true, # true - Will use curl instead stream socket client(especially in ssl connection), disable this if filehost refuse data sended by curl. Need curl exec/extension enable in your server
+'redir' => true, # true - Redirect passive method
+'no_cache' => true, # true - Prohibition by Browser; otherwise allowed
+'ref_check' => true, # true - Disallow downloads from external referers. In some hosts this check may give false positives, disable if it doesn't let you download.
 '2gb_fix' => true, # true - Try to list files bigger than 2gb on 32 bit o.s.
 'forbidden_filetypes' => array('.htaccess', '.htpasswd', '.php', '.php3', '.php4', '.php5', '.phtml', '.asp', '.aspx', '.cgi'), # Enter the forbidden filetypes in the given way
 'forbidden_filetypes_block' => false, # false - rename forbidden_filetypes, true - completely block them
 'rename_these_filetypes_to' => '.xxx', # If forbidden_filetypes_block = false then rename those filetypes to this
 'check_these_before_unzipping' => true, # true - Don't allow extraction/creation of these filetypes from file actions
-'no_cache' => true, # true - Prohibition by Browser; otherwise allowed
-'images_via_php' => false, # true - RapidShare images are downloaded through the script, but it requires ssl support; turn it off if you can't see the image.
-'use_curl' => false, # true - Will use curl instead stream socket client(especially in ssl connection), disable this if filehost refuse data sended by curl. Need curl exec/extension enable in your server
-'redir' => true, # true - Redirect passive method
 'fgc' => 0
 );
 /*Default Options End*/

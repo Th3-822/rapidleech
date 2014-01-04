@@ -395,4 +395,8 @@ $lang[386] = 'Ignorar mayúsculas y minúsculas';
 $lang[387] = 'Colocar cada fichero en archivos separados';
 $lang[388] = 'OpenSSL';
 $lang[389] = '44 [Video: WebM 854x480 | Audio: Vorbis 2ch 44.10kHz]';
+$lang[390] = 'Hash CRC32';
+$lang[391] = 'El CRC32 encontrado en nombre del archivo es válido';
+$lang[392] = 'El CRC32 encontrado en nombre del archivo (&quot;%1$s&quot;) no concuerda con el CRC32 calculado';
+$lang[390] = 'Hash SHA1';
 ?>

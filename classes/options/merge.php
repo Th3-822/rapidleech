@@ -79,7 +79,7 @@ function merge_go() {
 					}
 					fclose ( $fs );
 				}
-				$path = realpath ( DOWNLOAD_DIR ) . '/';
+				$path = realpath ( DOWNLOAD_DIR ) . PATH_SPLITTER;
 				$filename = basename ( $data ['filename'] );
 				$partfiles = array ();
 				$partsSize = 0;

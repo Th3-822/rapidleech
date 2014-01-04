@@ -20,17 +20,17 @@ function getftpurl($host, $port, $url, $saveToFile = 0) {
 	$server = "$host:$port";
 	if (empty($host) || empty($port) || !$ftp->SetServer($host, (int) $port)) {
 		$ftp->quit();
-		$lastError = sprintf(lang(79), $server) . '<br /><a href="javascript:history.back(-1);">' . lang(78) . '</a><br /><br />';
+		$lastError = sprintf(lang(79), $server);
 		return FALSE;
 	} else {
 		if (!$ftp->connect()) {
 			$ftp->quit();
-			$lastError = sprintf(lang(79), $server) . '<br /><a href="javascript:history.back(-1);">' . lang(78) . '</a><br /><br />';
+			$lastError = sprintf(lang(79), $server);
 			return FALSE;
 		} else {
 			if (!$ftp->login()) {
 				$ftp->quit();
-				$lastError = lang(80) . '<br /><a href="javascript:history.back(-1);">' . lang(78) . '</a><br /><br />';
+				$lastError = lang(80);
 				return FALSE;
 			} else {
 				echo('<p>');
@@ -74,7 +74,11 @@ function getftpurl($host, $port, $url, $saveToFile = 0) {
 					$saveToFile = str_replace($filetype, $options['rename_these_filetypes_to'], $saveToFile);
 				}
 
-				if (file_exists($saveToFile)) $saveToFile = dirname($saveToFile) . PATH_SPLITTER . time() . '_' . basename($saveToFile);
+				if (@file_exists($saveToFile) && $options['bw_save']) {
+					// Skip in audl.
+					if (isset($_GET['audl'])) echo '<script type="text/javascript">parent.nextlink();</script>';
+					html_error(lang(99) . ': ' . link_for_file($saveToFile), 0);
+				} elseif (@file_exists($saveToFile)) $saveToFile = dirname($saveToFile) . PATH_SPLITTER . time() . '_' . basename($saveToFile);
 				printf(lang(83), basename($saveToFile), bytesToKbOrMbOrGb($fileSize));
 				echo "<br />";
 				require_once(TEMPLATE_DIR . '/transloadui.php');

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Default Account Info =================
 $filerio_user = ''; //  Set you username
 $filerio_pass = ''; //  Set your password
