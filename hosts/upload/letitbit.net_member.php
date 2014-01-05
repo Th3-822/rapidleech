@@ -66,7 +66,7 @@ if ($continue_up)
 	$post['base'] = cut_str($page, 'name="base" type="hidden" value="', '"');
 	$post['host'] = cut_str($page, 'name="host" type="hidden" value="', '"');
 
-	$up_url = "http://{$up[1]}/marker=$UID";textarea($up_url,0,0,1);
+	$up_url = "http://{$up[1]}/marker=$UID";
 ?>
 <script type="text/javascript">document.getElementById('info').style.display='none';</script>
 <?php
@@ -93,7 +93,7 @@ if ($continue_up)
 	}
 }
 
-function login($user, $pass) {
+function Login($user, $pass) {
 	global $cookie;
 	$post = array();
 	$post['act'] = "login";
@@ -116,7 +116,7 @@ function login($user, $pass) {
 function IWillNameItLater($cookie, $decrypt=true) {
 	if (!is_array($cookie)) {
 		if (!empty($cookie)) return $decrypt ? decrypt(urldecode($cookie)) : urlencode(encrypt($cookie));
-		return "";
+		return '';
 	}
 	if (count($cookie) < 1) return $cookie;
 	$keys = array_keys($cookie);
@@ -126,8 +126,9 @@ function IWillNameItLater($cookie, $decrypt=true) {
 	return array_combine($keys, $values);
 }
 
-function SkipLoginC($user, $pass, $filename = 'letitbit_ul.php') {
+function SkipLoginC($user, $pass) {
 	global $cookie, $hash, $maxdays, $secretkey;
+	$filename = 'letitbit_ul.php';
 	$maxdays = 3; // Max days to keep cookies saved
 	if (!defined('DOWNLOAD_DIR')) {
 		global $options;
@@ -136,7 +137,7 @@ function SkipLoginC($user, $pass, $filename = 'letitbit_ul.php') {
 	}
 
 	$filename = DOWNLOAD_DIR.basename($filename);
-	if (!file_exists($filename)) return login($user, $pass);
+	if (!file_exists($filename)) return Login($user, $pass);
 
 	$file = file($filename);
 	$savedcookies = unserialize($file[1]);
@@ -144,22 +145,24 @@ function SkipLoginC($user, $pass, $filename = 'letitbit_ul.php') {
 
 	$hash = hash('crc32b', $user.':'.$pass);
 	if (array_key_exists($hash, $savedcookies)) {
-		if (time() - $savedcookies[$hash]['time'] >= ($maxdays * 24 * 60 * 60)) return login($user, $pass); // Ignore old cookies
+		if (time() - $savedcookies[$hash]['time'] >= ($maxdays * 24 * 60 * 60)) return Login($user, $pass); // Ignore old cookies
 		$_secretkey = $secretkey;
 		$secretkey = sha1($user.':'.$pass);
-		$cookie = IWillNameItLater($savedcookies[$hash]['cookie']);
+		$cookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? IWillNameItLater($savedcookies[$hash]['cookie']) : '';
 		$secretkey = $_secretkey;
+		if ((is_array($cookie) && count($cookie) < 1) || empty($cookie)) return Login($user, $pass);
 
 		$page = geturl("letitbit.net", 80, "/", 'http://letitbit.net/', $cookie, 0, 0, $_GET["proxy"], $pauth);is_page($page);
-		if (stripos($page, 'title="Logout">Logout</a>') === false) return login($user, $pass);
+		if (stripos($page, 'title="Logout">Logout</a>') === false) return Login($user, $pass);
 		SaveCookies($user, $pass); // Update cookies file
 		return $page;
 	}
-	return login($user, $pass);
+	return Login($user, $pass);
 }
 
-function SaveCookies($user, $pass, $filename = 'letitbit_ul.php') {
+function SaveCookies($user, $pass) {
 	global $cookie, $maxdays, $secretkey;
+	$filename = 'letitbit_ul.php';
 	$filename = DOWNLOAD_DIR.basename($filename);
 	if (file_exists($filename)) {
 		$file = file($filename);
@@ -172,12 +175,13 @@ function SaveCookies($user, $pass, $filename = 'letitbit_ul.php') {
 	$hash = hash('crc32b', $user.':'.$pass);
 	$_secretkey = $secretkey;
 	$secretkey = sha1($user.':'.$pass);
-	$savedcookies[$hash] = array('time' => time(), 'cookie' => IWillNameItLater($cookie, false));
+	$savedcookies[$hash] = array('time' => time(), 'enc' => urlencode(encrypt('OK')), 'cookie' => IWillNameItLater($cookie, false));
 	$secretkey = $_secretkey;
 
 	write_file($filename, "<?php exit(); ?>\r\n" . serialize($savedcookies));
 }
 
 //[01-1-2012] Written by Th3-822. // Happy New Year!
+//[16-2-2012] Added functions for save encrypted cookies in a file (Works with more than 1 login) and for keep the cookies saved for 3 days since the last login (can be changed). - Th3-822
 
 ?>
