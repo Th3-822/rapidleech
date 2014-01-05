@@ -401,8 +401,10 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		CURLOPT_FORBID_REUSE => 0, CURLOPT_FRESH_CONNECT => 0,
 		CURLINFO_HEADER_OUT => 1, CURLOPT_URL => $link,
 		CURLOPT_USERAGENT => 'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.16');
-	if (!empty($referer)) $opt[CURLOPT_REFERER] = $referer;
+
+	$opt[CURLOPT_REFERER] = !empty($referer) ? $referer : false;
 	if (!empty($cookie)) $opt[CURLOPT_COOKIE] = (is_array($cookie) ? CookiesToStr($cookie) : trim($cookie));
+	else $opt[CURLOPT_COOKIE] = false;
 
 	// Send more headers...
 	$headers = array('Accept-Language: en-US;q=0.7,en;q=0.3', 'Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7', 'Pragma: no-cache', 'Cache-Control: no-cache', 'Connection: Keep-Alive');
@@ -412,16 +414,19 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 	if ($post != '0') {
 		$opt[CURLOPT_POST] = 1;
 		$opt[CURLOPT_POSTFIELDS] = is_array($post) ? formpostdata($post) : $post;
-	}
+	} else $opt[CURLOPT_HTTPGET] = 1;
+
 	if ($auth) {
 		$opt[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
 		$opt[CURLOPT_USERPWD] = base64_decode($auth);
-	}
+	} else $opt[CURLOPT_HTTPAUTH] = false;
+
 	if (isset($_GET['useproxy']) && !empty($_GET['proxy'])) {
 		$opt[CURLOPT_HTTPPROXYTUNNEL] = false;
 		$opt[CURLOPT_PROXY] = $_GET['proxy'];
-		if ($pauth) $opt[CURLOPT_PROXYUSERPWD] = base64_decode($pauth);
-	}
+		$opt[CURLOPT_PROXYUSERPWD] = ($pauth ? base64_decode($pauth) : false);
+	} else $opt[CURLOPT_PROXY] = false;
+
 	$opt[CURLOPT_CONNECTTIMEOUT] = $opt[CURLOPT_TIMEOUT] = 120;
 	if (is_array($opts) && count($opts) > 0) foreach ($opts as $O => $V) $opt[$O] = $V;
 
