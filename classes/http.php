@@ -403,11 +403,12 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		CURLOPT_USERAGENT => 'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.16');
 
 	$opt[CURLOPT_REFERER] = !empty($referer) ? $referer : false;
-	if (!empty($cookie)) $opt[CURLOPT_COOKIE] = (is_array($cookie) ? CookiesToStr($cookie) : trim($cookie));
-	else $opt[CURLOPT_COOKIE] = false;
+	$opt[CURLOPT_COOKIE] = !empty($cookie) ? (is_array($cookie) ? CookiesToStr($cookie) : trim($cookie)) : false;
 
 	// Send more headers...
 	$headers = array('Accept-Language: en-US;q=0.7,en;q=0.3', 'Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7', 'Pragma: no-cache', 'Cache-Control: no-cache', 'Connection: Keep-Alive');
+	if (empty($opt[CURLOPT_REFERER])) $headers[] = 'Referer:';
+	if (empty($opt[CURLOPT_COOKIE])) $headers[] = 'Cookie:';
 	if (count($header) > 0) $headers = array_merge($headers, $header);
 	$opt[CURLOPT_HTTPHEADER] = $headers;
 

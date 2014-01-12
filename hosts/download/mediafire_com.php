@@ -15,12 +15,17 @@ class mediafire_com extends DownloadClass {
 
 		$link = preg_replace('@https?://([^/]+\.)?mediafire\.com/(?!download/)((download\.php)|(file/)|(view/))?\??@i', 'http://www.mediafire.com/download/', $link);
 		$page = $this->GetPage($link, $Cookies);
+		$Cookies = GetCookiesArr($page, $Cookies);
+		if (preg_match('@\nLocation: .*(/download/([^/\r\n]+)/?[^\r\n]*)@i', $page, $redir)) {
+			$link = 'http://www.mediafire.com'.$redir[1];
+			$page = $this->GetPage($link, $Cookies);
+			$Cookies = GetCookiesArr($page, $Cookies);
+		}
 		if (preg_match('@/error\.php\?errno=\d+@i', $page, $redir)) {
 			$page = $this->GetPage('http://www.mediafire.com'.$redir[0]);
 			if (preg_match('@error_msg_title">\s*([^\r\n<>]+)\s*<@i', $page, $err)) html_error($err[1]);
 			html_error('Link is not available');
 		}
-		$Cookies = GetCookiesArr($page);
 
 		$this->MF_Captcha($link, $page);
 		if (strpos($page, 'name="downloadp" id="downloadp"')) {
@@ -121,6 +126,7 @@ class mediafire_com extends DownloadClass {
  * added solvemedia captcha support && fixed dead link msgs by Th3-822 06-10-2012
  * quick fix for new format/redirect for share links && fixed capcha submit url by Th3-822 24-05-2013
  * fixed password post url by Th3-822 27-07-2013
+ * fixed redirects by Th3-822 24-09-2013
  */
  
 ?>

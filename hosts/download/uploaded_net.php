@@ -16,6 +16,7 @@ class uploaded_net extends DownloadClass {
 			$this->page = $this->GetPage($this->link);
 			$header = substr($this->page, 0, strpos($this->page, "\r\n\r\n"));
 			is_present($header, '/404', 'File Not Found');
+			is_present($header, '/410', 'File Was Removed');
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		}
 
@@ -204,5 +205,6 @@ class uploaded_net extends DownloadClass {
 }
 
 //[29-5-2013] Written by Th3-822.
+//[09-1-2013] Added '410 Gone' error. - Th3-822
 
 ?>
