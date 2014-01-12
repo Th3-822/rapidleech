@@ -39,16 +39,17 @@ class uptobox_com extends DownloadClass {
 		$post['referer'] = '';
 		$post['method_free'] = cut_str($page2, 'name="method_free" value="', '"');
 
-		if (!preg_match_all("@<span style='[^\'>]*padding-left\s*:\s*(\d+)[^\'>]*'[^>]*>((?:&#\w+;)|(?:\d))</span>@i", $page2, $spans)) html_error('Error: Cannot decode captcha.');
-		$spans = array_combine($spans[1], $spans[2]);
-		ksort($spans, SORT_NUMERIC);
-		$captcha = '';
-		foreach ($spans as $digit) $captcha .= $digit;
-		$post['code'] = html_entity_decode($captcha);
+		if (preg_match_all("@<span style='[^\'>]*padding-left\s*:\s*(\d+)[^\'>]*'[^>]*>((?:&#\w+;)|(?:\d))</span>@i", $page2, $spans)) {
+			$spans = array_combine($spans[1], $spans[2]);
+			ksort($spans, SORT_NUMERIC);
+			$captcha = '';
+			foreach ($spans as $digit) $captcha .= $digit;
+			$post['code'] = html_entity_decode($captcha);
+		}
 
 		$post['down_script'] = 1;
 
-		if (preg_match('@<span id="countdown_str"[^>]*>[^<>]+<span[^>]*>(\d+)</span>[^<>]+</span>@i', $page2, $count) && $count[1] > 0) $this->CountDown($count[1]);
+		if (preg_match('@<span id="\w+"[^>]*>(\d+)</span>\s*seconds@i', $page2, $count) && $count[1] > 0) $this->CountDown($count[1]);
 
 		$page = $this->GetPage($link, $this->cookie, $post);
 
@@ -115,5 +116,6 @@ class uptobox_com extends DownloadClass {
 }
 
 // [05-7-2013]  Written by Th3-822. (XFS, XFS everywhere. D:)
+// [05-1-2013]  Fixed FreeDL. - Th3-822
 
 ?>
