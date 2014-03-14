@@ -12,7 +12,7 @@ if (!isset($nn)) $nn = "\r\n";
 if (!isset($page_title)) {
 	echo 'Rapidleech v2 rev. '.$rev_num;
 } else {
-	echo htmlentities($page_title);
+	echo htmlspecialchars($page_title);
 }
 ?></title>
 <script type="text/javascript">

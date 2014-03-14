@@ -97,10 +97,10 @@ class filecloud_io extends DownloadClass {
 		$post['ukey'] = $this->_ukey;
 		$post['__ab1'] = $this->ab1; // More annoying ad-block trap.
 		if ($send) {
-			if (empty($_POST['captcha'])) html_error('You didn\'t enter the image verification code.');
+			if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
 			$post['ctype'] = 'recaptcha';
-			$post['recaptcha_response'] = $_POST['captcha'];
-			$post['recaptcha_challenge'] = $_POST['challenge'];
+			$post['recaptcha_response'] = $_POST['recaptcha_response_field'];
+			$post['recaptcha_challenge'] = $_POST['recaptcha_challenge_field'];
 
 			$this->_url = urldecode($_POST['_url']);
 			$this->dlreq = urldecode($_POST['_dlreq']);
@@ -127,30 +127,11 @@ class filecloud_io extends DownloadClass {
 					$data['_dlreq'] = urlencode($this->dlreq);
 					$data['_ab1'] = urlencode($this->ab1);
 					$data['skip'] = 'true';
-					$this->DL_reCaptcha($this->captcha, $data);
+					$this->reCAPTCHA($this->captcha, $data);
 				}
 			} else html_error("Error getting download data ('{$rply['status']}' => '{$rply['message']}').");
 		}
 		return false;
-	}
-
-	private function DL_reCaptcha($pid, $data) {
-		$page = $this->GetPage('http://www.google.com/recaptcha/api/challenge?k=' . $pid);
-		if (!preg_match('/challenge \: \'([^\']+)/i', $page, $ch)) html_error('Error getting CAPTCHA data.');
-		$challenge = $ch[1];
-
-		$data['challenge'] = $challenge;
-
-		//Download captcha img.
-		$page = $this->GetPage('http://www.google.com/recaptcha/api/image?c=' . $challenge);
-		$capt_img = substr($page, strpos($page, "\r\n\r\n") + 4);
-		$imgfile = DOWNLOAD_DIR . 'filecloud_captcha.jpg';
-
-		if (file_exists($imgfile)) unlink($imgfile);
-		if (!write_file($imgfile, $capt_img)) html_error('Error getting CAPTCHA image.');
-
-		$this->EnterCaptcha($imgfile.'?'.time(), $data, 20);
-		exit;
 	}
 
 	private function Login($cantlogin) {

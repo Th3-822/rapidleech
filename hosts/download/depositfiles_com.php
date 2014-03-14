@@ -12,19 +12,16 @@ class depositfiles_com extends DownloadClass {
 		global $premium_acc;
 		$this->pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
 		$this->link = str_ireplace('https://', 'http://', $link);
-		$this->domain = 'depositfiles.com';
 		$this->cookie = array('lang_current' => 'en');
 		$this->DLregexp = '@https?://fileshare\d+\.(?:depositfiles|dfiles)\.[^/:\r\n\t\"\'<>]+(?:\:\d+)?/auth-[^\r\n\t\"\'<>]+@i';
 		$this->TryFreeDLTricks = true;
 		$EnableJsCountdowns = false; // Change this to true if you can't download because server/client timeouts... Doesn't work with audl serverside.
+		$this->domain = parse_url($this->link, PHP_URL_HOST);
 		if (empty($_REQUEST['step'])) {
 			$this->page = $this->GetPage($this->link);
 			$this->CheckDomain();
 			is_present($this->page, 'This file does not exist', 'The requested file is not found');
-		} else {
-			$this->domain = parse_url($this->link, PHP_URL_HOST);
-			$this->CheckDomain(false);
-		}
+		} else $this->CheckDomain(false);
 
 		if (($_REQUEST['premium_acc'] == 'on' && ($this->pA || (!empty($premium_acc['depositfiles_com']['user']) && !empty($premium_acc['depositfiles_com']['pass']))))) {
 			$user = ($this->pA ? $_REQUEST['premium_user'] : $premium_acc['depositfiles_com']['user']);
@@ -125,7 +122,7 @@ class depositfiles_com extends DownloadClass {
 				$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
 				$data['step'] = '1';
 				$data['fid'] = urlencode($_POST['T8']['fid']);
-				$this->Show_reCaptcha(urlencode($_POST['T8']['cpid']), $data);
+				$this->reCAPTCHA(urlencode($_POST['T8']['cpid']), $data);
 				exit;
 		}
 
@@ -174,7 +171,7 @@ class depositfiles_com extends DownloadClass {
 			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
 			$data['step'] = '1';
 			$data['fid'] = urlencode($fid[1]);
-			$this->Show_reCaptcha($cpid[1], $data);
+			$this->reCAPTCHA($cpid[1], $data);
 	}
 
 	private function FreeDL() {
@@ -241,7 +238,7 @@ class depositfiles_com extends DownloadClass {
 			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
 			$data['step'] = '1';
 			$data['fid'] = urlencode($fid[1]);
-			$this->Show_reCaptcha($cpid[1], $data);
+			$this->reCAPTCHA($cpid[1], $data);
 		}
 	}
 
@@ -310,7 +307,7 @@ class depositfiles_com extends DownloadClass {
 				$data['premium_user'] = urlencode(encrypt($user));
 				$data['premium_pass'] = urlencode(encrypt($pass));
 			}
-			$this->Show_reCaptcha($cpid[1], $data, 'Login');
+			$this->reCAPTCHA($cpid[1], $data, 'Login');
 		}
 	}
 
@@ -321,17 +318,6 @@ class depositfiles_com extends DownloadClass {
 		$rply = json_decode($json, true);
 		if (!$rply || count($rply) == 0) html_error('Error reading json.');
 		return $rply;
-	}
-
-	private function Show_reCaptcha($pid, $inputs, $sname = 'Download File') {
-		global $PHP_SELF;
-		if (!is_array($inputs)) html_error('Error parsing captcha data.');
-
-		// Themes: 'red', 'white', 'blackglass', 'clean'
-		echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n\n<center><form name='recaptcha' action='$PHP_SELF' method='POST'><br />\n";
-		foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='$input' />\n";
-		echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script><noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br /><input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n</form></center>\n</body>\n</html>";
-		exit;
 	}
 
 	private function IWillNameItLater($cookie, $decrypt=true) {
@@ -399,9 +385,12 @@ class depositfiles_com extends DownloadClass {
 	public function CheckBack($header) {
 		$statuscode = (int) substr($header, 9, 3);
 		if ($statuscode == 400) {
-			if (stripos($header, "\nGuest-Limit: Wait") !== false) html_error('[Depositfiles] FreeDL Limit Reached, try downloading again for countdown.');
-			elseif (stripos($header, "\nDownload-Error: No such voucher") !== false) html_error('[Depositfiles] Expired download link.');
+			if (stripos($header, "\nGuest-Limit: Wait") !== false) html_error('[DepositFiles] FreeDL Limit Reached, try downloading again for countdown.');
+			elseif (stripos($header, "\nDownload-Error: No such voucher") !== false) html_error('[DepositFiles] Expired download link.');
 			else html_error('Error: 400 Bad Request');
+		} elseif ($statuscode == 404) {
+			textarea($header);
+			html_error('[DepositFiles] Your IP was banned?.');
 		}
 	}
 }

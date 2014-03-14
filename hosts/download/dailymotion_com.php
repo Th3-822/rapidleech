@@ -1,66 +1,94 @@
 <?php
+
 if (!defined('RAPIDLEECH')) {
-    require_once("index.html");
-    exit;
+	require_once('index.html');
+	exit();
 }
 
 class dailymotion_com extends DownloadClass {
+	private $cookie, $xid, $title, $streams,
+	$formats = array('1080' => 'stream_h264_hd1080_url', '720' => 'stream_h264_hd_url',
+		'480' => 'stream_h264_hq_url', '384' => 'stream_h264_url', '240' => 'stream_h264_ld_url');
 
-    public function Download($link) {
-        $page = $this->GetPage($link);
-        is_present($page, 'HTTP/1.1 410 Gone', 'This video has been removed by the user.');
-        is_present($page, 'HTTP/1.1 403 Forbidden', 'This video is forbidden to download!');
-        is_present($page, '(private)', 'This video is set to be PRIVATE!');
-        $Cookies = GetCookies($page);
-		if(preg_match('#ocation: (.*)#', $page, $loc)){
-		$page = $this->GetPage('http://www.dailymotion.com'.$loc[1]);
-		is_page($page);
-		is_present($page, 'HTTP/1.1 404', 'Page Not Found! [0*01]');
-		if(!preg_match('#trackPageview\("([^"]+)"#', $page, $family)){
-			html_error('Error in process Download [0*01]');
+	public function Download($link) {
+		$this->cookie = !empty($_POST['step']) && !empty($_POST['cookie']) ? StrToCookies(decrypt(urldecode($_POST['cookie']))) : array('ff' => 'off');
+		if (!preg_match('@/video/(x[0-9a-zA-Z]+)@i', $link, $xid)) html_error('Video ID not found.');
+		$this->xid = $xid[1];
+		$this->link = 'http://www.dailymotion.com/video/'.$this->xid;
+
+		if (empty($_POST['step'])) {
+			$page = $this->GetPage($this->link, $this->cookie);
+			$this->cookie = GetCookiesArr($page, $this->cookie);
+
+			$status = (int)substr($page, 9, 3);
+			switch ($status) {
+				case 200: break;
+				case 403: html_error('This video is forbidden to download!');break;
+				case 404: html_error('404 Not Found');break;
+				case 410: html_error('This video has been removed by the user.');break;
+				default: html_error("Unexpected response: $status");break;
+			}
 		}
-		$page = $this->GetPage('http://www.dailymotion.com'.$family[1].'&enable=false');
-		is_page($page);
-		is_present($page, 'HTTP/1.1 404', 'Page Not Found! [0*02]');
-		if(!preg_match('#ocation: (.*)#', $page, $loc2)){
-			html_error('Error in process Download [0*02]');
-		}
-		$page = $this->GetPage($loc2[1]);
-		is_page($page);
-		is_present($page, 'HTTP/1.1 404', 'Page Not Found! [0*03]');
-		$Cookies = $Cookies.'; '.GetCookies($page);
-		if(!preg_match('#ocation: (.*)#', $page, $loc3)){
-			html_error('Error in process Download [0*03]');
-		}
-		$page = $this->GetPage($loc3[1], $Cookies);
-		is_page($page);
-	    is_present($page, 'HTTP/1.1 404', 'Page Not Found! [0*04]');
-		}
-        $FileName = trim(cut_str($page, '<title>', '</title>'));
-        $FileName = str_replace(" ", "_", $FileName) . ".mp4";
-		
-        try {
-            if (!preg_match('@"hqURL":"([^|\r|\n|"]+)@i', urldecode($page), $temp)) {
-                preg_match('@"(?:sd)?URL":"([^|\r|\n|"]+)@i', urldecode($page), $temp);
-            }
-            if (!isset($temp[1])) {
-                throw new Exception("Error : Video link not found!");
-            }
-            $temp = str_replace("\/", "/", $temp[1]) . "&redirect=0";
-            $page = $this->GetPage($temp, $Cookies);
-            if (!preg_match('#http://.+dailymotion.com/video/[^\r\n]+#', $page, $dlink)) {
-                throw new Exception("Error : Direct link not found!");
-            }
-            $this->RedirectDownload($dlink[0], $FileName, $Cookies, 0, $temp);
-            exit();
-        } catch (Exception $e) {
-            html_error($e->getMessage());
-        }
-    }
+
+		$this->getVideoInfo();
+
+		if (empty($_POST['dlstream']) && !isset($_GET['audl'])) return $this->QSelector();
+		elseif (empty($_POST['dlstream']) || !empty($this->streams[$_POST['dlstream']])) {
+			$key = (empty($_POST['dlstream']) ? key($this->streams) : $_POST['dlstream']);
+			$DL = $this->streams[$key];
+		} else html_error('Selected video stream was not found.');
+
+		$filename = preg_replace('@[^ A-Za-z_\-\d\.,\(\)\[\]\{\}&\!\'\@\%\#]@u', '_', trim($this->title), ENT_QUOTES);
+		$filename .= " [DM-{$key}p][{$this->xid}].mp4";
+
+		$page = $this->GetPage($DL, $this->cookie);
+		if (!preg_match('@https?://[^/\s]+/video/[^\s<>\'\"]+@i', $page, $DL)) html_error('Download Link not Found.');
+
+		$this->RedirectDownload($DL[0], $filename, $this->cookie, 0, 0, $filename);
+	}
+
+	private function Get_Reply($content) {
+		if (!function_exists('json_decode')) html_error('Error: Please enable JSON in php.');
+		if (($pos = strpos($content, "\r\n\r\n")) > 0) $content = substr($content, $pos + 4);
+		$cb_pos = strpos($content, '{');
+		$sb_pos = strpos($content, '[');
+		if ($cb_pos === false && $sb_pos === false) html_error('Json start braces not found.');
+		$sb = ($cb_pos === false || $sb_pos < $cb_pos) ? true : false;
+		$content = substr($content, strpos($content, ($sb ? '[' : '{')));$content = substr($content, 0, strrpos($content, ($sb ? ']' : '}')) + 1);
+		if (empty($content)) html_error('No json content.');
+		$rply = json_decode($content, true);
+		if (!$rply || count($rply) == 0) html_error('Error reading json.');
+		return $rply;
+	}
+
+	private function getVideoInfo() {
+		$page = $this->GetPage("http://www.dailymotion.com/json/video/{$this->xid}?fields=title%2C".implode('%2C', $this->formats), $this->cookie);
+		$json = $this->Get_Reply($page);
+
+		if (empty($json['title'])) html_error('Video Title not Found.');
+		$this->title = $json['title'];
+
+		$this->streams = array();
+		foreach ($this->formats as $key => $fmt) if (!empty($json[$fmt])) $this->streams[$key] = $json[$fmt];
+		if (empty($this->streams)) html_error('Video Streams not Found.');
+	}
+
+	private function QSelector() {
+		echo "\n<br /><br /><h3 style='text-align: center;'>Video Quality Selector</h4>";
+		echo "\n<center><form name='T8_QS' action='{$GLOBALS['PHP_SELF']}' method='POST'>\n";
+		echo "<select name='dlstream' id='QS_fmt'>\n";
+		foreach ($this->streams as $fmt => $url) echo "<option value='$fmt'>{$fmt}p</option>\n";
+		echo "</select>\n";
+		if (count($this->cookie) > 0) $this->cookie = encrypt(CookiesToStr($this->cookie));
+		$data = $this->DefaultParamArr($this->link, $this->cookie);
+		$data['step'] = 1;
+		foreach ($data as $n => $v) echo("<input type='hidden' name='$n' id='QS_$n' value='$v' />\n");
+		echo "<input type='submit' name='Th3-822' value='".lang(209)."' />\n";
+		echo "</form></center>\n</body>\n</html>";
+		exit;
+	}
 }
 
-// dailymotion download plugin by vdhdevil
-// small fix in regex & filename by Ruud v.Tony 07-11-2011
-// small fix in regex based on SVN patch by Th3-822 13-12-2011
-// fixed bug with videos for over 18 years by SD-88 08.04.2012
+//[07-3-2014] Written by Th3-822.
+
 ?>

@@ -263,6 +263,6 @@ class rapidgator_net extends DownloadClass {
 // [28-1-2013]  Added Login captcha support. - Th3-822
 // [10-8-2013] Fixed redirects (again). - Th3-822
 // [25-11-2013] Fixed redirects function (aagain :D ). - Th3-822
-// [03-01-2013] Added support for rg.to domain. - Th3-822
+// [03-01-2014] Added support for rg.to domain. - Th3-822
 
 ?>
