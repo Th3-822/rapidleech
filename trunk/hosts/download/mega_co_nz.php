@@ -14,9 +14,9 @@ class mega_co_nz extends DownloadClass {
 
 		$fragment = parse_url($link, PHP_URL_FRAGMENT);
 		if (preg_match('@^F!([^!]{8})!([\w\-\,]{22})@i', $fragment, $fid)) return $this->Folder($fid[1], $fid[2]);
-		if (!preg_match('@^(T8)?!([^!]{8})!([\w\-\,]{43})@i', $fragment, $fid)) html_error('FileID or Key not found at link.');
+		if (!preg_match('@^(T8)?!([^!]{8})!([\w\-\,]{43})(?:!([^!]{8})!)?@i', $fragment, $fid)) html_error('FileID or Key not found at link.');
 
-		$reply = $this->apiReq(array('a' => 'g', 'g' => '1', (empty($fid[1]) ? 'p' : 'n') => $fid[2], 'ssl'=> '0'));
+		$reply = $this->apiReq(array('a' => 'g', 'g' => '1', (empty($fid[1]) ? 'p' : 'n') => $fid[2], 'ssl'=> '0'), (!empty($fid[1]) && !empty($fid[4]) ? $fid[4] : ''));
 		$this->CheckErr($reply[0]);
 		if (!empty($reply[0]['e'])) $this->CheckErr($reply[0]['e']);
 
@@ -168,14 +168,15 @@ class mega_co_nz extends DownloadClass {
 	}
 
 	private function Folder($fnid, $fnk) {
-		$files = $this->apiReq(array('a' => 'f', 'c' => 1), $fnid);
+		$files = $this->apiReq(array('a' => 'f', 'c' => 1, 'r' => 1), $fnid);
 		if (is_numeric($files[0])) $this->CheckErr($files[0], 'Cannot get folder contents');
 		$dfiles = array();
+
 		foreach ($files[0]['f'] as $file) if ($file['t'] == 0) {
 			$keys = array();
 			foreach (explode('/', $file['k']) as $key) if (strpos($key, ':') !== false && $key = explode(':', $key, 2)) $keys[$key[0]] = $key[1];
-			if (!array_key_exists($file['p'], $keys)) continue;
-			$key = $this->decrypt_key($this->base64_to_a32($keys[$file['p']]), $this->base64_to_a32($fnk));
+			if (empty($keys)) continue;
+			$key = $this->decrypt_key($this->base64_to_a32(reset($keys)), $this->base64_to_a32($fnk));
 			if (empty($key)) continue;
 			$attr = $this->dec_attr($this->base64url_decode($file['a']), array($key[0] ^ $key[4], $key[1] ^ $key[5], $key[2] ^ $key[6], $key[3] ^ $key[7]));
 			if (empty($attr)) html_error('Error while decoding folder: Invalid Key?.');
@@ -183,8 +184,9 @@ class mega_co_nz extends DownloadClass {
 		}
 		if (empty($dfiles)) html_error('Error while decoding folder: Empty Folder?.');
 		uasort($dfiles, array($this, 'FSort'));
+
 		$files = array();
-		foreach ($dfiles as $file => $key) $files[] = "https://mega.co.nz/#T8!$file!".$key['k'];
+		foreach ($dfiles as $file => $key) $files[] = "https://mega.co.nz/#T8!$file!{$key['k']}!$fnid!Rapidleech";
 		$this->moveToAutoDownloader($files);
 	}
 }
@@ -221,5 +223,8 @@ class Th3822_MegaDlDecrypt extends php_user_filter {
 //[27-3-2013] Simplified Stream decrypt function (The other one was not working well... After many tests looks like it's better now :D). - Th3-822
 //[20-7-2013] Fixed link regexp. - Th3-822
 //[09-8-2013] Added folder support and small fixes from upload plugin. (Download links that are fetched from a folder link are not public and only can be downloaded with this plugin.) - Th3-822
+//[25-1-2014] Added sub-folders support. - Th3-822
+//[30-1-2014] Fixed download from folders. - Th3-822
+//[09-2-2014] Fixed issues at link parsing. - Th3-822
 
 ?>

@@ -1,0 +1,266 @@
+<?php
+
+if (!defined('RAPIDLEECH')) {
+	require_once('index.html');
+	exit;
+}
+
+class keep2share_cc extends DownloadClass {
+	private $page, $cookie = array(), $pA;
+	public function Download($link) {
+		global $premium_acc, $Referer;
+		$this->LnkRegexp = '@https?://(?:www\.)?(keep2share\.(?:cc|com)|k(?:eep)?2s\.cc)/file(?:/info)?/(\w+)@i';
+		$this->RDRegexp = '@/file/url.html\?file=\w+@i';
+		$this->DLRegexp = '@https?://(?:slow|prx)-\d+\.(?:keep2share\.(?:cc|com)|k(?:eep)?2s\.cc)/[^\s\'\"<>]+@i';
+
+		if (!preg_match($this->LnkRegexp, $link, $fid)) html_error('Invalid link?.');
+		$this->domain = $fid[1];
+		$this->link = $Referer = 'http://'.$fid[1].'/file/'.$fid[2];
+
+		if (empty($_POST['step'])) {
+			$this->page = $this->GetPage($this->link, $this->cookie);
+			if (preg_match($this->LnkRegexp, $this->page, $fid)) {
+				$this->domain = $fid[1];
+				$this->link = $Referer = 'http://'.$fid[1].'/file/'.$fid[2];
+				$this->cookie = GetCookiesArr($this->page, $this->cookie);
+				$this->page = $this->GetPage($this->link, $this->cookie);
+			}
+			is_present($this->page, 'File not found or deleted');
+			$this->cookie = GetCookiesArr($this->page, $this->cookie);
+		}
+
+		$this->pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
+		if (($_REQUEST['premium_acc'] == 'on' && ($this->pA || (!empty($premium_acc['keep2share_cc']['user']) && !empty($premium_acc['keep2share_cc']['pass']))))) {
+			$user = ($this->pA ? $_REQUEST['premium_user'] : $premium_acc['keep2share_cc']['user']);
+			$pass = ($this->pA ? $_REQUEST['premium_pass'] : $premium_acc['keep2share_cc']['pass']);
+			if ($this->pA && !empty($_POST['pA_encrypted'])) {
+				$user = decrypt(urldecode($user));
+				$pass = decrypt(urldecode($pass));
+				unset($_POST['pA_encrypted']);
+			}
+			return $this->CookieLogin($user, $pass);
+		} else return $this->FreeDL();
+	}
+
+	private function FreeDL() {
+		if (empty($_POST['step']) || $_POST['step'] != 1) {
+			$post = array('yt0' => 'Submit');
+			$post['slow_id'] = cut_str($this->page, 'name="slow_id" value="', '"');
+			if (empty($post['slow_id'])) html_error('FreeDL ID don\'t found.');
+
+			$page = $this->GetPage($this->link, $this->cookie, $post);
+			$this->cookie = GetCookiesArr($page, $this->cookie);
+
+			// Check freedl limit timer
+			if (preg_match('@Please wait (?:(\d{1,2})\:)?(\d{2}):(\d{2}) to download this file@i', $page, $timer)) {
+				$timer = ($timer[1] * 3600) + ($timer[2] * 60) + $timer[3];
+				return $this->JSCountdown($timer, 0, 'FreeDL limit reached.');
+			}
+
+			// Check direct link
+			if (preg_match($this->RDRegexp, $page, $idDl)) {
+				$page = $this->GetPage('http://'.$this->domain.$idDl[0], $this->cookie);
+				if (!preg_match($this->DLRegexp, $page, $dl)) html_error('Download Link Not Found.');
+				return $this->RedirectDownload($dl[0], 'T8_k2s_fr2', $this->cookie);
+			}
+
+			if (!preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w|\-]+)@i', $page, $cpid)) html_error('CAPTCHA not found.');
+
+			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+			$data['step'] = '1';
+			$data['k2sdomain'] = $this->domain;
+			$data['uniqueId'] = $post['slow_id'];
+			return $this->reCAPTCHA($cpid[1], $data);
+		}
+
+		if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
+		$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
+
+		$uniqueId = !empty($_POST['uniqueId']) ? trim($_POST['uniqueId']) : false;
+		if (empty($uniqueId)) html_error('Error: Empty "uniqueId".');
+
+		$post = array('CaptchaForm%5Bcode%5D' => '',
+			'recaptcha_challenge_field' => $_POST['recaptcha_challenge_field'],
+			'recaptcha_response_field' => $_POST['recaptcha_response_field'],
+			'free' => 1, 'freeDownloadRequest' => 1, 'uniqueId' => $uniqueId,
+			'yt0' => 'Submit'
+		);
+		$page = $this->GetPage($this->link, $this->cookie, $post);
+		$this->cookie = GetCookiesArr($page, $this->cookie);
+
+		is_present($page, 'The verification code is incorrect.');
+
+		if (!preg_match('@\sid="download-wait-timer">\s*(\d+)\s*</@i', $page, $cD)) html_error('Countdown not found.');
+		if ($cD[1] > 0) $this->CountDown($cD[1]);
+
+		$post = array('uniqueId' => $uniqueId, 'free' => 1);
+		$page = $this->GetPage($this->link, $this->cookie, $post);
+		$this->cookie = GetCookiesArr($page, $this->cookie);
+
+		if (!preg_match($this->RDRegexp, $page, $idDl)) html_error('Redirect Link Not Found.');
+		$page = $this->GetPage('http://'.$this->domain.$idDl[0], $this->cookie);
+
+		if (!preg_match($this->DLRegexp, $page, $dl)) html_error('Download Link Not Found.');
+
+		$this->RedirectDownload($dl[0], 'T8_k2s_fr', $this->cookie);
+	}
+
+	private function PremiumDL() {
+		$page = $this->GetPage($this->link, $this->cookie);
+		if (preg_match($this->LnkRegexp, $page, $fid)) {
+			$this->domain = $fid[1];
+			$this->link = $Referer = 'http://'.$fid[1].'/file/'.$fid[2];
+			$this->cookie = GetCookiesArr($page, $this->cookie);
+			$page = $this->GetPage($this->link, $this->cookie);
+		}
+		$this->cookie = GetCookiesArr($page, $this->cookie);
+
+		// Check direct link
+		if (preg_match($this->DLRegexp, $page, $dl)) return $this->RedirectDownload($dl[0], 'T8_k2s_pr2', $this->cookie);
+
+		if (!preg_match($this->RDRegexp, $page, $idDl)) html_error('Redirect-Link Not Found.');
+		$page = $this->GetPage('http://'.$this->domain.$idDl[0], $this->cookie);
+		if (!preg_match($this->DLRegexp, $page, $dl)) html_error('Download-Link Not Found.');
+		return $this->RedirectDownload($dl[0], 'T8_k2s_pr', $this->cookie);
+	}
+
+	private function Login($user, $pass) {
+		$purl = 'http://'.$this->domain.'/';
+
+		$post = array();
+		$post['LoginForm%5Busername%5D'] = urlencode($user);
+		$post['LoginForm%5Bpassword%5D'] = urlencode($pass);
+		$post['LoginForm%5BrememberMe%5D'] = 1;
+		$post['yt0'] = 'Submit';
+		if (empty($_POST['step']) || !in_array($_POST['step'], array('1', '2'))) {
+			$page = $this->GetPage($purl.'login.html', $this->cookie, $post, $purl);
+			$this->cookie = GetCookiesArr($page, $this->cookie);
+
+			if (stripos($page, 'The verification code is incorrect.') !== false) {
+				$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+				$data['premium_acc'] = 'on';
+				if ($this->pA) {
+					$data['pA_encrypted'] = 'true';
+					$data['premium_user'] = urlencode(encrypt($user)); // encrypt() will keep this safe.
+					$data['premium_pass'] = urlencode(encrypt($pass)); // And this too.
+				}
+				if (preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w|\-]+)@i', $page, $cpid)) {
+					$data['step'] = '1';
+					$this->reCAPTCHA($pid[1], $data, 'Login');
+				} elseif (preg_match('@\Wauth/captcha\.html\?v=(\w+)@i', $page, $cpid)) {
+					$data['step'] = '2';
+
+					list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage($purl . 'auth/captcha.html?v=' . $cpid[1], $this->cookie), 2);
+					if (substr($headers, 9, 3) != '200') html_error('Error downloading captcha img.');
+					$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/png');
+
+					$this->EnterCaptcha("data:$mimetype;base64,".base64_encode($imgBody), $data, 20);
+				} else html_error('Login CAPTCHA not found.');
+				exit;
+			}
+
+			is_present($page, 'Incorrect username or password', 'Login Failed: Email/Password incorrect.');
+
+			$page = $this->GetPage($purl, $this->cookie, 0, $purl.'login.html');
+			is_notpresent($page, '/auth/logout.html">Logout', 'Login Error.');
+			$this->SaveCookies($user, $pass); // Update cookies file
+			is_present($page, ' class="free">Free</', 'Account isn\'t premium');
+
+			return $this->PremiumDL();
+		}
+
+		if ($_POST['step'] == '1') {
+			if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
+			$post['LoginForm%5BverifyCode%5D'] = '';
+			$post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
+			$post['recaptcha_response_field'] = $_POST['recaptcha_response_field'];
+		} else {
+			if (empty($_POST['captcha'])) html_error('You didn\'t enter the image verification code.');
+			$post['LoginForm%5BverifyCode%5D'] = $_POST['captcha'];
+		}
+
+		$_POST['step'] = false;
+		$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
+
+		$page = $this->GetPage($purl.'login.html', $this->cookie, $post, $purl);
+		$this->cookie = GetCookiesArr($page, $this->cookie);
+
+		is_present($page, 'The verification code is incorrect.');
+		is_present($page, 'Incorrect username or password', 'Login Failed: Email/Password incorrect.');
+
+		$page = $this->GetPage($purl, $this->cookie, 0, $purl.'login.html');
+		is_notpresent($page, '/auth/logout.html">Logout', 'Login Error.');
+		$this->SaveCookies($user, $pass); // Update cookies file
+		is_present($page, ' class="free">Free</', 'Account isn\'t premium');
+
+		return $this->PremiumDL();
+	}
+
+	private function IWillNameItLater($cookie, $decrypt=true) {
+		if (!is_array($cookie)) {
+			if (!empty($cookie)) return $decrypt ? decrypt(urldecode($cookie)) : urlencode(encrypt($cookie));
+			return '';
+		}
+		if (count($cookie) < 1) return $cookie;
+		$keys = array_keys($cookie);
+		$values = array_values($cookie);
+		$keys = $decrypt ? array_map('decrypt', array_map('urldecode', $keys)) : array_map('urlencode', array_map('encrypt', $keys));
+		$values = $decrypt ? array_map('decrypt', array_map('urldecode', $values)) : array_map('urlencode', array_map('encrypt', $values));
+		return array_combine($keys, $values);
+	}
+
+	private function CookieLogin($user, $pass, $filename = 'keep2share_dl.php') {
+		global $secretkey;
+		if (empty($user) || empty($pass)) html_error('Login Failed: User or Password is empty.');
+		$user = strtolower($user);
+
+		$filename = DOWNLOAD_DIR . basename($filename);
+		if (!file_exists($filename) || (!empty($_POST['step']) && in_array($_POST['step'], array('1', '2')))) return $this->Login($user, $pass);
+
+		$file = file($filename);
+		$savedcookies = unserialize($file[1]);
+		unset($file);
+
+		$hash = hash('crc32b', $user.':'.$pass);
+		if (array_key_exists($hash, $savedcookies)) {
+			$_secretkey = $secretkey;
+			$secretkey = hash('crc32b', $pass).sha1($user.':'.$pass).hash('crc32b', $user); // A 56 char key should be safer. :D
+			$this->cookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? $this->IWillNameItLater($savedcookies[$hash]['cookie']) : '';
+			$secretkey = $_secretkey;
+			if (empty($this->cookie) || (is_array($this->cookie) && count($this->cookie) < 1)) return $this->Login($user, $pass);
+
+			$page = $this->GetPage('http://'.$this->domain.'/', $this->cookie);
+			if (stripos($page, '/auth/logout.html">Logout') === false) return $this->Login($user, $pass);
+			$this->SaveCookies($user, $pass); // Update cookies file
+			is_present($page, ' class="free">Free</', 'Account isn\'t premium');
+			return $this->PremiumDL();
+		}
+		return $this->Login($user, $pass);
+	}
+
+	private function SaveCookies($user, $pass, $filename = 'keep2share_dl.php') {
+		global $secretkey;
+		$maxdays = 31; // Max days to keep extra cookies saved
+		$filename = DOWNLOAD_DIR . basename($filename);
+		if (file_exists($filename)) {
+			$file = file($filename);
+			$savedcookies = unserialize($file[1]);
+			unset($file);
+
+			// Remove old cookies
+			foreach ($savedcookies as $k => $v) if (time() - $v['time'] >= ($maxdays * 24 * 60 * 60)) unset($savedcookies[$k]);
+		} else $savedcookies = array();
+		$hash = hash('crc32b', $user.':'.$pass);
+		$_secretkey = $secretkey;
+		$secretkey = hash('crc32b', $pass).sha1($user.':'.$pass).hash('crc32b', $user); // A 56 char key should be safer. :D
+		$savedcookies[$hash] = array('time' => time(), 'enc' => urlencode(encrypt('OK')), 'cookie' => $this->IWillNameItLater($this->cookie, false));
+		$secretkey = $_secretkey;
+
+		file_put_contents($filename, "<?php exit(); ?>\r\n" . serialize($savedcookies), LOCK_EX);
+	}
+}
+
+//[16-2-2014] Written by Th3-822.
+//[07-3-2014] Fixed login captcha. - Th3-822
+
+?>

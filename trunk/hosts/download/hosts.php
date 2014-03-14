@@ -43,8 +43,14 @@ while (false !== ($entry = $d->read())) {
 			case 'filerio.com':
 				$host['filekeen.com'] = $host['filerio.com'];
 				break;
+			case 'firedrive.com':
+				$host['putlocker.com'] = $host['firedrive.com'];
+				break;
 			case 'freakshare.com':
 				$host['freakshare.net'] = $host['freakshare.com'];
+				break;
+			case 'keep2share.cc':
+				foreach(array('keep2share.com', 'keep2s.cc', 'k2s.cc') as $k2sdomains) $host["$k2sdomains"] = $host['keep2share.cc'];
 				break;
 			case 'multiupload.nl':
 				$host['multiupload.com'] = $host['multiupload.nl'];

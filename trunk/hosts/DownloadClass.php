@@ -121,12 +121,14 @@ class DownloadClass {
 	 * @param string $captchaImg -> The link of the captcha image or downloaded captcha image on server
 	 * @param array $inputs -> Key Value pairs for html form input elements ( these elements will be hidden form elements )
 	 * @param string $captchaSize -> The size of captcha text box
+	 * @param string $sname -> The text of submit button
+	 * @param string $sname -> The name of captcha text field
 	 */
 
-	public function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5') {
+	public function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5', $sname = 'Enter Captcha', $iname = 'captcha') {
 		echo "\n<form name='captcha' action='{$_SERVER['SCRIPT_NAME']}' method='POST'>\n";
 		foreach ($inputs as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='$input' />\n";
-		echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input type='text' name='captcha' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='Enter Captcha' />\n\t</h4>\n\t<script type='text/javascript'>/* <![CDATA[ */\n\t\tfunction check() {\n\t\t\tvar captcha=document.dl.captcha.value;\n\t\t\tif (captcha == '') {\n\t\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\t\treturn false;\n\t\t\t} else return true;\n\t\t}\n\t/* ]]> */</script>\n</form>\n";
+		echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input id='captcha' type='text' name='$iname' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='$sname' />\n\t</h4>\n\t<script type='text/javascript'>/* <![CDATA[ */\n\t\tfunction check() {\n\t\t\tvar captcha=document.getElementById('captcha').value;\n\t\t\tif (captcha == '') {\n\t\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\t\treturn false;\n\t\t\t} else return true;\n\t\t}\n\t/* ]]> */</script>\n</form>\n";
 		include(TEMPLATE_DIR.'footer.php');
 		exit();
 	}
@@ -143,13 +145,15 @@ class DownloadClass {
 			global $Referer;
 			$referer = $Referer;
 		}
-		if (is_array($cookie)) $cookie = CookiesToStr($cookie);
-		if ($encrypt) $cookie = encrypt($cookie);
+		if (!empty($cookie)) {
+			if (is_array($cookie)) $cookie = CookiesToStr($cookie);
+			if ($encrypt) $cookie = encrypt($cookie);
+		}
 
 		$DParam = GetDefaultParams();
-		if ($link) $DParam['link'] = urlencode($link);
-		if ($cookie) $DParam['cookie'] = urlencode($cookie);
-		if ($referer) $DParam['referer'] = urlencode($referer);
+		if (!empty($link)) $DParam['link'] = urlencode($link);
+		if (!empty($cookie)) $DParam['cookie'] = urlencode($cookie);
+		if (!empty($referer)) $DParam['referer'] = urlencode($referer);
 		return $DParam;
 	}
 
@@ -190,6 +194,34 @@ class DownloadClass {
 
 	public function changeMesg($mesg, $add=false) {
 		echo("\n<script type='text/javascript'>document.getElementById('mesg').innerHTML = " . ($add ? "document.getElementById('mesg').innerHTML + " : '') . "unescape('" . rawurlencode($mesg) . "');</script>");
+	}
+
+	public function reCAPTCHA($publicKey, $inputs, $sname = 'Download File') {
+		if (empty($publicKey) || preg_match('/[^\w\-]/', $publicKey)) html_error('Invalid reCAPTCHA public key.');
+		if (!is_array($inputs)) html_error('Error parsing captcha post data.');
+		// Check for a global recaptcha key
+		$page = $this->GetPage('http://www.google.com/recaptcha/api/challenge?k=' . $publicKey, 0, 0, 'http://fakedomain.tld/fakepath');
+		if (substr($page, 9, 3) != '200') html_error('Invalid or deleted reCAPTCHA public key.');
+
+		if (strpos($page, 'Invalid referer') === false) {
+			// Embed captcha
+			echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n\n<center><form name='recaptcha' action='{$GLOBALS['PHP_SELF']}' method='POST'><br />\n";
+			foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='$input' />\n";
+			echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$publicKey'></script><noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$publicKey' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br /><input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n</form></center>\n";
+			include(TEMPLATE_DIR.'footer.php');
+		} else {
+			// Download captcha
+			$page = $this->GetPage('http://www.google.com/recaptcha/api/challenge?k=' . $publicKey);
+			if (!preg_match('@[\{,\s]challenge\s*:\s*[\'\"]([\w\-]+)[\'\"]@', $page, $challenge)) html_error('Error getting reCAPTCHA challenge.');
+			$inputs['recaptcha_challenge_field'] = $challenge = $challenge[1];
+
+			list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage('http://www.google.com/recaptcha/api/image?c=' . $challenge), 2);
+			if (substr($headers, 9, 3) != '200') html_error('Error downloading captcha img.');
+			$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/jpeg');
+
+			$this->EnterCaptcha("data:$mimetype;base64,".base64_encode($imgBody), $inputs, 20, $sname, 'recaptcha_response_field');
+		}
+		exit;
 	}
 
 }

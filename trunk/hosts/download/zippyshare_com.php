@@ -19,6 +19,7 @@ class zippyshare_com extends DownloadClass {
 
 		$this->page = $this->GetPage($this->link, $this->cookie);
 		is_present($this->page, '>File does not exist on this server<', 'File does not exist.');
+		is_present($this->page, '>File has expired and does not exist anymore on this server', 'File does not exist.');
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
 
 		if (($pos = stripos($this->page, 'getElementById(\'dlbutton\').href')) !== false || ($pos = stripos($this->page, 'getElementById("dlbutton").href')) !== false) return $this->GetJSEncodedLink($pos);
@@ -40,11 +41,12 @@ class zippyshare_com extends DownloadClass {
 		$script = rtrim(str_replace(array(').href', "'dlbutton'", '"dlbutton"', '    '), array(').value', "'T8_dllink'", '"T8_dllink"', "\t\t"), substr($script, 0, strpos($script, '</script>'))));
 		if (empty($script)) html_error('Error while getting js code.');
 		$T8 = '';
-		if (preg_match_all('@getElementById[\s\t]*\([\s\t]*[\"\']([a-z][\w\.\-]*)[\"\'][\s\t]*\)@i', $script, $ids) && count($ids[0]) > 1) foreach ($ids[1] as $id) {
+		if (preg_match_all('@getElementById[\s\t]*\([\s\t]*[\"\']([a-z][\w\.\-]*)[\"\'][\s\t]*\)@i', $script, $ids) && count($ids[0]) > 1) foreach (array_unique($ids[1]) as $id) {
 			if ($id == 'T8_dllink') continue;
-			if (!preg_match("@<([a-z][a-z\d]*)\s*(?:\w+\s*=\s*[\"\'][^\"\']*[\"\']\s*)*(?:\s*id\s*=[\"\']{$id}[\"\']\s*)(?:\w+\s*=\s*[\"\'][^\"\']*[\"\']\s*)*(?:(>[^<>]*</)|/[\s\t]*>)@i", $this->page, $tag)) break; // If it doesn't found the tag the decode will fail, im not sure if break or continue...
-			$T8 .= (!empty($tag[2]) ? $tag[0].$tag[1].'>' : $tag[0]);
+			if (!preg_match("@<([a-z][a-z\d]*)\s*(?:\w+\s*=\s*[\"\'][^\"\'<>]*[\"\']\s*)*(?:\s*id\s*=[\"\']{$id}[\"\']\s*)(?:\w+\s*=\s*[\"\'][^\"\'<>]*[\"\']\s*)*(?:(\s*>[^<>]*</\1)|(/)?[\s]*>)@i", $this->page, $tag)) break; // If it doesn't found the tag the decode will fail, im not sure if break or continue...
+			$T8 .= (!empty($tag[2]) ? $tag[0].'>' : (empty($tag[3]) ? $tag[0].'</'.$tag[1].'>' : $tag[0]));
 		}
+		if (preg_match('@^\s*function\s+([\$_A-Za-z][\$\w]*)\s*\(@i', $script, $funcName)) $script .= "\n\t\t{$funcName[1]}();";
 
 		$data = $this->DefaultParamArr($this->link, $this->cookie);
 		$data['step'] = '2';
@@ -65,7 +67,7 @@ class zippyshare_com extends DownloadClass {
 		$data['dlpath'] = urlencode($dlpath[0]);
 		$data['shortencode'] = urlencode($dlpath[1]);
 
-		$this->Show_reCaptcha($cpid[1], $data);
+		$this->reCAPTCHA($cpid[1], $data);
 	}
 
 	private function CheckCaptcha() {
@@ -88,22 +90,11 @@ class zippyshare_com extends DownloadClass {
 		$fname = urldecode(basename(parse_url($dlink, PHP_URL_PATH)));
 		$this->RedirectDownload($dlink, $fname, $this->cookie);
 	}
-
-	private function Show_reCaptcha($pid, $inputs, $sname = 'Download File') {
-		global $PHP_SELF;
-		if (!is_array($inputs)) html_error('Error parsing captcha data.');
-
-		// Themes: 'red', 'white', 'blackglass', 'clean'
-		echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n\n<center><form name='recaptcha' action='$PHP_SELF' method='POST'><br />\n";
-		foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='$input' />\n";
-		echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script><noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br /><input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n</form></center>\n</body>\n</html>";
-		exit;
-	}
 }
 
 // [24-11-2012]  Written by Th3-822. (Only for rev43 :D)
 // [05-2-2013]  Added support for links that need user-side decoding of the link. - Th3-822
 // [04-3-2013]  Fixed File doesn't exists error msg... - Th3-822
-// [17-4-2013]  Fixed link decoder function. - Th3-822
+// [07-3-2014]  Fixed link decoder function. - Th3-822
 
 ?>

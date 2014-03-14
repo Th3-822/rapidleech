@@ -37,10 +37,11 @@ class d4shared_com extends DownloadClass {
 			return $this->RedirectDownload($DL[1], urldecode(basename(parse_url($DL[1], PHP_URL_PATH))), $this->cookie);
 		}
 
-		is_present($this->page, "You should log in to download this file. Sign up for free if you don\'t have an account yet.", 'You need to be logged in for download this file.');
-
 		if (!preg_match('@\.com/[^/]+/([^/]+)/?(.*)@i', $this->link, $L)) html_error('Invalid link?');
+		$getLink = "http://www.4shared.com/get/{$L[1]}/{$L[2]}";
 		$page = $this->GetPage("http://www.4shared.com/get/{$L[1]}/{$L[2]}", $this->cookie);
+		is_present($page, 'You should log in to download this file. Sign up for free if you don\'t have an account yet.', 'You need to be logged in for download this file.');
+		$GLOBALS['Referer'] = $getLink;
 
 		if (!preg_match($this->long_regexp, $page, $DL)) html_error('Download-link not found.');
 		$this->cookie = GetCookiesArr($page, $this->cookie);
@@ -89,8 +90,8 @@ class d4shared_com extends DownloadClass {
 
 	private function PremiumDownload() {
 		$page = $this->GetPage($this->link, $this->cookie);
-		$this->GetPage('http://www.4shared.com/get/gebpvkQ6/doberman_plays_hide_and_seek.html', $this->cookie);
 		$this->CheckForPass(true);
+		$this->cookie = GetCookiesArr($page, $this->cookie);
 
 		if (stripos($page, "\nContent-Length: 0\n") !== false) is_notpresent($page, "\nLocation: ", 'Error: Direct link not found.');
 		if (!preg_match($this->long_regexp, $page, $DL)) html_error('Error: Download link not found.');
@@ -107,29 +108,31 @@ class d4shared_com extends DownloadClass {
 		$pass = ($this->pA ? $_REQUEST['premium_pass'] : $premium_acc['4shared_com']['pass']);
 		if (empty($email) || empty($pass)) html_error('Login Failed: EMail or Password is empty. Please check login data.');
 
-		$postURL = 'http://www.4shared.com/login';
+		$postURL = 'http://www.4shared.com/web/login';
 		$post['login'] = urlencode($email);
 		$post['password'] = urlencode($pass);
 		$post['remember'] = 'false';
 		$post['doNotRedirect'] = 'true';
 		$page = $this->GetPage($postURL, $this->cookie, $post, $postURL);
-		$this->cookie = GetCookiesArr($page, $this->cookie, true, array('','deleted','""'));
 
 		is_present($page, 'Invalid e-mail address or password', 'Login Failed: Invalid Username/Email or Password.');
 		if (stripos($page, '"ok":false') !== false) {
 			if ($err=cut_str($page, '"rejectReason":"', '"')) html_error("Login Failed: 4S says: '$err'.");
 			else html_error('Login Failed.');
 		}
+		$this->cookie = GetCookiesArr($page, $this->cookie, true, array('','deleted','""'));
+		if (empty($this->cookie['Login'])) html_error('Login Error: Cannot find session cookie.');
 
 		// Chk Acc.
 		$page = $this->GetPage('http://www.4shared.com/account/home.jsp', $this->cookie);
+		if (substr($page, 9, 3) != '200') html_error('Login Error.');
 		$this->cookie = GetCookiesArr($page, $this->cookie, true, array('','deleted','""'));
 
 		$quota = cut_str($page, 'Premium Traffic:</div>', '</div>');
 		$Mesg = lang(300);
 
 		if (empty($quota) || !preg_match('@>([\d|\.]+)\s?(%|(?:\wB)) of ([\d|\.]+)\s?(\wB)@i', $quota, $qm)) {
-			$Mesg .= "<br /><b>Account isn\\\'t premium?</b><br />Using it as member.";
+			$Mesg .= "<br /><b>Account isn't premium?</b><br />Using it as member.";
 			$this->changeMesg($Mesg);
 
 			$this->page = $this->GetPage($this->link, $this->cookie);
@@ -148,12 +151,17 @@ class d4shared_com extends DownloadClass {
 				$Mesg .= "<br /><b>Bandwidth limit trigered: $used% - Limit: 95%</b><br />Switching to FreeDL.";
 				$this->changeMesg($Mesg);
 				$this->page = $this->GetPage($this->link, $this->cookie);
+				$this->cookie = GetCookiesArr($page, $this->cookie);
 				return $this->FreeDownload();
 			}
 			html_error("Bandwidth limit trigered: Bandwidth: $used% - Limit: 95%");
 		}
 
 		return $this->PremiumDownload();
+	}
+
+	public function CheckBack($header) {
+		is_present($header, 'cau2=dow-lim', 'The download limit has been reached.');
 	}
 }
 
@@ -168,5 +176,6 @@ class d4shared_com extends DownloadClass {
 //[23-Mar-2012] Added support for member (its needed for some links) & some changes & small fixes. - Th3-822
 //[18-Apr-2012] Fixed login needed msg, direct download link regexp (freedl) && removed 2 error msgs from login function. - Th3-822
 //[01-Aug-2012] Fixed for changes at 4S. - Th3-822
+//[20-Feb-2014] Fixed Login/FreeDL. - Th3-822
 
 ?>

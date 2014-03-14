@@ -5,16 +5,17 @@ if (!defined('RAPIDLEECH')) {
 	exit();
 }
 
-class uptobox_com extends DownloadClass {
+class storagon_com extends DownloadClass {
 	private $page, $cookie;
 	public function Download($link) {
 		global $premium_acc;
 		$this->cookie = array('lang' => 'english');
+		$link = str_ireplace('https://', 'http://', $link);
 		$this->page = $this->GetPage($link, $this->cookie);
 		is_present($this->page, 'The file you were looking for could not be found');
 		is_present($this->page, 'No such file with this filename', 'Error: Invalid filename, check your link and try again.');
 
-		if ($_REQUEST['premium_acc'] == 'on' && ((!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) || (!empty($premium_acc['uptobox_com']['user']) && !empty($premium_acc['uptobox_com']['pass'])))) $this->Login($link);
+		if ($_REQUEST['premium_acc'] == 'on' && ((!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) || (!empty($premium_acc['storagon_com']['user']) && !empty($premium_acc['storagon_com']['pass'])))) $this->Login($link);
 		else $this->FreeDL($link);
 	}
 
@@ -86,8 +87,8 @@ class uptobox_com extends DownloadClass {
 	private function Login($link) {
 		global $premium_acc;
 		$pA = (!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass']) ? true : false);
-		$user = ($pA ? $_REQUEST['premium_user'] : $premium_acc['uptobox_com']['user']);
-		$pass = ($pA ? $_REQUEST['premium_pass'] : $premium_acc['uptobox_com']['pass']);
+		$user = ($pA ? $_REQUEST['premium_user'] : $premium_acc['storagon_com']['user']);
+		$pass = ($pA ? $_REQUEST['premium_pass'] : $premium_acc['storagon_com']['pass']);
 
 		if (empty($user) || empty($pass)) html_error('Login Failed: User or Password is empty. Please check login data.');
 		$post = array();
@@ -96,7 +97,7 @@ class uptobox_com extends DownloadClass {
 		$post['op'] = 'login';
 		$post['redirect'] = '';
 
-		$purl = 'http://uptobox.com/';
+		$purl = 'https://storagon.com/';
 		$page = $this->GetPage($purl, $this->cookie, $post, $purl);
 		if (preg_match('@Incorrect ((Username)|(Login)) or Password@i', $page)) html_error('Login failed: User/Password incorrect.');
 		is_present($page, 'op=resend_activation', 'Login failed: Your account isn\'t confirmed yet.');
@@ -105,7 +106,7 @@ class uptobox_com extends DownloadClass {
 		if (empty($this->cookie['xfss'])) html_error('Login Error: Cannot find session cookie.');
 		$this->cookie['lang'] = 'english';
 
-		$page = $this->GetPage("$purl?op=my_account", $this->cookie, 0, $purl);
+		$page = $this->GetPage("$purl/account/", $this->cookie, 0, $purl);
 		if (stripos($page, '/?op=logout') === false && stripos($page, '/logout') === false) html_error('Login Error.');
 
 		if (stripos($page, 'Upgrade to premium') !== false) {

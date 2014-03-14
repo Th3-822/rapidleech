@@ -190,7 +190,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			$cbhost = (strpos($host, ':') !== false) ? substr($host, 0, strpos($host, ':')) : $host; // Remove the port that may be added when it's using proxy
 			$chkhost = preg_match('/^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/', $cbhost) ? false : true;
 			if (!empty($referer)) {
-				$cbrefhost = str_ireplace('www.', '', cut_str($referer, 'Referer: ', "\r\n"));
+				$cbrefhost = (stripos($referer, 'www.') === 0) ? substr($referer, 4) : $referer;
 				$cbrefhost = parse_url($cbrefhost, PHP_URL_HOST);
 				$chkref = (empty($cbrefhost) || preg_match('/^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/', $cbrefhost)) ? false : (($chkhost && strtolower($cbhost) == strtolower($cbrefhost)) ? false : true);
 			} else $chkref = false;
@@ -254,28 +254,25 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 		if ($force_name) $FileName = $force_name;
 		else {
-			$ContentDisposition = trim(cut_str($header, "\nContent-Disposition: ", "\n")) . "\n";
-			if ($ContentDisposition && stripos($ContentDisposition, 'filename=') !== false) {
-				$FileName = trim(trim(trim(trim(trim(cut_str($ContentDisposition, 'filename=', "\n")), '='), '?'), ';'), '"');
+			$ContentDisposition = cut_str($header, "\nContent-Disposition: ", "\n");
+			if (!empty($ContentDisposition) && stripos($ContentDisposition, 'filename') !== false) {
+				if (preg_match("@filename\*=UTF-8''((?:[\w\-\.]|%[0-F]{2})+)@i", $ContentDisposition, $fn)) $FileName = rawurldecode($fn[1]);
+				elseif (preg_match('@filename=\"?([^\r\n\"\;]+)\"?@i', $ContentDisposition, $fn)) $FileName = $fn[1];
+				else $FileName = $saveToFile;
 			} else $FileName = $saveToFile;
 		}
 		$FileName = str_replace(array_merge(range(chr(0), chr(31)), str_split("<>:\"/|?*\x5C\x7F")), '', basename(trim($FileName)));
-				$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $FileName;
 
-		if (!empty($options['rename_prefix'])) {
-			$File_Name = $options['rename_prefix'] . '_' . basename($saveToFile);
-			$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $File_Name;
-		}
+		if (!empty($options['rename_prefix'])) $FileName = $options['rename_prefix'] . '_' . $FileName;
 		if (!empty($options['rename_suffix'])) {
-			$ext = strrchr(basename($saveToFile), '.');
-			$before_ext = explode($ext, basename($saveToFile));
-			$File_Name = $before_ext[0] . '_' . $options['rename_suffix'] . $ext;
-			$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $File_Name;
+			$ext = strrchr($FileName, '.');
+			$before_ext = explode($ext, $FileName);
+			$FileName = $before_ext[0] . '_' . $options['rename_suffix'] . $ext;
 		}
-		if ($options['rename_underscore']) {
-			$File_Name = str_replace(array(' ', '%20'), '_', basename($saveToFile));
-			$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $File_Name;
-		}
+		if ($options['rename_underscore']) $FileName = str_replace(array(' ', '%20'), '_', $FileName);
+
+		$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $FileName;
+
 		$filetype = strrchr($saveToFile, '.');
 		if (is_array($options['forbidden_filetypes']) && in_array(strtolower($filetype), $options['forbidden_filetypes'])) {
 			if ($options['forbidden_filetypes_block']) {
@@ -405,10 +402,17 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 	$opt[CURLOPT_REFERER] = !empty($referer) ? $referer : false;
 	$opt[CURLOPT_COOKIE] = !empty($cookie) ? (is_array($cookie) ? CookiesToStr($cookie) : trim($cookie)) : false;
 
+	if (isset($_GET['useproxy']) && !empty($_GET['proxy'])) {
+		$opt[CURLOPT_HTTPPROXYTUNNEL] = false;
+		$opt[CURLOPT_PROXY] = $_GET['proxy'];
+		$opt[CURLOPT_PROXYUSERPWD] = (!empty($pauth) ? base64_decode($pauth) : false);
+	} else $opt[CURLOPT_PROXY] = false;
+
 	// Send more headers...
 	$headers = array('Accept-Language: en-US;q=0.7,en;q=0.3', 'Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7', 'Pragma: no-cache', 'Cache-Control: no-cache', 'Connection: Keep-Alive');
 	if (empty($opt[CURLOPT_REFERER])) $headers[] = 'Referer:';
 	if (empty($opt[CURLOPT_COOKIE])) $headers[] = 'Cookie:';
+	if (!empty($opt[CURLOPT_PROXY]) && empty($opt[CURLOPT_PROXYUSERPWD])) $headers[] = 'Proxy-Authorization:';
 	if (count($header) > 0) $headers = array_merge($headers, $header);
 	$opt[CURLOPT_HTTPHEADER] = $headers;
 
@@ -421,12 +425,6 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		$opt[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
 		$opt[CURLOPT_USERPWD] = base64_decode($auth);
 	} else $opt[CURLOPT_HTTPAUTH] = false;
-
-	if (isset($_GET['useproxy']) && !empty($_GET['proxy'])) {
-		$opt[CURLOPT_HTTPPROXYTUNNEL] = false;
-		$opt[CURLOPT_PROXY] = $_GET['proxy'];
-		$opt[CURLOPT_PROXYUSERPWD] = ($pauth ? base64_decode($pauth) : false);
-	} else $opt[CURLOPT_PROXY] = false;
 
 	$opt[CURLOPT_CONNECTTIMEOUT] = $opt[CURLOPT_TIMEOUT] = 120;
 	if (is_array($opts) && count($opts) > 0) foreach ($opts as $O => $V) $opt[$O] = $V;
@@ -551,7 +549,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 	global $nn, $lastError, $sleep_time, $sleep_count, $fp, $fs;
 
 	if (empty($upagent)) $upagent = 'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.16';
-	$scheme .= '://';
+	$scheme = strtolower("$scheme://");
 
 	$bound = '--------' . md5(microtime());
 	$saveToFile = 0;
@@ -565,13 +563,13 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
 	$fileSize = getSize($file);
 
-	$fieldname = $fieldname ? $fieldname : file . md5($filename);
+	$fieldname = $fieldname ? $fieldname : 'file' . md5($filename);
 
 	if (!is_readable($file)) {
 		$lastError = sprintf(lang(65), $file);
 		return FALSE;
 	}
-	if ($field2name != '') {
+	if (!empty($field2name)) {
 		$postdata .= '--' . $bound . $nn;
 		$postdata .= "Content-Disposition: form-data; name=\"$field2name\"; filename=\"\"$nn";
 		$postdata .= "Content-Type: application/octet-stream$nn$nn";
@@ -591,6 +589,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 	$referer = $referer ? "Referer: $referer$nn" : '';
 
 	if ($scheme == 'https://') {
+		if (!extension_loaded('openssl')) html_error('This server doesn\'t support https connections.');
 		$scheme = 'ssl://';
 		$port = 443;
 	}
@@ -626,14 +625,14 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
 	if ($proxy) {
 		echo '<p>' . sprintf(lang(89), $proxyHost, $proxyPort) . '<br />';
-		echo "UPLOAD: <b>$url</b>...<br />\n";
+		echo 'UPLOAD: <b>' . htmlspecialchars($url) . "</b>...<br />\n";
 	} else {
 		echo '<p>';
 		printf(lang(90), $host, $port);
 		echo '</p>';
 	}
 
-	echo(lang(104) . ' <b>' . $filename . '</b>, ' . lang(56) . ' <b>' . bytesToKbOrMbOrGb($fileSize) . '</b>...<br />');
+	echo(lang(104) . ' <b>' . htmlspecialchars($filename) . '</b>, ' . lang(56) . ' <b>' . bytesToKbOrMbOrGb($fileSize) . '</b>...<br />');
 	global $id;
 	$id = md5(time() * rand(0, 10));
 	require (TEMPLATE_DIR . '/uploadui.php');

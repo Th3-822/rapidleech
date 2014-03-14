@@ -9,12 +9,14 @@ if (!isset($_T8) || !is_array($_T8) || empty($_T8['domain']) || $_T8['domain'] =
 	if (strtolower(basename(__FILE__)) == strtolower($page_upload[$_REQUEST['uploaded']])) html_error('This plugin can\'t be called directly.');
 	html_error('Error: Called from non configured plugin "' . htmlentities($page_upload[$_REQUEST['uploaded']]) . '".');
 }
-if ($_T8['v'] > 2) html_error('Error: '.basename(__FILE__).' is outdated, please install last version from: http://www.rapidleech.com/index.php/topic/14014-upload-plugin-for-sites-with-xfs-pro/ or http://pastebin.com/E0z7qMU1 ');
+if ($_T8['v'] > 3) html_error('Error: '.basename(__FILE__).' is outdated, please install last version from: http://www.rapidleech.com/index.php/topic/14014-upload-plugin-for-sites-with-xfs-pro/ or http://pastebin.com/E0z7qMU1 ');
 
 /* # Default Settings # */
 $default = array();
+$default['port'] = 80; // Server's port, default: 80 | 443 = https.
 $default['path'] = '/'; // URL path to XFS script, default: '/'
 $default['xfsFree'] = false; // Change to true if the host is using XFS free.
+$default['sslLogin'] = false; // Force https on login.
 $default['opUploadName'] = 'upload'; // Custom ?op=value for checking upload page, default: 'upload'
 $default['anonUploadDisable'] = false; // Disallow non registered users upload. (XFS Pro)
 $default['anonUploadLimit'] = 0; // File-size limit for non registered users (MB) - 0 = Plugin's limit | (XFS Pro)
@@ -41,7 +43,9 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 	$not_done = false;
 	if (substr($_T8['path'], 0, 1) != '/') $_T8['path'] = '/'.$_T8['path'];
 	if (substr($_T8['path'], -1) != '/') $_T8['path'] .= '/';
-	$referer = 'http://'.$_T8['domain'].$_T8['path'];
+	$_T8['port'] = (!empty($_T8['port']) && $_T8['port'] > 0 && $_T8['port'] < 65536) ? (int)$_T8['port'] : 80;
+	$scheme = ($_T8['port'] == 443) ? 'https' : 'http';
+	$referer = $scheme.'://'.$_T8['domain'].$_T8['path'];
 
 	// Login
 	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='login' width='100%' align='center'>Login to ".str_ireplace('www.', '', $_T8['domain'])."</div>\n";
@@ -56,11 +60,12 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 		$post['login'] = $_REQUEST['up_login'];
 		$post['password'] = $_REQUEST['up_pass'];
 
-		$page = geturl($_T8['domain'], 80, $_T8['path'].'?op=login', $referer, $cookie, array_map('urlencode', $post), 0, $_GET['proxy'], $pauth);is_page($page);
+		$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'].'?op=login', $referer, $cookie, array_map('urlencode', $post), 0, $_GET['proxy'], $pauth, 0, ($_T8['sslLogin'] ? 'https' : $scheme));is_page($page);
 		$header = substr($page, 0, strpos($page, "\r\n\r\n"));
 		if (stripos($header, "\nLocation: ") !== false && preg_match('@\nLocation: (https?://[^\r\n]+)@i', $header, $redir) && 'www.' . strtolower($_T8['domain']) == strtolower(parse_url($redir[1], PHP_URL_HOST))) html_error("Please set \$_T8['domain'] to 'www.{$_T8['domain']}'.");
 		if (preg_match('@Incorrect ((Username)|(Login)) or Password@i', $page)) html_error('Login failed: User/Password incorrect.');
 		is_present($page, 'op=resend_activation', 'Login failed: Your account isn\'t confirmed yet.');
+		is_present($page, 'Please%20enter%20your%20e-mail', "Login failed: Missing account's email, login at site and set the email.");
 		$cookie = GetCookiesArr($header, $cookie);
 		if (empty($cookie['xfss']) && empty($cookie['login'])) html_error('Error: Login cookies not found.');
 		$cookie['lang'] = 'english';
@@ -75,9 +80,9 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 	// Retrive upload ID
 	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrive upload ID</div>\n";
 
-	$page = geturl($_T8['domain'], 80, $_T8['path'].'?op='.(empty($_T8['opUploadName']) ? 'upload' : urlencode($_T8['opUploadName'])), $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+	$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'].'?op='.(empty($_T8['opUploadName']) ? 'upload' : urlencode($_T8['opUploadName'])), $referer, $cookie, 0, 0, $_GET['proxy'], $pauth, 0, $scheme);is_page($page);
 	if (substr($page, 9, 3) != '200') {
-		$page = geturl($_T8['domain'], 80, $_T8['path'], $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'], $referer, $cookie, 0, 0, $_GET['proxy'], $pauth, 0, $scheme);is_page($page);
 	}
 	$header = substr($page, 0, strpos($page, "\r\n\r\n"));
 	if (!$login && stripos($header, "\nLocation: ") !== false && preg_match('@\nLocation: (https?://[^\r\n]+)@i', $header, $redir) && 'www.' . strtolower($_T8['domain']) == strtolower(parse_url($redir[1], PHP_URL_HOST))) html_error("Please set \$_T8['domain'] to 'www.{$_T8['domain']}'.");
@@ -92,7 +97,7 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 		}
 		html_error('Error: Cannot find upload server.', 0);
 	}
-	$up_url = (empty($up[2])) ? 'http://'.$_T8['domain'].$up[1] : $up[1];
+	$up_url = (empty($up[2])) ? $scheme.'://'.$_T8['domain'].$up[1] : $up[1];
 
 	// File-ext checks
 	if (preg_match('@var[\s\t]+ext_allowed[\s\t]*=[\s\t]*[\'\"]\|?(\w+(?:\|\w+)*)\|?[\'\"][\s\t]*;@i', $page, $allowedExts) || preg_match('@var[\s\t]+ext_not_allowed[\s\t]*=[\s\t]*[\'\"]\|?(\w+(?:\|\w+)*)\|?[\'\"][\s\t]*;@i', $page, $notAllowedExts)) {
@@ -141,7 +146,7 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 	$url = parse_url($up_url);
 	if (!empty($_T8['flashUpload'])) $url['path'] = substr($url['path'], 0, strrpos($url['path'], '/') + 1).(is_string($_T8['flashUpload']) ? $_T8['flashUpload'] : 'up_flash.cgi');
 	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), 0, $cookie, $post, $lfile, $lname, 
-	(empty($_T8['flashUpload']) ? 'file' : 'Filedata'), '', $_GET['proxy'], $pauth);
+	(empty($_T8['flashUpload']) ? 'file' : 'Filedata'), '', $_GET['proxy'], $pauth, 0, $url['scheme']);
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";
@@ -168,7 +173,7 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 	if (empty($post['fn'])) html_error('Error: "fn" input not found.');
 	if (strtolower($post['st']) != 'ok') html_error('Upload failed, response: '.htmlentities(urldecode($post['st'])));
 
-	$page = geturl($_T8['domain'], 80, $_T8['path'], $up_url, $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);
+	$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'], $up_url, $cookie, $post, 0, $_GET['proxy'], $pauth, 0, $scheme);is_page($page);
 	$host_rexexp = 'https?://(?:www\.)?'.preg_quote(str_ireplace('www.', '', $_T8['domain']).$_T8['path'], '@');
 
 	if (preg_match('@('.$host_rexexp.'\w{12}(?:/[^\?/<>\"\'\r\n]+)?(?:\.html?)?)\?killcode=\w+@i', $page, $lnk)) {
@@ -188,5 +193,6 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 //[16-3-2013] Some updates, it should support more sites now & Added more error msgs. - Th3-822
 //[05-8-2013] Plugin rewritten for making it a include (for saving space) & Added file-ext check & Small edits. - Th3-822
 //[21-9-2013] Fixed upload url regexp (Now it will work on hosts that change upload.cgi filename/path) & Edits for allow extra cookies & Added support for XFS's flash upload. - Th3-822
+//[22-1-2014] Added support for custom port and https on whole site, login or upload. - Th3-822
 
 ?>

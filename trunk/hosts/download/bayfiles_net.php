@@ -148,7 +148,7 @@ class bayfiles_net extends DownloadClass {
 	public function CheckBack($header) {
 		$statuscode = intval(substr($header, 9, 3));
 		if ($statuscode == 302) {
-			$length = trim(cut_str($header, "\r\nContent-Length: ", "\r\n"));
+			$length = trim(cut_str($header, "\nContent-Length: ", "\n"));
 			if (empty($length) || (strlen($length) <= 6 && intval($length) <= 102400)) {
 				global $fp, $PHP_SELF;
 				$page = '';

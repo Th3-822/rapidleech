@@ -33,6 +33,7 @@ class filefactory_com extends DownloadClass {
 		}
 
 		if (preg_match('@/error\.php\?code=(\d+)@i', $this->page, $this->redir) && !in_array($this->redir[1], array('257', '258')) /*Forcing PPS is not fair...*/) {
+			if ($this->redir[1] == '160') html_error('IP banned by FF.');
 			$page = $this->GetPage('http://www.filefactory.com'.$this->redir[0], $this->cookie);
 			if (preg_match('@class="alert alert-error">\s*<h2>\s*([\w\-\s]+)\s*</h2>@i', $page, $err)) html_error("[FF:{$this->redir[1]}] ".htmlspecialchars($err[1]));
 			html_error("Link is not available [{$this->redir[1]}]");

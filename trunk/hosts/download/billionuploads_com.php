@@ -24,6 +24,7 @@ class billionuploads_com extends DownloadClass {
 
 		if (empty($_POST['step']) || $_POST['step'] != '1') {
 			if (preg_match('@You have to wait (?:\d+ \w+,\s)?\d+ \w+ till next download@', $this->page, $err)) html_error('Error: '.$err[0]);
+			is_present($this->page, 'type="password" name="password"', 'File is password protected.');
 
 			$post = $this->FindPost();
 

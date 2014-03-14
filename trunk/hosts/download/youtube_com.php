@@ -28,7 +28,7 @@ class youtube_com extends DownloadClass {
 		if (empty($response['url_encoded_fmt_stream_map'])) html_error('Video links not found.');
 		$fmt_url_maps = explode(',', $response['url_encoded_fmt_stream_map']);
 
-		$this->fmts = array(38,37,46,22,45,44,35,43,34,18,6,5);
+		$this->fmts = array(38,37,46,22,45,44,35,43,34,18,6,5,36,17);
 		$yt_fmt = empty($_REQUEST['yt_fmt']) ? '' : $_REQUEST['yt_fmt'];
 		$this->fmturlmaps = $this->GetVideosArr($fmt_url_maps);
 
@@ -48,7 +48,7 @@ class youtube_com extends DownloadClass {
 		}
 
 		$ext = '.flv';
-		$fmtexts = array('.mp4' => array(18,22,37,38), '.webm' => array(43,44,45,46));
+		$fmtexts = array('.mp4' => array(18,22,37,38), '.webm' => array(43,44,45,46), '.3gp' => array(36,17));
 		foreach ($fmtexts as $k => $v) {
 			if (!is_array($v)) $v = array($v);  
 			if (in_array($fmt, $v)) {
@@ -107,18 +107,8 @@ class youtube_com extends DownloadClass {
 			if (isset($_REQUEST['yt_fmt'])) $data['yt_fmt'] = $_REQUEST['yt_fmt'];
 			$data['step'] = 1;
 
-			$this->Show_reCaptcha($pid[1], $data);
+			$this->reCAPTCHA($pid[1], $data);
 		}
-	}
-
-	private function Show_reCaptcha($pid, $inputs, $sname = 'Download File') {
-		if (!is_array($inputs)) html_error('Error parsing captcha data.');
-
-		// Themes: 'red', 'white', 'blackglass', 'clean'
-		echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n\n<center><form name='recaptcha' action='{$GLOBALS['PHP_SELF']}' method='POST'><br />\n";
-		foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='$input' />\n";
-		echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script><noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br /><input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n</form></center>\n</body>\n</html>";
-		exit;
 	}
 
 	private function sigDecode($sig) {
@@ -142,11 +132,11 @@ class youtube_com extends DownloadClass {
 	}
 
 	private function QSelector($link) {
-		$VR = array('>1080', 1080, 720, 480, 360, 270, 240);
-		$VC = array('MP4', 'WebM', 'FLV');
+		$VR = array('>1080', 1080, 720, 480, 360, 270, 240, 144);
+		$VC = array('MP4', 'WebM', 'FLV', '3GP');
 		$AC = array('AAC', 'Vorbis', 'MP3');
-		$AB = array(192, 128, 96, 64);
-		$vinfo = array(38=>'0000',37=>'1000',46=>'1110',22=>'2000',45=>'2110',44=>'3111',35=>'3201',43=>'4111',34=>'4201',18=>'4002',6=>'5223',5=>'6223'); // VR VC AC AB
+		$AB = array(192, 128, 96, 64, 36, 24);
+		$vinfo = array(38=>'0000',37=>'1000',46=>'1110',22=>'2000',45=>'2110',44=>'3111',35=>'3201',43=>'4111',34=>'4201',18=>'4002',6=>'5223',5=>'6223',36=>'6304',17=>'7305'); // VR VC AC AB
 
 		$sizes = array();
 		/* Add a // at the start of this line for enable this code.
@@ -195,5 +185,6 @@ class youtube_com extends DownloadClass {
 // [07-10-2012]  Fixed for redirect at link. - Th3-822
 // [02-1-2013]  Using new way for getting links and video info, now it doesn't need login for restricted videos. - Th3-822
 // [02-10-2013]  Fixed issues with videos with ciphered signature & Rewritten quality selector (Now it doesn't use lang) & Remove direct-link option & Added option for sanitize filenames & small changes. - Th3-822
+// [04-3-2014]  Re-Added Support for 3GP quality. - Th3-822
 
 ?>

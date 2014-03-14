@@ -384,6 +384,8 @@ function resetProgress() {
 															<option value='43'>[43] Video: WebM 360p | Audio: Vorbis ~128 kbps</option>
 															<option value='18'>[18] Video: MP4 360p | Audio: AAC ~96 kbps</option>
 															<option value='5'>[5] Video: FLV 240p | Audio: MP3 ~64 kbps</option>
+															<option value='36'>[36] Video: 3GP 240p | Audio: AAC ~36 kbps</option>
+															<option value='17'>[17] Video: 3GP 144p | Audio: AAC ~24 kbps</option>
 														</select>
 													</td>
 												</tr>
