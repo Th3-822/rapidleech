@@ -72,7 +72,7 @@ function insert_location($inputs, $action = 0) {
 	}
 	if (isset($_GET['GO']) && $_GET['GO'] == 'GO') $_GET = array_merge($_GET, $inputs);
 	else {
-		if ($action === 0) $action = $_SERVER['SCRIPT_NAME'];
+		if ($action === 0) $action = $GLOBALS['PHP_SELF'];
 		$fname = 'r'.time().'l';
 		echo "\n<form name='$fname' ".(!empty($action) ? "action='$action' " : '')."method='POST'>\n";
 		foreach($inputs as $name => $value) echo "\t<input type='hidden' name='$name' value='$value' />\n";
@@ -82,16 +82,15 @@ function insert_location($inputs, $action = 0) {
 }
 
 function pause_download() { // To make sure that the files pointers and streams are closed and unlocked.
-	global $PHP_SELF, $fs, $fp, $file, $pathWithName;
-	if (!empty($fs) && is_resource($fs)) {
-		flock($fs, LOCK_UN);
-		if (get_resource_type($fs) == 'stream') stream_socket_shutdown($fs, STREAM_SHUT_RDWR);
-		fclose($fs);
+	if (!empty($GLOBALS['fs']) && is_resource($GLOBALS['fs'])) {
+		flock($GLOBALS['fs'], LOCK_UN);
+		if (get_resource_type($GLOBALS['fs']) == 'stream') stream_socket_shutdown($GLOBALS['fs'], STREAM_SHUT_RDWR);
+		fclose($GLOBALS['fs']);
 	}
-	if (!empty($fp) && is_resource($fp)) {
-		flock($fp, LOCK_UN);
-		if (get_resource_type($fp) == 'stream') stream_socket_shutdown($fp, STREAM_SHUT_RDWR);
-		fclose($fp);
+	if (!empty($GLOBALS['fp']) && is_resource($GLOBALS['fp'])) {
+		flock($GLOBALS['fp'], LOCK_UN);
+		if (get_resource_type($GLOBALS['fp']) == 'stream') stream_socket_shutdown($GLOBALS['fp'], STREAM_SHUT_RDWR);
+		fclose($GLOBALS['fp']);
 	}
 }
 
@@ -131,9 +130,7 @@ function read_file($file_name, $count = -1) {
 }
 
 function pre($var) {
-	echo "<pre>";
-	print_r($var);
-	echo "</pre>";
+	echo "<pre>\n" . htmlspecialchars(print_r($var, true)) . "\n</pre>\n";
 }
 
 function getmicrotime() {
@@ -142,17 +139,15 @@ function getmicrotime() {
 }
 
 function html_error($msg, $head = 1) {
-	global $PHP_SELF, $options;
-
-	if (strtolower(basename($PHP_SELF)) == 'audl.php' && isset($_REQUEST['GO']) && $_REQUEST['GO'] == 'GO' && $_REQUEST['server_side'] == 'on' && !empty($GLOBALS['isHost'])) throw new Exception($msg); // Audl-Server Side, called from a plugin.
+	if (strtolower(basename($GLOBALS['PHP_SELF'])) == 'audl.php' && isset($_REQUEST['GO']) && $_REQUEST['GO'] == 'GO' && $_REQUEST['server_side'] == 'on' && !empty($GLOBALS['isHost'])) throw new Exception($msg); // Audl-Server Side, called from a plugin.
 	else {
 		//if ($head == 1)
 		if (!headers_sent()) include(TEMPLATE_DIR.'header.php');
 		echo '<div align="center">';
 		echo "<span class='htmlerror'><b>$msg</b></span><br /><br />";
 		if (isset($_GET['audl'])) echo '<script type="text/javascript">parent.nextlink();</script>';
-		if (!empty($options['new_window'])) echo '<a href="javascript:window.close();">'.lang(378).'</a>';
-		else echo '<a href="'.$PHP_SELF.'">'.lang(13).'</a>';
+		if (!empty($GLOBALS['options']['new_window'])) echo '<a href="javascript:window.close();">'.lang(378).'</a>';
+		else echo '<a href="'.htmlspecialchars($GLOBALS['PHP_SELF']).'">'.lang(13).'</a>';
 		echo '</div>';
 	}
 	pause_download();
@@ -207,13 +202,12 @@ function _cmp_list_enums($a, $b) {
 }
 
 function file_data_size_time($file) {
-	global $options;
 	$size = $time = false;
 	if (is_file($file)) {
 		$size = @filesize($file);
 		$time = @filemtime($file);
 	}
-	if ($size === false && $options['2gb_fix'] && file_exists($file) && !is_dir($file) && !is_link($file)) {
+	if ($size === false && $GLOBALS['options']['2gb_fix'] && file_exists($file) && !is_dir($file) && !is_link($file)) {
 		if (substr(PHP_OS, 0, 3) !== 'WIN') {
 			@exec('stat' . (stripos(@php_uname('s'), 'bsd') !== false ? '-f %m ' : ' -c %Y ') . escapeshellarg($file), $time, $tmp);
 			if ($tmp == 0) $time = trim(implode($time));
@@ -226,14 +220,13 @@ function file_data_size_time($file) {
 }
 
 function _create_list() {
-	global $list, $_COOKIE, $options;
 	$glist = array();
-	if (($options['show_all'] === true) && (isset($_COOKIE['showAll']) && $_COOKIE['showAll'] == 1)) {
+	if (($GLOBALS['options']['show_all'] === true) && (isset($_COOKIE['showAll']) && $_COOKIE['showAll'] == 1)) {
 		$dir = dir(DOWNLOAD_DIR);
 		while(false !== ($file = $dir->read())) {
 			if (($tmp = file_data_size_time(DOWNLOAD_DIR.$file)) === false) continue;
 			list($size, $time) = $tmp;
-			if ($file != '.' && $file != '..' && (!is_array($options['forbidden_filetypes']) || !in_array(strtolower(strrchr($file, '.')), $options['forbidden_filetypes']))) {
+			if ($file != '.' && $file != '..' && (!is_array($GLOBALS['options']['forbidden_filetypes']) || !in_array(strtolower(strrchr($file, '.')), $GLOBALS['options']['forbidden_filetypes']))) {
 				$file = DOWNLOAD_DIR . $file;
 				while(isset($glist[$time])) $time++;
 				$glist[$time] = array('name' => realpath($file), 'size' => bytesToKbOrMbOrGb($size), 'date' => $time);
@@ -245,15 +238,23 @@ function _create_list() {
 		if (@file_exists(CONFIG_DIR . 'files.lst') && ($glist = file(CONFIG_DIR . 'files.lst')) !== false) {
 			foreach($glist as $key => $record) {
 				foreach(unserialize($record) as $field => $value) {
+					switch ($field) {
+						case 'date':
+							$date = $value;
+						default:
 					$listReformat[$key][$field] = $value;
-					if ($field == 'date') $date = $value;
+							break;
+						case 'comment':
+							$listReformat[$key][$field] = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+							break;
+					}
 				}
 				$glist[$date] = $listReformat[$key];
 				unset($glist[$key], $listReformat[$key]);
 			}
 		}
 	}
-	$list = $glist;
+	$GLOBALS['list'] = $glist;
 }
 
 function checkmail($mail) {
@@ -274,10 +275,9 @@ function fixfilename($fname, $fpach = '') {
 }
 
 function getfilesize($f) {
-	global $is_windows;
 	$stat = stat($f);
 
-	if ($is_windows || (($stat[11] * $stat[12]) < 4 * 1024 * 1024 * 1024)) return sprintf('%u', $stat[7]);
+	if ($GLOBALS['is_windows'] || (($stat[11] * $stat[12]) < 4 * 1024 * 1024 * 1024)) return sprintf('%u', $stat[7]);
 
 	global $max_4gb;
 	if ($max_4gb === false) {
@@ -386,10 +386,10 @@ function link_for_file($filename, $only_link = FALSE, $style = '') {
 }
 
 function lang($id) {
-	global $options, $lang;
-	if (!is_array($lang)) $lang = array();
-	if (basename($options['default_language']) != 'en' && file_exists('languages/en.php')) require_once('languages/en.php');
-	require_once('languages/'.basename($options['default_language']).'.php');
+	global $lang;
+	if (empty($lang) || !is_array($lang)) $lang = array();
+	if (basename($GLOBALS['options']['default_language']) != 'en' && file_exists('languages/en.php')) require_once('languages/en.php');
+	require_once('languages/'.basename($GLOBALS['options']['default_language']).'.php');
 	return $lang[$id];
 }
 
@@ -487,7 +487,7 @@ function check_referer() {
 }
 
 function rebuild_url($url) {
-	return $url['scheme'] . '://' . (!empty($url['user']) && !empty($url['pass']) ? rawurlencode($url['user']) . ':' . rawurlencode($url['pass']) . '@' : '') . $url['host'] . (!empty($url['port']) && $url['port'] != 80 && $url['port'] != 443 ? ':' . $url['port'] : '') . (empty($url['path']) ? '/' : $url['path']) . (!empty($url['query']) ? '?' . $url['query'] : '') . (!empty($url['fragment']) ? '#' . $url['fragment'] : '');
+	return strtolower($url['scheme']) . '://' . (!empty($url['user']) && !empty($url['pass']) ? rawurlencode($url['user']) . ':' . rawurlencode($url['pass']) . '@' : '') . strtolower($url['host']) . (!empty($url['port']) && $url['port'] != 80 && $url['port'] != 443 ? ':' . $url['port'] : '') . (empty($url['path']) ? '/' : $url['path']) . (!empty($url['query']) ? '?' . $url['query'] : '') . (!empty($url['fragment']) ? '#' . $url['fragment'] : '');
 }
 
 if (!function_exists('http_chunked_decode')) {
@@ -527,7 +527,6 @@ function host_matches($site, $host) {
 }
 
 function GetDefaultParams() {
-	global $options;
 	$DParam = array();
 	if (isset($_GET['useproxy']) && $_GET['useproxy'] == 'on' && !empty($_GET['proxy'])) {
 		global $pauth;
@@ -537,7 +536,7 @@ function GetDefaultParams() {
 	}
 	if (isset($_GET['autoclose'])) $DParam['autoclose'] = '1';
 	if (isset($_GET['audl'])) $DParam['audl'] = 'doum';
-	if ($options['download_dir_is_changeable'] && !empty($_GET['path'])) $DParam['saveto'] = urlencode($_GET['path']);
+	if ($GLOBALS['options']['download_dir_is_changeable'] && !empty($_GET['path'])) $DParam['saveto'] = urlencode($_GET['path']);
 	$params = array('add_comment', 'domail', 'comment', 'email', 'split', 'partSize', 'method', 'uploadlater', 'uploadtohost');
 	foreach ($params as $key) if (!empty($_GET[$key])) $DParam[$key] = $_GET[$key];
 	return $DParam;

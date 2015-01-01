@@ -18,7 +18,7 @@ class filefactory_com extends DownloadClass {
 
 		$this->link = $GLOBALS['Referer'] = str_ireplace('://filefactory.com/', '://www.filefactory.com/', $link);
 
-		$post = empty($this->lpass) ? array() : array('password' => urlencode($this->lpass), 'Submit' => 'Continue');
+		$post = empty($this->lpass) ? 0 : array('password' => urlencode($this->lpass), 'Submit' => 'Continue');
 		$this->page = $this->GetPage($this->link, $this->cookie, $post);
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
 

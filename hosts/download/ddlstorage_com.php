@@ -60,7 +60,7 @@ class ddlstorage_com extends DownloadClass {
 
 			$page2 = cut_str($page, '<form name="F1" method="POST"', '</form>'); //Cutting page
 
-			if (!preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w|\-]+)@i', $page, $pid)) html_error('Error: reCAPTCHA not found.');
+			if (!preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w\.\-]+)@i', $page, $pid)) html_error('Error: reCAPTCHA not found.');
 
 			if (!preg_match('@<div id="countdown_str"[^>]*>[^<>]+<p>[^<>]*<h2[^>]*>(\d+)</h2>[^<>]+</p>[^<>]+</div>@i', $page2, $count)) html_error('Countdown not found.');
 			$this->CountDown($count[1]);

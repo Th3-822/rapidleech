@@ -126,7 +126,7 @@ class DownloadClass {
 	 */
 
 	public function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5', $sname = 'Enter Captcha', $iname = 'captcha') {
-		echo "\n<form name='captcha' action='{$_SERVER['SCRIPT_NAME']}' method='POST'>\n";
+		echo "\n<form name='captcha' action='{$GLOBALS['PHP_SELF']}' method='POST'>\n";
 		foreach ($inputs as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='$input' />\n";
 		echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input id='captcha' type='text' name='$iname' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='$sname' />\n\t</h4>\n\t<script type='text/javascript'>/* <![CDATA[ */\n\t\tfunction check() {\n\t\t\tvar captcha=document.getElementById('captcha').value;\n\t\t\tif (captcha == '') {\n\t\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\t\treturn false;\n\t\t\t} else return true;\n\t\t}\n\t/* ]]> */</script>\n</form>\n";
 		include(TEMPLATE_DIR.'footer.php');
@@ -164,9 +164,8 @@ class DownloadClass {
 	 */
 
 	public function JSCountdown($secs, $post = 0, $text='Waiting link timelock', $stop = 1) {
-		global $PHP_SELF;
 		echo "<p><center><span id='dl' class='htmlerror'><b>ERROR: Please enable JavaScript. (Countdown)</b></span><br /><span id='dl2'>Please wait</span></center></p>\n";
-		echo "<form action='$PHP_SELF' name='cdwait' method='POST'>\n";
+		echo "<form action='{$GLOBALS['PHP_SELF']}' name='cdwait' method='POST'>\n";
 		if (!empty($post) && is_array($post)) foreach ($post as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='$input' />\n";
 		?><script type="text/javascript">/* <![CDATA[ */
 		var c = <?php echo $secs; ?>;var text = "<?php echo $text; ?>";var c2 = 0;var dl = document.getElementById("dl");var a2 = document.getElementById("dl2");fc();fc2();
@@ -197,7 +196,7 @@ class DownloadClass {
 	}
 
 	public function reCAPTCHA($publicKey, $inputs, $sname = 'Download File') {
-		if (empty($publicKey) || preg_match('/[^\w\-]/', $publicKey)) html_error('Invalid reCAPTCHA public key.');
+		if (empty($publicKey) || preg_match('/[^\w\.\-]/', $publicKey)) html_error('Invalid reCAPTCHA public key.');
 		if (!is_array($inputs)) html_error('Error parsing captcha post data.');
 		// Check for a global recaptcha key
 		$page = $this->GetPage('http://www.google.com/recaptcha/api/challenge?k=' . $publicKey, 0, 0, 'http://fakedomain.tld/fakepath');
@@ -222,6 +221,48 @@ class DownloadClass {
 			$this->EnterCaptcha("data:$mimetype;base64,".base64_encode($imgBody), $inputs, 20, $sname, 'recaptcha_response_field');
 		}
 		exit;
+	}
+
+	public function captchaSolveMedia($skey, $data, $referer = 0, $sname = 'Download File') {
+		if (!is_array($data)) html_error('Post needs to be sended in a array.');
+		if (empty($skey) || preg_match('@[^\w\-\.]@', $skey)) html_error('Invalid value for $skey');
+		$page = $this->GetPage("http://api.solvemedia.com/papi/challenge.noscript?k=$skey", 0, 0, $referer);
+		if (!preg_match('@<img [^/<>]*src\s?=\s?\"((https?://[^/\"<>]+)?/papi/media[^\"<>]+)\"@i', $page, $imgurl)) html_error('[SM] CAPTCHA img not found.');
+		$imgurl = (empty($imgurl[2])) ? 'http://api.solvemedia.com'.$imgurl[1] : $imgurl[1];
+
+		if (!preg_match_all('@<input [^/|<|>]*type\s?=\s?\"?hidden\"?[^/<>]*\s?name\s?=\s?\"(\w+)\"[^/<>]*\s?value\s?=\s?\"([^\"<>]+)\"[^/<>]*/?\s*>@i', $page, $forms)) html_error('[SM] CAPTCHA data not found.');
+		$forms = array_combine($forms[1], $forms[2]);
+		foreach ($forms as $n => $v) $data["_smc[$n]"] = urlencode($v);
+
+		//Download captcha img.
+		list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage($imgurl), 2);
+		if (substr($headers, 9, 3) != '200') html_error('[SM] Error downloading CAPTCHA img.');
+		$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/gif');
+
+		$this->EnterCaptcha("data:$mimetype;base64,".base64_encode($imgBody), $data, 20, $sname, 'adcopy_response');
+		exit;
+	}
+
+	public function verifySolveMedia($referer = 0) {
+		if (empty($_POST['adcopy_response'])) html_error('[SM] You didn\'t enter the image verification code.');
+		if (empty($_POST['_smc']) || !is_array($_POST['_smc'])) html_error('[SM] CAPTCHA data invalid.');
+		$post = array();
+		foreach ($_POST['_smc'] as $n => $v) $post[urlencode($n)] = $v;
+		$post['adcopy_response'] = urlencode($_POST['adcopy_response']);
+
+		$url = 'http://api.solvemedia.com/papi/verify.noscript';
+		$page = $this->GetPage($url, 0, $post, $referer);
+
+		if (!preg_match('@(https?://[^/\'\"<>\r\n]+)?/papi/verify\.pass\.noscript\?[^/\'\"<>\r\n]+@i', $page, $resp)) {
+			is_present($page, '/papi/challenge.noscript', '[SM] Wrong CAPTCHA entered.');
+			html_error('Error sending CAPTCHA.');
+		}
+		$resp = (empty($resp[1])) ? 'http://api.solvemedia.com'.$resp[0] : $resp[0];
+
+		$page = $this->GetPage($resp, 0, 0, $url);
+		if (!preg_match('@>[\s\t\r\n]*([^<>\r\n]+)[\s\t\r\n]*</textarea>@i', $page, $gibberish)) html_error('[SM] CAPTCHA response not found.');
+
+		return array('adcopy_challenge' => urlencode($gibberish[1]), 'adcopy_response' => 'manual_challenge');
 	}
 
 }

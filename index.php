@@ -17,18 +17,6 @@ $_REQUEST = $_GET = array_merge($_GET, $_POST);
 $_REQUEST['premium_acc'] = $_POST['premium_acc'] = $_GET['premium_acc'] = isset($_REQUEST['premium_acc']) && $_REQUEST['premium_acc'] == 'on' ? 'on' : false;
 $_REQUEST['cookieuse'] = $_POST['cookieuse'] = $_GET['cookieuse'] = isset($_REQUEST['cookieuse']) && $_REQUEST['cookieuse'] == 'on' ? 'on' : false;
 
-if (!$_COOKIE) {
-	if (isset($_SERVER['HTTP_COOKIE']) && strpos($_SERVER['HTTP_COOKIE'], ';') !== false) {
-		foreach(explode('; ', $_SERVER['HTTP_COOKIE']) as $key => $value) {
-			list ($var, $val) = explode('=', $value);
-			$_COOKIE[$var] = $val;
-		}
-	} elseif (!empty($_SERVER['HTTP_COOKIE'])) {
-		list($var, $val) = @explode('=', $_SERVER['HTTP_COOKIE']);
-		$_COOKIE[$var] = $val;
-	}
-}
-
 require_once(CLASS_DIR . 'cookie.php');
 
 if (!@file_exists(HOST_DIR . 'download/hosts.php')) html_error(lang(127));
@@ -78,7 +66,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 	$Url = parse_url($LINK);
 	$Url['scheme'] = strtolower($Url['scheme']);
 
-	$Url['path'] = (empty($Url['path'])) ? '/' :str_replace('%2F', '/', rawurlencode(rawurldecode($Url['path'])));
+	$Url['path'] = (empty($Url['path'])) ? '/' :str_replace(array('%2F', '%7C'), array('/', '|'), rawurlencode(rawurldecode($Url['path'])));
 	$LINK = rebuild_url($Url);
 
 	if (empty($_GET['referer'])) {

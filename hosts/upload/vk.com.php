@@ -53,7 +53,7 @@ if (empty($_REQUEST['code'])) {
 	// Auth
 	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='login' width='100%' align='center'>Authenticating</div>\n";
 
-	if ($usecurl) $page = cURL ('https://oauth.vk.com/access_token?client_id='.urlencode($app['id']).'&client_secret='.urlencode($app['secret']).'&code='.urlencode($_REQUEST['code']).'&redirect_uri='.rawurlencode($return_url));
+	if ($usecurl) $page = cURL('https://oauth.vk.com/access_token?client_id='.urlencode($app['id']).'&client_secret='.urlencode($app['secret']).'&code='.urlencode($_REQUEST['code']).'&redirect_uri='.rawurlencode($return_url));
 	else {
 		$page = geturl('oauth.vk.com', 0, '/access_token?client_id='.urlencode($app['id']).'&client_secret='.urlencode($app['secret']).'&code='.urlencode($_REQUEST['code']).'&redirect_uri='.urlencode($return_url), 0, 0, 0, 0, $_GET['proxy'], $pauth, 0, 'https'); // Port is overridden to 443
 		is_page($page);
@@ -70,7 +70,7 @@ if (empty($_REQUEST['code'])) {
 	else $data = array('method'=>'audio.getUploadServer');
 	$req = SigAndReq($data, '/method/'.$data['method'].'?');
 
-	if ($usecurl) $page = cURL ('https://api.vk.com'.$req);
+	if ($usecurl) $page = cURL('https://api.vk.com'.$req);
 	else {
 		$page = geturl('api.vk.com', 0, $req, 0, 0, 0, 0, $_GET['proxy'], $pauth, 0, 'https'); // Port is overridden to 443
 		is_page($page);
@@ -90,7 +90,7 @@ if (empty($_REQUEST['code'])) {
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
 
 	$url = parse_url($up_url);
-	$upfiles = upfile($url['host'], 80, $url['path'].($url['query'] ? '?'.$url['query'] : ''), '', '', $post, $lfile, $lname, ($video ? 'video_file' : 'file'), '', $_GET['proxy'], $pauth);
+	$upfiles = upfile($url['host'], defport($url), $url['path'].($url['query'] ? '?'.$url['query'] : ''), '', '', $post, $lfile, $lname, ($video ? 'video_file' : 'file'), '', $_GET['proxy'], $pauth, 0, $url['scheme']);
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";
@@ -103,7 +103,7 @@ if (empty($_REQUEST['code'])) {
 		sleep(1); // Let's wait another second :D
 		$data = array('method'=>'audio.save', 'server'=>$upres['server'], 'audio'=>$upres['audio'], 'hash'=>$upres['hash']);
 		$req = SigAndReq($data, '/method/'.$data['method'].'?');
-		if ($usecurl) $page = cURL ('https://api.vk.com'.$req);
+		if ($usecurl) $page = cURL('https://api.vk.com'.$req);
 		else {
 			$page = geturl('api.vk.com', 0, $req, 0, 0, 0, 0, $_GET['proxy'], $pauth, 0, 'https'); // Port is overridden to 443
 			is_page($page);
@@ -118,7 +118,7 @@ if (empty($_REQUEST['code'])) {
 
 	if ($video && !empty($upsrv['response']['vid'])) $download_link = 'http://vk.com/video' . $json['user_id'] . '_' . $upsrv['response']['vid'];
 	elseif ($video) html_error('Your video will appear in your VK account after a while.', 0);
-	else html_error('Check your VK account for see the new uploaded file.', 0);
+	else html_error('Check your VK account for see your new uploaded file.', 0);
 }
 
 function SigAndReq($data, $req) {
@@ -148,5 +148,6 @@ function Get_Reply($page) {
 //[28-10-2012] Small fixes that i don't remember. - Th3-822
 //[24-11-2012] Now it shows video url & Fixed auul for this plugin. - Th3-822
 //[22-9-2013] Fixed mp3 upload & Other issues. - Th3-822
+//[15-12-2014] Fixed uploading (Now it requires support for HTTPS uploads). - Th3-822
 
 ?>

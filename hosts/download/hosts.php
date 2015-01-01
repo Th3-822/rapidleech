@@ -2,7 +2,7 @@
 $host = array();
 $d = dir(HOST_DIR . 'download/');
 $HostnamesToFix = array('cash.file.net' => 'cash-file.net', 'd.h.st' => 'd-h.st', 'ex.load.com' => 'ex-load.com', 'share.now.net' => 'share-now.net','share.online.biz' => 'share-online.biz');
-$HostnamesToIgnore = array('generic.minifilehost', 'youtube.com(1)', 'vBulletin.plug', 'hosts');
+$HostnamesToIgnore = array('generic.minifilehost', 'GenericXFS_DL', 'vBulletin.plug', 'hosts');
 while (false !== ($entry = $d->read())) {
 	if (strtolower(strrchr($entry, '.')) == '.php' && stripos($entry, '.JD') === false) {
 		$hostname = strtolower(substr($entry, 0, -4));
@@ -19,9 +19,6 @@ while (false !== ($entry = $d->read())) {
 			case 'bayfiles.net':
 				$host['bayfiles.com'] = $host['bayfiles.net'];
 				break;
-			case 'cloudzer.net':
-				$host['clz.to'] = $host['cloudzer.net'];
-				break;
 			case 'cramit.in':
 				foreach(array('cramitin.eu', 'cramitin.net', 'cramitin.us') as $cramit) $host["$cramit"] = $host['cramit.in'];
 				break;
@@ -34,14 +31,18 @@ while (false !== ($entry = $d->read())) {
 			case 'd-h.st':
 				$host['dev-host.org'] = $host['d-h.st'];
 				break;
+			case 'filesflash.com':
+				$host['filesflash.net'] = $host['filesflash.com'];
+				break;
 			case 'filecloud.io':
 				$host['ifile.it'] = $host['filecloud.io'];
 				break;
 			case 'filepost.com':
 				$host['fp.io'] = $host['filepost.com'];
 				break;
-			case 'filerio.com':
-				$host['filekeen.com'] = $host['filerio.com'];
+			case 'filerio.in':
+				$host['filerio.com'] = $host['filerio.in'];
+				$host['filekeen.com'] = $host['filerio.in'];
 				break;
 			case 'firedrive.com':
 				$host['putlocker.com'] = $host['firedrive.com'];
@@ -60,6 +61,10 @@ while (false !== ($entry = $d->read())) {
 				break;
 			case 'speedyshare.com':
 				$host['speedy.sh'] = $host['speedyshare.com'];
+				break;
+			case 'terafile.co':
+				$host['lumfile.com'] = $host['terafile.co'];
+				$host['lumfile.se'] = $host['terafile.co'];
 				break;
 			case 'turbobit.net':
 				$host['turbobit.ru'] = $host['turbobit.net'];

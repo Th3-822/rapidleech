@@ -9,7 +9,7 @@ if (!isset($_T8) || !is_array($_T8) || empty($_T8['domain']) || $_T8['domain'] =
 	if (strtolower(basename(__FILE__)) == strtolower($page_upload[$_REQUEST['uploaded']])) html_error('This plugin can\'t be called directly.');
 	html_error('Error: Called from non configured plugin "' . htmlentities($page_upload[$_REQUEST['uploaded']]) . '".');
 }
-if ($_T8['v'] > 3) html_error('Error: '.basename(__FILE__).' is outdated, please install last version from: http://www.rapidleech.com/index.php/topic/14014-upload-plugin-for-sites-with-xfs-pro/ or http://pastebin.com/E0z7qMU1 ');
+if ($_T8['v'] > 3) html_error('Error: '.basename(__FILE__).' is outdated, please install last version from: http://rapidleech.com/forum/viewtopic.php?f=17&t=80 or http://pastebin.com/E0z7qMU1 ');
 
 /* # Default Settings # */
 $default = array();
@@ -57,8 +57,8 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 		$post = array();
 		$post['op'] = 'login';
 		$post['redirect'] = '';
-		$post['login'] = $_REQUEST['up_login'];
-		$post['password'] = $_REQUEST['up_pass'];
+		$post['login'] = urlencode($_REQUEST['up_login']);
+		$post['password'] = urlencode($_REQUEST['up_pass']);
 
 		$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'].'?op=login', $referer, $cookie, array_map('urlencode', $post), 0, $_GET['proxy'], $pauth, 0, ($_T8['sslLogin'] ? 'https' : $scheme));is_page($page);
 		$header = substr($page, 0, strpos($page, "\r\n\r\n"));
@@ -91,6 +91,7 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 
 	if (!preg_match('@action=["\']((https?://[^/"\']+)?/(?:[^\?"\'/]+/)*[\w\-]+\.cgi)\?upload_id=@i', $page, $up) && (empty($_T8['flashUpload']) || !preg_match('@[\'"]?uploader[\'"]?\s*:\s*[\'"]((https?://[^/"\']+)?/(?:[^\?"\'/]+/)*'.preg_quote((is_string($_T8['flashUpload']) ? $_T8['flashUpload'] :'up_flash.cgi'), '@').')[\'"]@i', $page, $up))) {
 		is_present($page, 'We\'re sorry, there are no servers available for upload at the moment.', 'Site isn\'t accepting uploads.');
+		is_present($page, 'Uploads are disabled for your country:', 'Site isn\'t accepting uploads from your server\'s country.');
 		if (!$login) {
 			if (stripos($header, "\nLocation: ") !== false) is_present(cut_str($header, "\nLocation: ", "\n"), '?op=login', 'Please set '.($_T8['xfsFree'] ? '$_T8[\'xfsFree\'] to false and ' : '').'$_T8[\'anonUploadDisable\'] to true.');
 			is_present($page, '>Register on site to be able to upload files<', 'Please set '.($_T8['xfsFree'] ? '$_T8[\'xfsFree\'] to false and ' : '').'$_T8[\'anonUploadDisable\'] to true.');
@@ -194,5 +195,6 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 //[05-8-2013] Plugin rewritten for making it a include (for saving space) & Added file-ext check & Small edits. - Th3-822
 //[21-9-2013] Fixed upload url regexp (Now it will work on hosts that change upload.cgi filename/path) & Edits for allow extra cookies & Added support for XFS's flash upload. - Th3-822
 //[22-1-2014] Added support for custom port and https on whole site, login or upload. - Th3-822
+//[21-4-2014] Added urlencode on login $post. - Th3-822
 
 ?>

@@ -45,7 +45,7 @@ class freakshare_com extends DownloadClass {
 				}
 			case '1':
 				$page = $this->GetPage($this->link, $this->cookie, array('section' => 'benefit', 'did' => '0'));
-				if (!preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w|\-]+)@i', $page, $cpid)) html_error('CAPTCHA not found.');
+				if (!preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w\.\-]+)@i', $page, $cpid)) html_error('CAPTCHA not found.');
 				$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
 				$data['step'] = '2';
 				return $this->reCAPTCHA($cpid[1], $data);

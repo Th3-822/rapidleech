@@ -40,7 +40,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 			unset($_REQUEST['A_encrypted']);
 		}
 
-		$page = geturl($domain, 0, '/login', $referer, $cookie, 0, 0, 0, 0, 0, 'https');is_page($page);
+		$page = geturl($domain, 80, '/login', $referer.'login', $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 		$cookie = GetCookiesArr($page, $cookie);
 
 		$post = array();
@@ -51,18 +51,18 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		$post['user%5Bpassword%5D'] = urlencode($_REQUEST['up_pass']);
 		$post['submit'] = 'Log+In';
 
-		$page = geturl($domain, 0, '/login', $referer.'login', $cookie, $post, 0, 0, 0, 0, 'https');is_page($page);
+		$page = geturl($domain, 80, '/login', $referer.'login', $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);
 		$cookie = GetCookiesArr($page, $cookie);
 
 		is_present($page, 'Login incorrect', 'Login Failed: Email/Password incorrect.');
-		is_notpresent($page, 'Location: https://shared.com/dashboard', 'Login Error: Dashboard redirect not found.');
+		if (!preg_match('@\nLocation: (?:https?://shared.com)?/u/([^\r\n]+)@i', $page, $uname)) html_error('Login Error: Login redirect not found.');
 		$login = true;
 	} else html_error('Login failed: User/Password empty.');
 
 	// Retrive upload ID
 	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retriving upload ID</div>\n";
 
-	$page = geturl($domain, 0, '/dashboard', $referer.'login', $cookie, 0, 0, 0, 0, 0, 'https');is_page($page);
+	$page = geturl($domain, 80, '/u/'.$uname[1], $referer.'login', $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 	$cookie = GetCookiesArr($page, $cookie);
 
 	if (!preg_match('@action="((https?://(?:\w+\.)*shared\.com)?(/)?[^\s\'\"<>]+)"\s+class="no-files-selected"@i', $page, $up)) html_error('Error: Upload url not found.');
@@ -73,9 +73,9 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	$post = array();
 	$post['status'] = '1';
 
-	$ref = $referer."dashboard\r\nX-CSRF-Token: $csrf";
+	$ref = $referer.'u/'.$uname[1]."\r\nX-CSRF-Token: $csrf";
 
-	$up_url = (empty($up[2]) ? "https://$domain".(empty($up[3]) ? '/' : '').$up[1] : $up[1]);
+	$up_url = (empty($up[2]) ? "http://$domain".(empty($up[3]) ? '/' : '').$up[1] : $up[1]);
 
 	// Uploading
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
@@ -89,9 +89,11 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	is_page($upfiles);
 
 	if (!preg_match('@"slug"\s*:\s*"([^"]+)",@i', $upfiles, $lnk)) html_error('Download link not found.', 0);
-	$download_link = 'https://shared.com/'.$lnk[1];
+	$download_link = 'http://shared.com/'.$lnk[1];
 }
 
 //[09-3-2014]  Written by Th3-822.
+//[15-3-2014]  Fixed login redirect. - Th3-822
+//[26-5-2014]  Removed https, site is forcing http connections now. - Th3-822
 
 ?>

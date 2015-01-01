@@ -37,7 +37,7 @@ class mega_co_nz extends DownloadClass {
 				case -2: $msg = 'You have passed invalid arguments to this command, your rapidleech is outdated?';break;
 				case -3: $msg = 'A temporary congestion or server malfunction prevented your request from being processed';break;
 				case -4: $msg = 'You have exceeded your command weight per time quota. Please wait a few seconds, then try again';break;
-				case -9: $msg = 'File not found';break;
+				case -9: $msg = 'File/Folder not found';break;
 				case -11: $msg = 'Access violation';break;
 				case -13: $msg = 'Trying to access an incomplete file';break;
 				case -14: $msg = 'A decryption operation failed';break;
@@ -179,8 +179,7 @@ class mega_co_nz extends DownloadClass {
 			$key = $this->decrypt_key($this->base64_to_a32(reset($keys)), $this->base64_to_a32($fnk));
 			if (empty($key)) continue;
 			$attr = $this->dec_attr($this->base64url_decode($file['a']), array($key[0] ^ $key[4], $key[1] ^ $key[5], $key[2] ^ $key[6], $key[3] ^ $key[7]));
-			if (empty($attr)) html_error('Error while decoding folder: Invalid Key?.');
-			$dfiles[$file['h']] = array('k' => $this->a32_to_base64($key), 'n' => $attr['n']);
+			if (!empty($attr)) $dfiles[$file['h']] = array('k' => $this->a32_to_base64($key), 'n' => $attr['n']);
 		}
 		if (empty($dfiles)) html_error('Error while decoding folder: Empty Folder?.');
 		uasort($dfiles, array($this, 'FSort'));

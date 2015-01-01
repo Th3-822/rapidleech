@@ -56,7 +56,7 @@ class uploaded_net extends DownloadClass {
 			}
 			// Download js and find site's recaptcha key
 			$js = $this->GetPage("$url/js/download.js", $this->cookie);
-			if (!preg_match('@Recaptcha\.create[\s\t]*\([\s\t]*\"[\s\t]*([\w\-]+)[\s\t]*\"@i', $js, $cpid)) html_error('reCAPTCHA Not Found.');
+			if (!preg_match('@Recaptcha\.create[\s\t]*\([\s\t]*\"[\s\t]*([\w\.\-]+)[\s\t]*\"@i', $js, $cpid)) html_error('reCAPTCHA Not Found.');
 			// Do countdown
 			if ($cD[1] > 0) $this->CountDown($cD[1]);
 			// Prepare data for reCAPTCHA and call it
@@ -151,13 +151,13 @@ class uploaded_net extends DownloadClass {
 		if (is_array($savedcookies) && array_key_exists($hash, $savedcookies)) {
 			$_secretkey = $secretkey;
 			$secretkey = hash('crc32b', $pass).sha1($user.':'.$pass).hash('crc32b', $user); // A 56 char key should be safer. :D
-			$this->cookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? $this->IWillNameItLater($savedcookies[$hash]['cookie']) : '';
+			$testCookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? $this->IWillNameItLater($savedcookies[$hash]['cookie']) : '';
 			$secretkey = $_secretkey;
-			if (empty($this->cookie) || (is_array($this->cookie) && count($this->cookie) < 1)) return $this->Login($user, $pass);
+			if (empty($testCookie) || (is_array($testCookie) && count($testCookie) < 1)) return $this->Login($user, $pass);
 
-			$this->page = $this->GetPage('http://uploaded.net/me', $this->cookie, 0, 'http://uploaded.net/');
+			$this->page = $this->GetPage('http://uploaded.net/me', $testCookie, 0, 'http://uploaded.net/');
 			if (substr($this->page, 9, 3) != '200') return $this->Login($user, $pass);
-			$this->cookie = GetCookiesArr($this->page, $this->cookie); // Update cookies
+			$this->cookie = GetCookiesArr($this->page, $testCookie); // Update cookies
 			$this->SaveCookies($user, $pass); // Update cookies file
 			if (stripos($this->page, '<em>Free</em>') !== false) {
 				$this->changeMesg(lang(300).'<br /><b>Account isn\'t premium</b><br />Using it as member.');
@@ -171,7 +171,7 @@ class uploaded_net extends DownloadClass {
 
 	private function SaveCookies($user, $pass) {
 		global $secretkey;
-		$maxdays = 30; // Max days to keep cookies for more than 1 user.
+		$maxdays = 31; // Max days to keep cookies for more than 1 user.
 		$filename = DOWNLOAD_DIR . basename('uploaded_dl.php');
 		if (file_exists($filename) && filesize($filename) > 6) {
 			$file = file($filename);

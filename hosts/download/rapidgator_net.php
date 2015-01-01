@@ -9,8 +9,9 @@ class rapidgator_net extends DownloadClass {
 	private $page, $link, $cookie;
 	public function Download($link) {
 		global $premium_acc;
-		$this->link = str_ireplace(array('://www.rg.to/', '://rg.to/'), '://rapidgator.net/', $link);
+		$this->link = $GLOBALS['Referer'] = str_ireplace(array('://www.rg.to/', '://rg.to/'), '://rapidgator.net/', $link);
 		$this->cookie = array('lang' => 'en');
+		$this->DLregexp = '@https?://pr\d+\.rapidgator\.net/[^\s\"\'<>]+@i';
 		if (empty($_POST['step']) || $_POST['step'] != '1') {
 			$this->page = $this->GetPage($this->link, $this->cookie);
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
@@ -57,6 +58,8 @@ class rapidgator_net extends DownloadClass {
 			is_notpresent($page, '"state":"done"', 'Error: Countdown bypassed?.');
 
 			$page = $this->GetPage($capt_url, $this->cookie);
+
+			if (preg_match($this->DLregexp, $page, $dlink)) return $this->RedirectDownload($dlink[0], 'rapidgatorfr2');
 
 			if (!preg_match('@https?://api\.solvemedia\.com/papi/challenge\.noscript\?k=\w+@i', $page, $cframe)) html_error('CAPTCHA not found.');
 			$page = $this->GetPage($cframe[0], 0, 0, $capt_url);
@@ -105,7 +108,7 @@ class rapidgator_net extends DownloadClass {
 
 			is_present($page, "\r\nSet-Cookie: failed_on_captcha=1", 'Captcha expired. Try again in 15 minutes.');
 
-			if (!preg_match('@https?://pr\d+\.rapidgator\.net/[^\r\n\"\'<>\s\t]+@i', $page, $dlink)) html_error('Error: Download link not found.');
+			if (!preg_match($this->DLregexp, $page, $dlink)) html_error('Error: Download link not found.');
 			$this->RedirectDownload($dlink[0], 'rapidgatorfr');
 		}
 	}
@@ -113,9 +116,9 @@ class rapidgator_net extends DownloadClass {
 	private function PremiumDL() {
 		$page = $this->GetPage($this->link, $this->cookie);
 
-		if (preg_match('@You have reached daily quota of downloaded information for premium accounts. At the moment, the quota is \d+ GB@i', $page, $err)) html_error($err[0]);
+		if (preg_match('@You have reached quota of downloaded information for premium accounts. At the moment, the quota is \d+ [GT]B(?: per \d+ day\(s\))?@i', $page, $err)) html_error($err[0]);
 
-		if (!preg_match('@https?://pr\d+\.rapidgator\.net/[^\r\n\"\'<>\s\t]+@i', $page, $dlink)) html_error('Error: Download-link not found.');
+		if (!preg_match($this->DLregexp, $page, $dlink)) html_error('Error: Download-link not found.');
 
 		$this->RedirectDownload($dlink[0], 'rapidgatorpr');
 	}
@@ -132,6 +135,8 @@ class rapidgator_net extends DownloadClass {
 		$pass = ($pA ? $_REQUEST['premium_pass'] : $premium_acc['rapidgator_net']['pass']);
 
 		if (empty($user) || empty($pass)) html_error('Login Failed: User or Password is empty. Please check login data.', 0);
+		$this->cookie = array('lang' => 'en'); // Account is always showed as free if it comes from a file, as i don't send file's link as referer, lets reset the cookies.
+
 		$post = array();
 		$post['LoginForm%5Bemail%5D'] = urlencode($user);
 		$post['LoginForm%5Bpassword%5D'] = urlencode($pass);
@@ -192,7 +197,6 @@ class rapidgator_net extends DownloadClass {
 		$this->PremiumDL();
 	}
 
-	// 4 RG: You don't have nothing to read here :D
 	private function ChkRGRedirs($page, $lasturl, $rgpath = '/') {
 		$hpos = strpos($page, "\r\n\r\n");
 		$headers = empty($hpos) ? $page : substr($page, 0, $hpos);
@@ -263,6 +267,8 @@ class rapidgator_net extends DownloadClass {
 // [28-1-2013]  Added Login captcha support. - Th3-822
 // [10-8-2013] Fixed redirects (again). - Th3-822
 // [25-11-2013] Fixed redirects function (aagain :D ). - Th3-822
-// [03-01-2014] Added support for rg.to domain. - Th3-822
+// [03-1-2014] Added support for rg.to domain. - Th3-822
+// [24-3-2014] Fixed FreeDL. - Th3-822
+// [20-5-2014] Fixed Login, bw error msg. - Th3-822
 
 ?>

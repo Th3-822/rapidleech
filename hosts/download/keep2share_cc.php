@@ -43,7 +43,7 @@ class keep2share_cc extends DownloadClass {
 	}
 
 	private function FreeDL() {
-		if (empty($_POST['step']) || $_POST['step'] != 1) {
+		if (empty($_POST['step']) || !in_array($_POST['step'], array('1', '2'))) {
 			$post = array('yt0' => 'Submit');
 			$post['slow_id'] = cut_str($this->page, 'name="slow_id" value="', '"');
 			if (empty($post['slow_id'])) html_error('FreeDL ID don\'t found.');
@@ -64,27 +64,39 @@ class keep2share_cc extends DownloadClass {
 				return $this->RedirectDownload($dl[0], 'T8_k2s_fr2', $this->cookie);
 			}
 
-			if (!preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w|\-]+)@i', $page, $cpid)) html_error('CAPTCHA not found.');
-
 			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
 			$data['step'] = '1';
 			$data['k2sdomain'] = $this->domain;
 			$data['uniqueId'] = $post['slow_id'];
-			return $this->reCAPTCHA($cpid[1], $data);
+
+			if (preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w\.\-]+)@i', $page, $cpid)) {
+				$data['step'] = '1';
+				$this->reCAPTCHA($pid[1], $data);
+			} elseif (preg_match('@\W(file/captcha\.html\?v=\w+)@i', $page, $cpid)) {
+				$data['step'] = '2';
+				list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage('http://'.$this->domain.'/'.$cpid[1], $this->cookie), 2);
+				if (substr($headers, 9, 3) != '200') html_error('Error downloading captcha img.');
+				$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/png');
+				$this->EnterCaptcha("data:$mimetype;base64,".base64_encode($imgBody), $data, 20);
+			} else html_error('CAPTCHA not found.');
+			return;
 		}
 
-		if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
 		$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
-
 		$uniqueId = !empty($_POST['uniqueId']) ? trim($_POST['uniqueId']) : false;
 		if (empty($uniqueId)) html_error('Error: Empty "uniqueId".');
 
-		$post = array('CaptchaForm%5Bcode%5D' => '',
-			'recaptcha_challenge_field' => $_POST['recaptcha_challenge_field'],
-			'recaptcha_response_field' => $_POST['recaptcha_response_field'],
-			'free' => 1, 'freeDownloadRequest' => 1, 'uniqueId' => $uniqueId,
-			'yt0' => 'Submit'
-		);
+		$post = array('free' => 1, 'freeDownloadRequest' => 1, 'uniqueId' => $uniqueId, 'yt0' => 'Submit');
+		if ($_POST['step'] == '1') {
+			if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
+			$post['CaptchaForm%5Bcode%5D'] = '';
+			$post['recaptcha_challenge_field'] = urlencode($_POST['recaptcha_challenge_field']);
+			$post['recaptcha_response_field'] = urlencode($_POST['recaptcha_response_field']);
+		} else {
+			if (empty($_POST['captcha'])) html_error('You didn\'t enter the image verification code.');
+			$post['CaptchaForm%5Bcode%5D'] = urlencode($_POST['captcha']);
+		}
+
 		$page = $this->GetPage($this->link, $this->cookie, $post);
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 
@@ -105,8 +117,51 @@ class keep2share_cc extends DownloadClass {
 		$this->RedirectDownload($dl[0], 'T8_k2s_fr', $this->cookie);
 	}
 
+	private function checkAntiBotCaptcha($page) {
+		if (!empty($_POST['step'])) return; // Don't recheck.
+		if (stripos($page, 'Your account is suspected in using illegal software') !== false) {
+			$data = $this->DefaultParamArr($this->link);
+			$data['premium_acc'] = 'on';
+			if ($this->pA) {
+				$data['pA_encrypted'] = 'true';
+				$data['premium_user'] = urlencode(encrypt($user)); // encrypt() will keep this safe.
+				$data['premium_pass'] = urlencode(encrypt($pass)); // And this too.
+			}
+			if (preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w\.\-]+)@i', $page, $pkey)) {
+				$data['step'] = '3';
+				return $this->reCAPTCHA($pkey[1], $data);
+			} elseif (preg_match('@(https?://(?:www\.)?(?:keep2share\.(?:cc|com)|k(?:eep)?2s\.cc))?(?(1)/)(?:[^/\"\'<>\s]+/)*captcha\.html\?v=\w+@i', $page, $imgcap)) {
+				$imgcap = empty($imgcap[1]) ? 'http://'.$this->domain.'/'.$imgcap[0] : $imgcap[0];
+				$data['step'] = '4';
+				list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage($purl . $cpid[1], $this->cookie), 2);
+				if (substr($headers, 9, 3) != '200') html_error('Error downloading captcha img.');
+				$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/png');
+
+				return $this->EnterCaptcha("data:$mimetype;base64,".base64_encode($imgBody), $data, 20);
+			}
+			html_error('AntiBot captcha not found.');
+		}
+	}
+
+	private function postAntiBotCaptcha() {
+		if (empty($_POST['step']) || !in_array($_POST['step'], array('3', '4'))) return $_POST['step'] = false;
+		$post = array();
+		if ($_POST['step'] == '3') {
+			if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
+			if (empty($_POST['recaptcha_challenge_field'])) html_error('Empty reCAPTCHA challenge.');
+			$post['CoreRobotsCheckForm%5BverifyCode%5D'] = '';
+			$post['recaptcha_challenge_field'] = urlencode($_POST['recaptcha_challenge_field']);
+			$post['recaptcha_response_field'] = urlencode($_POST['recaptcha_response_field']);
+		} else {
+			if (empty($_POST['captcha'])) html_error('You didn\'t enter the image verification code.');
+			$post['CoreRobotsCheckForm%5BverifyCode%5D'] = urlencode($_POST['captcha']);
+		}
+
+		return $this->GetPage($this->link, $this->cookie, $post);
+	}
+
 	private function PremiumDL() {
-		$page = $this->GetPage($this->link, $this->cookie);
+		if (!($page = $this->postAntiBotCaptcha())) $page = $this->GetPage($this->link, $this->cookie);
 		if (preg_match($this->LnkRegexp, $page, $fid)) {
 			$this->domain = $fid[1];
 			$this->link = $Referer = 'http://'.$fid[1].'/file/'.$fid[2];
@@ -115,8 +170,12 @@ class keep2share_cc extends DownloadClass {
 		}
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 
+		$this->checkAntiBotCaptcha($page);
+
 		// Check direct link
 		if (preg_match($this->DLRegexp, $page, $dl)) return $this->RedirectDownload($dl[0], 'T8_k2s_pr2', $this->cookie);
+
+		is_present($page, 'Traffic limit exceed!');
 
 		if (!preg_match($this->RDRegexp, $page, $idDl)) html_error('Redirect-Link Not Found.');
 		$page = $this->GetPage('http://'.$this->domain.$idDl[0], $this->cookie);
@@ -144,13 +203,13 @@ class keep2share_cc extends DownloadClass {
 					$data['premium_user'] = urlencode(encrypt($user)); // encrypt() will keep this safe.
 					$data['premium_pass'] = urlencode(encrypt($pass)); // And this too.
 				}
-				if (preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w|\-]+)@i', $page, $cpid)) {
+				if (preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w\.\-]+)@i', $page, $cpid)) {
 					$data['step'] = '1';
 					$this->reCAPTCHA($pid[1], $data, 'Login');
-				} elseif (preg_match('@\Wauth/captcha\.html\?v=(\w+)@i', $page, $cpid)) {
+				} elseif (preg_match('@\W(auth/captcha\.html\?v=\w+)@i', $page, $cpid)) {
 					$data['step'] = '2';
 
-					list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage($purl . 'auth/captcha.html?v=' . $cpid[1], $this->cookie), 2);
+					list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage($purl . $cpid[1], $this->cookie), 2);
 					if (substr($headers, 9, 3) != '200') html_error('Error downloading captcha img.');
 					$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/png');
 
@@ -160,6 +219,7 @@ class keep2share_cc extends DownloadClass {
 			}
 
 			is_present($page, 'Incorrect username or password', 'Login Failed: Email/Password incorrect.');
+			if (empty($this->cookie['c903aeaf0da94d1b365099298d28f38f'])) html_error('Login Cookie Not Found.');
 
 			$page = $this->GetPage($purl, $this->cookie, 0, $purl.'login.html');
 			is_notpresent($page, '/auth/logout.html">Logout', 'Login Error.');
@@ -172,11 +232,11 @@ class keep2share_cc extends DownloadClass {
 		if ($_POST['step'] == '1') {
 			if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
 			$post['LoginForm%5BverifyCode%5D'] = '';
-			$post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
-			$post['recaptcha_response_field'] = $_POST['recaptcha_response_field'];
+			$post['recaptcha_challenge_field'] = urlencode($_POST['recaptcha_challenge_field']);
+			$post['recaptcha_response_field'] = urlencode($_POST['recaptcha_response_field']);
 		} else {
 			if (empty($_POST['captcha'])) html_error('You didn\'t enter the image verification code.');
-			$post['LoginForm%5BverifyCode%5D'] = $_POST['captcha'];
+			$post['LoginForm%5BverifyCode%5D'] = urlencode($_POST['captcha']);
 		}
 
 		$_POST['step'] = false;
@@ -225,12 +285,13 @@ class keep2share_cc extends DownloadClass {
 		if (array_key_exists($hash, $savedcookies)) {
 			$_secretkey = $secretkey;
 			$secretkey = hash('crc32b', $pass).sha1($user.':'.$pass).hash('crc32b', $user); // A 56 char key should be safer. :D
-			$this->cookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? $this->IWillNameItLater($savedcookies[$hash]['cookie']) : '';
+			$testCookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? $this->IWillNameItLater($savedcookies[$hash]['cookie']) : '';
 			$secretkey = $_secretkey;
-			if (empty($this->cookie) || (is_array($this->cookie) && count($this->cookie) < 1)) return $this->Login($user, $pass);
+			if (empty($testCookie) || (is_array($testCookie) && count($testCookie) < 1)) return $this->Login($user, $pass);
 
-			$page = $this->GetPage('http://'.$this->domain.'/', $this->cookie);
+			$page = $this->GetPage('http://'.$this->domain.'/', $testCookie);
 			if (stripos($page, '/auth/logout.html">Logout') === false) return $this->Login($user, $pass);
+			$this->cookie = GetCookiesArr($page, $testCookie); // Update cookies
 			$this->SaveCookies($user, $pass); // Update cookies file
 			is_present($page, ' class="free">Free</', 'Account isn\'t premium');
 			return $this->PremiumDL();
@@ -262,5 +323,7 @@ class keep2share_cc extends DownloadClass {
 
 //[16-2-2014] Written by Th3-822.
 //[07-3-2014] Fixed login captcha. - Th3-822
+//[08-6-2014] Added support for Anti bot captcha at premium Dl. (Untested) - Th3-822
+//[02-8-2014] Fixed FreeDL captcha. - Th3-822
 
 ?>
