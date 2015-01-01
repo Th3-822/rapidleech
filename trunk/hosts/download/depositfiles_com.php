@@ -147,7 +147,7 @@ class depositfiles_com extends DownloadClass {
 			}
 
 			if (!preg_match('@var[\s\t]+fid[\s\t]*=[\s\t]*\'(\w+)\'@i', $page, $fid)) html_error('FileID not found.');
-			if (!preg_match('@Recaptcha\.create[\s\t]*\([\s\t]*[\'\"]([\w\-]+)[\'\"]@i', $page, $cpid)) html_error('reCAPTCHA Not Found.');
+			if (!preg_match('@Recaptcha\.create[\s\t]*\([\s\t]*[\'\"]([\w\.\-]+)[\'\"]@i', $page, $cpid)) html_error('reCAPTCHA Not Found.');
 			if (!preg_match('@setTimeout\(\'load_form\(fid, msg\)\',[\s\t]*(\d+)([\s\t]*\*[\s\t]*1000)?[\s\t]*\);@i', $page, $cd)) html_error('Countdown not found.');
 			$cd = empty($cd[2]) ? $cd[1] / 1000 : $cd[1];
 			if ($cd > 0) {
@@ -220,7 +220,7 @@ class depositfiles_com extends DownloadClass {
 			}
 
 			if (!preg_match('@var[\s\t]+fid[\s\t]*=[\s\t]*\'(\w+)\'@i', $page, $fid)) html_error('FileID not found.');
-			if (!preg_match('@Recaptcha\.create[\s\t]*\([\s\t]*[\'\"]([\w\-]+)[\'\"]@i', $page, $cpid)) html_error('reCAPTCHA Not Found.');
+			if (!preg_match('@Recaptcha\.create[\s\t]*\([\s\t]*[\'\"]([\w\.\-]+)[\'\"]@i', $page, $cpid)) html_error('reCAPTCHA Not Found.');
 			if (!preg_match('@setTimeout\(\'load_form\(fid, msg\)\',[\s\t]*(\d+)([\s\t]*\*[\s\t]*1000)?[\s\t]*\);@i', $page, $cd)) html_error('Countdown not found.');
 			$cd = empty($cd[2]) ? $cd[1] / 1000 : $cd[1];
 			if ($cd > 0) $this->CountDown($cd);
@@ -297,7 +297,7 @@ class depositfiles_com extends DownloadClass {
 			$jsurl = (empty($jsurl[1])) ? 'http://' . $this->domain . $jsurl[0] : $jsurl[0];
 			$page = $this->GetPage($jsurl, $this->cookie, 0, $purl.'login.php?return=%2F');
 
-			if (!preg_match('@recaptcha_public_key\s*=\s*[\'\"]([\w\-]+)@i', $page, $cpid)) html_error('reCAPTCHA Not Found.');
+			if (!preg_match('@recaptcha_public_key\s*=\s*[\'\"]([\w\.\-]+)@i', $page, $cpid)) html_error('reCAPTCHA Not Found.');
 
 			$data = $this->DefaultParamArr($this->link);
 			$data['step'] = '1';
@@ -348,14 +348,15 @@ class depositfiles_com extends DownloadClass {
 		if (array_key_exists($hash, $savedcookies)) {
 			$_secretkey = $secretkey;
 			$secretkey = sha1($user.':'.$pass);
-			$this->cookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? $this->IWillNameItLater($savedcookies[$hash]['cookie']) : '';
+			$testCookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? $this->IWillNameItLater($savedcookies[$hash]['cookie']) : '';
 			$secretkey = $_secretkey;
-			if (empty($this->cookie) || (is_array($this->cookie) && count($this->cookie) < 1)) return $this->Login($user, $pass);
+			if (empty($testCookie) || (is_array($testCookie) && count($testCookie) < 1)) return $this->Login($user, $pass);
 
-			$page = $this->GetPage('http://' . $this->domain . '/', $this->cookie);
-			if (stripos($page, '/logout.php">Logout</a>') === false) return $this->Login($user, $pass);
-			is_present($page, 'user_icon user_member', 'Account isn\'t premium');
+			$page = $this->GetPage('http://' . $this->domain . '/', $testCookie);
+			if (stripos($page, 'style="display: none;" data-type="guest"') === false) return $this->Login($user, $pass);
+			$this->cookie = GetCookiesArr($page, $testCookie); // Update cookies
 			$this->SaveCookies($user, $pass); // Update cookies file
+			is_present($page, 'user_icon user_member', 'Account isn\'t premium');
 			return $this->PremiumDL();
 		}
 		return $this->Login($user, $pass);
@@ -363,7 +364,7 @@ class depositfiles_com extends DownloadClass {
 
 	private function SaveCookies($user, $pass, $filename = 'depositfiles_dl.php') {
 		global $secretkey;
-		$maxdays = 7; // Max days to keep cookies saved
+		$maxdays = 31; // Max days to keep cookies saved
 		$filename = DOWNLOAD_DIR . basename($filename);
 		if (file_exists($filename)) {
 			$file = file($filename);

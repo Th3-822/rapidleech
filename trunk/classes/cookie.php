@@ -1,101 +1,52 @@
 <?php
-if (! defined ( 'RAPIDLEECH' )) {
+
+if (!defined('RAPIDLEECH')) {
 	require('../deny.php');
-	exit ();
+	exit();
 }
 
-if (!empty($_COOKIE["clearsettings"])) {
-	setcookie ( "domail", "", time () - 3600 );
-	setcookie ( "email", "", time () - 3600 );
-	setcookie ( "saveto", "", time () - 3600 );
-	setcookie ( "path", "", time () - 3600 );
-	setcookie ( "useproxy", "", time () - 3600 );
-	setcookie ( "proxy", "", time () - 3600 );
-	setcookie ( "proxyuser", "", time () - 3600 );
-	setcookie ( "proxypass", "", time () - 3600 );
-	setcookie ( "split", "", time () - 3600 );
-	setcookie ( "partSize", "", time () - 3600 );
-	setcookie ( "savesettings", "", time () - 3600 );
-	setcookie ( "clearsettings", "", time () - 3600 );
-	setcookie ( "premium_acc", "", time () - 3600 );
-	setcookie ( "premium_user", "", time () - 3600 );
-	setcookie ( "premium_pass", "", time () - 3600 );
+function unsetcookies() {
+	foreach (func_get_args() as $name) {
+		if (!empty($name) && !empty($_COOKIE[$name])) {
+			setcookie($name, '', time() - 3600);
+			unset($_COOKIE[$name]);
+		}
+	}
 }
 
-if (isset($_REQUEST["savesettings"]) && $_REQUEST["savesettings"] == "on") {
-	setcookie ( "savesettings", TRUE, time () + 800600 );
-	if ($_REQUEST ["domail"] == "on") {
-		setcookie ( "domail", TRUE, time () + 800600 );
-		if (checkmail ( $_REQUEST ["email"] )) {
-			setcookie ( "email", $_REQUEST ["email"], time () + 800600 );
-		} else {
-			setcookie ( "email", "", time () - 3600 );
-		}
-		
-		if ($_REQUEST ["split"] == "on") {
-			setcookie ( "split", TRUE, time () + 800600 );
-			if (is_numeric ( $_REQUEST ["partSize"] )) {
-				setcookie ( "partSize", $_REQUEST ["partSize"], time () + 800600 );
-			} else {
-				setcookie ( "partSize", "", time () - 3600 );
-			}
-			if (in_array ( $_REQUEST ["method"], array ("tc", "rfc" ) )) {
-				setcookie ( "method", $_REQUEST ["method"], time () + 800600 );
-			} else {
-				setcookie ( "method", "", time () - 3600 );
-			}
-		} else {
-			setcookie ( "split", "", time () - 3600 );
-		}
-	} else {
-		setcookie ( "domail", "", time () - 3600 );
-	}
-	
-	if ($_REQUEST ["saveto"] == "on") {
-		setcookie ( "saveto", TRUE, time () + 800600 );
-		if (isset ( $_REQUEST ["path"] )) {
-			setcookie ( "path", $_REQUEST ["path"], time () + 800600 );
-		} else {
-			setcookie ( "path", "", time () - 3600 );
-		}
-	} else {
-		setcookie ( "saveto", "", time () - 3600 );
-	}
-	
-	if ($_REQUEST ["useproxy"] == "on") {
-		setcookie ( "useproxy", TRUE, time () + 800600 );
-		if (strlen ( strstr ( $_REQUEST ["proxy"], ":" ) ) > 0) {
-			setcookie ( "proxy", $_REQUEST ["proxy"], time () + 800600 );
-		} else {
-			setcookie ( "proxy", "", time () - 3600 );
-		}
-		
-		if ($_REQUEST ["proxyuser"]) {
-			setcookie ( "proxyuser", $_REQUEST ["proxyuser"], time () + 800600 );
-		} else {
-			setcookie ( "proxyuser", "", time () - 3600 );
-		}
-		
-		if ($_REQUEST ["proxypass"]) {
-			setcookie ( "proxypass", $_REQUEST ["proxypass"], time () + 800600 );
-		} else {
-			setcookie ( "proxypass", "", time () - 3600 );
-		}
-	} else {
-		setcookie ( "useproxy", "", time () - 3600 );
-	}
-	
-	if ($_REQUEST ["premium_acc"] == "on") {
-		setcookie ( "premium_acc", $_REQUEST ["premium_acc"], time () + 800600 );
-		if (isset ( $_REQUEST ["premium_user"] ) && isset ( $_REQUEST ["premium_pass"] )) {
-			setcookie ( "premium_user", $_REQUEST ["premium_user"], time () + 800600 );
-			setcookie ( "premium_pass", $_REQUEST ["premium_pass"], time () + 800600 );
-		} else {
-			setcookie ( "premium_user", "", time () - 3600 );
-			setcookie ( "premium_pass", "", time () - 3600 );
-		}
-	} else {
-		setcookie ( "premium_acc", "", time () - 3600 );
-	}
+if (!empty($_COOKIE['clearsettings'])) unsetcookies('domail', 'email', 'saveto', 'path', 'useproxy', 'proxy', 'proxyuser', 'proxypass', 'split', 'partSize', 'savesettings', 'clearsettings', 'premium_acc', 'premium_user', 'premium_pass');
+
+if (!empty($_GET['savesettings']) && $_GET['savesettings'] == 'on') {
+	$expiretime = time() + 800600;
+	setcookie('savesettings', '1', $expiretime);
+
+	if (!empty($_GET['domail']) && $_GET['domail'] == 'on' && !empty($_GET['email']) && checkmail($_GET['email'])) {
+		setcookie('domail', '1', $expiretime);
+		setcookie('email', $_GET['email'], $expiretime);
+		if (!empty($_GET['split']) && $_GET['split'] == 'on') {
+			setcookie('split', '1', $expiretime);
+			if (!empty($_GET['partSize']) && is_numeric($_GET['partSize'])) setcookie('partSize', $_GET['partSize'], $expiretime);
+			else unsetcookies('partSize');
+			if (!empty($_GET['method']) && in_array($_GET['method'], array('tc', 'rfc'))) setcookie('method', $_GET['method'], $expiretime);
+			else unsetcookies('method');
+		} else unsetcookies('split', 'partSize', 'method');
+	} else unsetcookies('domail', 'email', 'split', 'partSize', 'method');
+
+	if ($options['download_dir_is_changeable'] && !empty($_GET['saveto']) && $_GET['saveto'] == 'on' && !empty($_GET['path'])) {
+		setcookie('saveto', '1', $expiretime);
+		setcookie('path', $_GET['path'], $expiretime);
+	} else unsetcookies('saveto', 'path');
+
+	if (!empty($_GET['useproxy']) && $_GET['useproxy'] == 'on' && !empty($_GET['proxy'])) {
+		setcookie('useproxy', '1', $expiretime);
+		if (strlen(strstr($_GET['proxy'], ':')) > 0) setcookie('proxy', $_GET['proxy'], $expiretime);
+		else unsetcookies('proxy');
+		if (!empty($_GET['proxyuser']) && !empty($_GET['proxypass'])) {
+			setcookie('proxyuser', $_GET['proxyuser'], $expiretime);
+			setcookie('proxypass', $_GET['proxypass'], $expiretime);
+		} else unsetcookies('proxyuser', 'proxypass');
+	} else unsetcookies('useproxy', 'proxy', 'proxyuser', 'proxypass');
+	unset($expiretime);
 }
+
 ?>

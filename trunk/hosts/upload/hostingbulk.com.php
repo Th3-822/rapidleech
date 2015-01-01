@@ -1,55 +1,30 @@
-<table style="width:600px;margin:auto;">
-</td></tr>
-<tr><td align="center">
-<div id="info" style="width:100%;text-align:center;">Retrive upload ID</div>
-<?php
-	$cookie = 'lang=english';
-	$page = geturl("hostingbulk.com", 80, "/", 'http://hostingbulk.com/', $cookie, 0, 0, $_GET["proxy"], $pauth);is_page($page);
-	if (!preg_match('@action="(http://[^/|"]+/[^\?|"]+)\?@i',$page, $up)) html_error('Error: Cannot find upload server.', 0);
-
-	$uid = '';$i = 0;
-	while($i < 12) {
-		$uid .= rand(0,9);
-		$i++;
-	}
-
-	$post = array();
-	$post['upload_type'] = "file";
-	$post['sess_id'] = '';
-	$post['srv_tmp_url'] = urlencode(cut_str($page, 'name="srv_tmp_url" value="', '"'));
-	$post['link_rcpt'] = "";
-	$post['link_pass'] = "";
-	$post['tos'] = 1;
-	$post['submit_btn'] = " Upload! ";
-
-	$up_url = $up[1]."?upload_id=$uid&js_on=1&utype=".cut_str($page, "var utype='", "'")."&upload_type=file";
-?>
-<script type="text/javascript">document.getElementById('info').style.display='none';</script>
 <?php
 
-	$url=parse_url($up_url);
-	$upfiles=upfile($url["host"], 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), 'http://hostingbulk.com/', $cookie, $post, $lfile, $lname, "file_0");
+if (!defined('RAPIDLEECH')) exit;
+$_T8 = array('v' => 3); // Version of this config file. (Do Not Edit)
 
-?>
-<script type="text/javascript">document.getElementById('progressblock').style.display='none';</script>
-<?php
-	is_page($upfiles);
+/* # Plugin's Settings # */
+$_T8['domain'] = 'hostingbulk.com'; // May require the www. (Check first if the site adds the www.).
+$_T8['anonUploadDisable'] = false; // Disallow non-registered users upload. (XFS Pro)
+$_T8['anonUploadLimit'] = 500; // File-size limit for non-registered users (MB) | 0 = Plugin's limit | (XFS Pro)
 
-	$post = array();
-	$post['op'] = "upload_result";
-	$post['fn'] = cut_str($upfiles,"'fn'>","<");
-	$post['st'] = "OK";
+// Advanced Settings (Don't edit it unless you know what are you doing)
+	$_T8['port'] = 80; // Server's port, default: 80 | 443 = https.
+	$_T8['xfsFree'] = false; // Change to true if the host is using XFS free.
+	$_T8['path'] = '/'; // URL path to XFS script, default: '/'
+	$_T8['sslLogin'] = false; // Force https on login.
+	$_T8['opUploadName'] = 'upload'; // Custom ?op=value for checking upload page, default: 'upload'
+	$_T8['flashUpload'] = false; // Forces the use of flash upload method... Also filename for .cgi if it's a non empty string. (XFS Pro)
 
-	$page = geturl("hostingbulk.com", 80, "/", $up_url, $cookie, $post, 0, $_GET["proxy"], $pauth);is_page($page);
+$acc_key_name = str_ireplace(array('www.', '.'), array('', '_'), $_T8['domain']); // (Do Not Edit)
 
-	if (preg_match('@(https?://(?:www\.)?hostingbulk\.com/\w+)(\.html)?\?killcode=\w+@i', $page, $lnk)) {
-		$download_link = $lnk[1];
-		$delete_link = $lnk[0];
-	} else {
-		html_error("Download link not found.", 0);
-	}
+/* # Account Info # */
+$upload_acc[$acc_key_name]['user'] = ''; //Set your login
+$upload_acc[$acc_key_name]['pass'] = ''; //Set your password
 
-//[18-12-2011] Written by Th3-822
-//[18-12-2011] Edited for non member upload. (Based in member plugin) -Th3-822
+if (!file_exists(HOST_DIR . 'upload/GenericXFSHost.inc.php')) html_error('Cannot load "'.htmlentities(HOST_DIR).'upload/GenericXFSHost.inc.php" (File doesn\'t exists), please install lastest version from: http://rapidleech.com/forum/viewtopic.php?f=17&t=80 or http://pastebin.com/E0z7qMU1 ');
+require(HOST_DIR . 'upload/GenericXFSHost.inc.php');
+
+// Written by Th3-822 - Last Update: [22-1-2014]
 
 ?>

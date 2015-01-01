@@ -6,6 +6,7 @@ if (!defined('RAPIDLEECH')) {
 class uploading_com extends DownloadClass {
 	public function Download($link) {
 		global $premium_acc;
+		$this->DLregexp = '@https?://(?:[\w\-]+\.)*uploading\.com/get_file/[^\s\"\'<>]+@i';
 		if (empty($_REQUEST['step'])) {
 			$this->page = $this->GetPage($link);
 			is_present($this->page, 'OOPS! Looks like file not found.', 'The requested file is not found');
@@ -81,9 +82,13 @@ class uploading_com extends DownloadClass {
 		if (!empty($json['error'])) html_error('Error while getting free download link: '.$json['error']);
 		if (empty($json['answer']['link'])) html_error('Free dl link not found.');
 
-		if (!preg_match('@https?://([^/\r\n\"\'<>\s\t]+\.)?uploading\.com/get_file/[^\r\n\"\'<>\s\t]+@i', $json['answer']['link'], $dl)) {
+		if (!preg_match($this->DLregexp, $json['answer']['link'], $dl)) {
 			$page = $this->GetPage($json['answer']['link'], $this->cookie);
-			if (!preg_match('@https?://([^/\r\n\"\'<>\s\t]+\.)?uploading\.com/get_file/[^\r\n\"\'<>\s\t]+@i', $page, $dl)) html_error('Download link not found.');
+			if (preg_match('@https?://(?:[\w\-]+\.)*uploading\.com/files/(?:acc_)?thankyou/[^\s\"\'<>]+@i', $page, $redir)) {
+				$this->cookie = GetCookiesArr($page, $this->cookie);
+				$page = $this->GetPage(str_ireplace('/acc_thankyou/', '/thankyou/', $redir[0]), $this->cookie);
+			}
+			if (!preg_match($this->DLregexp, $page, $dl)) html_error('Download link not found.');
 		}
 
 		//$filename = basename(parse_url($json['answer']['link'], PHP_URL_PATH));
@@ -136,7 +141,7 @@ class uploading_com extends DownloadClass {
 					$data['cuser'] = urlencode(encrypt($email));
 					$data['cpass'] = urlencode(encrypt($password));
 				}
-				$this->Show_reCaptcha($c[1], $data);
+				$this->reCAPTCHA($c[1], $data);
 				exit();
 			}
 			if (!empty($json['redirect'])) {
@@ -191,47 +196,25 @@ class uploading_com extends DownloadClass {
 		$json = $this->Get_Reply($page);
 		if (!empty($json['error'])) html_error('Error at download: '.$json['error']);
 
-		if (!preg_match('@https?://([^/\r\n\"\'<>\s\t]+\.)?uploading\.com/get_file/[^\r\n\"\'<>\s\t]+@i', $json['answer']['link'], $dl)) {
+		if (!preg_match($this->DLregexp, $json['answer']['link'], $dl)) {
 			$page = $this->GetPage($json['answer']['link'], $this->cookie);
-			if (!preg_match('@https?://([^/\r\n\"\'<>\s\t]+\.)?uploading\.com/get_file/[^\r\n\"\'<>\s\t]+@i', $page, $dl)) html_error('Download-link not found.');
+			if (preg_match('@https?://(?:[\w\-]+\.)*uploading\.com/files/(?:acc_)?thankyou/[^\s\"\'<>]+@i', $page, $redir)) {
+				$this->cookie = GetCookiesArr($page, $this->cookie);
+				$page = $this->GetPage(str_ireplace('/acc_thankyou/', '/thankyou/', $redir[0]), $this->cookie);
+			}
+			if (!preg_match($this->DLregexp, $page, $dl)) html_error('Download-link not found.');
 		}
 
 		//$filename = basename(parse_url($json['answer']['link'], PHP_URL_PATH));
 		$this->RedirectDownload($dl[0], 'UP_premium', $this->cookie);
 	}
 
-	private function Show_reCaptcha($pid, $inputs) {
-		global $PHP_SELF;
-		if (!is_array($inputs)) {
-			html_error("Error parsing captcha data.");
-		}
-		// Themes: 'red', 'white', 'blackglass', 'clean'
-		echo "<script language='JavaScript'>var RecaptchaOptions={theme:'white', lang:'en'};</script>\n";
-		echo "\n<center><form name='dl' action='$PHP_SELF' method='post' ><br />\n";
-		foreach ($inputs as $name => $input) {
-			echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
-		}
-		echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script>";
-		echo "<noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br />";
-		echo "<textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br />";
-		echo "<input type='submit' name='submit' onclick='javascript:return checkc();' value='Enter Captcha' />\n";
-		echo "<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n";
-		echo "</form></center>\n</body>\n</html>";
-		exit;
-	}
-
 	private function EnterPassword($inputs) {
-		global $PHP_SELF;
-		if (!is_array($inputs)) {
-			html_error("Error parsing password data.");
-		}
-		echo "\n" . '<center><form action="' . $PHP_SELF . '" method="post" >' . "\n";
-		foreach ($inputs as $name => $input) {
-			echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
-		}
-		echo '<h4>Enter password here: <input type="text" name="password" id="filepass" size="13" />&nbsp;&nbsp;<input type="submit" onclick="return check()" value="Submit" /></h4>' . "\n";
-		echo "<script type='text/javascript'>\nfunction check() {\nvar pass=document.getElementById('filepass');\nif (pass.value == '') { window.alert('You didn\'t enter the password'); return false; }\nelse { return true; }\n}\n</script>\n";
-		echo "\n</form></center>\n</body>\n</html>";
+		if (!is_array($inputs)) html_error('Error parsing password data.');
+		echo "\n<center><form action='{$GLOBALS['PHP_SELF']}' method='POST' >\n";
+		foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
+		echo "<h4>Enter password here: <input type='text' name='password' id='filepass' size='13' />&nbsp;&nbsp;<input type='submit' onclick='return check()' value='Submit' /></h4>\n<script type='text/javascript'>\nfunction check() {\nvar pass=document.getElementById('filepass');\nif (pass.value == '') { window.alert('You didn\'t enter the password'); return false; }\nelse { return true; }\n}\n</script>\n</form></center>\n";
+		include(TEMPLATE_DIR.'footer.php');
 		exit();
 	}
 
@@ -246,6 +229,7 @@ class uploading_com extends DownloadClass {
  * Premium Dl after new template fixed by IndoLeech.Com 21-05-2012
  * Free DL, Login and Premium DL fixed by Th3-822 05-07-2012
  * Free DL and Premium DL links/filenames fixed by Th3-822 01-09-2012
+ * Free DL fixed by Th3-822 24-3-2014
  */
 
 ?>

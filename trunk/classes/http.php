@@ -4,6 +4,9 @@ if (!defined('RAPIDLEECH')) {
 	exit();
 }
 
+// Allow user-agent to be changed easily
+if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.17');
+
 /*
  * Pauses for countdown timer in file hosts
  * @param int The number of seconds to count down
@@ -99,6 +102,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	}
 
 	if ($scheme == 'https://') {
+		if (!extension_loaded('openssl')) html_error('This server doesn\'t support https connections.');
 		$scheme = 'ssl://';
 		if ($port == 0 || $port == 80) $port = 443;
 	}
@@ -114,15 +118,15 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	$request = array();
 	$request[] = $method . ' ' . str_replace(' ', '%20', $url) . ' HTTP/1.1';
 	$request[] = "Host: $host";
-	$request[] = 'User-Agent: Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.16';
+	$request[] = 'User-Agent: ' . rl_UserAgent;
 	$request[] = 'Accept: */*';
+	$request[] = 'Accept-Language: en-US,en;q=0.9';
+	$request[] = 'Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7';
 	if (!empty($referer)) $request[] = "Referer: $referer";
 	if (!empty($cookies)) $request[] = "Cookie: $cookies";
-	$request[] = 'Accept-Language: en-US;q=0.7,en;q=0.3';
-	$request[] = 'Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7';
 	$request[] = 'Pragma: no-cache';
 	$request[] = 'Cache-Control: no-cache';
-	if ($Resume['use'] === TRUE) $request[] = 'Range: bytes=' . $Resume['from'] . '-';
+//	if ($Resume['use'] === TRUE) $request[] = 'Range: bytes=' . $Resume['from'] . '-';
 	if (!empty($auth)) $request[] = "Authorization: Basic $auth";
 	if (!empty($pauth)) $request[] = "Proxy-Authorization: Basic $pauth";
 	if ($method == 'POST') {
@@ -161,7 +165,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	}
 
 	#########################################################################
-	fputs($fp, $request);
+	fwrite($fp, $request);
 	fflush($fp);
 	$timeStart = getmicrotime();
 
@@ -344,7 +348,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				$received = bytesToKbOrMbOrGb($bytesReceived + $Resume['from']);
 				$time = getmicrotime() - $timeStart;
 				$chunkTime = $time - $lastChunkTime;
-				$chunkTime = (!($chunkTime < 0) && $chunkTime > 0) ? $chunkTime : 1;
+				$chunkTime = ($chunkTime > 0) ? $chunkTime : 1;
 				$lastChunkTime = $time;
 				$speed = @round(($bytesReceived - $last) /*$chunkSize*/ / 1024 / $chunkTime, 2);
 				echo "<script type='text/javascript'>pr('$percent', '$received', '$speed');</script>";
@@ -397,19 +401,20 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		CURLOPT_FOLLOWLOCATION => 0, CURLOPT_FAILONERROR => 0,
 		CURLOPT_FORBID_REUSE => 0, CURLOPT_FRESH_CONNECT => 0,
 		CURLINFO_HEADER_OUT => 1, CURLOPT_URL => $link,
-		CURLOPT_USERAGENT => 'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.16');
+		CURLOPT_USERAGENT => rl_UserAgent);
 
 	$opt[CURLOPT_REFERER] = !empty($referer) ? $referer : false;
 	$opt[CURLOPT_COOKIE] = !empty($cookie) ? (is_array($cookie) ? CookiesToStr($cookie) : trim($cookie)) : false;
 
 	if (isset($_GET['useproxy']) && !empty($_GET['proxy'])) {
-		$opt[CURLOPT_HTTPPROXYTUNNEL] = false;
+		$opt[CURLOPT_HTTPPROXYTUNNEL] = strtolower(parse_url($link, PHP_URL_SCHEME) == 'https') ? true : false; // cURL https proxy support... Experimental.
+		// $opt[CURLOPT_HTTPPROXYTUNNEL] = false; // Uncomment this line for disable https proxy over curl.
 		$opt[CURLOPT_PROXY] = $_GET['proxy'];
 		$opt[CURLOPT_PROXYUSERPWD] = (!empty($pauth) ? base64_decode($pauth) : false);
 	} else $opt[CURLOPT_PROXY] = false;
 
 	// Send more headers...
-	$headers = array('Accept-Language: en-US;q=0.7,en;q=0.3', 'Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7', 'Pragma: no-cache', 'Cache-Control: no-cache', 'Connection: Keep-Alive');
+	$headers = array('Accept-Language: en-US,en;q=0.9', 'Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7', 'Pragma: no-cache', 'Cache-Control: no-cache', 'Connection: Keep-Alive');
 	if (empty($opt[CURLOPT_REFERER])) $headers[] = 'Referer:';
 	if (empty($opt[CURLOPT_COOKIE])) $headers[] = 'Cookie:';
 	if (!empty($opt[CURLOPT_PROXY]) && empty($opt[CURLOPT_PROXYUSERPWD])) $headers[] = 'Proxy-Authorization:';
@@ -546,22 +551,20 @@ function GetChunkSize($fsize) {
 }
 
 function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, $fieldname, $field2name = '', $proxy = 0, $pauth = 0, $upagent = 0, $scheme = 'http') {
-	global $nn, $lastError, $sleep_time, $sleep_count, $fp, $fs;
+	global $nn, $lastError, $fp, $fs;
 
-	if (empty($upagent)) $upagent = 'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.16';
+	if (empty($upagent)) $upagent = rl_UserAgent;
 	$scheme = strtolower("$scheme://");
 
 	$bound = '--------' . md5(microtime());
 	$saveToFile = 0;
 
 	$postdata = '';
-	if ($post) foreach ($post as $key => $value) {
+	if (!empty($post) && is_array($post)) foreach ($post as $key => $value) {
 		$postdata .= '--' . $bound . $nn;
 		$postdata .= "Content-Disposition: form-data; name=\"$key\"$nn$nn";
 		$postdata .= $value . $nn;
 	}
-
-	$fileSize = getSize($file);
 
 	$fieldname = $fieldname ? $fieldname : 'file' . md5($filename);
 
@@ -569,6 +572,9 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		$lastError = sprintf(lang(65), $file);
 		return FALSE;
 	}
+
+	$fileSize = getSize($file);
+
 	if (!empty($field2name)) {
 		$postdata .= '--' . $bound . $nn;
 		$postdata .= "Content-Disposition: form-data; name=\"$field2name\"; filename=\"\"$nn";
@@ -579,20 +585,22 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 	$postdata .= "Content-Disposition: form-data; name=\"$fieldname\"; filename=\"$filename\"$nn";
 	$postdata .= "Content-Type: application/octet-stream$nn$nn";
 
-
-	$cookies = '';
 	if (!empty($cookie)) {
-		if (is_array($cookie)) {
-			if (count($cookie) > 0) $cookies = 'Cookie: ' . CookiesToStr($cookie) . $nn;
-		} else $cookies = 'Cookie: ' . trim($cookie) . $nn;
+		if (is_array($cookie)) $cookies = (count($cookie) > 0) ? CookiesToStr($cookie) : 0;
+		else $cookies = trim($cookie);
 	}
-	$referer = $referer ? "Referer: $referer$nn" : '';
 
 	if ($scheme == 'https://') {
 		if (!extension_loaded('openssl')) html_error('This server doesn\'t support https connections.');
 		$scheme = 'ssl://';
-		$port = 443;
+		if ($port == 0 || $port == 80) $port = 443;
 	}
+
+	if (!empty($referer) && ($pos = strpos("\r\n", $referer)) !== 0) {
+		$origin = parse_url($pos ? substr($referer, 0, $pos) : $referer);
+		if (empty($origin['port'])) $origin['port'] = defport($origin);
+		$origin = strtolower($origin['scheme']) . '://' . strtolower($origin['host']) . ($origin['port'] != 80 && ($scheme != 'ssl://' || $origin['port'] != 443) ? ':' . $origin['port'] : '');
+	} else $origin = ($scheme == 'ssl://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
 
 	if ($proxy) {
 		list($proxyHost, $proxyPort) = explode(':', $proxy, 2);
@@ -602,17 +610,30 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
 	if ($scheme != 'ssl://') $scheme = '';
 
-	$http_auth = (!empty($auth)) ? "Authorization: Basic $auth$nn" : '';
-	$proxyauth = (!empty($pauth)) ? "Proxy-Authorization: Basic $pauth$nn" : '';
+	$request = array();
+	$request[] = 'POST ' . str_replace(' ', '%20', $url) . ' HTTP/1.0';
+	$request[] = "Host: $host";
+	$request[] = "User-Agent: $upagent";
+	$request[] = 'Accept: text/html, application/xml;q=0.9, application/xhtml+xml, image/png, image/webp, image/jpeg, image/gif, image/x-xbitmap, */*;q=0.1';
+	$request[] = 'Accept-Language: en-US,en;q=0.9';
+	$request[] = 'Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7';
+	if (!empty($referer)) $request[] = "Referer: $referer";
+	if (!empty($cookies)) $request[] = "Cookie: $cookies";
+	if (!empty($pauth)) $request[] = "Proxy-Authorization: Basic $pauth";
+	$request[] = "Origin: $origin";
+	$request[] = "Content-Type: multipart/form-data; boundary=$bound";
+	$request[] = 'Content-Length: ' . (strlen($postdata) + strlen($nn . "--" . $bound . "--" . $nn) + $fileSize);
+	$request[] = 'Connection: Close';
 
-	$zapros = 'POST ' . str_replace(' ', "%20", $url) . ' HTTP/1.0' . $nn . 'Host: ' . $host . $nn . $cookies . "Content-Type: multipart/form-data; boundary=" . $bound . $nn . "Content-Length: " . (strlen($postdata) + strlen($nn . "--" . $bound . "--" . $nn) + $fileSize) . $nn . "User-Agent: " . $upagent . $nn . "Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5" . $nn . "Accept-Language: en-en,en;q=0.5" . $nn . "Accept-Charset: utf-8,windows-1251;koi8-r;q=0.7,*;q=0.7" . $nn . "Connection: Close" . $nn . $http_auth . $proxyauth . $referer . $nn . $postdata;
-	$errno = 0; $errstr = '';
-	$posturl = (!empty($proxyHost) ? $scheme . $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
-	$fp = @stream_socket_client($posturl, $errno, $errstr, 120, STREAM_CLIENT_CONNECT);
-	//$fp = @fsockopen ( $host, $port, $errno, $errstr, 150 );
-	//stream_set_timeout ( $fp, 300 );
+	$request = implode($nn, $request). $nn . $nn . $postdata;
+
+	$errno = 0;
+	$errstr = '';
+	$hosts = (!empty($proxyHost) ? $scheme . $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
+	$fp = @stream_socket_client($hosts, $errno, $errstr, 120, STREAM_CLIENT_CONNECT);
 
 	if (!$fp) {
+		if (!function_exists('stream_socket_client')) html_error('[ERROR] stream_socket_client() is disabled.');
 		$dis_host = !empty($proxyHost) ? $proxyHost : $host;
 		$dis_port = !empty($proxyPort) ? $proxyPort : $port;
 		html_error(sprintf(lang(88), $dis_host, $dis_port));
@@ -623,33 +644,23 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		return false;
 	}
 
-	if ($proxy) {
-		echo '<p>' . sprintf(lang(89), $proxyHost, $proxyPort) . '<br />';
-		echo 'UPLOAD: <b>' . htmlspecialchars($url) . "</b>...<br />\n";
-	} else {
-		echo '<p>';
-		printf(lang(90), $host, $port);
-		echo '</p>';
-	}
+	if ($proxy) echo '<p>' . sprintf(lang(89), $proxyHost, $proxyPort) . '<br />UPLOAD: <b>' . htmlspecialchars($url) . "</b>...<br />\n";
+	else echo '<p>'.sprintf(lang(90), $host, $port).'</p>';
 
 	echo(lang(104) . ' <b>' . htmlspecialchars($filename) . '</b>, ' . lang(56) . ' <b>' . bytesToKbOrMbOrGb($fileSize) . '</b>...<br />');
-	global $id;
-	$id = md5(time() * rand(0, 10));
+	$GLOBALS['id'] = md5(time() * rand(0, 10));
 	require (TEMPLATE_DIR . '/uploadui.php');
 	flush();
 
 	$timeStart = getmicrotime();
 
-	//$chunkSize = 16384;		// Use this value no matter what (using this actually just causes massive cpu usage for large files, too much data is flushed to the browser!)
 	$chunkSize = GetChunkSize($fileSize);
 
-	fputs($fp, $zapros);
+	fwrite($fp, $request);
 	fflush($fp);
 
 	$fs = fopen($file, 'r');
 
-	$local_sleep = $sleep_count;
-	//echo('<script type="text/javascript">');
 	$totalsend = $time = $lastChunkTime = 0;
 	while (!feof($fs) && !$errno && !$errstr) {
 		$data = fread($fs, $chunkSize);
@@ -659,15 +670,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 			html_error(lang(112));
 		}
 
-		if (($sleep_count !== false) && ($sleep_time !== false) && is_numeric($sleep_time) && is_numeric($sleep_count) && ($sleep_count > 0) && ($sleep_time > 0)) {
-			$local_sleep--;
-			if ($local_sleep == 0) {
-				usleep($sleep_time);
-				$local_sleep = $sleep_count;
-			}
-		}
-
-		$sendbyte = @fputs($fp, $data);
+		$sendbyte = @fwrite($fp, $data);
 		fflush($fp);
 
 		if ($sendbyte === false || strlen($data) > $sendbyte) {
@@ -681,32 +684,196 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		$time = getmicrotime() - $timeStart;
 		$chunkTime = $time - $lastChunkTime;
 		$chunkTime = $chunkTime ? $chunkTime : 1;
-		$chunkTime = (!($chunkTime < 0) && $chunkTime > 0) ? $chunkTime : 1;
+		$chunkTime = ($chunkTime > 0) ? $chunkTime : 1;
 		$lastChunkTime = $time;
 		$speed = round($sendbyte / 1024 / $chunkTime, 2);
 		$percent = round($totalsend / $fileSize * 100, 2);
 		echo "<script type='text/javascript'>pr('$percent', '" . bytesToKbOrMbOrGb($totalsend) . "', '$speed');</script>\n";
 		flush();
 	}
-	//echo('</script>');
+
 	if ($errno || $errstr) {
 		$lastError = $errstr;
 		return false;
 	}
 	fclose($fs);
 
-	fputs($fp, $nn . "--" . $bound . "--" . $nn);
+	fwrite($fp, $nn . "--" . $bound . "--" . $nn);
 	fflush($fp);
 
 	$page = '';
 	while (!feof($fp)) {
-		$data = fgets($fp, 16384);
+		$data = fread($fp, 16384);
 		if ($data === false) break;
 		$page .= $data;
 	}
 
 	fclose($fp);
 
+	return $page;
+}
+
+function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy = 0, $pauth = 0, $upagent = 0, $scheme = 'http') {
+	global $nn, $lastError, $fp, $fs;
+
+	if (empty($upagent)) $upagent = rl_UserAgent;
+	$scheme = strtolower("$scheme://");
+
+	if (!is_readable($file)) {
+		$lastError = sprintf(lang(65), $file);
+		return FALSE;
+	}
+
+	$fileSize = getSize($file);
+	if ($cambialo) $fileSize++;
+
+	if (!empty($cookie)) {
+		if (is_array($cookie)) $cookies = (count($cookie) > 0) ? CookiesToStr($cookie) : 0;
+		else $cookies = trim($cookie);
+	}
+
+	if ($scheme == 'https://') {
+		if (!extension_loaded('openssl')) html_error('This server doesn\'t support https connections.');
+		$scheme = 'ssl://';
+		if ($port == 0 || $port == 80) $port = 443;
+	}
+
+	if (!empty($referer) && ($pos = strpos("\r\n", $referer)) !== 0) {
+		$origin = parse_url($pos ? substr($referer, 0, $pos) : $referer);
+		if (empty($origin['port'])) $origin['port'] = defport($origin);
+		$origin = strtolower($origin['scheme']) . '://' . strtolower($origin['host']) . ($origin['port'] != 80 && ($scheme != 'ssl://' || $origin['port'] != 443) ? ':' . $origin['port'] : '');
+	} else $origin = ($scheme == 'ssl://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
+
+	if ($proxy) {
+		list($proxyHost, $proxyPort) = explode(':', $proxy, 2);
+		$host = $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
+		$url = "$scheme$host$url";
+	}
+
+	if ($scheme != 'ssl://') $scheme = '';
+
+	$request = array();
+	$request[] = 'PUT ' . str_replace(' ', '%20', $url) . ' HTTP/1.1';
+	$request[] = "Host: $host";
+	$request[] = "User-Agent: $upagent";
+	$request[] = 'Accept: text/html, application/xml;q=0.9, application/xhtml+xml, image/png, image/webp, image/jpeg, image/gif, image/x-xbitmap, */*;q=0.1';
+	$request[] = 'Accept-Language: en-US,en;q=0.9';
+	$request[] = 'Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7';
+	if (!empty($referer)) $request[] = "Referer: $referer";
+	if (!empty($cookies)) $request[] = "Cookie: $cookies";
+	if (!empty($pauth)) $request[] = "Proxy-Authorization: Basic $pauth";
+	$request[] = "X-File-Name: $filename";
+	$request[] = "X-File-Size: $fileSize";
+	$request[] = "Origin: $origin";
+	$request[] = 'Content-Disposition: attachment';
+	$request[] = 'Content-Type: multipart/form-data';
+	$request[] = "Content-Length: $fileSize";
+	$request[] = 'Connection: Close';
+
+	$request = implode($nn, $request). $nn . $nn;
+
+	$errno = 0;
+	$errstr = '';
+	$hosts = (!empty($proxyHost) ? $scheme . $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
+	$fp = @stream_socket_client($hosts, $errno, $errstr, 120, STREAM_CLIENT_CONNECT);
+
+	if (!$fp) {
+		if (!function_exists('stream_socket_client')) html_error('[ERROR] stream_socket_client() is disabled.');
+		$dis_host = !empty($proxyHost) ? $proxyHost : $host;
+		$dis_port = !empty($proxyPort) ? $proxyPort : $port;
+		html_error(sprintf(lang(88), $dis_host, $dis_port));
+	}
+
+	if ($errno || $errstr) {
+		$lastError = $errstr;
+		return false;
+	}
+
+	if ($proxy) echo '<p>' . sprintf(lang(89), $proxyHost, $proxyPort) . '<br />PUT: <b>' . htmlspecialchars($url) . "</b>...<br />\n";
+	else echo '<p>'.sprintf(lang(90), $host, $port).'</p>';
+
+	echo(lang(104) . ' <b>' . htmlspecialchars($filename) . '</b>, ' . lang(56) . ' <b>' . bytesToKbOrMbOrGb($fileSize) . '</b>...<br />');
+	$GLOBALS['id'] = md5(time() * rand(0, 10));
+	require (TEMPLATE_DIR . '/uploadui.php');
+	flush();
+
+	$timeStart = getmicrotime();
+
+	$chunkSize = GetChunkSize($fileSize);
+
+	fwrite($fp, $request);
+	fflush($fp);
+
+	$fs = fopen($file, 'r');
+
+	$totalsend = $time = $lastChunkTime = 0;
+	while (!feof($fs) && !$errno && !$errstr) {
+		$data = fread($fs, $chunkSize);
+		if ($data === false) {
+			fclose($fs);
+			fclose($fp);
+			html_error(lang(112));
+		}
+
+		$sendbyte = @fwrite($fp, $data);
+		fflush($fp);
+
+		if ($sendbyte === false || strlen($data) > $sendbyte) {
+			fclose($fs);
+			fclose($fp);
+			html_error(lang(113));
+		}
+
+		$totalsend += $sendbyte;
+
+		$time = getmicrotime() - $timeStart;
+		$chunkTime = $time - $lastChunkTime;
+		$chunkTime = ($chunkTime > 0) ? $chunkTime : 1;
+		$lastChunkTime = $time;
+		$speed = round($sendbyte / 1024 / $chunkTime, 2);
+		$percent = round($totalsend / $fileSize * 100, 2);
+		echo "<script type='text/javascript'>pr('$percent', '" . bytesToKbOrMbOrGb($totalsend) . "', '$speed');</script>\n";
+		flush();
+	}
+
+	if ($errno || $errstr) {
+		$lastError = $errstr;
+		return false;
+	}
+	fclose($fs);
+
+	fflush($fp);
+
+	$llen = 0;
+	$header = '';
+	do {
+		$header .= fgets($fp, 16384);
+		$len = strlen($header);
+		if (!$header || $len == $llen) {
+			$lastError = lang(91);
+			stream_socket_shutdown($fp, STREAM_SHUT_RDWR);
+			fclose($fp);
+			return false;
+		}
+		$llen = $len;
+	} while (strpos($header, $nn . $nn) === false);
+
+	$page = '';
+	do {
+		$data = @fread($fp, 16384);
+		if ($data == '') break;
+		$page .= $data;
+	} while (!feof($fp) && strlen($data) > 0);
+
+	stream_socket_shutdown($fp, STREAM_SHUT_RDWR);
+	fclose($fp);
+
+	if (stripos($header, "\nTransfer-Encoding: chunked") !== false && function_exists('http_chunked_decode')) {
+		$dechunked = http_chunked_decode($page);
+		if ($dechunked !== false) $page = $dechunked;
+		unset($dechunked);
+	}
+	$page = $header.$page;
 	return $page;
 }
 ?>

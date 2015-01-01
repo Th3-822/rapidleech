@@ -10,12 +10,11 @@ class d4shared_com extends DownloadClass {
 	public $link;
 	public function Download($link) {
 		global $premium_acc;
-		$this->long_regexp = '@https?://dc\d+\.4shared\.com/download/[^/\"\'\r\n<>\s\t]+/(?:tsid[^/\"\'\r\n<>\s\t]+/)?[^/\"\'\r\n<>\s\t]+@i';
+		$this->long_regexp = '@https?://dc\d+\.4shared\.com/download/[^/\"\'\s<>]+/(?:tsid[^/\"\'\s<>]+/)?[^/\"\'\s<>]+@i';
 		$this->cookie = array('4langcookie' => 'en');
 		$this->noTrafficFreeDl = true; // Set to true to switch to free download when premium traffic used is over the limit.
 
-		if (stristr($link, '.com/get/')) $link = str_ireplace('.com/get/', '.com/file/', $link);
-		$this->link = $link;
+		$this->link = str_ireplace('.com/get/', '.com/file/', $link);
 		$this->page = $this->GetPage($this->link, $this->cookie);
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		is_present($this->page, 'The file link that you requested is not valid.');
@@ -40,7 +39,7 @@ class d4shared_com extends DownloadClass {
 		if (!preg_match('@\.com/[^/]+/([^/]+)/?(.*)@i', $this->link, $L)) html_error('Invalid link?');
 		$getLink = "http://www.4shared.com/get/{$L[1]}/{$L[2]}";
 		$page = $this->GetPage("http://www.4shared.com/get/{$L[1]}/{$L[2]}", $this->cookie);
-		is_present($page, 'You should log in to download this file. Sign up for free if you don\'t have an account yet.', 'You need to be logged in for download this file.');
+		//is_present($page, 'You should log in to download this file. Sign up for free if you don\'t have an account yet.', 'You need to be logged in for download this file.');
 		$GLOBALS['Referer'] = $getLink;
 
 		if (!preg_match($this->long_regexp, $page, $DL)) html_error('Download-link not found.');
@@ -122,6 +121,9 @@ class d4shared_com extends DownloadClass {
 		}
 		$this->cookie = GetCookiesArr($page, $this->cookie, true, array('','deleted','""'));
 		if (empty($this->cookie['Login'])) html_error('Login Error: Cannot find session cookie.');
+		$this->cookie['WWW_JSESSIONID'] = $this->cookie['JSESSIONID'];
+
+		$this->GetPage('http://www.4shared.com/web/user/language', $this->cookie, array('code' => 'en'), 0, 0, 1);
 
 		// Chk Acc.
 		$page = $this->GetPage('http://www.4shared.com/account/home.jsp', $this->cookie);
@@ -161,7 +163,8 @@ class d4shared_com extends DownloadClass {
 	}
 
 	public function CheckBack($header) {
-		is_present($header, 'cau2=dow-lim', 'The download limit has been reached.');
+		is_present($header, 'cau2=dow-lim', '[4S] The download limit has been reached.');
+		is_present($header, 'cau2=0759nousr', '[4S] You need to be logged in for download this file.');
 	}
 }
 

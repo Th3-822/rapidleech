@@ -209,12 +209,13 @@ function SkipLoginC($user, $pass) {
 	if (array_key_exists($hash, $savedcookies)) {
 		$_secretkey = $secretkey;
 		$secretkey = sha1($user.':'.$pass);
-		$cookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? IWillNameItLater($savedcookies[$hash]['cookie']) : '';
+		$testCookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? IWillNameItLater($savedcookies[$hash]['cookie']) : '';
 		$secretkey = $_secretkey;
-		if ((is_array($cookie) && count($cookie) < 1) || empty($cookie)) return Login($user, $pass);
+		if ((is_array($testCookie) && count($testCookie) < 1) || empty($testCookie)) return Login($user, $pass);
 
-		$page = geturl($domain, 80, '/', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
-		if (stripos($page, '/logout.php">Logout</a>') === false) return Login($user, $pass);
+		$page = geturl($domain, 80, '/', $referer, $testCookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		if (stripos($page, 'style="display: none;" data-type="guest"') === false) return Login($user, $pass);
+		$cookie = $testCookie; // Update cookies
 		SaveCookies($user, $pass); // Update cookies file
 		return true;
 	}

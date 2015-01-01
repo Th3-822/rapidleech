@@ -10,8 +10,10 @@ class ultramegabit_com extends DownloadClass {
 	public function Download($link) {
 		global $premium_acc;
 
+		$link = str_ireplace('http://', 'https://', $link);
 		$this->page = $this->GetPage($link, $this->cookie);
 		is_present($this->page, "\r\nContent-Length: 0\r\n", 'Invalid link?');
+		is_present($this->page, '>File has been deleted.<', 'File deleted');
 		$this->cookie = GetCookiesArr($this->page);
 
 		if ($_REQUEST['premium_acc'] == 'on' && ((!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) || (!empty($premium_acc['ultramegabit_com']['user']) && !empty($premium_acc['ultramegabit_com']['pass'])))) $this->Login($link);
@@ -19,14 +21,15 @@ class ultramegabit_com extends DownloadClass {
 	}
 
 	private function FreeDL($link, $acc=false) {
+		is_present($this->page, '>This download server is overloaded<', 'There are too many free users downloading from this server at this time.');
 		$post = array();
 		$post['csrf_token'] = cut_str($this->page, 'name="csrf_token" value="', '"');
 		$post['encode'] = cut_str($this->page, 'name="encode" value="', '"');
 
-		$page = $this->GetPage('http://ultramegabit.com/file/download', $this->cookie, $post);
+		$page = $this->GetPage('https://ultramegabit.com/file/download', $this->cookie, $post);
 		is_present('/user/confirm', 'Your account isn\'t validated.');
 		if (preg_match('@/alert/delay/(\d+)@i', $page, $time)) {
-			$wtime = $acc ? 20 : 30;
+			$wtime = $acc ? 20 : 60;
 			$msg = $acc ? 'Free users' : 'Guests';
 			$wait = ($time[1] - time()) + ($wtime * 60);
 
@@ -45,7 +48,7 @@ class ultramegabit_com extends DownloadClass {
 			$post['csrf_token'] = cut_str($this->page, 'name="csrf_token" value="', '"');
 			$post['encode'] = cut_str($this->page, 'name="encode" value="', '"');
 
-			$page = $this->GetPage('http://ultramegabit.com/file/download', $this->cookie, $post);
+			$page = $this->GetPage('https://ultramegabit.com/file/download', $this->cookie, $post);
 
 			if (!preg_match('@https?://[^/\r\n]+/files/[^\'\"\s\t<>\r\n]+@i', $page, $dlink)) html_error('Error: Download-link not found.');
 		}

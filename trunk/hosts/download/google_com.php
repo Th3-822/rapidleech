@@ -6,9 +6,9 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class google_com extends DownloadClass {
-	public $fNames = array('odt' => 'OpenDocument Text', 'docx' => 'Microsoft Word', 'rtf' => 'Rich Text Format', 'txt' => 'Plain Text', 'pdf' => 'PDF Document', 'zip' => 'Zipped html Document', 'pptx' => 'Microsoft PowerPoint', 'ods' => 'OpenDocument Spreadsheet', 'xlsx' => 'Microsoft Excel'), $dFormats = array('odt', 'docx', 'rtf', 'txt', 'pdf', 'zip'), $pFormats = array('pptx', 'pdf'), $sFormats = array(13 => 'ods', 420 => 'xlsx', 12 => 'pdf');
+	public $fNames = array('odt' => 'OpenDocument Text', 'docx' => 'Microsoft Word', 'rtf' => 'Rich Text Format', 'txt' => 'Plain Text', 'pdf' => 'PDF Document', 'zip' => 'Zipped html Document', 'pptx' => 'Microsoft PowerPoint', 'ods' => 'OpenDocument Spreadsheet', 'xlsx' => 'Microsoft Excel'), $dFormats = array('odt', 'docx', 'rtf', 'txt', 'pdf', 'zip'), $pFormats = array('pptx', 'pdf'), $ssFormats = array('ods', 'xlsx', 'pdf', 'zip'), $sFormats = array(13 => 'ods', 420 => 'xlsx', 12 => 'pdf');
 	public function Download($link) {
-		if (!preg_match('@https?://(?:[\w\-]+\.)*(?:drive|docs)\.google\.com/(?:(?:folderview|open|uc)\?(?:[\w\-\%]+=[\w\-\%]*&)*id=|(?:folder|file|document|presentation)/d/|spreadsheet/ccc\?(?:[\w\-\%]+=[\w\-\%]*&)*key=)([\w\-]{28,})@i', $link, $this->ID)) html_error('File/Folder ID not found at link.');
+		if (!preg_match('@https?://(?:[\w\-]+\.)*(?:drive|docs)\.google\.com/(?:(?:folderview|open|uc)\?(?:[\w\-\%]+=[\w\-\%]*&)*id=|(?:folder|file|document|presentation|spreadsheets)/d/|spreadsheet/ccc\?(?:[\w\-\%]+=[\w\-\%]*&)*key=)([\w\-]{28,})@i', $link, $this->ID)) html_error('File/Folder ID not found at link.');
 		$this->ID = $this->ID[1];
 
 		// Use /open link for check if ID exists and also get it's type.
@@ -21,6 +21,7 @@ class google_com extends DownloadClass {
 			case 'folder': case 'folderview': $this->Folder();break;
 			case 'document': $this->Document();break;
 			case 'presentation': $this->Presentation();break;
+			case 'spreadsheets': $this->Spreadsheets();break; // New spreadsheets
 			case 'spreadsheet': $this->Spreadsheet();break;
 			default: html_error('Unknown /open redirect.');break;
 		}
@@ -35,7 +36,7 @@ class google_com extends DownloadClass {
 		$page = $this->GetPage('https://drive.google.com/uc?export=download&confirm=T822&id='.$this->ID, "download_warning_13058876669334088843_{$this->ID}=T822");
 		$this->isPrivate($page);
 		if (substr($page, 9, 2) != '30' || !preg_match('@\nLocation: (https?://(?:[\w\-]+\.)*googleusercontent\.com/[^\r\n]+)@i', $page, $dl)) html_error('File\'s download-link not found.');
-		$this->RedirectDownload($dl[1], 'fGoogle');
+		$this->RedirectDownload($dl[1], 'fGoogle', 0, 0, 'https://drive.google.com/file/d/'.$this->ID);
 	}
 
 	private function Folder() {
@@ -55,7 +56,7 @@ class google_com extends DownloadClass {
 		$this->isPrivate($page);
 		if (empty($_GET['T8']['format']) && !isset($_GET['audl'])) $this->formatSelector(1);
 		$format = (!empty($_GET['T8']['format']) && in_array($_GET['T8']['format'], $this->dFormats)) ? $_GET['T8']['format'] : reset($this->dFormats);
-		$this->RedirectDownload("$url/export?format=$format", 'dGoogle');
+		$this->RedirectDownload("$url/export?format=$format", 'dGoogle', 0, 0, $url);
 	}
 
 	private function Presentation() {
@@ -64,7 +65,16 @@ class google_com extends DownloadClass {
 		$this->isPrivate($page);
 		if (empty($_GET['T8']['format']) && !isset($_GET['audl'])) $this->formatSelector(2);
 		$format = (!empty($_GET['T8']['format']) && in_array($_GET['T8']['format'], $this->pFormats)) ? $_GET['T8']['format'] : reset($this->pFormats);
-		$this->RedirectDownload("$url/export/$format", 'pGoogle');
+		$this->RedirectDownload("$url/export/$format", 'pGoogle', 0, 0, $url);
+	}
+
+	private function Spreadsheets() {
+		$url = 'https://docs.google.com/spreadsheets/d/'.$this->ID;
+		$page = $this->GetPage("$url/edit");
+		$this->isPrivate($page);
+		if (empty($_GET['T8']['format']) && !isset($_GET['audl'])) $this->formatSelector(3);
+		$format = (!empty($_GET['T8']['format']) && in_array($_GET['T8']['format'], $this->ssFormats)) ? $_GET['T8']['format'] : reset($this->ssFormats);
+		$this->RedirectDownload("$url/export/$format", 'ssGoogle', 0, 0, $url);
 	}
 
 	private function Spreadsheet() {
@@ -80,20 +90,21 @@ class google_com extends DownloadClass {
 
 		$page = $this->GetPage("$url/ccc?key=".$this->ID, $cookie);
 
-		if (empty($_GET['T8']['format']) && !isset($_GET['audl'])) $this->formatSelector(3);
+		if (empty($_GET['T8']['format']) && !isset($_GET['audl'])) $this->formatSelector(4);
 		if (empty($_GET['T8']['format']) || ($fmcmd = array_search($_GET['T8']['format'], $this->sFormats)) === false) {
 			reset($this->sFormats);
 			$fmcmd = key($this->sFormats);
 		}
 		if (($cmdUrl = cut_str($page, '/fm?id=', '"')) == false || !preg_match('@[\w\-\.]+@i', $cmdUrl, $cmdId)) html_error('Download ID not found.');
-		$this->RedirectDownload("$url/fm?id={$cmdId[0]}&fmcmd=$fmcmd", 'sGoogle', $cookie);
+		$this->RedirectDownload("$url/fm?id={$cmdId[0]}&fmcmd=$fmcmd", 'sGoogle', $cookie, 0, "$url/ccc?key=".$this->ID);
 	}
 
 	private function formatSelector($type = 1) {
 		switch ($type) {
 			case 1: $tName = 'Document';$formats = $this->dFormats;break;
 			case 2: $tName = 'Presentation';$formats = $this->pFormats;break;
-			case 3: $tName = 'Spreadsheet';$formats = $this->sFormats;break;
+			case 3: $tName = 'Spreadsheets';$formats = $this->ssFormats;break;
+			case 4: $tName = 'Spreadsheet';$formats = $this->sFormats;break;
 			default: html_error('formatSelector: Unknown type.');
 		}
 		if (count($formats) == 1) return $_GET['T8'] = array('format' => reset($formats));
@@ -109,15 +120,27 @@ class google_com extends DownloadClass {
 		exit;
 	}
 
-	public function CheckBack($headers) {
+	// Add a Range header for get the filesize on chunked file downloads
+	public function RedirectDownload($link, $FileName, $cookie = 0, $post = 0, $referer = 0, $force_name = 0, $auth = 0, $addon = array()) {
+		$referer .= "\r\nRange: bytes=0-";
+		return parent::RedirectDownload($link, $FileName, $cookie, $post, $referer, $force_name, $auth, $addon);
+	}
+
+	public function CheckBack(&$headers) {
+		if (substr($headers, 9, 3) == '416') html_error('[google_com.php] Plugin needs a fix, \'Range\' method is not working.');
 		if (stripos($headers, "\nTransfer-Encoding: chunked") !== false) {
 			global $fp, $sFilters;
 			if (empty($fp) || !is_resource($fp)) html_error('Error: Your rapidleech copy is outdated and it doesn\'t support functions required by this plugin.');
-			if (!in_array('dechunk', stream_get_filters())) html_error('Error: dechunk filter not available, cannot download chunked document/presentation.');
+			if (!in_array('dechunk', stream_get_filters())) html_error('Error: dechunk filter not available, cannot download chunked document/presentation/spreadsheet.');
 			if (empty($sFilters)) $sFilters = array();
 			if (empty($sFilters['dechunk'])) $sFilters['dechunk'] = stream_filter_append($fp, 'dechunk', STREAM_FILTER_READ);
+			// Little hack to get the filesize.
+			$headers = preg_replace('@\nContent-Range\: bytes 0-\d+/@i', "\nContent-Length: ", $headers, 1);
 		}
 	}
 }
+
+// [11-2-2014]  Written by Th3-822.
+// [23-12-2014]  Added support for new spreadsheets format/urls & Some workarounds to get filesize on chunked downloads... - Th3-822
 
 ?>

@@ -4,9 +4,9 @@ if (!defined('RAPIDLEECH')) exit;
 $_T8 = array('v' => 3); // Version of this config file. (Do Not Edit)
 
 /* # Plugin's Settings # */
-$_T8['domain'] = 'biggerupload.com'; // May require the www. (Check first if the site adds the www.).
+$_T8['domain'] = 'filerio.in'; // May require the www. (Check first if the site adds the www.).
 $_T8['anonUploadDisable'] = false; // Disallow non-registered users upload. (XFS Pro)
-$_T8['anonUploadLimit'] = 10; // File-size limit for non-registered users (MB) | 0 = Plugin's limit | (XFS Pro)
+$_T8['anonUploadLimit'] = 0; // File-size limit for non-registered users (MB) | 0 = Plugin's limit | (XFS Pro)
 
 // Advanced Settings (Don't edit it unless you know what are you doing)
 	$_T8['port'] = 80; // Server's port, default: 80 | 443 = https.

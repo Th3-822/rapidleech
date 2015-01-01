@@ -32,12 +32,15 @@ class d2shared_com extends DownloadClass {
 		$this->getCountDown($page);
 
 		// Retrieve download link
-		if (preg_match ('/dc(\d+)\.2shared\.com\/download\/([^\'|\"|\<|\>|\r|\n]+)/i', $page, $L)) {
+		if (preg_match('/dc(\d+)\.2shared\.com\/download\/([^\'\"<>\r\n]+)/i', $page, $L)) {
 			$dllink = "http://dc" . $L[1] . ".2shared.com/download/" . $L[2];
-			$FileName = urldecode(basename(parse_url($dllink, PHP_URL_PATH)));
+		} elseif (preg_match('@pageDownload\d/retrieveLink\.jsp\?id=[\w\-\.]+@i', $page, $RD)) {
+			$page = $this->GetPage('http://www.2shared.com/'.$RD[0], $cookie, 0, $link);
+			if (!preg_match('@https?://dc\d+\.2shared\.com/download/[^\'\"<>\s]+@i', $page, $L)) html_error("Download-link not found [2].");
+			$dllink = $L[0];
 		} else html_error("Download-link not found.");
 
-		$this->RedirectDownload($dllink, $FileName, $cookie);
+		$this->RedirectDownload($dllink, urldecode(basename(parse_url($dllink, PHP_URL_PATH))), $cookie);
 	}
 
 	private function getCountDown($page) {
@@ -69,5 +72,6 @@ Fixed by Th3-822 on 30 October 2010 => Fixed & Added support for password protec
 Fixed by Th3-822 on 25 December 2010 => Fixed: 2shared changed it's system (Again... Now shows dlink in same page)
 Fixed by Th3-822 on 06 March 2011 => Changed regex for new dlink format & Added error msg for download limit.
 Fixed by Th3-822 on 16 June 2012 => Fixed $FileName code.
+Fixed by Th3-822 on 04 October 2014 => Fixed download of image files.
 *********************************************************/
 ?>

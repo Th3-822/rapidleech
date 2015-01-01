@@ -324,7 +324,7 @@ if($list)
 <td><input onmousedown="checkFile(<?php echo $filecount;?>); return false;" id="files<?php echo $filecount; ?>" type="checkbox" name="files[]" value="<?php echo $file["date"]; ?>" /></td>
 <td><?php echo link_for_file($file["name"], FALSE, 'style="font-weight: bold; color: #000;"'); ?></td>
 <td><?php echo $file["size"]; ?></td>
-<td><?php echo isset($file["comment"]) ? str_replace("\\r\\n", "<br />", $file["comment"]) : ""; ?></td>
+<td><?php echo (!empty($file['comment']) ? nl2br($file['comment']) : ''); ?></td>
 <td><?php echo date("d.m.Y H:i:s", $file["date"]) ?></td>
 </tr>
 <?php

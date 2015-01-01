@@ -11,6 +11,7 @@ $continue_up = false;
 if ($upload_acc['zippyshare_com']['user'] && $upload_acc['zippyshare_com']['pass']) {
 	$_REQUEST['up_login'] = $upload_acc['zippyshare_com']['user'];
 	$_REQUEST['up_pass'] = $upload_acc['zippyshare_com']['pass'];
+	$_REQUEST['up_private'] = false;
 	$_REQUEST['action'] = 'FORM';
 	echo "<b><center>Using Default Login.</center></b>\n";
 }
@@ -22,6 +23,7 @@ else {
 	<input type='hidden' name='action' value='FORM' />
 	<tr><td style='white-space:nowrap;'>&nbsp;User*</td><td>&nbsp;<input type='text' name='up_login' value='' style='width:160px;' /></td></tr>
 	<tr><td style='white-space:nowrap;'>&nbsp;Password*</td><td>&nbsp;<input type='password' name='up_pass' value='' style='width:160px;' /></td></tr>\n";
+	echo "<tr><td colspan='2' align='center'><br />Upload options *<br /></td></tr>\r\n<tr><td colspan='2' align='center'><input type='checkbox' name='up_private' value='true' />&nbsp; Set as Private Upload</td></tr>";
 	echo "<tr><td colspan='2' align='center'><br /><input type='submit' value='Upload' /></td></tr>\n";
 	echo "<tr><td colspan='2' align='center'><small>*You can set it as default in <b>".basename(__FILE__)."</b></small></td></tr>\n";
 	echo "</form>\n</table>\n";
@@ -67,6 +69,7 @@ if ($continue_up) {
 		$post['zipname'] = $cookie['zipname'];
 		$post['ziphash'] = $cookie['ziphash'];
 	}
+	if (!empty($_REQUEST['up_private'])) $post['private'] = 'checked';
 	$post['Upload'] = 'Submit Query';
 
 	$up_url = $up[1];
@@ -88,5 +91,6 @@ if ($continue_up) {
 }
 
 //[17-5-2013] Written by Th3-822.
+//[28-9-2014] Added private upload option. - Th3-822
 
 ?>
