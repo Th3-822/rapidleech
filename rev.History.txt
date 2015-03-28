@@ -1,6 +1,26 @@
 Rapidleech PlugMod (by eqbal)
 /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\
 
+====================================
+Rev. 430 - Dec 31, 2014
+
+[SECURITY] Fixed XSS on file's comments.
+More strict .htaccess at /files/
+[FIX] Issues at parsing link password in "link|pass" format.
+Regexp in DownloadClass's reCAPTCHA function.
+[CHANGE] Some changes in http headers.
+Added 2 functions to DownloadClass for SolveMedia captchas.
+Rewritten /class/cookie.php, for avoid rare cookie-related issues.
+Added putfile() function in /class/http.php for uploading files with PUT
+requests.
+Revised upfile function.
+Added Origin headers automatically on upfile() and putfile().
+[PLUGINS] Deleted many non existing/working hosts.
+Added some updated plugins.
+Added GenericXFS_DL (alpha), plugins using it will come soon.
+
+
+====================================
 Rev. 42 - 19 Mar 2011
 [PLUGIN] Added some newly made plugins(Baking, kaox, Raj Malhotra)
 [PLUGIN] Removed some died sites plugins(Raj Malhotra)
