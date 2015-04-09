@@ -44,7 +44,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	} else html_error('Login failed: User/Password empty.');
 
 	// Retrive upload ID
-	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retriving upload ID</div>\n";
+	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrieving upload ID</div>\n";
 
 	$uploadData = k2s_apireq('getUploadFormData');
 	k2s_checkErrors($uploadData, 'Pre-Upload Error');
@@ -293,7 +293,7 @@ function k2s_checkErrors($reply, $prefix = 'Error') {
 		case 500: $msg = 'Server error while processing your request, please try again later';break;
 		case 503: $msg = 'API temporarily not available, please try again later';break;
 	}
-	html_error("$prefix: [$err] $msg.");
+	html_error("$prefix: [{$reply['code']}] $msg.");
 }
 
 function k2s_apireq($actionPath, $post = array()) {

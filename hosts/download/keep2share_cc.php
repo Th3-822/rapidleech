@@ -205,7 +205,7 @@ class keep2share_cc extends DownloadClass {
 				}
 				if (preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w\.\-]+)@i', $page, $cpid)) {
 					$data['step'] = '1';
-					$this->reCAPTCHA($pid[1], $data, 'Login');
+					$this->reCAPTCHA($pid[1], $data, 0, 'Login');
 				} elseif (preg_match('@\W(auth/captcha\.html\?v=\w+)@i', $page, $cpid)) {
 					$data['step'] = '2';
 

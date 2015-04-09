@@ -77,6 +77,7 @@ class d1fichier_com extends DownloadClass {
 		$page = $this->GetPage($this->link, $this->cookie);
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 
+		is_present($page, 'Premium status should not be used on professional services. Use download credits.'); // IP Ban?
 		if (!preg_match($this->DLRegexp, $page, $dl)) html_error('Download-Link Not Found.');
 
 		return $this->RedirectDownload($dl[0], (empty($dl[2]) ? 'T8_1f_pr' : urldecode(parse_url($dl[0], PHP_URL_PATH))));

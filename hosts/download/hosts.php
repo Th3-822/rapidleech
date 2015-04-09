@@ -16,12 +16,6 @@ while (false !== ($entry = $d->read())) {
 			case '1fichier.com':
 				foreach(array('alterupload.com', 'cjoint.net', 'desfichiers.com', 'dfichiers.com', 'megadl.fr', 'mesfichiers.org', 'piecejointe.net', 'pjointe.com', 'tenvoi.com', 'dl4free.com') as $d1fichier) $host["$d1fichier"] = $host['1fichier.com'];
 				break;
-			case 'bayfiles.net':
-				$host['bayfiles.com'] = $host['bayfiles.net'];
-				break;
-			case 'cramit.in':
-				foreach(array('cramitin.eu', 'cramitin.net', 'cramitin.us') as $cramit) $host["$cramit"] = $host['cramit.in'];
-				break;
 			case 'crocko.com':
 				$host['easy-share.com'] = $host['crocko.com'];
 				break;

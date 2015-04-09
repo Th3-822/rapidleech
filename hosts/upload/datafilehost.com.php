@@ -6,7 +6,7 @@ $domain = 'www.datafilehost.com';
 $referer = "http://$domain/";
 
 // Retrive upload ID
-echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='info' width='100%' align='center'>Retriving upload ID</div>\n";
+echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='info' width='100%' align='center'>Retrieving upload ID</div>\n";
 
 $page = geturl($domain, 80, '/', $referer, 0, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 $cookie = GetCookiesArr($page);

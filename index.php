@@ -40,7 +40,7 @@ if (empty($_GET['path']) || $options['download_dir_is_changeable'] == false) {
 }
 
 if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
-	$LINK = !empty($_GET['link']) ? trim(rawurldecode($_GET['link'])) : false;
+	$LINK = !empty($_GET['link']) ? trim($_GET['link']) : false;
 	if (!$LINK) {
 		require_once(CLASS_DIR . 'main.php');
 		exit();
@@ -66,7 +66,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 	$Url = parse_url($LINK);
 	$Url['scheme'] = strtolower($Url['scheme']);
 
-	$Url['path'] = (empty($Url['path'])) ? '/' :str_replace(array('%2F', '%7C'), array('/', '|'), rawurlencode(rawurldecode($Url['path'])));
+	$Url['path'] = (empty($Url['path'])) ? '/' : str_replace('%7C', '|', $Url['path']);
 	$LINK = rebuild_url($Url);
 
 	if (empty($_GET['referer'])) {
@@ -127,7 +127,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 	// print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />$nn</head>$nn<body>$nn";
 	include(TEMPLATE_DIR . '/header.php');
 
-	$FileName = isset($Url['path']) ? basename($Url['path']) : '';
+	$FileName = (isset($Url['path']) && basename($Url['path'])) ? basename($Url['path']) : 'index.html';
 	$mydomain = ($pos = strpos($_SERVER['HTTP_HOST'], ':')) !== false ? substr($_SERVER['HTTP_HOST'], 0, $pos) : $_SERVER['HTTP_HOST'];
 	if ($options['bw_save'] && ($Url['host'] == $_SERVER['SERVER_ADDR'] || host_matches($mydomain, $Url['host']))) html_error(sprintf(lang(7), $mydomain, $_SERVER['SERVER_ADDR']));
 
@@ -213,7 +213,8 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 				$purl = array_merge($ref, parse_url($redirectto));
 			} else $purl = parse_url($redirectto);
 			$_GET['link'] = urlencode(rebuild_url($purl));
-			$_GET['filename'] = urlencode(basename($purl['path']));
+			if (basename($purl['path'])) $_GET['filename'] = basename($purl['path']);
+			else $_GET['filename'] = 'index.html';
 			$_GET['host'] = urlencode($purl['host']);
 			$_GET['path'] = urlencode($purl['path'] . (!empty($purl['query']) ? '?' . $purl['query'] : ''));
 			$_GET['port'] = !empty($purl['port']) ? $purl['port'] : 0;
@@ -228,7 +229,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 		}
 	} while ($redirectto && !$lastError);
 
-	if ($lastError) html_error(htmlspecialchars($lastError), 0);
+	if ($lastError) html_error(htmlspecialchars($lastError));
 	elseif ($file['bytesReceived'] == $file['bytesTotal'] || $file['size'] == 'Unknown') {
 		echo '<script type="text/javascript">' . "pr(100, '" . $file['size'] . "', '" . $file['speed'] . "')</script>\r\n";
 		echo sprintf(lang(10), link_for_file(dirname($pathWithName) . '/' . basename($file['file'])), $file['size'], $file['time'], $file['speed']);

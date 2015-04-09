@@ -64,7 +64,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	} else html_error('Login failed: User/Password empty.');
 
 	// Retrive upload ID
-	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retriving upload ID</div>\n";
+	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrieving upload ID</div>\n";
 
 	$page = geturl($domain, 80, '/', $referer, $cookie);is_page($page);
 	$cookie = GetCookiesArr($page, $cookie);

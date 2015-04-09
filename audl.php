@@ -21,6 +21,7 @@ if (isset($_REQUEST['GO']) && $_REQUEST['GO'] == 'GO') {
 	$getlinks = array_values(array_unique(array_filter(array_map('trim', explode("\r\n", $_REQUEST['links'])))));
 	if (count($getlinks) < 1) html_error('No links submited');
 	if (isset($_REQUEST['server_side']) && $_REQUEST['server_side'] == 'on') {
+		$GLOBALS['throwRLErrors'] = true;
 		// Get supported download plugins
 		require_once(HOST_DIR . 'download/hosts.php');
 		require_once(CLASS_DIR . 'ftp.php');
@@ -223,6 +224,7 @@ function resetProgress() {
 
 		if (isset($_POST['cookieuse']) && !empty($_POST['cookie'])) $start_link .= '&cookie=' . urlencode(trim($_POST['cookie']));
 		if (isset($_POST['ytube_mp4']) && isset($_POST['yt_fmt'])) $start_link .= '&ytube_mp4=' . urlencode($_POST['ytube_mp4']) . '&yt_fmt='.urlencode($_POST['yt_fmt']);
+		if (isset($_POST['cleanname'])) $start_link .= '&cleanname=' . urlencode($_POST['cleanname']);
 
 ?>
 <script type="text/javascript">
@@ -374,7 +376,7 @@ function resetProgress() {
 											<label><input type="checkbox" name="ytube_mp4" onclick="javascript:var displ=this.checked?'':'none';document.getElementById('ytubeopt').style.display=displ;" checked="checked" />&nbsp;<?php echo lang(206); ?></label>
 											<table width="150" border="0" id="ytubeopt" style="display: none;">
 												<tr>
-													<td>&nbsp;<label><input type="checkbox" name="cleanname" checked="checked" /><small>&nbsp;Remove non-supported characters from filename</small></label></td>
+													<td>&nbsp;<label><input type="checkbox" name="cleanname" checked="checked" value="1" /><small>&nbsp;Remove non-supported characters from filename</small></label></td>
 												</tr>
 												<tr>
 													<td>

@@ -50,12 +50,12 @@ function login_check() {
 	}
 }
 
-function is_present($lpage, $mystr, $strerror = '', $head = 0) {
-	if (stripos($lpage, $mystr) !== false) html_error((!empty($strerror) ? $strerror : $mystr), $head);
+function is_present($lpage, $mystr, $strerror = '') {
+	if (stripos($lpage, $mystr) !== false) html_error((!empty($strerror) ? $strerror : $mystr));
 }
 
-function is_notpresent($lpage, $mystr, $strerror, $head = 0) {
-	if (stripos($lpage, $mystr) === false) html_error($strerror, $head);
+function is_notpresent($lpage, $mystr, $strerror) {
+	if (stripos($lpage, $mystr) === false) html_error($strerror);
 }
 
 function insert_location($inputs, $action = 0) {
@@ -75,7 +75,7 @@ function insert_location($inputs, $action = 0) {
 		if ($action === 0) $action = $GLOBALS['PHP_SELF'];
 		$fname = 'r'.time().'l';
 		echo "\n<form name='$fname' ".(!empty($action) ? "action='$action' " : '')."method='POST'>\n";
-		foreach($inputs as $name => $value) echo "\t<input type='hidden' name='$name' value='$value' />\n";
+		foreach($inputs as $name => $value) echo "\t<input type='hidden' name='$name' value='" . htmlspecialchars($value, ENT_QUOTES) . "' />\n";
 		echo "</form>\n<script type='text/javascript'>void(document.$fname.submit());</script>\n</body>\n</html>";
 		flush();
 	}
@@ -138,11 +138,10 @@ function getmicrotime() {
 	return ((float)$usec + (float)$sec);
 }
 
-function html_error($msg, $head = 1) {
-	if (strtolower(basename($GLOBALS['PHP_SELF'])) == 'audl.php' && isset($_REQUEST['GO']) && $_REQUEST['GO'] == 'GO' && $_REQUEST['server_side'] == 'on' && !empty($GLOBALS['isHost'])) throw new Exception($msg); // Audl-Server Side, called from a plugin.
+function html_error($msg) {
+	if (!empty($GLOBALS['throwRLErrors']) || (strtolower(basename($GLOBALS['PHP_SELF'])) == 'audl.php' && isset($_REQUEST['GO']) && $_REQUEST['GO'] == 'GO' && $_REQUEST['server_side'] == 'on' && !empty($GLOBALS['isHost']))) throw new Exception($msg); // throw errors for try and catch usage.
 	else {
-		//if ($head == 1)
-		if (!headers_sent()) include(TEMPLATE_DIR.'header.php');
+		if (!headers_sent()) include_once(TEMPLATE_DIR.'header.php');
 		echo '<div align="center">';
 		echo "<span class='htmlerror'><b>$msg</b></span><br /><br />";
 		if (isset($_GET['audl'])) echo '<script type="text/javascript">parent.nextlink();</script>';
@@ -487,7 +486,8 @@ function check_referer() {
 }
 
 function rebuild_url($url) {
-	return strtolower($url['scheme']) . '://' . (!empty($url['user']) && !empty($url['pass']) ? rawurlencode($url['user']) . ':' . rawurlencode($url['pass']) . '@' : '') . strtolower($url['host']) . (!empty($url['port']) && $url['port'] != 80 && $url['port'] != 443 ? ':' . $url['port'] : '') . (empty($url['path']) ? '/' : $url['path']) . (!empty($url['query']) ? '?' . $url['query'] : '') . (!empty($url['fragment']) ? '#' . $url['fragment'] : '');
+	$url['scheme'] = strtolower($url['scheme']);
+	return $url['scheme'] . '://' . (!empty($url['user']) && !empty($url['pass']) ? rawurlencode($url['user']) . ':' . rawurlencode($url['pass']) . '@' : '') . strtolower($url['host']) . (!empty($url['port']) && $url['port'] != defport(array('scheme' => $url['scheme'])) ? ':' . $url['port'] : '') . (empty($url['path']) ? '/' : $url['path']) . (!empty($url['query']) ? '?' . $url['query'] : '') . (!empty($url['fragment']) ? '#' . $url['fragment'] : '');
 }
 
 if (!function_exists('http_chunked_decode')) {

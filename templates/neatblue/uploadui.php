@@ -1,4 +1,4 @@
-<div id="<?php echo $id; ?>">
+<div id="<?php echo (!empty($id) ? $id : 'uploaddiv'); ?>">
 <table align="center" cellspacing="0" cellpadding="0" class="uploadui" id="progressblock">
 <tr>
 <td></td>

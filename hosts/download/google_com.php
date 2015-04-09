@@ -131,9 +131,10 @@ class google_com extends DownloadClass {
 		if (stripos($headers, "\nTransfer-Encoding: chunked") !== false) {
 			global $fp, $sFilters;
 			if (empty($fp) || !is_resource($fp)) html_error('Error: Your rapidleech copy is outdated and it doesn\'t support functions required by this plugin.');
-			if (!in_array('dechunk', stream_get_filters())) html_error('Error: dechunk filter not available, cannot download chunked document/presentation/spreadsheet.');
-			if (empty($sFilters)) $sFilters = array();
+			if (!in_array('dechunk', stream_get_filters())) html_error('Error: dechunk filter not available, cannot download chunked file.');
+			if (!isset($sFilters) || !is_array($sFilters)) $sFilters = array();
 			if (empty($sFilters['dechunk'])) $sFilters['dechunk'] = stream_filter_append($fp, 'dechunk', STREAM_FILTER_READ);
+			if (!$sFilters['dechunk']) html_error('Error: Unknown error while initializing dechunk filter, cannot download chunked file.');
 			// Little hack to get the filesize.
 			$headers = preg_replace('@\nContent-Range\: bytes 0-\d+/@i', "\nContent-Length: ", $headers, 1);
 		}

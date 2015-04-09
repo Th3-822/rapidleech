@@ -16,46 +16,16 @@ if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Opera/9.80 (Windows NT 6.1
  * @return bool
  */
 function insert_timer($countd, $caption = '', $timeouttext = '', $hide = false) {
-	global $disable_timer;
+	if (empty($countd) || !is_numeric($countd) || $countd < 0) return false;
+	$countd = ceil($countd);
 
-	if ($disable_timer === true) return true;
-	if (!$countd || !is_numeric($countd)) return false;
-
-	$timerid = rand(1000, time());
-	echo ('<div align="center">');
-	echo ('<span id="global' . $timerid . '">');
-	echo ('<br />');
-	echo ('<span class="caption">' . $caption . '</span>&nbsp;&nbsp;');
-	echo ('<span id="timerlabel' . $timerid . '" class="caption"></span></span>');
-	echo ('</div>');
-	echo ('<script type="text/javascript">');
-	echo ('var count' . $timerid . '=' . $countd . ';');
-	echo ('function timer' . $timerid . '() {');
-	echo ('if(count' . $timerid . ' > 0) {');
-	echo ('$("#timerlabel' . $timerid . '").html("' . sprintf(lang(87), '" + count' . $timerid . ' + "') . '");');
-	echo ('count' . $timerid . '--;');
-	echo ('setTimeout("timer' . $timerid . '()", 1000);');
-	echo ('}');
-	echo ('}');
-	echo ('timer' . $timerid . '();');
-	echo ('</script>');
-	flush();
-	for ($nnn = 0; $nnn < $countd; $nnn++) {
-		sleep(1);
-	}
-	flush();
-
-	if ($hide === true) {
-		echo ('<script type="text/javascript">$("#global' . $timerid . '").css("display","none");</script>');
+	$timerid = jstime();
+	echo "\n<div id='timer_$timerid' align='center'>\n\t<br /><span class='caption'>$caption</span>&nbsp;&nbsp;\n\t<span id='timerlabel_$timerid' class='caption'></span>\n</div>\n<script type='text/javascript'>/* <![CDATA[ */\n\tvar count_$timerid = $countd;\n\tfunction timer_$timerid() {\n\t\tif (count_$timerid > 0) {\n\t\t\t$('#timerlabel_$timerid').html('". sprintf(lang(87), "' + count_$timerid + '") . "');\n\t\t\tcount_$timerid--;\n\t\t\tsetTimeout('timer_$timerid()', 1000);\n\t\t}";
+	if ($hide) echo "else $('#timer_$timerid').css('display', 'none');";
+	elseif (!empty($timeouttext)) echo "else $('#timer_$timerid').html('" . addslashes($timeouttext) . "');";
+	echo "\n\t} timer_$timerid();\n/* ]]> */</script>";
 		flush();
-		return true;
-	}
-
-	if ($timeouttext) {
-		echo ('<script type="text/javascript">$("#global' . $timerid . '").html("' . $timeouttext . '");</script>');
-		flush();
-		return true;
-	}
+	sleep($countd);
 	return true;
 }
 
@@ -81,11 +51,11 @@ function insert_new_timer($countd, $displaytext, $caption = '', $text = '') {
  */
 function is_page($lpage) {
 	global $lastError;
-	if (!$lpage) html_error(lang(84) . "<br />$lastError", 0);
+	if (!$lpage) html_error(lang(84) . "<br />$lastError");
 }
 
 function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveToFile = 0, $proxy = 0, $pauth = 0, $auth = 0, $scheme = 'http', $resume_from = 0, $XMLRequest = 0) {
-	global $nn, $lastError, $Resume, $bytesReceived, $fp, $fs, $force_name, $options;
+	global $nn, $lastError, $Resume, $bytesReceived, $fp, $fs, $force_name, $options, $sFilters;
 	$scheme = strtolower($scheme) . '://';
 
 	if (($post !== 0) && ($scheme == 'http://' || $scheme == 'https://')) {
@@ -103,17 +73,17 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 	if ($scheme == 'https://') {
 		if (!extension_loaded('openssl')) html_error('This server doesn\'t support https connections.');
-		$scheme = 'ssl://';
+		$scheme = 'tls://';
 		if ($port == 0 || $port == 80) $port = 443;
 	}
 
 	if ($proxy) {
 		list($proxyHost, $proxyPort) = explode(':', $proxy, 2);
-		$host = $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
+		$host = $host . ($port != 80 && ($scheme != 'tls://' || $port != 443) ? ':' . $port : '');
 		$url = "$scheme$host$url";
 	}
 
-	if ($scheme != 'ssl://') $scheme = '';
+	if ($scheme != 'tls://') $scheme = '';
 
 	$request = array();
 	$request[] = $method . ' ' . str_replace(' ', '%20', $url) . ' HTTP/1.1';
@@ -167,7 +137,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	#########################################################################
 	fwrite($fp, $request);
 	fflush($fp);
-	$timeStart = getmicrotime();
+	$timeStart = microtime(true);
 
 	// Rewrote the get header function according to the proxy script
 	// Also made sure it goes faster and I think 8192 is the best value for retrieving headers
@@ -186,6 +156,14 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		}
 		$llen = $len;
 	} while (strpos($header, $nn . $nn) === false);
+
+	// Array for active stream filters
+	$sFilters = array();
+	if (stripos($header, "\nTransfer-Encoding: chunked") !== false && in_array('dechunk', stream_get_filters())) {
+		// Add built-in dechunk filter
+		$sFilters['dechunk'] = stream_filter_append($fp, 'dechunk', STREAM_FILTER_READ);
+		if (!$sFilters['dechunk'] && $saveToFile) html_error('Unknown error while initializing dechunk filter, cannot continue download.');
+	}
 
 	#########################################################################
 
@@ -288,7 +266,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		if (@file_exists($saveToFile) && $options['bw_save']) {
 			// Skip in audl.
 			if (isset($_GET['audl'])) echo '<script type="text/javascript">parent.nextlink();</script>';
-			html_error(lang(99) . ': ' . link_for_file($saveToFile), 0);
+			html_error(lang(99) . ': ' . link_for_file($saveToFile));
 		}
 		if (@file_exists($saveToFile) && $Resume['use'] === TRUE) {
 			$fs = @fopen($saveToFile, 'ab');
@@ -346,7 +324,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			else $percent = @round(($bytesReceived + $Resume['from']) / ($bytesTotal + $Resume['from']) * 100, 2);
 			if ($bytesReceived > $last + $chunkSize) {
 				$received = bytesToKbOrMbOrGb($bytesReceived + $Resume['from']);
-				$time = getmicrotime() - $timeStart;
+				$time = microtime(true) - $timeStart;
 				$chunkTime = $time - $lastChunkTime;
 				$chunkTime = ($chunkTime > 0) ? $chunkTime : 1;
 				$lastChunkTime = $time;
@@ -371,9 +349,9 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	stream_socket_shutdown($fp, STREAM_SHUT_RDWR);
 	fclose($fp);
 	if ($saveToFile) {
-		return array('time' => sec2time(round($time)), 'speed' => @round($bytesTotal / 1024 / (getmicrotime() - $timeStart), 2), 'received' => true, 'size' => $fileSize, 'bytesReceived' => ($bytesReceived + $Resume['from']), 'bytesTotal' => ($bytesTotal + $Resume ['from']), 'file' => $saveToFile);
+		return array('time' => sec2time(round($time)), 'speed' => @round($bytesTotal / 1024 / (microtime(true) - $timeStart), 2), 'received' => true, 'size' => $fileSize, 'bytesReceived' => ($bytesReceived + $Resume['from']), 'bytesTotal' => ($bytesTotal + $Resume ['from']), 'file' => $saveToFile);
 	} else {
-		if (stripos($header, "\nTransfer-Encoding: chunked") !== false && function_exists('http_chunked_decode')) {
+		if (stripos($header, "\nTransfer-Encoding: chunked") !== false && empty($sFilters['dechunk']) && function_exists('http_chunked_decode')) {
 			$dechunked = http_chunked_decode($page);
 			if ($dechunked !== false) $page = $dechunked;
 			unset($dechunked);
@@ -385,7 +363,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0) {
 	global $pauth;
-	static $ch;
+	static $ch, $lastProxy;
 	if (empty($link) || !is_string($link)) html_error(lang(24));
 	if (!extension_loaded('curl') || !function_exists('curl_init') || !function_exists('curl_exec')) html_error('cURL isn\'t enabled or cURL\'s functions are disabled');
 	$arr = explode("\r\n", $referer);
@@ -401,6 +379,7 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		CURLOPT_FOLLOWLOCATION => 0, CURLOPT_FAILONERROR => 0,
 		CURLOPT_FORBID_REUSE => 0, CURLOPT_FRESH_CONNECT => 0,
 		CURLINFO_HEADER_OUT => 1, CURLOPT_URL => $link,
+		CURLOPT_SSLVERSION => (defined('CURL_SSLVERSION_TLSv1') ? CURL_SSLVERSION_TLSv1 : 1), CURLOPT_SSL_CIPHER_LIST => 'TLSv1',
 		CURLOPT_USERAGENT => rl_UserAgent);
 
 	$opt[CURLOPT_REFERER] = !empty($referer) ? $referer : false;
@@ -434,7 +413,14 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 	$opt[CURLOPT_CONNECTTIMEOUT] = $opt[CURLOPT_TIMEOUT] = 120;
 	if (is_array($opts) && count($opts) > 0) foreach ($opts as $O => $V) $opt[$O] = $V;
 
+	if (!isset($lastProxy)) $lastProxy = $opt[CURLOPT_PROXY];
 	if (!isset($ch)) $ch = curl_init();
+	elseif ($lastProxy != $opt[CURLOPT_PROXY]) {
+		// cURL seems that doesn't like switching proxies on a active resource
+		curl_close($ch);
+		$ch = curl_init();
+		$lastProxy = $opt[CURLOPT_PROXY];
+	}
 
 	foreach ($opt as $O => $V) curl_setopt($ch, $O, $V); // Using this instead of 'curl_setopt_array'
 	$page = curl_exec($ch);
@@ -476,7 +462,7 @@ function GetCookies($content) {
 	if (empty($content) || stripos($content, "\nSet-Cookie: ") === false) return '';
 	// The U option will make sure that it matches the first character
 	// So that it won't grab other information about cookie such as expire, domain and etc
-	preg_match_all('/\nSet-Cookie: (.*)(;|\r\n)/U', $content, $temp);
+	preg_match_all('/\nSet-Cookie: (.*)(;|\r\n)/Ui', $content, $temp);
 	$cookie = $temp[1];
 	$cookie = implode('; ', $cookie);
 	return $cookie;
@@ -492,7 +478,7 @@ function GetCookies($content) {
 function GetCookiesArr($content, $cookie=array(), $del=true, $dval=array('','deleted')) {
 	if (!is_array($cookie)) $cookie = array();
 	if (($hpos = strpos($content, "\r\n\r\n")) > 0) $content = substr($content, 0, $hpos); // We need only the headers
-	if (empty($content) || stripos($content, "\nSet-Cookie: ") === false || !preg_match_all ('/\nSet-Cookie: ([^\r\n]+)/', $content, $temp)) return $cookie;
+	if (empty($content) || stripos($content, "\nSet-Cookie: ") === false || !preg_match_all ('/\nSet-Cookie: ([^\r\n]+)/i', $content, $temp)) return $cookie;
 	foreach ($temp[1] as $v) {
 		if (strpos($v, ';') !== false) list($v, $p) = explode(';', $v, 2);
 		else $p = false;
@@ -592,26 +578,26 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
 	if ($scheme == 'https://') {
 		if (!extension_loaded('openssl')) html_error('This server doesn\'t support https connections.');
-		$scheme = 'ssl://';
+		$scheme = 'tls://';
 		if ($port == 0 || $port == 80) $port = 443;
 	}
 
 	if (!empty($referer) && ($pos = strpos("\r\n", $referer)) !== 0) {
 		$origin = parse_url($pos ? substr($referer, 0, $pos) : $referer);
 		if (empty($origin['port'])) $origin['port'] = defport($origin);
-		$origin = strtolower($origin['scheme']) . '://' . strtolower($origin['host']) . ($origin['port'] != 80 && ($scheme != 'ssl://' || $origin['port'] != 443) ? ':' . $origin['port'] : '');
-	} else $origin = ($scheme == 'ssl://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
+		$origin = strtolower($origin['scheme']) . '://' . strtolower($origin['host']) . ($origin['port'] != 80 && ($scheme != 'tls://' || $origin['port'] != 443) ? ':' . $origin['port'] : '');
+	} else $origin = ($scheme == 'tls://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'tls://' || $port != 443) ? ':' . $port : '');
 
 	if ($proxy) {
 		list($proxyHost, $proxyPort) = explode(':', $proxy, 2);
-		$host = $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
+		$host = $host . ($port != 80 && ($scheme != 'tls://' || $port != 443) ? ':' . $port : '');
 		$url = "$scheme$host$url";
 	}
 
-	if ($scheme != 'ssl://') $scheme = '';
+	if ($scheme != 'tls://') $scheme = '';
 
 	$request = array();
-	$request[] = 'POST ' . str_replace(' ', '%20', $url) . ' HTTP/1.0';
+	$request[] = 'POST ' . str_replace(' ', '%20', $url) . ' HTTP/1.1';
 	$request[] = "Host: $host";
 	$request[] = "User-Agent: $upagent";
 	$request[] = 'Accept: text/html, application/xml;q=0.9, application/xhtml+xml, image/png, image/webp, image/jpeg, image/gif, image/x-xbitmap, */*;q=0.1';
@@ -652,7 +638,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 	require (TEMPLATE_DIR . '/uploadui.php');
 	flush();
 
-	$timeStart = getmicrotime();
+	$timeStart = microtime(true);
 
 	$chunkSize = GetChunkSize($fileSize);
 
@@ -681,7 +667,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
 		$totalsend += $sendbyte;
 
-		$time = getmicrotime() - $timeStart;
+		$time = microtime(true) - $timeStart;
 		$chunkTime = $time - $lastChunkTime;
 		$chunkTime = $chunkTime ? $chunkTime : 1;
 		$chunkTime = ($chunkTime > 0) ? $chunkTime : 1;
@@ -701,15 +687,40 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 	fwrite($fp, $nn . "--" . $bound . "--" . $nn);
 	fflush($fp);
 
-	$page = '';
-	while (!feof($fp)) {
-		$data = fread($fp, 16384);
-		if ($data === false) break;
-		$page .= $data;
-	}
+	$llen = 0;
+	$header = '';
+	do {
+		$header .= fgets($fp, 16384);
+		$len = strlen($header);
+		if (!$header || $len == $llen) {
+			$lastError = lang(91);
+			stream_socket_shutdown($fp, STREAM_SHUT_RDWR);
+			fclose($fp);
+			return false;
+		}
+		$llen = $len;
+	} while (strpos($header, $nn . $nn) === false);
 
+	// Array for active stream filters
+	$sFilters = array();
+	if (stripos($header, "\nTransfer-Encoding: chunked") !== false && in_array('dechunk', stream_get_filters())) $sFilters['dechunk'] = stream_filter_append($fp, 'dechunk', STREAM_FILTER_READ); // Add built-in dechunk filter
+
+	$page = '';
+	do {
+		$data = @fread($fp, 16384);
+		if ($data == '') break;
+		$page .= $data;
+	} while (!feof($fp) && strlen($data) > 0);
+
+	stream_socket_shutdown($fp, STREAM_SHUT_RDWR);
 	fclose($fp);
 
+	if (stripos($header, "\nTransfer-Encoding: chunked") !== false && empty($sFilters['dechunk']) && function_exists('http_chunked_decode')) {
+		$dechunked = http_chunked_decode($page);
+		if ($dechunked !== false) $page = $dechunked;
+		unset($dechunked);
+	}
+	$page = $header.$page;
 	return $page;
 }
 
@@ -734,23 +745,23 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 
 	if ($scheme == 'https://') {
 		if (!extension_loaded('openssl')) html_error('This server doesn\'t support https connections.');
-		$scheme = 'ssl://';
+		$scheme = 'tls://';
 		if ($port == 0 || $port == 80) $port = 443;
 	}
 
 	if (!empty($referer) && ($pos = strpos("\r\n", $referer)) !== 0) {
 		$origin = parse_url($pos ? substr($referer, 0, $pos) : $referer);
 		if (empty($origin['port'])) $origin['port'] = defport($origin);
-		$origin = strtolower($origin['scheme']) . '://' . strtolower($origin['host']) . ($origin['port'] != 80 && ($scheme != 'ssl://' || $origin['port'] != 443) ? ':' . $origin['port'] : '');
-	} else $origin = ($scheme == 'ssl://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
+		$origin = strtolower($origin['scheme']) . '://' . strtolower($origin['host']) . ($origin['port'] != 80 && ($scheme != 'tls://' || $origin['port'] != 443) ? ':' . $origin['port'] : '');
+	} else $origin = ($scheme == 'tls://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'tls://' || $port != 443) ? ':' . $port : '');
 
 	if ($proxy) {
 		list($proxyHost, $proxyPort) = explode(':', $proxy, 2);
-		$host = $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
+		$host = $host . ($port != 80 && ($scheme != 'tls://' || $port != 443) ? ':' . $port : '');
 		$url = "$scheme$host$url";
 	}
 
-	if ($scheme != 'ssl://') $scheme = '';
+	if ($scheme != 'tls://') $scheme = '';
 
 	$request = array();
 	$request[] = 'PUT ' . str_replace(' ', '%20', $url) . ' HTTP/1.1';
@@ -797,7 +808,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 	require (TEMPLATE_DIR . '/uploadui.php');
 	flush();
 
-	$timeStart = getmicrotime();
+	$timeStart = microtime(true);
 
 	$chunkSize = GetChunkSize($fileSize);
 
@@ -826,7 +837,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 
 		$totalsend += $sendbyte;
 
-		$time = getmicrotime() - $timeStart;
+		$time = microtime(true) - $timeStart;
 		$chunkTime = $time - $lastChunkTime;
 		$chunkTime = ($chunkTime > 0) ? $chunkTime : 1;
 		$lastChunkTime = $time;
@@ -858,6 +869,10 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 		$llen = $len;
 	} while (strpos($header, $nn . $nn) === false);
 
+	// Array for active stream filters
+	$sFilters = array();
+	if (stripos($header, "\nTransfer-Encoding: chunked") !== false && in_array('dechunk', stream_get_filters())) $sFilters['dechunk'] = stream_filter_append($fp, 'dechunk', STREAM_FILTER_READ); // Add built-in dechunk filter
+
 	$page = '';
 	do {
 		$data = @fread($fp, 16384);
@@ -868,7 +883,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 	stream_socket_shutdown($fp, STREAM_SHUT_RDWR);
 	fclose($fp);
 
-	if (stripos($header, "\nTransfer-Encoding: chunked") !== false && function_exists('http_chunked_decode')) {
+	if (stripos($header, "\nTransfer-Encoding: chunked") !== false && empty($sFilters['dechunk']) && function_exists('http_chunked_decode')) {
 		$dechunked = http_chunked_decode($page);
 		if ($dechunked !== false) $page = $dechunked;
 		unset($dechunked);

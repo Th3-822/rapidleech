@@ -43,7 +43,7 @@ $uptobox_pass = ''; //  Set your password
         $post["redirect"] = "http://uptobox.com/";
 		$post["login"] = trim($_REQUEST['upt_user']);
         $post["password"] = trim($_REQUEST['upt_pass']);
-		$page = geturl("uptobox.com", 80, "/", "http://uptobox.com/login.html", 0, $post, 0, $_GET["proxy"]);
+		$page = geturl("uptobox.com", 80, "/", "https://login.uptobox.com/", 0, $post, 0, $_GET["proxy"]);
 		is_page($page);
 		is_present($page, "Incorrect Login or Password", "Incorrect Login or Password");
 		$cookie = GetCookies($page);

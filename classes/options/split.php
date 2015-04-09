@@ -28,7 +28,7 @@ function rl_split() {
 ?>
 <tr>
 						<td><?php echo lang(40); ?>:&nbsp;<input type="text" name="saveTo[]" size="40"
-							value="<?php echo htmlspecialchars(DOWNLOAD_DIR); ?>" /></td>
+							value="<?php echo htmlspecialchars(DOWNLOAD_DIR, ENT_QUOTES); ?>" /></td>
 					</tr>
 <?php
 		}

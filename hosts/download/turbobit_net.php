@@ -231,7 +231,7 @@ class turbobit_net extends DownloadClass {
 					$data['premium_user'] = urlencode(encrypt($user)); // encrypt() will keep this safe.
 					$data['premium_pass'] = urlencode(encrypt($pass)); // And this too.
 				}
-				$this->reCAPTCHA($pid[1], $data, 'Login');
+				$this->reCAPTCHA($pid[1], $data, 0, 'Login');
 				exit;
 			} elseif (stripos($page, '/user/logout">Logout<') !== false) {
 				$this->SaveCookies($user, $pass); // Update cookies file

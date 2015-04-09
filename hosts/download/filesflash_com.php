@@ -27,18 +27,18 @@ class filesflash_com extends DownloadClass {
 	}
 
 	private function FreeDL() {
+		$pUrl = 'http://filesflash.com/freedownload.php';
 		if (!empty($_POST['step']) && $_POST['step'] == '1') {
 			if (!empty($_POST['cookie'])) $this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
 			if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
 			if (empty($_POST['recaptcha_challenge_field'])) html_error('Empty reCAPTCHA challenge.');
-
 			$post = array();
 			$post['token'] = $_POST['token'];
 			$post['recaptcha_challenge_field'] = urlencode($_POST['recaptcha_challenge_field']);
 			$post['recaptcha_response_field'] = urlencode($_POST['recaptcha_response_field']);
 			$post['submit'] = 'Submit';
 
-			$page = $this->GetPage('http://filesflash.com/freedownload.php', $this->cookie, $post);
+			$page = $this->GetPage($pUrl, $this->cookie, $post);
 
 			is_present($page, 'Your IP address is already downloading another link.');
 			if (stripos($page, 'google.com/recaptcha/api/') !== false || stripos($page, 'recaptcha.net/') !== false) html_error('Wrong captcha entered.');
@@ -47,7 +47,7 @@ class filesflash_com extends DownloadClass {
 			if (!preg_match('@\scount\s*=\s*(\d+)\s*;@i', $page, $wait)) html_error('Error: Countdown not found.');
 			if ($wait[1] > 0) $this->CountDown($wait[1]);
 
-			return $this->RedirectDownload($dlink[0], urldecode(basename(parse_url($dlink[0], PHP_URL_PATH))));
+			return $this->RedirectDownload($dlink[0], urldecode(basename(parse_url($dlink[0], PHP_URL_PATH))), $this->cookie, 0, $pUrl);
 		}
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
 
@@ -55,7 +55,7 @@ class filesflash_com extends DownloadClass {
 		$post['token'] = urlencode(cut_str($this->page, 'name="token" value="', '"')) or html_error('Download Token not Found.');
 		$post['freedl'] = urlencode(cut_str($this->page, 'name="freedl" value="', '"')) or $post['submit'] = '+Start+free+download+';
 
-		$page = $this->GetPage('http://filesflash.com/freedownload.php', $this->cookie, $post);
+		$page = $this->GetPage($pUrl, $this->cookie, $post);
 
 		is_present($page, 'Your IP address is already downloading another link.');
 
@@ -74,10 +74,11 @@ class filesflash_com extends DownloadClass {
 		if (stripos($header, "\nContent-Type: text/html") !== false) {
 			global $fp, $sFilters;
 			if (empty($fp) || !is_resource($fp)) html_error('[filesflash_com] Cannot check download error.');
-			if (empty($sFilters)) $sFilters = array();
-			if (in_array('dechunk', stream_get_filters()) && empty($sFilters['dechunk'])) $sFilters['dechunk'] = stream_filter_append($fp, 'dechunk', STREAM_FILTER_READ);
+			$is_chunked = (stripos($header, "\nTransfer-Encoding: chunked") !== false);
+			if (!isset($sFilters) || !is_array($sFilters)) $sFilters = array();
+			if ($is_chunked && empty($sFilters['dechunk']) && in_array('dechunk', stream_get_filters())) $sFilters['dechunk'] = stream_filter_append($fp, 'dechunk', STREAM_FILTER_READ);
 			$body = stream_get_contents($fp);
-			if (empty($sFilters['dechunk']) && stripos($header, "\nTransfer-Encoding: chunked") !== false && function_exists('http_chunked_decode')) {
+			if ($is_chunked && empty($sFilters['dechunk']) && function_exists('http_chunked_decode')) {
 				$dechunked = http_chunked_decode($body);
 				if ($dechunked !== false) $body = $dechunked;
 				unset($dechunked);

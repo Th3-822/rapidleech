@@ -18,7 +18,7 @@ class depositfiles_com extends DownloadClass {
 		$EnableJsCountdowns = false; // Change this to true if you can't download because server/client timeouts... Doesn't work with audl serverside.
 		$this->domain = parse_url($this->link, PHP_URL_HOST);
 		if (empty($_REQUEST['step'])) {
-			$this->page = $this->GetPage($this->link);
+			$this->page = $this->GetPage($this->link, $this->cookie);
 			$this->CheckDomain();
 			is_present($this->page, 'This file does not exist', 'The requested file is not found');
 		} else $this->CheckDomain(false);
@@ -307,7 +307,7 @@ class depositfiles_com extends DownloadClass {
 				$data['premium_user'] = urlencode(encrypt($user));
 				$data['premium_pass'] = urlencode(encrypt($pass));
 			}
-			$this->reCAPTCHA($cpid[1], $data, 'Login');
+			$this->reCAPTCHA($cpid[1], $data, 0, 'Login');
 		}
 	}
 

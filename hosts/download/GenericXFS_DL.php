@@ -12,7 +12,7 @@ if (!defined('RAPIDLEECH')) {
 
 class GenericXFS_DL extends DownloadClass {
 	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $embedDL = false, $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\'\"\t<>\r\n\\\]+@i';
-	private $classVer = 1;
+	private $classVer = 4;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -35,7 +35,7 @@ class GenericXFS_DL extends DownloadClass {
 
 		$this->scheme = $url['scheme'];
 		$this->domain = $url['host'];
-		$this->port = (!empty($url['port']) && $url['port'] > 0 && $url['port'] < 65536 && !in_array($url['port'], array(80, 443))) ? $url['port'] : 0;
+		$this->port = (!empty($url['port']) && $url['port'] > 0 && $url['port'] < 65536) ? $url['port'] : 0;
 		$this->host = $this->domain . (!empty($this->port) ? ':'.$this->port : '');
 		$this->purl = $this->scheme.'://'.$this->host.'/';
 		$this->link = $GLOBALS['Referer'] = rebuild_url($url);
@@ -50,6 +50,7 @@ class GenericXFS_DL extends DownloadClass {
 				}
 			} else {
 				is_present($this->page, 'The file you were looking for could not be found');
+				is_present($this->page, 'The file was removed by administrator');
 				is_present($this->page, 'No such file with this filename', 'Error: Invalid filename, check your link and try again.'); // With the regexp i removed the filename part of the link, this error shouldn't be showed
 			}
 		}
@@ -58,7 +59,8 @@ class GenericXFS_DL extends DownloadClass {
 	}
 
 	protected function FindPost($reverse = true) {
-		if (!preg_match_all('@<form(?:[\s\t][^\>]*)?\>(?:[^<]+(?!\<form)<[^<]+)*</form>@i', $this->page, $forms)) return false;
+		//if (!preg_match_all('@<form(?:[\s\t][^\>]*)?\>(?:[^<]+(?!\<form)<[^<]+)*</form>@i', $this->page, $forms)) return false;
+		if (!preg_match_all('@(?><form(?:[\s\t][^\>]*)?\>)(?>.*?</form>)@is', $this->page, $forms)) return false;
 		$forms = ($reverse ? array_reverse($forms[0]) : $forms[0]); // In some hosts the freedl form is before the "premium" form so $reverse must be on false on those hosts.
 		$found = false;
 		foreach ($forms as $form) {
@@ -123,7 +125,7 @@ class GenericXFS_DL extends DownloadClass {
 			$txtCaptcha = trim(html_entity_decode(implode($txtCaptcha), ENT_QUOTES, 'UTF-8'));
 			return array('type' => 2, 'key' => $txtCaptcha);
 		} elseif ((stripos($this->page, 'google.com/recaptcha/api/') !== false || stripos($this->page, 'recaptcha.net/') !== false) && preg_match('@https?://(?:[\w\-]+\.)?(?:google\.com/recaptcha/api|recaptcha\.net)/(?:challenge|noscript)\?k=([\w\.\-]+)@i', $this->page, $reCaptcha)) {
-			// reCAPTCHA
+			// Old reCAPTCHA
 			return array('type' => 3, 'key' => $reCaptcha[1]);
 		} elseif (($pos = stripos($this->page, '://api.solvemedia.com/')) !== false && preg_match('@https?://api\.solvemedia\.com/papi/challenge\.(?:no)?script\?k=([\w\.\-]+)@i', substr($this->page, $pos - 5), $smCaptcha)) {
 			// SolveMedia Captcha
@@ -146,12 +148,13 @@ class GenericXFS_DL extends DownloadClass {
 					$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/jpg');
 					return $this->EnterCaptcha("data:$mimetype;base64,".base64_encode($imgBody), $data);
 				case 2:
-					$_POST['captcha'] = $txtCaptcha;
+					$_POST['T8gXFS'] = $this->post;
+					$_POST['captcha'] = $captcha['key'];
 					$_POST['step'] = $step;
 					$_POST['captcha_type'] = 2;
 					return true;
 				case 3: return $this->reCAPTCHA($captcha['key'], $data);
-				case 4: return $this->captchaSolveMedia($captcha['key'], $data);
+				case 4: return $this->SolveMedia($captcha['key'], $data);
 			}
 		}
 		return false;
@@ -164,7 +167,7 @@ class GenericXFS_DL extends DownloadClass {
 			$this->cookie['lang'] = 'english';
 			$_POST['cookie'] = false;
 		}
-		$post = array_merge(array(), $_POST['T8gXFS']);
+		$post = (!empty($_POST['T8gXFS']) && is_array($_POST['T8gXFS']) ? $_POST['T8gXFS'] : array());
 		switch ($_POST['captcha_type']) {
 			default: 
 				return html_error('Invalid captcha type.');
@@ -178,7 +181,7 @@ class GenericXFS_DL extends DownloadClass {
 				if (empty($_POST['captcha'])) html_error('[2] You didn\'t enter the image verification code.');
 				$post['code'] = urlencode($_POST['captcha']);
 				break;
-			case '3': // reCAPTCHA
+			case '3': // Old reCAPTCHA
 				$this->captcha = 3;
 				if (empty($_POST['recaptcha_response_field'])) html_error('[3] You didn\'t enter the image verification code.');
 				if (empty($_POST['recaptcha_challenge_field'])) html_error('[3] Empty reCAPTCHA challenge.');
@@ -213,7 +216,7 @@ class GenericXFS_DL extends DownloadClass {
 
 	protected function FreeDL($step = 1) {
 		$this->postCaptcha($step);
-		if (($pos = stripos($this->page, 'You have to wait ')) !== false && preg_match('@You have to wait (?:\d+ \w+,\s){0,2}\d+ \w+ (?:un)?till? (?:the )?next download@i', substr($this->page, $pos), $err)) html_error('Error: '.$err[0]);
+		if (($pos = stripos($this->page, 'You have to wait')) !== false && preg_match('@You have to wait[\W\S]?(?:(?:\s*|\s*<br\s*/?\s*>\s*)?\d+ \w+,\s){0,2}\d+ \w+(?:\s*|\s*<br\s*/?\s*>\s*)?(?:un)?till? (?:the )?next download@i', substr($this->page, $pos), $err)) html_error('Error: '.strip_tags($err[0]));
 		if (($pos = stripos($this->page, 'You can download files up to ')) !== false && preg_match('@You can download files up to \d+ [KMG]b only.@i', substr($this->page, $pos), $err)) html_error('Error: '.$err[0]);
 		if (($pos = stripos($this->page, 'You have reached the download')) !== false && preg_match('@You have reached the download[- ]limit(?: of|:) \d+ [KMGT]b for(?: the)? last \d+ days?@i', substr($this->page, $pos), $err)) html_error('Error: '.$err[0]);
 		if (!$this->FindPost()) {
@@ -262,6 +265,12 @@ class GenericXFS_DL extends DownloadClass {
 		} else return true;
 	}
 
+	// Allow Custom Login Post. (UTB)
+	protected function sendLogin($post) {
+		$page = $this->GetPage((!empty($this->sslLogin) ? 'https://'.$this->host.'/' : $this->purl) . '?op=login', $this->cookie, $post, $this->purl);
+		return $page;
+	}
+
 	protected function Login() {
 		$this->pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
 		$pkey = str_ireplace(array('www.', '.'), array('', '_'), $this->domain);
@@ -282,7 +291,7 @@ class GenericXFS_DL extends DownloadClass {
 		$post['login'] = urlencode($user);
 		$post['password'] = urlencode($pass);
 
-		$page = $this->GetPage((!empty($this->sslLogin) ? 'https://'.$this->host.'/' : $this->purl) . '?op=login', $this->cookie, $post, $this->purl);
+		$page = $this->sendLogin($post);
 
 		if (!$this->checkLogin($page)) html_error('Login Error: checkLogin() returned false.');
 
@@ -299,7 +308,7 @@ class GenericXFS_DL extends DownloadClass {
 
 	protected function checkLogin($page) {
 		is_present($page, 'op=resend_activation', 'Login failed: Your account isn\'t confirmed yet.');
-		is_present($page, 'Your account was banned by administrator.', '[checkLogin] Account is Banned.');
+		is_present($page, 'Your account was banned by administrator.', 'Login failed: Account is Banned.');
 		is_present($page, 'Your IP is banned', 'Login Error: IP banned for too many wrong logins.');
 		if (preg_match('@Incorrect (Username|Login) or Password@i', $page)) html_error('Login failed: User/Password incorrect.');
 		return true;

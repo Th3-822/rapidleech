@@ -113,7 +113,7 @@ class DownloadClass {
 
 	public function CountDown($countDown) {
 		if ($countDown <= 0) return;
-		insert_timer($countDown, "Waiting link timelock");
+		insert_timer($countDown, 'Waiting link timelock', '', true);
 	}
 
 	/*
@@ -127,7 +127,7 @@ class DownloadClass {
 
 	public function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5', $sname = 'Enter Captcha', $iname = 'captcha') {
 		echo "\n<form name='captcha' action='{$GLOBALS['PHP_SELF']}' method='POST'>\n";
-		foreach ($inputs as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='$input' />\n";
+		foreach ($inputs as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='" . htmlspecialchars($input, ENT_QUOTES) . "' />\n";
 		echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input id='captcha' type='text' name='$iname' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='$sname' />\n\t</h4>\n\t<script type='text/javascript'>/* <![CDATA[ */\n\t\tfunction check() {\n\t\t\tvar captcha=document.getElementById('captcha').value;\n\t\t\tif (captcha == '') {\n\t\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\t\treturn false;\n\t\t\t} else return true;\n\t\t}\n\t/* ]]> */</script>\n</form>\n";
 		include(TEMPLATE_DIR.'footer.php');
 		exit();
@@ -151,9 +151,9 @@ class DownloadClass {
 		}
 
 		$DParam = GetDefaultParams();
-		if (!empty($link)) $DParam['link'] = urlencode($link);
+		if (!empty($link)) $DParam['link'] = $link;
 		if (!empty($cookie)) $DParam['cookie'] = urlencode($cookie);
-		if (!empty($referer)) $DParam['referer'] = urlencode($referer);
+		if (!empty($referer)) $DParam['referer'] = $referer;
 		return $DParam;
 	}
 
@@ -166,7 +166,7 @@ class DownloadClass {
 	public function JSCountdown($secs, $post = 0, $text='Waiting link timelock', $stop = 1) {
 		echo "<p><center><span id='dl' class='htmlerror'><b>ERROR: Please enable JavaScript. (Countdown)</b></span><br /><span id='dl2'>Please wait</span></center></p>\n";
 		echo "<form action='{$GLOBALS['PHP_SELF']}' name='cdwait' method='POST'>\n";
-		if (!empty($post) && is_array($post)) foreach ($post as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='$input' />\n";
+		if (!empty($post) && is_array($post)) foreach ($post as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='" . htmlspecialchars($input, ENT_QUOTES) . "' />\n";
 		?><script type="text/javascript">/* <![CDATA[ */
 		var c = <?php echo $secs; ?>;var text = "<?php echo $text; ?>";var c2 = 0;var dl = document.getElementById("dl");var a2 = document.getElementById("dl2");fc();fc2();
 		function fc() {
@@ -195,26 +195,32 @@ class DownloadClass {
 		echo("\n<script type='text/javascript'>document.getElementById('mesg').innerHTML = " . ($add ? "document.getElementById('mesg').innerHTML + " : '') . "unescape('" . rawurlencode($mesg) . "');</script>");
 	}
 
-	public function reCAPTCHA($publicKey, $inputs, $sname = 'Download File') {
+	public function reCAPTCHA($publicKey, $inputs, $referer = 0, $sname = 'Download File') {
 		if (empty($publicKey) || preg_match('/[^\w\.\-]/', $publicKey)) html_error('Invalid reCAPTCHA public key.');
 		if (!is_array($inputs)) html_error('Error parsing captcha post data.');
-		// Check for a global recaptcha key
-		$page = $this->GetPage('http://www.google.com/recaptcha/api/challenge?k=' . $publicKey, 0, 0, 'http://fakedomain.tld/fakepath');
-		if (substr($page, 9, 3) != '200') html_error('Invalid or deleted reCAPTCHA public key.');
 
-		if (strpos($page, 'Invalid referer') === false) {
+		$cookie = array('PREF' => 'LD=en');
+		// Check for a global recaptcha key
+		$page = $this->GetPage('http://www.google.com/recaptcha/api/challenge?k=' . $publicKey, $cookie, 0, 'http://fakedomain.tld/fakepath');
+		if (substr($page, 9, 3) != '200') html_error('Invalid or deleted reCAPTCHA public key.');
+		$inputs['recaptcha_public_key'] = $publicKey; // This may be needed later.
+
+		if (strpos($page, 'Invalid referer') === false && strpos($page, 'An internal error occurred') === false) {
 			// Embed captcha
 			echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n\n<center><form name='recaptcha' action='{$GLOBALS['PHP_SELF']}' method='POST'><br />\n";
-			foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='$input' />\n";
+			foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='" . htmlspecialchars($input, ENT_QUOTES) . "' />\n";
 			echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$publicKey'></script><noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$publicKey' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br /><input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n</form></center>\n";
 			include(TEMPLATE_DIR.'footer.php');
 		} else {
 			// Download captcha
-			$page = $this->GetPage('http://www.google.com/recaptcha/api/challenge?k=' . $publicKey);
-			if (!preg_match('@[\{,\s]challenge\s*:\s*[\'\"]([\w\-]+)[\'\"]@', $page, $challenge)) html_error('Error getting reCAPTCHA challenge.');
+			$page = $this->GetPage('http://www.google.com/recaptcha/api/challenge?k=' . $publicKey, $cookie, 0, $referer);
+			if (strpos($page, 'Invalid referer') !== false) html_error('Error getting reCAPTCHA challenge: Bad referer');
+			if (strpos($page, 'An internal error occurred') !== false) html_error('Error getting reCAPTCHA challenge: Possible reCAPTCHA v2 or bad referer');
+
+			if (!preg_match('@[\{,\s]challenge\s*:\s*[\'\"]([\w\.\-]+)[\'\"]@', $page, $challenge)) html_error('Error getting reCAPTCHA challenge.');
 			$inputs['recaptcha_challenge_field'] = $challenge = $challenge[1];
 
-			list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage('http://www.google.com/recaptcha/api/image?c=' . $challenge), 2);
+			list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage('http://www.google.com/recaptcha/api/image?c=' . $challenge, 0, 0, $referer), 2);
 			if (substr($headers, 9, 3) != '200') html_error('Error downloading captcha img.');
 			$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/jpeg');
 
@@ -260,9 +266,52 @@ class DownloadClass {
 		$resp = (empty($resp[1])) ? 'http://api.solvemedia.com'.$resp[0] : $resp[0];
 
 		$page = $this->GetPage($resp, 0, 0, $url);
-		if (!preg_match('@>[\s\t\r\n]*([^<>\r\n]+)[\s\t\r\n]*</textarea>@i', $page, $gibberish)) html_error('[SM] CAPTCHA response not found.');
+		if (!preg_match('@>\s*([^<>\s]+)\s*</textarea>@i', $page, $gibberish)) html_error('[SM] CAPTCHA response not found.');
 
 		return array('adcopy_challenge' => urlencode($gibberish[1]), 'adcopy_response' => 'manual_challenge');
+	}
+
+	public function reCAPTCHAv2($publicKey, $inputs, $referer = 0, $sname = 'Download File') {
+		if (empty($publicKey) || preg_match('/[^\w\.\-]/', $publicKey)) html_error('Invalid reCAPTCHA2 public key.');
+		if (!is_array($inputs)) html_error('[RC2] Error parsing captcha post data.');
+
+		// Check key
+		$page = $this->GetPage('http://www.google.com/recaptcha/api/fallback?k=' . urlencode($publicKey), array('PREF' => 'LD=en'), 0, $referer);
+		if (substr($page, 9, 3) != '200') html_error('Invalid or deleted reCAPTCHA2 public key.');
+		$inputs['recaptcha2_public_key'] = $publicKey; // Required for validateReCaptchav2()
+
+		// Download captcha
+		if (!preg_match('@name="c" value="([\w\.\-]+)\"@', $page, $challenge)) html_error('Error getting reCAPTCHA2 challenge.');
+		$inputs['recaptcha2_challenge_field'] = $challenge = $challenge[1];
+
+		list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage('http://www.google.com/recaptcha/api2/payload?c=' . $challenge . '&k=' . $publicKey), 2);
+		if (substr($headers, 9, 3) != '200') html_error('[RC2] Error downloading captcha img.');
+		$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/jpeg');
+
+		$this->EnterCaptcha("data:$mimetype;base64,".base64_encode($imgBody), $inputs, 20, $sname, 'recaptcha2_response_field');
+
+		exit;
+	}
+
+	public function verifyReCaptchav2($directOutput = false) {
+		if (empty($_POST['recaptcha2_response_field'])) html_error('[RC2] You didn\'t enter the image verification code.');
+		if (empty($_POST['recaptcha2_challenge_field']) || empty($_POST['recaptcha2_public_key']) || preg_match('/[^\w\.\-]/', $_POST['recaptcha2_public_key'])) html_error('Invalid reCaptcha2 data.');
+
+		$post = array();
+		$post['c'] = urlencode($_POST['recaptcha2_challenge_field']);
+		$post['response'] = urlencode($_POST['recaptcha2_response_field']);
+		$link = 'http://www.google.com/recaptcha/api/fallback?k=' . urlencode($_POST['recaptcha2_public_key']);
+
+		$page = $this->GetPage($link, array('PREF' => 'LD=en'), $post, $link);
+
+		is_present($page, 'Sorry, an error has occurred', '[RC2] Corrupted o Invalid reCaptcha2 Data.');
+		is_present($page, 'payload?c=', '[RC2] Wrong CAPTCHA entered.');
+		if (stripos($page, 'Copy this code') === false) html_error('[RC2] Unknown error after sending captcha.');
+
+		if (!preg_match('@>\s*([^<>\s]+)\s*</textarea>@i', $page, $gibberish)) html_error('[RC2] Validated response not found.');
+
+		if ($directOutput) return urlencode($gibberish[1]);
+		else return array('g-recaptcha-response' => urlencode($gibberish[1]));
 	}
 
 }

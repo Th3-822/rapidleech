@@ -77,7 +77,7 @@ function getftpurl($host, $port, $url, $saveToFile = 0) {
 				if (@file_exists($saveToFile) && $options['bw_save']) {
 					// Skip in audl.
 					if (isset($_GET['audl'])) echo '<script type="text/javascript">parent.nextlink();</script>';
-					html_error(lang(99) . ': ' . link_for_file($saveToFile), 0);
+					html_error(lang(99) . ': ' . link_for_file($saveToFile));
 				} elseif (@file_exists($saveToFile)) $saveToFile = dirname($saveToFile) . PATH_SPLITTER . time() . '_' . basename($saveToFile);
 				printf(lang(83), basename($saveToFile), bytesToKbOrMbOrGb($fileSize));
 				echo "<br />";

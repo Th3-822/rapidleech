@@ -52,7 +52,7 @@ class youtube_com extends DownloadClass {
 		}
 
 		if (empty($this->response['title'])) html_error('No video title found! Download halted.');
-		$FileName = str_replace(str_split('\\:*?"<>|=;'."\t\r\n\f"), '_', html_entity_decode(trim($this->response['title']), ENT_QUOTES));
+		$FileName = str_replace(str_split('\\\:*?"<>|=;'."\t\r\n\f"), '_', html_entity_decode(trim($this->response['title']), ENT_QUOTES));
 		if (!empty($_REQUEST['cleanname'])) $FileName = preg_replace('@[^ A-Za-z_\-\d\.,\(\)\[\]\{\}&\!\'\@\%\#]@u', '_', $FileName);
 		$FileName .= " [YT-f$fmt][{$this->vid}]$ext";
 
@@ -107,7 +107,7 @@ class youtube_com extends DownloadClass {
 	}
 
 	private function getFmtMaps() {
-		$this->page = $this->GetPage('https://www.youtube.com/get_video_info?video_id='.$this->vid.'&asv=3&el=detailpage&hl=en_US&s'.'t'.'s'.'='.(!empty($this->sts) ? urlencode($this->sts) : 0), $this->cookie);
+		$this->page = $this->GetPage('https://www.youtube.com/get_video_info?video_id='.$this->vid.'&asv=3&el=ve'.'vo&hl=en_US&s'.'t'.'s'.'='.(!empty($this->sts) ? urlencode($this->sts) : 0), $this->cookie);
 		$this->response = array_map('urldecode', $this->FormToArr(substr($this->page, strpos($this->page, "\r\n\r\n") + 4)));
 		if (!empty($this->response['reason'])) html_error('['.htmlspecialchars($this->response['errorcode']).'] '.htmlspecialchars($this->response['reason']));
 
@@ -268,7 +268,7 @@ class youtube_com extends DownloadClass {
 		echo "\n<br /><br /><h3 style='text-align: center;'>".lang(216).".</h4>";
 		echo "\n<center><form name='YT_QS' action='{$GLOBALS['PHP_SELF']}' method='POST'>\n";
 		echo "<input type='hidden' name='yt_QS' value='on' />\n";
-		echo '<label><input type="checkbox" name="cleanname" checked="checked" /><small>&nbsp;Remove non-supported characters from filename</small></label><br />';
+		echo '<label><input type="checkbox" name="cleanname" checked="checked" value="1" /><small>&nbsp;Remove non-supported characters from filename</small></label><br />';
 		echo "<select name='yt_fmt' id='QS_fmt'>\n";
 		foreach ($this->fmturlmaps as $fmt => $url) if (in_array($fmt, $this->fmts) && ($I = str_split($vinfo[$fmt]))) echo '<option '.($fmt == 18 ? "selected='selected' " : '')."value='$fmt'>[$fmt] Video: {$VC[$I[1]]} {$VR[$I[0]]}p | Audio: {$AC[$I[2]]} ~{$AB[$I[3]]} kbps".(!empty($sizes[$fmt]) ? ' ('.$sizes[$fmt].')' : '')."</option>\n";
 		echo "</select>\n";
@@ -302,5 +302,7 @@ class youtube_com extends DownloadClass {
 // [16-3-2014]  Added functions for decoding ciphered signatures. - Th3-822
 // [28-7-2014]  Fixed signature decoding functions. - Th3-822
 // [17-12-2014]  Forced https on all the requests for avoid redirect errors. - Th3-822
+// [14-1-2015]  Fixed Age Restrictions. (Please, do not annoy my inbox when a plugin fails, go to the forum) - Th3-822
+// [21-1-2015]  Fixed backslash in filename when cleanname is off. - Th3-822
 
 ?>

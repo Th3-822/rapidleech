@@ -8,20 +8,20 @@ class mega_co_nz extends DownloadClass {
 	private $seqno;
 	public function Download($link) {
 		if (!extension_loaded('mcrypt') || !in_array('rijndael-128', mcrypt_list_algorithms(), true)) html_error("Mcrypt module isn't installed or it doesn't have support for the needed encryption.");
-		$this->RLCheck();
+
 		$this->seqno = mt_rand();
 		$this->changeMesg(lang(300).'<br />Mega.co.nz plugin by Th3-822'); // Please, do not remove or change this line contents. - Th3-822
 
 		$fragment = parse_url($link, PHP_URL_FRAGMENT);
 		if (preg_match('@^F!([^!]{8})!([\w\-\,]{22})@i', $fragment, $fid)) return $this->Folder($fid[1], $fid[2]);
-		if (!preg_match('@^(T8)?!([^!]{8})!([\w\-\,]{43})(?:!([^!]{8})!)?@i', $fragment, $fid)) html_error('FileID or Key not found at link.');
+		if (!preg_match('@^(T8|N)?!([^!]{8})!([\w\-\,]{43})(?:!([^!]{8})!)?@i', $fragment, $fid)) html_error('FileID or Key not found at link.');
 
 		$reply = $this->apiReq(array('a' => 'g', 'g' => '1', (empty($fid[1]) ? 'p' : 'n') => $fid[2], 'ssl'=> '0'), (!empty($fid[1]) && !empty($fid[4]) ? $fid[4] : ''));
 		$this->CheckErr($reply[0]);
 		if (!empty($reply[0]['e'])) $this->CheckErr($reply[0]['e']);
 
 		$key = $this->base64_to_a32($fid[3]);
-		$iv = array_merge(array_slice($key, 4, 2), array(0, 0));
+		//$iv = array_merge(array_slice($key, 4, 2), array(0, 0));
 		$key = array($key[0] ^ $key[4], $key[1] ^ $key[5], $key[2] ^ $key[6], $key[3] ^ $key[7]);
 		$attr = $this->dec_attr($this->base64url_decode($reply[0]['at']), $key);
 		if (empty($attr)) html_error((!empty($fid[1]) ? 'Folder Error: ' : '').'File\'s key isn\'t correct.');
@@ -49,10 +49,6 @@ class mega_co_nz extends DownloadClass {
 			}
 			html_error("[Error: $code] $msg.");
 		}
-	}
-
-	private function RLCheck() {
-		if (!function_exists('cURL') || (!function_exists('host_matchs') && !function_exists('host_matches')) || !function_exists('GetDefaultParams')) html_error("Your rapidleech version is outdated and it doesn't support this plugin.");
 	}
 
 	private function apiReq($atrr, $node='') {
@@ -139,24 +135,27 @@ class mega_co_nz extends DownloadClass {
 	public function CheckBack($header) {
 		$statuscode = intval(substr($header, 9, 3));
 		if ($statuscode != 200) switch ($statuscode) {
-			case 509: html_error('[Mega] Transfer quota exeeded.');
-			case 503: html_error('Too many connections for this download.');
-			case 403: html_error('Link used/expired.');
-			case 404: html_error('Link expired.');
-			default : html_error('[HTTP] '.trim(substr($header, 9, strpos($header, "\n") - 8)));
+			case 509: html_error('[Mega_co_nz] Transfer quota exeeded.');
+			case 503: html_error('[Mega_co_nz] Too many connections for this download.');
+			case 403: html_error('[Mega_co_nz] Link used/expired.');
+			case 404: html_error('[Mega_co_nz] Link expired.');
+			default : html_error('[Mega_co_nz][HTTP] '.trim(substr($header, 9, strpos($header, "\n") - 8)));
 		}
 
-		global $fp;
+		global $fp, $sFilters;
 		if (empty($fp) || !is_resource($fp)) html_error("Error: Your rapidleech version is outdated and it doesn't support this plugin.");
 		if (!empty($_GET['T8']['fkey'])) $key = $this->base64_to_a32(urldecode($_GET['T8']['fkey']));
 		elseif (preg_match('@^(T8)?!([^!]{8})!([\w\-\,]{43})@i', parse_url($_GET['referer'], PHP_URL_FRAGMENT), $dat)) $key = $this->base64_to_a32($dat[2]);
 		else html_error("[CB] File's key not found.");
-
 		$iv = array_merge(array_slice($key, 4, 2), array(0, 0));
 		$key = array($key[0] ^ $key[4], $key[1] ^ $key[5], $key[2] ^ $key[6], $key[3] ^ $key[7]);
 		$opts = array('iv' => $this->a32_to_str($iv), 'key' => $this->a32_to_str($key), 'mode' => 'ctr');
-		stream_filter_register('MegaDlDecrypt', 'Th3822_MegaDlDecrypt');
-		stream_filter_prepend($fp, 'MegaDlDecrypt', STREAM_FILTER_READ, $opts);
+
+		if (!stream_filter_register('MegaDlDecrypt', 'Th3822_MegaDlDecrypt') && !in_array('MegaDlDecrypt', stream_get_filters())) html_error('Error: Cannot register "MegaDlDecrypt" filter.');
+
+		if (!isset($sFilters) || !is_array($sFilters)) $sFilters = array();
+		if (empty($sFilters['MegaDlDecrypt'])) $sFilters['MegaDlDecrypt'] = stream_filter_prepend($fp, 'MegaDlDecrypt', STREAM_FILTER_READ, $opts);
+		if (!$sFilters['MegaDlDecrypt']) html_error('Error: Unknown error while initializing MegaDlDecrypt filter, cannot continue download.');
 	}
 
 	private function FSort($a, $b) {
@@ -185,7 +184,7 @@ class mega_co_nz extends DownloadClass {
 		uasort($dfiles, array($this, 'FSort'));
 
 		$files = array();
-		foreach ($dfiles as $file => $key) $files[] = "https://mega.co.nz/#T8!$file!{$key['k']}!$fnid!Rapidleech";
+		foreach ($dfiles as $file => $key) $files[] = "https://mega.co.nz/#N!$file!{$key['k']}!$fnid!Rapidleech";
 		$this->moveToAutoDownloader($files);
 	}
 }
@@ -225,5 +224,6 @@ class Th3822_MegaDlDecrypt extends php_user_filter {
 //[25-1-2014] Added sub-folders support. - Th3-822
 //[30-1-2014] Fixed download from folders. - Th3-822
 //[09-2-2014] Fixed issues at link parsing. - Th3-822
+//[29-1-2015] Replaced 'T8' prefix at folder->file links for support on third-party downloaders using links with 'N' as prefix. - Th3-822
 
 ?>
