@@ -145,7 +145,7 @@ class mega_co_nz extends DownloadClass {
 		global $fp, $sFilters;
 		if (empty($fp) || !is_resource($fp)) html_error("Error: Your rapidleech version is outdated and it doesn't support this plugin.");
 		if (!empty($_GET['T8']['fkey'])) $key = $this->base64_to_a32(urldecode($_GET['T8']['fkey']));
-		elseif (preg_match('@^(T8)?!([^!]{8})!([\w\-\,]{43})@i', parse_url($_GET['referer'], PHP_URL_FRAGMENT), $dat)) $key = $this->base64_to_a32($dat[2]);
+		elseif (preg_match('@^(T8|N)?!([^!]{8})!([\w\-\,]{43})@i', parse_url($_GET['referer'], PHP_URL_FRAGMENT), $dat)) $key = $this->base64_to_a32($dat[2]);
 		else html_error("[CB] File's key not found.");
 		$iv = array_merge(array_slice($key, 4, 2), array(0, 0));
 		$key = array($key[0] ^ $key[4], $key[1] ^ $key[5], $key[2] ^ $key[6], $key[3] ^ $key[7]);

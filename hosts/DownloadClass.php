@@ -229,7 +229,7 @@ class DownloadClass {
 		exit;
 	}
 
-	public function captchaSolveMedia($skey, $data, $referer = 0, $sname = 'Download File') {
+	public function SolveMedia($skey, $data, $referer = 0, $sname = 'Download File') {
 		if (!is_array($data)) html_error('Post needs to be sended in a array.');
 		if (empty($skey) || preg_match('@[^\w\-\.]@', $skey)) html_error('Invalid value for $skey');
 		$page = $this->GetPage("http://api.solvemedia.com/papi/challenge.noscript?k=$skey", 0, 0, $referer);
