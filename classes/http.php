@@ -379,8 +379,15 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		CURLOPT_FOLLOWLOCATION => 0, CURLOPT_FAILONERROR => 0,
 		CURLOPT_FORBID_REUSE => 0, CURLOPT_FRESH_CONNECT => 0,
 		CURLINFO_HEADER_OUT => 1, CURLOPT_URL => $link,
-		CURLOPT_SSLVERSION => (defined('CURL_SSLVERSION_TLSv1') ? CURL_SSLVERSION_TLSv1 : 1), CURLOPT_SSL_CIPHER_LIST => 'TLSv1',
+		CURLOPT_SSLVERSION => (defined('CURL_SSLVERSION_TLSv1') ? CURL_SSLVERSION_TLSv1 : 1),
 		CURLOPT_USERAGENT => rl_UserAgent);
+
+	// Fixes "Unknown cipher in list: TLSv1" on cURL with NSS
+	$cV = curl_version();
+	if (!empty($cV['ssl_version']) && strtoupper(substr($cV['ssl_version'], 0, 4)) != 'NSS/') $opt[CURLOPT_SSL_CIPHER_LIST] = 'TLSv1';
+
+	// Uncomment next line if do you have IPv6 problems
+	// $opt[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
 
 	$opt[CURLOPT_REFERER] = !empty($referer) ? $referer : false;
 	$opt[CURLOPT_COOKIE] = !empty($cookie) ? (is_array($cookie) ? CookiesToStr($cookie) : trim($cookie)) : false;

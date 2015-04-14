@@ -111,9 +111,9 @@ class youtube_com extends DownloadClass {
 		$this->response = array_map('urldecode', $this->FormToArr(substr($this->page, strpos($this->page, "\r\n\r\n") + 4)));
 		if (!empty($this->response['reason'])) html_error('['.htmlspecialchars($this->response['errorcode']).'] '.htmlspecialchars($this->response['reason']));
 
-		if (isset($_REQUEST['step']) || preg_match('@Location: https?://(www\.)?youtube\.com/das_captcha@i', $this->page)) $this->captcha();
+		if (isset($_REQUEST['step']) || substr($this->page, 9, 3) == '402' || preg_match('@Location: https?://(www\.)?youtube\.com/das_captcha@i', $this->page)) $this->captcha();
 
-		if (empty($this->response['url_encoded_fmt_stream_map'])) html_error("[{$this->sts}] Video links not found.");
+		if (empty($this->response['url_encoded_fmt_stream_map'])) html_error('['. (!empty($this->sts) ? htmlspecialchars($this->sts) : 0) . '] Video links not found.');
 		$this->fmtmaps = explode(',', $this->response['url_encoded_fmt_stream_map']);
 	}
 
@@ -304,5 +304,6 @@ class youtube_com extends DownloadClass {
 // [17-12-2014]  Forced https on all the requests for avoid redirect errors. - Th3-822
 // [14-1-2015]  Fixed Age Restrictions. (Please, do not annoy my inbox when a plugin fails, go to the forum) - Th3-822
 // [21-1-2015]  Fixed backslash in filename when cleanname is off. - Th3-822
+// [13-4-2015]  Fixed captcha detection. - Th3-822
 
 ?>
