@@ -219,6 +219,7 @@ class keep2share_cc extends DownloadClass {
 			}
 
 			is_present($page, 'Incorrect username or password', 'Login Failed: Email/Password incorrect.');
+			is_present($page, 'You logged in from different country IP', 'Login Failed: Your account was locked for security reasons, to unlock your account check your email.');
 			if (empty($this->cookie['c903aeaf0da94d1b365099298d28f38f'])) html_error('Login Cookie Not Found.');
 
 			$page = $this->GetPage($purl, $this->cookie, 0, $purl.'login.html');
@@ -247,6 +248,8 @@ class keep2share_cc extends DownloadClass {
 
 		is_present($page, 'The verification code is incorrect.');
 		is_present($page, 'Incorrect username or password', 'Login Failed: Email/Password incorrect.');
+		is_present($page, 'You logged in from different country IP', 'Login Failed: Your account was locked for security reasons, to unlock your account check your email');
+		if (empty($this->cookie['c903aeaf0da94d1b365099298d28f38f'])) html_error('Login Cookie Not Found');
 
 		$page = $this->GetPage($purl, $this->cookie, 0, $purl.'login.html');
 		is_notpresent($page, '/auth/logout.html">Logout', 'Login Error.');

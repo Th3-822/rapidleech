@@ -10,7 +10,7 @@ class datafilehost_com extends DownloadClass {
         $page = $this->GetPage($link);
         is_present($page, cut_str($page, '<div style="text-align:center">', '<br>'));
         $cookie = GetCookiesArr($page);
-        if (!preg_match('/https?:\/\/www\.datafilehost\.com\/get.php\?file=[^\r\n\'"]+/', $page, $dl)) html_error("Error[DownloadLink] not found!");
+        if (!preg_match('/https?:\/\/(?:www\.)?datafilehost\.com\/get\.php\?file=[^\'\"\t<>\r\n\\\]+/i', $page, $dl)) html_error("Error[DownloadLink] not found!");
         $dlink = trim($dl[0]);
         $filename = basename(parse_url($dlink, PHP_URL_PATH));
         $this->RedirectDownload($dlink, $filename, $cookie, 0, $link);

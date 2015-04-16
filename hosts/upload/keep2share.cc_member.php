@@ -144,6 +144,7 @@ function Login($user, $pass) {
 		}
 
 		is_present($page, 'Incorrect username or password', 'Login Failed: Email/Password incorrect.');
+		is_present($page, 'You logged in from different country IP', 'Login Failed: Your account was locked for security reasons, to unlock your account check your email.');
 		if (empty($cookie['c903aeaf0da94d1b365099298d28f38f'])) html_error('Login Cookie Not Found.');
 		if (empty($cookie['sessid'])) html_error('Session Cookie Not Found.');
 
@@ -176,6 +177,7 @@ function Login($user, $pass) {
 
 	is_present($page, 'The verification code is incorrect.');
 	is_present($page, 'Incorrect username or password', 'Login Failed: Email/Password incorrect');
+	is_present($page, 'You logged in from different country IP', 'Login Failed: Your account was locked for security reasons, to unlock your account check your email');
 	if (empty($cookie['c903aeaf0da94d1b365099298d28f38f'])) html_error('Login Cookie Not Found');
 	if (empty($cookie['sessid'])) html_error('Session Cookie Not Found');
 
