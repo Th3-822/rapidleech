@@ -1,111 +1,37 @@
 <?php
-// Default Account Info =================
-$uptobox_user = ''; //  Set you username
-$uptobox_pass = ''; //  Set your password
-//=======================================
 
-			$not_done = true;
-			$continue_up = false;
-			if ($uptobox_user && $uptobox_pass) {
-				$_REQUEST['upt_user'] = $uptobox_user;
-				$_REQUEST['upt_pass'] = $uptobox_pass;
-				$_REQUEST['action'] = "FORM";
-				echo "<b><center>Automatic Login Uptobox.com</center></b>\n";
-			}
-			if ($_REQUEST['action'] == "FORM"){
-				$continue_up = true;
-			}else {
-?>
-					<script>document.getElementById('info').style.display='none';</script>
-                    <div id='info' width='100%' align='center' style="font-weight:bold; font-size:16px">LOGIN</div> 
-    <table border=0 style="width:270px;" cellspacing=0 align=center>
-        <form method="post">
-        <input type='hidden' name='action' value='FORM' />
-            <tr><td nowrap>&nbsp;User*<td>&nbsp;<input type='text' name='upt_user' value='' style="width:160px;" />&nbsp;</tr>
-            <tr><td nowrap>&nbsp;Password*<td>&nbsp;<input type='password' name='upt_pass' value='' style="width:160px;" />&nbsp;</tr>
-            <tr><td colspan=2 align=center><input type='submit' value='Upload' /></tr>
-            <tr><td colspan=2 align=center><small>*You can set it as default in <b><?php echo $page_upload["uptobox.com_member"]; ?></b></small></tr>
-        </form>
-    </table>
-<?php
-			}
-			if ($continue_up) {
-				$not_done = false;
-?>
-    <table width=600 align=center>
-    </td></tr>
-    <tr><td align=center>
-    		<script>document.getElementById('info').style.display='none';</script>
-            <div id='info' width='100%' align='center'>Login to Uptobox.com</div>
-        <?php
-        if (!empty($_REQUEST['upt_user']) && !empty($_REQUEST['upt_pass'])){
-        $post["op"] = "login";
-        $post["redirect"] = "http://uptobox.com/";
-		$post["login"] = trim($_REQUEST['upt_user']);
-        $post["password"] = trim($_REQUEST['upt_pass']);
-		$page = geturl("uptobox.com", 80, "/", "https://login.uptobox.com/", 0, $post, 0, $_GET["proxy"]);
-		is_page($page);
-		is_present($page, "Incorrect Login or Password", "Incorrect Login or Password");
-		$cookie = GetCookies($page);
-		}else{
-		html_error ('Error, user and/or password is empty, please go back and try again!');
-	}
-        ?> 
-<script>document.getElementById('info').style.display='none';</script>
-<div id=info width=100% align=center>Retrive upload ID</div> 
-<?php
-			$url = parse_url('http://uptobox.com/');
-			$page = geturl($url["host"], $url["port"] ? $url["port"] : 80, $url["path"] . ($url["query"] ? "?" . $url["query"] : ""), "http://uptobox.com/", $cookie, 0, 0, $_GET["proxy"], $pauth);
-			if(!preg_match('#action="([^"]+)"#', $page, $up)){
-				html_error('Cannot get url action upload.', 0);
-			}
-			if(!preg_match("#var[\r|\n|\s]+utype='([^']+)'#", $page, $utype)){
-				html_error('Cannot get user information.', 0);
-			}
-			if(!preg_match('#name="sess_id"[\r|\n|\s]+value="([^"]+)"#', $page, $sid)){
-				html_error('Cannot get session id.', 0);
-			}
-			if(!preg_match('#name="srv_tmp_url"[\r|\n|\s]+value="([^"]+)"#', $page, $tmp)){
-				html_error('Cannot get tmp url.', 0);
-			}
-			$uid = uid();
-			$url = parse_url($up[1].$uid.'&js_on=1&utype='.$utype[1].'&upload_type=file');
-			$post["upload_type"] = "file";
-            $post["sess_id"] = $sid[1];
-            $post["srv_tmp_url"] = $tmp[1];
-			$post["file_0_descr"] = '';
-			$post['tos'] = '1';
-			$upfiles = upfile($url["host"], $url["port"] ? $url["port"] : 80, $url["path"] . ($url["query"] ? "?" . $url["query"] : ""), "http://uptobox.com/", $cookie, $post, $lfile, $lname, "file_0");
-?>
+if (!defined('RAPIDLEECH')) exit;
+$_T8 = array('v' => 4); // Version of this config file. (Do Not Edit)
 
-<script>document.getElementById('progressblock').style.display='none';</script>
-<?php
-is_page($upfiles);
-			preg_match_all("#>([^><]+)<#", $upfiles, $dl);
-			if($dl[1][1] != 'OK')
-				html_error('Erro in upload');
-			$post['fn'] = $dl[1][0];
-			$post['st'] = 'OK';
-			$post['op'] = 'upload_result';
-			$page = geturl("uptobox.com", 80, "/", 'http://uptobox.com/', $cookie, $post, 0, $_GET["proxy"]);
-				if(!empty($dl[1][0]))
-					$download_link = 'http://uptobox.com/'.$dl[1][0].'/'.$lname;
-				else
-					html_error ("Didn't find download link!");
-				if(preg_match("#killcode=([^=<]+)<#", $page, $del))
-					$delete_link = $download_link.'?killcode='.$del[1];
-				else
-					html_error ("Didn't find delete link!");
-	}
-function uid(){
-				$nu = "0123456789";
-				for($i=0; $i < 12; $i++){
-				$rand .= $nu{mt_rand() % strlen($nu)};
-				}
-				return $rand;
-				//function by SD-88 05/02/2012
-	}
-/**
-written by SD-88 06.04.2012
-**/   
+/* # Plugin's Settings # */
+$_T8['domain'] = 'uptobox.com'; // May require the www. (Check first if the site adds the www.).
+$_T8['anonUploadDisable'] = true; // Disallow non-registered users upload. (XFS Pro)
+$_T8['anonUploadLimit'] = 0; // File-size limit for non-registered users (MB) | 0 = Plugin's limit | (XFS Pro)
+
+// Advanced Settings (Don't edit it unless you know what are you doing)
+	$_T8['port'] = 80; // Server's port, default: 80 | 443 = https.
+	$_T8['xfsFree'] = false; // Change to true if the host is using XFS free.
+	$_T8['path'] = '/'; // URL path to XFS script, default: '/'
+	$_T8['sslLogin'] = false; // Force https on login.
+	$_T8['opUploadName'] = 'upload'; // Custom ?op=value for checking upload page, default: 'upload'
+	$_T8['flashUpload'] = false; // Forces the use of flash upload method... Also filename for .cgi if it's a non empty string. (XFS Pro)
+	$_T8['fw_sendLogin'] = 'SendLogin'; // Callable function
+
+$acc_key_name = str_ireplace(array('www.', '.'), array('', '_'), $_T8['domain']); // (Do Not Edit)
+
+/* # Account Info # */
+$upload_acc[$acc_key_name]['user'] = ''; //Set your login
+$upload_acc[$acc_key_name]['pass'] = ''; //Set your password
+
+function SendLogin($post) {
+	global $_T8, $cookie, $pauth;
+	$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'].'?op=login', 'https://login.uptobox.com/', $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);
+	return $page;
+}
+
+if (!file_exists(HOST_DIR . 'upload/GenericXFSHost.inc.php')) html_error('Cannot load "'.htmlentities(HOST_DIR).'upload/GenericXFSHost.inc.php" (File doesn\'t exists), please install lastest version from: http://rapidleech.com/forum/viewtopic.php?f=17&t=80 or http://pastebin.com/E0z7qMU1 ');
+require(HOST_DIR . 'upload/GenericXFSHost.inc.php');
+
+// Written by Th3-822 - Last Update: [15-5-2015]
+
 ?>

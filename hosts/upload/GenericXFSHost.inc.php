@@ -9,7 +9,7 @@ if (!isset($_T8) || !is_array($_T8) || empty($_T8['domain']) || $_T8['domain'] =
 	if (strtolower(basename(__FILE__)) == strtolower($page_upload[$_REQUEST['uploaded']])) html_error('This plugin can\'t be called directly.');
 	html_error('Error: Called from non configured plugin "' . htmlentities($page_upload[$_REQUEST['uploaded']]) . '".');
 }
-if ($_T8['v'] > 3) html_error('Error: '.basename(__FILE__).' is outdated, please install last version from: http://rapidleech.com/forum/viewtopic.php?f=17&t=80 or http://pastebin.com/E0z7qMU1 ');
+if ($_T8['v'] > 4) html_error('Error: '.basename(__FILE__).' is outdated, please install last version from: http://rapidleech.com/forum/viewtopic.php?f=17&t=80 or http://pastebin.com/E0z7qMU1 ');
 
 /* # Default Settings # */
 $default = array();
@@ -60,7 +60,9 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 		$post['login'] = urlencode($_REQUEST['up_login']);
 		$post['password'] = urlencode($_REQUEST['up_pass']);
 
-		$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'].'?op=login', $referer, $cookie, array_map('urlencode', $post), 0, $_GET['proxy'], $pauth, 0, ($_T8['sslLogin'] ? 'https' : $scheme));is_page($page);
+		if (empty($_T8['fw_sendLogin']) || !is_callable($_T8['fw_sendLogin'])) {
+			$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'].'?op=login', $referer, $cookie, $post, 0, $_GET['proxy'], $pauth, 0, ($_T8['sslLogin'] ? 'https' : $scheme));is_page($page);
+		} else $page = call_user_func($_T8['fw_sendLogin'], $post);
 		$header = substr($page, 0, strpos($page, "\r\n\r\n"));
 		if (stripos($header, "\nLocation: ") !== false && preg_match('@\nLocation: (https?://[^\r\n]+)@i', $header, $redir) && 'www.' . strtolower($_T8['domain']) == strtolower(parse_url($redir[1], PHP_URL_HOST))) html_error("Please set \$_T8['domain'] to 'www.{$_T8['domain']}'.");
 		if (preg_match('@Incorrect ((Username)|(Login)) or Password@i', $page)) html_error('Login failed: User/Password incorrect.');
@@ -92,6 +94,7 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 	if (!preg_match('@action=["\']((https?://[^/"\']+)?/(?:[^\?"\'/]+/)*[\w\-]+\.cgi)\?upload_id=@i', $page, $up) && (empty($_T8['flashUpload']) || !preg_match('@[\'"]?uploader[\'"]?\s*:\s*[\'"]((https?://[^/"\']+)?/(?:[^\?"\'/]+/)*'.preg_quote((is_string($_T8['flashUpload']) ? $_T8['flashUpload'] :'up_flash.cgi'), '@').')[\'"]@i', $page, $up))) {
 		is_present($page, 'We\'re sorry, there are no servers available for upload at the moment.', 'Site isn\'t accepting uploads.');
 		is_present($page, 'Uploads are disabled for your country:', 'Site isn\'t accepting uploads from your server\'s country.');
+		is_present($page, 'Uploads are disabled for your user type', 'Uploads are disabled for your account type.');
 		if (!$login) {
 			if (stripos($header, "\nLocation: ") !== false) is_present(cut_str($header, "\nLocation: ", "\n"), '?op=login', 'Please set '.($_T8['xfsFree'] ? '$_T8[\'xfsFree\'] to false and ' : '').'$_T8[\'anonUploadDisable\'] to true.');
 			is_present($page, '>Register on site to be able to upload files<', 'Please set '.($_T8['xfsFree'] ? '$_T8[\'xfsFree\'] to false and ' : '').'$_T8[\'anonUploadDisable\'] to true.');
@@ -146,7 +149,7 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 
 	$url = parse_url($up_url);
 	if (!empty($_T8['flashUpload'])) $url['path'] = substr($url['path'], 0, strrpos($url['path'], '/') + 1).(is_string($_T8['flashUpload']) ? $_T8['flashUpload'] : 'up_flash.cgi');
-	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), 0, $cookie, $post, $lfile, $lname, 
+	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), 0, $cookie, $post, $lfile, $lname,
 	(empty($_T8['flashUpload']) ? 'file' : 'Filedata'), '', $_GET['proxy'], $pauth, 0, $url['scheme']);
 
 	// Upload Finished

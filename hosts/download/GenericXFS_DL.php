@@ -11,8 +11,8 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class GenericXFS_DL extends DownloadClass {
-	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $embedDL = false, $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\'\"\t<>\r\n\\\]+@i';
-	private $classVer = 4;
+	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $embedDL = false, $reverseForms = true, $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\'\"\t<>\r\n\\\]+@i';
+	private $classVer = 5;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -58,13 +58,13 @@ class GenericXFS_DL extends DownloadClass {
 		return $this->Login();
 	}
 
-	protected function FindPost($reverse = true) {
+	protected function FindPost($formOp = 'download[1-3]') {
 		//if (!preg_match_all('@<form(?:[\s\t][^\>]*)?\>(?:[^<]+(?!\<form)<[^<]+)*</form>@i', $this->page, $forms)) return false;
-		if (!preg_match_all('@(?><form(?:[\s\t][^\>]*)?\>)(?>.*?</form>)@is', $this->page, $forms)) return false;
-		$forms = ($reverse ? array_reverse($forms[0]) : $forms[0]); // In some hosts the freedl form is before the "premium" form so $reverse must be on false on those hosts.
+		if (!preg_match_all('@(?><form(?:\s[^\>]*)?\>)(?>.*?</form>)@is', $this->page, $forms)) return false;
+		$forms = ($this->reverseForms ? array_reverse($forms[0]) : $forms[0]); // In some hosts the freedl form is before the "premium" form so $this->reverseForms must be on false on those hosts.
 		$found = false;
 		foreach ($forms as $form) {
-			if (preg_match('@<input\s*[^>]*\sname="op"[^>]*\svalue="download[1-3]"@i', $form)) {
+			if (preg_match('@<input\s*[^>]*\sname="op"[^>]*\svalue="' . $formOp . '"@i', $form)) {
 				$found = true;
 				break;
 			}
@@ -148,10 +148,9 @@ class GenericXFS_DL extends DownloadClass {
 					$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/jpg');
 					return $this->EnterCaptcha("data:$mimetype;base64,".base64_encode($imgBody), $data);
 				case 2:
-					$_POST['T8gXFS'] = $this->post;
-					$_POST['captcha'] = $captcha['key'];
-					$_POST['step'] = $step;
-					$_POST['captcha_type'] = 2;
+					$this->captcha = 2;
+					$this->post['code'] = $captcha['key'];
+					// postCaptcha won't be needed on this case.
 					return true;
 				case 3: return $this->reCAPTCHA($captcha['key'], $data);
 				case 4: return $this->SolveMedia($captcha['key'], $data);
@@ -174,11 +173,6 @@ class GenericXFS_DL extends DownloadClass {
 			case '1': // Image (gd) Captcha
 				$this->captcha = 1;
 				if (empty($_POST['captcha'])) html_error('[1] You didn\'t enter the image verification code.');
-				$post['code'] = urlencode($_POST['captcha']);
-				break;
-			case '2': // Decoded Text Captcha
-				$this->captcha = 2;
-				if (empty($_POST['captcha'])) html_error('[2] You didn\'t enter the image verification code.');
 				$post['code'] = urlencode($_POST['captcha']);
 				break;
 			case '3': // Old reCAPTCHA
@@ -259,6 +253,7 @@ class GenericXFS_DL extends DownloadClass {
 				html_error('[PremiumDL] Non aceptable form found.');
 			}
 			if (!isset($this->post['method_premium']) || $this->post['method_premium'] === '') $this->post['method_premium'] = 1;
+			sleep(1); // This should avoid errors at massive usage.
 			$this->page = $this->GetPage($this->link, $this->cookie, $this->post);
 			if (($pos = stripos($this->page, 'You have reached the download')) !== false && preg_match('@You have reached the download[- ]limit(?: of|:) \d+ [TGMK]b for(?: the)? last \d+ days?@i', substr($this->page, $pos), $err)) html_error('Error: '.$err[0]);
 			if (!$this->testDL()) html_error('Error: Download-link not found.');

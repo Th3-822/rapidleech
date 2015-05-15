@@ -38,9 +38,6 @@ while (false !== ($entry = $d->read())) {
 				$host['filerio.com'] = $host['filerio.in'];
 				$host['filekeen.com'] = $host['filerio.in'];
 				break;
-			case 'firedrive.com':
-				$host['putlocker.com'] = $host['firedrive.com'];
-				break;
 			case 'freakshare.com':
 				$host['freakshare.net'] = $host['freakshare.com'];
 				break;
