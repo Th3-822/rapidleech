@@ -27,7 +27,7 @@ if (is_file(CONFIG_DIR.'config.php')) {
 // Avoid setup page to be cached
 header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
 header('Last-Modified: ' . gmdate ("D, d M Y H:i:s") . 'GMT');
-header('Cache-Control: no-cache, must-revalidate');
+header('Cache-Control: max-age=0, no-store, no-cache, must-revalidate, proxy-revalidate, post-check=0, pre-check=0');
 header('Pragma: no-cache');
 
 define('TEMPLATE_DIR', 'templates/plugmod/');

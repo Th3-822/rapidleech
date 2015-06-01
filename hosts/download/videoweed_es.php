@@ -11,7 +11,7 @@ class videoweed_es extends DownloadClass {
 		is_present($page, "This file no longer exists", 'Video not found or it was deleted.');
 		is_present($page, "The file is being transfered", 'Video is temporarily unavailable.');
 
-		if (!preg_match('@name="title" content="([^"]+)"@i', $page, $fname)) html_error('Error: Video title not found.');
+		if (!preg_match('@<h1 class="text_shadow">\s*([^"<>]+)\s*</h1>@i', $page, $fname)) html_error('Error: Video title not found.');
 		if (!preg_match('@flashvars.domain="([^"]+)";\s+flashvars.file="([^"]+)";\s+flashvars.filekey="([^"]+)"@', $page, $matches)) html_error('Error: Download link not found.');
     
 		$url = $matches[1] . '/api/player.api.php?user=undefined&codes=1&file=' . $matches[2] . '&pass=undefined&key=' . urlencode($matches[3]);

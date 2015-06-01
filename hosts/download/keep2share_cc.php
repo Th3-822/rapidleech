@@ -44,6 +44,7 @@ class keep2share_cc extends DownloadClass {
 
 	private function FreeDL() {
 		if (empty($_POST['step']) || !in_array($_POST['step'], array('1', '2'))) {
+			is_present($this->page, 'This file is available<br>only for premium members.', 'This file is available only for premium members.');
 			$post = array('yt0' => 'Submit');
 			$post['slow_id'] = cut_str($this->page, 'name="slow_id" value="', '"');
 			if (empty($post['slow_id'])) html_error('FreeDL ID don\'t found.');

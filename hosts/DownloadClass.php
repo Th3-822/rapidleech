@@ -239,6 +239,7 @@ class DownloadClass {
 		if (!preg_match_all('@<input [^/|<|>]*type\s?=\s?\"?hidden\"?[^/<>]*\s?name\s?=\s?\"(\w+)\"[^/<>]*\s?value\s?=\s?\"([^\"<>]+)\"[^/<>]*/?\s*>@i', $page, $forms)) html_error('[SM] CAPTCHA data not found.');
 		$forms = array_combine($forms[1], $forms[2]);
 		foreach ($forms as $n => $v) $data["_smc[$n]"] = urlencode($v);
+		$data['sm_public_key'] = $skey; // Required for verifySolveMedia()
 
 		//Download captcha img.
 		list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage($imgurl), 2);
@@ -249,7 +250,7 @@ class DownloadClass {
 		exit;
 	}
 
-	public function verifySolveMedia($referer = 0) {
+	public function verifySolveMedia($directOutput = false) {
 		if (empty($_POST['adcopy_response'])) html_error('[SM] You didn\'t enter the image verification code.');
 		if (empty($_POST['_smc']) || !is_array($_POST['_smc'])) html_error('[SM] CAPTCHA data invalid.');
 		$post = array();
@@ -257,7 +258,7 @@ class DownloadClass {
 		$post['adcopy_response'] = urlencode($_POST['adcopy_response']);
 
 		$url = 'http://api.solvemedia.com/papi/verify.noscript';
-		$page = $this->GetPage($url, 0, $post, $referer);
+		$page = $this->GetPage($url, 0, $post, 'http://api.solvemedia.com/papi/challenge.noscript?k=' . urlencode($_POST['sm_public_key']));
 
 		if (!preg_match('@(https?://[^/\'\"<>\r\n]+)?/papi/verify\.pass\.noscript\?[^/\'\"<>\r\n]+@i', $page, $resp)) {
 			is_present($page, '/papi/challenge.noscript', '[SM] Wrong CAPTCHA entered.');
@@ -268,7 +269,8 @@ class DownloadClass {
 		$page = $this->GetPage($resp, 0, 0, $url);
 		if (!preg_match('@>\s*([^<>\s]+)\s*</textarea>@i', $page, $gibberish)) html_error('[SM] CAPTCHA response not found.');
 
-		return array('adcopy_challenge' => urlencode($gibberish[1]), 'adcopy_response' => 'manual_challenge');
+		if ($directOutput) return urlencode($gibberish[1]);
+		else return array('adcopy_challenge' => urlencode($gibberish[1]), 'adcopy_response' => 'manual_challenge');
 	}
 
 	public function reCAPTCHAv2($publicKey, $inputs, $referer = 0, $sname = 'Download File') {

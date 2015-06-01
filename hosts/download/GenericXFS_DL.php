@@ -11,8 +11,8 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class GenericXFS_DL extends DownloadClass {
-	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $embedDL = false, $reverseForms = true, $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\'\"\t<>\r\n\\\]+@i';
-	private $classVer = 5;
+	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\'\"\t<>\r\n\\\]+@i';
+	private $classVer = 6;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -25,7 +25,8 @@ class GenericXFS_DL extends DownloadClass {
 		$this->cookie = empty($this->cookie) ? array('lang' => 'english') : array_merge($this->cookie, array('lang' => 'english'));
 		$link = explode('|', str_ireplace('%7C', '|', $link), 2);
 		if (count($link) > 1) $this->lpass = rawurldecode($link[1]);
-		if (!preg_match('@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/\w{12}(?=(?:[/\.]|(?:\.html?))?)@i', $link[0], $url)) html_error('Invalid link?.');
+		if (!preg_match('@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(\w{12})(?=(?:[/\.]|(?:\.html?))?)@i', $link[0], $url)) html_error('Invalid link?.');
+		$this->fid = $url[1];
 		$url = parse_url($url[0]);
 		$url['scheme'] = strtolower($url['scheme']);
 		$url['host'] = strtolower($url['host']);
@@ -40,6 +41,8 @@ class GenericXFS_DL extends DownloadClass {
 		$this->purl = $this->scheme.'://'.$this->host.'/';
 		$this->link = $GLOBALS['Referer'] = rebuild_url($url);
 		unset($url, $link);
+
+		$this->enableDecoders = $this->embedDL || $this->unescaper || $this->customDecoder;
 
 		if (empty($_POST['step']) || empty($_POST['captcha_type'])) {
 			$this->page = $this->GetPage($this->link, $this->cookie);
@@ -91,24 +94,52 @@ class GenericXFS_DL extends DownloadClass {
 		return true;
 	}
 
-	protected function testDL($name = '') {
-		if (preg_match($this->DLregexp, $this->page, $DL)) {
-			if (empty($name)) $name = urldecode(basename(parse_url($DL[0], PHP_URL_PATH)));
-			$this->RedirectDownload($DL[0], $name);
-			return true;
-		} elseif (!empty($this->embedDL) && preg_match('@eval\s*\(\s*function\s*\(p,a,c,k,e,d\)\s*\{[^\}]+\}\s*\(\s*\'([^\r|\n]*)\'\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*\'([^\']+)\'\.split\([\'|\"](.)[\'|\"]\)\)\)@', $page, $js)) {
-			$embed = XFSUnpacker($js[1], $js[2], $js[3], $js[4], $js[5]);
-			if (preg_match($this->DLregexp, $this->page, $DL)) {
-				if (empty($name)) $name = urldecode(basename(parse_url($DL[0], PHP_URL_PATH)));
-				$this->RedirectDownload($DL[0], $name);
-				return true;
+	// Custom page decoder placeholder
+	protected function pageDecoder() {
+		html_error('[GenericXFS_DL] $this->customDecoder is enabled but there is no pageDecoder() function.');
+	}
+
+	protected function runDecoders() {
+		// Packed embedded video decoder
+		if (!empty($this->embedDL) && preg_match_all('@eval\s*\(\s*function\s*\(p,a,c,k,e,d\)\s*\{.*\}\s*\(\s*\'([^\r|\n]*)\'\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*\'([^\']+)\'\.split\([\'|\"](.)[\'|\"]\)(?:,\d,\{\})?\)\)@', $this->page, $js)) {
+			$cnt = count($js[0]);
+			for ($i = 0; $i < count($js[0]); $i++) {
+				$this->page = str_replace($js[0][$i], $this->XFSUnpacker($js[1][$i], $js[2][$i], $js[3][$i], $js[4][$i], $js[5][$i]), $this->page);
 			}
+		}
+		// JS unescape decoder
+		if (!empty($this->unescaper) && preg_match_all('@eval\s*\(unescape\s*\(\s*(\"|\')([%\da-fA-F]+)\1\s*\)\s*\)\s*;?@', $this->page, $js)) {
+			$cnt = count($js[0]);
+			for ($i = 0; $i < count($js[0]); $i++) {
+				$this->page = str_replace($js[0][$i], urldecode($js[2][$i]), $this->page);
+			}
+		}
+		// Custom decoder function
+		if (!empty($this->customDecoder)) $this->pageDecoder();
+	}
+
+	protected function getFileName($url) {
+		$fname = basename(parse_url($url, PHP_URL_PATH));
+		if (!empty($this->post['fname']) && preg_match("@^(?:v(?:ideo)|{$this->fid})?\.(mp4|flv)$@i", $fname, $vExt)) { // Possible video/stream and original filename available.
+			// I always like to add a letter to mark it as a reconverted video stream and remove the original video .ext
+			$fname = preg_replace('@\.(mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpg?v?|vob)$@i', '', basename($this->post['fname'])) . '_S.' . strtolower($vExt[1]);
+		}
+		return $fname;
+	}
+
+	protected function testDL($name = '') {
+		if (!empty($this->enableDecoders)) $this->runDecoders();
+
+		if (preg_match($this->DLregexp, $this->page, $DL)) {
+			if (empty($name)) $name = $this->getFileName($DL[0]);
+			$this->RedirectDownload($DL[0], basename($name));
+			return true;
 		}
 		return false;
 	}
 
-	protected function XFSUnpacker($p,$a,$c,$k,$er) {
-		$k = explode($er, $k);
+	protected function XFSUnpacker($p,$a,$c,$k,$ed) {
+		$k = explode($ed, $k);
 		while ($c--) if($k[$c]) $p = preg_replace('@\b'.base_convert($c, 10, $a).'\b@', $k[$c], $p);
 		return $p;
 	}
@@ -195,8 +226,8 @@ class GenericXFS_DL extends DownloadClass {
 	}
 
 	protected function findCountdown() {
-		if (preg_match('@<span[^>]*>[^<>]+<span\s+id=[\'"][\w\-]+[\'"][^>]*>(\d+)</span>[^<>]*</span>@i', $this->form, $count)) {
-			if ($count[1] > 0) $this->CountDown($count[1]);
+		if (preg_match('@<span[^>]*>(?>.*?<span\s+id=[\'"][\w\-]+[\'"][^>]*>)(\d+)</span>(?>.*?</span>)@sim', $this->page, $count)) {
+			if ($count[1] > 0) $this->CountDown($count[1] + 2);
 			return true;
 		}
 		return false;
@@ -225,21 +256,19 @@ class GenericXFS_DL extends DownloadClass {
 		switch ($this->post['op']) {
 			default: html_error('Unknown form op.');
 			case 'download1':
-				if ($step > 1) html_error('Loop Detected [1]');
-				is_present($this->page, '>Expired session<', 'Error: Expired Download Session. [1]');
-				$this->showCaptcha(1);
-				$this->page = $this->GetPage($this->link, $this->cookie, $this->post);
-				$this->cookie = GetCookiesArr($this->page, $this->cookie);
-				return $this->FreeDL(2);
+				$fstep = 1;
+				break;
 			case 'download2':
-				if ($step > 2) html_error('Loop Detected [2]');
-				is_present($this->page, '>Expired session<', 'Error: Expired Download Session. [2]');
-				$this->findCountdown();
-				$this->showCaptcha(2);
-				$this->page = $this->GetPage($this->link, $this->cookie, $this->post);
-				$this->cookie = GetCookiesArr($this->page, $this->cookie);
-				return $this->FreeDL(3);
+				$fstep = 2;
+				break;
 		}
+		if ($step > $fstep) html_error("Loop Detected [$fstep]");
+		is_present($this->page, '>Expired session<', "Error: Expired Download Session. [$fstep]");
+		$this->findCountdown();
+		$this->showCaptcha($fstep);
+		$this->page = $this->GetPage($this->link, $this->cookie, $this->post);
+		$this->cookie = GetCookiesArr($this->page, $this->cookie);
+		return $this->FreeDL($fstep + 1);
 	}
 
 	protected function PremiumDL() {

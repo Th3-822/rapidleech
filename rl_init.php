@@ -35,12 +35,12 @@ define('DOWNLOAD_DIR', (substr($options['download_dir'], 0, 6) == 'ftp://' ? '' 
 define('TEMPLATE_DIR', 'templates/' . $options['template_used'] . '/');
 define('IMAGE_DIR', TEMPLATE_DIR . 'images/');
 header('X-Frame-Options: SAMEORIGIN');
-if ($options['no_cache']) {
-	header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-	header('Last-Modified: ' . gmdate ("D, d M Y H:i:s") . 'GMT');
-	header('Cache-Control: no-cache, must-revalidate, max-age=0');
-	header('Pragma: no-cache');
-}
+// Avoid Caching
+header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+header('Last-Modified: ' . gmdate ("D, d M Y H:i:s") . 'GMT');
+header('Cache-Control: max-age=0, no-store, no-cache, must-revalidate, proxy-revalidate, post-check=0, pre-check=0');
+header('Pragma: no-cache');
+
 require_once(CLASS_DIR . 'other.php');
 
 

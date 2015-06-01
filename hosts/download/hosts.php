@@ -1,8 +1,8 @@
 <?php
 $host = array();
 $d = dir(HOST_DIR . 'download/');
-$HostnamesToFix = array('cash.file.net' => 'cash-file.net', 'd.h.st' => 'd-h.st', 'ex.load.com' => 'ex-load.com', 'share.now.net' => 'share-now.net','share.online.biz' => 'share-online.biz');
-$HostnamesToIgnore = array('generic.minifilehost', 'GenericXFS_DL', 'vBulletin.plug', 'hosts');
+$HostnamesToFix = array('d.h.st' => 'd-h.st', 'ex.load.com' => 'ex-load.com', 'share.online.biz' => 'share-online.biz');
+$HostnamesToIgnore = array('GenericXFS_DL', 'vBulletin.plug', 'hosts');
 while (false !== ($entry = $d->read())) {
 	if (strtolower(strrchr($entry, '.')) == '.php' && stripos($entry, '.JD') === false) {
 		$hostname = strtolower(substr($entry, 0, -4));
