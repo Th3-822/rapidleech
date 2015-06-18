@@ -101,7 +101,7 @@ class d1fichier_com extends DownloadClass {
 
 		$page = $this->GetPage($purl, $this->cookie, 0, $purl.'login.pl');
 		is_notpresent($page, 'logout.pl">Logout', 'Login Error.');
-		if (stripos($page, '/console/index.pl" class="premium"') === false) {
+		if (stripos($page, 'https://img.1fichier.com/icons/etoile.png') === false) {
 			$this->changeMesg(lang(300).'<br /><b>Account isn\\\'t premium</b><br />Using it as member.');
 			$this->page = $this->GetPage($this->link, $this->cookie);
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
