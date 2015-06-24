@@ -41,7 +41,7 @@ class mega_co_nz extends DownloadClass {
 				case -11: $msg = 'Access violation';break;
 				case -13: $msg = 'Trying to access an incomplete file';break;
 				case -14: $msg = 'A decryption operation failed';break;
-				case -16: $msg = 'User blocked';break;
+				case -16: $msg = 'File not available, uploader\'s account is banned';break;
 				case -17: $msg = 'Request over quota';break;
 				case -18: $msg = 'File temporarily not available, please try again later';break;
 				// Confirmed at page:

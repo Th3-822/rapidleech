@@ -139,7 +139,7 @@ function getmicrotime() {
 }
 
 function html_error($msg) {
-	if (!empty($GLOBALS['throwRLErrors']) || (strtolower(basename($GLOBALS['PHP_SELF'])) == 'audl.php' && isset($_REQUEST['GO']) && $_REQUEST['GO'] == 'GO' && $_REQUEST['server_side'] == 'on' && !empty($GLOBALS['isHost']))) throw new Exception($msg); // throw errors for try and catch usage.
+	if (!empty($GLOBALS['throwRLErrors']) || (strtolower(basename($_SERVER['SCRIPT_NAME'])) == 'audl.php' && isset($_REQUEST['GO']) && $_REQUEST['GO'] == 'GO' && $_REQUEST['server_side'] == 'on' && !empty($GLOBALS['isHost']))) throw new Exception($msg); // throw errors for try and catch usage.
 	else {
 		if (!headers_sent()) include_once(TEMPLATE_DIR.'header.php');
 		echo '<div align="center">';
@@ -357,7 +357,7 @@ function is__writable($path) {
 function link_for_file($filename, $only_link = FALSE, $style = '') {
 	$inCurrDir = strpos(dirname($filename), ROOT_DIR) !== FALSE ? TRUE : FALSE;
 	if ($inCurrDir) {
-		$Path = parse_url($_SERVER ['SCRIPT_NAME']);
+		$Path = parse_url($_SERVER['SCRIPT_NAME']);
 		$Path = substr($Path['path'], 0, strlen($Path['path']) - strlen(strrchr($Path['path'], '/')));
 		$Path = str_replace('\\', '/', $Path.substr(dirname($filename), strlen(ROOT_DIR)));
 	} elseif (dirname($_SERVER ['SCRIPT_NAME'].'safe') != '/') {
@@ -377,11 +377,11 @@ function link_for_file($filename, $only_link = FALSE, $style = '') {
 		$Path = FALSE;
 		if ($only_link) return '';
 	}
-	$basename = htmlspecialchars(basename($filename));
-	$Path = htmlspecialchars($Path).'/'.rawurlencode(basename($filename));
-	if ($only_link) return 'http://'.urldecode($_SERVER['HTTP_HOST']).$Path;
-	elseif ($Path === FALSE) return "<span>$basename</span>";
-	else return '<a href="'.$Path.'"'.($style !== '' ? ' '.$style : '').'>'.$basename.'</a>';
+	$basename = basename($filename);
+	$Path = $Path.'/'.rawurlencode($basename);
+	if ($only_link) return 'http://'.$_SERVER['HTTP_HOST'].$Path;
+	elseif ($Path === FALSE) return '<span>' . htmlspecialchars($basename) . '</span>';
+	else return '<a href="'.htmlspecialchars($Path).'"'.($style !== '' ? ' '.$style : '').'>'.htmlspecialchars($basename).'</a>';
 }
 
 function lang($id) {

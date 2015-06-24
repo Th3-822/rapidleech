@@ -72,7 +72,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	}
 
 	if ($scheme == 'https://') {
-		if (!extension_loaded('openssl')) html_error('This server doesn\'t support https connections.');
+		if (!extension_loaded('openssl')) html_error('You need to install/enable PHP\'s OpenSSL extension to support downloading via HTTPS.');
 		$scheme = 'tls://';
 		if ($port == 0 || $port == 80) $port = 443;
 	}
@@ -423,7 +423,7 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 	if (!isset($lastProxy)) $lastProxy = $opt[CURLOPT_PROXY];
 	if (!isset($ch)) $ch = curl_init();
 	elseif ($lastProxy != $opt[CURLOPT_PROXY]) {
-		// cURL seems that doesn't like switching proxies on a active resource
+		// cURL seems that doesn't like switching proxies on a active resource, there is a bug about that @ https://bugs.php.net/bug.php?id=68211
 		curl_close($ch);
 		$ch = curl_init();
 		$lastProxy = $opt[CURLOPT_PROXY];
@@ -584,7 +584,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 	}
 
 	if ($scheme == 'https://') {
-		if (!extension_loaded('openssl')) html_error('This server doesn\'t support https connections.');
+		if (!extension_loaded('openssl')) html_error('You need to install/enable PHP\'s OpenSSL extension to support uploading via HTTPS.');
 		$scheme = 'tls://';
 		if ($port == 0 || $port == 80) $port = 443;
 	}
@@ -751,7 +751,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 	}
 
 	if ($scheme == 'https://') {
-		if (!extension_loaded('openssl')) html_error('This server doesn\'t support https connections.');
+		if (!extension_loaded('openssl')) html_error('You need to install/enable PHP\'s OpenSSL extension to support uploading via HTTPS.');
 		$scheme = 'tls://';
 		if ($port == 0 || $port == 80) $port = 443;
 	}

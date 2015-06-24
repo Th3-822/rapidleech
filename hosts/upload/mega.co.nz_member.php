@@ -151,7 +151,7 @@ function doApiReq($atrr) {
 		$cV = curl_version();
 		if (in_array('https', $cV['protocols'], true)) $chttps = true;
 	}
-	if (!extension_loaded('openssl') && !$chttps) html_error('This server doesn\'t support https connections.');
+	if (!extension_loaded('openssl') && !$chttps) html_error('You need to install/enable PHP\'s OpenSSL extension to support HTTPS connections.');
 	elseif (!$chttps) $cURL = false;
 
 	$sid = (!empty($T8['sid']) ? '&sid=' . $T8['sid'] : '');
@@ -160,7 +160,7 @@ function doApiReq($atrr) {
 	if ($cURL) $page = cURL("https://$domain/cs?id=" . ($T8['seqno']++) . $sid, 0, "[$post]", $referer);
 	else {
 		global $pauth;
-		$page = geturl($domain, 443, '/cs?id=' . ($T8['seqno']++) . $sid, $referer, 0, "[$post]", 0, !empty($_GET['proxy']) ? $_GET['proxy'] : '', $pauth, 0, 'https');
+		$page = geturl($domain, 443, '/cs?id=' . ($T8['seqno']++) . $sid, $referer, 0, "[$post]", 0, 0, 0, 0, 'https');
 		is_page($page);
 	}
 	list ($header, $page) = array_map('trim', explode("\r\n\r\n", $page, 2));
@@ -238,10 +238,11 @@ function stringhash($s, $aeskey) {
 }
 function prepare_key($a) {
 	$pkey = array(0x93C467E3, 0x7DB0C7A4, 0xD1BE3F81, 0x0152CB56);
+	$count_a = count($a);
 	for ($r = 0; $r < 0x10000; $r++) {
-		for ($j = 0; $j < count($a); $j += 4) {
+		for ($j = 0; $j < $count_a; $j += 4) {
 			$key = array(0, 0, 0, 0);
-			for ($i = 0; $i < 4; $i++) if ($i + $j < count($a)) $key[$i] = $a[$i + $j];
+			for ($i = 0; $i < 4; $i++) if ($i + $j < $count_a) $key[$i] = $a[$i + $j];
 			$pkey = aes_cbc_encrypt_a32($pkey, $key);
 		}
 	}
@@ -541,22 +542,22 @@ function SaveCookies($user, $pass) {
 function chunk_ul($scheme, $host, $port, $url, $onlyOpen = false) {
 	global $nn, $pauth, $fp, $errno, $errstr, $fsize, $pbChunkSize, $data, $zapros;
 	if ($scheme == 'https://') {
-		$scheme = 'ssl://';
+		$scheme = 'tls://';
 		$port = 443;
 	}
 
 	if (!empty($_GET['proxy'])) {
 		$proxy = true;
 		list($proxyHost, $proxyPort) = explode(':', $_GET['proxy'], 2);
-		$host = $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
+		$host = $host . ($port != 80 && ($scheme != 'tls://' || $port != 443) ? ':' . $port : '');
 		$url = $scheme . $host . $url;
 	} else $proxy = false;
 
-	if ($scheme != 'ssl://') $scheme = '';
+	if ($scheme != 'tls://') $scheme = '';
 	$request = array();
 	$request[] = 'POST ' . str_replace(' ', '%20', $url) . ' HTTP/1.0';
 	$request[] = "Host: $host";
-	$request[] = 'User-Agent: Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.14';
+	$request[] = 'User-Agent: '. (defined('rl_UserAgent') ? rl_UserAgent : 'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.17');
 	$request[] = 'Accept: */*';
 	$request[] = 'Accept-Language: en-US;q=0.7,en;q=0.3';
 	$request[] = 'Accept-Charset: utf-8,windows-1251;q=0.7,*;q=0.7';

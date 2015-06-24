@@ -51,12 +51,16 @@ class mediafire_com extends DownloadClass {
 		if (!empty($this->page) && stripos($this->page, ">Authorize Download</a>") === false) return;
 		if (!empty($_POST['step']) && $_POST['step'] == '1') {
 			$_POST['step'] = false;
-			if (empty($_POST['recaptcha2_response_field']) && empty($_POST['recaptcha_response_field']) && empty($_POST['adcopy_response'])) html_error('You didn\'t enter the image verification code.');
-			if (empty($_POST['adcopy_response'])) {
-				if (empty($_POST['recaptcha2_public_key'])) $post = array('recaptcha_challenge_field' => urlencode($_POST['recaptcha_challenge_field']), 'recaptcha_response_field' => urlencode($_POST['recaptcha_response_field']));
-				else $post = $this->verifyReCaptchav2();
-			} else $post = $this->verifySolveMedia();
-			$this->cookie = StrToCookies(urldecode($_POST['cookie']));
+			if (empty($_POST['recaptcha2_response_field']) && empty($_POST['recaptcha_response_field']) && empty($_POST['adcopy_response']) && empty($_POST['mf_captcha_response'])) html_error('You didn\'t enter the image verification code.');
+			if (empty($_POST['mf_captcha_response'])) {
+				if (empty($_POST['adcopy_response'])) {
+					if (empty($_POST['recaptcha2_public_key'])) $post = array('recaptcha_challenge_field' => urlencode($_POST['recaptcha_challenge_field']), 'recaptcha_response_field' => urlencode($_POST['recaptcha_response_field']));
+					else $post = $this->verifyReCaptchav2();
+				} else $post = $this->verifySolveMedia();
+				$this->cookie = StrToCookies(urldecode($_POST['cookie']));
+			} else {
+				$post = array('mf_captcha_response' => $_POST['mf_captcha_response']);
+			}
 
 			$purl = 'http://www.mediafire.com/?' . $this->fid[3];
 
@@ -82,6 +86,12 @@ class mediafire_com extends DownloadClass {
 			} else if (preg_match('@https?://(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w\.\-]+)@i', $this->page, $cKey)) {
 				// Old reCAPTCHA
 				return $this->reCAPTCHA($cKey[1], $data);
+			} else if (($pseudoCaptcha = cut_str($this->page, 'name="mf_captcha_response" value="', '"'))) {
+				// Best... CAPTCHA... Ever... :D
+				if (!empty($_POST['mf_captcha_response'])) html_error('Captcha Loop?');
+				$_POST['step'] = '1';
+				$_POST['mf_captcha_response'] = html_entity_decode($pseudoCaptcha);
+				return $this->MF_Captcha();
 			}
 
 			html_error('Error: CAPTCHA not found.');
@@ -104,6 +114,7 @@ class mediafire_com extends DownloadClass {
  * fixed redirects by Th3-822 24-09-2013
  * fixed captcha forms by Th3-822 11-04-2014
  * added recaptcha v2 captcha support && fixed dead link msgs by Th3-822 07-04-2015
+ * added checkbox "captcha" support (non tested) by Th3-822 18-06-2015
  */
  
 ?>

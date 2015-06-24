@@ -76,7 +76,7 @@ class depositfiles_com extends DownloadClass {
 			if ($diff < 1) return 0; // Error?
 			$page = $this->GetPage($purl . 'get_file.php?fd=clearlimit', $this->cookie);
 			if (($fd2 = cut_str($page, 'name="fd2" value="', '"')) == false) return $limit[1];
-			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+			$data = $this->DefaultParamArr($this->link, $this->cookie, true, true);
 			$data['step'] = '2';
 			$data['T8[fd2]'] = htmlentities($fd2);
 			$data['T8[try]'] = $try;
@@ -93,11 +93,11 @@ class depositfiles_com extends DownloadClass {
 		$purl = 'http://' . $this->domain . '/';
 		if ($this->TryFreeDLTricks) $this->Mesg = lang(300);
 		if (!empty($_POST['step'])) switch ($_POST['step']) {
-			case '1': if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
+			case '1': $response = urldecode($this->verifySolveMedia());
 				$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
 				if (empty($_POST['fid'])) html_error('FileID not found after POST.');
 
-				$query = array('fid' => $_POST['fid'], 'challenge' => $_POST['recaptcha_challenge_field'], 'response' => $_POST['recaptcha_response_field']);
+				$query = array('fid' => $_POST['fid'], 'challenge' => $response, 'response' => 'manual_challenge', 'acpuzzle' => '1');
 				$page = $this->GetPage($purl . 'get_file.php?'.http_build_query($query), $this->cookie);
 				is_present($page, 'load_recaptcha()', 'Error: Wrong CAPTCHA entered.');
 
@@ -119,11 +119,12 @@ class depositfiles_com extends DownloadClass {
 				$page = $this->GetPage($purl . 'get_file.php?fid='.urlencode($_POST['T8']['fid']), $this->cookie);
 				is_notpresent($page, 'load_recaptcha()', 'Error: Countdown skipped?.');
 
-				$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+				if (!preg_match('@var\s*+ACPuzzleKey\s*=\s*[\'\"]([\w\.\-]+)[\'\"]\s*;@', $page, $cpkey)) html_error('FreeDL: CAPTCHA Not Found.');
+
+				$data = $this->DefaultParamArr($this->link, $this->cookie, true, true);
 				$data['step'] = '1';
-				$data['fid'] = urlencode($_POST['T8']['fid']);
-				$this->reCAPTCHA(urlencode($_POST['T8']['cpid']), $data);
-				exit;
+				$data['fid'] = urlencode($fid[1]);
+				return $this->SolveMedia($cpkey[1], $data);
 		}
 
 		$page = $this->GetPage($this->link, $this->cookie, array('gateway_result' => '1'));
@@ -135,23 +136,21 @@ class depositfiles_com extends DownloadClass {
 					if ($limit[1] > 45) {
 						$page = $this->GetPage($purl . 'get_file.php?fd=clearlimit', $this->cookie);
 						if (($fd2 = cut_str($page, 'name="fd2" value="', '"')) == false) return $limit[1];
-						$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+						$data = $this->DefaultParamArr($this->link, $this->cookie, true, true);
 						$data['step'] = '2';
 						$data['T8[fd2]'] = htmlentities($fd2);
 						$data['T8[try]'] = '0';
-						$this->JSCountdown(30, $data, 'Try 1 to reduce ip-limit waiting time');
-						exit;
+						return $this->JSCountdown(30, $data, 'Try 1 to reduce ip-limit waiting time');
 					}
 					return $this->JSCountdown($limit[1], $this->DefaultParamArr($this->link), 'Connection limit has been exhausted for your IP address');
 				} else html_error('Connection limit has been exhausted for your IP address. Please try again later.');
 			}
 
-			if (!preg_match('@var[\s\t]+fid[\s\t]*=[\s\t]*\'(\w+)\'@i', $page, $fid)) html_error('FileID not found.');
-			if (!preg_match('@Recaptcha\.create[\s\t]*\([\s\t]*[\'\"]([\w\.\-]+)[\'\"]@i', $page, $cpid)) html_error('reCAPTCHA Not Found.');
-			if (!preg_match('@setTimeout\(\'load_form\(fid, msg\)\',[\s\t]*(\d+)([\s\t]*\*[\s\t]*1000)?[\s\t]*\);@i', $page, $cd)) html_error('Countdown not found.');
+			if (!preg_match('@var\s+fid\s*=\s*\'(\w+)\'@i', $page, $fid)) html_error('FileID not found.');
+			if (!preg_match('@setTimeout\(\'load_form\(fid, msg\)\',\s*(\d+)(\s*\*\s*1000)?\s*\);@i', $page, $cd)) html_error('Countdown not found.');
 			$cd = empty($cd[2]) ? $cd[1] / 1000 : $cd[1];
 			if ($cd > 0) {
-				$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+				$data = $this->DefaultParamArr($this->link, $this->cookie, true, true);
 				$data['step'] = '3';
 				$data['T8[fid]'] = htmlentities($fid[1]);
 				$data['T8[cpid]'] = $cpid[1];
@@ -168,20 +167,22 @@ class depositfiles_com extends DownloadClass {
 			$page = $this->GetPage($purl . 'get_file.php?fid='.urlencode($fid[1]), $this->cookie);
 			is_notpresent($page, 'load_recaptcha()', 'Error: Countdown skipped?.');
 
-			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+			if (!preg_match('@var\s*+ACPuzzleKey\s*=\s*[\'\"]([\w\.\-]+)[\'\"]\s*;@', $page, $cpkey)) html_error('FreeDL: CAPTCHA Not Found.');
+
+			$data = $this->DefaultParamArr($this->link, $this->cookie, true, true);
 			$data['step'] = '1';
 			$data['fid'] = urlencode($fid[1]);
-			$this->reCAPTCHA($cpid[1], $data);
+			return $this->SolveMedia($cpkey[1], $data);
 	}
 
 	private function FreeDL() {
 		$purl = 'http://' . $this->domain . '/';
 		if (!empty($_POST['step']) && $_POST['step'] == 1) {
-			if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
+			$response = urldecode($this->verifySolveMedia());
 			$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
 			if (empty($_POST['fid'])) html_error('FileID not found after POST.');
 
-			$query = array('fid' => $_POST['fid'], 'challenge' => $_POST['recaptcha_challenge_field'], 'response' => $_POST['recaptcha_response_field']);
+			$query = array('fid' => $_POST['fid'], 'challenge' => $response, 'response' => 'manual_challenge', 'acpuzzle' => '1');
 			$page = $this->GetPage($purl . 'get_file.php?'.http_build_query($query), $this->cookie);
 			is_present($page, 'load_recaptcha()', 'Error: Wrong CAPTCHA entered.');
 
@@ -219,9 +220,8 @@ class depositfiles_com extends DownloadClass {
 				} else html_error('Connection limit has been exhausted for your IP address. Please try again later.');
 			}
 
-			if (!preg_match('@var[\s\t]+fid[\s\t]*=[\s\t]*\'(\w+)\'@i', $page, $fid)) html_error('FileID not found.');
-			if (!preg_match('@Recaptcha\.create[\s\t]*\([\s\t]*[\'\"]([\w\.\-]+)[\'\"]@i', $page, $cpid)) html_error('reCAPTCHA Not Found.');
-			if (!preg_match('@setTimeout\(\'load_form\(fid, msg\)\',[\s\t]*(\d+)([\s\t]*\*[\s\t]*1000)?[\s\t]*\);@i', $page, $cd)) html_error('Countdown not found.');
+			if (!preg_match('@var\s+fid\s*=\s*\'(\w+)\'@i', $page, $fid)) html_error('FileID not found.');
+			if (!preg_match('@setTimeout\(\'load_form\(fid, msg\)\',\s*(\d+)(\s*\*\s*1000)?\s*\);@i', $page, $cd)) html_error('Countdown not found.');
 			$cd = empty($cd[2]) ? $cd[1] / 1000 : $cd[1];
 			if ($cd > 0) $this->CountDown($cd);
 
@@ -235,10 +235,12 @@ class depositfiles_com extends DownloadClass {
 			$page = $this->GetPage($purl . 'get_file.php?fid='.urlencode($fid[1]), $this->cookie);
 			is_notpresent($page, 'load_recaptcha()', 'Error: Countdown skipped?.');
 
-			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+			if (!preg_match('@var\s*+ACPuzzleKey\s*=\s*[\'\"]([\w\.\-]+)[\'\"]\s*;@', $page, $cpkey)) html_error('FreeDL: CAPTCHA Not Found.');
+
+			$data = $this->DefaultParamArr($this->link, $this->cookie, true, true);
 			$data['step'] = '1';
 			$data['fid'] = urlencode($fid[1]);
-			$this->reCAPTCHA($cpid[1], $data);
+			return $this->SolveMedia($cpkey[1], $data);
 		}
 	}
 
@@ -256,8 +258,7 @@ class depositfiles_com extends DownloadClass {
 		$purl = 'http://' . $this->domain . '/';
 		$errors = array('CaptchaInvalid' => 'Wrong CAPTCHA entered.', 'LoginInvalid' => 'Invalid Login/Pass.', 'InvalidLogIn' => 'Invalid Login/Pass.', 'CaptchaRequired' => 'Captcha Required.');
 		if (!empty($_POST['step']) && $_POST['step'] == '1') {
-			if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
-			$post = array('recaptcha_challenge_field' => $_POST['recaptcha_challenge_field'], 'recaptcha_response_field' => $_POST['recaptcha_response_field']);
+			$post = $this->verifyReCaptchav2();
 			$post['login'] = urlencode($user);
 			$post['password'] = urlencode($pass);
 
@@ -293,11 +294,11 @@ class depositfiles_com extends DownloadClass {
 			$page = $this->GetPage($purl.'login.php?return=%2F', $this->cookie, 0, $purl);
 			$this->cookie = GetCookiesArr($page, $this->cookie);
 
-			if (!preg_match('@(https?://([^/\r\n\t\s\'\"<>]+\.)?(?:depositfiles|dfiles)\.[^/:\r\n\t\"\'<>]+(?:\:\d+)?)/js/base2\.js@i', $page, $jsurl)) html_error('Cannot find captcha.');
+			if (!preg_match('@(https?://([\w\-]+\.)?(?:depositfiles|dfiles)\.[^/:\r\n\t\"\'<>]+(?:\:\d+)?)/js/base2\.js@i', $page, $jsurl)) html_error('Cannot find captcha.');
 			$jsurl = (empty($jsurl[1])) ? 'http://' . $this->domain . $jsurl[0] : $jsurl[0];
 			$page = $this->GetPage($jsurl, $this->cookie, 0, $purl.'login.php?return=%2F');
 
-			if (!preg_match('@recaptcha_public_key\s*=\s*[\'\"]([\w\.\-]+)@i', $page, $cpid)) html_error('reCAPTCHA Not Found.');
+			if (!preg_match('@recaptcha2PublicKey\s*=\s*[\'\"]([\w\.\-]+)@i', $page, $cpid)) html_error('reCAPTCHA2 Not Found.');
 
 			$data = $this->DefaultParamArr($this->link);
 			$data['step'] = '1';
@@ -307,7 +308,7 @@ class depositfiles_com extends DownloadClass {
 				$data['premium_user'] = urlencode(encrypt($user));
 				$data['premium_pass'] = urlencode(encrypt($pass));
 			}
-			$this->reCAPTCHA($cpid[1], $data, 0, 'Login');
+			$this->reCAPTCHAv2($cpid[1], $data, 0, 'Login');
 		}
 	}
 
@@ -401,5 +402,6 @@ class depositfiles_com extends DownloadClass {
 //[20-2-2013] Added new functions and a var for using JSCountdown at freedl for avoid timeouts. - Th3-822
 //[23-7-2013] Fixed freedl countdown on both freedl functions. - Th3-822
 //[17-9-2013] Fixed redirect not working with https links. - Th3-822
+//[21-6-2015] Fixed CAPTCHAs. - Th3-822
 
 ?>

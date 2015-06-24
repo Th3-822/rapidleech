@@ -25,7 +25,7 @@ class GenericXFS_DL extends DownloadClass {
 		$this->cookie = empty($this->cookie) ? array('lang' => 'english') : array_merge($this->cookie, array('lang' => 'english'));
 		$link = explode('|', str_ireplace('%7C', '|', $link), 2);
 		if (count($link) > 1) $this->lpass = rawurldecode($link[1]);
-		if (!preg_match('@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(\w{12})(?=(?:[/\.]|(?:\.html?))?)@i', $link[0], $url)) html_error('Invalid link?.');
+		if (!preg_match('@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(\w{12})(?=(?:[/\.]|(?:\.html?))?)@i', str_ireplace('/embed-', '/', $link[0]), $url)) html_error('Invalid link?.');
 		$this->fid = $url[1];
 		$url = parse_url($url[0]);
 		$url['scheme'] = strtolower($url['scheme']);

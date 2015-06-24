@@ -41,7 +41,7 @@ class DownloadClass {
 				$cV = curl_version();
 				if (in_array('https', $cV['protocols'], true)) $chttps = true;
 			}
-			if (!extension_loaded('openssl') && !$chttps) html_error('This server doesn\'t support https connections.');
+			if (!extension_loaded('openssl') && !$chttps) html_error('You need to install/enable PHP\'s OpenSSL extension to support HTTPS connections.');
 			elseif (!$chttps) $cURL = false;
 		}
 
