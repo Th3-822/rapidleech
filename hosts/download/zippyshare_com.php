@@ -87,10 +87,20 @@ class zippyshare_com extends DownloadClass {
 
 		$data = $this->DefaultParamArr($this->link, $this->cookie);
 		$data['step'] = '1';
-		$data['dlpath'] = urlencode($dlpath[0]);
-		$data['shortencode'] = urlencode($dlpath[1]);
+		$data['dlpath'] = $dlpath[0];
+		$data['shortencode'] = $dlpath[1];
 
 		$this->reCAPTCHAv2($cpid[1], $data);
+	}
+
+	// Special Function Called by verifyReCaptchav2 When Captcha Is Incorrect, To Allow Retry. - Required
+	protected function retryReCaptchav2() {
+		$data = $this->DefaultParamArr($this->link, $this->cookie);
+		$data['step'] = '1';
+		$data['shortencode'] = (!empty($_POST['shortencode']) ? $_POST['shortencode'] : '');
+		$data['dlpath'] = (!empty($_POST['dlpath']) ? $_POST['dlpath'] : '');
+
+		return $this->reCAPTCHAv2($_POST['recaptcha2_public_key'], $data);
 	}
 
 	private function CheckCaptcha() {
@@ -99,7 +109,7 @@ class zippyshare_com extends DownloadClass {
 
 		$post = array();
 		$post['response'] = $this->verifyReCaptchav2(true);
-		$post['shortencode'] = $_POST['shortencode'];
+		$post['shortencode'] = urlencode($_POST['shortencode']);
 
 		$page = $this->GetPage($host . '/rest/captcha/test', $this->cookie, $post, $this->link . "\r\nX-Requested-With: XMLHttpRequest");
 		$body = strtolower(trim(substr($page, strpos($page, "\r\n\r\n"))));
@@ -107,7 +117,7 @@ class zippyshare_com extends DownloadClass {
 		if ($body == 'false') html_error('Error: Wrong CAPTCHA Entered.');
 		elseif ($body != 'true') html_error('Unknown Reply from Server.');
 
-		$dlink = $host . urldecode($_POST['dlpath']);
+		$dlink = $host . $_POST['dlpath'];
 		$fname = urldecode(basename(parse_url($dlink, PHP_URL_PATH)));
 		$this->RedirectDownload($dlink, $fname, $this->cookie);
 	}

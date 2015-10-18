@@ -21,7 +21,6 @@ if (isset($_REQUEST['GO']) && $_REQUEST['GO'] == 'GO') {
 	$getlinks = array_values(array_unique(array_filter(array_map('trim', explode("\r\n", $_REQUEST['links'])))));
 	if (count($getlinks) < 1) html_error('No links submited');
 	if (isset($_REQUEST['server_side']) && $_REQUEST['server_side'] == 'on') {
-		$GLOBALS['throwRLErrors'] = true;
 		// Get supported download plugins
 		require_once(HOST_DIR . 'download/hosts.php');
 		require_once(CLASS_DIR . 'ftp.php');
@@ -99,6 +98,7 @@ function resetProgress() {
 				echo "<div id='progress$i' style='display:block;'>$nn";
 				$isHost = false;
 				$redir = $lastError = '';
+				$GLOBALS['throwRLErrors'] = true;
 				foreach ($host as $site => $file) {
 					if (host_matches($site, $Url['host'])) { //if (preg_match("/^(.+\.)?".$site."$/i", $Url['host'])) {
 						$isHost = true;
@@ -113,7 +113,7 @@ function resetProgress() {
 								$hostClass->Download($LINK);
 							}
 						} catch (Exception $e) {
-							echo "</div><script type='text/javascript'>updateStatus($i, '".htmlentities($e->getMessage())."');$nn"."document.getElementById('progress$i').style.display='none';</script>$nn";
+							echo "</div><script type='text/javascript'>updateStatus($i, '".htmlspecialchars($e->getMessage(), ENT_QUOTES)."');$nn"."document.getElementById('progress$i').style.display='none';</script>$nn";
 							continue 2;
 						}
 					}
@@ -339,9 +339,9 @@ function resetProgress() {
 										<td>&nbsp;</td>
 										<td id="proxy"<?php echo !empty($_COOKIE['useproxy']) ? '' : ' style="display: none;"'; ?>>
 											<table border="0">
-												<tr><td><?php echo lang(36); ?>:</td><td><input name="proxy" size="25"<?php echo !empty($_COOKIE['roxy']) ? ' value="'.htmlentities($_COOKIE['proxy']).'"' : ''; ?> /></td></tr>
-												<tr><td><?php echo lang(37); ?>:</td><td><input name="proxyuser" size="25"<?php echo !empty($_COOKIE['proxyuser']) ? ' value="'.htmlentities($_COOKIE['proxyuser']).'"' : ''; ?> /></td></tr>
-												<tr><td><?php echo lang(38); ?>:</td><td><input name="proxypass" size="25"<?php echo !empty($_COOKIE['proxypass']) ? ' value="'.htmlentities($_COOKIE['proxypass']).'"' : ''; ?> /></td></tr>
+												<tr><td><?php echo lang(36); ?>:</td><td><input name="proxy" size="25"<?php echo !empty($_COOKIE['roxy']) ? ' value="'.htmlspecialchars($_COOKIE['proxy'], ENT_QUOTES).'"' : ''; ?> /></td></tr>
+												<tr><td><?php echo lang(37); ?>:</td><td><input name="proxyuser" size="25"<?php echo !empty($_COOKIE['proxyuser']) ? ' value="'.htmlspecialchars($_COOKIE['proxyuser'], ENT_QUOTES).'"' : ''; ?> /></td></tr>
+												<tr><td><?php echo lang(38); ?>:</td><td><input name="proxypass" size="25"<?php echo !empty($_COOKIE['proxypass']) ? ' value="'.htmlspecialchars($_COOKIE['proxypass'], ENT_QUOTES).'"' : ''; ?> /></td></tr>
 											</table>
 										</td>
 									</tr>

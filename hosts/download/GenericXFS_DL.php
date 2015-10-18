@@ -12,7 +12,7 @@ if (!defined('RAPIDLEECH')) {
 
 class GenericXFS_DL extends DownloadClass {
 	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\'\"\t<>\r\n\\\]+@i';
-	private $classVer = 6;
+	private $classVer = 7;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -122,7 +122,7 @@ class GenericXFS_DL extends DownloadClass {
 		$fname = basename(parse_url($url, PHP_URL_PATH));
 		if (!empty($this->post['fname']) && preg_match("@^(?:v(?:ideo)|{$this->fid})?\.(mp4|flv)$@i", $fname, $vExt)) { // Possible video/stream and original filename available.
 			// I always like to add a letter to mark it as a reconverted video stream and remove the original video .ext
-			$fname = preg_replace('@\.(mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpg?v?|vob)$@i', '', basename($this->post['fname'])) . '_S.' . strtolower($vExt[1]);
+			$fname = preg_replace('@\.(mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpe?g?|vob|avi|[23]gp)$@i', '', basename($this->post['fname'])) . '_S.' . strtolower($vExt[1]);
 		}
 		return $fname;
 	}
@@ -344,12 +344,20 @@ class GenericXFS_DL extends DownloadClass {
 		return $page;
 	}
 
+	// A simpler function for check if account is premium, easier to override on plugins for specific hosts.
+	protected function isAccPremium($page) {
+		if (stripos($page, 'Premium account expire') !== false || stripos($page, 'Premium-account expire') !== false || stripos($page, 'Premium Expires') !== false) return true;
+		return false;
+	}
+
 	protected function checkAccount($page) {
 		is_present($page, 'Your account was banned by administrator.', '[checkAccount] Account is Banned.');
-		if (stripos($page, 'Premium account expire') !== false || stripos($page, 'Premium-account expire') !== false || stripos($page, 'Premium Expires') !== false) return $this->PremiumDL();
+		if ($this->isAccPremium($page)) return $this->PremiumDL();
 
 		// FreeDL() shouldn't have issues using it with a premium account... But PremiumDL() uses less checks.
 		$this->changeMesg('<br /><b>Account isn\'t premium?</b>', true);
+		// We need to reload the download page for FreeDL
+		$this->page = $this->GetPage($this->link, $this->cookie);
 		return $this->FreeDL();
 	}
 

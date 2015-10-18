@@ -455,7 +455,7 @@ function formpostdata($post=array()) {
 
 // function to convert an array of cookies into a string
 function CookiesToStr($cookie=array()) {
-	if (count($cookie) == 0) return '';
+	if (empty($cookie)) return '';
 	$cookies = '';
 	foreach ($cookie as $k => $v) $cookies .= "$k=$v; ";
 
@@ -591,8 +591,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
 	if (!empty($referer) && ($pos = strpos("\r\n", $referer)) !== 0) {
 		$origin = parse_url($pos ? substr($referer, 0, $pos) : $referer);
-		if (empty($origin['port'])) $origin['port'] = defport($origin);
-		$origin = strtolower($origin['scheme']) . '://' . strtolower($origin['host']) . ($origin['port'] != 80 && ($scheme != 'tls://' || $origin['port'] != 443) ? ':' . $origin['port'] : '');
+		$origin = strtolower($origin['scheme']) . '://' . strtolower($origin['host']) . (!empty($origin['port']) && $origin['port'] != defport(array('scheme' => $origin['scheme'])) ? ':' . $origin['port'] : '');
 	} else $origin = ($scheme == 'tls://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'tls://' || $port != 443) ? ':' . $port : '');
 
 	if ($proxy) {
@@ -758,8 +757,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 
 	if (!empty($referer) && ($pos = strpos("\r\n", $referer)) !== 0) {
 		$origin = parse_url($pos ? substr($referer, 0, $pos) : $referer);
-		if (empty($origin['port'])) $origin['port'] = defport($origin);
-		$origin = strtolower($origin['scheme']) . '://' . strtolower($origin['host']) . ($origin['port'] != 80 && ($scheme != 'tls://' || $origin['port'] != 443) ? ':' . $origin['port'] : '');
+		$origin = strtolower($origin['scheme']) . '://' . strtolower($origin['host']) . (!empty($origin['port']) && $origin['port'] != defport(array('scheme' => $origin['scheme'])) ? ':' . $origin['port'] : '');
 	} else $origin = ($scheme == 'tls://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'tls://' || $port != 443) ? ':' . $port : '');
 
 	if ($proxy) {

@@ -312,6 +312,19 @@ class depositfiles_com extends DownloadClass {
 		}
 	}
 
+	// Special Function Called by verifyReCaptchav2 When Captcha Is Incorrect, To Allow Retry. - Required
+	protected function retryReCaptchav2() {
+		$data = $this->DefaultParamArr($this->link);
+		$data['step'] = '1';
+		$data['premium_acc'] = 'on';
+		if ($this->pA && !empty($_GET['pA_encrypted']) && !empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) {
+			$data['pA_encrypted'] = 'true';
+			$data['premium_user'] = $_REQUEST['premium_user'];
+			$data['premium_pass'] = $_REQUEST['premium_pass'];
+		}
+		return $this->reCAPTCHAv2($_POST['recaptcha2_public_key'], $data, 0, 'Retry Login');
+	}
+
 	private function Get_Reply($page) {
 		if (!function_exists('json_decode')) html_error('Error: Please enable JSON in php.');
 		$json = substr($page, strpos($page, "\r\n\r\n") + 4);

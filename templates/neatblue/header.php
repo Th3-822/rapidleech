@@ -10,7 +10,7 @@
 <title><?php
 if (!isset($nn)) $nn = "\r\n";
 if (!isset($page_title)) {
-	echo 'Rapidleech v2 rev. '.$rev_num;
+	echo 'Rapidleech v2 rev. '.$GLOBALS['rev_num'];
 } else {
 	echo htmlspecialchars($page_title);
 }
@@ -25,8 +25,8 @@ pic1.src="templates/neatblue/images/ajax-loading.gif";
 </script>
 <script src="classes/js.js"></script>
 <?php
-if ($options['ajax_refresh']) { echo '<script src="classes/ajax_refresh.js"></script>'.$nn; }
-if ($options['flist_sort']) { echo '<script src="classes/sorttable.js"></script>'.$nn; }
+if ($GLOBALS['options']['ajax_refresh']) { echo '<script src="classes/ajax_refresh.js"></script>'.$nn; }
+if ($GLOBALS['options']['flist_sort']) { echo '<script src="classes/sorttable.js"></script>'.$nn; }
 ?>
 <script type="text/javascript">function toggle(b){var a=document.getElementById(b);if(a.style.display=="none"){a.style.display="block"}else{a.style.display="none"}};</script>
 </head>

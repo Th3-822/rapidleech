@@ -16,7 +16,7 @@ if ($cURL) {
 	$cV = curl_version();
 	if (in_array('https', $cV['protocols'], true)) $chttps = true;
 }
-if (!extension_loaded('openssl') && !$chttps) html_error('This server doesn\'t support https connections.');
+if (!extension_loaded('openssl') && !$chttps) html_error('You need to install/enable PHP\'s OpenSSL extension to support HTTPS connections.');
 elseif (!$chttps) $cURL = false;
 
 if ($upload_acc['mediafire_com']['user'] && $upload_acc['mediafire_com']['pass']) {
@@ -40,7 +40,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	$login = $not_done = false;
 	$domain = 'mediafire.com';
 	$referer = "https://$domain/";
-	$app = array('id' => '44595', 'api_version' => '1.3'); // Application ID for MediaFire's API @ https://www.mediafire.com/#settings/applications
+	$app = array('id' => '44595', 'api_version' => '1.4'); // Application ID for MediaFire's API @ https://www.mediafire.com/#settings/applications
 
 	// Login
 	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='info' width='100%' align='center'>Login to $domain</div>\n";
@@ -125,8 +125,8 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	do {
 		echo "<script type='text/javascript'>document.getElementById('T8_try').innerHTML = '$x';</script>\n";
 
-		sleep(5);
-		$poll_upload = mf_apireq('upload/poll_upload', array('key' => $ulResult['doupload']['key'])); // 1 Hour Lifespan
+		sleep($x + 5);
+		$poll_upload = mf_apireq('upload/poll_upload', array('key' => $ulResult['doupload']['key']));
 		mf_checkErrors($poll_upload, 'Error Saving File');
 
 		echo "<script type='text/javascript'>document.getElementById('T8_status').innerHTML += '" . htmlspecialchars($poll_upload['doupload']['description'], ENT_QUOTES) . "<br />';</script>\n";
@@ -154,7 +154,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 			}
 			html_error("$err.");
 		}
-	} while ($x++ < 10 && $poll_upload['doupload']['status'] != '99');
+	} while ($x++ < 20 && $poll_upload['doupload']['status'] != '99');
 
 	if (empty($poll_upload['doupload']['quickkey'])) html_error('Upload: quickkey not found.');
 	$download_link = "$referer?" . $poll_upload['doupload']['quickkey'];
@@ -233,7 +233,7 @@ function mf_apireq($action, $post = array()) {
 	$post['response_format'] = 'json'; // Get API replies in json
 	if (in_array($action, array('user/get_session_token', 'upload/poll_upload'))) unset($post['session_token']);
 	else if (empty($post['session_token']) && !empty($GLOBALS['app']['session_token'])) $post['session_token'] = $GLOBALS['app']['session_token'];
-	$post = array_map('urlencode', $post);
+	$post = array_map('urlencode', array_filter($post));
 
 	$path = "api/{$GLOBALS['app']['api_version']}/$action.php";
 	if ($GLOBALS['cURL']) $page = cURL($GLOBALS['referer'] . $path, 0, $post, $GLOBALS['referer']);

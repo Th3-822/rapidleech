@@ -97,6 +97,14 @@ class mediafire_com extends DownloadClass {
 			html_error('Error: CAPTCHA not found.');
 		}
 	}
+
+	// Special Function Called by verifyReCaptchav2 When Captcha Is Incorrect, To Allow Retry. - Required
+	protected function retryReCaptchav2() {
+		$data = $this->DefaultParamArr($this->link, $this->cookie);
+		$data['step'] = '1';
+
+		return $this->reCAPTCHAv2($_POST['recaptcha2_public_key'], $data);
+	}
 }
 
 /*

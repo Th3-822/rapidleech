@@ -72,7 +72,7 @@ function insert_location($inputs, $action = 0) {
 	}
 	if (isset($_GET['GO']) && $_GET['GO'] == 'GO') $_GET = array_merge($_GET, $inputs);
 	else {
-		if ($action === 0) $action = $GLOBALS['PHP_SELF'];
+		if ($action === 0) $action = $_SERVER['SCRIPT_NAME'];
 		$fname = 'r'.time().'l';
 		echo "\n<form name='$fname' ".(!empty($action) ? "action='$action' " : '')."method='POST'>\n";
 		foreach($inputs as $name => $value) echo "\t<input type='hidden' name='$name' value='" . htmlspecialchars($value, ENT_QUOTES) . "' />\n";
@@ -146,7 +146,7 @@ function html_error($msg) {
 		echo "<span class='htmlerror'><b>$msg</b></span><br /><br />";
 		if (isset($_GET['audl'])) echo '<script type="text/javascript">parent.nextlink();</script>';
 		if (!empty($GLOBALS['options']['new_window'])) echo '<a href="javascript:window.close();">'.lang(378).'</a>';
-		else echo '<a href="'.htmlspecialchars($GLOBALS['PHP_SELF']).'">'.lang(13).'</a>';
+		else echo '<a href="'.htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES).'">'.lang(13).'</a>';
 		echo '</div>';
 	}
 	pause_download();
@@ -381,7 +381,7 @@ function link_for_file($filename, $only_link = FALSE, $style = '') {
 	$Path = $Path.'/'.rawurlencode($basename);
 	if ($only_link) return 'http://'.$_SERVER['HTTP_HOST'].$Path;
 	elseif ($Path === FALSE) return '<span>' . htmlspecialchars($basename) . '</span>';
-	else return '<a href="'.htmlspecialchars($Path).'"'.($style !== '' ? ' '.$style : '').'>'.htmlspecialchars($basename).'</a>';
+	else return '<a href="'.htmlspecialchars($Path, ENT_QUOTES).'"'.($style !== '' ? ' '.$style : '').'>'.htmlspecialchars($basename).'</a>';
 }
 
 function lang($id) {
@@ -536,6 +536,7 @@ function GetDefaultParams() {
 	}
 	if (isset($_GET['autoclose'])) $DParam['autoclose'] = '1';
 	if (isset($_GET['audl'])) $DParam['audl'] = 'doum';
+	if (isset($_GET['premium_acc']) && $_GET['premium_acc'] == 'on') $DParam['premium_acc'] = 'on';
 	if ($GLOBALS['options']['download_dir_is_changeable'] && !empty($_GET['path'])) $DParam['saveto'] = urlencode($_GET['path']);
 	$params = array('add_comment', 'domail', 'comment', 'email', 'split', 'partSize', 'method', 'uploadlater', 'uploadtohost');
 	foreach ($params as $key) if (!empty($_GET[$key])) $DParam[$key] = $_GET[$key];

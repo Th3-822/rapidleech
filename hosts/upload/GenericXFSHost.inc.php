@@ -9,7 +9,7 @@ if (!isset($_T8) || !is_array($_T8) || empty($_T8['domain']) || $_T8['domain'] =
 	if (strtolower(basename(__FILE__)) == strtolower($page_upload[$_REQUEST['uploaded']])) html_error('This plugin can\'t be called directly.');
 	html_error('Error: Called from non configured plugin "' . htmlentities($page_upload[$_REQUEST['uploaded']]) . '".');
 }
-if ($_T8['v'] > 5) html_error('Error: '.basename(__FILE__).' is outdated, please install last version from: http://rapidleech.com/forum/viewtopic.php?f=17&t=80 or http://pastebin.com/E0z7qMU1 ');
+if ($_T8['v'] > 6) html_error('Error: '.basename(__FILE__).' is outdated, please install last version from: http://rapidleech.com/forum/viewtopic.php?f=17&t=80 or http://pastebin.com/E0z7qMU1 ');
 
 /* # Default Settings # */
 $default = array();
@@ -82,7 +82,7 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 	// Retrive upload ID
 	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrive upload ID</div>\n";
 
-	$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'].'?op='.(empty($_T8['opUploadName']) ? 'upload' : urlencode($_T8['opUploadName'])), $referer, $cookie, 0, 0, $_GET['proxy'], $pauth, 0, $scheme);is_page($page);
+	$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'].'?op='.(empty($_T8['opUploadName']) ? 'upload' : $_T8['opUploadName']), $referer, $cookie, 0, 0, $_GET['proxy'], $pauth, 0, $scheme);is_page($page);
 	if (substr($page, 9, 3) != '200') {
 		$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'], $referer, $cookie, 0, 0, $_GET['proxy'], $pauth, 0, $scheme);is_page($page);
 	}
@@ -91,7 +91,7 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 
 	if (preg_match('@var[\s\t]+max_upload_filesize[\s\t]*=[\s\t]*[\'\"]?(\d+)[\'\"]?[\s\t]*;@i', $page, $fzlimit) && $fzlimit[1] > 0 && $fsize > $fzlimit[1]*1024*1024) html_error('Error: '.lang(66)); // Max upload filesize test
 
-	if (!preg_match('@action=["\']((https?://[^/"\']+)?/(?:[^\?"\'/]+/)*[\w\-]+\.cgi)\?(?:\w+=\w+&)*upload_id=@i', $page, $up) && (empty($_T8['flashUpload']) || !preg_match('@[\'"]?uploader[\'"]?\s*:\s*[\'"]((https?://[^/"\']+)?/(?:[^\?"\'/]+/)*'.preg_quote((is_string($_T8['flashUpload']) ? $_T8['flashUpload'] :'up_flash.cgi'), '@').')[\'"]@i', $page, $up))) {
+	if (!preg_match('@action=["\']((https?://[^/"\']+)?/(?:[^\?"\'/]+/)*[\w\-]+(?:\.cgi)?)\?(?:\w+=\w+&)*(?:upload_id=|upload_type=file)@i', $page, $up) && (empty($_T8['flashUpload']) || !preg_match('@[\'"]?uploader[\'"]?\s*:\s*[\'"]((https?://[^/"\']+)?/(?:[^\?"\'/]+/)*'.preg_quote((is_string($_T8['flashUpload']) ? $_T8['flashUpload'] :'up_flash.cgi'), '@').')[\'"]@i', $page, $up))) {
 		is_present($page, 'We\'re sorry, there are no servers available for upload at the moment.', 'Site isn\'t accepting uploads.');
 		is_present($page, 'Uploads are disabled for your country:', 'Site isn\'t accepting uploads from your server\'s country.');
 		is_present($page, 'Uploads are disabled for your user type', 'Uploads are disabled for your account type.');

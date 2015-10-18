@@ -25,7 +25,8 @@ $upload_acc[$acc_key_name]['pass'] = ''; //Set your password
 
 function SendLogin($post) {
 	global $_T8, $cookie, $pauth;
-	$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'].'?op=login', 'https://login.uptobox.com/', $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);
+	$page = geturl('login.uptobox.com', 443, '/logarithme', 'https://login.uptobox.com/', $cookie, $post, 0, 0, 0, 0, 'https'); // geturl doesn't support https proxy
+	is_page($page);
 	return $page;
 }
 

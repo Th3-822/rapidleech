@@ -244,14 +244,14 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 				printf(lang(11), $_GET['email'], basename($file['file']));
 			} else echo lang(12) . '<br />';
 		}
-		echo "\n<form method='POST' name='flist' action='$PHP_SELF'>\n";
+		echo "\n<form method='POST' name='flist' action='{$_SERVER['SCRIPT_NAME']}'>\n";
 		echo "\t<input type='hidden' name='files[]' value='{$file['date']}' /><br />\n";
 		echo "\t<div style='text-align:center;'>\n";
 		echo renderActions();
 		echo "\t</div>\n";
 		echo "</form>\n";
 		if ($options['new_window']) echo '<br /><a href="javascript:window.close();">' . lang(378) . '</a>';
-		else echo "<br /><a href='$PHP_SELF'>" . lang(13) . "</a>";
+		else echo "<br /><a href='{$_SERVER['SCRIPT_NAME']}'>" . lang(13) . "</a>";
 
 		if (!empty($_GET['audl'])) echo $nn . '<script type="text/javascript">parent.nextlink();</script>';
 	} else {
