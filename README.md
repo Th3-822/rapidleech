@@ -1,6 +1,6 @@
 ==> For Support Related Rapidleech Visit - www.rapidleech.com 
 
-==> Last Update - June 24,2015 
+==> Last Update - October,2015 
 
 ==> Latest Version - Rev.431 
 
