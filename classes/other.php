@@ -241,7 +241,7 @@ function _create_list() {
 						case 'date':
 							$date = $value;
 						default:
-					$listReformat[$key][$field] = $value;
+							$listReformat[$key][$field] = $value;
 							break;
 						case 'comment':
 							$listReformat[$key][$field] = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');

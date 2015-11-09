@@ -12,14 +12,14 @@ if (!defined('RAPIDLEECH')) {
 
 class GenericXFS_DL extends DownloadClass {
 	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\'\"\t<>\r\n\\\]+@i';
-	private $classVer = 7;
+	private $classVer = 8;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
 		html_error('[GenericXFS_DL] This plugin can\'t be called directly.');
 	}
 
-	protected function Start($link, $cErrs = array()) {
+	protected function Start($link, $cErrs = array(), $cErrReplace = true) {
 		if ($this->pluginVer > $this->classVer) html_error('GenericXFS_DL class is outdated, please update it.');
 
 		$this->cookie = empty($this->cookie) ? array('lang' => 'english') : array_merge($this->cookie, array('lang' => 'english'));
@@ -51,11 +51,11 @@ class GenericXFS_DL extends DownloadClass {
 					if (is_array($cErr)) is_present($this->page, $cErr[0], $cErr[1]);
 					else is_present($this->page, $cErr);
 				}
-			} else {
-				is_present($this->page, 'The file you were looking for could not be found');
-				is_present($this->page, 'The file was removed by administrator');
-				is_present($this->page, 'No such file with this filename', 'Error: Invalid filename, check your link and try again.'); // With the regexp i removed the filename part of the link, this error shouldn't be showed
+				if ($cErrReplace) return $this->Login();
 			}
+			is_present($this->page, 'The file you were looking for could not be found');
+			is_present($this->page, 'The file was removed by administrator');
+			is_present($this->page, 'No such file with this filename', 'Error: Invalid filename, check your link and try again.'); // With the regexp i removed the filename part of the link, this error shouldn't be showed
 		}
 
 		return $this->Login();
@@ -80,12 +80,12 @@ class GenericXFS_DL extends DownloadClass {
 		$this->form = $form;
 		unset($forms, $form, $ret);
 
-		preg_match_all('@<input\s*[^>]*\stype="hidden"[^>]*\sname="(\w+)"[^>]*\svalue="([^"<>]*)"@i', $this->form, $inputs);
+		preg_match_all('@<input\s*[^>]*\stype="hidden"[^>]*\sname="(\w+)"[^>]*\svalue="([^"]*)"@i', $this->form, $inputs);
 		$data = array_map('html_entity_decode', array_combine($inputs[1], $inputs[2]));
 
 		if (($pos = stripos($this->form, '<textarea')) !== false && preg_match_all('@<textarea\s+(?:[^>]*\s)?name="(\w+)"[^>]*>([^<]*)</textarea>@i', substr($this->form, $pos), $inputs)) $data = array_merge($data, array_map('html_entity_decode', array_combine($inputs[1], $inputs[2])));
 
-		if ((stripos($this->form, 'type="submit"') !== false || stripos($this->form, 'type="image"') !== false) && preg_match_all('@<input\s*[^>]*\stype="(?:submit|image)"[^>]*\sname="(\w+)"[^>]*\svalue="([^"<>]*)"@i', $this->form, $inputs)) {
+		if ((stripos($this->form, 'type="submit"') !== false || stripos($this->form, 'type="image"') !== false) && preg_match_all('@<input\s*[^>]*\stype="(?:submit|image)"[^>]*\sname="(\w+)"[^>]*\svalue="([^"]*)"@i', $this->form, $inputs)) {
 			$data = array_merge($data, array_map('html_entity_decode', array_combine($inputs[1], $inputs[2])));
 			if (!empty($data['method_free']) && !empty($data['method_premium'])) $data['method_premium'] = '';
 		}
@@ -248,6 +248,7 @@ class GenericXFS_DL extends DownloadClass {
 			if ($this->testDL()) return true;
 			is_present($this->page, 'Downloads are disabled for your country:', 'Downloads are disabled for your server\'s country.');
 			is_present($this->page, 'This server is in maintenance mode. Refresh this page in some minutes.', 'File is not available at this moment, try again later.');
+			is_present($this->page, 'This file is available for Premium Users only.');
 			return html_error('Non aceptable form found.');
 		}
 		is_present($this->page, 'This file reached max downloads limit', 'Error: This file reached max downloads limit.');

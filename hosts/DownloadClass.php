@@ -282,7 +282,7 @@ class DownloadClass {
 		if (empty($this->rc2Page[$publicKey])) {
 			$c = '[c] ';
 			$this->rc2Page[$publicKey] = $page = $this->GetPage($link, $cookie, 0, ($referer !== 0 ? $referer : $link));
-		if (substr($page, 9, 3) != '200') html_error('Invalid or deleted reCAPTCHA2 public key.');
+			if (substr($page, 9, 3) != '200') html_error('Invalid or deleted reCAPTCHA2 public key.');
 		} else {
 			$c = '';
 			$page = $this->rc2Page[$publicKey];
@@ -292,7 +292,7 @@ class DownloadClass {
 		$inputs['recaptcha2_public_key'] = $publicKey; // Required for validateReCaptchav2()
 
 		// Download captcha
-	if (!preg_match('@name="c" value="([\w\.\-]+)"@', $page, $challenge)) html_error("{$c}Error getting reCAPTCHA2 challenge.");
+		if (!preg_match('@name="c" value="([\w\.\-]+)"@', $page, $challenge)) html_error("{$c}Error getting reCAPTCHA2 challenge.");
 		$inputs['recaptcha2_challenge_field'] = $challenge = $challenge[1];
 
 		list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage("$blink/api2/payload?c=" . urlencode($challenge) . '&k=' . urlencode($publicKey), $cookie, 0, $link), 2);

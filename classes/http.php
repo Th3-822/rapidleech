@@ -24,7 +24,7 @@ function insert_timer($countd, $caption = '', $timeouttext = '', $hide = false) 
 	if ($hide) echo "else $('#timer_$timerid').css('display', 'none');";
 	elseif (!empty($timeouttext)) echo "else $('#timer_$timerid').html('" . addslashes($timeouttext) . "');";
 	echo "\n\t} timer_$timerid();\n/* ]]> */</script>";
-		flush();
+	flush();
 	sleep($countd);
 	return true;
 }
@@ -186,12 +186,12 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 					break;
 				}
 			}
-				if ($found) {
-					require_once(HOST_DIR . 'DownloadClass.php');
-					require_once(HOST_DIR . "download/$file");
-					$class = substr($file, 0, -4);
-					$firstchar = substr($file, 0, 1);
-					if ($firstchar > 0) $class = "d$class";
+			if ($found) {
+				require_once(HOST_DIR . 'DownloadClass.php');
+				require_once(HOST_DIR . "download/$file");
+				$class = substr($file, 0, -4);
+				$firstchar = substr($file, 0, 1);
+				if ($firstchar > 0) $class = "d$class";
 				if (class_exists($class) && method_exists($class, 'CheckBack')) { // is_callable(array($class , 'CheckBack'))
 					$hostClass = new $class(false);
 					$hostClass->CheckBack($header);
@@ -436,7 +436,7 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 	$errz2 = curl_error($ch);
 	// curl_close($ch);
 
-	if (substr($page, 9, 3) == '100' || !empty($opt[CURLOPT_HTTPPROXYTUNNEL])) $page = preg_replace("@^HTTP/1\.[01] \d{3}(?:\s[^\r\n]+)?\r\n\r\n(HTTP/1\.[01] \d+ [^\r\n]+)@i", "$1", $page, 1); // The "100 Continue" or "200 Connection established" can break some functions in plugins, lets remove it...
+	if (substr($page, 9, 3) == '100' || !empty($opt[CURLOPT_PROXY])) $page = preg_replace("@^HTTP/1\.[01] \d{3}(?:\s[^\r\n]+)?\r\n\r\n(HTTP/1\.[01] \d+ [^\r\n]+)@i", "$1", $page, 1); // The "100 Continue" or "200 Connection established" can break some functions in plugins, lets remove it...
 	if ($errz != 0) html_error("[cURL:$errz] $errz2");
 
 	return $page;
