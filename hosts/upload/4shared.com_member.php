@@ -4,96 +4,122 @@ $upload_acc['4shared_com']['user'] = ''; //Set your login
 $upload_acc['4shared_com']['pass'] = ''; //Set your password
 ########################
 
-if (!class_exists('SoapClient')) html_error('This plugins needs SOAP module enabled.');
 $_GET['proxy'] = isset($_GET['proxy']) ? $_GET['proxy'] : '';
 $not_done = true;
 
-if (!empty($upload_acc['4shared_com']['user']) && !empty($upload_acc['4shared_com']['pass'])) {
+// Check https support for requests.
+$use_curl = $options['use_curl'] && extension_loaded('curl') && function_exists('curl_init') && function_exists('curl_exec') ? true : false;
+$chttps = false;
+$use_https = true;
+if ($use_curl) {
+	$cV = curl_version();
+	if (in_array('https', $cV['protocols'], true)) $chttps = true;
+}
+if (!extension_loaded('openssl') && !$chttps) $use_https = false;
+else if (!$chttps) $use_curl = false;
+
+if ($upload_acc['4shared_com']['user'] && $upload_acc['4shared_com']['pass']) {
+	$default_acc = true;
 	$_REQUEST['up_login'] = $upload_acc['4shared_com']['user'];
 	$_REQUEST['up_pass'] = $upload_acc['4shared_com']['pass'];
 	$_REQUEST['action'] = 'FORM';
 	echo "<b><center>Using Default Login.</center></b>\n";
-}
+} else $default_acc = false;
 
 if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	echo "<table border='0' style='width:270px;' cellspacing='0' align='center'>
 	<form method='POST'>
 	<input type='hidden' name='action' value='FORM' />
-	<tr><td style='white-space:nowrap;'>&nbsp;Email*</td><td>&nbsp;<input type='text' name='up_login' value='' style='width:160px;' /></td></tr>
+	<tr><td style='white-space:nowrap;'>&nbsp;Login*</td><td>&nbsp;<input type='text' name='up_login' value='' style='width:160px;' /></td></tr>
 	<tr><td style='white-space:nowrap;'>&nbsp;Password*</td><td>&nbsp;<input type='password' name='up_pass' value='' style='width:160px;' /></td></tr>\n";
 	echo "<tr><td colspan='2' align='center'><br /><input type='submit' value='Upload' /></td></tr>\n";
 	echo "<tr><td colspan='2' align='center'><small>*You can set it as default in <b>".basename(__FILE__)."</b></small></td></tr>\n";
-	echo "</form>\n</table>\n";
+	echo "</table>\n</form>\n";
 } else {
-	$not_done = false;
+	$login = $not_done = false;
+	$domain = 'www.4shared.com';
+	$referer = "https://$domain/";
+
+	$home_url = $referer . 'account/home.jsp';
 
 	// Login
-	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='login' width='100%' align='center'>Login to 4shared.com</div>\n";
+	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='login' width='100%' align='center'>Login to $domain</div>\n";
 
+	$cookie = array('4langcookie' => 'en');
 	if (!empty($_REQUEST['up_login']) && !empty($_REQUEST['up_pass'])) {
-		$user = $_REQUEST['up_login'];
-		$pass = $_REQUEST['up_pass'];
-		$soap_options = array('connection_timeout' => 120, 'cache_wsdl' => WSDL_CACHE_DISK, 'exceptions' => false);
-		if (!empty($_GET['proxy'])) {
-			list($soap_options['proxy_host'], $soap_options['proxy_port']) = explode(':', $_GET['proxy'], 2);
-			if (!empty($pauth)) list($soap_options['proxy_login'], $soap_options['proxy_password']) = array_map('rawurldecode', explode(':', base64_decode($pauth), 2));
-		}
-		$client = new SoapClient('http://api.4shared.com/jax3/DesktopApp?wsdl', $soap_options);
-		if (!is_object($client)) html_error('Cannot get 4shared\'s wsdl.');
-
-		if (($Chk = $client->hasRightUpload()) !== true) {
-			if (is_soap_fault($Chk)) html_error('[' . $Chk->faultcode . '] ' . htmlentities($Chk->faultstring));
-			else html_error('Uploading is temporarily disabled.');
+		if (!empty($_REQUEST['A_encrypted'])) {
+			$_REQUEST['up_login'] = decrypt(urldecode($_REQUEST['up_login']));
+			$_REQUEST['up_pass'] = decrypt(urldecode($_REQUEST['up_pass']));
+			unset($_REQUEST['A_encrypted']);
 		}
 
-		$LoginChk = $client->isExistsLoginPassword($user, $pass);
-		if (is_soap_fault($LoginChk)) html_error('[' . $LoginChk->faultcode . '] ' . htmlentities($LoginChk->faultstring));
-		elseif ($LoginChk !== true) html_error('Login failed: Email/Password incorrect.');
+		$post = array();
+		$post['login'] = urlencode($_REQUEST['up_login']);
+		$post['password'] = urlencode($_REQUEST['up_pass']);
+		$post['returnto'] = urlencode($home_url);
+		$post['_remember'] = $post['remember'] = 'on';
 
-		if ($client->isAccountBanned($user, $pass) === true) html_error('Login failed: Account is banned.');
+		$page = ul_GetPage($referer . 'web/login', $cookie, $post, $referer);
+		is_present($page, 'Invalid e-mail address or password', 'Login Failed: Email/Password incorrect.');
 
-		if ($fsize > $client->getMaxFileSize($user, $pass)) html_error('Error: Your file is too big.');
-		elseif ($fsize > $client->getFreeSpace($user, $pass)) html_error('Error: Not enough space in your account.');
-	} else html_error('Login failed: User/Password empty.');
+		$cookie = GetCookiesArr($page, $cookie);
+		if (empty($cookie['Login']) || empty($cookie['Password'])) html_error('Login Error.');
+
+		$login = true;
+	} else {
+		html_error('Login Failed: Login/Password empty.');
+	}
 
 	// Retrive upload ID
-	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrive upload ID</div>\n";
+	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrieving upload ID</div>\n";
 
-	$session = $client->createUploadSessionKey($user, $pass, -1);
-	if (!$session) html_error('Error: Cannot get upload session.');
+	$page = ul_GetPage($referer . 'account/home.jsp', $cookie, 0, $referer);
+	$cookie = GetCookiesArr($page, $cookie);
 
-	$dc = $client->getNewFileDataCenter($user, $pass, -1);
-	if ($dc <= 0) html_error('Error: Cannot get upload server.');
+	if (!preg_match('@dc_path\s*:\s*[\'\"](https?://dc\d+\.4shared\.com)[\'\"]@i', $page, $up_server)) html_error('Upload Server Not Found.');
+	$up_server = $up_server[1];
+	if (!preg_match('@(?:id="jsRootFolderIdForCurrentUser"|class="jsRootId") value="([\w\-\.]+)"@i', $page, $folder_id)) html_error('Root Folder ID Not Found.');
+	$folder_id = urlencode($folder_id[1]);
 
-	$up_url = $client->getUploadFormUrl($dc, $session);
-	if (!$up_url) html_error('Error: Cannot get upload url.');
-
-	$fid = $client->uploadStartFile($user, $pass, -1, $lname, $fsize);
-	if (!$fid) html_error('Error: Cannot get upload id.');
-
-	$post = array();
-	$post['resumableFileId'] = $fid;
-	$post['resumableFirstByte'] = 0;
+	$up_url = "$up_server/main/upload.jsp?x-upload-dir=$folder_id";
 
 	// Uploading
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
-
 	$url = parse_url($up_url);
-	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), 0, 0, $post, $lfile, $lname, 'FilePart', '', $_GET['proxy'], $pauth);
+	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer . 'account/home.jsp', $cookie, array(), $lfile, $lname, 'tfff0', '', $_GET['proxy'], $pauth, 0, $url['scheme']);
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";
 
 	is_page($upfiles);
 
-	$finish = $client->uploadFinishFile($user, $pass, $fid, md5_file($lfile));
-	if (is_soap_fault($finish)) html_error('[' . $finish->faultcode . '] ' . htmlentities($finish->faultstring));
-	elseif ($finish != '') html_error('Upload error: ' . htmlentities($finish));
+	if (!preg_match('@https?://(?:www\.)?4shared\.com/file/[\w\-\.]+/[^\r\n\"\'<>]+\.html?@i', $upfiles, $download_link)) 
+	{
+		if (preg_match('@id="alert"\s+value=\"([^\"\r\n<>]+)\"@i', $upfiles, $err)) html_error('Upload Error: ' . htmlspecialchars($err[1]));
+		is_notpresent($upfiles, 'Your upload has successfully completed!', 'Upload Failed.');
+		html_error('Download-Link not Found.');
+	}
 
-	$fileinfo = $client->getFileInfo($user, $pass, $fid);
-	$download_link = $fileinfo->downloadLink;
+	$download_link = $download_link[0];
 }
 
-//[09-4-2013] Written by Th3-822
+function ul_GetPage($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $XMLRequest = 0) {
+	if (!$referer && !empty($GLOBALS['Referer'])) {
+		$referer = $GLOBALS['Referer'];
+	}
+
+	if ($GLOBALS['use_curl']) {
+		if ($XMLRequest) $referer .= "\r\nX-Requested-With: XMLHttpRequest";
+		$page = cURL($link, $cookie, $post, $referer, $auth);
+	} else {
+		global $pauth;
+		$Url = parse_url($link);
+		$page = geturl($Url['host'], defport($Url), $Url['path'] . (!empty($Url['query']) ? '?' . $Url['query'] : ''), $referer, $cookie, $post, 0, !empty($_GET['proxy']) ? $_GET['proxy'] : '', $pauth, $auth, $Url['scheme'], 0, $XMLRequest);
+		is_page($page);
+	}
+	return $page;
+}
+
+//[11-11-2015] ReWritten by Th3-822.
 
 ?>
