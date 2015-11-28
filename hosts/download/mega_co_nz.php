@@ -14,7 +14,7 @@ class mega_co_nz extends DownloadClass {
 
 		$fragment = parse_url($link, PHP_URL_FRAGMENT);
 		if (preg_match('@^F!([^!]{8})!([\w\-\,]{22})@i', $fragment, $fid)) return $this->Folder($fid[1], $fid[2]);
-		if (!preg_match('@^(T8|N)?!([^!]{8})!([\w\-\,]{43})(?:!([^!]{8})!)?@i', $fragment, $fid)) html_error('FileID or Key not found at link.');
+		if (!preg_match('@^(T8|N)?!([^!]{8})!([\w\-\,]{43})(?:(?:!|=###n=)([^!#]{8})(?:!|$))?@i', $fragment, $fid)) html_error('FileID or Key not found at link.');
 
 		$reply = $this->apiReq(array('a' => 'g', 'g' => '1', (empty($fid[1]) ? 'p' : 'n') => $fid[2], 'ssl'=> '0'), (!empty($fid[1]) && !empty($fid[4]) ? $fid[4] : ''));
 		$this->CheckErr($reply[0]);
@@ -51,7 +51,7 @@ class mega_co_nz extends DownloadClass {
 		}
 	}
 
-	private function apiReq($atrr, $node='') {
+	private function apiReq($atrr, $node = '') {
 		$try = 0;
 		do {
 			if ($try > 0) sleep(2);

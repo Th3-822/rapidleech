@@ -5,7 +5,7 @@ if (!defined('RAPIDLEECH')) {
 }
 
 // Allow user-agent to be changed easily
-if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.17');
+if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:42.0) Gecko/20100101 Firefox/42.0');
 
 /*
  * Pauses for countdown timer in file hosts
@@ -742,7 +742,6 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 	}
 
 	$fileSize = getSize($file);
-	if ($cambialo) $fileSize++;
 
 	if (!empty($cookie)) {
 		if (is_array($cookie)) $cookies = (count($cookie) > 0) ? CookiesToStr($cookie) : 0;

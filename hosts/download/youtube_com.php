@@ -136,7 +136,8 @@ class youtube_com extends DownloadClass {
 			}
 			if (empty($this->jsVars[$obj]['fn'][$fName]['step'])) {
 				$v = '[\$_A-Za-z][\$\w]*';
-				if (!preg_match("@(?<=^|,)$fName:function\($v(?:,($v))?\)\{([^}]+)\}(?=,|$)@", $this->jsVars[$obj]['src'], $src)) $this->decError("Cannot find function '$obj.$fName'");
+				if (!preg_match("@(?<=^|,)\s*$fName:function\($v(?:,($v))?\)\{([^}]+)\}\s*(?=,|$)@", $this->jsVars[$obj]['src'], $src)) $this->decError("Cannot find function '$obj.$fName'");
+				$src[0] = trim($src[0]);
 				$this->jsVars[$obj]['fn'][$fName] = array('src' => $src);
 
 				if (empty($src[1])) return $this->jsVars[$obj]['fn'][$fName]['step'] = 'r';
@@ -306,6 +307,6 @@ class youtube_com extends DownloadClass {
 // [14-1-2015]  Fixed Age Restrictions. (Please, do not annoy my inbox when a plugin fails, go to the forum) - Th3-822
 // [21-1-2015]  Fixed backslash in filename when cleanname is off. - Th3-822
 // [13-4-2015]  Fixed captcha detection. - Th3-822
-// [10-11-2015]  Fixed signature decoding functions. - Th3-822
+// [28-11-2015]  Fixed signature decoding functions. - Th3-822
 
 ?>

@@ -93,8 +93,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 
 	is_page($upfiles);
 
-	if (!preg_match('@https?://(?:www\.)?4shared\.com/file/[\w\-\.]+/[^\r\n\"\'<>]+\.html?@i', $upfiles, $download_link)) 
-	{
+	if (!preg_match('@https?://(?:www\.)?4shared\.com/\w+/[\w\-\.]+/[^\r\n\"\'<>]+\.html?@i', $upfiles, $download_link)) {
 		if (preg_match('@id="alert"\s+value=\"([^\"\r\n<>]+)\"@i', $upfiles, $err)) html_error('Upload Error: ' . htmlspecialchars($err[1]));
 		is_notpresent($upfiles, 'Your upload has successfully completed!', 'Upload Failed.');
 		html_error('Download-Link not Found.');
@@ -121,5 +120,6 @@ function ul_GetPage($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $XML
 }
 
 //[11-11-2015] ReWritten by Th3-822.
+//[13-11-2015] Fixed Link Regexp. - Th3-822
 
 ?>

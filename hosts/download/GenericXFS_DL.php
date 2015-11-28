@@ -11,8 +11,8 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class GenericXFS_DL extends DownloadClass {
-	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\'\"\t<>\r\n\\\]+@i';
-	private $classVer = 8;
+	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\'\"\t<>\r\n\\\]+@i';
+	private $classVer = 10;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -55,6 +55,8 @@ class GenericXFS_DL extends DownloadClass {
 			}
 			is_present($this->page, 'The file you were looking for could not be found');
 			is_present($this->page, 'The file was removed by administrator');
+			is_present($this->page, 'The file was deleted by its owner');
+			is_present($this->page, 'The file was deleted by administration');
 			is_present($this->page, 'No such file with this filename', 'Error: Invalid filename, check your link and try again.'); // With the regexp i removed the filename part of the link, this error shouldn't be showed
 		}
 
@@ -118,21 +120,30 @@ class GenericXFS_DL extends DownloadClass {
 		if (!empty($this->customDecoder)) $this->pageDecoder();
 	}
 
+	// (Placeholder) Returns video title if available to use on stream video downloads.
+	protected function getVideoTitle() {
+		return false;
+	}
+
 	protected function getFileName($url) {
 		$fname = basename(parse_url($url, PHP_URL_PATH));
-		if (!empty($this->post['fname']) && preg_match("@^(?:v(?:ideo)|{$this->fid})?\.(mp4|flv)$@i", $fname, $vExt)) { // Possible video/stream and original filename available.
+		if (preg_match("@^(?:v(?:ideo)?|{$this->fid})?\.(mp4|flv)$@i", $fname, $vExt)) { // Possible video/stream
+			// Try to get original filename or title for renaming the file.
+			if (!empty($this->post['fname'])) $newname = $this->post['fname'];
+			else if (($title = $this->getVideoTitle())) $newname = $title;
+			else $newname = false;
+
 			// I always like to add a letter to mark it as a reconverted video stream and remove the original video .ext
-			$fname = preg_replace('@\.(mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpe?g?|vob|avi|[23]gp)$@i', '', basename($this->post['fname'])) . '_S.' . strtolower($vExt[1]);
+			if (!empty($newname)) $fname = preg_replace('@\.(mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpe?g?|vob|avi|[23]gp)$@i', '', basename($newname)) . '_S.' . strtolower($vExt[1]);
 		}
 		return $fname;
 	}
 
-	protected function testDL($name = '') {
+	protected function testDL() {
 		if (!empty($this->enableDecoders)) $this->runDecoders();
 
 		if (preg_match($this->DLregexp, $this->page, $DL)) {
-			if (empty($name)) $name = $this->getFileName($DL[0]);
-			$this->RedirectDownload($DL[0], basename($name));
+			$this->RedirectDownload($DL[0], basename($this->getFileName($DL[0])));
 			return true;
 		}
 		return false;
@@ -222,9 +233,11 @@ class GenericXFS_DL extends DownloadClass {
 		$_POST['step'] = $_POST['captcha_type'] = false;
 		$this->page = $this->GetPage($this->link, $this->cookie, $post);
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
-		return false;
+		return true;
 	}
 
+	// Finds FreeDL countdown on $this->page and calls $this->CountDown(X) for it.
+	// return true if there is a countdown, false otherwise.
 	protected function findCountdown() {
 		if (preg_match('@<span[^>]*>(?>.*?<span\s+id=[\'"][\w\-]+[\'"][^>]*>)(\d+)</span>(?>.*?</span>)@sim', $this->page, $count)) {
 			if ($count[1] > 0) $this->CountDown($count[1] + 2);
@@ -234,24 +247,36 @@ class GenericXFS_DL extends DownloadClass {
 	}
 
 	protected function checkCaptcha($step) {
-		if (empty($this->captcha)) is_present($this->page, '>Wrong captcha<', "Error: Unknown captcha. [$step]");
-		elseif ($this->captcha == '2') is_present($this->page, '>Wrong captcha<', "Error: Error Decoding Captcha. [$step]");
-		else is_present($this->page, '>Wrong captcha<', "Error: Wrong Captcha Entered. [$step]");
+		if (preg_match('@>\s*Wrong captcha\s*<@i', $this->page)) {
+			if (empty($this->captcha)) html_error("Error: Unknown captcha. [$step]");
+			else if ($this->captcha == '2') html_error("Error: Error Decoding Captcha. [$step]");
+			else html_error("Error: Wrong Captcha Entered. [$step]");
+		}
 	}
 
 	protected function FreeDL($step = 1) {
-		$this->postCaptcha($step);
+		if (!$this->postCaptcha($step) && $step == 1 && !empty($this->cookie[(!empty($this->cname) ? $this->cname : 'xfss')])) {
+			// Member DL: We need to reload the page with the user's cookies.
+			$this->page = $this->GetPage($this->link, $this->cookie);
+			$this->cookie = GetCookiesArr($this->page, $this->cookie);
+		}
 		if (($pos = stripos($this->page, 'You have to wait')) !== false && preg_match('@You have to wait[\W\S]?(?:(?:\s*|\s*<br\s*/?\s*>\s*)?\d+ \w+,\s){0,2}\d+ \w+(?:\s*|\s*<br\s*/?\s*>\s*)?(?:un)?till? (?:the )?next download@i', substr($this->page, $pos), $err)) html_error('Error: '.strip_tags($err[0]));
 		if (($pos = stripos($this->page, 'You can download files up to ')) !== false && preg_match('@You can download files up to \d+ [KMG]b only.@i', substr($this->page, $pos), $err)) html_error('Error: '.$err[0]);
 		if (($pos = stripos($this->page, 'You have reached the download')) !== false && preg_match('@You have reached the download[- ]limit(?: of|:) \d+ [KMGT]b for(?: the)? last \d+ days?@i', substr($this->page, $pos), $err)) html_error('Error: '.$err[0]);
+		if ($this->testDL()) return true;
 		if (!$this->FindPost()) {
-			if ($this->testDL()) return true;
 			is_present($this->page, 'Downloads are disabled for your country:', 'Downloads are disabled for your server\'s country.');
 			is_present($this->page, 'This server is in maintenance mode. Refresh this page in some minutes.', 'File is not available at this moment, try again later.');
 			is_present($this->page, 'This file is available for Premium Users only.');
+			is_present($this->page, 'This file reached max downloads limit', 'Error: This file reached max downloads limit.');
+			if (!empty($this->cErrsFDL) && is_array($this->cErrsFDL)) {
+				foreach ($this->cErrsFDL as $cErr) {
+					if (is_array($cErr)) is_present($this->page, $cErr[0], $cErr[1]);
+					else is_present($this->page, $cErr);
+				}
+			}
 			return html_error('Non aceptable form found.');
 		}
-		is_present($this->page, 'This file reached max downloads limit', 'Error: This file reached max downloads limit.');
 		is_present($this->page, '>Skipped countdown', "Error: Skipped countdown? [$step].");
 		$this->checkCaptcha($step);
 		switch ($this->post['op']) {
@@ -331,6 +356,8 @@ class GenericXFS_DL extends DownloadClass {
 		return $this->checkAccount($page);
 	}
 
+	// Checks For Login Errors on $page and Calls html_error() For Them.
+	// return true if there are no login errors, false otherwise.
 	protected function checkLogin($page) {
 		is_present($page, 'op=resend_activation', 'Login failed: Your account isn\'t confirmed yet.');
 		is_present($page, 'Your account was banned by administrator.', 'Login failed: Account is Banned.');
@@ -339,13 +366,16 @@ class GenericXFS_DL extends DownloadClass {
 		return true;
 	}
 
+	// Checks if account is logged in.
+	// return $page - If it's logged in and the $page loaded is usable too for checkAccount(), if not, return true or false
 	protected function isLoggedIn() {
 		$page = $this->GetPage($this->purl.'?op=my_account', $this->cookie, 0, $this->purl);
 		if (stripos($page, '/?op=logout') === false && stripos($page, '/logout') === false) return false;
 		return $page;
 	}
 
-	// A simpler function for check if account is premium, easier to override on plugins for specific hosts.
+	// A simpler function for check if account is premium in $page contents, easier to override on plugins for specific hosts.
+	// return true if user is premium, false otherwise.
 	protected function isAccPremium($page) {
 		if (stripos($page, 'Premium account expire') !== false || stripos($page, 'Premium-account expire') !== false || stripos($page, 'Premium Expires') !== false) return true;
 		return false;
@@ -357,8 +387,6 @@ class GenericXFS_DL extends DownloadClass {
 
 		// FreeDL() shouldn't have issues using it with a premium account... But PremiumDL() uses less checks.
 		$this->changeMesg('<br /><b>Account isn\'t premium?</b>', true);
-		// We need to reload the download page for FreeDL
-		$this->page = $this->GetPage($this->link, $this->cookie);
 		return $this->FreeDL();
 	}
 

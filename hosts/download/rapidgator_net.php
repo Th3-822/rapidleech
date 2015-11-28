@@ -8,33 +8,32 @@ if (!defined('RAPIDLEECH')) {
 class rapidgator_net extends DownloadClass {
 	private $page, $link, $cookie;
 	public function Download($link) {
-		global $premium_acc;
 		$this->link = $GLOBALS['Referer'] = str_ireplace(array('://www.rg.to/', '://rg.to/'), '://rapidgator.net/', $link);
 		$this->cookie = array('lang' => 'en');
 		$this->DLregexp = '@https?://pr\d+\.rapidgator\.net/[^\s\"\'<>]+@i';
-		if (empty($_POST['step']) || $_POST['step'] != '1') {
-			$this->page = $this->GetPage($this->link, $this->cookie);
-			$this->cookie = GetCookiesArr($this->page, $this->cookie);
-
-			// Sometimes i see a couple of redirects that don't let do anything without doing them first, let skip them.
+		if ((empty($_POST['step']) || $_POST['step'] != '1') && (empty($_GET['rgredir']) || stripos($_GET['rgredir'], '/auth/login') === false)) {
+			// Weird RG redirects.
 			$rdc = 0;
-			$redir = $link;
-			while (($redir = $this->ChkRGRedirs($this->page, parse_url($redir))) && $rdc < 5) {
-				$this->page = $this->GetPage($redir, $this->cookie);
+			$this->page = false; // False value for starting the loop.
+			$redir = $this->link;
+			$this->referer = !empty($GLOBALS['Referer']) ? $GLOBALS['Referer'] : $this->link;
+			while (($redir = $this->ChkRGRedirs($this->page, $redir)) && $rdc < 15) {
+				$this->page = cURL($redir, $this->cookie, 0, $this->referer);
 				$this->cookie = GetCookiesArr($this->page, $this->cookie);
+				$this->referer = $redir;
 				$rdc++;
 			}
 
 			// I haven't tested those redirects fine so i will check this too.
-			if (!empty($redir) && stripos($redir, 'rapidgator.net/file/') === false) {
-				$this->page = $this->GetPage($this->link, $this->cookie);
+			if (stripos($redir, 'rapidgator.net/file/') === false) {
+				$this->page = cURL($this->link, $this->cookie, 0, $this->referer);
 				$this->cookie = GetCookiesArr($this->page, $this->cookie);
 			}
 
 			is_present($this->page, '>File not found<', 'File not found.');
 		}
 
-		if ($_REQUEST['premium_acc'] == 'on' && ((!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) || (!empty($premium_acc['rapidgator_net']['user']) && !empty($premium_acc['rapidgator_net']['pass'])))) {
+		if ($_REQUEST['premium_acc'] == 'on' && ((!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) || (!empty($GLOBALS['premium_acc']['rapidgator_net']['user']) && !empty($GLOBALS['premium_acc']['rapidgator_net']['pass'])))) {
 			$this->Login();
 		} else $this->FreeDL();
 	}
@@ -48,21 +47,21 @@ class rapidgator_net extends DownloadClass {
 			if (!preg_match('@fid\s*=\s*(\d+)\s*;@i', $this->page, $fid)) html_error('File-id not found.');
 			if (!preg_match('@secs\s*=\s*(\d+)\s*;@i', $this->page, $cd)) html_error('Countdown not found.');
 
-			$page = $this->GetPage('http://rapidgator.net/download/AjaxStartTimer?fid='.$fid[1], $this->cookie, 0, $this->link."\r\nX-Requested-With: XMLHttpRequest");
+			$page = cURL('http://rapidgator.net/download/AjaxStartTimer?fid='.$fid[1], $this->cookie, 0, $this->link."\r\nX-Requested-With: XMLHttpRequest");
 			if (!preg_match('@"sid":"([^"\}]+)"@i', $page, $sid)) html_error('Session id not found.');
 
 			if ($cd[1] > 0) $this->CountDown($cd[1]);
 
-			$page = $this->GetPage('http://rapidgator.net/download/AjaxGetDownloadLink?sid='.urlencode($sid[1]), $this->cookie, 0, $this->link."\r\nX-Requested-With: XMLHttpRequest"); // ['download_link']
+			$page = cURL('http://rapidgator.net/download/AjaxGetDownloadLink?sid='.urlencode($sid[1]), $this->cookie, 0, $this->link."\r\nX-Requested-With: XMLHttpRequest"); // ['download_link']
 			$this->cookie = GetCookiesArr($page, $this->cookie);
 			is_notpresent($page, '"state":"done"', 'Error: Countdown bypassed?.');
 
-			$page = $this->GetPage($capt_url, $this->cookie);
+			$page = cURL($capt_url, $this->cookie);
 
 			if (preg_match($this->DLregexp, $page, $dlink)) return $this->RedirectDownload($dlink[0], 'rapidgatorfr2');
 
 			if (!preg_match('@https?://api\.solvemedia\.com/papi/challenge\.noscript\?k=\w+@i', $page, $cframe)) html_error('CAPTCHA not found.');
-			$page = $this->GetPage($cframe[0], 0, 0, $capt_url);
+			$page = cURL($cframe[0], 0, 0, $capt_url);
 			if (!preg_match('@<img [^/<>]*src\s?=\s?\"((https?://[^/\"\<\>]+)?/papi/media[^\"<>]+)\"@i', $page, $imgurl)) html_error('CAPTCHA img not found.');
 			$imgurl = (empty($imgurl[2])) ? 'http://api.solvemedia.com'.$imgurl[1] : $imgurl[1];
 
@@ -74,7 +73,7 @@ class rapidgator_net extends DownloadClass {
 			foreach ($forms as $n => $v) $data["T8[$n]"] = urlencode($v);
 
 			//Download captcha img.
-			$page = $this->GetPage($imgurl, $this->cookie);
+			$page = cURL($imgurl, $this->cookie);
 			$capt_img = substr($page, strpos($page, "\r\n\r\n") + 4);
 			$imgfile = DOWNLOAD_DIR . 'rapidgator_captcha.gif';
 
@@ -92,7 +91,7 @@ class rapidgator_net extends DownloadClass {
 			$post['adcopy_response'] = $_POST['captcha'];
 
 			$url = 'http://api.solvemedia.com/papi/verify.noscript';
-			$page = $this->GetPage($url, 0, $post, $capt_url);
+			$page = cURL($url, 0, $post, $capt_url);
 
 			if (!preg_match('@(https?://[^/\'\"\<\>\r\n]+)?/papi/verify\.pass\.noscript\?[^/\'\"\<\>\r\n]+@i', $page, $resp)) {
 				is_present($page, '/papi/challenge.noscript', 'Wrong CAPTCHA entered.');
@@ -100,11 +99,11 @@ class rapidgator_net extends DownloadClass {
 			}
 			$resp = (empty($resp[1])) ? 'http://api.solvemedia.com'.$resp[0] : $resp[0];
 
-			$page = $this->GetPage($resp, 0, 0, $url);
+			$page = cURL($resp, 0, 0, $url);
 			if (!preg_match('@>[\s\t\r\n]*([^<>\r\n]+)[\s\t\r\n]*</textarea>@i', $page, $gibberish)) html_error('CAPTCHA response not found.');
 
 			$post = array('DownloadCaptchaForm%5Bcaptcha%5D' => '', 'adcopy_challenge' => urlencode($gibberish[1]), 'adcopy_response' => 'manual_challenge');
-			$page = $this->GetPage($capt_url, $this->cookie, $post);
+			$page = cURL($capt_url, $this->cookie, $post);
 
 			is_present($page, "\r\nSet-Cookie: failed_on_captcha=1", 'Captcha expired. Try again in 15 minutes.');
 
@@ -114,7 +113,7 @@ class rapidgator_net extends DownloadClass {
 	}
 
 	private function PremiumDL() {
-		$page = $this->GetPage($this->link, $this->cookie);
+		$page = cURL($this->link, $this->cookie);
 
 		if (preg_match('@You have reached quota of downloaded information for premium accounts. At the moment, the quota is \d+ [GT]B(?: per \d+ day\(s\))?@i', $page, $err)) html_error($err[0]);
 
@@ -124,15 +123,14 @@ class rapidgator_net extends DownloadClass {
 	}
 
 	private function Login() {
-		global $premium_acc;
 		if (!empty($_REQUEST['pA_encrypted']) && !empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) {
 			$_REQUEST['premium_user'] = decrypt(urldecode($_REQUEST['premium_user']));
 			$_REQUEST['premium_pass'] = decrypt(urldecode($_REQUEST['premium_pass']));
 			unset($_REQUEST['pA_encrypted']);
 		}
 		$pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
-		$user = ($pA ? $_REQUEST['premium_user'] : $premium_acc['rapidgator_net']['user']);
-		$pass = ($pA ? $_REQUEST['premium_pass'] : $premium_acc['rapidgator_net']['pass']);
+		$user = ($pA ? $_REQUEST['premium_user'] : $GLOBALS['premium_acc']['rapidgator_net']['user']);
+		$pass = ($pA ? $_REQUEST['premium_pass'] : $GLOBALS['premium_acc']['rapidgator_net']['pass']);
 
 		if (empty($user) || empty($pass)) html_error('Login Failed: User or Password is empty. Please check login data.', 0);
 		$this->cookie = array('lang' => 'en'); // Account is always showed as free if it comes from a file, as i don't send file's link as referer, lets reset the cookies.
@@ -148,15 +146,15 @@ class rapidgator_net extends DownloadClass {
 		}
 
 		$purl = 'http://rapidgator.net/';
-		$page = $this->GetPage($purl.'auth/login', $this->cookie, $post, $purl);
-		$this->cookie = GetCookiesArr($page, $this->cookie);
-
 		// There are more of those redirects at login
 		$rdc = 0;
+		$page = false; // False value for starting the loop.
 		$redir = $purl.'auth/login';
-		while (($redir = $this->ChkRGRedirs($page, parse_url($redir), '/auth/login')) && $rdc < 5) {
-			$page = $this->GetPage($redir, $this->cookie, $post, $purl);
+		$this->referer = !empty($GLOBALS['Referer']) && $GLOBALS['Referer'] != $this->link ? $GLOBALS['Referer'] : $purl;
+		while (($redir = $this->ChkRGRedirs($page, $redir, '/auth/login')) && $rdc < 15) {
+			$page = cURL($redir, $this->cookie, $post, $this->referer);
 			$this->cookie = GetCookiesArr($page, $this->cookie);
+			$this->referer = $redir;
 			$rdc++;
 		}
 
@@ -167,7 +165,7 @@ class rapidgator_net extends DownloadClass {
 			if (!preg_match('@(https?://(?:[^\./\r\n\'\"\t\:]+\.)?rapidgator\.net(?:\:\d+)?)?/auth/captcha/\w+/\w+@i', $page, $imgurl)) html_error('Error: CAPTCHA not found.');
 			$imgurl = (empty($imgurl[1])) ? 'http://rapidgator.net'.$imgurl[0] : $imgurl[0];
 			//Download captcha img.
-			$capt_page = $this->GetPage($imgurl, $this->cookie);
+			$capt_page = cURL($imgurl, $this->cookie);
 			$capt_img = substr($capt_page, strpos($capt_page, "\r\n\r\n") + 4);
 			$imgfile = DOWNLOAD_DIR . 'rapidgator_captcha.png';
 
@@ -191,24 +189,25 @@ class rapidgator_net extends DownloadClass {
 		if (empty($this->cookie['user__'])) html_error("Login Error: Cannot find 'user__' cookie.");
 		$this->cookie['lang'] = 'en';
 
-		$page = $this->GetPage($purl, $this->cookie, 0, $purl.'auth/login');
+		$page = cURL($purl, $this->cookie, 0, $purl.'auth/login');
 		is_present($page, '>Free</a>', 'Account isn\'t premium');
 
 		$this->PremiumDL();
 	}
 
 	private function ChkRGRedirs($page, $lasturl, $rgpath = '/') {
+		if (!is_array($lasturl)) $lasturl = parse_url($lasturl);
+		if ($page === false) return $lasturl;
 		$hpos = strpos($page, "\r\n\r\n");
 		$headers = empty($hpos) ? $page : substr($page, 0, $hpos);
 
 		if (stripos($headers, "\nLocation: ") === false && stripos($headers, "\nSet-Cookie: ") === false && !(cut_str($page, '<title>', '</title>'))) {
 			if (empty($_GET['rgredir'])) {
-				global $PHP_SELF;
 				if (!($body = cut_str($page, '<body>', '</body>'))) $body = $page;
 				if (stripos($body, '<script') !== strripos($body, '<script')) html_error('Unknown error while getting redirect code.');
 				$login = ($_REQUEST['premium_acc'] == 'on' && (!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])));
-				$data = $this->DefaultParamArr($this->link);
-				$data['rgredir'] = $pform = $sform = '';
+				$data = $this->DefaultParamArr($this->link, 0, $lasturl);
+				$data['rgredir'] = '';
 				$data['premium_acc'] = $_REQUEST['premium_acc']; // I should add 'premium_acc' to DefaultParamArr()
 				if ($login) {
 					$data['pA_encrypted'] = 'true';
@@ -242,16 +241,16 @@ class rapidgator_net extends DownloadClass {
 					$js = substr($js, 0, $funcPos)."\nvar T8RGLinks = $jsLinks;\nif ($linkVar in T8RGLinks) document.getElementById('rgredir').value = T8RGLinks[$linkVar];";
 					unset($jsLinks, $funcPos, $linkVar);
 				}
-				echo "\n<form name='rg_redir' action='$PHP_SELF' method='POST'><br />\n";
-				foreach ($data as $name => $input) echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
-				echo "<noscript><span class='htmlerror'><b>Sorry, this code needs JavaScript enabled to work.</b></span></noscript><br />";
-				echo "</form>\n<script type='text/javascript'>/* <![CDATA[Th3-822 */\n$js\nwindow.setTimeout(\"$('form[name=rg_redir]').submit();\", 300); // 300 µs to make sure that the value was decoded and added.\n/* ]]> */</script>\n\n</body>\n</html>";
+				echo "\n<form name='rg_redir' action='{$_SERVER['SCRIPT_NAME']}' method='POST'><br />\n";
+				foreach ($data as $name => $input) echo "<input type='hidden' name='$name' id='$name' value='" . htmlspecialchars($input, ENT_QUOTES) . "' />\n";
+				echo "</form>\n<span id='T8_emsg' class='htmlerror' style='text-align:center;display:none;'></span>\n<noscript><span class='htmlerror'><b>Sorry, this code needs JavaScript enabled to work.</b></span></noscript>\n<script type='text/javascript'>/* <![CDATA[ Th3-822 */\n\tvar T8 = true;\n\ttry {{$js}\n\t} catch(e) {\n\t\t$('#T8_emsg').html('<b>Cannot decode challenge: ['+e.name+'] '+e.message+'</b>').show();\n\t\tT8 = false;\n\t}\n\tif (T8) window.setTimeout(\"$('form[name=rg_redir]').submit();\", 300); // 300 µs to make sure that the value was decoded and added.\n/* ]]> */</script>\n\n</body>\n</html>";
 				exit;
 			} else {
 				$_GET['rgredir'] = rawurldecode($_GET['rgredir']);
 				if (strpos($_GET['rgredir'], '://')) $_GET['rgredir'] = parse_url($_GET['rgredir'], PHP_URL_PATH);
 				if (empty($_GET['rgredir']) || substr($_GET['rgredir'], 0, 1) != '/') html_error('Invalid redirect value.');
 				$redir = (!empty($lasturl['scheme']) && strtolower($lasturl['scheme']) == 'https' ? 'https' : 'http').'://rapidgator.net'.$_GET['rgredir'];
+				unset($_GET['rgredir']);
 			}
 		} elseif (preg_match('@Location: ((https?://(?:[^/\r\n]+\.)?rapidgator\.net)?'.$rgpath.'[^\r\n]*)@i', $headers, $redir)) $redir = (empty($redir[2])) ? (!empty($lasturl['scheme']) && strtolower($lasturl['scheme']) == 'https' ? 'https' : 'http').'://rapidgator.net'.$redir[1] : $redir[1];
 
@@ -270,5 +269,6 @@ class rapidgator_net extends DownloadClass {
 // [03-1-2014] Added support for rg.to domain. - Th3-822
 // [24-3-2014] Fixed FreeDL. - Th3-822
 // [20-5-2014] Fixed Login, bw error msg. - Th3-822
+// [16-11-2015][WIP] Fixing Blocks, Redirect Handling & Forcing Plugin To Use cURL. - Th3-822
 
 ?>

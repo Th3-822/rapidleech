@@ -38,7 +38,7 @@ class dailymotion_com extends DownloadClass {
 			$DL = $this->streams[$key];
 		} else html_error('Selected video stream was not found.');
 
-		$filename = preg_replace('@[^ A-Za-z_\-\d\.,\(\)\[\]\{\}&\!\'\@\%\#]@u', '_', trim($this->title), ENT_QUOTES);
+		$filename = preg_replace('@[^ A-Za-z_\-\d\.,\(\)\[\]\{\}&\!\'\@\%\#]@u', '_', html_entity_decode(trim($this->title), ENT_QUOTES, 'UTF-8'));
 		$filename .= " [DM-{$key}p][{$this->xid}].mp4";
 
 		$page = $this->GetPage($DL, $this->cookie);
@@ -75,7 +75,7 @@ class dailymotion_com extends DownloadClass {
 
 	private function QSelector() {
 		echo "\n<br /><br /><h3 style='text-align: center;'>Video Quality Selector</h4>";
-		echo "\n<center><form name='T8_QS' action='{$GLOBALS['PHP_SELF']}' method='POST'>\n";
+		echo "\n<center><form name='T8_QS' action='{$_SERVER['SCRIPT_NAME']}' method='POST'>\n";
 		echo "<select name='dlstream' id='QS_fmt'>\n";
 		foreach ($this->streams as $fmt => $url) echo "<option value='$fmt'>{$fmt}p</option>\n";
 		echo "</select>\n";
