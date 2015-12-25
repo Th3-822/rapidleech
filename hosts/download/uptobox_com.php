@@ -24,6 +24,7 @@ class uptobox_com extends GenericXFS_DL {
 				'Sorry, Uptobox.com is not available in your country'
 		);
 
+		$link = str_ireplace('uptostream.com', 'uptobox.com', $link);
 		$this->Start($link, $errMsgs);
 	}
 
