@@ -11,7 +11,7 @@ class rapidgator_net extends DownloadClass {
 		$this->link = $GLOBALS['Referer'] = str_ireplace(array('://www.rg.to/', '://rg.to/'), '://rapidgator.net/', $link);
 		$this->cookie = array('lang' => 'en');
 		$this->DLregexp = '@https?://pr\d+\.rapidgator\.net/[^\s\"\'<>]+@i';
-		if ((empty($_POST['step']) || $_POST['step'] != '1') && (empty($_GET['rgredir']) || stripos($_GET['rgredir'], '/auth/login') === false)) {
+		if ((empty($_POST['step']) || $_POST['step'] != '1') && (empty($_GET['rgredir']) || (stripos($_GET['rgredir'], '/auth/login') === false && stripos($_GET['rgredir'], '/site/ChangeLocation/key/') === false))) {
 			// Weird RG redirects.
 			$rdc = 0;
 			$this->page = false; // False value for starting the loop.
@@ -151,7 +151,7 @@ class rapidgator_net extends DownloadClass {
 		$page = false; // False value for starting the loop.
 		$redir = $purl.'auth/login';
 		$this->referer = !empty($GLOBALS['Referer']) && $GLOBALS['Referer'] != $this->link ? $GLOBALS['Referer'] : $purl;
-		while (($redir = $this->ChkRGRedirs($page, $redir, '/auth/login')) && $rdc < 15) {
+		while (($redir = $this->ChkRGRedirs($page, $redir, '(?:/auth/login|/site/ChangeLocation/key/)')) && $rdc < 15) {
 			$page = cURL($redir, $this->cookie, $post, $this->referer);
 			$this->cookie = GetCookiesArr($page, $this->cookie);
 			$this->referer = $redir;
@@ -160,6 +160,7 @@ class rapidgator_net extends DownloadClass {
 
 		is_present($page, 'Error e-mail or password.', 'Login Failed: Email/Password incorrect.');
 		is_present($page, 'E-mail is not a valid email address.', 'Login Failed: Login isn\'t an email address.');
+		is_present($page, 'We discovered that you try to access your account from unusual location.', 'Login Failed: Login Blocked By IP, Check Account Email And Follow The Steps To Add IP to Whitelist.');
 		if (stripos($page, 'The code from a picture does not coincide') !== false) {
 			if (!empty($_POST['step']) && $_POST['step'] == '1') html_error('Login Failed: Incorrect CAPTCHA response.');
 			if (!preg_match('@(https?://(?:[^\./\r\n\'\"\t\:]+\.)?rapidgator\.net(?:\:\d+)?)?/auth/captcha/\w+/\w+@i', $page, $imgurl)) html_error('Error: CAPTCHA not found.');
@@ -197,16 +198,16 @@ class rapidgator_net extends DownloadClass {
 
 	private function ChkRGRedirs($page, $lasturl, $rgpath = '/') {
 		if (!is_array($lasturl)) $lasturl = parse_url($lasturl);
-		if ($page === false) return $lasturl;
+		if ($page === false) return rebuild_url($lasturl);
 		$hpos = strpos($page, "\r\n\r\n");
 		$headers = empty($hpos) ? $page : substr($page, 0, $hpos);
 
-		if (stripos($headers, "\nLocation: ") === false && stripos($headers, "\nSet-Cookie: ") === false && !(cut_str($page, '<title>', '</title>'))) {
+		if (stripos($headers, "\nLocation: ") === false && stripos($headers, "\nSet-Cookie: ") === false && stripos($headers, '<script') !== false && !(cut_str($page, '<title>', '</title>'))) {
 			if (empty($_GET['rgredir'])) {
 				if (!($body = cut_str($page, '<body>', '</body>'))) $body = $page;
 				if (stripos($body, '<script') !== strripos($body, '<script')) html_error('Unknown error while getting redirect code.');
 				$login = ($_REQUEST['premium_acc'] == 'on' && (!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])));
-				$data = $this->DefaultParamArr($this->link, 0, $lasturl);
+				$data = $this->DefaultParamArr($this->link, 0, rebuild_url($lasturl));
 				$data['rgredir'] = '';
 				$data['premium_acc'] = $_REQUEST['premium_acc']; // I should add 'premium_acc' to DefaultParamArr()
 				if ($login) {
@@ -269,6 +270,6 @@ class rapidgator_net extends DownloadClass {
 // [03-1-2014] Added support for rg.to domain. - Th3-822
 // [24-3-2014] Fixed FreeDL. - Th3-822
 // [20-5-2014] Fixed Login, bw error msg. - Th3-822
-// [16-11-2015][WIP] Fixing Blocks, Redirect Handling & Forcing Plugin To Use cURL. - Th3-822
+// [16-12-2015][WIP] Fixing Blocks, Redirect Handling & Forcing Plugin To Use cURL. - Th3-822
 
 ?>

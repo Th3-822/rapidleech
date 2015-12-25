@@ -67,7 +67,7 @@ class nitroflare_com extends DownloadClass {
 			$ajaxBody = trim($ajaxBody);
 			if ($ajaxBody != "\xEF\xBB\xBF1" && $ajaxBody != '1') html_error('Unexpected result at freeDownload request.');
 
-			$this->CountDown(60);
+			if (preg_match('@id="CountDownTimer"\s+data-timer="(\d+)"@i', $page, $cD))$this->CountDown($cD[1]);
 
 			$data = $this->DefaultParamArr($this->link, $this->cookie, 1, 1);
 			$data['step'] = 1;
@@ -83,6 +83,7 @@ class nitroflare_com extends DownloadClass {
 		$post['recaptcha_response_field'] = urlencode($_POST['recaptcha_response_field']);
 
 		$page = $this->GetPage('http://nitroflare.com/ajax/freeDownload.php', $this->cookie, $post, $this->link . "\r\nX-Requested-With: XMLHttpRequest");
+		is_present($page, 'Free users have to wait ', 'Error: Skipped CountDown?');
 		is_present($page, 'The captcha wasn\'t entered correctly');
 
 		if (!preg_match($this->DLRegexp, $page, $dl)) html_error('Download Link Not Found.');
@@ -240,5 +241,6 @@ class nitroflare_com extends DownloadClass {
 }
 
 //[18-10-2015] Written by Th3-822.
+//[13-12-2015] Fixed FreeDL CountDown. - Th3-822
 
 ?>

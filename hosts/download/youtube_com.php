@@ -188,7 +188,8 @@ class youtube_com extends DownloadClass {
 			$v = '[\$_A-Za-z][\$\w]*';
 			if (!preg_match("@(?<=\.sig\|\|)$v(?=\($v\.s\))@", $cut1, $fn)) $this->decError('Cannot get decoder function name');
 			$fn = $fn[0];
-			if (($fpos = strpos($this->playerJs, "function $fn(")) === false && ($fpos = strpos($this->playerJs, "var $fn=function(")) === false) $this->decError('Cannot find decoder function');
+			if (!preg_match("@(?:function\s+$fn\s*\(|var\s+$fn\s*=\s*function\s*\(|(?<={|,)\s*$fn\s*=\s*function\s*\()@", $this->playerJs, $fpos, PREG_OFFSET_CAPTURE)) $this->decError('Cannot find decoder function');
+			$fpos = $fpos[0][1];
 			if (($cut2 = cut_str(substr($this->playerJs, $fpos), '{', '}')) == false) $this->decError('Cannot get decoder function contents');
 			$this->sigJs = preg_replace("@var $v=$v\[0\];$v\[0\]=($v)\[(\d+)%$v(?:\.length|\[$v\])\];$v\[\d+\]=$v;@", '$1=T8($1,$2);', trim($cut2));
 			$this->encS = array();
@@ -307,6 +308,6 @@ class youtube_com extends DownloadClass {
 // [14-1-2015]  Fixed Age Restrictions. (Please, do not annoy my inbox when a plugin fails, go to the forum) - Th3-822
 // [21-1-2015]  Fixed backslash in filename when cleanname is off. - Th3-822
 // [13-4-2015]  Fixed captcha detection. - Th3-822
-// [28-11-2015]  Fixed signature decoding functions. - Th3-822
+// [22-12-2015]  Fixed signature decoding functions. - Th3-822
 
 ?>

@@ -63,7 +63,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		$page = false; // False value for starting the loop.
 		$redir = "http://$domain/auth/login";
 		if (!empty($_POST['referer'])) $referer = $_POST['referer'];
-		while (($redir = ChkRGRedirs($page, $redir, '/auth/login', $default_acc)) && $rdc < 15) {
+		while (($redir = ChkRGRedirs($page, $redir, '(?:/auth/login|/site/ChangeLocation/key/)', $default_acc)) && $rdc < 15) {
 			$page = cURL($redir, $cookie, $post, $referer);
 			$cookie = GetCookiesArr($page, $cookie);
 			$referer = $redir;
@@ -72,6 +72,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 
 		is_present($page, 'Error e-mail or password', 'Login Failed: Invalid Email or Password.');
 		is_present($page, 'E-mail is not a valid email address.', 'Login Failed: Login isn\'t an email address.');
+		is_present($page, 'We discovered that you try to access your account from unusual location.', 'Login Failed: Login Blocked By IP, Check Account Email And Follow The Steps To Add IP to Whitelist.');
 		if (stripos($page, 'The code from a picture does not coincide') !== false) {
 			if (!empty($_POST['step']) && $_POST['step'] == '1') html_error('Login Failed: Incorrect CAPTCHA response.');
 			if (!preg_match('@(https?://(?:[^\./\r\n\'\"\t\:]+\.)?rapidgator\.net(?:\:\d+)?)?/auth/captcha/\w+/\w+@i', $page, $imgurl)) html_error('Error: CAPTCHA not found.');
@@ -172,15 +173,15 @@ function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5') {
 
 function ChkRGRedirs($page, $lasturl, $rgpath = '/', $default_login = false) { // Edited for upload plugin usage.
 	if (!is_array($lasturl)) $lasturl = parse_url($lasturl);
-	if ($page === false) return $lasturl;
+	if ($page === false) return rebuild_url($lasturl);
 	$hpos = strpos($page, "\r\n\r\n");
 	$headers = empty($hpos) ? $page : substr($page, 0, $hpos);
 
-	if (stripos($headers, "\nLocation: ") === false && stripos($headers, "\nSet-Cookie: ") === false && !(cut_str($page, '<title>', '</title>'))) {
+	if (stripos($headers, "\nLocation: ") === false && stripos($headers, "\nSet-Cookie: ") === false && stripos($headers, '<script') !== false && !(cut_str($page, '<title>', '</title>'))) {
 		if (empty($_REQUEST['rgredir'])) {
 			if (!($body = cut_str($page, '<body>', '</body>'))) $body = $page;
 			if (stripos($body, '<script') !== strripos($body, '<script')) html_error('Unknown error while getting redirect code.');
-			$data = array('action' => 'FORM', 'referer' => $lasturl, 'rgredir' => '');
+			$data = array('action' => 'FORM', 'referer' => rebuild_url($lasturl), 'rgredir' => '');
 			if (!$default_login) {
 				$data['A_encrypted'] = 'true';
 				$data['up_login'] = urlencode(encrypt($_REQUEST['up_login']));
@@ -237,6 +238,6 @@ function ChkRGRedirs($page, $lasturl, $rgpath = '/', $default_login = false) { /
 // [10-8-2013] Fixed redirects (again). - Th3-822
 // [05-10-2013] Removed anon user support. - Th3-822
 // [25-11-2013] Fixed redirects function (aagain :D ). - Th3-822
-// [16-11-2015][WIP] Fixing Blocks, Redirect Handling & Forcing Plugin To Use cURL. - Th3-822
+// [16-12-2015][WIP] Fixing Blocks, Redirect Handling & Forcing Plugin To Use cURL. - Th3-822
 
 ?>

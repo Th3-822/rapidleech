@@ -5,7 +5,7 @@ if (!defined('RAPIDLEECH')) {
 }
 
 // Allow user-agent to be changed easily
-if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:42.0) Gecko/20100101 Firefox/42.0');
+if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:43.0) Gecko/20100101 Firefox/43.0');
 
 /*
  * Pauses for countdown timer in file hosts

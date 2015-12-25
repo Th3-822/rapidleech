@@ -13,11 +13,15 @@ class uploaded_net extends DownloadClass {
 		$this->link = $Referer = 'http://uploaded.net/file/'.$fid[1];
 
 		if (empty($_POST['step']) || $_POST['step'] != 1) {
-			$this->page = $this->GetPage($this->link);
-			$header = substr($this->page, 0, strpos($this->page, "\r\n\r\n"));
+			$x = 0;
+			do {
+				$this->page = $this->GetPage($this->link, $this->cookie);
+				$header = substr($this->page, 0, strpos($this->page, "\r\n\r\n"));
+				$this->cookie = GetCookiesArr($header, $this->cookie);
+				$x++;
+			} while ($x < 6 && substr($header, 9, 3) == '302' && stripos($header, "\nLocation: /file/{$fid[1]}") !== false);
 			is_present($header, '/404', 'File Not Found');
 			is_present($header, '/410', 'File Was Removed');
-			$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		}
 
 		$this->pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
@@ -25,9 +29,15 @@ class uploaded_net extends DownloadClass {
 			$cookie = (empty($c[1]) ? urldecode($premium_acc['uploaded_net']['cookie']) : urldecode($c[1]));
 			if (strpos($cookie, '%')) $cookie = urldecode($cookie);
 			$this->cookie = array('login' => urlencode($cookie));
-			$this->page = $this->GetPage('http://uploaded.net/me', $this->cookie, 0, 'http://uploaded.net/');
+
+			$x = 0;
+			do {
+				$this->page = $this->GetPage('http://uploaded.net/me', $this->cookie, 0, 'http://uploaded.net/'.($x > 0 ? 'me' : ''));
+				$this->cookie = GetCookiesArr($this->page, $this->cookie);
+				$x++;
+			} while ($x < 6 && substr($this->page, 9, 3) == '302' && stripos($this->page, "\nLocation: /me") !== false);
+
 			if (substr($this->page, 9, 3) != '200') html_error('Cookie Error: Invalid Cookie?.');
-			$this->cookie = GetCookiesArr($this->page, $this->cookie);
 			if (stripos($this->page, '<em>Free</em>') !== false) {
 				$this->changeMesg(lang(300).'<br /><b>Cookie: Account isn\'t premium</b><br />Using it as member.');
 				$this->page = $this->GetPage($this->link, $this->cookie);
@@ -100,7 +110,7 @@ class uploaded_net extends DownloadClass {
 
 	private function Login($user, $pass) {
 		$post = array_map('urlencode', array('id' => $user, 'pw' => $pass));
-		$page = $this->GetPage('http://uploaded.net/io/login', 0, $post, 'http://uploaded.net/', 0, 1);
+		$page = $this->GetPage('http://uploaded.net/io/login', $this->cookie, $post, 'http://uploaded.net/', 0, 1);
 		$body = trim(substr($page, strpos($page, "\r\n\r\n") + 4));
 		is_present($body, 'No connection to database', 'Login failed: "No connection to database".');
 		if (preg_match('@\{\"err\":\"([^\"]+)\"@i', $body, $err)) html_error('Login Error: "'.html_entity_decode(stripslashes($err[1])).'".');
@@ -155,9 +165,15 @@ class uploaded_net extends DownloadClass {
 			$secretkey = $_secretkey;
 			if (empty($testCookie) || (is_array($testCookie) && count($testCookie) < 1)) return $this->Login($user, $pass);
 
-			$this->page = $this->GetPage('http://uploaded.net/me', $testCookie, 0, 'http://uploaded.net/');
+			$x = 0;
+			do {
+				$this->page = $this->GetPage('http://uploaded.net/me', $testCookie, 0, 'http://uploaded.net/'.($x > 0 ? 'me' : ''));
+				$testCookie = GetCookiesArr($this->page, $testCookie);
+				$x++;
+			} while ($x < 6 && substr($this->page, 9, 3) == '302' && stripos($this->page, "\nLocation: /me") !== false);
+
 			if (substr($this->page, 9, 3) != '200') return $this->Login($user, $pass);
-			$this->cookie = GetCookiesArr($this->page, $testCookie); // Update cookies
+			$this->cookie = $testCookie; // Update cookies
 			$this->SaveCookies($user, $pass); // Update cookies file
 			if (stripos($this->page, '<em>Free</em>') !== false) {
 				$this->changeMesg(lang(300).'<br /><b>Account isn\'t premium</b><br />Using it as member.');
@@ -195,5 +211,6 @@ class uploaded_net extends DownloadClass {
 
 //[29-5-2013] Written by Th3-822.
 //[09-1-2013] Added '410 Gone' error. - Th3-822
+//[06-12-2015] Added support for redirects blocking site access. #6DCambiemosVzla - Th3-822
 
 ?>

@@ -225,10 +225,10 @@ class DownloadClass {
 		exit;
 	}
 
-	public function SolveMedia($skey, $data, $referer = 0, $sname = 'Download File') {
+	public function SolveMedia($publicKey, $data, $referer = 0, $sname = 'Download File') {
 		if (!is_array($data)) html_error('Post needs to be sended in a array.');
-		if (empty($skey) || preg_match('@[^\w\-\.]@', $skey)) html_error('Invalid value for $skey');
-		$page = $this->GetPage("http://api.solvemedia.com/papi/challenge.noscript?k=$skey", 0, 0, $referer);
+		if (empty($publicKey) || preg_match('@[^\w\-\.]@', $publicKey)) html_error('[SM] Invalid value for $publicKey');
+		$page = $this->GetPage("http://api.solvemedia.com/papi/challenge.noscript?k=$publicKey", 0, 0, $referer);
 		is_present($page, 'domain / ckey mismatch', '[SM] Error getting CAPTCHA challenge: Bad referer.');
 		if (!preg_match('@<img [^/<>]*src\s?=\s?\"((https?://[^/\"<>]+)?/papi/media[^\"<>]+)\"@i', $page, $imgurl)) html_error('[SM] CAPTCHA img not found.');
 		$imgurl = (empty($imgurl[2])) ? 'http://api.solvemedia.com'.$imgurl[1] : $imgurl[1];
@@ -236,7 +236,7 @@ class DownloadClass {
 		if (!preg_match_all('@<input [^/|<|>]*type\s?=\s?\"?hidden\"?[^/<>]*\s?name\s?=\s?\"(\w+)\"[^/<>]*\s?value\s?=\s?\"([^\"<>]+)\"[^/<>]*/?\s*>@i', $page, $forms)) html_error('[SM] CAPTCHA data not found.');
 		$forms = array_combine($forms[1], $forms[2]);
 		foreach ($forms as $n => $v) $data["_smc[$n]"] = urlencode($v);
-		$data['sm_public_key'] = $skey; // Required for verifySolveMedia()
+		$data['sm_public_key'] = $publicKey; // Required for verifySolveMedia()
 
 		//Download captcha img.
 		list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage($imgurl), 2);
@@ -247,23 +247,30 @@ class DownloadClass {
 		exit;
 	}
 
-	public function verifySolveMedia($directOutput = false) {
+	public function verifySolveMedia($directOutput = false, $retryMethod = 'retrySolveMedia') {
 		if (empty($_POST['adcopy_response'])) html_error('[SM] You didn\'t enter the image verification code.');
 		if (empty($_POST['_smc']) || !is_array($_POST['_smc'])) html_error('[SM] CAPTCHA data invalid.');
 		$post = array();
 		foreach ($_POST['_smc'] as $n => $v) $post[urlencode($n)] = $v;
 		$post['adcopy_response'] = urlencode($_POST['adcopy_response']);
+		$publicKey = $_POST['sm_public_key'];
 
-		$url = 'http://api.solvemedia.com/papi/verify.noscript';
-		$page = $this->GetPage($url, 0, $post, 'http://api.solvemedia.com/papi/challenge.noscript?k=' . urlencode($_POST['sm_public_key']));
+		$link = 'http://api.solvemedia.com/papi/verify.noscript';
+		$page = $this->GetPage($link, 0, $post, 'http://api.solvemedia.com/papi/challenge.noscript?k=' . urlencode($publicKey));
 
 		if (!preg_match('@(https?://[^/\'\"<>\r\n]+)?/papi/verify\.pass\.noscript\?[^/\'\"<>\r\n]+@i', $page, $resp)) {
-			is_present($page, '/papi/challenge.noscript', '[SM] Wrong CAPTCHA entered.');
+			if (stripos($page, '/papi/challenge.noscript') !== false) {
+				$retryCallback = array($this, $retryMethod);
+				if (is_callable($retryCallback)) {
+					echo '<span class="htmlerror"><b>[SM] Wrong CAPTCHA entered.</b></span><br /><br />';
+					return call_user_func($retryCallback);
+				} else html_error('[SM] Wrong CAPTCHA entered.');
+			}
 			html_error('Error sending CAPTCHA.');
 		}
 		$resp = (empty($resp[1])) ? 'http://api.solvemedia.com'.$resp[0] : $resp[0];
 
-		$page = $this->GetPage($resp, 0, 0, $url);
+		$page = $this->GetPage($resp, 0, 0, $link);
 		if (!preg_match('@>\s*([^<>\s]+)\s*</textarea>@i', $page, $gibberish)) html_error('[SM] CAPTCHA response not found.');
 
 		if ($directOutput) return urlencode($gibberish[1]);

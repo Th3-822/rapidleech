@@ -35,16 +35,8 @@ if ($continue_up) {
 	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='login' width='100%' align='center'>Login to uploaded.net</div>\n";
 
 	$cookie = array();
-	if (!empty($_REQUEST['up_login']) && !empty($_REQUEST['up_pass'])) {
-		$post = array();
-		$post['id'] = urlencode($_REQUEST['up_login']);
-		$post['pw'] = urlencode($_REQUEST['up_pass']);
-
-		$page = geturl('uploaded.net', 80, '/io/login', $referer."\r\nX-Requested-With: XMLHttpRequest", $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);
-		if (preg_match('@"err":"([^"]+)"@i', $page, $err)) html_error('Login Error: "'.htmlentities($err[1]).'".');
-		$cookie = GetCookiesArr($page, $cookie);
-		if (empty($cookie['login']) || empty($cookie['auth'])) html_error('Login Error: Login cookies not found.');
-	} else html_error('Login Failed: Email or Password are empty. Please check login data.');
+	if (!empty($_REQUEST['up_login']) && !empty($_REQUEST['up_pass'])) CookieLogin(urlencode($_REQUEST['up_login']), urlencode($_REQUEST['up_pass']));
+	else html_error('Login Failed: Email or Password are empty. Please check login data.');
 
 	// Retrive upload ID
 	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrive upload ID</div>\n";
@@ -62,13 +54,13 @@ if ($continue_up) {
 	$post['Filename'] = $lname;
 	$post['Upload'] = 'Submit Query';
 
-	$up_url = $up[1]."upload?admincode=$adm_link&id={$uid[1]}&pw={$spass[1]}";
+	$up_url = $up[1]."upload?admincode=$adm_link&id={$uid[1]}&pw={$spass[1]}&folder=0";
 
 	// Uploading
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
 
 	$url = parse_url($up_url);
-	$upfiles = upfile($url['host'], 80, $url['path'].($url['query'] ? '?'.$url['query'] : ''), $referer, $cookie, $post, $lfile, $lname, 'Filedata', '', $_GET['proxy'], $pauth, 'Shockwave Flash');
+	$upfiles = upfile($url['host'], 80, $url['path'].($url['query'] ? '?'.$url['query'] : ''), 0, 0, $post, $lfile, $lname, 'Filedata', '', $_GET['proxy'], $pauth, 'Shockwave Flash');
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";
@@ -76,6 +68,8 @@ if ($continue_up) {
 	is_page($upfiles);
 
 	$content = substr($upfiles, strpos($upfiles, "\r\n\r\n") + 4);
+
+	if (stripos($content, 'forbidden') === 0) html_error('File Forbidden (Blacklisted)');
 
 	if (preg_match('@^(\w+)\,\d@i', $content, $fid)) {
 		$download_link = 'http://uploaded.net/file/'.$fid[1]; // $download_link = 'http://ul.to/'.$fid[1];
@@ -97,7 +91,107 @@ function generate($len = 6) {
 	return $pwd;
 }
 
+function Login($user, $pass) {
+	global $cookie, $referer, $pauth;
+	$post = array_map('urlencode', array('id' => $user, 'pw' => $pass));
+
+	$x = 0;
+	do {
+		$page = geturl('uploaded.net', 80, '/io/login', $referer.($x > 0 ? 'io/login' : '')."\r\nX-Requested-With: XMLHttpRequest", $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);
+		$cookie = GetCookiesArr($page, $cookie);
+		$x++;
+	} while ($x < 6 && substr($page, 9, 3) == '302' && stripos($page, "\nLocation: /io/login") !== false);
+
+	$body = trim(substr($page, strpos($page, "\r\n\r\n") + 4));
+	is_present($body, 'No connection to database', 'Login failed: "No connection to database".');
+	if (preg_match('@\{\"err\":\"([^\"]+)\"@i', $body, $err)) html_error('Login Error: "'.html_entity_decode(stripslashes($err[1])).'".');
+	if (empty($cookie['login'])) {
+		if ($body == '') html_error('The host didn\'t replied the login request, wait 15-30 seconds and try again.');
+		html_error('Login Error: Cannot find "login" cookie.');
+	}
+
+	SaveCookies($user, $pass); // Update cookies file
+}
+
+function IWillNameItLater($cookie, $decrypt=true) {
+	if (!is_array($cookie)) {
+		if (!empty($cookie)) return $decrypt ? decrypt(urldecode($cookie)) : urlencode(encrypt($cookie));
+		return '';
+	}
+	if (count($cookie) < 1) return $cookie;
+	$keys = array_keys($cookie);
+	$values = array_values($cookie);
+	$keys = $decrypt ? array_map('decrypt', array_map('urldecode', $keys)) : array_map('urlencode', array_map('encrypt', $keys));
+	$values = $decrypt ? array_map('decrypt', array_map('urldecode', $values)) : array_map('urlencode', array_map('encrypt', $values));
+	return array_combine($keys, $values);
+}
+
+function CookieLogin($user, $pass) {
+	global $secretkey, $cookie, $referer, $pauth;
+	if (empty($user) || empty($pass)) html_error('Login Failed: User or Password is empty.');
+	$user = strtolower($user);
+
+	if (!defined('DOWNLOAD_DIR')) {
+		global $options;
+		if (substr($options['download_dir'], -1) != '/') $options['download_dir'] .= '/';
+		define('DOWNLOAD_DIR', (substr($options['download_dir'], 0, 6) == 'ftp://' ? '' : $options['download_dir']));
+	}
+	$filename = DOWNLOAD_DIR . basename('uploaded_ul.php');
+	if (!file_exists($filename) || filesize($filename) <= 6) return Login($user, $pass);
+
+	$file = file($filename);
+	$savedcookies = unserialize($file[1]);
+	unset($file);
+
+	$hash = hash('crc32b', $user.':'.$pass);
+	if (is_array($savedcookies) && array_key_exists($hash, $savedcookies)) {
+		$_secretkey = $secretkey;
+		$secretkey = hash('crc32b', $pass).sha1($user.':'.$pass).hash('crc32b', $user); // A 56 char key should be safer. :D
+		$testCookie = (decrypt(urldecode($savedcookies[$hash]['enc'])) == 'OK') ? IWillNameItLater($savedcookies[$hash]['cookie']) : '';
+		$secretkey = $_secretkey;
+		if (empty($testCookie) || (is_array($testCookie) && count($testCookie) < 1)) return Login($user, $pass);
+
+		$x = 0;
+		do {
+			$page = geturl('uploaded.net', 80, '/me', $referer.($x > 0 ? 'me' : ''), $testCookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+			$testCookie = GetCookiesArr($page, $testCookie);
+			$x++;
+		} while ($x < 6 && substr($page, 9, 3) == '302' && stripos($page, "\nLocation: /me") !== false);
+
+		if (substr($page, 9, 3) != '200') return Login($user, $pass);
+		$cookie = $testCookie; // Update cookies
+		SaveCookies($user, $pass); // Update cookies file
+		return;
+	}
+	return Login($user, $pass);
+}
+
+function SaveCookies($user, $pass) {
+	global $secretkey, $cookie;
+	$maxdays = 30; // Max days to keep cookies for more than 1 user.
+	$filename = DOWNLOAD_DIR . basename('uploaded_ul.php');
+	if (file_exists($filename) && filesize($filename) > 6) {
+		$file = file($filename);
+		$savedcookies = unserialize($file[1]);
+		unset($file);
+
+		// Remove old cookies
+		if (is_array($savedcookies)) {
+			foreach ($savedcookies as $k => $v) if (time() - $v['time'] >= ($maxdays * 24 * 60 * 60)) unset($savedcookies[$k]);
+		} else $savedcookies = array();
+	} else $savedcookies = array();
+	$hash = hash('crc32b', $user.':'.$pass);
+	$_secretkey = $secretkey;
+	$secretkey = hash('crc32b', $pass).sha1($user.':'.$pass).hash('crc32b', $user); // A 56 char key should be safer. :D
+	$savedcookies[$hash] = array('time' => time(), 'enc' => urlencode(encrypt('OK')), 'cookie' => IWillNameItLater($cookie, false));
+	$secretkey = $_secretkey;
+
+	file_put_contents($filename, "<?php exit(); ?>\r\n" . serialize($savedcookies), LOCK_EX);
+}
+
 //[26-8-2012] Written by Th3-822.
 //[02-10-2012] Fixed link regexp. - Th3-822
+//[13-5-2013] Added "CookieLogin" for saving user cookies. (ul.to is blocking login requests after 5-6 logins) - Th3-822
+//[06-12-2015] Added support for redirects blocking site access. #6DCambiemosVzla - Th3-822
 
 ?>

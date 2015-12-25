@@ -93,7 +93,7 @@ class depositfiles_com extends DownloadClass {
 		$purl = 'http://' . $this->domain . '/';
 		if ($this->TryFreeDLTricks) $this->Mesg = lang(300);
 		if (!empty($_POST['step'])) switch ($_POST['step']) {
-			case '1': $response = urldecode($this->verifySolveMedia());
+			case '1': $response = urldecode($this->verifySolveMedia(true));
 				$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
 				if (empty($_POST['fid'])) html_error('FileID not found after POST.');
 
@@ -178,7 +178,7 @@ class depositfiles_com extends DownloadClass {
 	private function FreeDL() {
 		$purl = 'http://' . $this->domain . '/';
 		if (!empty($_POST['step']) && $_POST['step'] == 1) {
-			$response = urldecode($this->verifySolveMedia());
+			$response = urldecode($this->verifySolveMedia(true));
 			$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
 			if (empty($_POST['fid'])) html_error('FileID not found after POST.');
 

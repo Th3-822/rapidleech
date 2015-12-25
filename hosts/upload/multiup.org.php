@@ -4,8 +4,9 @@ $upload_acc['multiup_org']['user'] = ''; //Set your login
 $upload_acc['multiup_org']['pass'] = ''; //Set your password
 #######################
 
+$DontUlTo = array();
 #Plugin Settings#
-	# Uncheck/Disable Upload Sites: (Note: It'll upload to sites non listed here if checked at login page or in auul).
+	# Uncheck/Disable Upload Sites: (Note: It'll upload to sites non listed here if checked at login page).
 
 		$DontUlTo['sitename.tld'] = true; // This will uncheck by default the checkbox for upload to 'sitename.tld' at login form and it won't upload to that host at auul.
 
@@ -14,7 +15,7 @@ $upload_acc['multiup_org']['pass'] = ''; //Set your password
 
 // Don't edit from here unless you know what are you doing.
 $not_done = true;
-$domain = 'multiup.org';
+$domain = 'www.multiup.org';
 
 $page = geturl($domain, 80, '/api/get-list-hosts', 0, 0, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 $page = Get_Reply($page);
@@ -40,7 +41,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	<tr><td style='white-space:nowrap;'>&nbsp;Login*</td><td>&nbsp;<input type='text' name='up_login' value='' style='width:160px;' /></td></tr>
 	<tr><td style='white-space:nowrap;'>&nbsp;Password*</td><td>&nbsp;<input type='password' name='up_pass' value='' style='width:160px;' /></td></tr>\n";
 	echo "\t<tr><td colspan='2' align='center'><br />Upload to these hosts*<br /><br /></td></tr>\n";
-	foreach ($sites as $site => $mblimit) echo "\t<tr><td style='white-space:nowrap;' align='left'><input type='checkbox' name='UpT8[" . htmlentities($site, ENT_QUOTES) . "]' value='1'" . (($fsize > ($mblimit * 1048576)) ? " title='This file is too heavy for the max size allowed for this hoster.'" : (!empty($DontUlTo[$site]) ? " title='Unchecked by default for \$DontUlTo setting.'" : " checked='checked'")) . " /></td><td style='white-space:nowrap;' align='right'>&nbsp;".htmlentities($site)."&nbsp; ($mblimit MB)</td>\n";
+	foreach ($sites as $site => $data) echo "\t<tr><td style='white-space:nowrap;' align='left'><input type='checkbox' name='UpT8[" . htmlentities($site, ENT_QUOTES) . "]' value='1'" . (($fsize > ($data['size'] * 1048576)) ? " title='This file is too heavy for the max size allowed for this hoster.'" : (!empty($DontUlTo[$site]) ? " title='Unchecked by default for \$DontUlTo setting.'" : " checked='checked'")) . " /></td><td style='white-space:nowrap;' align='right'>&nbsp;".htmlentities($site)."&nbsp; ({$data['size']} MB)</td>\n";
 	echo "<tr><td colspan='2' align='center'><br /><input type='submit' value='Upload' onclick='javascript:return checkh();' /></td></tr>\n";
 	echo "<tr><td colspan='2' align='center'><small>*You can set it as default in <b>" . basename(__FILE__) . "</b></small></td></tr>\n";
 	echo "</form>\n</table>\n";
@@ -114,5 +115,6 @@ function Get_Reply($page) {
 }
 
 //[25-1-2013] Written by Th3-822.
+//[14-12-2015] Fixed. - Th3-822
 
 ?>
