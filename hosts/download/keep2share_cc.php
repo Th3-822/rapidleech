@@ -103,7 +103,7 @@ class keep2share_cc extends DownloadClass {
 
 		is_present($page, 'The verification code is incorrect.');
 
-		if (!preg_match('@\sid="download-wait-timer">\s*(\d+)\s*</@i', $page, $cD)) html_error('Countdown not found.');
+		if (!preg_match('@\sid="download-wait-timer"[^>]*>\s*(\d+)\s*</@i', $page, $cD)) html_error('Countdown not found.');
 		if ($cD[1] > 0) $this->CountDown($cD[1]);
 
 		$post = array('uniqueId' => $uniqueId, 'free' => 1);
@@ -226,7 +226,7 @@ class keep2share_cc extends DownloadClass {
 			$page = $this->GetPage($purl, $this->cookie, 0, $purl.'login.html');
 			is_notpresent($page, '/auth/logout.html">Logout', 'Login Error.');
 			$this->SaveCookies($user, $pass); // Update cookies file
-			is_present($page, ' class="free">Free</', 'Account isn\'t premium');
+			is_present($page, '/premium.html" class="free"', 'Account isn\'t premium');
 
 			return $this->PremiumDL();
 		}
@@ -255,7 +255,7 @@ class keep2share_cc extends DownloadClass {
 		$page = $this->GetPage($purl, $this->cookie, 0, $purl.'login.html');
 		is_notpresent($page, '/auth/logout.html">Logout', 'Login Error.');
 		$this->SaveCookies($user, $pass); // Update cookies file
-		is_present($page, ' class="free">Free</', 'Account isn\'t premium');
+		is_present($page, '/premium.html" class="free"', 'Account isn\'t premium');
 
 		return $this->PremiumDL();
 	}
@@ -297,7 +297,7 @@ class keep2share_cc extends DownloadClass {
 			if (stripos($page, '/auth/logout.html">Logout') === false) return $this->Login($user, $pass);
 			$this->cookie = GetCookiesArr($page, $testCookie); // Update cookies
 			$this->SaveCookies($user, $pass); // Update cookies file
-			is_present($page, ' class="free">Free</', 'Account isn\'t premium');
+			is_present($page, '/premium.html" class="free"', 'Account isn\'t premium');
 			return $this->PremiumDL();
 		}
 		return $this->Login($user, $pass);
@@ -329,5 +329,6 @@ class keep2share_cc extends DownloadClass {
 //[07-3-2014] Fixed login captcha. - Th3-822
 //[08-6-2014] Added support for Anti bot captcha at premium Dl. (Untested) - Th3-822
 //[02-8-2014] Fixed FreeDL captcha. - Th3-822
+//[02-1-2016] Fixed FreeDL countdown. - Th3-822
 
 ?>

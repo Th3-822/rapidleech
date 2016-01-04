@@ -76,9 +76,6 @@ while (false !== ($entry = $d->read())) {
 			case 'upstore.net':
 				$host['upsto.re'] = $host['upstore.net'];
 				break;
-			case 'uptobox.com':
-				$host['uptostream.com'] = $host['uptobox.com'];
-				break;
 			case 'youtube.com':
 				$host['youtu.be'] = $host['youtube.com'];
 				break;

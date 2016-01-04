@@ -5,7 +5,7 @@ if (!defined('RAPIDLEECH')) {
 	exit;
 }
 
-class nowvideo_sx extends DownloadClass {
+class vidgg_to extends DownloadClass {
 	public function Download($link) {
 		$page = $this->GetPage($link);
 		is_present($page, 'This file no longer exists', 'Video not found or it was deleted.');
@@ -19,7 +19,7 @@ class nowvideo_sx extends DownloadClass {
 			is_present($page, 'The file is being transfered', 'Video is temporarily unavailable..');
 		}
 
-		if (!preg_match('@<h4>\s*([^"<>]+)\s*</h4>@i', $page, $title)) html_error('Error: Video title not found.');
+		if (!preg_match('@<h5(?:[\s\t][^>]*)?>\s*([^"<>]+)\s*</h5>@i', $page, $title)) html_error('Error: Video title not found.');
 		if (!preg_match('@flashvars.domain\s*=\s*"([^"]+)";\s+flashvars.file\s*=\s*"([^"]+)";\s+flashvars.filekey\s*=\s*(?:"([^"]+)"|([\$_A-Za-z][\$\w]*))@', $page, $matches)) html_error('Error: Download link not found.');
 		if (empty($matches[3])) {
 			if (!preg_match('@var\s+'.$matches[4].'\s*=\s*"([^"]+)"\s*;@i', $page, $fkey)) html_error('FileKey not Found.');
@@ -34,12 +34,12 @@ class nowvideo_sx extends DownloadClass {
 
 		if (!preg_match('@\.(?:mp4|flv|webm|avi)$@i', basename($downl[1]), $ext)) $ext = array('.flv');
 		$filename = preg_replace('@\.(mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpe?g?|vob|avi|[23]gp)$@i', '', preg_replace('@[^ A-Za-z_\-\d\.,\(\)\[\]\{\}&\!\'\@\%\#]@u', '_', html_entity_decode(trim($title[1]), ENT_QUOTES, 'UTF-8')));
-		$filename .= sprintf(' [NowVideo][%s]%s', $matches[2], $ext[0]);
+		$filename .= sprintf(' [NovaMov][%s]%s', $matches[2], $ext[0]);
 
 		$this->RedirectDownload($downl[1], $filename, 0, 0, 0, $filename);
 	}
 }
 
-//[28-12-2015]  ReWritten by Th3-822.
+//[28-12-2015]  Written by Th3-822.
 
 ?>

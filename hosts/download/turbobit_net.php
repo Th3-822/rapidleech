@@ -6,15 +6,15 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class turbobit_net extends DownloadClass {
-	private $link, $page, $cookie, $pA, $DLregexp;
+	private $link, $page, $cookie, $pA, $RDregexp, $DLregexp;
 	public function Download($link) {
 		global $premium_acc, $Referer;
-		if (!preg_match('@^https?://(?:[^/]+\.)?turbobit\.(?:(?:net)|(?:ru))/(?:download/free/)?(\w+)(?:\.html)?@i', str_ireplace('unextfiles.com', 'turbobit.net', $link), $id)) html_error('Error: Invalid link entered.');
+		if (!preg_match('@^https?://(?:[^/]+\.)?turbobit\.(?:net|ru)/(?:download/free/)?(\w+)(?:\.html)?@i', str_ireplace('unextfiles.com', 'turbobit.net', $link), $id)) html_error('Error: Invalid link entered.');
 		$this->link = $Referer = 'http://turbobit.net/' . $id[1] . '.html';
 		$this->pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
 		$this->cookie = array('user_lang' => 'en');
-		$this->RDregexp = '@(https?://(?:[^/\"\'\t\r\n<>]+\.)?turbobit\.(?:(?:ru)|(:?net))(?:\:\d+)?)?//?download/redirect/[^\"\'\t\r\n<>]+@i';
-		$this->DLregexp = '@https?://s\d+\.turbobit\.(?:(?:ru)|(:?net))(?:\:\d+)?/download\.php\?[^\"\'\t\r\n<>]+@i';
+		$this->RDregexp = '@(https?://(?:[^/\"\'\t\r\n<>]+\.)?turbobit\.(?:ru|net)(?:\:\d+)?)?//?download/redirect/[^\"\'\t\r\n<>]+@i';
+		$this->DLregexp = '@https?://s\d+\.turbobit\.(?:ru|net)(?:\:\d+)?/download\.php\?[^\"\'\t\r\n<>]+@i';
 
 		if (empty($_POST['step'])) {
 			$this->page = $this->GetPage($this->link);
@@ -53,7 +53,7 @@ class turbobit_net extends DownloadClass {
 				$post['captcha_subtype'] = (!empty($_POST['c_subtype']) ? urlencode($_POST['c_subtype']) : '');
 				$page = $this->GetPage($this->link, $this->cookie, $post);
 
-				is_present($page, '>Incorrect, try again!<', 'Error: Wrong CAPTCHA entered.');
+				is_present($page, 'Incorrect, try again!', 'Error: Wrong CAPTCHA entered.');
 				is_present($page, 'Looks like your browser has disabled cookies.', 'Error: Invalid cookies.');
 
 				if (!preg_match('@\W(?:min)?Limit[\s\t]*:[\s\t]*([\d\s\t\r\n\+\-\*/\(\)]+)[\s\t]*[\,\;]@i', $page, $count)) html_error('Countdown not found.');
@@ -64,11 +64,11 @@ class turbobit_net extends DownloadClass {
 			}
 			case '2': { // Download
 				$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
-				$page = $page = $this->GetPage(str_replace('/download/free/', '/download/getLinkTimeout/', $this->link), $this->cookie, 0, $this->link . "\r\nX-Requested-With: XMLHttpRequest");
+				$page = $this->GetPage(str_replace('/download/free/', '/download/getLinkTimeout/', $this->link), $this->cookie, 0, $this->link . "\r\nX-Requested-With: XMLHttpRequest");
 
 				if (preg_match($this->RDregexp, $page, $redir)) {
 					$redir = (empty($redir[1])) ? 'http://turbobit.net'.$redir[0] : $redir[0];
-					$page = $this->GetPage($redir, $this->cookie);
+					$page = $this->GetPage($redir, $this->cookie, 0, $this->link);
 					if (!preg_match($this->DLregexp, $page, $dllink)) html_error('Download-Link not Found.');
 				} elseif (!preg_match($this->DLregexp, $page, $dllink)) html_error('Redirect-Link not Found.');
 				$this->RedirectDownload(html_entity_decode($dllink[0]), 'turbobit_fr', $this->cookie);
