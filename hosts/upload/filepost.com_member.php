@@ -43,7 +43,7 @@ if ($continue_up) {
 
 		is_present($page, 'Incorrect e-mail\/password combination', 'Login Failed: Invalid username and/or password.');
 		$cookie = GetCookiesArr($page);
-		if (empty($cookie['SID'])) html_error('Login Failed: Session cookie not found', 0);
+		if (empty($cookie['SID'])) html_error('Login Failed: Session cookie not found');
 		$login = true;
 	} else echo "<b><center>Login not found or empty, using non member upload.</center></b>\n";
 
@@ -58,8 +58,8 @@ if ($continue_up) {
 		$page = geturl("filepost.com", 80, "/", 0, $cookie);is_page($page);
 		if ($try > $max_trys) {
 			$try = $try-1;
-			if (stristr($page, 'Upload will be available a bit later')) html_error("Error@$try: Upload will be available a bit later.", 0);
-			else html_error("Error: No useable upload server found in $try trys.", 0);
+			if (stristr($page, 'Upload will be available a bit later')) html_error("Error@$try: Upload will be available a bit later.");
+			else html_error("Error: No useable upload server found in $try trys.");
 		}
 		$cookie = array_merge($cookie, GetCookiesArr($page));
 
@@ -68,7 +68,7 @@ if ($continue_up) {
 			continue;
 		}
 
-		if (!preg_match("@upload_url:\s+'(http://fs\d+\.filepost\.com/)([^\']+)'@i", $page, $loc)) html_error("Upload url not found.", 0);
+		if (!preg_match("@upload_url:\s+'(http://fs\d+\.filepost\.com/)([^\']+)'@i", $page, $loc)) html_error("Upload url not found.");
 
 		//Testing server.
 		$test = @file_get_contents($loc[1].'crossdomain.xml');
@@ -98,13 +98,13 @@ if ($continue_up) {
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>";
 
 	is_page($upfiles);
-	if (!preg_match('@\{"answer":"(\w+)"\}@i', $upfiles, $udid)) html_error("File-Adm id not found.", 0);
+	if (!preg_match('@\{"answer":"(\w+)"\}@i', $upfiles, $udid)) html_error("File-Adm id not found.");
 	$page = geturl("filepost.com", 80, "/files/done/".$udid[1], 'http://filepost.com/', $cookie);is_page($page);
 
 	if (preg_match('@id="down_link"[^<|>]+value="(http://[^\"]+)"@i', $page, $dl)) {
 		$download_link = $dl[1];
 		if (preg_match('@id="edit_link"[^<|>]+value="(http://[^\"]+)"@i', $page, $adml)) $adm_link = $adml[1];
-	} else html_error("Download link not found.", 0);
+	} else html_error("Download link not found.");
 }
 
 //[07-12-2011]  Written by Th3-822.

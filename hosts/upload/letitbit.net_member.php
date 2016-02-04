@@ -49,8 +49,8 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	$page = geturl($domain, 80, '/', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);
 	is_page($page);
 
-	if (!preg_match("@\.server\s*=\s*'([^\']+)'\s*;@i",$page, $up)) html_error('Error: Cannot find upload server.', 0);
-	if (!($props = cut_str($page, '.props = {', '}'))) html_error('Error: Cannot find upload data.', 0);
+	if (!preg_match("@\.server\s*=\s*'([^\']+)'\s*;@i",$page, $up)) html_error('Error: Cannot find upload server.');
+	if (!($props = cut_str($page, '.props = {', '}'))) html_error('Error: Cannot find upload data.');
 
 	function rndStr($lg, $num = false) {
 		if ($num) $str = "0123456789";
@@ -89,7 +89,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	if (preg_match('@"uids"\s*:\s*\["([\w\.\-]+)"\]@i', $upfiles, $uid)) {
 		$download_link = 'http://letitbit.net/download/'.$uid[1].'/'.str_replace(array(' ', '?'), '_', $lname).'.html';
 	} else {
-		html_error("Error: Download link not found.", 0);
+		html_error("Error: Download link not found.");
 	}
 }
 

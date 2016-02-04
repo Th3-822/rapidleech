@@ -90,7 +90,7 @@ if ($continue_up)
 	$upfiles = upfile('www.wrzuta.pl', 80, '/ajax/pliki/dodaj', '', 0, $post, $lfile, $lname, "file", '', $_GET["proxy"], $pauth, 'Shockwave Flash');
 	is_page($upfiles);
 	is_notpresent($page, '"status":"ok"', 'Upload failed?');
-	if (!preg_match('@"token":"([^\"]+)"@i', $upfiles, $token)) html_error("Error: File token not found!.", 0);
+	if (!preg_match('@"token":"([^\"]+)"@i', $upfiles, $token)) html_error("Error: File token not found!.");
 	$token = $token[1];
 ?>
 <script type="text/javascript">document.getElementById('progressblock').style.display='none';document.getElementById('info').innerHTML='Saving file...';</script>
@@ -129,7 +129,7 @@ if ($continue_up)
 	if (preg_match('@Location: (https?://[^/]+wrzuta.pl/[^\r|\n]+)@i', $page, $lnk)) {
 		$download_link = $lnk[1];
 	} else {
-		html_error("Error: Download link not found.", 0);
+		html_error("Error: Download link not found.");
 	}
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
 }

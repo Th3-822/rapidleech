@@ -7,7 +7,7 @@ if (count(get_included_files()) == 1) {
 }
 
 @set_time_limit(0);
-ini_alter('memory_limit', '1024M');
+@ini_alter('memory_limit', '1024M');
 if (ob_get_level()) ob_end_clean();
 ob_implicit_flush(true);
 clearstatcache();

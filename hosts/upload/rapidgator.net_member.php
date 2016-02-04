@@ -53,6 +53,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		$post['LoginForm%5Bpassword%5D'] = urlencode($_REQUEST['up_pass']);
 		$post['LoginForm%5BrememberMe%5D'] = 1;
 		if (!empty($_POST['step']) && $_POST['step'] == '1') {
+			$_POST['step'] = false;
 			if (empty($_POST['captcha'])) html_error('You didn\'t enter the image verification code.');
 			$cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
 			$post['LoginForm%5BverifyCode%5D'] = urlencode($_POST['captcha']);
@@ -74,17 +75,13 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		is_present($page, 'E-mail is not a valid email address.', 'Login Failed: Login isn\'t an email address.');
 		is_present($page, 'We discovered that you try to access your account from unusual location.', 'Login Failed: Login Blocked By IP, Check Account Email And Follow The Steps To Add IP to Whitelist.');
 		if (stripos($page, 'The code from a picture does not coincide') !== false) {
-			if (!empty($_POST['step']) && $_POST['step'] == '1') html_error('Login Failed: Incorrect CAPTCHA response.');
+			if (!empty($post['LoginForm%5BverifyCode%5D'])) html_error('Login Failed: Incorrect CAPTCHA response.');
 			if (!preg_match('@(https?://(?:[^\./\r\n\'\"\t\:]+\.)?rapidgator\.net(?:\:\d+)?)?/auth/captcha/\w+/\w+@i', $page, $imgurl)) html_error('Error: CAPTCHA not found.');
 			$imgurl = (empty($imgurl[1])) ? 'http://rapidgator.net'.$imgurl[0] : $imgurl[0];
 			//Download captcha img.
-			$capt_page = cURL($imgurl, $cookie, 0, $referer);
-			$capt_img = substr($capt_page, strpos($capt_page, "\r\n\r\n") + 4);
-			$imgfile = DOWNLOAD_DIR . 'rapidgator_captcha.png';
-
-			if (file_exists($imgfile)) unlink($imgfile);
-			if (!write_file($imgfile, $capt_img)) html_error('Error getting CAPTCHA image.');
-			unset($capt_page, $capt_img);
+			$captcha = explode("\r\n\r\n", cURL($imgurl, $this->cookie), 2);
+			if (substr($captcha[0], 9, 3) != '200') html_error('Error downloading captcha img.');
+			$mimetype = (preg_match('@image/[\w+]+@', $captcha[0], $mimetype) ? $mimetype[0] : 'image/png');
 
 			$data = array();
 			$data['step'] = '1';
@@ -95,7 +92,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 				$data['up_login'] = urlencode(encrypt($_REQUEST['up_login'])); // encrypt() will keep this safe.
 				$data['up_pass'] = urlencode(encrypt($_REQUEST['up_pass'])); // And this too.
 			}
-			EnterCaptcha($imgfile.'?'.time(), $data);
+			EnterCaptcha("data:$mimetype;base64,".base64_encode($captcha[1]), $data, 5, 'Login');
 			exit;
 		}
 		//is_present($page, 'The code from a picture does not coincide', 'Login Failed: Captcha... (T8: I will add it later)');
@@ -122,7 +119,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 
 	if (!preg_match('@var\s+form_url\s*=\s*"(https?://[^/|\"]+/[^\"]+)"\s*;@i', $page, $form_url) || !preg_match('@var\s+progress_url_web\s*=\s*"(https?://[^/|\"]+/[^\"]+)"\s*;@i', $page, $prog_url)) {
 		is_present($page, 'Your storage space is full. Delete some files or upgrade to the new', 'Your storage space is full');
-		html_error('Error: Cannot find upload url.', 0);
+		html_error('Error: Cannot find upload url.');
 	}
 
 	$starttime = time();
@@ -161,14 +158,14 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	if (!empty($resp['download_url'])) {
 		$download_link = $resp['download_url'];
 		if (!empty($resp['remove_url'])) $delete_link = $resp['remove_url'];
-	} else html_error("Download link not found ({$resp['state']}).", 0);
+	} else html_error("Download link not found ({$resp['state']}).");
 }
 
 // Edited For upload.php usage.
-function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5') {
+function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5', $sname = 'Enter Captcha', $iname = 'captcha') {
 	echo "\n<form name='captcha' method='POST'>\n";
-	foreach ($inputs as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='$input' />\n";
-	echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input type='text' name='captcha' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='Enter Captcha' />\n\t</h4>\n\t<script type='text/javascript'>/* <![CDATA[ */\n\t\tfunction check() {\n\t\t\tvar captcha=document.dl.captcha.value;\n\t\t\tif (captcha == '') {\n\t\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\t\treturn false;\n\t\t\t} else return true;\n\t\t}\n\t/* ]]> */</script>\n</form>\n</body>\n</html>";
+	foreach ($inputs as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='" . htmlspecialchars($input, ENT_QUOTES) . "' />\n";
+	echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input id='captcha' type='text' name='$iname' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='$sname' />\n\t</h4>\n\t<script type='text/javascript'>/* <![CDATA[ */\n\t\tfunction check() {\n\t\t\tvar captcha=document.getElementById('captcha').value;\n\t\t\tif (captcha == '') {\n\t\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\t\treturn false;\n\t\t\t} else return true;\n\t\t}\n\t/* ]]> */</script>\n</form>\n</body></html>";
 }
 
 function ChkRGRedirs($page, $lasturl, $rgpath = '/', $default_login = false) { // Edited for upload plugin usage.

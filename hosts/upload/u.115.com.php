@@ -56,7 +56,7 @@ if ($continue_up)
       
         if($errorcode)
         {
-             html_error("Error logging in - are your logins correct!", 0);
+             html_error("Error logging in - are your logins correct!");
         } 
       
       //  $linkaction =cut_str ($page ,' Location: ','');
@@ -64,7 +64,7 @@ if ($continue_up)
       //  
       //  if(!$linkaction)
       //  {
-      //       html_error("Error logging in - are your logins correct!", 0);
+      //       html_error("Error logging in - are your logins correct!");
       //  } 
       //  $Url = parse_url($linkaction);
       //  $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie1, 0, 0, $_GET["proxy"],$pauth);    
@@ -89,7 +89,7 @@ if ($continue_up)
         
         if(!$Upload_url)
         {
-            html_error($Upload_url, 0);
+            html_error($Upload_url);
         }
 ?>
 <script>document.getElementById('info').style.display='none';</script>
@@ -111,7 +111,7 @@ if ($continue_up)
         //echo (" <div> upfiles : $upfiles  </div>");
         if(!$pickcode)
         {
-             html_error("Finished, Go to your account to see Download-URL.", 0);
+             html_error("Finished, Go to your account to see Download-URL.");
         }
         else
         {

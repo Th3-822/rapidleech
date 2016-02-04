@@ -50,7 +50,7 @@ if ($continue_up)
 				$cookies=GetCookies($page);
 				preg_match("#login=([^=]+)#", $cookies, $login);
 				if(empty($login[1])){
-					html_error('Wrong Username or Password!', 0);
+					html_error('Wrong Username or Password!');
 				}
 				}else{
 		html_error ('Error, user and/or password is empty, please go back and try again!');
@@ -62,16 +62,16 @@ if ($continue_up)
 			$Url=parse_url('http://freakshare.com/');
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://freakshare.com/login.html", $cookies, $post, 0, $_GET["proxy"], $pauth);
 			if(!preg_match('#action="([^"]+)"#', $page, $up)){
-				html_error('Cannot get url action upload.', 0);
+				html_error('Cannot get url action upload.');
 			}
 			if(!preg_match('#id="progress_key"[\r|\n|\s]+value="([^"]+)"#', $page, $key)){
-				html_error('Cannot get user progress key.', 0);
+				html_error('Cannot get user progress key.');
 			}
 			if(!preg_match('#id="usergroup_key"[\r|\n|\s]+value="([^"]+)"#', $page, $group_key)){
-				html_error('Cannot get user group key.', 0);
+				html_error('Cannot get user group key.');
 			}
 			if(!preg_match('#name="UPLOAD_IDENTIFIER"[\r|\n|\s]+value="([^"]+)"#', $page, $UPLOAD_IDENTIFIER)){
-				html_error('Cannot get upload ID.', 0);
+				html_error('Cannot get upload ID.');
 			}
 			$uuid = uuid();
 			$url = $up[1].'?X-Progress-ID='.$uuid;
@@ -94,18 +94,18 @@ if ($continue_up)
 			$page = geturl($url["host"],  80, $url["path"].($url["query"] ? "?".$url["query"] : ""), 'http://freakshare.net/', $cookies, 0, 0, $_GET["proxy"],$pauth);
 			if(preg_match('#"status" : (\d+)#', $page, $status)){
 				if($status[1] != '302'){
-					html_error('Error in upload.', 0);
+					html_error('Error in upload.');
 				}
 			}
 			$Url=parse_url($locat);
 			$page = geturl($Url["host"],  80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 'http://freakshare.net/', $cookies, 0, 0, $_GET["proxy"],$pauth);
 			is_page($page);
 			if(!preg_match('#type="text"[\r|\n|\s]+value="([^"]+)"#', $page, $dl)){
-				html_error('Cannot get download link.', 0);
+				html_error('Cannot get download link.');
 			}
 			$download_link = $dl[1];
 			if(!preg_match('#delete\/([^"]+)"#', $page, $dlet)){
-				html_error('Cannot get delete link.', 0);
+				html_error('Cannot get delete link.');
 			}
 			$delete_link= 'http://freakshare.net/delete/'.$dlet[1];
 }

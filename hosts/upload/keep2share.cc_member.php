@@ -64,7 +64,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	$ulResult = ($status >= 500) ? array('status' => 'fail', 'code' => $status, 'message' => "HTTP Error $status.") : Get_Reply($upfiles);
 	k2s_checkErrors($ulResult, $prefix = 'Upload error');
 
-	if (empty($ulResult['user_file_id'])) html_error('Download link not found.', 0);
+	if (empty($ulResult['user_file_id'])) html_error('Download link not found.');
 	$download_link = 'http://k2s.cc/file/'.$ulResult['user_file_id'];
 }
 

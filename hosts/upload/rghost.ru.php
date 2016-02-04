@@ -44,7 +44,7 @@ $not_done = false;
 <tr><td align=center>
 <div id=login width=100% align=center>Login to Site</div>
 <?php
-if ( !isset($_REQUEST['my_login']) || !isset($_REQUEST['my_pass']) ) html_error('No user and pass given', 0);
+if ( !isset($_REQUEST['my_login']) || !isset($_REQUEST['my_pass']) ) html_error('No user and pass given');
 
 $Url = parse_url('http://rghost.ru/');
 $page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, 0, 0, 0, $_GET["proxy"], $pauth);

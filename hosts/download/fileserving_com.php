@@ -22,20 +22,20 @@ class fileserving_com extends DownloadClass {
         global $options;
         $page = $this->GetPage($link);
 		if (preg_match("#Location: (.*)#", $page)) {
-            html_error("File Not Available or Not Found: Error 01.", 0);
+            html_error("File Not Available or Not Found: Error 01.");
         }
 		preg_match("#HTTP\/1\.1 ([0-9]+)#", $page, $err);
 		if($err[1] == '400'){
 			html_error('Error 400: Bad Request');
 		}
 		if (!preg_match("#verify_url = '([^']+)'#", $page, $pth)) {
-            html_error("Cannot get URL ReCaptcha", 0);
+            html_error("Cannot get URL ReCaptcha");
         }
 		if (!preg_match("#fid:'([^']+)'#", $page, $fid)) {
-            html_error("File Not Available or Not Found. Error 02", 0);
+            html_error("File Not Available or Not Found. Error 02");
         }
 		if (!preg_match("#server:'([^']+)'#", $page, $server)) {
-            html_error("Cannot get URL of Download", 0);
+            html_error("Cannot get URL of Download");
         }
         $Cookies = GetCookies($page);
 		$page = $this->GetPage("http://www.google.com/recaptcha/api/challenge?k=6LfrS8kSAAAAAIMFkpPQ3wacYcW2EbM7mC53RvvD");

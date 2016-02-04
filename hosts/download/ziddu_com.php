@@ -53,7 +53,7 @@ class ziddu_com extends DownloadClass {
             $imgfile = DOWNLOAD_DIR . "ziddu_captcha.png";
 
             if (file_exists($imgfile)) unlink($imgfile);
-            if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.", 0);
+            if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.");
             // Captcha img downloaded
             
             $data = array_merge($this->DefaultParamArr($dlink, $cookie, $rlink), $match);

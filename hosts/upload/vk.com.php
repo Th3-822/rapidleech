@@ -151,10 +151,10 @@ if (empty($_REQUEST['code'])) {
 
 	if ($type == 'video') {
 		if (!empty($upsrv['response']['vid'])) $download_link = 'https://vk.com/video' . $json['user_id'] . '_' . $upsrv['response']['vid'];
-		else html_error('Your video will appear in your VK account after a while.', 0);
+		else html_error('Your video will appear in your VK account after a while.');
 	}
 	elseif ($type == 'doc' && !empty($rply['response'][0]['did'])) $download_link = 'https://vk.com/doc' . $rply['response'][0]['owner_id'] . '_' . $rply['response'][0]['did'];
-	else html_error('Check your VK account for see your new uploaded file.', 0);
+	else html_error('Check your VK account for see your new uploaded file.');
 }
 
 function vk_doApiReq($data) {

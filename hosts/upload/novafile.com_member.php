@@ -54,7 +54,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 
 	$page = geturl($domain, 80, '/?op=upload', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 
-	if (!preg_match('@action="((https?://[^/\"]+)?/upload/\d+)/?\"@i',$page, $up)) html_error('Error: Cannot find upload server.', 0);
+	if (!preg_match('@action="((https?://[^/\"]+)?/upload/\d+)/?\"@i',$page, $up)) html_error('Error: Cannot find upload server.');
 	$up[1] = (empty($up[2])) ? "http://$domain".$up[1] : $up[1];
 
 	$uid = '';for ($i = 0; $i < 13; $i++) $uid .= rand(0,9);
@@ -93,7 +93,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	if (preg_match('@(https?://(?:www\.)?'.preg_quote($domain, '@').'/\w{12}(?:/[^\?/<>\"\'\r\n]+)?(?:\.html?)?)\?killcode=\w+@i', $page, $lnk)) {
 		$download_link = $lnk[1];
 		$delete_link = $lnk[0];
-	} else html_error('Download link not found.', 0);
+	} else html_error('Download link not found.');
 }
 
 //[17-11-2012] Written by Th3-822.

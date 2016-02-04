@@ -104,7 +104,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	is_page($upfiles);
 
 	$json = Get_Reply($upfiles);
-	if (empty($json['result']) || $json['result'] != 'success' || empty($json['url'])) html_error('Download link not found.', 0);
+	if (empty($json['result']) || $json['result'] != 'success' || empty($json['url'])) html_error('Download link not found.');
 	$download_link = $json['url'];
 }
 

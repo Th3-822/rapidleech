@@ -35,7 +35,7 @@ $cookie = GetCookiesArr($upfiles, $cookie);
 $redir = parse_url((empty($redir[2]) ? 'http://www.datafilehost.com'.$redir[1] : $redir[1]));
 $page = geturl($redir['host'], defport($redir), $redir['path'].(!empty($redir['query']) ? '?'.$redir['query'] : ''), $up_url, $cookie, 0, 0, $_GET['proxy'], $pauth, 0, $url['scheme']);is_page($page);
 
-if (!preg_match('@https?://(?:www\.)?datafilehost\.com/d/[^\s\'\"<>/]+@i', $page, $lnk)) html_error('Download link not found.', 0);
+if (!preg_match('@https?://(?:www\.)?datafilehost\.com/d/[^\s\'\"<>/]+@i', $page, $lnk)) html_error('Download link not found.');
 $download_link = $lnk[0];
 if (preg_match('@https?://(?:www\.)?datafilehost\.com/delete-[^\s\'\"<>/]+@i', $page, $lnk)) $delete_link = $lnk[0];
 

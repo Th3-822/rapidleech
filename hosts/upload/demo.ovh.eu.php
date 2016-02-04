@@ -11,7 +11,7 @@ echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id
 $page = geturl($domain, 80, '/en/', $referer, 0, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 $cookie = GetCookiesArr($page);
 
-if (!preg_match('@action="((https?://(?:[\w\-]+\.)*demo\.ovh\.eu)?(/[^\"\'<>\s]*)?)"@i', $page, $up)) html_error('Error: Cannot find upload server.', 0);
+if (!preg_match('@action="((https?://(?:[\w\-]+\.)*demo\.ovh\.eu)?(/[^\"\'<>\s]*)?)"@i', $page, $up)) html_error('Error: Cannot find upload server.');
 
 $post = array();
 $post['step'] = trim(cut_str($page, 'name="step" value="', '"'));

@@ -61,7 +61,7 @@ if ($continue_up)
 <div id="info" style="width:100%;text-align:center;">Retrive upload ID</div>
 <?php
 	$page = geturl("netkups.com", 80, "/ajax.php?action=upload", 'http://netkups.com/', $cookie, 0, 0, $_GET["proxy"], $pauth);is_page($page);
-	if (stripos($page, "ERROR")) html_error('Error: '. htmlentities(substr($page, strpos($page, "\r\n\r\n") + 4)), 0);
+	if (stripos($page, "ERROR")) html_error('Error: '. htmlentities(substr($page, strpos($page, "\r\n\r\n") + 4)));
 	$rply = Get_Reply($page);
 
 	$post = array();
@@ -84,7 +84,7 @@ if ($continue_up)
 
 	$page = geturl("netkups.com", 80, "/?finish={$rply['key']}&process={$rply['process']}", 'http://netkups.com/', $cookie, 0, 0, $_GET["proxy"], $pauth);is_page($page);
 
-	if (!preg_match('@(https?%3A%2F%2F(?:[^\%]+\.)?netkups\.com%2F%3Fd%3D[^\"|\'|\&]+)@i', $page, $lnk)) html_error("Download link not found.", 0);
+	if (!preg_match('@(https?%3A%2F%2F(?:[^\%]+\.)?netkups\.com%2F%3Fd%3D[^\"|\'|\&]+)@i', $page, $lnk)) html_error("Download link not found.");
 	$download_link = urldecode($lnk[1]);
 }
 

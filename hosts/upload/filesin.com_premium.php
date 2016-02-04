@@ -57,7 +57,7 @@ $Filesin_pass = ''; //  Set your password
 		$url = parse_url('http://filesin.com/');
 		$page = geturl($url["host"], $url["port"] ? $url["port"] : 80, $url["path"] . ($url["query"] ? "?" . $url["query"] : ""), "http://www.filesin.com/", $cookie, 0, 0, $_GET["proxy"], $pauth);
 		if(!preg_match('#name="UPLOAD_IDENTIFIER"[\r|\n|\s]+value="([^"]+)"#', $page, $id)){
-				html_error('Cannot get id.', 0);
+				html_error('Cannot get id.');
 		}
 		$url = parse_url('http://filesin.com/');
         $post["UPLOAD_IDENTIFIER"] = $id[1];
@@ -69,7 +69,7 @@ $Filesin_pass = ''; //  Set your password
 <?php
 is_page($upfiles);
 				if(!preg_match("#ocation: (.*)#", $upfiles, $link)){
-					html_error('Error in upload.', 0);
+					html_error('Error in upload.');
 				}
 				$dl = explode('=', $link[1]);
 				if(!empty($dl)){

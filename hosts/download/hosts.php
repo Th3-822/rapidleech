@@ -25,8 +25,8 @@ while (false !== ($entry = $d->read())) {
 			case 'd-h.st':
 				$host['dev-host.org'] = $host['d-h.st'];
 				break;
-			case 'filesflash.com':
-				$host['filesflash.net'] = $host['filesflash.com'];
+			case 'fileboom.me':
+				$host['fboom.me'] = $host['fileboom.me'];
 				break;
 			case 'filecloud.io':
 				$host['ifile.it'] = $host['filecloud.io'];
@@ -37,6 +37,9 @@ while (false !== ($entry = $d->read())) {
 			case 'filerio.in':
 				$host['filerio.com'] = $host['filerio.in'];
 				$host['filekeen.com'] = $host['filerio.in'];
+				break;
+			case 'filesflash.com':
+				$host['filesflash.net'] = $host['filesflash.com'];
 				break;
 			case 'freakshare.com':
 				$host['freakshare.net'] = $host['freakshare.com'];
@@ -67,6 +70,9 @@ while (false !== ($entry = $d->read())) {
 			case 'uploaded.net':
 				foreach (array('ul.to', 'uploaded.to') as $uploaded) $host["$uploaded"] = $host['uploaded.net'];
 				break;
+			case 'uploadboy.com':
+				$host['uploadboy.me'] = $host['uploadboy.com'];
+				break;
 			case 'uploadhero.co':
 				$host['uploadhero.com'] = $host['uploadhero.co'];
 				break;
@@ -78,6 +84,9 @@ while (false !== ($entry = $d->read())) {
 				break;
 			case 'youtube.com':
 				$host['youtu.be'] = $host['youtube.com'];
+				break;
+			case 'xvideos.com':
+				$host['xnxx.com'] = $host['xvideos.com'];
 				break;
 		}
 	}

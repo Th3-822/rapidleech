@@ -59,7 +59,7 @@ if ($continue_up) {
 
 	$page = geturl($domain, 80, '/', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 
-	if (!preg_match('@\'uploader\'[\s\t]*:[\s\t]*[\'|\"](https?://www\d+\.zippyshare\.com/[^\r\n\'\"\s\t<>]+)[\'|\"]@i', $page, $up)) html_error('Error: Cannot find upload server.', 0);
+	if (!preg_match('@\'uploader\'[\s\t]*:[\s\t]*[\'|\"](https?://www\d+\.zippyshare\.com/[^\r\n\'\"\s\t<>]+)[\'|\"]@i', $page, $up)) html_error('Error: Cannot find upload server.');
 
 	$post = array();
 	$post['Filename'] = $lname;
@@ -86,7 +86,7 @@ if ($continue_up) {
 	is_page($upfiles);
 
 	if (preg_match('@https?://www\d*\.zippyshare\.com/v/\d+/file\.html@i', $upfiles, $link)) $download_link = $link[0];
-	else html_error('Download link not found.', 0);
+	else html_error('Download link not found.');
 
 }
 

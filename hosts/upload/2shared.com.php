@@ -47,13 +47,13 @@ if ($continue_up) {
 		}
 		$cookie = GetCookiesArr($page);
 		$login = true;
-	} else html_error("Login Failed: Email or Password are empty. Please check login data.", 0);
+	} else html_error("Login Failed: Email or Password are empty. Please check login data.");
 
 	// Retrive upload ID
 	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrive upload ID</div>\n";
 
 	$page = geturl("www.2shared.com", 80, "/", $referer, $cookie, 0, 0, $_GET["proxy"], $pauth);is_page($page);
-	if (!preg_match('@action="(https?://[^/|\"|\<|\>]+/[^\"|\<|\>]+)"@i', $page, $up)) html_error('Error: Cannot find upload server.', 0);
+	if (!preg_match('@action="(https?://[^/|\"|\<|\>]+/[^\"|\<|\>]+)"@i', $page, $up)) html_error('Error: Cannot find upload server.');
 
 	$post = array('mainDC' => cut_str($page, 'name="mainDC" value="', '"'));
 
@@ -70,13 +70,13 @@ if ($continue_up) {
 
 	is_page($upfiles);
 
-	if (stripos($upfiles, 'Your upload has successfully completed') === false) html_error('Error at upload', 0);
+	if (stripos($upfiles, 'Your upload has successfully completed') === false) html_error('Error at upload');
 	$page = geturl("www.2shared.com", 80, "/uploadComplete.jsp?".$url["query"], $referer, $cookie, 0, 0, $_GET["proxy"], $pauth);is_page($page);
 
 	if (preg_match('@action="(https?://[^/|\"|\<|\>]+/[^\"|\<|\>]+)"[^\<|\>]*name="downloadForm@i', $page, $lnk)) {
 		$download_link = $lnk[1];
 		if (preg_match('@action="(https?://[^/|\"|\<|\>]+/[^\"|\<|\>]+)"[^\<|\>]*name="adminForm@i', $page, $admlnk)) $adm_link = $admlnk[1];
-	} else html_error("Download link not found.", 0);
+	} else html_error("Download link not found.");
 }
 
 //[17-6-2012] Rewritten (for adding login support) by Th3-822.

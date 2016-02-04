@@ -105,7 +105,7 @@ if ($continue_up) {
 	$page = geturl('api.filecloud.io', 80, '/api-fetch_upload_url.api?response=text', '', 0, array('akey' => $_REQUEST['up_apikey']));is_page($page);
 	is_present($page, 'status: error', 'Upload Failed: "'.htmlentities(cut_str($page, 'message: ', "\n")).'"');
 
-	if (!preg_match('@upload_url: http://(s\d+\.filecloud\.io)(/[^\r|\n]+)@i', $page, $loc)) html_error('Upload server not found.', 0);
+	if (!preg_match('@upload_url: http://(s\d+\.filecloud\.io)(/[^\r|\n]+)@i', $page, $loc)) html_error('Upload server not found.');
 
 	$post = array();
 	if ($login) $post['akey'] = $_REQUEST['up_apikey'];
@@ -128,7 +128,7 @@ if ($continue_up) {
 		$download_link = 'http://filecloud.io/'.$dl[1];
 		if(preg_match('@name: ([^\r|\n]+)@i', $upfiles, $fn)) $download_link .= '/' . $fn[1];
 		if ($uselogin) echo "\n<table width='100%' border='0'>\n<tr><td width='100' nowrap='nowrap' align='right'>filecloud.io Apikey:<td width='80%'><input value='{$_REQUEST['up_apikey']}' class='upstyles-dllink' readonly='readonly' /></tr>\n</table>\n";
-	} else html_error('Download link not found.', 0);
+	} else html_error('Download link not found.');
 }
 
 //[09-8-2012]  (Re)Written by Th3-822.

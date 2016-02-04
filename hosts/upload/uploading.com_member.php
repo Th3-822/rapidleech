@@ -64,13 +64,13 @@ if ($continue_up) {
 		$cookie = GetCookiesArr($ajax_req, $cookie);
 		// if (empty($cookie['SID'])) html_error('Login Error: SID cookie not found.');
 		if (empty($cookie['u']) || empty($cookie['remembered_user'])) html_error('Login Error: Login cookies not found.'); // Yes.... u=1 is needed. :D
-	} else html_error("Login Failed: Email or Password are empty. Please check login data.", 0);
+	} else html_error("Login Failed: Email or Password are empty. Please check login data.");
 
 	// Retrive upload ID
 	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrive upload ID</div>\n";
 
 	$page = geturl('uploading.com', 80, '/', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
-	if (!preg_match('@upload_url[\s|\t]*:[\s|\t|\r|\n]*[\'|\"](https?://([^\|\'|\"|\r|\n|\s|\t]+\.)?uploading\.com/[^\'|\"|\r|\n|\s|\t]+)@i', $page, $up)) html_error('Error: Cannot find upload server.', 0);
+	if (!preg_match('@upload_url[\s|\t]*:[\s|\t|\r|\n]*[\'|\"](https?://([^\|\'|\"|\r|\n|\s|\t]+\.)?uploading\.com/[^\'|\"|\r|\n|\s|\t]+)@i', $page, $up)) html_error('Error: Cannot find upload server.');
 
 	$post = array('name' => urlencode($lname), 'size' => getSize($lfile));
 	$page = geturl('uploading.com', 80, '/files/generate/?ajax', $referer."\r\nX-Requested-With: XMLHttpRequest", $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);

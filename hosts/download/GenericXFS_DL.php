@@ -12,7 +12,7 @@ if (!defined('RAPIDLEECH')) {
 
 class GenericXFS_DL extends DownloadClass {
 	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\'\"\t<>\r\n\\\]+@i';
-	private $classVer = 10;
+	private $classVer = 11;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -127,7 +127,7 @@ class GenericXFS_DL extends DownloadClass {
 
 	protected function getFileName($url) {
 		$fname = basename(parse_url($url, PHP_URL_PATH));
-		if (preg_match("@^(?:v(?:ideo)?|{$this->fid})?\.(mp4|flv)$@i", $fname, $vExt)) { // Possible video/stream
+		if (preg_match("@^(?:v(?:id(?:eo)?)?|{$this->fid})?\.(mp4|flv)$@i", $fname, $vExt)) { // Possible video/stream
 			// Try to get original filename or title for renaming the file.
 			if (!empty($this->post['fname'])) $newname = $this->post['fname'];
 			else if (($title = $this->getVideoTitle())) $newname = $title;

@@ -56,7 +56,7 @@ if ($continue_up)
 				$page = geturl("videobb.com", 80, "/login.php","http://videobb.com/index.php",$cookie, $post, 0);
 		        is_page($page);
                 preg_match('/^HTTP\/1\.0|1 ([0-9]+) .*/',$page,$status);
-				if ($status[1] == 200) {html_error("Error, check username and password", 0);}
+				if ($status[1] == 200) {html_error("Error, check username and password");}
                 $cookie .= "; ".GetCookies($page);
 				$split = split ('[; ]', $cookie);
 				$cookie = $split[0].'; '.$split[2].'; '.$split[16].'; '.$split[18];

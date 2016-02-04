@@ -103,7 +103,7 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 			if (stripos($header, "\nLocation: ") !== false) is_present(cut_str($header, "\nLocation: ", "\n"), '?op=login', 'Please set '.($_T8['xfsFree'] ? '$_T8[\'xfsFree\'] to false and ' : '').'$_T8[\'anonUploadDisable\'] to true.');
 			is_present($page, '>Register on site to be able to upload files<', 'Please set '.($_T8['xfsFree'] ? '$_T8[\'xfsFree\'] to false and ' : '').'$_T8[\'anonUploadDisable\'] to true.');
 		}
-		html_error('Error: Cannot find upload server.', 0);
+		html_error('Error: Cannot find upload server.');
 	}
 	$up_url = (empty($up[2])) ? $scheme.'://'.$_T8['domain'].$up[1] : $up[1];
 
@@ -197,7 +197,7 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 		$download_link = substr($lnk[0], 0, (stripos($lnk[0], '/del-') + 1)) . $lnk[2] . '/' . $lnk[3];
 		$delete_link = $lnk[0];
 	} elseif (preg_match('@'.$host_rexexp.'\w{12}(?:/[^\?/<>\"\'\r\n]+)?(?:\.html?)?(?=[\r\n\t\s\'\"<>])@i', $page, $lnk)) $download_link = $lnk[0];
-	else html_error('Download link not found.', 0);
+	else html_error('Download link not found.');
 }
 
 //[17-8-2012] Written by Th3-822

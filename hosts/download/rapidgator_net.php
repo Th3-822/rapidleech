@@ -132,7 +132,7 @@ class rapidgator_net extends DownloadClass {
 		$user = ($pA ? $_REQUEST['premium_user'] : $GLOBALS['premium_acc']['rapidgator_net']['user']);
 		$pass = ($pA ? $_REQUEST['premium_pass'] : $GLOBALS['premium_acc']['rapidgator_net']['pass']);
 
-		if (empty($user) || empty($pass)) html_error('Login Failed: User or Password is empty. Please check login data.', 0);
+		if (empty($user) || empty($pass)) html_error('Login Failed: User or Password is empty. Please check login data.');
 		$this->cookie = array('lang' => 'en'); // Account is always showed as free if it comes from a file, as i don't send file's link as referer, lets reset the cookies.
 
 		$post = array();
@@ -140,6 +140,7 @@ class rapidgator_net extends DownloadClass {
 		$post['LoginForm%5Bpassword%5D'] = urlencode($pass);
 		$post['LoginForm%5BrememberMe%5D'] = '1';
 		if (!empty($_POST['step']) && $_POST['step'] == '1') {
+			$_POST['step'] = false;
 			if (empty($_POST['captcha'])) html_error('You didn\'t enter the image verification code.');
 			$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
 			$post['LoginForm%5BverifyCode%5D'] = urlencode($_POST['captcha']);
@@ -162,17 +163,13 @@ class rapidgator_net extends DownloadClass {
 		is_present($page, 'E-mail is not a valid email address.', 'Login Failed: Login isn\'t an email address.');
 		is_present($page, 'We discovered that you try to access your account from unusual location.', 'Login Failed: Login Blocked By IP, Check Account Email And Follow The Steps To Add IP to Whitelist.');
 		if (stripos($page, 'The code from a picture does not coincide') !== false) {
-			if (!empty($_POST['step']) && $_POST['step'] == '1') html_error('Login Failed: Incorrect CAPTCHA response.');
+			if (!empty($post['LoginForm%5BverifyCode%5D'])) html_error('Login Failed: Incorrect CAPTCHA response.');
 			if (!preg_match('@(https?://(?:[^\./\r\n\'\"\t\:]+\.)?rapidgator\.net(?:\:\d+)?)?/auth/captcha/\w+/\w+@i', $page, $imgurl)) html_error('Error: CAPTCHA not found.');
 			$imgurl = (empty($imgurl[1])) ? 'http://rapidgator.net'.$imgurl[0] : $imgurl[0];
 			//Download captcha img.
-			$capt_page = cURL($imgurl, $this->cookie);
-			$capt_img = substr($capt_page, strpos($capt_page, "\r\n\r\n") + 4);
-			$imgfile = DOWNLOAD_DIR . 'rapidgator_captcha.png';
-
-			if (file_exists($imgfile)) unlink($imgfile);
-			if (!write_file($imgfile, $capt_img)) html_error('Error getting CAPTCHA image.');
-			unset($capt_page, $capt_img);
+			$captcha = explode("\r\n\r\n", cURL($imgurl, $this->cookie), 2);
+			if (substr($captcha[0], 9, 3) != '200') html_error('Error downloading captcha img.');
+			$mimetype = (preg_match('@image/[\w+]+@', $captcha[0], $mimetype) ? $mimetype[0] : 'image/png');
 
 			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
 			$data['step'] = '1';
@@ -182,7 +179,7 @@ class rapidgator_net extends DownloadClass {
 				$data['premium_user'] = urlencode(encrypt($user)); // encrypt() will keep this safe.
 				$data['premium_pass'] = urlencode(encrypt($pass)); // And this too.
 			}
-			$this->EnterCaptcha($imgfile.'?'.time(), $data);
+			$this->EnterCaptcha("data:$mimetype;base64,".base64_encode($captcha[1]), $data, 5, 'Login');
 			exit;
 		}
 		//is_present($page, 'The code from a picture does not coincide', 'Login Failed: Captcha... (T8: I will add it later)');

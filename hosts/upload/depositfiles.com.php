@@ -55,7 +55,7 @@ if ($continue_up) {
 		$cookie = GetCookiesArr($page, $cookie);
 	}
 
-	if (!preg_match('@https?://fileshare\d+\.(?:depositfiles|dfiles)\.[^/:\r\n\t\"\'<>]+(?:\:\d+)?/[\w\-]+/[^\?\'"\r\n\<>;\s\t]*@i', $page, $up)) html_error('Error: Cannot find upload server.', 0);
+	if (!preg_match('@https?://fileshare\d+\.(?:depositfiles|dfiles)\.[^/:\r\n\t\"\'<>]+(?:\:\d+)?/[\w\-]+/[^\?\'"\r\n\<>;\s\t]*@i', $page, $up)) html_error('Error: Cannot find upload server.');
 
 	$post = array();
 	$post['MAX_FILE_SIZE'] = cut_str($page, 'name="MAX_FILE_SIZE" value="', '"');
@@ -79,7 +79,7 @@ if ($continue_up) {
 	if (preg_match('@https?://(?:[^/\'"\r\n\s\t<>;]\.)?(?:depositfiles|dfiles)\.[^/\r\n\t\"\'<>]+/files/[^\'"\r\n\s\t<>;]+@i', $upfiles, $dl)) {
 		$download_link = $dl[0];
 		if (preg_match('@https?://(?:[^/\'"\r\n\s\t<>;]\.)?(?:depositfiles|dfiles)\.[^/\r\n\t\"\'<>]+/rmv/[^\'"\r\n\s\t<>;]+@i', $upfiles, $del)) $delete_link = $del[0];
-	} else html_error('Download link not found.', 0);
+	} else html_error('Download link not found.');
 }
 
 function CheckDomain($domain) {

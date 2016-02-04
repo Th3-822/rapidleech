@@ -54,7 +54,7 @@ class bitshare_com extends DownloadClass {
             $imgfile = DOWNLOAD_DIR . "bitshare_captcha.jpg";
 
             if (file_exists($imgfile)) unlink($imgfile);
-            if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.", 0);
+            if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.");
             
             $data = $this->DefaultParamArr($rd[1], $this->cookie);
             $data['step'] = '1';
@@ -87,7 +87,7 @@ class bitshare_com extends DownloadClass {
             $imgfile = DOWNLOAD_DIR . "bitshare_captcha.jpg";
 
             if (file_exists($imgfile)) unlink($imgfile);
-            if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.", 0);
+            if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.");
             
             $data = $this->DefaultParamArr($Url, $this->cookie);
             $data['challenge'] = $ch;

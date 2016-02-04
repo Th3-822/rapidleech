@@ -44,7 +44,10 @@ if ($continue_up) {
 	$page = geturl('uploaded.net', 80, '/', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 	$js = geturl('uploaded.net', 80, '/js/script.js', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($js);
 
-	if (!preg_match('@uploadServer = [\'|\"](https?://([^\|\'|\"|\r|\n|\s|\t]+\.)uploaded\.net/)[\'|\"]@i', $js, $up)) html_error('Error: Cannot find upload server.', 0);
+	if (!preg_match('@uploadServer = [\'|\"](https?://([^\|\'|\"|\r|\n|\s|\t]+\.)uploaded\.net/)[\'|\"]@i', $js, $up)) {
+		is_present($js, "uploadServer = '';" ,'Due to high load our capacities are currently in full usage. Please try again in a few minutes.');
+		html_error('Error: Cannot find upload server.');
+	}
 
 	if (!preg_match('@id="user_id" value="(\d+)"@i', $page, $uid)) html_error('Error: UserID not found.');
 	if (!preg_match('@id="user_pw" value="(\w+)"@i', $page, $spass)) html_error('Error: Password hash not found.'); // $spass = array(1 => sha1($_REQUEST['up_pass']));
@@ -73,7 +76,7 @@ if ($continue_up) {
 
 	if (preg_match('@^(\w+)\,\d@i', $content, $fid)) {
 		$download_link = 'http://uploaded.net/file/'.$fid[1]; // $download_link = 'http://ul.to/'.$fid[1];
-	} else html_error('Download link not found.', 0);
+	} else html_error('Download link not found.');
 
 }
 

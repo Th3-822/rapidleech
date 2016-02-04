@@ -62,7 +62,7 @@ if ($continue_up)
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"] . ($Url["query"] ? "?" . $Url["query"] : ""), "http://minus.com/", $cookies, 0, 0, $_GET["proxy"], $pauth);
 			$cookie = GetCookies($page);
 			if(!preg_match('#"editor_id": "([^"]+)"#', $page, $id)){
-				html_error('Cannot get url action upload.', 0);
+				html_error('Cannot get url action upload.');
 			}
 			$dl = $id[1];
 			$url = parse_url('http://minus.com/api/UploadItem_Web/?editor_id='.$id[1].'&key=-&filename='.$lname);

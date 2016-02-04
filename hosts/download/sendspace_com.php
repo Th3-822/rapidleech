@@ -66,7 +66,7 @@ class sendspace_com extends DownloadClass {
 		if (empty($this->cookie['ssal'])) html_error('Login Error: Cannot find "ssal" cookie.');
 
 		$page = $this->GetPage("$site/mysendspace/myindex.html", $this->cookie, 0, "$site/");
-		is_notpresent($page, 'Your account needs to be renewed in', 'Login Failed: Account Isn\'t Premium.');
+		is_present($page, '<b>Sendspace Free</b>', 'Login Failed: Account Isn\'t Premium.');
 
 		$this->Premium();
 	}
@@ -97,5 +97,6 @@ class sendspace_com extends DownloadClass {
 // fix free download by kaox 19-dec-2009
 // Fix premium & free by Ruud v.Tony 03-Okt-2011
 // [16-6-2013] Rewritten & Added captcha support. - Th3-822
+// [09-1-2016] Fixed premium acc check. - Th3-822
 
 ?>

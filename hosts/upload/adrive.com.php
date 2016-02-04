@@ -80,6 +80,6 @@ if ($continue_up)
 			is_page($upfiles);
 			$Url = parse_url("http://www.adrive.com/login/logout");
 			$page = geturl($Url["host"], $Url["port"] ? $Url["port"] : 80, $Url["path"].($Url["query"] ? "?".$Url["query"] : ""), 0, $cookie, 0, 0, $_GET["proxy"],$pauth);
-			html_error("Finished, Go to your account to see Download-URL.", 0);
+			html_error("Finished, Go to your account to see Download-URL.");
 	}
 ?>

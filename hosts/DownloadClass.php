@@ -159,28 +159,13 @@ class DownloadClass {
 	 * Param $string $text -> Default text you want to display when counting down
 	 */
 
-	public function JSCountdown($secs, $post = 0, $text='Waiting link timelock', $stop = 1) {
-		echo "<p><center><span id='dl' class='htmlerror'><b>ERROR: Please enable JavaScript. (Countdown)</b></span><br /><span id='dl2'>Please wait</span></center></p>\n";
-		echo "<form action='{$_SERVER['SCRIPT_NAME']}' name='cdwait' method='POST'>\n";
+	public function JSCountdown($secs, $post = 0, $text = '', $stop = 1, $onFinish = '') {
+		if (empty($text)) $text = 'Waiting link timelock';
+		if (empty($onFinish)) $onFinish = (empty($post) ? 'location.reload();' : 'document.forms.js_timer.submit();');
+		echo "<p><center><span id='jsTimer_1' class='htmlerror'><b>ERROR: Please enable JavaScript. (Countdown)</b></span><br /><span id='jsTimer_2'>Please wait</span></center></p>\n";
+		echo "<form action='{$_SERVER['SCRIPT_NAME']}' name='js_timer' method='POST'>\n";
 		if (!empty($post) && is_array($post)) foreach ($post as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='" . htmlspecialchars($input, ENT_QUOTES) . "' />\n";
-		?><script type="text/javascript">/* <![CDATA[ */
-		var c = <?php echo $secs; ?>;var text = "<?php echo $text; ?>";var c2 = 0;var dl = document.getElementById("dl");var a2 = document.getElementById("dl2");fc();fc2();
-		function fc() {
-			if (c > 0) {
-				if (c > 120) {
-					dl.innerHTML = text+". Please wait <b>"+ Math.round(c/60) +"</b> minutes...";
-				} else {
-					dl.innerHTML = text+". Please wait <b>"+c+"</b> seconds...";
-				}
-				c = c - 1;
-				setTimeout("fc()", 1000);
-			} else {
-				dl.style.display="none";
-				void(<?php if (!empty($post)) echo 'document.forms.cdwait.submit()';else echo 'location.reload()'; ?>);
-			}
-		}
-		function fc2(){if(c>120){if(c2<=20){a2.innerHTML=a2.innerHTML+".";c2=c2+1}else{c2=10;a2.innerHTML=""}setTimeout("fc2()",100)}else{dl2.style.display="none"}}<?php
-		echo "/* ]]> */</script></form><br />";
+		echo "<script type='text/javascript'>/* <![CDATA[ */\nvar jsTimer=".intval($secs).";var text='".htmlspecialchars($text, ENT_QUOTES)."';var c2=0;var dl=document.getElementById('jsTimer_1');var a2=document.getElementById('jsTimer_2');fc();fc2();function fc(){if(jsTimer>0){if(jsTimer>120)dl.innerHTML=text+'. Please wait <b>'+Math.round(jsTimer/60)+'</b> minutes...';else dl.innerHTML=text+'. Please wait <b>'+jsTimer+'</b> seconds...';jsTimer--;setTimeout('fc()',1000)}else{dl.style.display='none';$onFinish}}function fc2(){if(jsTimer>120){if(c2<=20){a2.innerHTML=a2.innerHTML+'.';c2++}else{c2=10;a2.innerHTML=''}setTimeout('fc2()',100)}else{dl2.style.display='none'}}\n/* ]]> */</script></form><br />";
 		if ($stop) {
 			include(TEMPLATE_DIR.'footer.php');
 			exit();

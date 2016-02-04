@@ -69,7 +69,7 @@ class netload_in extends DownloadClass {
             $capt_img = substr($capt, strpos($capt, "\r\n\r\n") + 4);
             $imgfile = DOWNLOAD_DIR . "netload_captcha.png";
             if (file_exists($imgfile)) unlink($imgfile);
-            if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.", 0);
+            if (empty($capt_img) || !write_file($imgfile, $capt_img)) html_error("Error getting CAPTCHA image.");
             
             $data = array_merge($this->DefaultParamArr('http://netload.in/' . $temp[1], $this->cookie), array_combine($match[1], $match[3]));
             $data['step'] = 'captcha';

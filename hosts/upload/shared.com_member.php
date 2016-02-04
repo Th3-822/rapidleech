@@ -88,7 +88,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 
 	is_page($upfiles);
 
-	if (!preg_match('@"slug"\s*:\s*"([^"]+)",@i', $upfiles, $lnk)) html_error('Download link not found.', 0);
+	if (!preg_match('@"slug"\s*:\s*"([^"]+)",@i', $upfiles, $lnk)) html_error('Download link not found.');
 	$download_link = 'http://shared.com/'.$lnk[1];
 }
 

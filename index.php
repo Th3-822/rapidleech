@@ -65,6 +65,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 
 	$Url = parse_url($LINK);
 	$Url['scheme'] = strtolower($Url['scheme']);
+	$Url['host'] = strtolower($Url['host']);
 
 	$Url['path'] = (empty($Url['path'])) ? '/' : str_replace('%7C', '|', $Url['path']);
 	$LINK = rebuild_url($Url);
@@ -104,11 +105,12 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 		$LINK = rebuild_url($Url);
 	} else $auth = '';
 
-	if (empty($_GET['dis_plug']) || $_GET ['dis_plug'] != 'on') {
+	include(TEMPLATE_DIR . '/header.php');
+
+	if (empty($_GET['dis_plug']) || $_GET['dis_plug'] != 'on') {
 		// check Domain-Host
 		foreach ($host as $site => $file) {
 			if (host_matches($site, $Url['host'])) {
-				include(TEMPLATE_DIR . '/header.php');
 				error_reporting(E_ERROR | E_PARSE | error_reporting()); // Make sure to show any critical error while loading the plugin.
 				require_once(CLASS_DIR . 'http.php');
 				require_once(HOST_DIR . 'DownloadClass.php');
@@ -124,16 +126,24 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 			}
 		}
 	}
-	// print "<html>$nn<head>$nn<title>Downloading $LINK</title>$nn<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />$nn</head>$nn<body>$nn";
-	include(TEMPLATE_DIR . '/header.php');
 
-	$FileName = (isset($Url['path']) && basename($Url['path'])) ? basename($Url['path']) : 'index.html';
-	$mydomain = ($pos = strpos($_SERVER['HTTP_HOST'], ':')) !== false ? substr($_SERVER['HTTP_HOST'], 0, $pos) : $_SERVER['HTTP_HOST'];
+	$mydomain = strtolower(($pos = strpos($_SERVER['HTTP_HOST'], ':')) !== false ? substr($_SERVER['HTTP_HOST'], 0, $pos) : $_SERVER['HTTP_HOST']);
 	if ($options['bw_save'] && ($Url['host'] == $_SERVER['SERVER_ADDR'] || host_matches($mydomain, $Url['host']))) html_error(sprintf(lang(7), $mydomain, $_SERVER['SERVER_ADDR']));
+	if (empty($auth) && $_GET['premium_acc'] == 'on') {
+		if (!empty($premium_acc[$Url['host']]['user']) && !empty($premium_acc[$Url['host']]['pass'])) $auth = '2';
+		else if (!filter_var($Url['host'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6)) {
+			foreach (array_keys($premium_acc) as $site) {
+				if (host_matches($site, $Url['host']) && !empty($premium_acc["$site"]['user']) && !empty($premium_acc["$site"]['pass'])) {
+					$auth = '2';
+					break;
+				}
+			}
+		}
+	}
 
 	$redir = GetDefaultParams();
 	$redir['dis_plug'] = 'on';
-	$redir['filename'] = urlencode($FileName);
+	$redir['filename'] = urlencode((isset($Url['path']) && basename($Url['path'])) ? basename($Url['path']) : 'index.html');
 	$redir['host'] = urlencode($Url['host']);
 	if (!empty($Url['port'])) $redir['port'] = urlencode($Url['port']);
 	$redir['path'] = urlencode($Url['path'] . (!empty($Url['query']) ? '?' . $Url['query'] : ''));
@@ -144,6 +154,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 
 	insert_location($redir);
 } else {
+	header('X-Accel-Buffering: no');
 	require_once(TEMPLATE_DIR . 'functions.php');
 	include(TEMPLATE_DIR . '/header.php');
 	if ($options['ref_check']) check_referer();
@@ -153,7 +164,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 		$_GET['filename'] = urldecode(trim($_GET['filename']));
 		if (strpos($_GET['filename'], '?') !== false) $_GET['filename'] = substr($_GET['filename'], 0, strpos($_GET['filename'], '?'));
 		$_GET['saveto'] = urldecode(trim($_GET['saveto']));
-		$_GET['host'] = urldecode(trim($_GET['host']));
+		$_GET['host'] = strtolower(urldecode(trim($_GET['host'])));
 		$_GET['path'] = urldecode(trim($_GET['path']));
 		$_GET['port'] = !empty($_GET['port']) ? urldecode(trim($_GET['port'])) : 0;
 		$_GET['referer'] = !empty($_GET['referer']) ? urldecode(trim($_GET['referer'])) : 0;
@@ -180,8 +191,25 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 			if (!preg_match('|^(?:.+\.)?(.+\..+)$|i', $_GET['host'], $hostmatch)) html_error('No valid hostname found for authorisation!');
 			$hostmatch = str_replace('.', '_', $hostmatch[1]);
 			if (isset($premium_acc["$hostmatch"]) && is_array($premium_acc["$hostmatch"]) && !empty($premium_acc["$hostmatch"]['user']) && !empty($premium_acc["$hostmatch"]['pass'])) {
-				$auth = base64_encode($premium_acc["$hostmatch"]['user'] . ':' . $premium_acc["$hostmatch"]['pass']);
+				$AUTH['user'] = $premium_acc["$hostmatch"]['user'];
+				$AUTH['pass'] = $premium_acc["$hostmatch"]['pass'];
+				$auth = base64_encode($AUTH['user'] . ':' . $AUTH['pass']);
 			} else html_error('No usable premium account found for this download - please set one in accounts.php');
+		} elseif ($_GET['auth'] == '2') {
+			if (!empty($premium_acc[$_GET['host']]['user']) && !empty($premium_acc[$_GET['host']]['pass'])) {
+				$AUTH['user'] = $premium_acc[$_GET['host']]['user'];
+				$AUTH['pass'] = $premium_acc[$_GET['host']]['pass'];
+				$auth = base64_encode($AUTH['user'] . ':' . $AUTH['pass']);
+			} else if (!filter_var($_GET['host'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6)) {
+				foreach (array_keys($premium_acc) as $site) {
+					if (host_matches($site, $_GET['host']) && !empty($premium_acc["$site"]['user']) && !empty($premium_acc["$site"]['pass'])) {
+						$AUTH['user'] = $premium_acc["$site"]['user'];
+						$AUTH['pass'] = $premium_acc["$site"]['pass'];
+						$auth = base64_encode($AUTH['user'] . ':' . $AUTH['pass']);
+						break;
+					}
+				}
+			}
 		} elseif (!empty($_GET['auth'])) {
 			$auth = decrypt(urldecode($_GET['auth']));
 			list($AUTH['user'], $AUTH['pass']) = array_map('rawurldecode', explode(':', base64_decode($auth), 2));
