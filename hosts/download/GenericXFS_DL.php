@@ -134,7 +134,7 @@ class GenericXFS_DL extends DownloadClass {
 			else $newname = false;
 
 			// I always like to add a letter to mark it as a reconverted video stream and remove the original video .ext
-			if (!empty($newname)) $fname = preg_replace('@\.(mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpe?g?|vob|avi|[23]gp)$@i', '', basename($newname)) . '_S.' . strtolower($vExt[1]);
+			if (!empty($newname)) $fname = preg_replace('@(?:\.(?:mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpe?g?|vob|avi|[23]gp))+$@i', '', basename($newname)) . '_S.' . strtolower($vExt[1]);
 		}
 		return $fname;
 	}
@@ -151,7 +151,7 @@ class GenericXFS_DL extends DownloadClass {
 
 	protected function XFSUnpacker($p,$a,$c,$k,$ed) {
 		$k = explode($ed, $k);
-		while ($c--) if($k[$c]) $p = preg_replace('@\b'.base_convert($c, 10, $a).'\b@', $k[$c], $p);
+		while ($c--) if ($k[$c]) $p = preg_replace('@\b'.base_convert($c, 10, $a).'\b@', $k[$c], $p);
 		return $p;
 	}
 
@@ -269,6 +269,7 @@ class GenericXFS_DL extends DownloadClass {
 			is_present($this->page, 'This server is in maintenance mode. Refresh this page in some minutes.', 'File is not available at this moment, try again later.');
 			is_present($this->page, 'This file is available for Premium Users only.');
 			is_present($this->page, 'This file reached max downloads limit', 'Error: This file reached max downloads limit.');
+			is_present($this->page, 'Error happened when generating Download Link.', 'Error: Download server is not available at this moment, try again later.');
 			if (!empty($this->cErrsFDL) && is_array($this->cErrsFDL)) {
 				foreach ($this->cErrsFDL as $cErr) {
 					if (is_array($cErr)) is_present($this->page, $cErr[0], $cErr[1]);
@@ -305,6 +306,7 @@ class GenericXFS_DL extends DownloadClass {
 			if (!$this->FindPost()) {
 				is_present($this->page, 'Downloads are disabled for your country:', 'Downloads are disabled for your server\'s country.');
 				is_present($this->page, 'This server is in maintenance mode. Refresh this page in some minutes.', 'File is not available at this moment, try again later.');
+				is_present($this->page, 'Error happened when generating Download Link.', 'Error: Download server is not available at this moment, try again later.');
 				html_error('[PremiumDL] Non aceptable form found.');
 			}
 			if (!isset($this->post['method_premium']) || $this->post['method_premium'] === '') $this->post['method_premium'] = 1;

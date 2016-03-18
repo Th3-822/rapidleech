@@ -39,6 +39,7 @@ class dailymotion_com extends DownloadClass {
 		} else html_error('Selected video stream was not found.');
 
 		$filename = preg_replace('@[^ A-Za-z_\-\d\.,\(\)\[\]\{\}&\!\'\@\%\#]@u', '_', html_entity_decode(trim($this->title), ENT_QUOTES, 'UTF-8'));
+		$filename = preg_replace('@(?:\.(?:mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpe?g?|vob|avi|[23]gp))+$@i', '', $filename);
 		$filename .= " [DM-{$key}p][{$this->xid}].mp4";
 
 		$page = $this->GetPage($DL, $this->cookie);

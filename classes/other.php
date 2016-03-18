@@ -223,9 +223,9 @@ function _create_list() {
 	if (($GLOBALS['options']['show_all'] === true) && (isset($_COOKIE['showAll']) && $_COOKIE['showAll'] == 1)) {
 		$dir = dir(DOWNLOAD_DIR);
 		while(false !== ($file = $dir->read())) {
-			if (($tmp = file_data_size_time(DOWNLOAD_DIR.$file)) === false) continue;
+			if ($file == '.' || $file == '..' || ($tmp = file_data_size_time(DOWNLOAD_DIR.$file)) === false) continue;
 			list($size, $time) = $tmp;
-			if ($file != '.' && $file != '..' && (!is_array($GLOBALS['options']['forbidden_filetypes']) || !in_array(strtolower(strrchr($file, '.')), $GLOBALS['options']['forbidden_filetypes']))) {
+			if (!is_array($GLOBALS['options']['forbidden_filetypes']) || !in_array(strtolower(strrchr($file, '.')), $GLOBALS['options']['forbidden_filetypes'])) {
 				$file = DOWNLOAD_DIR . $file;
 				while(isset($glist[$time])) $time++;
 				$glist[$time] = array('name' => realpath($file), 'size' => bytesToKbOrMbOrGb($size), 'date' => $time);
@@ -235,20 +235,24 @@ function _create_list() {
 		@uasort($glist, '_cmp_list_enums');
 	} else {
 		if (@file_exists(CONFIG_DIR . 'files.lst') && ($glist = file(CONFIG_DIR . 'files.lst')) !== false) {
+			$listReformat = array();
 			foreach($glist as $key => $record) {
-				foreach(unserialize($record) as $field => $value) {
-					switch ($field) {
-						case 'date':
-							$date = $value;
-						default:
-							$listReformat[$key][$field] = $value;
-							break;
-						case 'comment':
-							$listReformat[$key][$field] = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-							break;
+				if ($record = @unserialize($record)) {
+					$date = 0;
+					foreach($record as $field => $value) {
+						switch ($field) {
+							case 'date':
+								$date = $value;
+							default:
+								$listReformat[$key][$field] = $value;
+								break;
+							case 'comment':
+								$listReformat[$key][$field] = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+								break;
+						}
 					}
+					if (!empty($date)) $glist[$date] = $listReformat[$key];
 				}
-				$glist[$date] = $listReformat[$key];
 				unset($glist[$key], $listReformat[$key]);
 			}
 		}
@@ -528,11 +532,10 @@ function host_matches($site, $host) {
 
 function GetDefaultParams() {
 	$DParam = array();
-	if (isset($_GET['useproxy']) && $_GET['useproxy'] == 'on' && !empty($_GET['proxy'])) {
-		global $pauth;
+	if (!empty($_GET['useproxy']) && !empty($_GET['proxy'])) {
 		$DParam['useproxy'] = 'on';
 		$DParam['proxy'] = $_GET['proxy'];
-		if ($pauth) $DParam['pauth'] = urlencode(encrypt($pauth));
+		if (!empty($GLOBALS['pauth'])) $DParam['pauth'] = urlencode(encrypt($GLOBALS['pauth']));
 	}
 	if (isset($_GET['autoclose'])) $DParam['autoclose'] = '1';
 	if (isset($_GET['audl'])) $DParam['audl'] = 'doum';

@@ -13,7 +13,7 @@ class mega_co_nz extends DownloadClass {
 		$this->changeMesg(lang(300).'<br />Mega.co.nz plugin by Th3-822'); // Please, do not remove or change this line contents. - Th3-822
 
 		$fragment = parse_url($link, PHP_URL_FRAGMENT);
-		if (preg_match('@^F!([^!]{8})!([\w\-\,]{22})@i', $fragment, $fid)) return $this->Folder($fid[1], $fid[2]);
+		if (preg_match('@^F!([^!]{8})!([\w\-\,]{22})(?:!([^!#]{8}))?(!less$)?@i', $fragment, $fid)) return $this->Folder($fid[1], $fid[2], (!empty($fid[3]) && $fid[3] != $fid[1] ? $fid[3] : 0), (empty($fid[4]) ? 1 : 0));
 		if (!preg_match('@^(T8|N)?!([^!]{8})!([\w\-\,]{43})(?:(?:!|=###n=)([^!#]{8})(?:!|$))?@i', $fragment, $fid)) html_error('FileID or Key not found at link.');
 
 		$reply = $this->apiReq(array('a' => 'g', 'g' => '1', (empty($fid[1]) ? 'p' : 'n') => $fid[2], 'ssl'=> '0'), (!empty($fid[1]) && !empty($fid[4]) ? $fid[4] : ''));
@@ -166,22 +166,36 @@ class mega_co_nz extends DownloadClass {
 		//return strnatcasecmp($a, $b); // Case Insensitive "Natural" Sort
 	}
 
-	private function Folder($fnid, $fnk) {
-		$files = $this->apiReq(array('a' => 'f', 'c' => 1, 'r' => 1), $fnid);
+	private function Folder($fnid, $fnk, $sfolder, $recursive) {
+		$files = $this->apiReq(array('a' => 'f', 'c' => 1, 'r' => (!empty($sfolder) || $recursive ? 1 : 0)), $fnid);
 		if (is_numeric($files[0])) $this->CheckErr($files[0], 'Cannot get folder contents');
-		$dfiles = array();
+		$sfolder = (!empty($sfolder) ? array($sfolder => 1) : array());
 
-		foreach ($files[0]['f'] as $file) if ($file['t'] == 0) {
-			$keys = array();
-			foreach (explode('/', $file['k']) as $key) if (strpos($key, ':') !== false && $key = explode(':', $key, 2)) $keys[$key[0]] = $key[1];
-			if (empty($keys)) continue;
-			$key = $this->decrypt_key($this->base64_to_a32(reset($keys)), $this->base64_to_a32($fnk));
-			if (empty($key)) continue;
-			$attr = $this->dec_attr($this->base64url_decode($file['a']), array($key[0] ^ $key[4], $key[1] ^ $key[5], $key[2] ^ $key[6], $key[3] ^ $key[7]));
-			if (!empty($attr)) $dfiles[$file['h']] = array('k' => $this->a32_to_base64($key), 'n' => $attr['n']);
+		foreach ($files[0]['f'] as $file) switch ($file['t']) {
+			case 0: // File
+				if (!empty($sfolder) && empty($sfolder[$file['p']])) break;
+				$keys = array();
+				foreach (explode('/', $file['k']) as $key) if (strpos($key, ':') !== false && $key = explode(':', $key, 2)) $keys[$key[0]] = $key[1];
+				if (empty($keys)) {
+					$key = $this->base64_to_a32($fnk);
+					$attr = $this->dec_attr($this->base64url_decode($file['a']), array($key[0] ^ $key[4], $key[1] ^ $key[5], $key[2] ^ $key[6], $key[3] ^ $key[7]));
+					if (!empty($attr)) textarea($attr);
+					break;
+				}
+				$key = $this->decrypt_key($this->base64_to_a32(reset($keys)), $this->base64_to_a32($fnk));
+				if (empty($key)) break;
+				$attr = $this->dec_attr($this->base64url_decode($file['a']), array($key[0] ^ $key[4], $key[1] ^ $key[5], $key[2] ^ $key[6], $key[3] ^ $key[7]));
+				if (!empty($attr)) $dfiles[$file['h']] = array('k' => $this->a32_to_base64($key), 'n' => $attr['n'], 'p' => $file['p']);
+if (!empty($attr)) $_names[] = $attr['n'];
+				break;
+			case 1: // Folder
+				if (!empty($sfolder) && $recursive && !empty($sfolder[$file['p']])) $sfolder[$file['h']] = 1;
+				break;
 		}
-		if (empty($dfiles)) html_error('Error while decoding folder: Empty Folder?.');
+
+		if (empty($dfiles)) html_error('Error while decoding folder: Empty'.(!empty($sfolder) ? ' or Inexistent Sub-' : ' ').'Folder? [Subfolders: '.(!empty($sfolder) || $recursive ? 'Yes' : 'No').']');
 		uasort($dfiles, array($this, 'FSort'));
+
 
 		$files = array();
 		foreach ($dfiles as $file => $key) $files[] = "https://mega.co.nz/#N!$file!{$key['k']}!$fnid!Rapidleech";
@@ -221,9 +235,9 @@ class Th3822_MegaDlDecrypt extends php_user_filter {
 //[27-3-2013] Simplified Stream decrypt function (The other one was not working well... After many tests looks like it's better now :D). - Th3-822
 //[20-7-2013] Fixed link regexp. - Th3-822
 //[09-8-2013] Added folder support and small fixes from upload plugin. (Download links that are fetched from a folder link are not public and only can be downloaded with this plugin.) - Th3-822
-//[25-1-2014] Added sub-folders support. - Th3-822
 //[30-1-2014] Fixed download from folders. - Th3-822
 //[09-2-2014] Fixed issues at link parsing. - Th3-822
 //[29-1-2015] Replaced 'T8' prefix at folder->file links for support on third-party downloaders using links with 'N' as prefix. - Th3-822
+//[04-2-2016] Added sub-folders support (fully) and added support for link suffix "!less" to disable recursive sub-folder download. - Th3-822
 
 ?>

@@ -238,7 +238,7 @@ if (isset($_GET['auul'])) {
 	// Write links to a file
 	$file = DOWNLOAD_DIR.'myuploads.txt';	// Obviously it was a mistake not making it a variable earlier
 	if (!$options['myuploads_disable']) {
-		if (!isset($_GET['save_style']) || $_GET['save_style'] !== lang(51)) {
+		if (empty($_GET['save_style']) || $_GET['save_style'] == lang(51)) {
 			$dash = "";
 			for ($i=0;$i<=80;$i++) $dash.="=";
 			write_file($file, "$lname$nn$dash$nn$download_link$nn$nn", 0);

@@ -38,7 +38,7 @@ class vidbull_com extends GenericXFS_DL {
 	protected function getFileName($url) {
 		$fname = parent::getFileName($url);
 		if (preg_match("@^(?:v(?:ideo)|{$this->fid})?\.(mp4|flv)$@i", $fname, $vExt) && preg_match('@<h3>Watch\s+([^\s<>\"\']+)\s*</h3>@i', $this->page, $title)) {
-			$fname = preg_replace('@\.(mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpe?g?|vob|avi|[23]gp)$@i', '', trim($title[1])) . '_S.' . strtolower($vExt[1]);
+			$fname = preg_replace('@(?:\.(?:mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpe?g?|vob|avi|[23]gp))+$@i', '', trim($title[1])) . '_S.' . strtolower($vExt[1]);
 		}
 		return $fname;
 	}

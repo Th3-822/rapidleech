@@ -50,7 +50,7 @@ include(TEMPLATE_DIR.'header.php');
 			exit;
 		}
 		$save_style = "";
-		if ($_POST['save_style'] != 'Default') {
+		if (!empty($_POST['save_style']) && $_POST['save_style'] != lang(51)) {
 			$save_style = '&save_style='.urlencode(base64_encode($_POST['save_style']));
 		}
 		$start_link = "upload.php";
@@ -176,7 +176,7 @@ unset($Path);
 </div><br />
 <hr /><br />
 <input type="submit" name="submit" value="Upload" /> <?php echo lang(49); ?>: <input type="text" size="2" name="windows" value="4" /><br />
-<?php echo lang(50); ?>: <input type="text" size="50" name="save_style" value="<?php echo lang(51); ?>" /><br />
+<?php echo lang(50); ?>: <input type="text" size="50" name="save_style" placeholder="{name}: {link} or {link}" /><br />
 <a href="javascript:setCheckboxes(1);" class="chkmenu"><?php echo lang(52); ?></a> |
 <a href="javascript:setCheckboxes(0);" class="chkmenu"><?php echo lang(53); ?></a> |
 <a href="javascript:setCheckboxes(2);" class="chkmenu"><?php echo lang(54); ?></a> |

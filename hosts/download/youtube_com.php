@@ -7,10 +7,11 @@ if (!defined('RAPIDLEECH')) {
 
 class youtube_com extends DownloadClass {
 	private $page, $cookie, $fmturlmaps, $vid, $sts, $js, $playerJs, $sigJs, $jsVars,
-		$fmts = array(38,37,46,22,45,44,35,43,34,18,6,5,36,17);
+		$fmts = array(38,37,46,22,45,44,35,43,34,18,6,5,36,17), $cookieFile;
 
 	public function Download($link) {
-		$this->cookie = isset($_POST['yt_QS']) && !empty($_POST['cookie']) ? StrToCookies(decrypt(urldecode($_POST['cookie']))) : array();
+		$this->cookieFile = DOWNLOAD_DIR.'YT_cookie.txt';
+		$this->cookie = isset($_POST['step']) && !empty($_POST['cookie']) ? StrToCookies(decrypt(urldecode($_POST['cookie']))) : $this->loadCookie();
 		$url = parse_url($link);
 		$this->vid = array();
 
@@ -21,7 +22,8 @@ class youtube_com extends DownloadClass {
 		$this->vid = $this->vid[1];
 		$this->link = 'https://www.youtube.com/watch?v='.$this->vid;
 
-		$this->getFmtMaps();
+		if (empty($_POST['step'])) $this->getFmtMaps();
+		else $this->captcha();
 
 		$this->fmturlmaps = $this->GetVideosArr();
 
@@ -70,52 +72,74 @@ class youtube_com extends DownloadClass {
 	}
 
 	private function captcha() {
-		$url = 'https://www.youtube.com/das_captcha?next=' . urlencode($this->link);
-		if (isset($_REQUEST['step']) && $_REQUEST['step'] == '1') {
-			if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
-			$post = array('recaptcha_challenge_field' => $_POST['recaptcha_challenge_field'], 'recaptcha_response_field' => $_POST['recaptcha_response_field']);
-			$post['next'] = $_POST['next'];
-			$post['action_recaptcha_verify'] = $_POST['action_recaptcha_verify'];
-			$post['submit'] = $_POST['_submit'];
+		$url = 'https://www.youtube.com/das_captcha';
+		if (!empty($_POST['step']) && $_POST['step'] == '1') {
+			$post = $this->verifyReCaptchav2();
+			$post['action_recaptcha_verify2'] = '1';
 			$post['session_token'] = $_POST['session_token'];
-			$cookie = urldecode($_POST['cookie']);
 
-			$page = $this->GetPage($url, $cookie, $post, $url);
+			$page = $this->GetPage($url, $this->cookie, $post, $url);
 			is_present($page, 'The verification code was invalid', 'The verification code was invalid or has timed out, please try again.');
 			is_present($page, "\r\n\r\nAuthorization Error.", 'Error sending captcha.');
 			is_notpresent($page, 'Set-Cookie: goojf=', 'Cannot get captcha cookie.');
 
-			$this->cookie = GetCookiesArr($page);
-			unset($_REQUEST['step']);
+			$this->cookie = GetCookiesArr($page, $this->cookie);
+			unset($_POST['step']);
 			$this->getFmtMaps();
 		} else {
-			$page = $this->GetPage($url);
-			if (!preg_match('@//(?:[^/]+\.)?(?:(?:google\.com/recaptcha/api)|(?:recaptcha\.net))/(?:(?:challenge)|(?:noscript))\?k=([\w\.\-]+)@i', $page, $pid)) html_error('Error: reCAPTCHA not found.');
+			$page = $this->GetPage($url, $this->cookie);
+			$this->cookie = GetCookiesArr($page, $this->cookie);
+			if (!preg_match('@class="g-recaptcha" data-sitekey="([\w\.\-]+)"@i', $page, $pid)) html_error('Error: reCAPTCHA2 not found.');
 
-			$data = $this->DefaultParamArr($this->link, GetCookies($page));
-			$data['next'] = urlencode(html_entity_decode(cut_str($page, 'name="next" value="', '"')));
-			$data['action_recaptcha_verify'] = urlencode(cut_str($page, 'name="action_recaptcha_verify" value="', '"'));
-			$data['_submit'] = urlencode(cut_str($page, 'type="submit" name="submit" value="', '"'));
-			$data['session_token'] = urlencode(cut_str($page, "'XSRF_TOKEN': '", "'"));
+			$data = $this->DefaultParamArr($this->link, $this->cookie, 1, 1);
+			$data['session_token'] = urlencode(cut_str($page, 'name="session_token" value="', '"'));
 			if (isset($_REQUEST['ytube_mp4'])) $data['ytube_mp4'] = $_REQUEST['ytube_mp4'];
 			if (isset($_REQUEST['ytdirect'])) $data['ytdirect'] = $_REQUEST['ytdirect'];
 			if (isset($_REQUEST['yt_fmt'])) $data['yt_fmt'] = $_REQUEST['yt_fmt'];
-			$data['step'] = 1;
+			$data['step'] = '1';
 
-			$this->reCAPTCHA($pid[1], $data);
+			$this->reCAPTCHAv2($pid[1], $data);
 		}
+	}
+
+	private function loadCookie() {
+		if (@file_exists($this->cookieFile) && ($file = file_get_contents($this->cookieFile)) && ($saved = @unserialize($file)) && is_array($saved) && !empty($saved['hash']) && !empty($saved['cookie']) && ($saved['cookie'] = decrypt(base64_decode($saved['cookie']))) && sha1($saved['cookie']) == $saved['hash']) {
+			return StrToCookies($saved['cookie']);
+		}
+		return array();
+	}
+
+	private function saveCookie() {
+		if (!empty($this->cookie)) {
+			$data = array('cookie' => CookiesToStr($this->cookie));
+			$data['hash'] = sha1($data['cookie']);
+			$data['cookie'] = base64_encode(encrypt($data['cookie']));
+			file_put_contents($this->cookieFile, serialize($data));
+		}
+	}
+
+	// Special Function Called by verifyReCaptchav2 When Captcha Is Incorrect, To Allow Retry. - Required
+	protected function retryReCaptchav2() {
+		$data = $this->DefaultParamArr($this->link, $this->cookie, 1, 1);
+		foreach (array('step', 'action_recaptcha_verify2', 'session_token', 'ytube_mp4', 'ytdirect', 'yt_fmt') as $name) {
+			if (!empty($_POST[$name])) $data[$name] = $_POST[$name];
+		}
+		return $this->reCAPTCHAv2($_POST['recaptcha2_public_key'], $data);
 	}
 
 	private function getFmtMaps() {
 		$this->page = $this->GetPage('https://www.youtube.com/get_video_info?video_id='.$this->vid.'&asv=3&el=ve'.'vo&hl=en_US&s'.'t'.'s'.'='.(!empty($this->sts) ? urlencode($this->sts) : 0), $this->cookie);
+		$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		$this->response = array_map('urldecode', $this->FormToArr(substr($this->page, strpos($this->page, "\r\n\r\n") + 4)));
 		if (!empty($this->response['requires_purchase'])) html_error('[Unsupported Video] This Video or Channel Requires a Payment to Watch.');
 		if (!empty($this->response['reason'])) html_error('['.htmlspecialchars($this->response['errorcode']).'] '.htmlspecialchars($this->response['reason']));
 
-		if (isset($_REQUEST['step']) || substr($this->page, 9, 3) == '402' || preg_match('@Location: https?://(www\.)?youtube\.com/das_captcha@i', $this->page)) $this->captcha();
+		if (in_array(substr($this->page, 9, 3), array('402', '429')) || preg_match('@Location: https?://(www\.)?youtube\.com/das_captcha@i', $this->page)) return $this->captcha();
 
 		if (empty($this->response['url_encoded_fmt_stream_map'])) html_error('['. (!empty($this->sts) ? htmlspecialchars($this->sts) : 0) . '] Video links not found.');
 		$this->fmtmaps = explode(',', $this->response['url_encoded_fmt_stream_map']);
+
+		if (!empty($this->cookie['goojf'])) $this->saveCookie();
 	}
 
 	private function decError($msg) {
@@ -269,14 +293,14 @@ class youtube_com extends DownloadClass {
 		} //*/
 
 		echo "\n<br /><br /><h3 style='text-align: center;'>".lang(216).".</h4>";
-		echo "\n<center><form name='YT_QS' action='{$GLOBALS['PHP_SELF']}' method='POST'>\n";
+		echo "\n<center><form name='YT_QS' action='{$_SERVER['SCRIPT_NAME']}' method='POST'>\n";
 		echo "<input type='hidden' name='yt_QS' value='on' />\n";
 		echo '<label><input type="checkbox" name="cleanname" checked="checked" value="1" /><small>&nbsp;Remove non-supported characters from filename</small></label><br />';
 		echo "<select name='yt_fmt' id='QS_fmt'>\n";
 		foreach ($this->fmturlmaps as $fmt => $url) if (in_array($fmt, $this->fmts) && ($I = str_split($vinfo[$fmt]))) echo '<option '.($fmt == 18 ? "selected='selected' " : '')."value='$fmt'>[$fmt] Video: {$VC[$I[1]]} {$VR[$I[0]]}p | Audio: {$AC[$I[2]]} ~{$AB[$I[3]]} kbps".(!empty($sizes[$fmt]) ? ' ('.$sizes[$fmt].')' : '')."</option>\n";
 		echo "</select>\n";
-		if (count($this->cookie) > 0) $this->cookie = encrypt(CookiesToStr($this->cookie));
-		$data = $this->DefaultParamArr($this->link, $this->cookie);
+
+		$data = $this->DefaultParamArr($this->link);
 		$data['ytube_mp4'] = 'on';
 		foreach ($data as $n => $v) echo("<input type='hidden' name='$n' id='QS_$n' value='$v' />\n");
 
@@ -309,5 +333,6 @@ class youtube_com extends DownloadClass {
 // [21-1-2015]  Fixed backslash in filename when cleanname is off. - Th3-822
 // [13-4-2015]  Fixed captcha detection. - Th3-822
 // [22-12-2015]  Fixed signature decoding functions. - Th3-822
+// [05-2-2016]  Fixed captcha (Now uses reCaptcha2) & Added cookie storage for it. - Th3-822
 
 ?>

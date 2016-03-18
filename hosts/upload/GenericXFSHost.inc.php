@@ -13,7 +13,7 @@ if (!isset($_T8) || !is_array($_T8) || empty($_T8['domain']) || $_T8['domain'] =
 	if (strtolower(basename(__FILE__)) == strtolower($page_upload[$_REQUEST['uploaded']])) html_error('This plugin can\'t be called directly.');
 	html_error('Error: Called from non configured plugin "' . htmlentities($page_upload[$_REQUEST['uploaded']]) . '".');
 }
-if ($_T8['v'] > 7) html_error('Error: '.basename(__FILE__).' is outdated, please install last version from: http://rapidleech.com/forum/viewtopic.php?f=17&t=80 or http://pastebin.com/E0z7qMU1 ');
+if ($_T8['v'] > 9) html_error('Error: '.basename(__FILE__).' is outdated, please install last version from: http://rapidleech.com/forum/viewtopic.php?f=17&t=80 or http://pastebin.com/E0z7qMU1 ');
 
 /* # Default Settings # */
 $default = array();
@@ -120,24 +120,26 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 		}
 	}
 
-	$uid = '';for ($i = 0; $i < 12; $i++) $uid .= mt_rand(0,9);
-
 	$post = array();
 	if (empty($_T8['flashUpload'])) {
 		$post['upload_type'] = 'file';
-		$post['sess_id'] = cut_str($page, 'name="sess_id" value="', '"');
-		$post['srv_tmp_url'] = cut_str($page, 'name="srv_tmp_url" value="', '"');
-		if (stripos($page, 'name="srv_id" value="') !== false && ($tmp = cut_str($page, 'name="srv_id" value="', '"'))) $post['srv_id'] = $tmp;
-		if (stripos($page, 'name="disk_id" value="') !== false && ($tmp = cut_str($page, 'name="disk_id" value="', '"'))) $post['disk_id'] = $tmp;
-		$post['link_rcpt'] = '';
-		$post['link_pass'] = '';
+		$post['sess_id'] = !empty($cookie['xfss']) ? $cookie['xfss'] : cut_str($page, 'name="sess_id" value="', '"');
+		foreach (array('srv_tmp_url', 'utype', 'srv_id', 'disk_id') as $tmpName) {
+			if (stripos($page, "name=\"$tmpName\" value=\"") !== false && ($tmp = cut_str($page, "name=\"$tmpName\" value=\"", '"'))) $post["$tmpName"] = $tmp;
+		}
+		$post['link_pass'] = $post['link_rcpt'] = '';
 		$post['file_descr'] = 'Uploaded with Rapidleech.';
 		$post['file_public'] = '1';
 		$post['tos'] = '1';
 		$post['submit_btn'] = ' Upload! ';
 
-		$up_url .= "?upload_id=$uid&js_on=1";
-		if (!$_T8['xfsFree']) $up_url .= '&utype='.cut_str($page, "var utype='", "'").'&upload_type=file'.(!empty($post['disk_id']) ? '&disk_id=' . urlencode($post['disk_id']) : '');
+		$up_url .= '?upload_id=';
+		for ($i = 0; $i < 12; $i++) $up_url .= mt_rand(0,9);
+		$up_url .= '&js_on=1';
+		if (!$_T8['xfsFree']) {
+			if (empty($post['utype']) && ($tmp = cut_str($page, "var utype='", "'"))) $up_url .= "&utype=$tmp";
+			$up_url .= '&upload_type=file'.(!empty($post['disk_id']) ? '&disk_id=' . urlencode($post['disk_id']) : '');
+		}
 	} else {
 		$post['Filename'] = $lname;
 		if ($login) if (!($post['sess_id'] = cut_str($page, 'name="sess_id" value="', '"'))) {
@@ -181,10 +183,10 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 		//$download_link = $referer.$reply[0];
 		//return;
 		$post = array('op' => 'upload_result', 'fn' => urlencode($reply[0]), 'st' => 'OK');
-	} elseif (preg_match('@"file_code"\s*:\s*"(\w{12})"\s*,\s*"file_status"\s*:\s*"([^\"\'\]\}]+)"@', $upfiles, $reply)) {
+	} elseif (preg_match('@"file_status"\s*:\s*"([^\"\'\]\}]+)"@', $upfiles, $reply) && (strtolower($reply[1]) != 'ok' || preg_match('@"file_code"\s*:\s*"(\w{12})"@', $upfiles, $fileid))) {
 		// New JSON response.
-		if (strtolower($reply[2]) != 'ok') html_error('Upload failed, json response: '.htmlspecialchars($reply[2]));
-		$post = array('op' => 'upload_result', 'fn' => urlencode($reply[1]), 'st' => urlencode($reply[2]));
+		if (empty($fileid)) html_error('Upload failed, json response: '.htmlspecialchars($reply[1]));
+		$post = array('op' => 'upload_result', 'fn' => urlencode($fileid[1]), 'st' => urlencode($reply[1]));
 	} else html_error('Error: upload_result form/json not found.');
 
 	$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'], $up_url, $cookie, $post, 0, $_GET['proxy'], $pauth, 0, $scheme);is_page($page);

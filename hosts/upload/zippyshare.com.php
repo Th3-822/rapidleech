@@ -59,17 +59,17 @@ if ($continue_up) {
 
 	$page = geturl($domain, 80, '/', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 
-	if (!preg_match('@\'uploader\'[\s\t]*:[\s\t]*[\'|\"](https?://www\d+\.zippyshare\.com/[^\r\n\'\"\s\t<>]+)[\'|\"]@i', $page, $up)) html_error('Error: Cannot find upload server.');
+	if (!preg_match('@\s(?:url\s*:\s*|action=)[\'\"](https?://www\d+\.zippyshare\.com/[^\s\'\"<>]+)[\'\"]@i', $page, $up)) html_error('Error: Cannot find upload server.');
 
 	$post = array();
-	$post['Filename'] = $lname;
-	$post['uploadify'] = 'true';
-	$post['embPlayerValues'] = (!empty($cookie['embed-player-values']) ? $cookie['embed-player-values'] : 'null');
+	$post['name'] = $lname;
 	if ($login) {
 		$post['zipname'] = $cookie['zipname'];
 		$post['ziphash'] = $cookie['ziphash'];
 	}
+	$post['embPlayerValues'] = (!empty($cookie['embed-player-values']) ? $cookie['embed-player-values'] : 'false');
 	if (!empty($_REQUEST['up_private'])) $post['private'] = 'checked';
+	//else $post['notprivate'] = '';
 	$post['Upload'] = 'Submit Query';
 
 	$up_url = $up[1];
@@ -85,12 +85,13 @@ if ($continue_up) {
 
 	is_page($upfiles);
 
-	if (preg_match('@https?://www\d*\.zippyshare\.com/v/\d+/file\.html@i', $upfiles, $link)) $download_link = $link[0];
+	if (preg_match('@https?://www\d*\.zippyshare\.com/v/\w+/file\.html@i', $upfiles, $link)) $download_link = $link[0];
 	else html_error('Download link not found.');
 
 }
 
 //[17-5-2013] Written by Th3-822.
 //[28-9-2014] Added private upload option. - Th3-822
+//[11-1-2015] Fixed upload & Link regexp. (Happy new year) - Th3-822
 
 ?>

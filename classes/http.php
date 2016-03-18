@@ -5,7 +5,7 @@ if (!defined('RAPIDLEECH')) {
 }
 
 // Allow user-agent to be changed easily
-if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:44.0) Gecko/20100101 Firefox/44.0');
+if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0');
 
 /*
  * Pauses for countdown timer in file hosts
@@ -129,6 +129,8 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		$lastError = $errstr;
 		return false;
 	}
+
+	stream_set_timeout($fp, 120);
 
 	if ($saveToFile) {
 		if ($proxy) echo '<p>' . sprintf(lang(89), $proxyHost, $proxyPort) . '<br />GET: <b>' . htmlspecialchars($url) . "</b>...<br />\n";
@@ -298,28 +300,19 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			} else $saveToFile = str_replace($filetype, $options['rename_these_filetypes_to'], $saveToFile);
 		}
 
-		if (@file_exists($saveToFile) && $options['bw_save']) {
-			// Skip in audl.
-			if (isset($_GET['audl'])) echo '<script type="text/javascript">parent.nextlink();</script>';
-			html_error(lang(99) . ': ' . link_for_file($saveToFile));
+		if (@file_exists($saveToFile) && $Resume['use'] !== TRUE) {
+			if ($options['bw_save']) {
+				// Skip in audl.
+				if (isset($_GET['audl'])) echo '<script type="text/javascript">parent.nextlink();</script>';
+				return html_error(lang(99) . ': ' . link_for_file($saveToFile));
+			}
+			$FileName = time() . '_' . $FileName;
+			$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $FileName;
 		}
-		if (@file_exists($saveToFile) && $Resume['use'] === TRUE) {
-			$fs = @fopen($saveToFile, 'ab');
-			if (!$fs) {
-				$lastError = sprintf(lang(101), basename($saveToFile), dirname($saveToFile)) . '<br />' . lang(102) . '<br /><a href="javascript:location.reload();">' . lang(103) . '</a>';
-				return FALSE;
-			}
-		} else {
-			if (@file_exists($saveToFile)) $saveToFile = dirname($saveToFile) . PATH_SPLITTER . time() . '_' . basename($saveToFile);
-			$fs = @fopen($saveToFile, 'wb');
-			if (!$fs) {
-				$secondName = dirname($saveToFile) . PATH_SPLITTER . str_replace(':', '', str_replace('?', '', basename($saveToFile)));
-				$fs = @fopen($secondName, 'wb');
-				if (!$fs) {
-					$lastError = sprintf(lang(101), basename($saveToFile), dirname($saveToFile)) . '<br />' . lang(102) . '<br /><a href="javascript:location.reload();">' . lang(103) . '</a>';
-					return FALSE;
-				}
-			}
+		$fs = @fopen($saveToFile, ($Resume['use'] === TRUE ? 'ab' : 'wb'));
+		if (!$fs) {
+			$lastError = sprintf(lang(101), $FileName, dirname($saveToFile)) . '<br />' . lang(102) . '<br /><a href="javascript:location.reload();">' . lang(103) . '</a>';
+			return FALSE;
 		}
 
 		flock($fs, LOCK_EX);
@@ -329,7 +322,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			$fileSize = bytesToKbOrMbOrGb($fileSize);
 		} else $fileSize = bytesToKbOrMbOrGb($bytesTotal);
 		$chunkSize = GetChunkSize($bytesTotal);
-		echo(lang(104) . ' <b>' . basename($saveToFile) . '</b>, ' . lang(56) . " <b>$fileSize</b>...<br />");
+		echo(lang(104) . ' <b>' . $FileName . '</b>, ' . lang(56) . " <b>$fileSize</b>...<br />");
 
 		//$scriptStarted = false;
 		require_once(TEMPLATE_DIR . '/transloadui.php');
@@ -350,7 +343,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			if ($bytesSaved !== false && $datalen == $bytesSaved) {
 				$bytesReceived += $bytesSaved;
 			} else {
-				$lastError = sprintf(lang(105), basename($saveToFile));
+				$lastError = sprintf(lang(105), $FileName);
 				// unlink($saveToFile);
 				return false;
 			}
@@ -386,7 +379,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	stream_socket_shutdown($fp, STREAM_SHUT_RDWR);
 	fclose($fp);
 	if ($saveToFile) {
-		return array('time' => sec2time(round($time)), 'speed' => @round($bytesTotal / 1024 / (microtime(true) - $timeStart), 2), 'received' => true, 'size' => $fileSize, 'bytesReceived' => ($bytesReceived + $Resume['from']), 'bytesTotal' => ($bytesTotal + $Resume ['from']), 'file' => $saveToFile);
+		return array('time' => sec2time(round($time)), 'speed' => @round($bytesTotal / 1024 / (microtime(true) - $timeStart), 2), 'received' => true, 'size' => $fileSize, 'bytesReceived' => ($bytesReceived + $Resume['from']), 'bytesTotal' => ($bytesTotal + $Resume ['from']), 'file' => $saveToFile, 'name' => $FileName);
 	} else {
 		if (empty($sFilters['dechunk']) && stripos($header, "\nTransfer-Encoding: chunked") !== false && function_exists('http_chunked_decode')) {
 			$dechunked = http_chunked_decode($page);
@@ -440,7 +433,7 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 	$opt[CURLOPT_REFERER] = !empty($referer) ? $referer : false;
 	$opt[CURLOPT_COOKIE] = !empty($cookie) ? (is_array($cookie) ? CookiesToStr($cookie) : trim($cookie)) : false;
 
-	if (isset($_GET['useproxy']) && !empty($_GET['proxy'])) {
+	if (!empty($_GET['useproxy']) && !empty($_GET['proxy'])) {
 		$opt[CURLOPT_HTTPPROXYTUNNEL] = strtolower(parse_url($link, PHP_URL_SCHEME) == 'https') ? true : false; // cURL https proxy support... Experimental.
 		// $opt[CURLOPT_HTTPPROXYTUNNEL] = false; // Uncomment this line for disable https proxy over curl.
 		$opt[CURLOPT_PROXY] = $_GET['proxy'];

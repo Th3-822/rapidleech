@@ -33,7 +33,7 @@ class cloudtime_to extends DownloadClass {
 		if (!preg_match('@url=(http://[^&]+)@', $page2, $downl)) html_error('Error: Download link not found.');  
 
 		if (!preg_match('@\.(?:mp4|flv|webm|avi)$@i', basename($downl[1]), $ext)) $ext = array('.flv');
-		$filename = preg_replace('@\.(mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpe?g?|vob|avi|[23]gp)$@i', '', preg_replace('@[^ A-Za-z_\-\d\.,\(\)\[\]\{\}&\!\'\@\%\#]@u', '_', html_entity_decode(trim($title[1]), ENT_QUOTES, 'UTF-8')));
+		$filename = preg_replace('@(?:\.(?:mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpe?g?|vob|avi|[23]gp))+$@i', '', preg_replace('@[^ A-Za-z_\-\d\.,\(\)\[\]\{\}&\!\'\@\%\#]@u', '_', html_entity_decode(trim($title[1]), ENT_QUOTES, 'UTF-8')));
 		$filename .= sprintf(' [CloudTime][%s]%s', $matches[2], $ext[0]);
 
 		$this->RedirectDownload($downl[1], $filename, 0, 0, 0, $filename);

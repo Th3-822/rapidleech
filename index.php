@@ -30,9 +30,9 @@ if (!empty($_GET['image'])) {
 	exit();
 }
 
-if (isset($_GET['useproxy']) && (empty($_GET['proxy']) || strpos($_GET['proxy'], ':') === false)) html_error(lang(324));
-if (!empty($_GET['pauth'])) $pauth = decrypt(urldecode(trim($_GET['pauth'])));
-else $pauth = (!empty($_GET['proxyuser']) && !empty($_GET['proxypass'])) ? base64_encode($_GET['proxyuser'] . ':' . $_GET['proxypass']) : '';
+$_GET['proxy'] = !empty($_GET['proxy']) ? trim(urldecode($_GET['proxy'])) : '';
+if (!empty($_GET['useproxy']) && (empty($_GET['proxy']) || strpos($_GET['proxy'], ':') === false)) html_error(lang(324));
+$pauth = (!empty($_GET['proxyuser']) && !empty($_GET['proxypass'])) ? base64_encode($_GET['proxyuser'] . ':' . $_GET['proxypass']) : (!empty($_GET['pauth']) ? decrypt(urldecode(trim($_GET['pauth']))) : '');
 
 if (empty($_GET['path']) || $options['download_dir_is_changeable'] == false) {
 	if (empty($_GET['host'])) $_GET['path'] = (substr($options['download_dir'], 0, 6) != 'ftp://') ? realpath(DOWNLOAD_DIR) : $options['download_dir'];
@@ -55,8 +55,6 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 	}
 
 	if (!empty($_GET['saveto']) && empty($_GET['path'])) html_error(lang(6));
-
-	if (empty($_GET['useproxy'])) $_GET['proxy'] = '';
 
 	if (!empty($_GET['domail']) && !checkmail($_GET['email'])) {
 		html_error(lang(3));
@@ -114,8 +112,14 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 				error_reporting(E_ERROR | E_PARSE | error_reporting()); // Make sure to show any critical error while loading the plugin.
 				require_once(CLASS_DIR . 'http.php');
 				require_once(HOST_DIR . 'DownloadClass.php');
-				require_once(HOST_DIR . "download/$file");
 				$class = substr($file, 0, -4);
+				if (empty($auth) && $_GET['premium_acc'] == 'on' && !empty($premium_acc["$class"]['proxy'])) {
+					$proxy = $premium_acc["$class"]['proxy'];
+					$_GET['useproxy'] = ($proxy != -1 ? 'on' : false);
+					$_GET['proxy'] = ($proxy != -1 ? $proxy : false);
+					$pauth = (!empty($premium_acc["$class"]['pauth']) ? base64_encode($premium_acc["$class"]['pauth']) : false);
+				}
+				require_once(HOST_DIR . "download/$file");
 				$firstchar = substr($file, 0, 1);
 				if ($firstchar > 0) $class = "d$class";
 				if (class_exists($class)) {
@@ -130,10 +134,23 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 	$mydomain = strtolower(($pos = strpos($_SERVER['HTTP_HOST'], ':')) !== false ? substr($_SERVER['HTTP_HOST'], 0, $pos) : $_SERVER['HTTP_HOST']);
 	if ($options['bw_save'] && ($Url['host'] == $_SERVER['SERVER_ADDR'] || host_matches($mydomain, $Url['host']))) html_error(sprintf(lang(7), $mydomain, $_SERVER['SERVER_ADDR']));
 	if (empty($auth) && $_GET['premium_acc'] == 'on') {
+		if (!empty($premium_acc[$Url['host']]['proxy'])) {
+			$proxy = $premium_acc[$Url['host']]['proxy'];
+			$_GET['useproxy'] = ($proxy != -1 ? 'on' : false);
+			$_GET['proxy'] = ($proxy != -1 ? $proxy : false);
+			$pauth = (!empty($premium_acc[$Url['host']]['pauth']) ? base64_encode($premium_acc[$Url['host']]['pauth']) : false);
+		} else $proxy = false;
+
 		if (!empty($premium_acc[$Url['host']]['user']) && !empty($premium_acc[$Url['host']]['pass'])) $auth = '2';
 		else if (!filter_var($Url['host'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6)) {
-			foreach (array_keys($premium_acc) as $site) {
-				if (host_matches($site, $Url['host']) && !empty($premium_acc["$site"]['user']) && !empty($premium_acc["$site"]['pass'])) {
+			foreach (array_keys($premium_acc) as $site) if (host_matches($site, $Url['host'])) {
+				if (empty($proxy) && !empty($premium_acc["$site"]['proxy'])) {
+					$proxy = $premium_acc["$site"]['proxy'];
+					$_GET['useproxy'] = ($proxy != -1 ? 'on' : false);
+					$_GET['proxy'] = ($proxy != -1 ? $proxy : false);
+					$pauth = (!empty($premium_acc["$site"]['pauth']) ? base64_encode($premium_acc["$site"]['pauth']) : false);
+				}
+				if (!empty($premium_acc["$site"]['user']) && !empty($premium_acc["$site"]['pass'])) {
 					$auth = '2';
 					break;
 				}
@@ -160,10 +177,10 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 	if ($options['ref_check']) check_referer();
 	echo('<div align="center">');
 
+	$_GET['saveto'] = urldecode(trim($_GET['saveto']));
 	do {
 		$_GET['filename'] = urldecode(trim($_GET['filename']));
 		if (strpos($_GET['filename'], '?') !== false) $_GET['filename'] = substr($_GET['filename'], 0, strpos($_GET['filename'], '?'));
-		$_GET['saveto'] = urldecode(trim($_GET['saveto']));
 		$_GET['host'] = strtolower(urldecode(trim($_GET['host'])));
 		$_GET['path'] = urldecode(trim($_GET['path']));
 		$_GET['port'] = !empty($_GET['port']) ? urldecode(trim($_GET['port'])) : 0;
@@ -172,7 +189,6 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 
 		$_GET['post'] = !empty($_GET['post']) ? unserialize(decrypt(urldecode(trim($_GET['post'])))) : 0;
 		$_GET['cookie'] = !empty($_GET['cookie']) ? decrypt(urldecode(trim($_GET['cookie']))) : '';
-		$_GET['proxy'] = !empty($_GET['proxy']) ? trim(urldecode($_GET['proxy'])) : '';
 		// $resume_from = $_GET["resume"] ? intval(urldecode(trim($_GET["resume"]))) : 0;
 		// if ($_GET["resume"]) {unset($_GET["resume"]);}
 		$redirectto = '';
@@ -182,8 +198,6 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 			if (($_GET['host'] == $_SERVER['SERVER_ADDR'] || host_matches($mydomain, $_GET['host']))) html_error(sprintf(lang(7), $mydomain, $_SERVER['SERVER_ADDR']));
 			unset($mydomain);
 		}
-
-		$pauth = !empty($_GET['pauth']) ? decrypt(urldecode(trim($_GET['pauth']))) : '';
 
 		$AUTH = array();
 		$_GET['auth'] = !empty($_GET['auth']) ? trim($_GET['auth']) : '';
@@ -215,7 +229,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 			list($AUTH['user'], $AUTH['pass']) = array_map('rawurldecode', explode(':', base64_decode($auth), 2));
 		} else $auth = false;
 
-		$pathWithName = $_GET['saveto'] . PATH_SPLITTER . basename(urldecode($_GET['filename']));
+		$pathWithName = $_GET['saveto'] . PATH_SPLITTER . basename($_GET['filename']);
 		while (strpos($pathWithName, "\\\\") !== false) $pathWithName = str_replace("\\\\", "\\", $pathWithName);
 		if (strpos($pathWithName, '?') !== false) $pathWithName = substr($pathWithName, 0, strpos($pathWithName, '?'));
 
@@ -260,7 +274,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 	if ($lastError) html_error(htmlspecialchars($lastError));
 	elseif ($file['bytesReceived'] == $file['bytesTotal'] || $file['size'] == 'Unknown') {
 		echo '<script type="text/javascript">' . "pr(100, '" . $file['size'] . "', '" . $file['speed'] . "')</script>\r\n";
-		echo sprintf(lang(10), link_for_file(dirname($pathWithName) . '/' . basename($file['file'])), $file['size'], $file['time'], $file['speed']);
+		echo sprintf(lang(10), link_for_file($file['file']), $file['size'], $file['time'], $file['speed']);
 		$file['date'] = time();
 
 		if (!write_file(CONFIG_DIR . 'files.lst', serialize(array('name' => $file['file'], 'size' => $file['size'], 'date' => $file['date'], 'link' => $_GET['link'], 'comment' => (!empty($_GET['comment']) ? str_replace(array("\r", "\n"), array('\r', '\n'), $_GET['comment']) : ''))) . "\r\n", 0)) echo lang(9) . '<br />';
@@ -268,8 +282,8 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 		if (!empty($_GET['email']) && !$options['disable_email']) {
 			require_once(CLASS_DIR . 'mail.php');
 			$_GET['partSize'] = (isset($_GET['partSize']) && is_numeric($_GET['partSize']) ? $_GET['partSize'] * 1024 * 1024 : false);
-			if (xmail($fromaddr, $_GET['email'], 'File ' . basename($file['file']), 'File: ' . basename($file['file']) . "\r\n" . 'Link: ' . $_GET['link'] . (!empty($_GET['comment']) ? "\r\n" . 'Comments: ' . str_replace (array('\r', '\n'), array("\r", "\n"), $_GET['comment']) : ''), $pathWithName, $_GET['partSize'], ($_GET['partSize'] && !empty($_GET['method']) ? $_GET['method'] : ''))) {
-				printf(lang(11), $_GET['email'], basename($file['file']));
+			if (xmail($fromaddr, $_GET['email'], 'File ' . $file['name'], 'File: ' . $file['name'] . "\r\n" . 'Link: ' . $_GET['link'] . (!empty($_GET['comment']) ? "\r\n" . 'Comments: ' . str_replace (array('\r', '\n'), array("\r", "\n"), $_GET['comment']) : ''), $pathWithName, $_GET['partSize'], ($_GET['partSize'] && !empty($_GET['method']) ? $_GET['method'] : ''))) {
+				printf(lang(11), $_GET['email'], $file['name']);
 			} else echo lang(12) . '<br />';
 		}
 		echo "\n<form method='POST' name='flist' action='{$_SERVER['SCRIPT_NAME']}'>\n";

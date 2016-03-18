@@ -70,10 +70,10 @@ class DownloadClass {
 			$referer = $GLOBALS['Referer'];
 		}
 		$url = parse_url($link);
-		$params = $this->DefaultParamArr($link, (!empty($cookie) ? (is_array($cookie) ? encrypt(CookiesToStr($cookie)) : encrypt($cookie)) : 0), $referer);
+		$params = $this->DefaultParamArr($link, $cookie, $referer, true);
 		unset($params['premium_acc']);
-		$params['filename'] = urlencode($FileName);
-		if (!empty($force_name)) $params['force_name'] = urlencode($force_name);
+		$params['filename'] = urlencode(basename($FileName));
+		if (!empty($force_name)) $params['force_name'] = urlencode(basename($force_name));
 		$params['host'] = urlencode($url['host']);
 		if (!empty($url['port'])) $params['port'] = urlencode($url['port']);
 		$params['path'] = urlencode($url['path'] . (!empty($url['query']) ? '?' . $url['query'] : ''));

@@ -14,7 +14,7 @@ if (!defined('FTP_OS_Windows')) define('FTP_OS_Windows', 'w');
 if (!defined('FTP_OS_Mac')) define('FTP_OS_Mac', 'm');
 
 function getftpurl($host, $port, $url, $saveToFile = 0) {
-	global $nn, $lastError, $PHP_SELF, $FtpBytesTotal, $FtpBytesReceived, $FtpTimeStart, $FtpChunkSize, $options;
+	global $nn, $lastError, $FtpBytesTotal, $FtpBytesReceived, $FtpTimeStart, $FtpChunkSize, $options;
 
 	$ftp = new ftp(FALSE, FALSE);
 	$server = "$host:$port";
@@ -42,33 +42,28 @@ function getftpurl($host, $port, $url, $saveToFile = 0) {
 				$ftp_dir = implode('/', $tmp);
 				$ftp->chdir($ftp_dir);
 				$fileSize = $FtpBytesTotal = $ftp->filesize($ftp_file);
-				$FtpChunkSize = round($fileSize / 333);
-
-				if (strpos($saveToFile, '?') !== false) $saveToFile = substr($saveToFile, 0, strpos($saveToFile, '?'));
+				$FtpChunkSize = ftpGetChunkSize($fileSize);
 
 				if ($options['file_size_limit'] > 0) {
 					if ($fileSize > $options['file_size_limit']*1024*1024) {
-						$lastError = lang(336) . bytesToKbOrMbOrGb ( $options['file_size_limit']*1024*1024 ) .".";
+						$lastError = lang(336) . bytesToKbOrMbOrGb($options['file_size_limit'] * 1024 * 1024) . '.';
 						return false;
 					}
 				}
-				if (!empty($options['rename_prefix'])) {
-					$File_Name = $options['rename_prefix'] . '_' . basename($saveToFile);
-					$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $File_Name;
-				}
+
+				$FileName = str_replace(array_merge(range(chr(0), chr(31)), str_split("<>:\"/|?*\x5C\x7F")), '', basename(trim($saveToFile)));
+
+				if (!empty($options['rename_prefix'])) $FileName = $options['rename_prefix'] . '_' . $FileName;
 				if (!empty($options['rename_suffix'])) {
-					$ext = strrchr(basename($saveToFile), '.');
-					$before_ext = explode($ext, basename($saveToFile));
-					$File_Name = $before_ext[0] . '_' . $options['rename_suffix'] . $ext;
-					$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $File_Name;
+					$ext = strrchr($FileName, '.');
+					$before_ext = explode($ext, $FileName);
+					$FileName = $before_ext[0] . '_' . $options['rename_suffix'] . $ext;
 				}
-				if ($options['rename_underscore']) {
-					$File_Name = str_replace(array(' ', '%20'), '_', basename($saveToFile));
-					$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $File_Name;
-				}
+				if ($options['rename_underscore']) $FileName = str_replace(array(' ', '%20'), '_', $FileName);
+
+				$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $FileName;
 
 				$filetype = strrchr($saveToFile, '.');
-
 				if (is_array($options['forbidden_filetypes']) && in_array(strtolower($filetype), $options['forbidden_filetypes'])) {
 					if ($options['forbidden_filetypes_block']) html_error(sprintf(lang(82), $filetype));
 					$saveToFile = str_replace($filetype, $options['rename_these_filetypes_to'], $saveToFile);
@@ -78,22 +73,25 @@ function getftpurl($host, $port, $url, $saveToFile = 0) {
 					// Skip in audl.
 					if (isset($_GET['audl'])) echo '<script type="text/javascript">parent.nextlink();</script>';
 					html_error(lang(99) . ': ' . link_for_file($saveToFile));
-				} elseif (@file_exists($saveToFile)) $saveToFile = dirname($saveToFile) . PATH_SPLITTER . time() . '_' . basename($saveToFile);
-				printf(lang(83), basename($saveToFile), bytesToKbOrMbOrGb($fileSize));
+				} elseif (@file_exists($saveToFile)) $saveToFile = dirname($saveToFile) . PATH_SPLITTER . time() . '_' . $FileName;
+				printf(lang(83), $FileName, bytesToKbOrMbOrGb($fileSize));
 				echo "<br />";
+
+				$FtpTimeStart = microtime(true);
+				$FtpLastChunkTime = 0;
 				require_once(TEMPLATE_DIR . '/transloadui.php');
 
-				$FtpTimeStart = getmicrotime();
 				if ($ftp->get($ftp_file, $saveToFile)) {
 					$ftp->quit();
-					$time = getmicrotime() - $FtpTimeStart;
+					$time = microtime(true) - $FtpTimeStart;
 					return array('time' => sec2time(round($time)),
 						'speed' => @round($FtpBytesTotal / 1024 / ($time), 2),
 						'received' => TRUE,
 						'size' => bytesToKbOrMbOrGb($fileSize),
 						'bytesReceived' => $FtpBytesReceived,
 						'bytesTotal' => $FtpBytesTotal,
-						'file' => $saveToFile);
+						'file' => $saveToFile,
+						'name' => $FileName);
 				}
 				$ftp->quit();
 				return FALSE;
@@ -110,7 +108,7 @@ function updateFtpProgress($bytesReceived) {
 	}
 	$FtpBytesReceived = $bytesReceived;
 	if ($bytesReceived > $FtpLast + $FtpChunkSize) {
-		$time = getmicrotime() - $FtpTimeStart;
+		$time = microtime(true) - $FtpTimeStart;
 		$chunkTime = $time - $FtpLastChunkTime;
 		$FtpLastChunkTime = $time;
 		$speed = round($FtpChunkSize / 1024 / $chunkTime, 2);
@@ -120,6 +118,24 @@ function updateFtpProgress($bytesReceived) {
 		$FtpLast = $bytesReceived;
 		echo "<script type='text/javascript'>pr($percent, '" . bytesToKbOrMbOrGb($bytesReceived) . "', $speed)</script>\r\n";
 	}
+}
+
+function ftpGetChunkSize($fsize) {
+	if ($fsize <= 0) return 4096;
+	if ($fsize < 4096) return (int)$fsize;
+	if ($fsize <= 1024 * 1024) return 4096;
+	if ($fsize <= 1024 * 1024 * 10) return 4096 * 10;
+	if ($fsize <= 1024 * 1024 * 40) return 4096 * 30;
+	if ($fsize <= 1024 * 1024 * 80) return 4096 * 47;
+	if ($fsize <= 1024 * 1024 * 120) return 4096 * 65;
+	if ($fsize <= 1024 * 1024 * 150) return 4096 * 70;
+	if ($fsize <= 1024 * 1024 * 200) return 4096 * 85;
+	if ($fsize <= 1024 * 1024 * 250) return 4096 * 100;
+	if ($fsize <= 1024 * 1024 * 300) return 4096 * 115;
+	if ($fsize <= 1024 * 1024 * 400) return 4096 * 135;
+	if ($fsize <= 1024 * 1024 * 500) return 4096 * 170;
+	if ($fsize <= 1024 * 1024 * 1000) return 4096 * 200;
+	return 4096 * 210;
 }
 
 class ftp_base {
@@ -225,7 +241,7 @@ class ftp_base {
 
 	function SendMSG($message = '', $crlf=true) {
 		if ($this->Verbose) {
-			echo $message . ($crlf ? CRLF : '');
+			textarea($message . ($crlf ? CRLF : ''), 0, max(1, substr_count($message, "\n")));
 			flush();
 		}
 		return TRUE;
@@ -666,7 +682,7 @@ class ftp extends ftp_base {
 				if (preg_match('/^([0-9]{3})(-(.*' . CRLF . ')+\\1)? [^' . CRLF . ']+' . CRLF . '$/', $this->_message, $regs)) $go = false;
 			}
 		} while ($go);
-		if ($this->LocalEcho) echo 'GET < ' . rtrim($this->_message, CRLF) . CRLF;
+		if ($this->LocalEcho) textarea('GET < ' . rtrim($this->_message, CRLF), 0, max(1, substr_count($this->_message, "\n")));
 		$this->_code = (int) $regs[1];
 		return $result;
 	}
@@ -676,7 +692,7 @@ class ftp extends ftp_base {
 			$this->PushError($fnction, 'Connect first');
 			return FALSE;
 		}
-		if ($this->LocalEcho) echo 'PUT > ', $cmd, CRLF;
+		if ($this->LocalEcho) textarea('PUT > '. $cmd, 0, max(1, substr_count($cmd, "\n")));
 		$status = @fputs($this->_ftp_control_sock, $cmd . CRLF);
 		if ($status === false) {
 			$this->PushError($fnction, 'socket write failed');
