@@ -211,7 +211,7 @@ class youtube_com extends DownloadClass {
 			if (($cut1 = cut_str(substr($this->playerJs, $spos), '{', '}')) == false) $this->decError('Cannot get inner content of "if(X.sig||X.s)"');
 			$v = '[\$_A-Za-z][\$\w]*';
 			if (!preg_match("@(?<=\.sig\|\|)$v(?=\($v\.s\))@", $cut1, $fn)) $this->decError('Cannot get decoder function name');
-			$fn = $fn[0];
+			$fn = preg_quote($fn[0], '@');
 			if (!preg_match("@(?:function\s+$fn\s*\(|var\s+$fn\s*=\s*function\s*\(|(?<={|,)\s*$fn\s*=\s*function\s*\()@", $this->playerJs, $fpos, PREG_OFFSET_CAPTURE)) $this->decError('Cannot find decoder function');
 			$fpos = $fpos[0][1];
 			if (($cut2 = cut_str(substr($this->playerJs, $fpos), '{', '}')) == false) $this->decError('Cannot get decoder function contents');
@@ -297,7 +297,7 @@ class youtube_com extends DownloadClass {
 		echo "<input type='hidden' name='yt_QS' value='on' />\n";
 		echo '<label><input type="checkbox" name="cleanname" checked="checked" value="1" /><small>&nbsp;Remove non-supported characters from filename</small></label><br />';
 		echo "<select name='yt_fmt' id='QS_fmt'>\n";
-		foreach ($this->fmturlmaps as $fmt => $url) if (in_array($fmt, $this->fmts) && ($I = str_split($vinfo[$fmt]))) echo '<option '.($fmt == 18 ? "selected='selected' " : '')."value='$fmt'>[$fmt] Video: {$VC[$I[1]]} {$VR[$I[0]]}p | Audio: {$AC[$I[2]]} ~{$AB[$I[3]]} kbps".(!empty($sizes[$fmt]) ? ' ('.$sizes[$fmt].')' : '')."</option>\n";
+		foreach ($this->fmturlmaps as $fmt => $url) if (in_array($fmt, $this->fmts) && ($I = str_split($vinfo[$fmt]))) echo "<option value='$fmt'>[$fmt] Video: {$VC[$I[1]]} {$VR[$I[0]]}p | Audio: {$AC[$I[2]]} ~{$AB[$I[3]]} kbps".(!empty($sizes[$fmt]) ? ' ('.$sizes[$fmt].')' : '')."</option>\n";
 		echo "</select>\n";
 
 		$data = $this->DefaultParamArr($this->link);
@@ -332,7 +332,7 @@ class youtube_com extends DownloadClass {
 // [14-1-2015]  Fixed Age Restrictions. (Please, do not annoy my inbox when a plugin fails, go to the forum) - Th3-822
 // [21-1-2015]  Fixed backslash in filename when cleanname is off. - Th3-822
 // [13-4-2015]  Fixed captcha detection. - Th3-822
-// [22-12-2015]  Fixed signature decoding functions. - Th3-822
 // [05-2-2016]  Fixed captcha (Now uses reCaptcha2) & Added cookie storage for it. - Th3-822
+// [03-5-2016]  Fixed signature decoding functions. - Th3-822
 
 ?>

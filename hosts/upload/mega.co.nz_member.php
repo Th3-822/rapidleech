@@ -11,9 +11,28 @@ $calcMacEachChunk = true; // Set to false for get the file's cbc-mac after uploa
 $_GET['proxy'] = isset($_GET['proxy']) ? $_GET['proxy'] : '';
 $not_done = true;
 $T8 = array('seqno' => mt_rand(), 'sid' => '');
-//$T8DEBUG = true;
+
 echo "<center>Mega.co.nz plugin by <b>Th3-822</b></center><br />\n"; // Please, do not remove or change this line contents. - Th3-822
 if (!extension_loaded('mcrypt') || !in_array('rijndael-128', mcrypt_list_algorithms(), true)) html_error("Mcrypt module isn't installed or it doesn't have support for the needed encryption.");
+
+// OpenSSL is Much Faster.
+if (extension_loaded('openssl') && in_array('AES-128-CBC', openssl_get_cipher_methods(), true)) {
+	function aes_cbc_encrypt($data, $key) {
+		$data = str_pad($data, 16 * ceil(strlen($data) / 16), "\0"); // OpenSSL needs this padded.
+		return openssl_encrypt($data, 'AES-128-CBC', $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
+	}
+	function aes_cbc_decrypt($data, $key) {
+		$data = str_pad($data, 16 * ceil(strlen($data) / 16), "\0"); // OpenSSL needs this padded.
+		return openssl_decrypt($data, 'AES-128-CBC', $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
+	}
+} else {
+	function aes_cbc_encrypt($data, $key) {
+		return mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_CBC, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
+	}
+	function aes_cbc_decrypt($data, $key) {
+		return mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_CBC, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
+	}
+}
 
 if (!empty($upload_acc['mega_co_nz']['user']) && !empty($upload_acc['mega_co_nz']['pass'])) {
 	$default_acc = true;
@@ -142,10 +161,10 @@ function apiReq($atrr) {
 	return $ret;
 }
 function doApiReq($atrr) {
-	global $options, $T8;
+	global $T8;
 	$domain = 'g.api.mega.co.nz';//$domain = 'eu.api.mega.co.nz';
 	if (!function_exists('json_encode')) html_error('Error: Please enable JSON in php.');
-	$cURL = $options['use_curl'] && extension_loaded('curl') && function_exists('curl_init') && function_exists('curl_exec') ? true : false;
+	$cURL = $GLOBALS['options']['use_curl'] && extension_loaded('curl') && function_exists('curl_init') && function_exists('curl_exec') ? true : false;
 	$chttps = false;
 	if ($cURL) {
 		$cV = curl_version();
@@ -212,12 +231,6 @@ function str_to_a32($b) {
 }
 function base64_to_a32($s) {
 	return str_to_a32(base64url_decode($s));
-}
-function aes_cbc_encrypt($data, $key) {
-	return mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_CBC, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
-}
-function aes_cbc_decrypt($data, $key) {
-	return mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_CBC, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
 }
 function aes_cbc_encrypt_a32($data, $key) {
 	return str_to_a32(aes_cbc_encrypt(a32_to_str($data), a32_to_str($key)));
@@ -436,8 +449,12 @@ function Login($user, $pass) {
 	$T8['sid'] = base64url_encode(substr(strrev($T8['sid']), 0, 43));
 	getRootNode();
 	t8ArrToCookieArr($rsa_priv_key);
+
+	$quota = apiReq(array('a' => 'uq', 'strg' => 1));
+	check_errors($quota[0], 'Cannot get disk quota');
 	SaveCookies($user, $pass); // Update cookies file.
 	$cookie = '';
+	if (($quota[0]['mstrg'] - $quota[0]['cstrg']) < $GLOBALS['fsize']) html_error('Insufficient Free Space in Account for Upload this File.');
 }
 
 function IWillNameItLater($cookie, $decrypt=true) {
@@ -483,9 +500,9 @@ function SavedLogin($user, $pass) {
 		$T8['root_id'] = $cookie['root_id'];
 		$rsa_priv_key = explode('/T8\\', $cookie['rsa_priv_key']);
 
-		$test = apiReq(array('a' => 'uq')); // I'm using the 'User quota details' request for validating the session id.
-		if (is_numeric($test[0]) && $test[0] < 0) {
-			if ($test[0] == -15) { // Session code expired... We need to get a newer one.
+		$quota = apiReq(array('a' => 'uq', 'strg' => 1)); // I'm using the 'User quota details' request for validating the session id.
+		if (is_numeric($quota[0]) && $quota[0] < 0) {
+			if ($quota[0] == -15) { // Session code expired... We need to get a newer one.
 				if (!extension_loaded('bcmath')) html_error('This plugin needs BCMath extension for login.');
 				$T8['sid'] = false; // Do not send old sid or it will get '-15' error.
 				$res = apiReq(array('a' => 'us', 'user' => $user, 'uh' => $T8['user_handle']));
@@ -493,14 +510,11 @@ function SavedLogin($user, $pass) {
 				$T8['sid'] = rsa_decrypt(mpi2bc(base64url_decode($res[0]['csid'])), $rsa_priv_key[0], $rsa_priv_key[1], $rsa_priv_key[2]);
 				$T8['sid'] = base64url_encode(substr(strrev($T8['sid']), 0, 43));
 				t8ArrToCookieArr();
-				SaveCookies($user, $pass); // Update cookies file with new SID.
-				$cookie = '';
-				return;
-			}
-			check_errors($test[0], 'Cannot validate saved-login');
+			} else check_errors($quota[0], 'Cannot validate saved-login');
 		}
 		SaveCookies($user, $pass); // Update last used time.
 		$cookie = '';
+		if (($quota[0]['mstrg'] - $quota[0]['cstrg']) < $GLOBALS['fsize']) html_error('Insufficient Free Space in Account for Upload this File');
 		return;
 	}
 	return Login($user, $pass);
@@ -595,7 +609,6 @@ function chunk_ul($scheme, $host, $port, $url, $onlyOpen = false) {
 		fflush($fp);
 
 		if ($sendbyte === false || strlen($chunk) > $sendbyte) {
-			if (isset($GLOBALS['T8DEBUG'])) textarea("UPLOAD Chunk\nRAW Request:\n".$zapros."[Incomplete Chunk Content]",200,15); //Debug 4/4 XD
 			fclose($fp);
 			html_error(lang(113));
 		}
@@ -625,7 +638,6 @@ function chunk_ul($scheme, $host, $port, $url, $onlyOpen = false) {
 	}
 
 	fclose($fp);
-	if (isset($GLOBALS['T8DEBUG'])) textarea("UPLOAD Chunk\nResponse:\n$page\nRAW Request:\n".$zapros."[Uploaded Chunk Content]",200,15);
 	$body = substr($page, strpos($page, "\r\n\r\n") + 4);
 	if (is_numeric($body) && $body < 0) check_errors($body, 'Error while uploading chunk');
 	return $page;
@@ -672,7 +684,6 @@ function T8_mega_upload($link, $ul_key, $file, $filename, &$mac_str = '') {
 	while (!feof($fs) && !$errno && !$errstr) {
 		$data = fread($fs, $chunkSize);
 		if ($data === false) {
-			if (isset($GLOBALS['T8DEBUG'])) textarea("UPLOAD\nRAW Request:\n".$zapros."[Incomplete File Content]",200,15); //Debug
 			fclose($fs);
 			if (!$chunk_UL) fclose($fp);
 			html_error(lang(112));
@@ -703,7 +714,6 @@ function T8_mega_upload($link, $ul_key, $file, $filename, &$mac_str = '') {
 				fflush($fp);
 
 				if ($sendbyte === false || strlen($chunk) > $sendbyte) {
-					if (isset($GLOBALS['T8DEBUG'])) textarea("UPLOAD\n$errstr\n".print_r(stream_get_meta_data($fp), true)."\nRAW Request:\n".$zapros."[Incomplete File Content]",200,15); //Debug
 					fclose($fs);
 					fclose($fp);
 					html_error(lang(113));
@@ -743,12 +753,12 @@ function T8_mega_upload($link, $ul_key, $file, $filename, &$mac_str = '') {
 		fclose($fp);
 	}
 	fclose($fs);
-	if (isset($GLOBALS['T8DEBUG']) && !$chunk_UL) textarea("UPLOAD\nResponse:\n$page\nRAW Request:\n".$zapros."[Encrypted Uploaded File Content]",200,15); //Debug
 	return $page;
 }
 
 //[23-7-2013] Written by Th3-822.
 //[30-1-2014] Ephemeral account support removed, mega is not allowing anon users to generate public links. - Th3-822
 //[15-4-2014] Fixed re-login error. - Th3-822
+//[19-5-2016] Using OpenSSL where is possible for better login speed & Added free space check. - Th3-822
 
 ?>

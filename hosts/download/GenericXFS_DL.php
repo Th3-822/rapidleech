@@ -11,8 +11,8 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class GenericXFS_DL extends DownloadClass {
-	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\'\"\t<>\r\n\\\]+@i';
-	private $classVer = 11;
+	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\'\"\t<>\r\n\\\]{15,}@i';
+	private $classVer = 12;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -239,7 +239,7 @@ class GenericXFS_DL extends DownloadClass {
 	// Finds FreeDL countdown on $this->page and calls $this->CountDown(X) for it.
 	// return true if there is a countdown, false otherwise.
 	protected function findCountdown() {
-		if (preg_match('@<span[^>]*>(?>.*?<span\s+id=[\'"][\w\-]+[\'"][^>]*>)(\d+)</span>(?>.*?</span>)@sim', $this->page, $count)) {
+		if (preg_match('@<span[^>]*>(?>.*?<span\s+id=[\'"][\w\-]+[\'"][^>]*>)\s*(\d+)\s*</span>(?>.*?</span>)@sim', $this->page, $count)) {
 			if ($count[1] > 0) $this->CountDown($count[1] + 2);
 			return true;
 		}

@@ -8,23 +8,24 @@ if (!defined('RAPIDLEECH')) {
 if (!file_exists(HOST_DIR . 'download/GenericXFS_DL.php')) html_error('Cannot load "'.htmlentities(HOST_DIR).'download/GenericXFS_DL.php" (File doesn\'t exists)');
 require_once(HOST_DIR . 'download/GenericXFS_DL.php');
 
-class filerio_in extends GenericXFS_DL {
-	public $pluginVer = 11;
+class subyshare_com extends GenericXFS_DL {
+	public $pluginVer = 12;
 	public function Download($link) {
 		$this->wwwDomain = false; // Switch to true if filehost forces it's domain with www.
 		$this->cname = 'xfss'; // Session cookie name
 		$this->sslLogin = false; // Force https on login.
 		$this->embedDL = false; // Try to unpack player's js for finding download link. (Only hosts with video player)
-		$this->unescaper = true; // Enable JS unescape decoder.
+		$this->unescaper = false; // Enable JS unescape decoder.
 
 		$this->Start($link);
 	}
 
-	// They have another op name for the my_account option.
-	protected function isLoggedIn() {
-		$page = $this->GetPage($this->purl.'?op=view_account', $this->cookie, 0, $this->purl);
-		if (stripos($page, '/?op=logout') === false && stripos($page, '/logout') === false) return false;
-		return $page;
+	protected function findCountdown() {
+		if (preg_match('@<span[^>]*>(?>[\w ]*?<span[^>]*>)\s*(\d+)\s*</span>(?>[\w ]*?</span>)@sim', $this->page, $count)) {
+			if ($count[1] > 0) $this->CountDown($count[1] + 2);
+			return true;
+		}
+		return false;
 	}
 }
 

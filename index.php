@@ -113,11 +113,16 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 				require_once(CLASS_DIR . 'http.php');
 				require_once(HOST_DIR . 'DownloadClass.php');
 				$class = substr($file, 0, -4);
-				if (empty($auth) && $_GET['premium_acc'] == 'on' && !empty($premium_acc["$class"]['proxy'])) {
-					$proxy = $premium_acc["$class"]['proxy'];
-					$_GET['useproxy'] = ($proxy != -1 ? 'on' : false);
-					$_GET['proxy'] = ($proxy != -1 ? $proxy : false);
-					$pauth = (!empty($premium_acc["$class"]['pauth']) ? base64_encode($premium_acc["$class"]['pauth']) : false);
+				if (empty($auth) && !empty($_GET['premium_acc'])) {
+					if (!empty($premium_acc["$class"]['proxy']) && $premium_acc["$class"]['proxy'] != -1) {
+						// Load Server-Side Proxy for this host.
+						$_GET['useproxy'] = 'on';
+						$_GET['proxy'] = $premium_acc["$class"]['proxy'];
+						$pauth = (!empty($premium_acc["$class"]['pauth']) ? base64_encode($premium_acc["$class"]['pauth']) : false);
+					} else if (!empty($premium_acc["$class"])) {
+						// Disable User-Proxy Support for Server-Side accounts.
+						$_GET['useproxy'] = $_GET['proxy'] = $pauth = false;
+					}
 				}
 				require_once(HOST_DIR . "download/$file");
 				$firstchar = substr($file, 0, 1);

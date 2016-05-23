@@ -5,7 +5,7 @@ if (!defined('RAPIDLEECH')) {
 }
 
 // Allow user-agent to be changed easily
-if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0');
+if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:46.0) Gecko/20100101 Firefox/46.0');
 
 /*
  * Pauses for countdown timer in file hosts
@@ -322,7 +322,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			$fileSize = bytesToKbOrMbOrGb($fileSize);
 		} else $fileSize = bytesToKbOrMbOrGb($bytesTotal);
 		$chunkSize = GetChunkSize($bytesTotal);
-		echo(lang(104) . ' <b>' . $FileName . '</b>, ' . lang(56) . " <b>$fileSize</b>...<br />");
+		echo(lang(104) . " <b>$FileName</b>, " . lang(56) . " <b>$fileSize</b>...<br />");
 
 		//$scriptStarted = false;
 		require_once(TEMPLATE_DIR . '/transloadui.php');

@@ -10,7 +10,7 @@ class d1fichier_com extends DownloadClass {
 	public function Download($link) {
 		$this->LnkRegexp = '@https?://(?:www\.)?((?:1fichier|alterupload|desfichiers|dfichiers|pjointe|tenvoi|dl4free)\.com|(?:cjoint|piecejointe)\.net|mesfichiers\.org|megadl\.fr)/\?([\w\-]+)@i';
 
-		$link = preg_replace('@//([\w\-]{4,})\.((?:1fichier|alterupload|desfichiers|dfichiers|pjointe|tenvoi|dl4free)\.com|(?:cjoint|piecejointe)\.net|mesfichiers\.org|megadl\.fr)/[^\r\n\t\'\"<>]+$@i', '//$2/?$1', $link); // Let's support old links by now
+		$link = preg_replace('@//([\w\-]{4,})\.((?:1fichier|alterupload|desfichiers|dfichiers|pjointe|tenvoi|dl4free)\.com|(?:cjoint|piecejointe)\.net|mesfichiers\.org|megadl\.fr)/[^\r\n\t\'\"<>]*$@i', '//$2/?$1', $link); // Let's support old links by now
 
 		$link = parse_url($link);
 		$link['scheme'] = 'https';

@@ -22,6 +22,7 @@ class uploaded_net extends DownloadClass {
 			} while ($x < 6 && substr($header, 9, 3) == '302' && stripos($header, "\nLocation: /file/{$fid[1]}") !== false);
 			is_present($header, '/404', 'File Not Found');
 			is_present($header, '/410', 'File Was Removed');
+			is_present($header, 'Please check the URL for typing errors,', 'File not Found or Removed.');
 		}
 
 		$this->pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);

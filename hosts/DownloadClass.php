@@ -109,7 +109,7 @@ class DownloadClass {
 
 	public function CountDown($countDown) {
 		if ($countDown <= 0) return;
-		insert_timer($countDown, 'Waiting link timelock', '', true);
+		insert_timer($countDown, 'Waiting link timelock.', '', true);
 	}
 
 	/*
@@ -328,7 +328,7 @@ class DownloadClass {
 			if (is_callable($retryCallback)) {
 				echo '<span class="htmlerror"><b>[RC2] Wrong CAPTCHA entered.</b></span><br /><br />';
 				return call_user_func($retryCallback);
-			} else html_error('[RC2] Wrong CAPTCHA entered.');
+			} else html_error('[RC2] retryMethod not found/callable.');
 		}
 		if (stripos($page, 'Copy this code') === false) html_error('[RC2] Unknown error after sending captcha.');
 
