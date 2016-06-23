@@ -5,10 +5,8 @@ if (!defined('RAPIDLEECH')) {
 	exit();
 }
 
-if (!file_exists(HOST_DIR . 'download/GenericXFS_DL.php')) html_error('Cannot load "'.htmlentities(HOST_DIR).'download/GenericXFS_DL.php" (File doesn\'t exists)');
-require_once(HOST_DIR . 'download/GenericXFS_DL.php');
 
-class solidfiles_com extends GenericXFS_DL
+class solidfiles_com extends DownloadClass
 {
 	public function Download($link)
 	{
