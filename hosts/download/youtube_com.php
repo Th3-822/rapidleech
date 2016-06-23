@@ -6,8 +6,9 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class youtube_com extends DownloadClass {
-	private $page, $cookie, $fmturlmaps, $vid, $sts, $js, $playerJs, $sigJs, $jsVars,
-		$fmts = array(38,37,46,22,45,44,35,43,34,18,6,5,36,17), $cookieFile;
+	private $page, $cookie, $fmtmaps, $vid, $sts, $js, $playerJs, $sigJs, $jsVars, $cookieFile,
+		$fmts = array(22 => '0|720|0|192', 45 => '1|720|1|192', 44 => '1|480|1|192', 35 => '2|480|0|128', 43 => '1|360|1|128', 34 => '2|360|0|128', 18 => '0|360|0|96', 6 => '2|270|3|64', 5 => '2|240|3|64', 36 => '3|240|0|36', 17 => '3|144|0|24'),
+		$dashfmts = array(138 => 'V0', 272 => 'V1', 315 => 'V1', 266 => 'V0', 313 => 'V1', 308 => 'V1', 264 => 'V0', 271 => 'V1', 299 => 'V0', 303 => 'V1', 137 => 'V0', 248 => 'V1', 298 => 'V0', 302 => 'V1', 140 => 'A0', 171 => 'A1', 251 => 'A2', 250 => 'A2', 249 => 'A2');
 
 	public function Download($link) {
 		$this->cookieFile = DOWNLOAD_DIR.'YT_cookie.txt';
@@ -16,7 +17,7 @@ class youtube_com extends DownloadClass {
 		$this->vid = array();
 
 		if (host_matches('youtu.be', $url['host'])) preg_match('@/([\w\-\.]{11})@i', $url['path'], $this->vid);
-		elseif (empty($url['query']) || ($this->vid[1] = cut_str('&'.$url['query'].'&', '&v=', '&')) === false || !preg_match('@^[\w\-\.]{11}$@i', $this->vid[1])) preg_match('@/(?:v|(?:embed))/([\w\-\.]{11})@i', $url['path'], $this->vid);
+		else if (empty($url['query']) || ($this->vid[1] = cut_str('&'.$url['query'].'&', '&v=', '&')) === false || !preg_match('@^[\w\-\.]{11}$@i', $this->vid[1])) preg_match('@/(?:v|(?:embed))/([\w\-\.]{11})@i', $url['path'], $this->vid);
 
 		if (empty($this->vid[1])) html_error('Video ID not found.');
 		$this->vid = $this->vid[1];
@@ -25,40 +26,36 @@ class youtube_com extends DownloadClass {
 		if (empty($_POST['step'])) $this->getFmtMaps();
 		else $this->captcha();
 
-		$this->fmturlmaps = $this->GetVideosArr();
-
 		$yt_fmt = empty($_REQUEST['yt_fmt']) ? '' : $_REQUEST['yt_fmt'];
 		if (empty($yt_fmt) && !isset($_GET['audl'])) return $this->QSelector();
-		elseif (isset($_REQUEST['ytube_mp4']) && $_REQUEST['ytube_mp4'] == 'on' && !empty($yt_fmt)) {
+		else if (isset($_REQUEST['ytube_mp4']) && $_REQUEST['ytube_mp4'] == 'on' && !empty($yt_fmt)) {
 			//look for and download the highest quality we can find?
 			if ($yt_fmt == 'highest') {
-				foreach ($this->fmts as $fmt) if (array_key_exists($fmt, $this->fmturlmaps)) {
-					$furl = $this->fmturlmaps[$fmt];
-					break;
-				}
-			} elseif (!$furl = $this->fmturlmaps[$yt_fmt]) html_error('Specified video format not found');
-			else $fmt = $yt_fmt;
+				foreach (array_keys($this->fmts) as $itag) if (!empty($this->fmtmaps[$itag])) break;
+			} else if (!empty($this->fmtmaps[$yt_fmt])) {
+				$itag = $yt_fmt;
+			} else html_error('Specified video format not found');
 		} else { //just get the one Youtube plays by default (in some cases it could also be the highest quality format)
-			$fmt = key($this->fmturlmaps);
-			$furl = $this->fmturlmaps[$fmt];
+			$itag = key($this->fmtmaps);
 		}
+		$fmt = $this->fmtmaps[$itag];
+		$is_dash = !empty($this->dashfmts[$itag]) ? $this->dashfmts[$itag] : false;
 
-		$ext = '.flv';
-		$fmtexts = array('.mp4' => array(18,22,37,38), '.webm' => array(43,44,45,46), '.3gp' => array(36,17));
-		foreach ($fmtexts as $k => $v) {
-			if (!is_array($v)) $v = array($v);  
-			if (in_array($fmt, $v)) {
-				$ext = $k;
-				break;
-			}
-		}
+		$ext = ($is_dash ? '.dash' : '');
+		$fmtexts = array('V' => array('.mp4', '.webm', '.flv', '.3gp'), 'A' => array('.m4a', '.ogg', '.opus', '.mp3'));
+		$v = ($is_dash ? str_split($is_dash) : array('V', substr($this->fmts[$itag], 0, 1)));
+		if ($v) $ext .= $fmtexts[$v[0]][$v[1]];
 
 		if (empty($this->response['title'])) html_error('No video title found! Download halted.');
-		$FileName = str_replace(str_split('\\\:*?"<>|=;'."\t\r\n\f"), '_', html_entity_decode(trim($this->response['title']), ENT_QUOTES));
-		if (!empty($_REQUEST['cleanname'])) $FileName = preg_replace('@[^ A-Za-z_\-\d\.,\(\)\[\]\{\}&\!\'\@\%\#]@u', '_', $FileName);
-		$FileName .= " [YT-f$fmt][{$this->vid}]$ext";
+		$filename = str_replace(str_split('\\\:*?"<>|=;'."\t\r\n\f"), '_', html_entity_decode(trim($this->response['title']), ENT_QUOTES));
+		if (!empty($_REQUEST['cleanname'])) $filename = preg_replace('@[^ A-Za-z_\-\d\.,\(\)\[\]\{\}&\!\'\@\%\#]@u', '_', $filename);
+		if (!$is_dash) {
+			$v = explode('|', $this->fmts[$itag]);
+			$filename .= " [YT-{$v[1]}p]";
+		} else $filename .= " [YT-{$fmt['quality_label']}]";
+		$filename .= "[{$this->vid}]$ext";
 
-		$this->RedirectDownload($furl, $FileName, $this->cookie, 0, 0, $FileName);
+		$this->RedirectDownload($fmt['url'], $filename, $this->cookie, 0, 0, $filename);
 	}
 
 	private function FormToArr($content, $v1 = '&', $v2 = '=') {
@@ -136,10 +133,31 @@ class youtube_com extends DownloadClass {
 
 		if (in_array(substr($this->page, 9, 3), array('402', '429')) || preg_match('@Location: https?://(www\.)?youtube\.com/das_captcha@i', $this->page)) return $this->captcha();
 
-		if (empty($this->response['url_encoded_fmt_stream_map'])) html_error('['. (!empty($this->sts) ? htmlspecialchars($this->sts) : 0) . '] Video links not found.');
-		$this->fmtmaps = explode(',', $this->response['url_encoded_fmt_stream_map']);
+		if (empty($this->response['url_encoded_fmt_stream_map']) && empty($this->response['adaptive_fmts'])) html_error('['. (!empty($this->sts) ? htmlspecialchars($this->sts) : 0) . '] Video links not found.');
 
 		if (!empty($this->cookie['goojf'])) $this->saveCookie();
+
+		$this->fmtmaps = array();
+		foreach (array('url_encoded_fmt_stream_map', 'adaptive_fmts') as $map) {
+			if (empty($this->response[$map])) continue;
+			foreach (explode(',', $this->response[$map]) as $fmt) {
+				$fmt = array_map('urldecode', $this->FormToArr($fmt));
+				if (empty($fmt['itag']) || empty($fmt['url'])) continue;
+				if (!empty($fmt['s']) && empty($this->encS)) {
+					if (empty($this->sts)) return $this->getCipher();
+					else $this->decError('No decoded steps');
+				}
+				$fmt['url'] = parse_url($fmt['url']);
+				$fmt['url']['query'] = array_map('urldecode', $this->FormToArr($fmt['url']['query']));
+				if (empty($fmt['url']['query']['signature'])) $fmt['url']['query']['signature'] = (!empty($fmt['s']) ? $this->sigDecode($fmt['s']) : $fmt['sig']);
+				foreach (array_diff(array_keys($fmt), array('signature', 'sig', 's', 'url')) as $k) $fmt['url']['query'][$k] = $fmt[$k];
+				ksort($fmt['url']['query']);
+				$fmt['url']['query'] = http_build_query($fmt['url']['query']);
+
+				$fmt['url'] = rebuild_url($fmt['url']);
+				$this->fmtmaps[$fmt['itag']] = $fmt;
+			}
+		}
 	}
 
 	private function decError($msg) {
@@ -165,13 +183,13 @@ class youtube_com extends DownloadClass {
 				$this->jsVars[$obj]['fn'][$fName] = array('src' => $src);
 
 				if (empty($src[1])) return $this->jsVars[$obj]['fn'][$fName]['step'] = 'r';
-				elseif (preg_match("@var\s+($v)=($v)\[0\];\\2\[0\]=\\2\[{$src[1]}%\\2(?:\.length|\[$v\])\];\\2\[{$src[1]}\]=\\1@", $src[2])) {
+				else if (preg_match("@var\s+($v)=($v)\[0\];\\2\[0\]=\\2\[{$src[1]}%\\2(?:\.length|\[$v\])\];\\2\[{$src[1]}\]=\\1@", $src[2])) {
 					$this->jsVars[$obj]['fn'][$fName]['step'] = 'w%d';
 					return "w$num";
-				} elseif (preg_match("@(?:$v=)?$v(?:\.s(p)?lice|\[$v\])\((?(1)0,){$src[1]}\)@", $src[2])) {
+				} else if (preg_match("@(?:$v=)?$v(?:\.s(p)?lice|\[$v\])\((?(1)0,){$src[1]}\)@", $src[2])) {
 					$this->jsVars[$obj]['fn'][$fName]['step'] = 's%d';
 					return "s$num";
-				} elseif (preg_match("@(?:$v=)?$v(?:\.reverse|\[$v\])\(\)@", $src[2])) return $this->jsVars[$obj]['fn'][$fName]['step'] = 'r';
+				} else if (preg_match("@(?:$v=)?$v(?:\.reverse|\[$v\])\(\)@", $src[2])) return $this->jsVars[$obj]['fn'][$fName]['step'] = 'r';
 				else $this->decError("Error parsing function '$obj.$fName'");
 			} else return sprintf($this->jsVars[$obj]['fn'][$fName]['step'], $num);
 		}
@@ -181,13 +199,13 @@ class youtube_com extends DownloadClass {
 			$v = '[\$_A-Za-z][\$\w]*';
 			if (!preg_match("@^function\s+$fName\($v(?:,($v))?\)\{(.*)$@", $this->jsVars[$fName]['src'], $pars)) $this->decError("Cannot parse function '$fName'");
 			if (empty($pars[1])) return $this->jsVars[$fName]['step'] = 'r';
-			elseif (preg_match("@var\s+($v)=($v)\[0\];\\2\[0\]=\\2\[{$pars[1]}%\\2(?:\.length|\[$v\])\];\\2\[{$pars[1]}\]=\\1@", $src[2])) {
+			else if (preg_match("@var\s+($v)=($v)\[0\];\\2\[0\]=\\2\[{$pars[1]}%\\2(?:\.length|\[$v\])\];\\2\[{$pars[1]}\]=\\1@", $src[2])) {
 				$this->jsVars[$fName]['step'] = 'w%d';
 				return "w$num";
-			} elseif (preg_match("@(?:$v=)?$v(?:\.s(p)?lice|\[$v\])\((?(1)0,){$src[1]}\)@", $src[2])) {
+			} else if (preg_match("@(?:$v=)?$v(?:\.s(p)?lice|\[$v\])\((?(1)0,){$src[1]}\)@", $src[2])) {
 				$this->jsVars[$fName]['step'] = 's%d';
 				return "s$num";
-			} elseif (preg_match("@(?:$v=)?$v(?:\.reverse|\[$v\])\(\)@", $src[2])) return $this->jsVars[$fName]['step'] = 'r';
+			} else if (preg_match("@(?:$v=)?$v(?:\.reverse|\[$v\])\(\)@", $src[2])) return $this->jsVars[$fName]['step'] = 'r';
 			else $this->decError("Error parsing function '$fName'");
 		} else return sprintf($this->jsVars[$fName]['step'], $num);
 	}
@@ -212,17 +230,16 @@ class youtube_com extends DownloadClass {
 			$v = '[\$_A-Za-z][\$\w]*';
 			if (!preg_match("@(?<=\.sig\|\|)$v(?=\($v\.s\))@", $cut1, $fn)) $this->decError('Cannot get decoder function name');
 			$fn = preg_quote($fn[0], '@');
-			if (!preg_match("@(?:function\s+$fn\s*\(|var\s+$fn\s*=\s*function\s*\(|(?<={|,)\s*$fn\s*=\s*function\s*\()@", $this->playerJs, $fpos, PREG_OFFSET_CAPTURE)) $this->decError('Cannot find decoder function');
+			if (!preg_match("@(?:function\s+$fn\s*\(|var\s+$fn\s*=\s*function\s*\(|(?<=(?:{|,|;))\s*$fn\s*=\s*function\s*\()@", $this->playerJs, $fpos, PREG_OFFSET_CAPTURE)) $this->decError('Cannot find decoder function');
 			$fpos = $fpos[0][1];
 			if (($cut2 = cut_str(substr($this->playerJs, $fpos), '{', '}')) == false) $this->decError('Cannot get decoder function contents');
 			$this->sigJs = preg_replace("@var $v=$v\[0\];$v\[0\]=($v)\[(\d+)%$v(?:\.length|\[$v\])\];$v\[\d+\]=$v;@", '$1=T8($1,$2);', trim($cut2));
 			$this->encS = array();
 			foreach (array_map('trim', explode(';', '{'.$this->sigJs.'}')) as $step) {
 				if (($step{0} == '{' || substr($step, strlen($step) - 1, 1) == '}') && (preg_match("@^\{(?:var\s+)?$v=$v(?:\.split|\[$v\])\(\"\"\)$@", $step) || preg_match("@^return\s+$v(?:\.join|\[$v\])\(\"\"\);?\}$@", $step))) continue;
-				elseif (preg_match("@^(?:$v=)?((?:$v.)*$v)\($v\,(\d+)\)$@", $step, $s)) $this->encS[] = $this->findFunction($s[1], $s[2]);
-				//elseif (preg_match("@^$v=$v\($v\,(\d+)\)$@", $step, $s)) $this->encS[] = 'w'.$s[1];
-				elseif (preg_match("@^(?:$v=)?$v(?:\.s(p)?lice|\[$v\])\((?(1)0,)(\d+)\)$@", $step, $s)) $this->encS[] = 's'.$s[2];
-				elseif (preg_match("@^(?:$v=)?$v(?:\.reverse|\[$v\])\(\)$@", $step)) $this->encS[] = 'r';
+				else if (preg_match("@^(?:$v=)?((?:$v.)*$v)\($v\,(\d+)\)$@", $step, $s)) $this->encS[] = $this->findFunction($s[1], $s[2]);
+				else if (preg_match("@^(?:$v=)?$v(?:\.s(p)?lice|\[$v\])\((?(1)0,)(\d+)\)$@", $step, $s)) $this->encS[] = 's'.$s[2];
+				else if (preg_match("@^(?:$v=)?$v(?:\.reverse|\[$v\])\(\)$@", $step)) $this->encS[] = 'r';
 				else $this->decError($step.' | Unknown step on decoder function.');
 			}
 
@@ -232,8 +249,6 @@ class youtube_com extends DownloadClass {
 
 		// Request video fmts with the current sts
 		$this->getFmtMaps();
-
-		return $this->GetVideosArr();
 	}
 
 	private function sigDecode($sig) {
@@ -251,43 +266,26 @@ class youtube_com extends DownloadClass {
 		return implode($sig);
 	}
 
-	private function GetVideosArr() {
-		$fmturls = array();
-		foreach ($this->fmtmaps as $fmtlist) {
-			$fmtlist = array_map('urldecode', $this->FormToArr($fmtlist));
-			if (!in_array($fmtlist['itag'], $this->fmts)) continue;
-			if (!empty($fmtlist['s']) && empty($this->encS)) {
-				if (empty($this->sts)) return $this->getCipher();
-				else $this->decError('No decoded steps');
-			}
-			$fmtlist['url'] = parse_url($fmtlist['url']);
-			$fmtlist['url']['query'] = array_map('urldecode', $this->FormToArr($fmtlist['url']['query']));
-			if (empty($fmtlist['url']['query']['signature'])) $fmtlist['url']['query']['signature'] = (!empty($fmtlist['s']) ? $this->sigDecode($fmtlist['s']) : $fmtlist['sig']);
-			foreach (array_diff(array_keys($fmtlist), array('signature', 'sig', 's', 'url')) as $k) $fmtlist['url']['query'][$k] = $fmtlist[$k];
-			ksort($fmtlist['url']['query']);
-			$fmtlist['url']['query'] = http_build_query($fmtlist['url']['query']);
-			$fmturls[$fmtlist['itag']] = rebuild_url($fmtlist['url']);
-		}
-		return $fmturls;
+	private function bitrate2KMG($bitrate) {
+		if (!is_numeric($bitrate)) return 'Unknown';
+		$s = array('', 'K', 'M', 'G');
+		$e = min(floor(log($bitrate) / log(1000)), count($s) - 1);
+		return sprintf("%.2f {$s[$e]}bps", ($bitrate / pow(1000, $e)));
 	}
 
 	private function QSelector() {
-		$VR = array('>1080', 1080, 720, 480, 360, 270, 240, 144);
-		$VC = array('MP4', 'WebM', 'FLV', '3GP');
-		$AC = array('AAC', 'Vorbis', 'MP3');
-		$AB = array(192, 128, 96, 64, 36, 24);
-		$vinfo = array(38=>'0000',37=>'1000',46=>'1110',22=>'2000',45=>'2110',44=>'3111',35=>'3201',43=>'4111',34=>'4201',18=>'4002',6=>'5223',5=>'6223',36=>'6304',17=>'7305'); // VR VC AC AB
+		$C = array('V' => array('MP4', 'WebM', 'FLV', '3GP'), 'A' => array('AAC', 'Vorbis', 'Opus', 'MP3'));
 
 		$sizes = array();
 		/* Add a // at the start of this line for enable this code.
-		if (extension_loaded('curl') && function_exists('curl_init') && function_exists('curl_exec')) {
+		if (extension_loaded('curl') && function_exists('curl_init') && function_exists('curl_exec') && !trim(ini_get('open_basedir'))) {
 			$sizes = array();
-			$opt = array(CURLOPT_FOLLOWLOCATION => true, CURLOPT_MAXREDIRS => 5, CURLOPT_NOBODY => true); // Redirects may fail with open_basedir enabled
-			foreach ($this->fmturlmaps as $fmt => $url) {
-				if (!in_array($fmt, $this->fmts)) continue;
-				$headers = explode("\r\n\r\n", cURL($url, $this->cookie, 0, 0, 0, $opt));
+			$opt = array(CURLOPT_FOLLOWLOCATION => true, CURLOPT_MAXREDIRS => 5, CURLOPT_NOBODY => true);
+			foreach ($this->fmtmaps as $itag => $fmt) {
+				if (empty($this->fmts[$itag]) && empty($this->dashfmts[$itag])) continue;
+				$headers = explode("\r\n\r\n", cURL($fmt['url'], $this->cookie, 0, 0, 0, $opt));
 				$headers = ((count($headers) > 2) ? $headers[count($headers) - 2] : $headers[0]) . "\r\n\r\n";
-				if (substr($headers, 9, 3) == '200' && ($CL = cut_str($headers, "\nContent-Length: ", "\n")) && $CL > 1024) $sizes[$fmt] = bytesToKbOrMbOrGb(trim($CL));
+				if (substr($headers, 9, 3) == '200' && ($CL = cut_str($headers, "\nContent-Length: ", "\n")) && $CL > 1024) $sizes[$itag] = bytesToKbOrMbOrGb(trim($CL));
 			}
 			unset($headers, $CL);
 		} //*/
@@ -297,7 +295,17 @@ class youtube_com extends DownloadClass {
 		echo "<input type='hidden' name='yt_QS' value='on' />\n";
 		echo '<label><input type="checkbox" name="cleanname" checked="checked" value="1" /><small>&nbsp;Remove non-supported characters from filename</small></label><br />';
 		echo "<select name='yt_fmt' id='QS_fmt'>\n";
-		foreach ($this->fmturlmaps as $fmt => $url) if (in_array($fmt, $this->fmts) && ($I = str_split($vinfo[$fmt]))) echo "<option value='$fmt'>[$fmt] Video: {$VC[$I[1]]} {$VR[$I[0]]}p | Audio: {$AC[$I[2]]} ~{$AB[$I[3]]} kbps".(!empty($sizes[$fmt]) ? ' ('.$sizes[$fmt].')' : '')."</option>\n";
+		foreach ($this->fmtmaps as $itag => $fmt) {
+			$size = (!empty($sizes[$itag]) ? ' ('.$sizes[$itag].')' : '');
+			if (!empty($this->fmts[$itag])) {
+				if (($I = explode('|', $this->fmts[$itag]))) printf("<option value='%d'>[%1\$d] Video: %s %dp | Audio: %s ~%d Kbps%s</option>\n", $itag, $C['V'][$I[0]], $I[1], $C['A'][$I[2]], $I[3], $size);
+			} else if (!empty($this->dashfmts[$itag])) {
+				if (($I = str_split($this->dashfmts[$itag]))) {
+					if ($I[0] == 'V' || $I[0] == 'v') printf("<option value='%d'>[%1\$d] Video only: %s @ %s%s</option>\n", $itag, $C['V'][$I[1]], $fmt['quality_label'], $size);
+					else printf("<option value='%d'>[%1\$d] Audio only: %s @ ~%s%s</option>\n", $itag, $C['A'][$I[1]], $this->bitrate2KMG($fmt['bitrate']), $size);
+				}
+			}
+		}
 		echo "</select>\n";
 
 		$data = $this->DefaultParamArr($this->link);
@@ -333,6 +341,7 @@ class youtube_com extends DownloadClass {
 // [21-1-2015]  Fixed backslash in filename when cleanname is off. - Th3-822
 // [13-4-2015]  Fixed captcha detection. - Th3-822
 // [05-2-2016]  Fixed captcha (Now uses reCaptcha2) & Added cookie storage for it. - Th3-822
-// [03-5-2016]  Fixed signature decoding functions. - Th3-822
+// [08-6-2016]  Added support to download DASH formats & Revised video formats handling. - Th3-822
+// [23-6-2016]  Fixed signature decoding functions. - Th3-822
 
 ?>

@@ -383,12 +383,31 @@ function resetProgress() {
 													<td>
 														<select name="yt_fmt" id="yt_fmt">
 															<option value="highest" selected="selected"><?php echo lang(219); ?></option>
-															<option value='22'>[22] Video: MP4 720p | Audio: AAC ~192 kbps</option>
-															<option value='43'>[43] Video: WebM 360p | Audio: Vorbis ~128 kbps</option>
-															<option value='18'>[18] Video: MP4 360p | Audio: AAC ~96 kbps</option>
-															<option value='5'>[5] Video: FLV 240p | Audio: MP3 ~64 kbps</option>
-															<option value='36'>[36] Video: 3GP 240p | Audio: AAC ~36 kbps</option>
-															<option value='17'>[17] Video: 3GP 144p | Audio: AAC ~24 kbps</option>
+															<option value='22'>[22] Video: MP4 720p | Audio: AAC ~192 Kbps</option>
+															<option value='43'>[43] Video: WebM 360p | Audio: Vorbis ~128 Kbps</option>
+															<option value='18'>[18] Video: MP4 360p | Audio: AAC ~96 Kbps</option>
+															<option value='5'>[5] Video: FLV 240p | Audio: MP3 ~64 Kbps</option>
+															<option value='36'>[36] Video: 3GP 240p | Audio: AAC ~36 Kbps</option>
+															<option value='17'>[17] Video: 3GP 144p | Audio: AAC ~24 Kbps</option>
+															<option value='138'>[138] Video only: MP4 @ 4320p</option>
+															<option value='272'>[272] Video only: WebM @ 4320p</option>
+															<option value='315'>[315] Video only: WebM @ 2160p60</option>
+															<option value='266'>[266] Video only: MP4 @ 2160p</option>
+															<option value='313'>[313] Video only: WebM @ 2160p</option>
+															<option value='308'>[308] Video only: WebM @ 1440p60</option>
+															<option value='264'>[264] Video only: MP4 @ 1440p</option>
+															<option value='271'>[271] Video only: WebM @ 1440p</option>
+															<option value='299'>[299] Video only: MP4 @ 1080p60</option>
+															<option value='303'>[303] Video only: WebM @ 1080p60</option>
+															<option value='137'>[137] Video only: MP4 @ 1080p</option>
+															<option value='248'>[248] Video only: WebM @ 1080p</option>
+															<option value='298'>[298] Video only: MP4 @ 720p60</option>
+															<option value='302'>[302] Video only: WebM @ 720p60</option>
+															<option value='140'>[140] Audio only: AAC @ ~128 Kbps</option>
+															<option value='171'>[171] Audio only: Vorbis @ ~160 Kbps</option>
+															<option value='251'>[251] Audio only: Opus @ ~128 Kbps</option>
+															<option value='250'>[250] Audio only: Opus @ ~64 Kbps</option>
+															<option value='249'>[249] Audio only: Opus @ ~48 Kbps</option>
 														</select>
 													</td>
 												</tr>

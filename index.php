@@ -267,10 +267,6 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 			$_GET['port'] = !empty($purl['port']) ? $purl['port'] : 0;
 			$_GET['cookie'] = !empty($_GET['cookie']) ? urlencode(encrypt($_GET['cookie'])) : '';
 			if (is_array($_GET['post'])) $_GET['post'] = false;//$_GET['post'] = urlencode(encrypt(serialize($_GET['post'])));
-			if (!empty($_GET['proxy'])) {
-				$_GET['proxy'] = urlencode($_GET['proxy']);
-				if (!empty($pauth)) $_GET['pauth'] = urlencode(encrypt($pauth));
-			}
 			$lastError = $_GET['auth'] = '';
 			unset($ref, $purl);
 		}

@@ -5,7 +5,7 @@ if (!defined('RAPIDLEECH')) {
 }
 
 // Allow user-agent to be changed easily
-if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:46.0) Gecko/20100101 Firefox/46.0');
+if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:47.0) Gecko/20100101 Firefox/47.0');
 
 /*
  * Pauses for countdown timer in file hosts
@@ -276,7 +276,10 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			$ContentDisposition = cut_str($header, "\nContent-Disposition: ", "\n");
 			if (!empty($ContentDisposition) && stripos($ContentDisposition, 'filename') !== false) {
 				if (preg_match("@filename\*=UTF-8''((?:[\w\-\.]|%[0-F]{2})+)@i", $ContentDisposition, $fn)) $FileName = rawurldecode($fn[1]);
-				elseif (preg_match('@filename=\"?([^\r\n\"\;]+)\"?@i', $ContentDisposition, $fn)) $FileName = $fn[1];
+				else if (preg_match('@filename=(\")?([^\r\n]+?)(?(1)\"|[;\r\n])@i', $ContentDisposition, $fn)) {
+					if (preg_match('@&(?:[A-Z]+|#[0-9]+|#X[0-9A-F]+);@i', $fn[2])) $fn[3] = html_entity_decode($fn[2], ENT_QUOTES, 'UTF-8');
+					$FileName = (empty($fn[3]) ? $fn[2] : $fn[3]);
+				}
 				else $FileName = $saveToFile;
 			} else $FileName = $saveToFile;
 		}

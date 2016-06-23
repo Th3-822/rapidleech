@@ -8,7 +8,7 @@ if (!defined('RAPIDLEECH')) {
 if (!file_exists(HOST_DIR . 'download/GenericXFS_DL.php')) html_error('Cannot load "'.htmlentities(HOST_DIR).'download/GenericXFS_DL.php" (File doesn\'t exists)');
 require_once(HOST_DIR . 'download/GenericXFS_DL.php');
 
-class subyshare_com extends GenericXFS_DL {
+class br2share_net extends GenericXFS_DL {
 	public $pluginVer = 13;
 	public function Download($link) {
 		$this->wwwDomain = false; // Switch to true if filehost forces it's domain with www.

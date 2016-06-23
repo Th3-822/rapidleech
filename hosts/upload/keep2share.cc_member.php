@@ -234,7 +234,7 @@ function CookieLogin($user, $pass) {
 		if ($test['code'] != 403) k2s_checkErrors($test, 'Login error');
 		else {
 			// If session is expired, try to get a updated one from the site with the cookies
-			$page = geturl($domain, 80, '/', $referer.'login.html', $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+			$page = geturl($domain, 80, '/', $referer.'login.html', $testCookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 			$testCookie = GetCookiesArr($page, $testCookie);
 			if (stripos($page, '/auth/logout.html">Logout') === false || empty($testCookie['sessid'])) return Login($user, $pass);
 			// Test possibly updated session

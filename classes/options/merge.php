@@ -26,8 +26,7 @@ function merge() {
 				if (function_exists ( 'hash_file' )) {
 ?><input type="radio" name="crc_mode" value="hash_file" checked="checked" />&nbsp;<?php echo lang(172); ?><br />
 <?php } ?>
-<input type="radio" name="crc_mode" value="file_read" />&nbsp;<?php echo lang(173); ?><br />
-<input type="radio" name="crc_mode" value="fake"<?php if (! function_exists ( 'hash_file' )) { echo 'checked="checked"'; }?> />&nbsp;<?php echo lang(174); ?></span></td>
+<input type="radio" name="crc_mode" value="fake"<?php if (!function_exists('hash_file')) { echo 'checked="checked"'; }?> />&nbsp;<?php echo lang(174); ?></span></td>
 </tr>
 <tr>
 <td><input type="checkbox" name="del_ok" <?php echo $options['disable_deleting'] ? 'disabled="disabled"' : 'checked="checked"'; ?> />&nbsp;<?php echo lang(175); ?></td>
@@ -75,6 +74,7 @@ function merge_go() {
 					$data = array ();
 					while ( ! feof ( $fs ) ) {
 						$data_ = explode ( '=', trim ( fgets ( $fs ) ), 2 );
+						if ($data_[0] == 'crc32') $data_[1] = strtoupper($data_[1]);
 						$data [$data_ [0]] = $data_ [1];
 					}
 					fclose ( $fs );
@@ -133,9 +133,8 @@ function merge_go() {
 						}
 						fclose ( $merge_dest );
 						if ($merge_ok) {
-							$fc = ($_POST ['crc_mode'] == 'file_read') ? dechex ( crc32 ( read_file ( $path . $filename ) ) ) : (($_POST ['crc_mode'] == 'hash_file' && function_exists ( 'hash_file' )) ? hash_file ( 'crc32b', $path . $filename ) : '111111');
-							$fc = str_repeat ( "0", 8 - strlen ( $fc ) ) . strtoupper ( $fc );
-							if ($fc != strtoupper ( $data ["crc32"] )) {
+							$fc = (($_POST['crc_mode'] == 'hash_file' && function_exists('hash_file')) ? strtoupper(hash_file('crc32b', $path . $filename)) : '111111');
+							if ($fc != $data["crc32"]) {
 								echo lang(184)."<br /><br />";
 							} else {
 								printf(lang(185),$filename);
