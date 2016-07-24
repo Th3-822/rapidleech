@@ -818,7 +818,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 	return $page;
 }
 
-function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy = 0, $pauth = 0, $upagent = 0, $scheme = 'http') {
+function putfile($host, $port, $url, $referer, $cookie, $headers, $file, $filename, $proxy = 0, $pauth = 0, $upagent = 0, $scheme = 'http') {
 	global $nn, $lastError, $fp, $fs;
 
 	if (empty($upagent)) $upagent = rl_UserAgent;
@@ -872,6 +872,9 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 	$request[] = "Origin: $origin";
 	$request[] = 'Content-Disposition: attachment';
 	$request[] = 'Content-Type: multipart/form-data';
+	if (!empty($headers) && is_array($headers)) foreach ($headers as $key => $value) {
+		$request[] .= "$key: $value";
+	}
 	$request[] = "Content-Length: $fileSize";
 	$request[] = 'Connection: Close';
 
