@@ -20,9 +20,8 @@
 	$url = parse_url($uplocs[0]);
 	$srang = getSize($lfile);
 	$gg = $srang-1;
-	$head = array("Content-Range"=>"bytes 0-$gg/$srang",'Content-Type'=>'application/octet-stream');
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
-	$pfile = putfile($url['host'],0,$url['path'].($url["query"] ? "?" . $url["query"] : ""),'https://www.solidfiles.com/',$cookie,$head,$lfile,$lname,0,0,0,$url['scheme']);is_page($pfile);
+	$pfile = putfile($url['host'],0,$url['path'].($url["query"] ? "?" . $url["query"] : ""),"https://www.solidfiles.com/\r\nContent-Range: bytes 0-$gg/$srang\r\nContent-Type: application/octet-stream",$cookie,$lfile,$lname,0,0,0,$url['scheme']);is_page($pfile);
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>";
 	$devil = jsonreply($pfile);
 	(empty($devil['view_url'])) ? html_error('[1]Error: Cannot Find Download Link') : $download_link = $devil['view_url'];
