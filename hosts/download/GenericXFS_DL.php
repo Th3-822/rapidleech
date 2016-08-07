@@ -11,8 +11,8 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class GenericXFS_DL extends DownloadClass {
-	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\'\"\t<>\r\n\\\]{15,}@i';
-	private $classVer = 13;
+	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\?\'\"\t<>\r\n\\\]{15,}@i';
+	private $classVer = 14;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -166,10 +166,10 @@ class GenericXFS_DL extends DownloadClass {
 			ksort($txtCaptcha, SORT_NUMERIC);
 			$txtCaptcha = trim(html_entity_decode(implode($txtCaptcha), ENT_QUOTES, 'UTF-8'));
 			return array('type' => 2, 'key' => $txtCaptcha);
-		} elseif ((stripos($this->page, 'google.com/recaptcha/api/') !== false || stripos($this->page, 'recaptcha.net/') !== false) && preg_match('@https?://(?:[\w\-]+\.)?(?:google\.com/recaptcha/api|recaptcha\.net)/(?:challenge|noscript)\?k=([\w\.\-]+)@i', $this->page, $reCaptcha)) {
+		} elseif ((stripos($this->page, 'google.com/recaptcha/api/') !== false || stripos($this->page, 'recaptcha.net/') !== false) && preg_match('@(?:https?:)?//(?:[\w\-]+\.)?(?:google\.com/recaptcha/api|recaptcha\.net)/(?:challenge|noscript)\?k=([\w\.\-]+)@i', $this->page, $reCaptcha)) {
 			// Old reCAPTCHA
 			return array('type' => 3, 'key' => $reCaptcha[1]);
-		} elseif (($pos = stripos($this->page, '://api.solvemedia.com/')) !== false && preg_match('@https?://api\.solvemedia\.com/papi/challenge\.(?:no)?script\?k=([\w\.\-]+)@i', substr($this->page, $pos - 5), $smCaptcha)) {
+		} elseif (($pos = stripos($this->page, '//api.solvemedia.com/')) !== false && preg_match('@(?:https?:)?//api\.solvemedia\.com/papi/challenge\.(?:no)?script\?k=([\w\.\-]+)@i', substr($this->page, $pos - 5), $smCaptcha)) {
 			// SolveMedia Captcha
 			return array('type' => 4, 'key' => $smCaptcha[1]);
 		}
@@ -260,7 +260,7 @@ class GenericXFS_DL extends DownloadClass {
 			$this->page = $this->GetPage($this->link, $this->cookie);
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		}
-		if (($pos = stripos($this->page, 'You have to wait')) !== false && preg_match('@You have to wait[\W\S]?(?:(?:\s*|\s*<br\s*/?\s*>\s*)?\d+ \w+,\s){0,2}\d+ \w+(?:\s*|\s*<br\s*/?\s*>\s*)?(?:un)?till? (?:the )?next download@i', substr($this->page, $pos), $err)) html_error('Error: '.strip_tags($err[0]));
+		if ((($pos = stripos($this->page, 'You have to wait')) !== false || ($pos = stripos($this->page, 'Please wait ')) !== false) && preg_match('@(?:You have to|Please) wait[\W\S]?(?:(?:\s*|\s*<br\s*/?\s*>\s*)?\d+ \w+,?\s){0,2}\d+ \w+(?:\s*|\s*<br\s*/?\s*>\s*)?(?:un)?till? (?:the )?next download@i', substr($this->page, $pos), $err)) html_error('Error: '.strip_tags($err[0]));
 		if (($pos = stripos($this->page, 'You can download files up to ')) !== false && preg_match('@You can download files up to \d+ [KMG]b only.@i', substr($this->page, $pos), $err)) html_error('Error: '.$err[0]);
 		if (($pos = stripos($this->page, 'You have reached the download')) !== false && preg_match('@You have reached the download[- ]limit(?: of|:) \d+ [KMGT]b for(?: the)? last \d+ days?@i', substr($this->page, $pos), $err)) html_error('Error: '.$err[0]);
 		if ($this->testDL()) return true;
@@ -369,7 +369,7 @@ class GenericXFS_DL extends DownloadClass {
 	}
 
 	// Checks if account is logged in.
-	// return $page - If it's logged in and the $page loaded is usable too for checkAccount(), if not, return true or false
+	// return $page - If it's logged in and the $page loaded is usable for checkAccount() too, if not, return true or false
 	protected function isLoggedIn() {
 		$page = $this->GetPage($this->purl.'?op=my_account', $this->cookie, 0, $this->purl);
 		if (stripos($page, '/?op=logout') === false && stripos($page, '/logout') === false) return false;

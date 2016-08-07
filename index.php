@@ -147,6 +147,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 		} else $proxy = false;
 
 		if (!empty($premium_acc[$Url['host']]['user']) && !empty($premium_acc[$Url['host']]['pass'])) $auth = '2';
+		else if (empty($_GET['cookie']) && !empty($premium_acc[$Url['host']]['cookie'])) $auth = '3';
 		else if (!filter_var($Url['host'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6)) {
 			foreach (array_keys($premium_acc) as $site) if (host_matches($site, $Url['host'])) {
 				if (empty($proxy) && !empty($premium_acc["$site"]['proxy'])) {
@@ -157,6 +158,9 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 				}
 				if (!empty($premium_acc["$site"]['user']) && !empty($premium_acc["$site"]['pass'])) {
 					$auth = '2';
+					break;
+				} else if (empty($_GET['cookie']) && !empty($premium_acc["$site"]['cookie'])) {
+					$auth = '3';
 					break;
 				}
 			}
@@ -225,6 +229,18 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 						$AUTH['user'] = $premium_acc["$site"]['user'];
 						$AUTH['pass'] = $premium_acc["$site"]['pass'];
 						$auth = base64_encode($AUTH['user'] . ':' . $AUTH['pass']);
+						break;
+					}
+				}
+			}
+		} elseif ($_GET['auth'] == '3') {
+			$auth = false;
+			if (!empty($premium_acc[$_GET['host']]['cookie'])) {
+				$_GET['cookie'] = trim($premium_acc[$_GET['host']]['cookie']);
+			} else if (!filter_var($_GET['host'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6)) {
+				foreach (array_keys($premium_acc) as $site) {
+					if (host_matches($site, $_GET['host']) && !empty($premium_acc["$site"]['cookie'])) {
+						$_GET['cookie'] = trim($premium_acc["$site"]['cookie']);
 						break;
 					}
 				}

@@ -16,8 +16,9 @@ $DontUlTo = array();
 // Don't edit from here unless you know what are you doing.
 $not_done = true;
 $domain = 'www.multiup.org';
+$referer = "http://$domain/";
 
-$page = geturl($domain, 80, '/api/get-list-hosts', 0, 0, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+$page = geturl($domain, 80, '/api/get-list-hosts', $referer, 0, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 $page = Get_Reply($page);
 if (empty($page['hosts'])) {
 	if (empty($page['error']) || strtolower($page['error']) == 'success') html_error('Failed to get hosts list.');
@@ -56,7 +57,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	if (!empty($_REQUEST['up_login']) && !empty($_REQUEST['up_pass'])) {
 		$post = array('username' => urlencode($_REQUEST['up_login']), 'password' => urlencode($_REQUEST['up_pass']));
 
-		$page = geturl($domain, 80, '/api/login', 0, 0, $post, 0, $_GET['proxy'], $pauth);is_page($page);
+		$page = geturl($domain, 80, '/api/login', $referer, 0, $post, 0, $_GET['proxy'], $pauth);is_page($page);
 		$json = Get_Reply($page);
 		if (empty($json['user'])) {
 			if (empty($json['error']) || strtolower($json['error']) == 'success') html_error('Login error: UserID value not found.');
@@ -70,7 +71,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	// Retrive upload ID
 	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrive upload ID</div>\n";
 
-	$page = geturl($domain, 80, '/api/get-fastest-server', 0, 0, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+	$page = geturl($domain, 80, '/api/get-fastest-server', $referer, 0, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 	$json = Get_Reply($page);
 	if (empty($json['server'])) {
 		if (empty($json['error']) || strtolower($json['error']) == 'success') html_error('Cannot get upload url.');
@@ -88,7 +89,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
 
 	$url = parse_url($up_url);
-	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), 0, 0, $post, $lfile, $lname, 'files[]', '', $_GET['proxy'], $pauth);
+	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer, 0, $post, $lfile, $lname, 'files[]', '', $_GET['proxy'], $pauth);
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";
@@ -116,5 +117,6 @@ function Get_Reply($page) {
 
 //[25-1-2013] Written by Th3-822.
 //[14-12-2015] Fixed. - Th3-822
+//[19-7-2016] Added referer to requests to fix small bug. - Th3-822
 
 ?>

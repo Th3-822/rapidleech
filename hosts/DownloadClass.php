@@ -65,14 +65,14 @@ class DownloadClass {
 	 * @param array $params -> This parameter allows you to add extra _GET values to be passed on
 	 */
 
-	public function RedirectDownload($link, $FileName, $cookie = 0, $post = 0, $referer = 0, $force_name = 0, $auth = 0, $addon = array()) {
+	public function RedirectDownload($link, $FileName = 0, $cookie = 0, $post = 0, $referer = 0, $force_name = 0, $auth = 0, $addon = array()) {
 		if (!$referer && !empty($GLOBALS['Referer'])) {
 			$referer = $GLOBALS['Referer'];
 		}
 		$url = parse_url($link);
 		$params = $this->DefaultParamArr($link, $cookie, $referer, true);
 		unset($params['premium_acc']);
-		$params['filename'] = urlencode(basename($FileName));
+		$params['filename'] = urlencode(basename((!empty($FileName) ? $FileName : urldecode(parse_url($link, PHP_URL_PATH)))));
 		if (!empty($force_name)) $params['force_name'] = urlencode(basename($force_name));
 		$params['host'] = urlencode($url['host']);
 		if (!empty($url['port'])) $params['port'] = urlencode($url['port']);

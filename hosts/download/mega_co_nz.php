@@ -149,7 +149,7 @@ class mega_co_nz extends DownloadClass {
 		else html_error("[CB] File's key not found.");
 		$iv = array_merge(array_slice($key, 4, 2), array(0, 0));
 		$key = array($key[0] ^ $key[4], $key[1] ^ $key[5], $key[2] ^ $key[6], $key[3] ^ $key[7]);
-		$opts = array('iv' => $this->a32_to_str($iv), 'key' => $this->a32_to_str($key), 'mode' => 'ctr');
+		$opts = array('iv' => $this->a32_to_str($iv), 'key' => $this->a32_to_str($key));
 
 		if (!stream_filter_register('MegaDlDecrypt', 'Th3822_MegaDlDecrypt') && !in_array('MegaDlDecrypt', stream_get_filters())) html_error('Error: Cannot register "MegaDlDecrypt" filter.');
 
@@ -204,29 +204,32 @@ if (!empty($attr)) $_names[] = $attr['n'];
 }
 
 class Th3822_MegaDlDecrypt extends php_user_filter {
-	private $_td, $_data, $_dlen, $_clen, $bucket;
+	private $td;
 	public function onCreate() {
-		if (empty($this->params['iv']) || empty($this->params['key']) || empty($this->params['mode'])) return false;
-		$this->_td = mcrypt_module_open('rijndael-128', '', $this->params['mode'], '');
-		$init = mcrypt_generic_init($this->_td, $this->params['key'], $this->params['iv']);
+		if (empty($this->params['iv']) || empty($this->params['key'])) return false;
+		$this->td = mcrypt_module_open('rijndael-128', '', 'ctr', '');
+		$init = mcrypt_generic_init($this->td, $this->params['key'], $this->params['iv']);
 		if ($init === false || $init < 0) return false;
+		if (!empty($this->params['waste']) && is_int($this->params['waste']) && $this->params['waste'] > 0 && $this->params['waste'] < 16) {
+			mdecrypt_generic($this->td, str_repeat('*', $this->params['waste']));
+		}
 		return true;
 	}
 
 	public function filter($in, $out, &$consumed, $stop) {
 		while ($bucket = stream_bucket_make_writeable($in)) {
-			if ($bucket->datalen == 0) continue;
-			$this->bucket = $bucket;
-			$this->bucket->data = mdecrypt_generic($this->_td, $this->bucket->data);
-			$consumed += $bucket->datalen;
-			stream_bucket_append($out, $this->bucket);
+			if ($bucket->datalen > 0) {
+				$bucket->data = mdecrypt_generic($this->td, $bucket->data);
+				$consumed += $bucket->datalen;
+				stream_bucket_append($out, $bucket);
+			}
 		}
 		return PSFS_PASS_ON;
 	}
 
 	public function onClose() {
-		mcrypt_generic_deinit($this->_td);
-		mcrypt_module_close($this->_td);
+		mcrypt_generic_deinit($this->td);
+		mcrypt_module_close($this->td);
 	}
 }
 

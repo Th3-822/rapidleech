@@ -109,7 +109,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'Th3-822') {
 	$key = substr($file[0]['f'][0]['k'], strpos($file[0]['f'][0]['k'], ':'));
 	$decrypted_key = a32_to_base64(decrypt_key(base64_to_a32($key), $T8['master_key']));
 
-	$download_link = "https://mega.co.nz/#!{$public_handle[0]}!$decrypted_key";
+	$download_link = "https://$domain/#!{$public_handle[0]}!$decrypted_key";
 }
 
 // secure_rand() function from: http://www.zimuel.it/en/strong-cryptography-in-php/
@@ -451,7 +451,7 @@ function Login($user, $pass) {
 	t8ArrToCookieArr($rsa_priv_key);
 
 	$quota = apiReq(array('a' => 'uq', 'strg' => 1));
-	check_errors($quota[0], 'Cannot get disk quota');
+	if (!is_array($quota[0])) check_errors($quota[0], 'Cannot get disk quota');
 	SaveCookies($user, $pass); // Update cookies file.
 	$cookie = '';
 	if (($quota[0]['mstrg'] - $quota[0]['cstrg']) < $GLOBALS['fsize']) html_error('Insufficient Free Space in Account for Upload this File.');

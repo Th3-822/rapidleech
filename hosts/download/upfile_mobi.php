@@ -7,7 +7,7 @@ if (!defined('RAPIDLEECH')) {
 
 class upfile_mobi extends DownloadClass {
 	public function Download($link) {
-		if (!preg_match('@https?://upfile\.mobi/(\d+)(?:\.([\dA-Fa-f]{32}))?@i', str_ireplace(array('://www.', 'index.php', '?page=file&f='), array('://'), $link), $fid)) html_error('Invalid link?.');
+		if (!preg_match('@https?://upfile\.mobi/([\w\-]+)(?:\.([\dA-Fa-f]{32}))?@i', str_ireplace(array('://www.', 'index.php', '?page=file&f='), array('://'), $link), $fid)) html_error('Invalid link?.');
 		$link = explode('|', str_ireplace('%7C', '|', $link), 2);
 		if (count($link) > 1) $lpass = md5(rawurldecode($link[1]));
 		$link = $GLOBALS['Referer'] = !empty($lpass) ? (empty($fid[2]) ? "{$fid[0]}.$lpass" : str_replace(".{$fid[2]}", ".$lpass", $fid[0])) : $fid[0];
@@ -17,8 +17,9 @@ class upfile_mobi extends DownloadClass {
 		is_present($page, 'File does not exist', 'File Not Found.');
 		is_present($page, 'Enter password:', 'Incorrect Link Password.');
 
-		if (!preg_match("@https?://upfile\.mobi/(?:download/)?(?:index\.php)?\?page=download&server=\d+&f=$fid&[^\'\"\t<>\r\n]+@i", $page, $RD)) html_error('Redirect-Link Not Found.');
-		$page = $this->GetPage(str_ireplace('/download/', '/', $RD[0]));
+		if (!preg_match("@(https?://upfile\.mobi)?/(?:download/)?(?:index\.php)?\?page=download&server=\d+&f=$fid&[^\'\"\t<>\r\n]+@i", $page, $RD)) html_error('Redirect-Link Not Found.');
+		$RD = (empty($RD[1])) ? parse_url($link, PHP_URL_SCHEME).'://upfile.mobi'.$RD[0] : $RD[0];
+		$page = $this->GetPage(str_ireplace('/download/', '/', $RD));
 
 		// Fix Bad Link Formatting.
 		$page = preg_replace('@(https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?)([^/])@i', '$1/$2', $page);
@@ -29,5 +30,6 @@ class upfile_mobi extends DownloadClass {
 }
 
 // [18-5-2016] Written by Th3-822.
+// [04-8-2016] Fixed Link & Download Regexp. - Th3-822
 
 ?>

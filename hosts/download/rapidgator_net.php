@@ -11,7 +11,7 @@ class rapidgator_net extends DownloadClass {
 		$this->link = $GLOBALS['Referer'] = str_ireplace(array('://www.rg.to/', '://rg.to/'), '://rapidgator.net/', $link);
 		$this->cookie = array('lang' => 'en');
 		$this->DLregexp = '@https?://pr\d+\.rapidgator\.net/[^\s\"\'<>]+@i';
-		if ((empty($_POST['step']) || $_POST['step'] != '1') && (empty($_GET['rgredir']) || (stripos($_GET['rgredir'], '/auth/login') === false && stripos($_GET['rgredir'], '/site/ChangeLocation/key/') === false))) {
+		if ((empty($_POST['step']) || !in_array($_POST['step'], array('1', '2', 'L'))) && (empty($_GET['rgredir']) || (stripos($_GET['rgredir'], '/auth/login') === false && stripos($_GET['rgredir'], '/site/ChangeLocation/key/') === false))) {
 			// Weird RG redirects.
 			$rdc = 0;
 			$this->page = false; // False value for starting the loop.
@@ -40,7 +40,7 @@ class rapidgator_net extends DownloadClass {
 
 	private function FreeDL() {
 		$capt_url = 'http://rapidgator.net/download/captcha';
-		if (empty($_POST['step']) || $_POST['step'] != '1') {
+		if (empty($_POST['step']) || !in_array($_POST['step'], array('1', '2'))) {
 			is_present($this->page, 'This file can be downloaded by premium only', 'Only Premium users can download this file.'); // F##### PPS
 			is_present($this->page, 'download not more than 1 file at a time in free mode.', 'You can\'t download not more than 1 file at a time. Wait 15 minutes and try again.');
 			if (preg_match('@You can download files up to \d+ MB in free mode@i', $this->page, $err)) html_error($err[0].'.');
@@ -60,56 +60,47 @@ class rapidgator_net extends DownloadClass {
 
 			if (preg_match($this->DLregexp, $page, $dlink)) return $this->RedirectDownload($dlink[0], 'rapidgatorfr2');
 
-			if (!preg_match('@https?://api\.solvemedia\.com/papi/challenge\.noscript\?k=\w+@i', $page, $cframe)) html_error('CAPTCHA not found.');
-			$page = cURL($cframe[0], 0, 0, $capt_url);
-			if (!preg_match('@<img [^/<>]*src\s?=\s?\"((https?://[^/\"\<\>]+)?/papi/media[^\"<>]+)\"@i', $page, $imgurl)) html_error('CAPTCHA img not found.');
-			$imgurl = (empty($imgurl[2])) ? 'http://api.solvemedia.com'.$imgurl[1] : $imgurl[1];
-
-			if (!preg_match_all('@<input [^/<>]*type\s?=\s?\"?hidden\"?[^/<>]*\s?name\s?=\s?\"(\w+)\"[^/<>]*\s?value\s?=\s?\"([^\"<>]+)\"[^/<>]*/?\s*>@i', $page, $forms)) html_error('CAPTCHA data not found.');
-			$forms = array_combine($forms[1], $forms[2]);
-
 			$data = $this->DefaultParamArr($this->link, $this->cookie);
-			$data['step'] = 1;
-			foreach ($forms as $n => $v) $data["T8[$n]"] = urlencode($v);
+			if (preg_match('@(?:https?:)?//api\.solvemedia\.com/papi/challenge\.(?:no)?script\?k=([\w\.\-]+)@i', $page, $captcha)) {
+				$data['step'] = 1;
+				return $this->SolveMedia($captcha[1], $data);
+			} else if (preg_match('@(?:https?:)?//(?:[\w\-]+\.)?(?:google\.com/recaptcha/api|recaptcha\.net)/(?:challenge|noscript)\?k=([\w\.\-]+)@i', $page, $captcha)) {
+				$data['step'] = 2;
+				return $this->reCAPTCHA($captcha[1], $data);
+			}
 
-			//Download captcha img.
-			$page = cURL($imgurl, $this->cookie);
-			$capt_img = substr($page, strpos($page, "\r\n\r\n") + 4);
-			$imgfile = DOWNLOAD_DIR . 'rapidgator_captcha.gif';
-
-			if (file_exists($imgfile)) unlink($imgfile);
-			if (!write_file($imgfile, $capt_img)) html_error('Error getting CAPTCHA image.');
-
-			$this->EnterCaptcha($imgfile.'?'.time(), $data, 20);
-			exit();
+			return html_error('CAPTCHA not found.');
 		} else {
-			if (empty($_POST['captcha'])) html_error('You didn\'t enter the image verification code.');
 			$this->cookie = (!empty($_POST['cookie'])) ? urldecode($_POST['cookie']) : '';
 
-			$post = array();
-			foreach ($_POST['T8'] as $n => $v) $post[urlencode($n)] = $v;
-			$post['adcopy_response'] = $_POST['captcha'];
-
-			$url = 'http://api.solvemedia.com/papi/verify.noscript';
-			$page = cURL($url, 0, $post, $capt_url);
-
-			if (!preg_match('@(https?://[^/\'\"\<\>\r\n]+)?/papi/verify\.pass\.noscript\?[^/\'\"\<\>\r\n]+@i', $page, $resp)) {
-				is_present($page, '/papi/challenge.noscript', 'Wrong CAPTCHA entered.');
-				html_error('Error sending CAPTCHA.');
+			$post = array('DownloadCaptchaForm%5Bcaptcha%5D' => '');
+			switch ($_POST['step']) {
+				case '1':
+					$post = array_merge($post, $this->verifySolveMedia());
+					break;
+				case '2':
+					if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
+					if (empty($_POST['recaptcha_challenge_field'])) html_error('Empty reCAPTCHA challenge.');
+					$post['recaptcha_challenge_field'] = urlencode($_POST['recaptcha_challenge_field']);
+					$post['recaptcha_response_field'] = urlencode($_POST['recaptcha_response_field']);
+					break;
 			}
-			$resp = (empty($resp[1])) ? 'http://api.solvemedia.com'.$resp[0] : $resp[0];
-
-			$page = cURL($resp, 0, 0, $url);
-			if (!preg_match('@>[\s\t\r\n]*([^<>\r\n]+)[\s\t\r\n]*</textarea>@i', $page, $gibberish)) html_error('CAPTCHA response not found.');
-
-			$post = array('DownloadCaptchaForm%5Bcaptcha%5D' => '', 'adcopy_challenge' => urlencode($gibberish[1]), 'adcopy_response' => 'manual_challenge');
+			$_POST['step'] = false;
 			$page = cURL($capt_url, $this->cookie, $post);
 
-			is_present($page, "\r\nSet-Cookie: failed_on_captcha=1", 'Captcha expired. Try again in 15 minutes.');
+			is_present($page, 'The verification code is incorrect.');
+			is_present($page, "\nSet-Cookie: failed_on_captcha=1", 'Captcha expired. Try again in 15 minutes.');
 
 			if (!preg_match($this->DLregexp, $page, $dlink)) html_error('Error: Download link not found.');
 			$this->RedirectDownload($dlink[0], 'rapidgatorfr');
 		}
+	}
+
+	// Special Function Called by verifySolveMedia When Captcha Is Incorrect, To Allow Retry.
+	protected function retrySolveMedia() {
+		$data = $this->DefaultParamArr($this->link, $this->cookie);
+		$data['step'] = 1;
+		return $this->SolveMedia($_POST['sm_public_key'], $data, 0, 'Retry Download');
 	}
 
 	private function PremiumDL() {
@@ -139,7 +130,7 @@ class rapidgator_net extends DownloadClass {
 		$post['LoginForm%5Bemail%5D'] = urlencode($user);
 		$post['LoginForm%5Bpassword%5D'] = urlencode($pass);
 		$post['LoginForm%5BrememberMe%5D'] = '1';
-		if (!empty($_POST['step']) && $_POST['step'] == '1') {
+		if (!empty($_POST['step']) && $_POST['step'] == 'L') {
 			$_POST['step'] = false;
 			if (empty($_POST['captcha'])) html_error('You didn\'t enter the image verification code.');
 			$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
@@ -172,7 +163,7 @@ class rapidgator_net extends DownloadClass {
 			$mimetype = (preg_match('@image/[\w+]+@', $captcha[0], $mimetype) ? $mimetype[0] : 'image/png');
 
 			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
-			$data['step'] = '1';
+			$data['step'] = 'L';
 			$data['premium_acc'] = 'on'; // I should add 'premium_acc' to DefaultParamArr()
 			if ($pA) {
 				$data['pA_encrypted'] = 'true';
@@ -268,5 +259,6 @@ class rapidgator_net extends DownloadClass {
 // [24-3-2014] Fixed FreeDL. - Th3-822
 // [20-5-2014] Fixed Login, bw error msg. - Th3-822
 // [16-12-2015][WIP] Fixing Blocks, Redirect Handling & Forcing Plugin To Use cURL. - Th3-822
+// [01-8-2015] Fixed FreeDL Captchas. - Th3-822
 
 ?>

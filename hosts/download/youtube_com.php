@@ -52,7 +52,8 @@ class youtube_com extends DownloadClass {
 		if (!$is_dash) {
 			$v = explode('|', $this->fmts[$itag]);
 			$filename .= " [YT-{$v[1]}p]";
-		} else $filename .= " [YT-{$fmt['quality_label']}]";
+		} else if (!empty($fmt['quality_label'])) $filename .= " [YT-{$fmt['quality_label']}]";
+		else $filename .= " [YT-Audio]";
 		$filename .= "[{$this->vid}]$ext";
 
 		$this->RedirectDownload($fmt['url'], $filename, $this->cookie, 0, 0, $filename);

@@ -49,6 +49,7 @@ class keep2share_cc extends DownloadClass {
 			if (empty($post['slow_id'])) html_error('FreeDL ID don\'t found.');
 
 			$page = $this->GetPage($this->link, $this->cookie, $post);
+			is_present($page, 'Free user can\'t download large files.', 'File is Too Heavy for Free Download');
 			$this->cookie = GetCookiesArr($page, $this->cookie);
 
 			// Check freedl limit timer

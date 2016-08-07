@@ -5,7 +5,7 @@ if (!defined('RAPIDLEECH')) {
 }
 
 // Allow user-agent to be changed easily
-if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:47.0) Gecko/20100101 Firefox/47.0');
+if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:48.0) Gecko/20100101 Firefox/48.0');
 
 /*
  * Pauses for countdown timer in file hosts
@@ -102,7 +102,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	if (!empty($auth)) $request[] = "Authorization: Basic $auth";
 	if (!empty($pauth) && !$scheme) $request[] = "Proxy-Authorization: Basic $pauth";
 	if ($method == 'POST') {
-		if (!empty($referer) && stripos($referer, "\nContent-Type: ") === false) $request[] = 'Content-Type: application/x-www-form-urlencoded';
+		if (empty($referer) || stripos($referer, "\nContent-Type: ") === false) $request[] = 'Content-Type: application/x-www-form-urlencoded';
 		$request[] = 'Content-Length: ' . strlen($postdata);
 	}
 	if ($XMLRequest) $request[] = 'X-Requested-With: XMLHttpRequest';
