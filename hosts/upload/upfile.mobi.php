@@ -58,7 +58,7 @@ if ($continue_up) {
 		echo "<b><center>Login not found or empty, using non member upload.</center></b>\n";
 		$login = false;
 
-		if (!preg_match('@\.(png|jpe?g|gif|bmp|t(iff?|ga|cx)|avi|mp[2-4]|m4a|mk(a|v)|divx|wm(a|v)|mov|3gp|flv|rmvb|web(m|p)|ts|h264|aac|flac|ogg|wav|aiff?|amr)$@i', $lname)) html_error('Non members can only upload video, audio and pictures.');
+		//if (!preg_match('@\.(png|jpe?g|gif|bmp|t(iff?|ga|cx)|avi|mp[2-4]|m4a|mk(a|v)|divx|wm(a|v)|mov|3gp|flv|rmvb|web(m|p)|ts|h264|aac|flac|ogg|wav|aiff?|amr)$@i', $lname)) html_error('Non members can only upload video, audio and pictures.');
 	}
 
 	// Retrive upload ID
@@ -110,13 +110,14 @@ if ($continue_up) {
 		html_error('Upload Error: ' . htmlspecialchars($err));
 	}
 
-	if (!preg_match('@[\?&]id=(\d+)@i', $upfiles, $fid)) html_error('Download link not Found.');
+	if (!preg_match('@[\?&]id=([\w\-]+)@i', $upfiles, $fid)) html_error('Download link not Found.');
 	$download_link = $referer.$fid[1];
-	if (preg_match('@[\?&]password=(\w+)@i', $upfiles, $fpsw)) $access_pass = $download_link.'.'.$fpsw[1]; // Testing this var.
+	if (preg_match('@[\?&]password=([\dA-Fa-f]{32})@i', $upfiles, $fpsw)) $access_pass = $download_link.'.'.$fpsw[1]; // Testing this var.
 	if (preg_match('@[\?&]code=(\w+)@i', $upfiles, $fdel)) $delete_link = $referer."?page=delete&f={$fid[1]}&s=".$fdel[1];
 }
 
 //[05-7-2013] Written by Th3-822.
 //[26-1-2015] Fixed. - Th3-822
+//[22-8-2016] Fixed Link Regexp. - Th3-822
 
 ?>

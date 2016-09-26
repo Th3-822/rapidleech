@@ -48,23 +48,9 @@ class dailymotion_com extends DownloadClass {
 		$this->RedirectDownload($DL[0], $filename, $this->cookie, 0, 0, $filename);
 	}
 
-	private function Get_Reply($content) {
-		if (!function_exists('json_decode')) html_error('Error: Please enable JSON in php.');
-		if (($pos = strpos($content, "\r\n\r\n")) > 0) $content = substr($content, $pos + 4);
-		$cb_pos = strpos($content, '{');
-		$sb_pos = strpos($content, '[');
-		if ($cb_pos === false && $sb_pos === false) html_error('Json start braces not found.');
-		$sb = ($cb_pos === false || $sb_pos < $cb_pos) ? true : false;
-		$content = substr($content, strpos($content, ($sb ? '[' : '{')));$content = substr($content, 0, strrpos($content, ($sb ? ']' : '}')) + 1);
-		if (empty($content)) html_error('No json content.');
-		$rply = json_decode($content, true);
-		if (!$rply || count($rply) == 0) html_error('Error reading json.');
-		return $rply;
-	}
-
 	private function getVideoInfo() {
 		$page = $this->GetPage("http://www.dailymotion.com/json/video/{$this->xid}?fields=title%2C".implode('%2C', $this->formats), $this->cookie);
-		$json = $this->Get_Reply($page);
+		$json = $this->json2array($page);
 
 		if (empty($json['title'])) html_error('Video Title not Found.');
 		$this->title = $json['title'];

@@ -112,7 +112,7 @@ class d1fichier_com extends DownloadClass {
 	}
 
 	// As some users doesn't have support por https downloads, let's switch to http
-	public function RedirectDownload($link, $FileName, $cookie = 0, $post = 0, $referer = 0, $force_name = 0, $auth = 0, $addon = array()) {
+	public function RedirectDownload($link, $FileName = 0, $cookie = 0, $post = 0, $referer = 0, $force_name = 0, $auth = 0, $addon = array()) {
 		$link = parse_url($link);
 		$link['scheme'] = 'http';
 		$link = rebuild_url($link);

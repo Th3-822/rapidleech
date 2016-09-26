@@ -263,7 +263,7 @@ class depositfiles_com extends DownloadClass {
 			$post['password'] = urlencode($pass);
 
 			$page = $this->GetPage($purl.'api/user/login', $this->cookie, $post, $purl.'login.php?return=%2F');
-			$json = $this->Get_Reply($page);
+			$json = $this->json2array($page);
 			if (!empty($json['error'])) html_error('Login Error'. (!empty($errors[$json['error']]) ? ': ' . $errors[$json['error']] : '.. ['.htmlentities($json['error']).']'));
 			elseif ($json['status'] != 'OK') html_error('Login Failed');
 
@@ -280,7 +280,7 @@ class depositfiles_com extends DownloadClass {
 			$post['password'] = urlencode($pass);
 
 			$page = $this->GetPage($purl.'api/user/login', $this->cookie, $post, $purl.'login.php?return=%2F');
-			$json = $this->Get_Reply($page);
+			$json = $this->json2array($page);
 			if (!empty($json['error']) && $json['error'] != 'CaptchaRequired') html_error('Login Error'. (!empty($errors[$json['error']]) ? ': ' . $errors[$json['error']] : '. ['.htmlentities($json['error']).']'));
 			elseif ($json['status'] == 'OK') {
 				$this->cookie = GetCookiesArr($page, $this->cookie);
@@ -323,15 +323,6 @@ class depositfiles_com extends DownloadClass {
 			$data['premium_pass'] = $_REQUEST['premium_pass'];
 		}
 		return $this->reCAPTCHAv2($_POST['recaptcha2_public_key'], $data, 0, 'Retry Login');
-	}
-
-	private function Get_Reply($page) {
-		if (!function_exists('json_decode')) html_error('Error: Please enable JSON in php.');
-		$json = substr($page, strpos($page, "\r\n\r\n") + 4);
-		$json = substr($json, strpos($json, '{'));$json = substr($json, 0, strrpos($json, '}') + 1);
-		$rply = json_decode($json, true);
-		if (!$rply || count($rply) == 0) html_error('Error reading json.');
-		return $rply;
 	}
 
 	private function IWillNameItLater($cookie, $decrypt=true) {

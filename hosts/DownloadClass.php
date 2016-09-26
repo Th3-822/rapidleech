@@ -176,6 +176,22 @@ class DownloadClass {
 		echo("\n<script type='text/javascript'>document.getElementById('mesg').innerHTML = " . ($add ? "document.getElementById('mesg').innerHTML + " : '') . "unescape('" . rawurlencode($mesg) . "');</script>");
 	}
 
+	public function json2array($content, $errorPrefix = 'Error') {
+		if (!function_exists('json_decode')) html_error('Error: Please enable JSON in php.');
+		if (empty($content)) html_error("[$errorPrefix]: No content.");
+		$content = ltrim($content);
+		if (($pos = strpos($content, "\r\n\r\n")) > 0) $content = trim(substr($content, $pos + 4));
+		$cb_pos = strpos($content, '{');
+		$sb_pos = strpos($content, '[');
+		if ($cb_pos === false && $sb_pos === false) html_error("[$errorPrefix]: JSON start braces not found.");
+		$sb = ($cb_pos === false || $sb_pos < $cb_pos) ? true : false;
+		$content = substr($content, strpos($content, ($sb ? '[' : '{')));$content = substr($content, 0, strrpos($content, ($sb ? ']' : '}')) + 1);
+		if (empty($content)) html_error("[$errorPrefix]: No JSON content.");
+		$rply = json_decode($content, true);
+		if ($rply === NULL) html_error("[$errorPrefix]: Error reading JSON.");
+		return $rply;
+	}
+
 	public function reCAPTCHA($publicKey, $inputs, $referer = 0, $sname = 'Download File') {
 		if (empty($publicKey) || preg_match('/[^\w\.\-]/', $publicKey)) html_error('Invalid reCAPTCHA public key.');
 		if (!is_array($inputs)) html_error('Error parsing captcha post data.');
@@ -337,7 +353,6 @@ class DownloadClass {
 		if ($directOutput) return urlencode($gibberish[1]);
 		else return array('g-recaptcha-response' => urlencode($gibberish[1]));
 	}
-
 }
 
 /**********************************************************

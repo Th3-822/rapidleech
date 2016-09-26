@@ -152,6 +152,7 @@ class youtube_com extends DownloadClass {
 				$fmt['url']['query'] = array_map('urldecode', $this->FormToArr($fmt['url']['query']));
 				if (empty($fmt['url']['query']['signature'])) $fmt['url']['query']['signature'] = (!empty($fmt['s']) ? $this->sigDecode($fmt['s']) : $fmt['sig']);
 				foreach (array_diff(array_keys($fmt), array('signature', 'sig', 's', 'url')) as $k) $fmt['url']['query'][$k] = $fmt[$k];
+				if (empty($fmt['url']['query']['ratebypass'])) $fmt['url']['query']['ratebypass'] = 'yes'; // Fix for Slow Downloads of DASH Formats
 				ksort($fmt['url']['query']);
 				$fmt['url']['query'] = http_build_query($fmt['url']['query']);
 
@@ -344,5 +345,6 @@ class youtube_com extends DownloadClass {
 // [05-2-2016]  Fixed captcha (Now uses reCaptcha2) & Added cookie storage for it. - Th3-822
 // [08-6-2016]  Added support to download DASH formats & Revised video formats handling. - Th3-822
 // [23-6-2016]  Fixed signature decoding functions. - Th3-822
+// [30-8-2016]  Fixed slow speed while downloading DASH streams. - Th3-822
 
 ?>

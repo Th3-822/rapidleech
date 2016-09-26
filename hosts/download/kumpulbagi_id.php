@@ -6,9 +6,13 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class kumpulbagi_id extends DownloadClass {
-	private $page, $cookie = array(), $pA, $DLRegexp = '@https?://s\d+\.kumpulbagi\.id/download\?[^\t\r\n\'\"<>]+@i';
+	private $page, $cookie = array(), $pA, $DLRegexp = '@https?://s\d+\.kumpulbagi\.(?:id|com)/download\?[^\t\r\n\'\"<>]+@i';
 	public function Download($link) {
-		if (!preg_match('@(https?://kumpulbagi\.id)/(?:[^/]+/)+[^\r\n\t/<>\"]+?,(\d+)[^\r\n\t/<>\"]*@i', preg_replace('@^(http)s?(://)(?:www\.)?(kumpulbagi)\.(?:id|com)(?=(?::\d+)?/)@i', '$1$2$3.id', $link), $fid)) html_error('Invalid link?.');
+		$link = parse_url($link);
+		$link['scheme'] = 'http';
+		$link['host'] = 'kumpulbagi.com';
+		$link = rebuild_url($link);
+		if (!preg_match('@(https?://kumpulbagi\.com)/(?:[^/]+/)+[^\r\n\t/<>\"]+?,(\d+)[^\r\n\t/<>\"]*@i', $link, $fid)) html_error('Invalid link?.');
 		$this->link = $GLOBALS['Referer'] = $fid[0];
 		$this->baseurl = $fid[1];
 		$this->fid = $fid[2];
@@ -60,25 +64,10 @@ class kumpulbagi_id extends DownloadClass {
 
 		return $reply;
 	}
-
-	private function json2array($content, $errorPrefix = 'Error') {
-		if (!function_exists('json_decode')) html_error('Error: Please enable JSON in php.');
-		if (empty($content)) return NULL;
-		$content = ltrim($content);
-		if (($pos = strpos($content, "\r\n\r\n")) > 0) $content = trim(substr($content, $pos + 4));
-		$cb_pos = strpos($content, '{');
-		$sb_pos = strpos($content, '[');
-		if ($cb_pos === false && $sb_pos === false) html_error("[$errorPrefix]: JSON start braces not found.");
-		$sb = ($cb_pos === false || $sb_pos < $cb_pos) ? true : false;
-		$content = substr($content, strpos($content, ($sb ? '[' : '{')));$content = substr($content, 0, strrpos($content, ($sb ? ']' : '}')) + 1);
-		if (empty($content)) html_error("[$errorPrefix]: No JSON content.");
-		$rply = json_decode($content, true);
-		if ($rply === NULL) html_error("[$errorPrefix]: Error reading JSON.");
-		return $rply;
-	}
 }
 
 // [20-3-2016] Written by Th3-822.
 // [22-4-2016] Renamed to kumpulbagi_id and fixed. - Th3-822
+// [12-8-2016] Switched domain to .com tld (I won't rename the plugin again) & Added support for "mirror" domains. - Th3-822
 
 ?>

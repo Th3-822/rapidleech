@@ -60,22 +60,6 @@ class moyapidbirka_com_ua extends DownloadClass {
 
 		return $reply;
 	}
-
-	private function json2array($content, $errorPrefix = 'Error') {
-		if (!function_exists('json_decode')) html_error('Error: Please enable JSON in php.');
-		if (empty($content)) return NULL;
-		$content = ltrim($content);
-		if (($pos = strpos($content, "\r\n\r\n")) > 0) $content = trim(substr($content, $pos + 4));
-		$cb_pos = strpos($content, '{');
-		$sb_pos = strpos($content, '[');
-		if ($cb_pos === false && $sb_pos === false) html_error("[$errorPrefix]: JSON start braces not found.");
-		$sb = ($cb_pos === false || $sb_pos < $cb_pos) ? true : false;
-		$content = substr($content, strpos($content, ($sb ? '[' : '{')));$content = substr($content, 0, strrpos($content, ($sb ? ']' : '}')) + 1);
-		if (empty($content)) html_error("[$errorPrefix]: No JSON content.");
-		$rply = json_decode($content, true);
-		if ($rply === NULL) html_error("[$errorPrefix]: Error reading JSON.");
-		return $rply;
-	}
 }
 
 // [20-3-2016] Written by Th3-822.

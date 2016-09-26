@@ -67,21 +67,7 @@ class mega_co_nz extends DownloadClass {
 		list ($header, $page) = array_map('trim', explode("\r\n\r\n", $page, 2));
 		if (is_numeric($page)) return array((int)$page);
 		if (in_array((int)substr($header, 9, 3), array(500, 503))) return array(-3); //  500 Server Too Busy
-		return $this->Get_Reply($page);
-	}
-
-	private function Get_Reply($content) {
-		if (!function_exists('json_decode')) html_error('Error: Please enable JSON in php.');
-		if (($pos = strpos($content, "\r\n\r\n")) > 0) $content = substr($content, $pos + 4);
-		$cb_pos = strpos($content, '{');
-		$sb_pos = strpos($content, '[');
-		if ($cb_pos === false && $sb_pos === false) html_error('Json start braces not found.');
-		$sb = ($cb_pos === false || $sb_pos < $cb_pos) ? true : false;
-		$content = substr($content, strpos($content, ($sb ? '[' : '{')));$content = substr($content, 0, strrpos($content, ($sb ? ']' : '}')) + 1);
-		if (empty($content)) html_error('No json content.');
-		$rply = json_decode($content, true);
-		if (!$rply || count($rply) == 0) html_error('Error reading json.');
-		return $rply;
+		return $this->json2array($page);
 	}
 
 	private function str_to_a32($b) {
@@ -129,7 +115,7 @@ class mega_co_nz extends DownloadClass {
 		$attr = trim($this->aes_cbc_decrypt($attr, $this->a32_to_str($key)));
 		if (substr($attr, 0, 6) != 'MEGA{"') return false;
 		$attr = substr($attr, 4);$attr = substr($attr, 0, strrpos($attr, '}') + 1);
-		return $this->Get_Reply($attr);
+		return $this->json2array($attr);
 	}
 
 	public function CheckBack($header) {

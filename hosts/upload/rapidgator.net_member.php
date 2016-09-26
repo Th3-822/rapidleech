@@ -71,7 +71,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 			$rdc++;
 		}
 
-		is_present($page, 'Error e-mail or password', 'Login Failed: Invalid Email or Password.');
+		is_present($page, 'Wrong e-mail or password.', 'Login Failed: Invalid Email or Password.');
 		is_present($page, 'E-mail is not a valid email address.', 'Login Failed: Login isn\'t an email address.');
 		is_present($page, 'We discovered that you try to access your account from unusual location.', 'Login Failed: Login Blocked By IP, Check Account Email And Follow The Steps To Add IP to Whitelist.');
 		if (stripos($page, 'The code from a picture does not coincide') !== false) {

@@ -5,7 +5,7 @@ if (!defined('RAPIDLEECH')) {
 }
 
 // Allow user-agent to be changed easily
-if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:48.0) Gecko/20100101 Firefox/48.0');
+if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:49.0) Gecko/20100101 Firefox/49.0');
 
 /*
  * Pauses for countdown timer in file hosts
@@ -37,7 +37,7 @@ function insert_timer($countd, $caption = '', $timeouttext = '', $hide = false) 
  * @param string The text you want to display when count down is complete
  */
 function insert_new_timer($countd, $displaytext, $caption = '', $text = '') {
-	if (!is_numeric($countd)) html_error(lang(85));
+	if (!is_numeric($countd)) return html_error(lang(85));
 	echo ('<div id="code"></div>');
 	echo ('<div align="center">');
 	echo ('<div id="dl"><h4>' . lang(86) . '</h4></div></div>');
@@ -51,7 +51,40 @@ function insert_new_timer($countd, $displaytext, $caption = '', $text = '') {
  */
 function is_page($lpage) {
 	global $lastError;
-	if (!$lpage) html_error(lang(84) . "<br />$lastError");
+	if (!$lpage) return html_error(lang(84) . "<br />$lastError");
+}
+
+function readCustomHeaders(&$referer) {
+	$headers = array();
+	if (!empty($referer)) {
+		$tmp = array_map('trim', explode("\n", $referer));
+		$referer = array_shift($tmp);
+		if (count($tmp) > 0) {
+			foreach (array_filter($tmp) as $tmp) {
+				$tmp = array_map('trim', explode(':', $tmp, 2));
+				// Avoid set an empty method header (key: '')
+				if ($tmp[0] !== '' || $tmp[1] !== '') {
+					// Key must be lowercase (for override default header)
+					$headers[strtolower($tmp[0])] = $tmp[1];
+				}
+			}
+		}
+	}
+	return $headers;
+}
+
+function headers2request(array $headers, $data = '') {
+	if (empty($headers) || empty($headers[''])) return html_error('Empty headers array or Non HTTP method');
+	$request = trim($headers['']) . "\r\n";
+	unset($headers['']);
+	foreach ($headers as $header => $value) {
+		$header = strtolower($header);
+		if ($header != 'connection' && $value !== '') {
+			$request .= strtr(ucwords(strtr(trim($header), '-', ' ')), ' ', '-') . ': ' . trim($value) . "\r\n";
+		}
+	}
+	$request .= "Connection: Close\r\n\r\n$data";
+	return $request;
 }
 
 function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveToFile = 0, $proxy = 0, $pauth = 0, $auth = 0, $scheme = 'http', $resume_from = 0, $XMLRequest = 0) {
@@ -72,7 +105,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	}
 
 	if ($scheme == 'https://') {
-		if (!extension_loaded('openssl')) html_error('You need to install/enable PHP\'s OpenSSL extension to support downloading via HTTPS.');
+		if (!extension_loaded('openssl')) return html_error('You need to install/enable PHP\'s OpenSSL extension to support downloading via HTTPS.');
 		$scheme = 'tls://';
 		if ($port == 0 || $port == 80) $port = 443;
 	} else if ($port == 0) $port = 80;
@@ -87,28 +120,27 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 	if ($scheme != 'tls://') $scheme = '';
 
+	$cHeaders = readCustomHeaders($referer);
 	$request = array();
-	$request[] = $method . ' ' . str_replace(' ', '%20', $url) . ' HTTP/1.1';
-	$request[] = "Host: $host";
-	$request[] = 'User-Agent: ' . rl_UserAgent;
-	$request[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
-	if (!$saveToFile) $request[] = 'Accept-Encoding: gzip, deflate';
-	$request[] = 'Accept-Language: en-US,en;q=0.5';
-	if (!empty($referer)) $request[] = "Referer: $referer";
-	if (!empty($cookies)) $request[] = "Cookie: $cookies";
-	$request[] = 'Pragma: no-cache';
-	$request[] = 'Cache-Control: no-cache';
-//	if ($Resume['use'] === TRUE) $request[] = 'Range: bytes=' . $Resume['from'] . '-';
-	if (!empty($auth)) $request[] = "Authorization: Basic $auth";
-	if (!empty($pauth) && !$scheme) $request[] = "Proxy-Authorization: Basic $pauth";
+	$request[''] = $method . ' ' . str_replace(' ', '%20', $url) . ' HTTP/1.1';
+	$request['host'] = $host;
+	$request['user-agent'] = rl_UserAgent;
+	$request['accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
+	if (!$saveToFile) $request['accept-encoding'] = 'gzip, deflate';
+	$request['accept-language'] = 'en-US,en;q=0.5';
+	if (!empty($referer)) $request['referer'] = $referer;
+	if (!empty($cookies)) $request['cookie'] = $cookies;
+	$request['cache-control'] = $request['pragma'] = 'no-cache';
+//	if ($Resume['use'] === TRUE) $request['range'] = 'bytes=' . $Resume['from'] . '-';
+	if (!empty($auth)) $request['authorization'] = "Basic $auth";
+	if (!empty($pauth) && !$scheme) $request['proxy-authorization'] = "Basic $pauth";
 	if ($method == 'POST') {
-		if (empty($referer) || stripos($referer, "\nContent-Type: ") === false) $request[] = 'Content-Type: application/x-www-form-urlencoded';
-		$request[] = 'Content-Length: ' . strlen($postdata);
+		$request['content-type'] = 'application/x-www-form-urlencoded';
+		$request['content-length'] = strlen($postdata);
 	}
-	if ($XMLRequest) $request[] = 'X-Requested-With: XMLHttpRequest';
-	$request[] = 'Connection: Close';
+	if ($XMLRequest) $request['x-requested-with'] = 'XMLHttpRequest';
 
-	$request = implode($nn, $request). $nn . $nn . $postdata;
+	$request = headers2request(array_merge($request, $cHeaders), $postdata);
 
 	$errno = 0;
 	$errstr = '';
@@ -119,10 +151,10 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	$fp = @stream_socket_client($hosts, $errno, $errstr, 120, STREAM_CLIENT_CONNECT);
 
 	if (!$fp) {
-		if (!function_exists('stream_socket_client')) html_error('[ERROR] stream_socket_client() is disabled.');
+		if (!function_exists('stream_socket_client')) return html_error('[ERROR] stream_socket_client() is disabled.');
 		$dis_host = !empty($proxyHost) ? $proxyHost : $host;
 		$dis_port = !empty($proxyPort) ? $proxyPort : $port;
-		html_error(sprintf(lang(88), $dis_host, $dis_port));
+		return html_error(sprintf(lang(88), $dis_host, $dis_port));
 	}
 
 	if ($errno || $errstr) {
@@ -139,11 +171,10 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 	if ($scheme == 'tls://' && $proxy) {
 		$connRequest = array();
-		$connRequest[] = "CONNECT $host:$port HTTP/1.1";
-		if (!empty($pauth)) $connRequest[] = "Proxy-Authorization: Basic $pauth";
-		$connRequest[] = "Connection: Close";
-		$connRequest[] = "Proxy-Connection: Close";
-		$connRequest = implode($nn, $connRequest). $nn . $nn;
+		$connRequest[''] = "CONNECT $host:$port HTTP/1.1";
+		if (!empty($pauth)) $connRequest['proxy-authorization'] = "Basic $pauth";
+		$connRequest['proxy-connection'] = 'Close';
+		$connRequest = headers2request($connRequest);
 
 		fwrite($fp, $connRequest);
 		fflush($fp);
@@ -164,11 +195,11 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 		$status = intval(substr($header, 9, 3));
 		if ($status != 200) {
-			html_error("Proxy returned $status after CONNECT.");
+			return html_error("Proxy returned $status after CONNECT.");
 		}
 
 		// Start TLS.
-		if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) html_error('TLS Startup Error.');
+		if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) return html_error('TLS Startup Error.');
 	}
 
 	#########################################################################
@@ -199,7 +230,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	if (stripos($header, "\nTransfer-Encoding: chunked") !== false && in_array('dechunk', stream_get_filters())) {
 		// Add built-in dechunk filter
 		$sFilters['dechunk'] = stream_filter_append($fp, 'dechunk', STREAM_FILTER_READ);
-		if (!$sFilters['dechunk'] && $saveToFile) html_error('Unknown error while initializing dechunk filter, cannot continue download.');
+		if (!$sFilters['dechunk'] && $saveToFile) return html_error('Unknown error while initializing dechunk filter, cannot continue download.');
 	}
 
 	#########################################################################
@@ -285,30 +316,23 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		}
 		$FileName = str_replace(array_merge(range(chr(0), chr(31)), str_split("<>:\"/|?*\x5C\x7F")), '', basename(trim($FileName)));
 
-		if (!empty($options['rename_prefix'])) $FileName = $options['rename_prefix'] . '_' . $FileName;
-		if (!empty($options['rename_suffix'])) {
-			$ext = strrchr($FileName, '.');
-			$before_ext = explode($ext, $FileName);
-			$FileName = $before_ext[0] . '_' . $options['rename_suffix'] . $ext;
+		$extPos = strrpos($FileName, '.');
+		$ext = ($extPos ? substr($FileName, $extPos) : '');
+		if (is_array($options['forbidden_filetypes']) && in_array(strtolower($ext), array_map('strtolower', $options['forbidden_filetypes']))) {
+			if ($options['forbidden_filetypes_block']) return html_error(sprintf(lang(82), $ext));
+			if (empty($options['rename_these_filetypes_to'])) $options['rename_these_filetypes_to'] = '.xxx';
+			else if (strpos($options['rename_these_filetypes_to'], '.') === false) $options['rename_these_filetypes_to'] = '.' . $options['rename_these_filetypes_to'];
+			$FileName = substr_replace($FileName, $options['rename_these_filetypes_to'], $extPos);
 		}
-		if ($options['rename_underscore']) $FileName = str_replace(array(' ', '%20'), '_', $FileName);
+
+		if (!empty($options['rename_prefix'])) $FileName = $options['rename_prefix'] . '_' . $FileName;
+		if (!empty($options['rename_suffix'])) $FileName = ($extPos > 0 ? substr($FileName, 0, $extPos) : $FileName) . '_' . $options['rename_suffix'] . $ext;
+		if (!empty($options['rename_underscore'])) $FileName = str_replace(array(' ', '%20'), '_', $FileName);
 
 		$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $FileName;
 
-		$filetype = strrchr($saveToFile, '.');
-		if (is_array($options['forbidden_filetypes']) && in_array(strtolower($filetype), $options['forbidden_filetypes'])) {
-			if ($options['forbidden_filetypes_block']) {
-				$lastError = sprintf(lang(82), $filetype);
-				return false;
-			} else $saveToFile = str_replace($filetype, $options['rename_these_filetypes_to'], $saveToFile);
-		}
-
 		if (@file_exists($saveToFile) && $Resume['use'] !== TRUE) {
-			if ($options['bw_save']) {
-				// Skip in audl.
-				if (isset($_GET['audl'])) echo '<script type="text/javascript">parent.nextlink();</script>';
-				return html_error(lang(99) . ': ' . link_for_file($saveToFile));
-			}
+			if ($options['bw_save']) return html_error(lang(99) . ': ' . link_for_file($saveToFile));
 			$FileName = time() . '_' . $FileName;
 			$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $FileName;
 		}
@@ -406,17 +430,13 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0) {
 	global $pauth;
 	static $ch, $lastProxy;
-	if (empty($link) || !is_string($link)) html_error(lang(24));
-	if (!extension_loaded('curl') || !function_exists('curl_init') || !function_exists('curl_exec')) html_error('cURL isn\'t enabled or cURL\'s functions are disabled');
-	$header = array();
+	if (empty($link) || !is_string($link)) return html_error(lang(24));
+	if (!extension_loaded('curl') || !function_exists('curl_init') || !function_exists('curl_exec')) return html_error('cURL isn\'t enabled or cURL\'s functions are disabled');
 	if (!empty($referer)) {
-		$arr = explode("\r\n", $referer);
-		if (count($arr) > 1) {
-			$referer = $arr[0];
-			unset($arr[0]);
-			$header = array_filter(array_map('trim', $arr));
-		}
-	}
+		$arr = array_map('trim', explode("\n", $referer));
+		$referer = array_shift($arr);
+		$header = array_filter($arr);
+	} else $header = array();
 	$link = str_replace(array(' ', "\r", "\n"), array('%20'), $link);
 	$opt = array(CURLOPT_HEADER => 1, CURLOPT_SSL_VERIFYPEER => 0,
 		CURLOPT_SSL_VERIFYHOST => 0, CURLOPT_RETURNTRANSFER => 1,
@@ -482,7 +502,7 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 	// curl_close($ch);
 
 	if (substr($page, 9, 3) == '100' || !empty($opt[CURLOPT_PROXY])) $page = preg_replace("@^HTTP/1\.[01] \d{3}(?:\s[^\r\n]+)?\r\n\r\n(HTTP/1\.[01] \d+ [^\r\n]+)@i", "$1", $page, 1); // The "100 Continue" or "200 Connection established" can break some functions in plugins, lets remove it...
-	if ($errz != 0) html_error("[cURL:$errz] $errz2");
+	if ($errz != 0) return html_error("[cURL:$errz] $errz2");
 
 	return $page;
 }
@@ -629,7 +649,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 	}
 
 	if ($scheme == 'https://') {
-		if (!extension_loaded('openssl')) html_error('You need to install/enable PHP\'s OpenSSL extension to support uploading via HTTPS.');
+		if (!extension_loaded('openssl')) return html_error('You need to install/enable PHP\'s OpenSSL extension to support uploading via HTTPS.');
 		$scheme = 'tls://';
 		if ($port == 0 || $port == 80) $port = 443;
 	} else if ($port == 0) $port = 80;
@@ -649,22 +669,22 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
 	if ($scheme != 'tls://') $scheme = '';
 
+	$cHeaders = readCustomHeaders($referer);
 	$request = array();
-	$request[] = 'POST ' . str_replace(' ', '%20', $url) . ' HTTP/1.1';
-	$request[] = "Host: $host";
-	$request[] = "User-Agent: $upagent";
-	$request[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
-	$request[] = 'Accept-Encoding: gzip, deflate';
-	$request[] = 'Accept-Language: en-US,en;q=0.5';
-	if (!empty($referer)) $request[] = "Referer: $referer";
-	if (!empty($cookies)) $request[] = "Cookie: $cookies";
-	if (!empty($pauth) && !$scheme) $request[] = "Proxy-Authorization: Basic $pauth";
-	$request[] = "Origin: $origin";
-	$request[] = "Content-Type: multipart/form-data; boundary=$bound";
-	$request[] = 'Content-Length: ' . (strlen($postdata) + strlen($nn . "--" . $bound . "--" . $nn) + $fileSize);
-	$request[] = 'Connection: Close';
+	$request[''] = 'POST ' . str_replace(' ', '%20', $url) . ' HTTP/1.1';
+	$request['host'] = $host;
+	$request['user-agent'] = $upagent;
+	$request['accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
+	$request['accept-encoding'] = 'gzip, deflate';
+	$request['accept-language'] = 'en-US,en;q=0.5';
+	if (!empty($referer)) $request['referer'] = $referer;
+	if (!empty($cookies)) $request['cookie'] = $cookies;
+	if (!empty($pauth) && !$scheme) $request['proxy-authorization'] = "Basic $pauth";
+	$request['origin'] = $origin;
+	$request['content-type'] = "multipart/form-data; boundary=$bound";
+	$request['content-length'] = (strlen($postdata) + strlen($nn . "--" . $bound . "--" . $nn) + $fileSize);
 
-	$request = implode($nn, $request). $nn . $nn . $postdata;
+	$request = headers2request(array_merge($request, $cHeaders), $postdata);
 
 	$errno = 0;
 	$errstr = '';
@@ -675,10 +695,10 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 	$fp = @stream_socket_client($hosts, $errno, $errstr, 120, STREAM_CLIENT_CONNECT);
 
 	if (!$fp) {
-		if (!function_exists('stream_socket_client')) html_error('[ERROR] stream_socket_client() is disabled.');
+		if (!function_exists('stream_socket_client')) return html_error('[ERROR] stream_socket_client() is disabled.');
 		$dis_host = !empty($proxyHost) ? $proxyHost : $host;
 		$dis_port = !empty($proxyPort) ? $proxyPort : $port;
-		html_error(sprintf(lang(88), $dis_host, $dis_port));
+		return html_error(sprintf(lang(88), $dis_host, $dis_port));
 	}
 
 	if ($errno || $errstr) {
@@ -691,11 +711,10 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
 	if ($scheme == 'tls://' && $proxy) {
 		$connRequest = array();
-		$connRequest[] = "CONNECT $host:$port HTTP/1.1";
-		if (!empty($pauth)) $connRequest[] = "Proxy-Authorization: Basic $pauth";
-		$connRequest[] = "Connection: Close";
-		$connRequest[] = "Proxy-Connection: Close";
-		$connRequest = implode($nn, $connRequest). $nn . $nn;
+		$connRequest[''] = "CONNECT $host:$port HTTP/1.1";
+		if (!empty($pauth)) $connRequest['proxy-authorization'] = "Basic $pauth";
+		$connRequest['proxy-connection'] = 'Close';
+		$connRequest = headers2request($connRequest);
 
 		fwrite($fp, $connRequest);
 		fflush($fp);
@@ -716,11 +735,11 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
 		$status = intval(substr($header, 9, 3));
 		if ($status != 200) {
-			html_error("Proxy returned $status after CONNECT.");
+			return html_error("Proxy returned $status after CONNECT.");
 		}
 
 		// Start TLS.
-		if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) html_error('TLS Startup Error.');
+		if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) return html_error('TLS Startup Error.');
 	}
 
 	echo(lang(104) . ' <b>' . htmlspecialchars($filename) . '</b>, ' . lang(56) . ' <b>' . bytesToKbOrMbOrGb($fileSize) . '</b>...<br />');
@@ -741,7 +760,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		if ($data === false) {
 			fclose($fs);
 			fclose($fp);
-			html_error(lang(112));
+			return html_error(lang(112));
 		}
 
 		$sendbyte = @fwrite($fp, $data);
@@ -750,7 +769,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		if ($sendbyte === false || strlen($data) > $sendbyte) {
 			fclose($fs);
 			fclose($fp);
-			html_error(lang(113));
+			return html_error(lang(113));
 		}
 
 		$totalsend += $sendbyte;
@@ -837,7 +856,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 	}
 
 	if ($scheme == 'https://') {
-		if (!extension_loaded('openssl')) html_error('You need to install/enable PHP\'s OpenSSL extension to support uploading via HTTPS.');
+		if (!extension_loaded('openssl')) return html_error('You need to install/enable PHP\'s OpenSSL extension to support uploading via HTTPS.');
 		$scheme = 'tls://';
 		if ($port == 0 || $port == 80) $port = 443;
 	} else if ($port == 0) $port = 80;
@@ -857,25 +876,24 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 
 	if ($scheme != 'tls://') $scheme = '';
 
+	$cHeaders = readCustomHeaders($referer);
 	$request = array();
-	$request[] = 'PUT ' . str_replace(' ', '%20', $url) . ' HTTP/1.1';
-	$request[] = "Host: $host";
-	$request[] = "User-Agent: $upagent";
-	$request[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
-	$request[] = 'Accept-Encoding: gzip, deflate';
-	$request[] = 'Accept-Language: en-US,en;q=0.5';
-	if (!empty($referer)) $request[] = "Referer: $referer";
-	if (!empty($cookies)) $request[] = "Cookie: $cookies";
-	if (!empty($pauth) && !$scheme) $request[] = "Proxy-Authorization: Basic $pauth";
-	$request[] = "X-File-Name: $filename";
-	$request[] = "X-File-Size: $fileSize";
-	$request[] = "Origin: $origin";
-	$request[] = 'Content-Disposition: attachment';
-	$request[] = 'Content-Type: multipart/form-data';
-	$request[] = "Content-Length: $fileSize";
-	$request[] = 'Connection: Close';
+	$request[''] = 'PUT ' . str_replace(' ', '%20', $url) . ' HTTP/1.1';
+	$request['host'] = $host;
+	$request['user-agent'] = $upagent;
+	$request['accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
+	$request['accept-encoding'] = 'gzip, deflate';
+	$request['accept-language'] = 'en-US,en;q=0.5';
+	if (!empty($referer)) $request['referer'] = $referer;
+	if (!empty($cookies)) $request['cookie'] = $cookies;
+	if (!empty($pauth) && !$scheme) $request['proxy-authorization'] = "Basic $pauth";
+	$request['origin'] = $origin;
+	$request['content-disposition'] = 'attachment';
+	$request['content-type'] = 'multipart/form-data';
+	$request['x-file-name'] = $filename;
+	$request['x-file-size'] = $request['content-length'] = $fileSize;
 
-	$request = implode($nn, $request). $nn . $nn;
+	$request = headers2request(array_merge($request, $cHeaders));
 
 	$errno = 0;
 	$errstr = '';
@@ -886,10 +904,10 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 	$fp = @stream_socket_client($hosts, $errno, $errstr, 120, STREAM_CLIENT_CONNECT);
 
 	if (!$fp) {
-		if (!function_exists('stream_socket_client')) html_error('[ERROR] stream_socket_client() is disabled.');
+		if (!function_exists('stream_socket_client')) return html_error('[ERROR] stream_socket_client() is disabled.');
 		$dis_host = !empty($proxyHost) ? $proxyHost : $host;
 		$dis_port = !empty($proxyPort) ? $proxyPort : $port;
-		html_error(sprintf(lang(88), $dis_host, $dis_port));
+		return html_error(sprintf(lang(88), $dis_host, $dis_port));
 	}
 
 	if ($errno || $errstr) {
@@ -902,11 +920,10 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 
 	if ($scheme == 'tls://' && $proxy) {
 		$connRequest = array();
-		$connRequest[] = "CONNECT $host:$port HTTP/1.1";
-		if (!empty($pauth)) $connRequest[] = "Proxy-Authorization: Basic $pauth";
-		$connRequest[] = "Connection: Close";
-		$connRequest[] = "Proxy-Connection: Close";
-		$connRequest = implode($nn, $connRequest). $nn . $nn;
+		$connRequest[''] = "CONNECT $host:$port HTTP/1.1";
+		if (!empty($pauth)) $connRequest['proxy-authorization'] = "Basic $pauth";
+		$connRequest['proxy-connection'] = 'Close';
+		$connRequest = headers2request($connRequest);
 
 		fwrite($fp, $connRequest);
 		fflush($fp);
@@ -927,11 +944,11 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 
 		$status = intval(substr($header, 9, 3));
 		if ($status != 200) {
-			html_error("Proxy returned $status after CONNECT.");
+			return html_error("Proxy returned $status after CONNECT.");
 		}
 
 		// Start TLS.
-		if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) html_error('TLS Startup Error.');
+		if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) return html_error('TLS Startup Error.');
 	}
 
 	echo(lang(104) . ' <b>' . htmlspecialchars($filename) . '</b>, ' . lang(56) . ' <b>' . bytesToKbOrMbOrGb($fileSize) . '</b>...<br />');
@@ -952,7 +969,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 		if ($data === false) {
 			fclose($fs);
 			fclose($fp);
-			html_error(lang(112));
+			return html_error(lang(112));
 		}
 
 		$sendbyte = @fwrite($fp, $data);
@@ -961,7 +978,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 		if ($sendbyte === false || strlen($data) > $sendbyte) {
 			fclose($fs);
 			fclose($fp);
-			html_error(lang(113));
+			return html_error(lang(113));
 		}
 
 		$totalsend += $sendbyte;
