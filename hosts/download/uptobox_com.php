@@ -9,7 +9,7 @@ if (!file_exists(HOST_DIR . 'download/GenericXFS_DL.php')) html_error('Cannot lo
 require_once(HOST_DIR . 'download/GenericXFS_DL.php');
 
 class uptobox_com extends GenericXFS_DL {
-	public $pluginVer = 7;
+	public $pluginVer = 15;
 	public function Download($link) {
 		$this->wwwDomain = false; // Switch to true if filehost forces it's domain with www.
 		$this->cname = 'xfss'; // Session cookie name
@@ -45,6 +45,11 @@ class uptobox_com extends GenericXFS_DL {
 	protected function isAccPremium($page) {
 		if (stripos($page, 'Free member') === false) return true;
 		else return false;
+	}
+
+	protected function checkLogin($page) {
+		is_present($page, 'You are trying to log in from a different country', 'Login Failed: Login Blocked By IP, Check Account Email And Follow The Steps To Add IP to Whitelist.');
+		return parent::checkLogin($page);
 	}
 }
 

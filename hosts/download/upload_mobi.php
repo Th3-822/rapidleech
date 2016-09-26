@@ -22,9 +22,13 @@ class upload_mobi extends DownloadClass {
 		}
 		return $this->RedirectDownload($DL[0], 'upload_mobi-placeholder-name');
 	}
+
+	public function CheckBack($headers) {
+		// Keep the referer
+		$_GET['link'] = (!empty($_GET['referer']) && stripos($_GET['referer'], '://upload.mobi/') !== false) ? $_GET['referer'] : 'http://upload.mobi/';
+	}
 }
 
 // [18-5-2016] Written by Th3-822.
 // [04-8-2016] Fixed Download Regexp. - Th3-822
-
-?>
+// [27-9-2016] Quick fix to keep original referer on redirects. - Th3-822

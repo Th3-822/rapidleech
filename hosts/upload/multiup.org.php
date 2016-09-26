@@ -89,7 +89,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
 
 	$url = parse_url($up_url);
-	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer, 0, $post, $lfile, $lname, 'files[]', '', $_GET['proxy'], $pauth);
+	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer, 0, $post, $lfile, $lname, 'files[]', '', $_GET['proxy'], $pauth, 0, $url['scheme']);
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";

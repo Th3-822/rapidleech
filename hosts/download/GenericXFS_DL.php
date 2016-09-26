@@ -11,8 +11,8 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class GenericXFS_DL extends DownloadClass {
-	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/[^\?\'\"\t<>\r\n\\\]{15,}@i';
-	private $classVer = 14;
+	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/(?:[^\?\'\"\t<>\r\n\\\]{15,}|v(?:id(?:eo)?)?\.(?:flv|mp4))@i';
+	private $classVer = 15;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -157,8 +157,9 @@ class GenericXFS_DL extends DownloadClass {
 
 	protected function findCaptcha() {
 		if (!empty($this->captcha)) return false;
-		if (($pos = stripos($this->page, $this->scheme . '://' . $this->host . '/captchas/')) !== false && preg_match('@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/captchas/[\w\-]+\.(?:jpe?g|png|gif)@i', substr($this->page, $pos), $gdCaptcha)) {
+		if (($pos = stripos($this->page, $this->scheme . '://' . $this->host . '/captchas/')) !== false && preg_match('@(https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?)?/captchas/[\w\-]+\.(?:jpe?g|png|gif)@i', substr($this->page, $pos), $gdCaptcha)) {
 			// gd Captcha
+			if (empty($gdCaptcha[1])) $gdCaptcha[0] = $this->scheme . '://' . $this->host . $gdCaptcha[0];
 			return array('type' => 1, 'url' => $gdCaptcha[0]);
 		} elseif (substr_count($this->form, "<span style='position:absolute;padding-left:") > 3 && preg_match_all("@<span style='[^\'>]*padding-left\s*:\s*(\d+)[^\'>]*'[^>]*>((?:&#\w+;)|(?:\d))</span>@i", $this->form, $txtCaptcha)) {
 			// Text Captcha (decodeable)
@@ -208,7 +209,7 @@ class GenericXFS_DL extends DownloadClass {
 			$this->cookie['lang'] = 'english';
 			$_POST['cookie'] = false;
 		}
-		$post = (!empty($_POST['T8gXFS']) && is_array($_POST['T8gXFS']) ? $_POST['T8gXFS'] : array());
+		$post = (!empty($_POST['T8gXFS']) && is_array($_POST['T8gXFS']) ? array_map('urlencode', $_POST['T8gXFS']) : array());
 		switch ($_POST['captcha_type']) {
 			default: 
 				return html_error('Invalid captcha type.');
@@ -229,7 +230,7 @@ class GenericXFS_DL extends DownloadClass {
 				$post = array_merge($post, $this->verifySolveMedia());
 				break;
 		}
-		$step = (int)$_POST['step'];
+		$step = intval($_POST['step']);
 		$_POST['step'] = $_POST['captcha_type'] = false;
 		$this->page = $this->GetPage($this->link, $this->cookie, $post);
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
@@ -293,7 +294,7 @@ class GenericXFS_DL extends DownloadClass {
 		is_present($this->page, '>Expired session<', "Error: Expired Download Session. [$fstep]");
 		$this->findCountdown();
 		$this->showCaptcha($fstep);
-		$this->page = $this->GetPage($this->link, $this->cookie, $this->post);
+		$this->page = $this->GetPage($this->link, $this->cookie, array_map('urlencode', $this->post));
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		return $this->FreeDL($fstep + 1);
 	}
@@ -311,13 +312,13 @@ class GenericXFS_DL extends DownloadClass {
 			}
 			if (!isset($this->post['method_premium']) || $this->post['method_premium'] === '') $this->post['method_premium'] = 1;
 			sleep(1); // This should avoid errors at massive usage.
-			$this->page = $this->GetPage($this->link, $this->cookie, $this->post);
+			$this->page = $this->GetPage($this->link, $this->cookie, array_map('urlencode', $this->post));
 			if (($pos = stripos($this->page, 'You have reached the download')) !== false && preg_match('@You have reached the download[- ]limit(?: of|:) \d+ [TGMK]b for(?: the)? last \d+ days?@i', substr($this->page, $pos), $err)) html_error('Error: '.$err[0]);
 			if (!$this->testDL()) html_error('Error: Download-link not found.');
 		} else return true;
 	}
 
-	// Allow Custom Login Post. (UTB)
+	// Allow Custom Login Post.
 	protected function sendLogin($post) {
 		$page = $this->GetPage((!empty($this->sslLogin) ? 'https://'.$this->host.'/' : $this->purl) . '?op=login', $this->cookie, $post, $this->purl);
 		return $page;

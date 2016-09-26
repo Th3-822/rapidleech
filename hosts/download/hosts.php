@@ -47,6 +47,9 @@ while (false !== ($entry = $d->read())) {
 			case 'keep2share.cc':
 				foreach(array('keep2share.com', 'keep2s.cc', 'k2s.cc') as $k2sdomains) $host["$k2sdomains"] = $host['keep2share.cc'];
 				break;
+			case 'kumpulbagi.id':
+				$host['kumpulbagi.com'] = $host['kumpulbagi.id'];
+				break;
 			case 'mega.co.nz':
 				$host['mega.nz'] = $host['mega.co.nz'];
 				break;

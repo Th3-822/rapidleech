@@ -6,11 +6,11 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class d4shared_com extends DownloadClass {
-	private $page, $cookie, $pA, $long_regexp, $noTrafficFreeDl;
+	private $page, $cookie, $pA, $DL_regexp, $noTrafficFreeDl;
 	public $link;
 	public function Download($link) {
 		global $premium_acc;
-		$this->long_regexp = '@https?://dc\d+\.4shared\.com/download/[^/\"\'\s<>]+/(?:tsid[^/\"\'\s<>]+/)?[^/\"\'\s<>]+@i';
+		$this->DL_regexp = '@https?://dc\d+\.4shared\.com/download/[^/\"\'\s<>]+/(?:tsid[^/\"\'\s<>]+/)?[^/\"\'\s<>]+@i';
 		$this->cookie = array('4langcookie' => 'en');
 		$this->noTrafficFreeDl = true; // Set to true to switch to free download when premium traffic used is over the limit.
 
@@ -31,18 +31,17 @@ class d4shared_com extends DownloadClass {
 		$this->CheckForPass();
 
 		// Direct link downloadable without login or countdown...
-		if (preg_match('@window\.location[\s\t]*=[\s\t]*"(https?://dc\d+\.4shared\.com/download/[^/\"\';]+/[^/\"\'\?;]+)"@i', $this->page, $DL)) {
-			if (preg_match('/[\?&]dirPwdVerified=(\w+)/i', $this->link, $pwd)) $DL[1] .= '&dirPwdVerified='.$pwd[1];
-			return $this->RedirectDownload($DL[1], urldecode(basename(parse_url($DL[1], PHP_URL_PATH))), $this->cookie);
+		if (preg_match($this->DL_regexp, $this->page, $DL)) {
+			if (preg_match('/[\?&]dirPwdVerified=(\w+)/i', $this->link, $pwd)) $DL[0] .= '&dirPwdVerified='.$pwd[1];
+			return $this->RedirectDownload($DL[0], urldecode(basename(parse_url($DL[0], PHP_URL_PATH))), $this->cookie);
 		}
 
 		if (!preg_match('@\.com/[^/]+/([^/]+)/?(.*)@i', $this->link, $L)) html_error('Invalid link?');
 		$getLink = "http://www.4shared.com/get/{$L[1]}/{$L[2]}";
 		$page = $this->GetPage("http://www.4shared.com/get/{$L[1]}/{$L[2]}", $this->cookie);
-		//is_present($page, 'You should log in to download this file. Sign up for free if you don\'t have an account yet.', 'You need to be logged in for download this file.');
 		$GLOBALS['Referer'] = $getLink;
 
-		if (!preg_match($this->long_regexp, $page, $DL)) html_error('Download-link not found.');
+		if (!preg_match($this->DL_regexp, $page, $DL)) html_error('Download-link not found.');
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 		$dllink = $DL[0];
 		if (preg_match('/[\?&]dirPwdVerified=(\w+)/i', $this->link, $pwd)) $dllink .= '&dirPwdVerified='.$pwd[1];
@@ -93,7 +92,7 @@ class d4shared_com extends DownloadClass {
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 
 		if (stripos($page, "\nContent-Length: 0\n") !== false) is_notpresent($page, "\nLocation: ", 'Error: Direct link not found.');
-		if (!preg_match($this->long_regexp, $page, $DL)) html_error('Error: Download link not found.');
+		if (!preg_match($this->DL_regexp, $page, $DL)) html_error('Error: Download link not found.');
 		$dllink = $DL[0];
 		if (preg_match('/[\?&]dirPwdVerified=(\w+)/i', $this->link, $pwd)) $dllink .= '&dirPwdVerified='.$pwd[1];
 
@@ -180,5 +179,6 @@ class d4shared_com extends DownloadClass {
 //[18-Apr-2012] Fixed login needed msg, direct download link regexp (freedl) && removed 2 error msgs from login function. - Th3-822
 //[01-Aug-2012] Fixed for changes at 4S. - Th3-822
 //[20-Feb-2014] Fixed Login/FreeDL. - Th3-822
+//[10-Sep-2016] Fixed FreeDL of Direct-Link Files. - Th3-822
 
 ?>

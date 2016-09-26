@@ -71,7 +71,7 @@ class datafile_com extends DownloadClass {
 		$filename = $_POST['filename'];
 		$this->cookie = urldecode($_POST['cookie']);
 		$page = $this->GetPage($this->posturl . '/files/ajax.html', $this->cookie, $post, $this->link, 0, 1);
-		$json = $this->Get_Reply($page);
+		$json = $this->json2array($page);
 		if ($json['success'] == 0) {
 			echo "<div align='center'><font color='red'><b>{$json['msg']}</b></font></div>";
 			$data = $this->DefaultParamArr($this->link, $this->cookie);
@@ -133,16 +133,6 @@ class datafile_com extends DownloadClass {
 		echo "<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n";
 		echo "</form></center>\n</body>\n</html>";
 		exit;
-	}
-
-	private function Get_Reply($page) {
-		if (!function_exists('json_decode')) html_error("Error: Please enable JSON in php.");
-		$json = substr($page, strpos($page, "\r\n\r\n") + 4);
-		$json = substr($json, strpos($json, "{"));
-		$json = substr($json, 0, strrpos($json, "}") + 1);
-		$rply = json_decode($json, true);
-		if (!$rply || (is_array($rply) && count($rply) == 0)) html_error("Error getting json data.");
-		return $rply;
 	}
 
 }
