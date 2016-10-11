@@ -266,7 +266,8 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 		}
 
 		if ($options['redir'] && $lastError && strpos($lastError, substr(lang(95), 0, strpos(lang(95), '%1$s'))) !== false) {
-			$redirectto = trim(cut_str($lastError, substr(lang(95), 0, strpos(lang(95), '%1$s')), ']'));
+			$redirectto = substr($lastError, strpos(lang(95), '%1$s'));
+			$redirectto = trim(substr($redirectto, 0, strrpos($redirectto, ']')));
 			print lang(8) . ' <b>' . htmlspecialchars($redirectto) . "</b> ... <br />$nn";
 			$_GET['referer'] = urlencode($_GET['link']);
 			if (!preg_match('@^(?:https?|ftp)\://@i', $redirectto)) { // If redirect doesn't have the host
