@@ -14,14 +14,14 @@ class mediafire_com extends DownloadClass {
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		}
 
-		if (!preg_match('@https?://(?:[\w\-]+\.)*mediafire\.com/(?:(download/)|(download\.php|file/|view/)?\??)([\w\-\.]+)(?(1)(/[^/\s]+))?@i', $link, $this->fid)) html_error('Invalid Link?');
+		if (!preg_match('@https?://(?:[\w\-]+\.)*mediafire\.com/(?:(download|file)/|(download\.php|file/|view/)?\??)([\w\-\.]+)(?(1)(/[^/\s]+))?@i', $link, $this->fid)) html_error('Invalid Link?');
 
-		$this->link = $GLOBALS['Referer'] = 'http://www.mediafire.com/download/' . $this->fid[3] . (!empty($this->fid[4]) ? $this->fid[4] : '');
+		$this->link = $GLOBALS['Referer'] = 'http://www.mediafire.com/file/' . $this->fid[3] . (!empty($this->fid[4]) ? $this->fid[4] : '');
 
 		if (empty($_POST['step']) || $_POST['step'] != '1') {
 			$this->page = $this->GetPage($this->link, $this->cookie, 0, 'http://www.mediafire.com/?' . $this->fid[3]);
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
-			if (preg_match('@\nLocation: .*(/download/([^/\r\n]+)/?[^\r\n]*)@i', $this->page, $redir)) {
+			if (preg_match('@\nLocation: .*(/file/([^/\r\n]+)/?[^\r\n]*)@i', $this->page, $redir)) {
 				$this->link = $GLOBALS['Referer'] = 'http://www.mediafire.com'.$redir[1];
 				$this->page = $this->GetPage($this->link, $this->cookie);
 				$this->cookie = GetCookiesArr($this->page, $this->cookie);
@@ -35,7 +35,7 @@ class mediafire_com extends DownloadClass {
 
 		$this->MF_Captcha();
 		if (strpos($this->page, 'name="downloadp" id="downloadp"')) {
-			$DefaultParam = $this->DefaultParamArr(preg_replace('@/download/([^/]+)/?.*@i', '/?$1', $link), $this->cookie);
+			$DefaultParam = $this->DefaultParamArr(preg_replace('@/file/([^/]+)/?.*@i', '/?$1', $link), $this->cookie);
 			echo "<form action='".htmlspecialchars($GLOBALS['PHP_SELF'], ENT_QUOTES)."' method='POST'>\n";
 			foreach ($DefaultParam as $key => $value) echo "<input type='hidden' name='$key' value='" . htmlspecialchars($value, ENT_QUOTES) . "' />\n";
 			echo "Enter your password here:<br />\n<input type='text' name='mfpassword' value='' placeholder='Enter file password here' autofocus='autofocus' required='required' />\n<input type='submit' />\n</form>";
@@ -123,6 +123,7 @@ class mediafire_com extends DownloadClass {
  * fixed captcha forms by Th3-822 11-04-2014
  * added recaptcha v2 captcha support && fixed dead link msgs by Th3-822 07-04-2015
  * added checkbox "captcha" support (non tested) by Th3-822 18-06-2015
+ * fixed link regexp, redirect by Th3-822 18-10-2016
  */
  
 ?>

@@ -80,8 +80,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'Th3-822') {
 	$upfiles = T8_mega_upload($up_url, $ul_key, $lfile, $lname, $mac_str);
 
 	// Upload Finished
-	//echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";
-	echo "<script type='text/javascript'>document.getElementById('upload_div').style.display='none';</script>\n";
+	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";
 
 	is_page($upfiles);
 
@@ -183,8 +182,8 @@ function doApiReq($atrr) {
 		is_page($page);
 	}
 	list ($header, $page) = array_map('trim', explode("\r\n\r\n", $page, 2));
-	if (is_numeric($page)) return array((int)$page);
-	if (in_array((int)substr($header, 9, 3), array(500, 503))) return array(-3); //  500 Server Too Busy
+	if (is_numeric($page)) return array(intval($page));
+	if (in_array(intval(substr($header, 9, 3)), array(500, 503))) return array(-3); //  500 Server Too Busy
 	return Get_Reply($page);
 }
 function check_errors($err, $prefix = 'Error') {
@@ -323,7 +322,7 @@ function rsa_decrypt($enc_data, $p, $q, $d) {
 	$modulus = bcmul($p, $q);
 	$data_len = strlen($enc_data);
 	$chunk_len = bitLen($modulus) - 1;
-	$block_len = (int) ceil($chunk_len / 8);
+	$block_len = intval(ceil($chunk_len / 8));
 	$curr_pos = 0;
 	$bit_pos = 0;
 	$plain_data = 0;
@@ -594,7 +593,6 @@ function chunk_ul($scheme, $host, $port, $url, $onlyOpen = false) {
 	if (!@fputs($fp, $zapros)) html_error('Cannot send request headers.');
 	fflush($fp);
 
-	$id = 'upload_div';
 	require_once(TEMPLATE_DIR . '/uploadui.php');
 	echo "\n<script type='text/javascript'>document.getElementById('ul_con').innerHTML ='".($proxy ? (sprintf(lang(89), $proxyHost, $proxyPort) . "<br />'UPLOAD: <b>$url</b>...<br />") : sprintf(lang(90), $host, $port))."';document.getElementById('ul_fname').style.display = 'block';</script>";
 	flush();

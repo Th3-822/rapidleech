@@ -7,7 +7,7 @@ if (!defined('RAPIDLEECH')) {
 
 class openload_co extends DownloadClass {
 	private $page, $cookie = array(), $elink, $pA, $DLRegexp = '@https?://\w+\.(?:openload\.co|oloadcdn\.net)/dl/[^\t\r\n\'\"<>\?]+@i';
-	private $ignoreApiDLCaptcha = false, $useDecoder = true;
+	private $ignoreApiDLCaptcha = false;
 	public function Download($link) {
 		if (!preg_match('@https?://openload\.co/f/([\w-]+)@i', str_ireplace(array('://www.openload.co', '/embed/'), array('://openload.co', '/f/'), $link), $fid)) html_error('Invalid link?.');
 		$this->link = $GLOBALS['Referer'] = str_ireplace('http://', 'https://', $fid[0]);
@@ -16,7 +16,6 @@ class openload_co extends DownloadClass {
 
 		if (empty($_POST['step'])) $this->testLink();
 		else if ($_POST['step'] == '1') return $this->ApiDLPost();
-		else if ($_POST['step'] == '42') return $this->processAnswer();
 
 		$this->pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
 		if (($_REQUEST['premium_acc'] == 'on' && ($this->pA || (!empty($GLOBALS['premium_acc']['openload_co']['user']) && !empty($GLOBALS['premium_acc']['openload_co']['pass']))))) {
@@ -39,22 +38,6 @@ class openload_co extends DownloadClass {
 			is_present($this->page, 'We can\'t find the file you are looking for.', 'File Not Found.');
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		}
-	}
-
-	private function processAnswer() {
-		if (empty($_POST['decAnswer'])) return html_error('Decoded Download-Link Empty');
-		else if (preg_match($this->DLRegexp, $_POST['decAnswer'], $DL)) return $this->RedirectDownload($DL[0], urldecode(parse_url($DL[0], PHP_URL_PATH)));
-		else if (preg_match('@https?://(?:www\.)?openload\.co/stream/[\w\-]+~\d+~[^\r\n\s\'\"<>\?]+@i', $_POST['decAnswer'], $stream)) {
-			$stream = $stream[0].'?mime=true';
-			$page = $this->GetPage($stream);
-			if (!preg_match($this->DLRegexp, $page, $DL)) return html_error('Stream Download-Link Not Found.');
-			$filename = basename(urldecode($DL[0]));
-			if (!preg_match('@\.(?:mp4|flv|webm|avi)$@i', $filename, $ext)) $ext = array('.mp4');
-			$filename = preg_replace('@(?:\.(?:mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpe?g?|vob|avi|[23]gp))+$@i', '', $filename);
-			$filename .= sprintf(' [openload][%s]%s', $this->fid, $ext[0]);
-			return $this->RedirectDownload($DL[0].'?mime=true', $filename);
-		}
-		return html_error('Decoded Download-Link Invalid or Not Found');
 	}
 
 	private function AnonDL() {
@@ -108,25 +91,30 @@ class openload_co extends DownloadClass {
 		return $this->RedirectDownload($DL['url'], 'T8_ol_adl_c');
 	}
 
-	private function WebDL() {
-		if (!($script = $this->getAAScript($this->page))) html_error('Obsfuscated JS Not Found.');
-		if (preg_match('@var\s+secondsdl\s*=\s*(\d+)\s*;@', $this->page, $cD) && $cD[1] > 0) $this->CountDown($cD[1]);
-		$data = $this->DefaultParamArr($this->link);
-		$data['step'] = '42';
-		$data['decAnswer'] = '';
-		echo "\n<form name='ol_dcode' action='{$GLOBALS['PHP_SELF']}' method='POST'><br />\n";
-		foreach ($data as $name => $input) echo "<input type='hidden' name='$name' id='T8_$name' value='" . htmlspecialchars($input, ENT_QUOTES) . "' />\n";
-		echo "</form>\n<span id='T8_emsg' class='htmlerror' style='text-align:center;display:none'></span>\n<noscript><span class='htmlerror'><b>Sorry, this code needs JavaScript enabled to work.</b></span></noscript>\n<script type='text/javascript'>/* <![CDATA[ */\n\t" . 'function T8_SetLink(link){window._gotLink=true;document.getElementById("T8_decAnswer").value=link}var fake$=function(){};fake$.prototype.attr=function(attr,value){if(attr==="href"&&typeof value==="string")T8_SetLink(value)};window._eval=window.eval;window.eval=function(txt){throw new Error("Script Tried to Eval: "+txt);};window.real$=(typeof window.$==="undefined"?undefined:window.$);window.$=function(){return(new fake$)};window._gotLink=window.vs=false;var T8=true;try{' . "\n$script\n" . 'if(!window._gotLink){if(!window.vs)throw new Error("Decoded Link Not Found");T8_SetLink(window.vs)}}catch(e){var emsg=document.getElementById("T8_emsg");emsg.innerHTML="<b>Cannot decode link: ["+e.name+"] "+e.message+"</b>";emsg.style.display="block";T8=false}finally{window.eval=window._eval;window.$=(typeof window.real$==="undefined"?undefined:window.real$)}if(T8)window.setTimeout(function(){$("form[name=ol_dcode]").submit()},500);' . "\n/* ]]> */</script>\n\n</body>\n</html>";
-		exit;
+	private function ulDecode($str) {
+		$len = strlen($str);
+		for ($i = 0; $i < $len; $i++) {
+			$y = ord($str[$i]);
+			if (($y >= 33) && ($y <= 126)) $str[$i] = chr(33 + (($y + 14) % 94));
+		}
+		return substr($str, 0, $len - 1) . chr(ord(substr($str, -1)) + 2);
 	}
 
-	private function getAAScript($page) {
-		$script = trim(cut_str($page, 'ﾟωﾟﾉ', "('_');"));
-		$script = (!empty($script) ? "ﾟωﾟﾉ$script('_');" : false);
-		if (!$script) return false;
+	private function testStreamToken($token) {
+		if (!preg_match("@^{$this->fid}~\d{10}~(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)~[\w\-]{8}$@", $token)) return false;
+		$page = $this->GetPage("https://openload.co/stream/$token?mime=true");
+		if (!preg_match($this->DLRegexp, $page, $DL)) return html_error('Stream Download-Link Not Found.');
+		if (strpos($DL[0], '/KDA_8nZ2av4/x.mp4') !== false) return false; // No, no Pidgeons
+		return $DL[0];
+	}
 
-		if ($this->useDecoder) $script = (new AADecoder)->decode($script);
-		return $script;
+	private function WebDL() {
+		if (preg_match($this->DLRegexp, $this->page, $DL)) return $this->RedirectDownload($DL[0], urldecode(parse_url($DL[0], PHP_URL_PATH)));
+		if (!preg_match('@<span\s+id="(\w+)">\s*(.+?)\s*</span>\s*<span\s+id="\1x">\s*(.+?)\s*</span>@', $this->page, $token)) html_error('Obsfuscated Download-Token Not Found.');
+		$token[2] = $this->ulDecode(html_entity_decode($token[2], ENT_QUOTES, 'UTF-8')); // 'y' token
+		$token[3] = $this->ulDecode(html_entity_decode($token[3], ENT_QUOTES, 'UTF-8')); // 'x' token
+		if (!($DL = $this->testStreamToken($token[2])) && !($DL = $this->testStreamToken($token[3]))) html_error('Token Decode Failed, Plugin Needs to be Updated.');
+		return $this->RedirectDownload($DL, urldecode(parse_url($DL, PHP_URL_PATH)));
 	}
 
 	private function Login($user, $pass) {
@@ -191,173 +179,7 @@ class openload_co extends DownloadClass {
 	}
 }
 
-/**
- * Class AADecoder
- * @author Andrey Izman <izmanw@gmail.com>
- * @link https://github.com/mervick/php-aaencoder
- * @license MIT
- */
-
-/*
-The MIT License (MIT)
-
-Copyright (c) 2015 Andrey Izman <izmanw@gmail.com>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-/**
- * Class AADecoder
- */
-class AADecoder
-{
-	const BEGIN_CODE = "ﾟωﾟﾉ=/｀ｍ´）ﾉ~┻━┻/['_'];o=(ﾟｰﾟ)=_=3;c=(ﾟΘﾟ)=(ﾟｰﾟ)-(ﾟｰﾟ);(ﾟДﾟ)=(ﾟΘﾟ)=(o^_^o)/(o^_^o);(ﾟДﾟ)={ﾟΘﾟ:'_',ﾟωﾟﾉ:((ﾟωﾟﾉ==3)+'_')[ﾟΘﾟ],ﾟｰﾟﾉ:(ﾟωﾟﾉ+'_')[o^_^o-(ﾟΘﾟ)],ﾟДﾟﾉ:((ﾟｰﾟ==3)+'_')[ﾟｰﾟ]};(ﾟДﾟ)[ﾟΘﾟ]=((ﾟωﾟﾉ==3)+'_')[c^_^o];(ﾟДﾟ)['c']=((ﾟДﾟ)+'_')[(ﾟｰﾟ)+(ﾟｰﾟ)-(ﾟΘﾟ)];(ﾟДﾟ)['o']=((ﾟДﾟ)+'_')[ﾟΘﾟ];(ﾟoﾟ)=(ﾟДﾟ)['c']+(ﾟДﾟ)['o']+(ﾟωﾟﾉ+'_')[ﾟΘﾟ]+((ﾟωﾟﾉ==3)+'_')[ﾟｰﾟ]+((ﾟДﾟ)+'_')[(ﾟｰﾟ)+(ﾟｰﾟ)]+((ﾟｰﾟ==3)+'_')[ﾟΘﾟ]+((ﾟｰﾟ==3)+'_')[(ﾟｰﾟ)-(ﾟΘﾟ)]+(ﾟДﾟ)['c']+((ﾟДﾟ)+'_')[(ﾟｰﾟ)+(ﾟｰﾟ)]+(ﾟДﾟ)['o']+((ﾟｰﾟ==3)+'_')[ﾟΘﾟ];(ﾟДﾟ)['_']=(o^_^o)[ﾟoﾟ][ﾟoﾟ];(ﾟεﾟ)=((ﾟｰﾟ==3)+'_')[ﾟΘﾟ]+(ﾟДﾟ).ﾟДﾟﾉ+((ﾟДﾟ)+'_')[(ﾟｰﾟ)+(ﾟｰﾟ)]+((ﾟｰﾟ==3)+'_')[o^_^o-ﾟΘﾟ]+((ﾟｰﾟ==3)+'_')[ﾟΘﾟ]+(ﾟωﾟﾉ+'_')[ﾟΘﾟ];(ﾟｰﾟ)+=(ﾟΘﾟ);(ﾟДﾟ)[ﾟεﾟ]='\\\\';(ﾟДﾟ).ﾟΘﾟﾉ=(ﾟДﾟ+ﾟｰﾟ)[o^_^o-(ﾟΘﾟ)];(oﾟｰﾟo)=(ﾟωﾟﾉ+'_')[c^_^o];(ﾟДﾟ)[ﾟoﾟ]='\\\"';(ﾟДﾟ)['_']((ﾟДﾟ)['_'](ﾟεﾟ+(ﾟДﾟ)[ﾟoﾟ]+";
-
-	const END_CODE = "(ﾟДﾟ)[ﾟoﾟ])(ﾟΘﾟ))('_');";
-
-
-	/**
-	 * Decode encoded-as-aaencode JavaScript code.
-	 * @param string $js
-	 * @return string
-	 */
-	public static function decode($js)
-	{
-		if (self::hasAAEncoded($js, $start, $next, $encoded)) {
-			$decoded = self::deobfuscate($encoded);
-			if (substr(rtrim($decoded), -1) !== ';') {
-				$decoded .= ';';
-			}
-			return mb_substr($js, 0, $start, 'UTF-8') . $decoded . self::decode(mb_substr($js, $next, null, 'UTF-8'));
-		}
-		return $js;
-	}
-
-	/**
-	 * @param string $js
-	 * @return string
-	 */
-	protected static function deobfuscate($js)
-	{
-		$bytes = array(
-			9 => '((ﾟｰﾟ)+(ﾟｰﾟ)+(ﾟΘﾟ))',
-			6 => '((o^_^o)+(o^_^o))',
-			2 => '((o^_^o)-(ﾟΘﾟ))',
-			7 => '((ﾟｰﾟ)+(o^_^o))',
-			5 => '((ﾟｰﾟ)+(ﾟΘﾟ))',
-			8 => '((ﾟｰﾟ)+(ﾟｰﾟ))',
-			10 => '(ﾟДﾟ).ﾟωﾟﾉ',
-			11 => '(ﾟДﾟ).ﾟΘﾟﾉ',
-			12 => '(ﾟДﾟ)[\'c\']',
-			13 => '(ﾟДﾟ).ﾟｰﾟﾉ',
-			14 => '(ﾟДﾟ).ﾟДﾟﾉ',
-			15 => '(ﾟДﾟ)[ﾟΘﾟ]',
-			3 => '(o^_^o)',
-			0 => '(c^_^o)',
-			4 => '(ﾟｰﾟ)',
-			1 => '(ﾟΘﾟ)',
-		);
-		$native = array(
-			'-~' => '1+',
-			'!' => '1',
-			'[]' => '0',
-		);
-		$native = array(
-			array_keys($native),
-			array_values($native),
-		);
-		$chars = array();
-		$hex = '(oﾟｰﾟo)+';
-		$hexLen = mb_strlen($hex, 'UTF-8');
-		$calc = function($expr) {
-			return eval("return $expr;");
-		};
-		$convert = function ($block, $func) use ($bytes, $calc) {
-			while (preg_match('/\([0-9\-\+\*\/]+\)/', $block)) {
-				$block = preg_replace_callback('/\([0-9\-\+\*\/]+\)/', function($matches) use ($calc) {
-					return $calc($matches[0]);
-				}, $block);
-			}
-			$split = array();
-			foreach (explode('+', trim($block, '+')) as $num) {
-				if ($num === '') continue;
-				$split[] = $func(intval(trim($num)));
-			}
-			return implode('', $split);
-		};
-		foreach ($bytes as $byte => $search) {
-			$js = implode($byte, mb_split(preg_quote($search), $js));
-		}
-		foreach (mb_split(preg_quote('(ﾟДﾟ)[ﾟεﾟ]+'), $js) as $block) {
-			$block = trim(trim(str_replace($native[0], $native[1], $block), '+'));
-			if ($block === '') continue;
-			if (mb_substr($block, 0, $hexLen, 'UTF-8') === $hex) {
-				$code = hexdec($convert(mb_substr($block, $hexLen, null, 'UTF-8'), 'dechex'));
-			}
-			else {
-				$code = octdec($convert($block, 'decoct'));
-			}
-			$chars[] = mb_convert_encoding('&#' . intval($code) . ';', 'UTF-8', 'HTML-ENTITIES');
-		}
-		return implode('', $chars);
-	}
-
-	/**
-	 * Detect aaencoded JavaScript code.
-	 * @param string $js
-	 * @param null|int $start
-	 * @param null|int $next
-	 * @param null|string $encoded
-	 * @return bool
-	 */
-	public static function hasAAEncoded($js, &$start=null, &$next=null, &$encoded=null)
-	{
-		$find = function($haystack, $needle, $offset=0) {
-			$matches = array();
-			for ($i = 0; $i < 6 && $offset !== false; $i ++) {
-				if (($offset = mb_strpos($haystack, $needle, $offset, 'UTF-8')) !== false) {
-					$matches[$i] = $offset;
-					$offset ++;
-				}
-			}
-			return count($matches) >= 6 ? array($matches[4], $matches[5]) : false;
-		};
-		$start = -1;
-		while (($start = mb_strpos($js, 'ﾟωﾟﾉ', $start + 1, 'UTF-8')) !== false) {
-			$clear = preg_replace('/\/\*.+?\*\//', '', preg_replace('/[\x03-\x20]/', '', $code = mb_substr($js, $start, null, 'UTF-8')));
-			$len = mb_strlen(self::BEGIN_CODE, 'UTF-8');
-			if (mb_substr($clear, 0, $len, 'UTF-8') === self::BEGIN_CODE &&
-				mb_strpos($clear, self::END_CODE, $len, 'UTF-8') &&
-				($matches = $find($js, 'ﾟoﾟ', $start))
-			) {
-				list($beginAt, $endAt) = $matches;
-				$beginAt = mb_strpos($js, '+', $beginAt, 'UTF-8');
-				$endAt = mb_strrpos($js, '(', - mb_strlen($js, 'UTF-8') + $endAt, 'UTF-8');
-				$next = mb_strpos($js, ';', $endAt + 1, 'UTF-8') + 1;
-				$encoded = preg_replace('/[\x03-\x20]/', '', mb_substr($js, $beginAt, $endAt - $beginAt, 'UTF-8'));
-				return true;
-			}
-		}
-		return false;
-	}
-}
-
-//[21-04-2016]  Written by Th3-822. (Using mervick's AADecoder class)
+//[21-04-2016]  Written by Th3-822.
+//[15-10-2016]  Rewritten Decoding Functions. - Th3-822
 
 ?>

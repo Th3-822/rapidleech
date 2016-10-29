@@ -29,6 +29,7 @@ $default['flashUpload'] = false; // Forces the use of flash upload method... Als
 $_T8 = array_merge($default, array_filter($_T8)); // Merge default settings with loader's settings
 
 $_GET['proxy'] = isset($_GET['proxy']) ? $_GET['proxy'] : '';
+$pauth = !empty($pauth) ? $pauth : false;
 $not_done = true;
 
 if (!$_T8['xfsFree'] && !empty($upload_acc[$acc_key_name]['user']) && !empty($upload_acc[$acc_key_name]['pass'])) {

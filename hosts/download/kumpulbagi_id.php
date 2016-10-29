@@ -6,13 +6,13 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class kumpulbagi_id extends DownloadClass {
-	private $page, $cookie = array(), $pA, $DLRegexp = '@https?://s\d+\.kumpulbagi\.(?:id|com)/download\?[^\t\r\n\'\"<>]+@i';
+	private $page, $cookie = array(), $pA, $DLRegexp = '@https?://s\d+\.(?:kumpulbagi\.(?:id|com)|kbagi\.com)/download\?[^\t\r\n\'\"<>]+@i';
 	public function Download($link) {
 		$link = parse_url($link);
 		$link['scheme'] = 'http';
-		$link['host'] = 'kumpulbagi.com';
+		$link['host'] = 'kbagi.com';
 		$link = rebuild_url($link);
-		if (!preg_match('@(https?://kumpulbagi\.com)/(?:[^/]+/)+[^\r\n\t/<>\"]+?,(\d+)[^\r\n\t/<>\"]*@i', $link, $fid)) html_error('Invalid link?.');
+		if (!preg_match('@(https?://kbagi\.com)/(?:[^/]+/)+[^\r\n\t/<>\"]+?,(\d+)[^\r\n\t/<>\"]*@i', $link, $fid)) html_error('Invalid link?.');
 		$this->link = $GLOBALS['Referer'] = $fid[0];
 		$this->baseurl = $fid[1];
 		$this->fid = $fid[2];
@@ -69,5 +69,6 @@ class kumpulbagi_id extends DownloadClass {
 // [20-3-2016] Written by Th3-822.
 // [22-4-2016] Renamed to kumpulbagi_id and fixed. - Th3-822
 // [12-8-2016] Switched domain to .com tld (I won't rename the plugin again) & Added support for "mirror" domains. - Th3-822
+// [12-10-2016] Changed Domain. - Th3-822
 
 ?>

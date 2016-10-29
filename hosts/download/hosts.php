@@ -49,6 +49,7 @@ while (false !== ($entry = $d->read())) {
 				break;
 			case 'kumpulbagi.id':
 				$host['kumpulbagi.com'] = $host['kumpulbagi.id'];
+				$host['kbagi.com'] = $host['kumpulbagi.id'];
 				break;
 			case 'mega.co.nz':
 				$host['mega.nz'] = $host['mega.co.nz'];

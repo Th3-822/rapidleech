@@ -158,15 +158,6 @@ function setParam() {
 	for (var i = 0; i < arguments.length; i++) document.cookie = arguments[i] + '=' + document.getElementById(arguments[i]).value;
 }
 
-function pr(percent, received, speed) {
-	document.getElementById('received').innerHTML = '<b>' + received + '</b>';
-	document.getElementById('percent').innerHTML = '<b>' + percent + '%</b>';
-	document.getElementById('progress').style.width = percent + '%';
-	document.getElementById('speed').innerHTML = '<b>' + speed + ' KB/s</b>';
-	document.title = 'Uploaded ' + percent + '%';
-	return true;
-}
-
 function changeStatus(file, size) {
 	document.getElementById('status').innerHTML = 'Uploading File <b>' + file + '</b>, Size <b>' + size + '</b>...<br />';
 }
