@@ -65,7 +65,7 @@ class shareflare_net extends DownloadClass {
 			$data = $this->DefaultParamArr("http://shareflare.net/ajax/check_recaptcha.php", $this->cookie);
 			$data['step'] = '1';
 			$data['recaptcha_control_field'] = rawurlencode($ctrl[1]);
-			$this->Show_reCaptcha($pid[1], $data);
+			$this->reCAPTCHA($pid[1], $data);
 			exit;
 		}
 		is_present($page, 'error_wrong_captcha', 'Error: Wrong Captcha Entered.');
@@ -84,24 +84,6 @@ class shareflare_net extends DownloadClass {
 		foreach ($match as $k => $v)
 			$post[$k] = $v;
 		return $post;
-	}
-
-	private function Show_reCaptcha($pid, $inputs, $sname = 'Download File') {
-		global $PHP_SELF;
-		if (!is_array($inputs)) html_error('Error parsing captcha data.');
-
-		// Themes: 'red', 'white', 'blackglass', 'clean'
-		echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n";
-
-		echo "\n<center><form name='recaptcha' action='$PHP_SELF' method='post'><br />\n";
-		foreach ($inputs as $name => $input)
-			echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
-		echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script>";
-		echo "<noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br />";
-		echo "<input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n";
-		echo "<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n";
-		echo "</form></center>\n</body>\n</html>";
-		exit;
 	}
 
 }

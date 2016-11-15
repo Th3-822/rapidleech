@@ -78,7 +78,7 @@ class filepost_com extends DownloadClass {
                         if (!preg_match('@key:			\'([^\']+)@i', $this->page, $cap)) html_error('Error: Captcha Data [FREE] not found!');
                         $data['step'] = 'Captcha';
                         $data['recap'] = $cap[1]; // incase we need to load the captcha image again
-                        $this->Show_reCaptcha($cap[1], $data);
+                        $this->reCAPTCHA($cap[1], $data);
                         exit();
                     }
                 } else { // no captcha or password required, skip the form process
@@ -105,7 +105,7 @@ class filepost_com extends DownloadClass {
                     case 'You entered a wrong CAPTCHA code. Please try again.':
                         $data['step'] = 'Captcha';
                         $data['recap'] = $recap;
-                        $this->Show_reCaptcha($recap, $data);
+                        $this->reCAPTCHA($recap, $data);
                         break;
                 }
                 break;
@@ -153,7 +153,7 @@ class filepost_com extends DownloadClass {
 
                     $data = $this->DefaultParamArr($posturl, $this->Cookies);
                     $data['step'] = 'Recaptcha';
-                    $this->Show_reCaptcha($cap[1], $data);
+                    $this->reCAPTCHA($cap[1], $data);
                     break;
                 case 'success':
                     //check account, we need to convert to array since we have pass the captcha, I also made mistake, should be array_merge, not array_replace, stupid...
@@ -217,26 +217,6 @@ class filepost_com extends DownloadClass {
             $filename = basename(parse_url($dlink, PHP_URL_PATH));
             $this->RedirectDownload($dlink, $filename, $this->Cookies);
         }
-    }
-
-    private function Show_reCaptcha($pid, $inputs) {
-        global $PHP_SELF;
-        if (!is_array($inputs)) {
-            html_error("Error parsing captcha data.");
-        }
-        // Themes: 'red', 'white', 'blackglass', 'clean'
-        echo "<script language='JavaScript'>var RecaptchaOptions={theme:'white', lang:'en'};</script>\n";
-        echo "\n<center><form name='dl' action='$PHP_SELF' method='post' ><br />\n";
-        foreach ($inputs as $name => $input) {
-            echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
-        }
-        echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script>";
-        echo "<noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br />";
-        echo "<textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br />";
-        echo "<input type='submit' name='submit' onclick='javascript:return checkc();' value='Enter Captcha' />\n";
-        echo "<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n";
-        echo "</form></center>\n</body>\n</html>";
-        exit;
     }
 
     private function EnterPassword($inputs) {

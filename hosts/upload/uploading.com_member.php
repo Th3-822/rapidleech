@@ -9,11 +9,12 @@ $not_done = true;
 $continue_up = false;
 
 if ($upload_acc['uploading_com']['user'] && $upload_acc['uploading_com']['pass']) {
+	$default_acc = true;
 	$_REQUEST['up_login'] = $upload_acc['uploading_com']['user'];
 	$_REQUEST['up_pass'] = $upload_acc['uploading_com']['pass'];
 	$_REQUEST['action'] = 'FORM';
 	echo "<b><center>Using Default Login.</center></b>\n";
-}
+} else $default_acc = false;
 
 if (!empty($_REQUEST['action']) && $_REQUEST['action'] == 'FORM') $continue_up = true;
 else {
@@ -37,14 +38,19 @@ if ($continue_up) {
 
 	$cookie = array();
 	if (!empty($_REQUEST['up_login']) && !empty($_REQUEST['up_pass'])) {
+		if (!empty($_REQUEST['A_encrypted'])) {
+			$_REQUEST['up_login'] = decrypt(urldecode($_REQUEST['up_login']));
+			$_REQUEST['up_pass'] = decrypt(urldecode($_REQUEST['up_pass']));
+			unset($_REQUEST['A_encrypted']);
+		}
 		if ($captcha && empty($_POST['recaptcha_response_field'])) html_error("You didn't enter the image verification code.");
 		$page = geturl('uploading.com', 80, '/', '', $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 		$cookie = GetCookiesArr($page, $cookie);
 		if (empty($cookie['SID'])) html_error('Login Error: SID cookie not found.');
 
 		$post = array();
-		$post['email'] = $_REQUEST['up_login'];
-		$post['password'] = $_REQUEST['up_pass'];
+		$post['email'] = urlencode($_REQUEST['up_login']);
+		$post['password'] = urlencode($_REQUEST['up_pass']);
 		$post['remember'] = 'on';
 		if ($captcha) {
 			$post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
@@ -58,7 +64,12 @@ if ($continue_up) {
 		if (!empty($json['answer']) && isset($json['answer']['captcha']) && $json['answer']['captcha'] == true) {
 			if (!preg_match('@build_recaptcha\s*\([^,|\)]+,\s*[\'|\"](\w+)[\'|\"]\s*\)@i', $page, $pid)) html_error('Error: Login captcha data not found.');
 			$data = array('action' => 'FORM', 'step' => 'captcha');
-			Show_reCaptcha($pid[1], $data, ($upload_acc['uploading_com']['user'] && $upload_acc['uploading_com']['pass']));
+			if (!$default_acc) {
+				$data['A_encrypted'] = 'true';
+				$data['up_login'] = urlencode(encrypt($user)); // encrypt() will keep this safe.
+				$data['up_pass'] = urlencode(encrypt($pass)); // And this too.
+			}
+			reCAPTCHA($pid[1], $data);
 			exit;
 		}
 		$cookie = GetCookiesArr($ajax_req, $cookie);
@@ -111,20 +122,40 @@ function Get_Reply($page) {
 }
 
 // Edited For upload.php usage.
-function Show_reCaptcha($pid, $inputs, $default_login) { 
-	if (!is_array($inputs)) html_error("Error parsing captcha data.");
+function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5', $sname = 'Enter Captcha', $iname = 'captcha') {
+	echo "\n<form name='captcha' method='POST'>\n";
+	foreach ($inputs as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='$input' />\n";
+	echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input type='text' id='captcha' name='$iname' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='$sname' />\n\t</h4>\n\t<script type='text/javascript'>/* <![CDATA[ */\n\t\tfunction check() {\n\t\t\tvar captcha=document.getElementById('captcha').value;\n\t\t\tif (captcha == '') {\n\t\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\t\treturn false;\n\t\t\t} else return true;\n\t\t}\n\t/* ]]> */</script>\n</form>\n</body>\n</html>";
+}
 
-	// Themes: 'red', 'white', 'blackglass', 'clean'
-	echo "<script language='JavaScript'>var RecaptchaOptions={theme:'white', lang:'en'};</script>\n";
-	echo "\n<center><form name='dl' method='post' ><br />\n";
-	foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
-	if (!$default_login) echo "\t<table border='0' style='width:270px;' cellspacing='0' align='center'>\n\t\t<tr><td style='white-space:nowrap;'>&nbsp;Email</td><td>&nbsp;<input type='text' id='up_login' name='up_login' value='".htmlentities($_REQUEST['up_login'])."' style='width:160px;' /></td></tr>\n\t\t<tr><td style='white-space:nowrap;'>&nbsp;Password</td><td>&nbsp;<input type='password' id='up_password' name='up_pass' value='' style='width:160px;' /></td></tr>\n\t</table><br /><br />";
-	echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script>";
-	echo "<noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br />";
-	echo "<textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br />";
-	echo "<input type='submit' name='submit' onclick='javascript:return checks();' value='Enter Captcha' />\n";
-	echo "<script type='text/javascript'>/*<![CDATA[*/\n\tfunction checks() {\n\t\tif ($('#recaptcha_response_field').val() == '') {\n\t\t\twindow.alert('You didn\'t enter the image verification code.');\n\t\t\treturn false;\n\t\t} " . ($default_login ? '' : "else if ($('#up_login').val() == '' || $('#up_password').val() == '') {\n\t\t\twindow.alert('Please fill login fields.');\n\t\t\treturn false;\n\t\t} ") . "else return true;\n\t}\n/*]]>*/</script>\n";
-	echo "</form></center>\n</body>\n</html>";
+// Edited For upload.php usage.
+function reCAPTCHA($publicKey, $inputs, $sname = 'Upload File') {
+	global $cookie, $domain, $referer, $pauth;
+	if (empty($publicKey) || preg_match('/[^\w\.\-]/', $publicKey)) html_error('Invalid reCAPTCHA public key.');
+	if (!is_array($inputs)) html_error('Error parsing captcha post data.');
+	// Check for a global recaptcha key
+	$page = geturl('www.google.com', 0, '/recaptcha/api/challenge?k=' . $publicKey, 'http://fakedomain.tld/fakepath', 0, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+	if (substr($page, 9, 3) != '200') html_error('Invalid or deleted reCAPTCHA public key.');
+
+	if (strpos($page, 'Invalid referer') === false) {
+		// Embed captcha
+		echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n\n<center><form name='recaptcha' method='POST'><br />\n";
+		foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='$input' />\n";
+		echo "<script type='text/javascript' src='//www.google.com/recaptcha/api/challenge?k=$publicKey'></script><noscript><iframe src='//www.google.com/recaptcha/api/noscript?k=$publicKey' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br /><input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n</form></center>\n</body>\n</html>";
+	} else {
+		// Download captcha
+		$page = geturl('www.google.com', 0, '/recaptcha/api/challenge?k=' . $publicKey, $referer, 0, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		if (!preg_match('@[\{,\s]challenge\s*:\s*[\'\"]([\w\-]+)[\'\"]@', $page, $challenge)) html_error('Error getting reCAPTCHA challenge.');
+		$inputs['recaptcha_challenge_field'] = $challenge = $challenge[1];
+
+		$imgReq = geturl('www.google.com', 0, '/recaptcha/api/image?c=' . $challenge, $referer, 0, 0, 0, $_GET['proxy'], $pauth);is_page($imgReq);
+		list($headers, $imgBody) = explode("\r\n\r\n", $imgReq, 2);
+		unset($imgReq);
+		if (substr($headers, 9, 3) != '200') html_error('Error downloading captcha img.');
+		$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/jpeg');
+
+		EnterCaptcha("data:$mimetype;base64,".base64_encode($imgBody), $inputs, 20, $sname, 'recaptcha_response_field');
+	}
 	exit;
 }
 

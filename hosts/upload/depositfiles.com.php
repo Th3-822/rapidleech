@@ -102,13 +102,40 @@ function generate_upload_id() {
 }
 
 // Edited For upload.php usage.
-function Show_reCaptcha($pid, $inputs, $sname = 'Upload File') { 
-	if (!is_array($inputs)) html_error('Error parsing captcha data.');
+function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5', $sname = 'Enter Captcha', $iname = 'captcha') {
+	echo "\n<form name='captcha' method='POST'>\n";
+	foreach ($inputs as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='$input' />\n";
+	echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input type='text' id='captcha' name='$iname' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='$sname' />\n\t</h4>\n\t<script type='text/javascript'>/* <![CDATA[ */\n\t\tfunction check() {\n\t\t\tvar captcha=document.getElementById('captcha').value;\n\t\t\tif (captcha == '') {\n\t\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\t\treturn false;\n\t\t\t} else return true;\n\t\t}\n\t/* ]]> */</script>\n</form>\n</body>\n</html>";
+}
 
-	// Themes: 'red', 'white', 'blackglass', 'clean'
-	echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n\n<center><form name='recaptcha' method='POST'><br />\n";
-	foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
-	echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script><noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br /><input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n</form></center>\n</body>\n</html>";
+// Edited For upload.php usage.
+function reCAPTCHA($publicKey, $inputs, $sname = 'Upload File') {
+	global $cookie, $domain, $referer, $pauth;
+	if (empty($publicKey) || preg_match('/[^\w\.\-]/', $publicKey)) html_error('Invalid reCAPTCHA public key.');
+	if (!is_array($inputs)) html_error('Error parsing captcha post data.');
+	// Check for a global recaptcha key
+	$page = geturl('www.google.com', 0, '/recaptcha/api/challenge?k=' . $publicKey, 'http://fakedomain.tld/fakepath', 0, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+	if (substr($page, 9, 3) != '200') html_error('Invalid or deleted reCAPTCHA public key.');
+
+	if (strpos($page, 'Invalid referer') === false) {
+		// Embed captcha
+		echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n\n<center><form name='recaptcha' method='POST'><br />\n";
+		foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='$input' />\n";
+		echo "<script type='text/javascript' src='//www.google.com/recaptcha/api/challenge?k=$publicKey'></script><noscript><iframe src='//www.google.com/recaptcha/api/noscript?k=$publicKey' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br /><input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n</form></center>\n</body>\n</html>";
+	} else {
+		// Download captcha
+		$page = geturl('www.google.com', 0, '/recaptcha/api/challenge?k=' . $publicKey, $referer, 0, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		if (!preg_match('@[\{,\s]challenge\s*:\s*[\'\"]([\w\-]+)[\'\"]@', $page, $challenge)) html_error('Error getting reCAPTCHA challenge.');
+		$inputs['recaptcha_challenge_field'] = $challenge = $challenge[1];
+
+		$imgReq = geturl('www.google.com', 0, '/recaptcha/api/image?c=' . $challenge, $referer, 0, 0, 0, $_GET['proxy'], $pauth);is_page($imgReq);
+		list($headers, $imgBody) = explode("\r\n\r\n", $imgReq, 2);
+		unset($imgReq);
+		if (substr($headers, 9, 3) != '200') html_error('Error downloading captcha img.');
+		$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/jpeg');
+
+		EnterCaptcha("data:$mimetype;base64,".base64_encode($imgBody), $inputs, 20, $sname, 'recaptcha_response_field');
+	}
 	exit;
 }
 
@@ -173,7 +200,7 @@ function Login($user, $pass) {
 			$post['up_login'] = urlencode(encrypt($user));
 			$post['up_pass'] = urlencode(encrypt($pass));
 		}
-		Show_reCaptcha($cpid[1], $post, 'Login');
+		reCAPTCHA($cpid[1], $post, 'Login');
 	}
 }
 

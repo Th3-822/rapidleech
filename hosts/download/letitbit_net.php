@@ -74,7 +74,7 @@ class letitbit_net extends DownloadClass {
 		$data = $this->DefaultParamArr($this->server . "/ajax/check_recaptcha.php", $this->cookie);
 		$data['step'] = '1';
 		$data['recaptcha_control_field'] = rawurlencode($ctrl[1]);
-		$this->Show_reCaptcha($pid[1], $data);
+		$this->reCAPTCHA($pid[1], $data);
 	}
 
 	private function Free() {
@@ -95,23 +95,6 @@ class letitbit_net extends DownloadClass {
 		exit();
 	}
 
-	private function Show_reCaptcha($pid, $inputs, $sname = 'Download File') {
-		global $PHP_SELF;
-		if (!is_array($inputs)) html_error('Error parsing captcha data.');
-
-		// Themes: 'red', 'white', 'blackglass', 'clean'
-		echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n";
-
-		echo "\n<center><form name='recaptcha' action='$PHP_SELF' method='post'><br />\n";
-		foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
-		echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script>";
-		echo "<noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br />";
-		echo "<input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n";
-		echo "<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n";
-		echo "</form></center>\n</body>\n</html>";
-		exit;
-	}
-
 	private function Premium($premiumkey = false) {
 		if ($premiumkey) {
 			$form = cut_str($this->page, '<div class="hide-block password_area">', '<div class="column label" style="width:200px">');
@@ -123,10 +106,17 @@ class letitbit_net extends DownloadClass {
 			$this->page = $this->GetPage($this->link, $this->cookie, $post);
 		} else $this->page = $this->GetPage($this->link, $this->cookie, 0, $this->link);
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
-		if (preg_match('@Location: (http(s)?:\/\/[^\r\n]+)@i', $this->page, $redir)) {
-			$this->link = trim($redir[1]);
-			$this->page = $this->GetPage($this->link, $this->cookie, 0, $this->link);
+
+		$x = 0;
+		$ref = $this->link;
+		while ($x < 5 && preg_match('@\nLocation: ((https?://(?:[a-zA-Z\d\-]+\.)*letitbit\.net)?/[^\r\n]*)@i', $this->page, $redir)) {
+			$redir = (empty($redir[2])) ? (!empty($ref['scheme']) && strtolower($ref['scheme']) == 'https' ? 'https' : 'http').'://'.parse_url($ref, PHP_URL_HOST).$redir[1] : $redir[1];
+			$this->page = $this->GetPage($redir, $this->cookie, 0, $ref);
+			$ref = $redir;
+			$this->cookie = GetCookiesArr($this->page, $this->cookie);
+			$x++;
 		}
+
 		is_present($this->page, 'The premium key has been banned for sharing with other people.');
 		is_present($this->page, 'This premium key is attached to a registered account', 'You need to use your username and password not the premium key!');
 		is_present($this->page, 'callback_no_pass', 'This premium key does not exist.');
@@ -147,7 +137,10 @@ class letitbit_net extends DownloadClass {
 		$this->cookie = GetCookiesArr($check, array('lang' => 'en'));
 		if (empty($this->cookie['log']) || empty($this->cookie['pas'])) html_error('Error [log/pass cookie not found!]');
 
-		$this->SaveCookies($user, $pass);
+		$check = $this->GetPage('http://letitbit.net/ajax/get_attached_passwords.php', $this->cookie, 0, 'http://letitbit.net/');
+		is_present($check, 'Authorization data is invalid!', 'Unknown login error.');
+		$this->SaveCookies($user, $pass); // Update cookies file
+		is_present($check, 'There are no attached premium', 'No premium codes attached');
 
 		return $this->Premium();
 	}
@@ -183,10 +176,10 @@ class letitbit_net extends DownloadClass {
 			if (is_array($this->cookie)) unset($this->cookie['PHPSESSID']);
 			if ((is_array($this->cookie) && count($this->cookie) < 1) || empty($this->cookie)) return $this->login($user, $pass);
 
-			$check = $this->GetPage("http://letitbit.net/", $this->cookie, 0, "http://letitbit.net/");
-			if (stripos($check, 'title="Logout">Logout</a>') === false) return $this->login($user, $pass);
-
+			$check = $this->GetPage('http://letitbit.net/ajax/get_attached_passwords.php', $this->cookie, 0, 'http://letitbit.net/');
+			if (stripos($check, 'Authorization data is invalid!') !== false) return $this->login($user, $pass);
 			$this->SaveCookies($user, $pass); // Update cookies file
+			is_present($check, 'There are no attached premium', 'No premium codes attached');
 
 			return $this->Premium();
 		}

@@ -37,30 +37,7 @@ class fileover_net extends DownloadClass {
 		$data['fo_file'] = $lid[1];
 		$data['fo_hash'] = $lhs[1];
 
-		$this->Show_reCaptcha($rpid[1], $data);
-	}
-
-	private function Show_reCaptcha($pid, $inputs) {
-		global $PHP_SELF;
-
-		if (!is_array($inputs)) {
-			html_error("Error parsing captcha data.");
-		}
-
-		// Themes: 'red', 'white', 'blackglass', 'clean'
-		echo "<script type='text/javascript'>var RecaptchaOptions={theme:'white', lang:'en'};</script>\n";
-
-		echo "\n<center><form name='dl' action='$PHP_SELF' method='post' ><br />\n";
-		echo "<script type='text/javascript' src='http://www.google.com/recaptcha/api/challenge?k=$pid'></script>";
-		echo "<noscript><iframe src='http://www.google.com/recaptcha/api/noscript?k=$pid' height='300' width='500' frameborder='0'></iframe><br />";
-		echo "<textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br />\n";
-		foreach ($inputs as $name => $input) {
-			echo "<input type='hidden' name='$name' id='$name' value='$input' />\n";
-		}
-		echo "<input type='submit' name='submit' onclick='javascript:return checkc();' value='Download File' />\n";
-		echo "<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n";
-		echo "</form></center>\n</body>\n</html>";
-		exit;
+		$this->reCAPTCHA($rpid[1], $data);
 	}
 
 	private function Download_Free($link) {
