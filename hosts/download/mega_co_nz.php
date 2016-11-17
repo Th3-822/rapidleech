@@ -16,7 +16,7 @@ class mega_co_nz extends DownloadClass {
 		if (preg_match('@^F!([^!]{8})!([\w\-\,]{22})(?:!([^!#]{8}))?(!less$)?@i', $fragment, $fid)) return $this->Folder($fid[1], $fid[2], (!empty($fid[3]) && $fid[3] != $fid[1] ? $fid[3] : 0), (empty($fid[4]) ? 1 : 0));
 		if (!preg_match('@^(T8|N)?!([^!]{8})!([\w\-\,]{43})(?:(?:!|=###n=)([^!#]{8})(?:!|$))?@i', $fragment, $fid)) html_error('FileID or Key not found at link.');
 
-		$reply = $this->apiReq(array('a' => 'g', 'g' => '1', (empty($fid[1]) ? 'p' : 'n') => $fid[2], 'ssl'=> '0'), (!empty($fid[1]) && !empty($fid[4]) ? $fid[4] : ''));
+		$reply = $this->apiReq(array('a' => 'g', 'g' => '1', (empty($fid[1]) ? 'p' : 'n') => $fid[2], 'ssl' => (extension_loaded('openssl') ? '2' : '0')), (!empty($fid[1]) && !empty($fid[4]) ? $fid[4] : ''));
 		$this->CheckErr($reply[0]);
 		if (!empty($reply[0]['e'])) $this->CheckErr($reply[0]['e']);
 
