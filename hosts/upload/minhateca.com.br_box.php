@@ -56,7 +56,7 @@ if ($continue_up)
 							  '</s:Body>' .
 							'</s:Envelope>';
 						
-						$page = geturl($host, 80, "/services/ChomikBoxService.svc", "http://".$host."/\r\nSOAPAction: http://chomikuj.pl/IChomikBoxService/Auth\r\nContent-Type: text/xml;charset=utf-8\r\nConnection: Keep-Alive\r\nUser-Agent: Mozilla/5.0", 0, $post, 0, $_GET["uproxy"], $pauth);
+						$page = geturl($host, 80, "/services/ChomikBoxService.svc", "http://".$host."/\r\nSOAPAction: http://chomikuj.pl/IChomikBoxService/Auth\r\nContent-Type: text/xml;charset=utf-8\r\nUser-Agent: Mozilla/5.0", 0, $post, 0, $_GET["uproxy"], $pauth);
 						is_page($page);
 						
 						
@@ -93,7 +93,7 @@ if ($continue_up)
 							  '</s:Body>' .
 							'</s:Envelope>';
 
-						$page = geturl($host, 80, "/services/ChomikBoxService.svc", "http://".$host."/\r\nSOAPAction: http://chomikuj.pl/IChomikBoxService/UploadToken\r\nContent-Type: text/xml;charset=utf-8\r\nConnection: Keep-Alive\r\nUser-Agent: Mozilla/5.0", 0, $post, 0, $_GET["uproxy"], $pauth);
+						$page = geturl($host, 80, "/services/ChomikBoxService.svc", "http://".$host."/\r\nSOAPAction: http://chomikuj.pl/IChomikBoxService/UploadToken\r\nContent-Type: text/xml;charset=utf-8\r\nUser-Agent: Mozilla/5.0", 0, $post, 0, $_GET["uproxy"], $pauth);
 						is_page($page);
 
 						preg_match('/\<a:key\>(.*?)\<\/a:key\>/', $page, $temp);
@@ -130,11 +130,64 @@ if ($continue_up)
 						is_page($upfiles);					
 						is_notpresent($upfiles, 'HTTP/1.1 200', 'Upload error');
 						
-						$pos = strpos($upfiles, '<resp res="1"');
+						$pos = strpos($upfiles, '<resp res="1" fileid=');
 						if($pos == false)
 						{
 							html_error ('Upload error');
 						}
+						
+						preg_match('/fileid\="(.*?)"/', $upfiles, $temp);
+						if($temp)
+						{
+							$fileid = $temp[1];
+						} else {
+							html_error ('Fileid not found');
+						}
+						
+						$post = 
+							'<?xml version="1.0" encoding="UTF-8"?>' .
+							'<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">' .
+								'<s:Body>' .
+									'<Download xmlns="http://chomikuj.pl/">' .
+										'<token>' . $auth_token . '</token>' .
+										'<sequence>' .
+											'<stamp>' . rand(0,25000) . '</stamp>' .
+											'<part>0</part>' .
+											'<count>1</count>' .
+										'</sequence>' .
+										'<disposition>download</disposition>' .
+										'<list>' .
+											'<DownloadReqEntry>' .
+												'<id>' . $fileid . '</id>' .
+											'</DownloadReqEntry>' .
+										'</list>' .
+									'</Download>' .
+								'</s:Body>' .
+							'</s:Envelope>';
+						
+						$page = geturl($host, 80, "/services/ChomikBoxService.svc", "http://".$host."/\r\nSOAPAction: http://chomikuj.pl/IChomikBoxService/Download\r\nContent-Type: text/xml;charset=utf-8\r\nUser-Agent: Mozilla/5.0", 0, $post, 0, $_GET["uproxy"], $pauth);
+						is_page($page);
+						
+						$dl = array();
+						preg_match('/\<globalId\>(.*?)\<\/globalId\>/', $page, $temp);
+						if($temp)
+						{
+							$dl['globalId'] = $temp[1];
+						} else {
+							html_error ('Error retrive download link!');
+						}
+						
+						preg_match_all('/\<name\>(.*?)\<\/name\>/', $page, $temp);
+						if($temp)
+						{
+							$dl['name'] = $temp[1][1];
+							$dl['filename'] = pathinfo($dl['name'], PATHINFO_FILENAME);
+							$dl['extension'] = pathinfo($dl['name'], PATHINFO_EXTENSION);
+						} else {
+							html_error ('Error retrive download link!');
+						}
+						
+						$download_link = 'http://minhateca.com.br'.$dl['globalId'].'/'.$dl['filename'].','.$fileid.'.'.$dl['extension'];
 						
 		}
 
@@ -223,12 +276,10 @@ function MT_upfile($host, $port, $time, $chomik_id, $key, $file, $filename, $pro
 	$request[''] = 'POST ' . str_replace(' ', '%20', $url) . ' HTTP/1.1';
 	
 	$request['Content-Type'] = "multipart/mixed; boundary=!CHB$time";
-	$request['Connection'] = 'Keep-Alive';
 	$request['User-Agent'] = $upagent;
 	$request['Pragma'] = 'no-cache';
 	$request['Cache-Control'] = 'no-cache';
 	$request['Host'] = $host.':'.$port;
-	$request['Connection'] = 'Keep-Alive';
 
 	if (!empty($pauth) && !$scheme) $request['proxy-authorization'] = "Basic $pauth";
 	$request['content-length'] = (strlen($postdata) + strlen($nn . "--" . $bound . "--" . $nn) + $fileSize);
