@@ -275,7 +275,7 @@ function MT_upfile($host, $port, $time, $chomik_id, $key, $file, $filename, $pro
 	$request = array();
 	$request[''] = 'POST ' . str_replace(' ', '%20', $url) . ' HTTP/1.1';
 	
-	$request['Content-Type'] = "multipart/mixed; boundary=!CHB$time";
+	$request['Content-Type'] = "multipart/mixed; boundary=$bound";
 	$request['User-Agent'] = $upagent;
 	$request['Pragma'] = 'no-cache';
 	$request['Cache-Control'] = 'no-cache';
