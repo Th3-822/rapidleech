@@ -1,40 +1,26 @@
-<table width=600 align=center>
-</td></tr>
-<tr><td align=center>
-	
-<div id=info width=100% align=center>Retrive upload ID</div>
-<?php
-			$ref='http://www.filedropper.com/';
-			$page = geturl("www.filedropper.com", 80, "/", "", 0, 0, 0, "");
-			preg_match_all('/Set-Cookie: (.*);/U',$page,$temp);
-			$cookie = $temp[1];
-			$cookies = implode(';',$cookie);
-			
-?>
-<script>document.getElementById('info').style.display='none';</script>
-<table width=600 align=center>
-</td></tr>
-<tr><td align=center>
 <?php
 
-			$post["Filename"]="$lname";
-			$post["Upload"]="Submit Query";
-			$u1='http://www.filedropper.com//index.php?xml=true';
-			$url = parse_url($u1);
-			$upagent = "Shockwave Flash";
-			$upfiles = upfile($url["host"],$url["port"] ? $url["port"] : 80, $url["path"].($url["query"] ? "?".$url["query"] : ""), 0, $cookies, $post, $lfile, $lname, "file",0,$upagent);
-?>
-<script>document.getElementById('progressblock').style.display='none';</script>
-<div id=final width=100% align=center>Get final code</div>
-<?php		
-			is_page($upfiles);
-			$form=cut_str($upfiles,'/index.php',"\n");
-			$page = geturl("www.filedropper.com", 80, "/index.php$form", "http://www.filedropper.com/", $cookies, 0, 0, $_GET["proxy"], $pauth);
-			$ddl=cut_str($page,'Location: /',"\n");
-			
-			$download_link='http://www.filedropper.com/'.$ddl;
-			
+	echo "<center>Filedropper.com plugin by <b>The Devil</b></center><br />\n";
+	$uploc = 'http://www.filedropper.com/index.php?xml=true';
+	$domain = 'http://www.filedropper.com/';
+	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='info' width='100%' align='center'>Retrive upload ID</div>\n";
+	$url = parse_url($uploc);
+	$post = array('Filename'=>$lname,'Upload'=>'Submit Query');
+	$heads = "\r\nX-Requested-With: ShockwaveFlash/23.0.0.207";
+	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
+	$upfiles = upfile($url['host'],0,$url['path']."?".$url['query'],$domain.$heads,0,$post,$lfile,$lname,'file');
+	is_page($upfiles);
+	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";
+	$resp = cut_str($upfiles,'/index.php','\r\n');
+	$page = cURL($domain.$resp);
+	preg_match_all('~https?://(www)?.filedropper.com/[\d\w./]+~',$page,$redirs);
+	$redir = $redirs[0][0];
+	$resp = cURL($redir);
+	$ind = preg_match_all('~https?://(www)?.filedropper.com/[\d\w]+~',$resp,$dlocs);
+	(!$ind)?html_error('Error[0]: Unable to Retrieve Download Link'):'';
+	$download_link = $dlocs[0][0];
 
+//[15-12-2016] Re-Written by The Devil	
 
-// Made by Baking 27/08/2009 21:53
 ?>
+
