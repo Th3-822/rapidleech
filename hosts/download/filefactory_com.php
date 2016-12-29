@@ -119,13 +119,14 @@ class filefactory_com extends DownloadClass {
 		$post['Submit'] = 'Sign+In';
 		$page = $this->GetPage($postURL, 0, $post, $postURL);
 		is_present($page, 'The Email Address submitted was invalid', 'Login Failed: Invalid email address.');
-		is_present($page, 'The email or password wre invalid', 'Login Failed: The Email/Password you have entered is incorrect.');
-		is_present($page, 'The email or password were invalid', 'Login Failed: The Email/Password you have entered is incorrect.');
-		is_present($page, "\nLocation: /member/setpwd.php", 'Your password has expired, please change it.');
+		is_present($page, 'The email address or password you have entered is incorrect.', 'Login Failed: The Email/Password you have entered is incorrect.');
+
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 		if (empty($this->cookie['auth'])) html_error('Login Failed, auth cookie not found.');
 
-		$page = $this->GetPage('http://www.filefactory.com/account/', $this->cookie);
+		$page = $this->GetPage('http://www.filefactory.com/account/', $this->cookie, 0, $postURL);
+		is_present($page, "\nLocation: /member/settos.php", 'TOS have changed and need to be approved at the site.');
+		is_present($page, "\nLocation: /member/setpwd.php", 'Your password has expired, please change it.');
 		if (stripos($page, '>Free Member<') !== false) {
 			$this->changeMesg(lang(300).'<br /><b>Account isn\'t premium</b><br />Using it as member.');
 			$this->page = $this->GetPage($this->link, $this->cookie);
@@ -149,5 +150,6 @@ class filefactory_com extends DownloadClass {
 //[17-Sep-2013] Rewritten for make it work with the new site & Cookie support removed & Added password protected links support. - Th3-822
 //[24-Oct-2013] Added a error at login & fixed redirect on premium download. - Th3-822
 //[18-Nov-2013] Fixed premium-dl error msgs. - Th3-822
+//[02-Dec-2016] Fixed login error msgs. - Th3-822
 
 ?>

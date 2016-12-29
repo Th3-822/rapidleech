@@ -7,16 +7,18 @@ if (count(get_included_files()) == 1) {
 }
 
 @set_time_limit(0);
-@ini_alter('memory_limit', '1024M');
+@ini_set('memory_limit', '1024M');
+if (ini_get('zlib.output_compression')) @ini_set('zlib.output_compression', 0);
 if (ob_get_level()) ob_end_clean();
 ob_implicit_flush(true);
+header('X-Accel-Buffering: no');
 clearstatcache();
 error_reporting(6135);
 $nn = "\r\n";
 $fromaddr = 'RapidLeech';
 $dev_name = 'Development Stage';
 $rev_num = '43';
-$plusrar_v = '4.1';
+$plusrar_v = '4.2';
 $PHP_SELF = $_SERVER['SCRIPT_NAME'];
 define('RAPIDLEECH', 'yes');
 define('ROOT_DIR', realpath('./'));

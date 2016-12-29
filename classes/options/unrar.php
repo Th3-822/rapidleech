@@ -44,7 +44,7 @@ function unrar_setCheckboxes(act, filestounrar) {
 <?php
     unset ($rar);
     $rar = new rlRar($file["name"], $options['check_these_before_unzipping'] ? $options['forbidden_filetypes'] : array('.xxx'));
-    if ($rar->rar_return === false) { echo lang(367); }
+    if ($rar->get_rar_return() === false) { echo lang(367); }
     else {
       $rar_list = $rar->listthem(@$_GET['passwords'][$i], $options['download_dir'], $i);
       if ($rar_list[0] == 'PASS') { $rar_passl_needed = true; echo lang(368); }
@@ -168,7 +168,7 @@ function rar_st(elementid, st){
     foreach ($_GET['filestounrar'][$i] as $rar_item) {
       flush();
       $rar = new rlRar($file["name"], $options['check_these_before_unzipping'] ? $options['forbidden_filetypes'] : array('.xxx'));
-      if ($rar->rar_return === false) {
+      if ($rar->get_rar_return() === false) {
 ?>
 <script type="text/javascript">rar_st('<?php echo 'unrar'.$_GET["files"][$i].'-'.str_replace('=', '-', $rar_item); ?>', '<?php echo lang(343); ?>');</script>
 <?php

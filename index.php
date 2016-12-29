@@ -180,7 +180,6 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 
 	insert_location($redir);
 } else {
-	header('X-Accel-Buffering: no');
 	require_once(TEMPLATE_DIR . 'functions.php');
 	include(TEMPLATE_DIR . '/header.php');
 	if ($options['ref_check']) check_referer();

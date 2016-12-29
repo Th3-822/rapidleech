@@ -120,7 +120,7 @@ function rar() {
                 <input type="checkbox" name="rar_opts[separated]" value="1" /><?php echo lang(387); ?>
               </td>
               <td class="rar-options-right-td">
-                &nbsp;
+                <input type="checkbox" name="rar_opts[rar5]" value="1" /><?php echo lang(394); ?>
               </td>
             </tr>
             <tr>
@@ -159,7 +159,7 @@ function rar_go() {
     <tr>
       <td>
 <?php
-  if ($_GET['rar_opts']['separated']) {
+  if (!empty($_GET['rar_opts']['separated'])) {
     foreach ($_GET['rar_opts']['filestorar'] as $k => $v) { if (empty($list[$v])) { unset($_GET['rar_opts']['filestorar'][$k]); } }
     $am = count($_GET['rar_opts']['filestorar']);
   }
@@ -170,12 +170,12 @@ function rar_go() {
   }
 
   for($i = 0; $i < $am; $i++) {
-    if ($_GET['rar_opts']['separated']) { $name = htmlentities(basename($list[$_GET['rar_opts']['filestorar'][$i]]['name']).'.rar'); }
+    if (!empty($_GET['rar_opts']['separated'])) $name = htmlentities(basename($list[$_GET['rar_opts']['filestorar'][$i]]['name']).'.rar');
 ?>
         <table align="center">
           <tr>
             <td colspan="2" class="rar-main-td">
-              <?php printf(lang(363), ($_GET['rar_opts']['separated'] ? $name : $_GET['rar_opts']['rarfilename'])); ?>
+              <?php printf(lang(363), (!empty($_GET['rar_opts']['separated']) ? $name : $_GET['rar_opts']['rarfilename'])); ?>
             </td>
           </tr>
           <tr>
@@ -217,28 +217,29 @@ function rar_st(elementid, st){
   flush();
   require_once(CLASS_DIR."rar.php");
 
-  if ($options['disable_deleting']) { $_GET['rar_opts']['delete'] = 0; }
-  if ($options['disable_archive_compression']) { $_GET['rar_opts']['comp_lvl'] = 0; }
+  if ($options['disable_deleting']) $_GET['rar_opts']['delete'] = 0;
+  if ($options['disable_archive_compression']) $_GET['rar_opts']['comp_lvl'] = 0;
 
-  if ($_GET['rar_opts']['separated']) { $am = count($_GET['rar_opts']['filestorar']); }
-  else { $am = 1; }
+  if (!empty($_GET['rar_opts']['separated'])) $am = count($_GET['rar_opts']['filestorar']);
+  else $am = 1;
+
   for($i = 0; $i < $am; $i++) {
-    $name = ($_GET['rar_opts']['separated']) ? basename($list[$_GET['rar_opts']['filestorar'][$i]]['name']).'.rar' : $_GET['rar_opts']['rarfilename'];
+    $name = (!empty($_GET['rar_opts']['separated'])) ? basename($list[$_GET['rar_opts']['filestorar'][$i]]['name']).'.rar' : $_GET['rar_opts']['rarfilename'];
     $rar = new rlRar($name, $options['check_these_before_unzipping'] ? $options['forbidden_filetypes'] : array('.xxx'));
-    if ($rar->rar_return !== 'rar') {
+    if ($rar->get_rar_return() !== 'rar') {
 ?>
 <script type="text/javascript">rar_st('rar_status<?php echo $i; ?>', '<?php echo lang(343); ?>');</script>
 <?php 
     }
     else {
       $rar_opts_tmp = $_GET['rar_opts'];
-      if ($_GET['rar_opts']['separated']) { $rar_opts_tmp['filestorar'] = array($_GET['rar_opts']['filestorar'][$i]); }
+      if (!empty($_GET['rar_opts']['separated'])) { $rar_opts_tmp['filestorar'] = array($_GET['rar_opts']['filestorar'][$i]); }
       $rar_result = $rar->addtoarchive($rar_opts_tmp, $options['download_dir'], 'rar_status'.$i, $i);
       echo $rar_result;
       if (strpos($rar_result, ", 'Done')") !== false) {
         _create_list();
         clearstatcache();
-        if ($_GET['rar_opts']['delete'] == true) {
+        if (!empty($_GET['rar_opts']['delete'])) {
           foreach ($_GET['rar_opts']['filestorar'] as $rar_tounlist) {
             $rar_tounlist = basename($list[$rar_tounlist]['name']);
             if (empty($rar_tounlist)) { continue; }
@@ -249,9 +250,9 @@ function rar_st(elementid, st){
             }
           }
         }
-        $rar_tolist = realpath($options['download_dir']).'/'.basename($rar->filename);
-        if ($_GET['rar_opts']['vols'] && !is_file($rar_tolist)) {
-          if (substr(strtolower($rar_tolist), -4) == '.rar') { $rar_tolist = substr($rar_tolist, 0, -4); }
+        $rar_tolist = realpath($options['download_dir']).'/'.basename($rar->get_filename());
+        if (!empty($_GET['rar_opts']['vols']) && !is_file($rar_tolist)) {
+          if (substr(strtolower($rar_tolist), -4) == '.rar') $rar_tolist = substr($rar_tolist, 0, -4);
           $tmp = basename(strtolower($rar_tolist)).'.part';
           $rar_dir = opendir(realpath($options['download_dir']).'/');
           while (false !== ($rar_f_dd = readdir($rar_dir))) {
