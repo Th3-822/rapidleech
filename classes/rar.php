@@ -182,7 +182,7 @@ class rlRar {
 				}
 				$rar_onfile = !$rar_onfile;
 			} else {
-				if (preg_match('/^(\*)?(?:\s+[\w\.]{7}|(?(1)|\s)[dl\-](?:[r\-][w\-][x\-]){3})\s+(\d+)\s+\d+\s\d+%\s+[\w\-]{10}\s+[\d:]{4,5}\s+[\w\.]{8}\s+([^\r\n]+)$/', $rar_line, $attr)) {
+				if (preg_match('/^(\*)?(?:\s+[\w\.]{7}|(?(1)|\s)[dl\-](?:[r\-][w\-][x\-]){3})\s+(\d+)\s+\d+\s\d+%\s+(?:[\w\-]{10}|[\w\-]{8})\s+[\d:]{4,5}\s+[\w\.]{8}\s+([^\r\n]+)$/', $rar_line, $attr)) {
 					$rar_files[$attr[3]]['size'] = $attr[2];
 					if (!$rar_needs_pass && !empty($attr[1])) $rar_needs_pass = true;
 				}
