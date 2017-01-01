@@ -182,7 +182,7 @@ class rlRar {
 				}
 				$rar_onfile = !$rar_onfile;
 			} else {
-				if (preg_match('/^(\*)?(?:\s+[\w\.]{7}|(?(1)|\s)[dl\-](?:[r\-][w\-][x\-]){3})\s+(\d+)\s+\d+\s\d+%\s+(?:[\w\-]{10}|[\w\-]{8})\s+[\d:]{4,5}\s+[\w\.]{8}\s+([^\r\n]+)$/', $rar_line, $attr)) {
+				if (preg_match('/^(\*)?(?:\s+[\w\.]{7}|(?(1)|\s)[dl\-](?:[r\-][w\-][x\-]){3})\s+(\d+)\s+\d+\s+\d+%\s+(?:[\w\-]{10}|[\w\-]{8})\s+[\d:]{4,5}\s+[\w\.]{8}\s+([^\r\n]+)$/', $rar_line, $attr)) {
 					$rar_files[$attr[3]]['size'] = $attr[2];
 					if (!$rar_needs_pass && !empty($attr[1])) $rar_needs_pass = true;
 				}
@@ -292,8 +292,9 @@ class rlRar {
 								if ($pos_tmp[0] === 0) $pos_found_s = 'Testing     ' . basename(substr($pos_found_s, 12));
 								$pos_found_s = str_replace(array("\r\n", "\n", "\r"), '' , $pos_found_s);
 							}
-							echo "<script type='text/javascript'>rar_st('$jsoutid', '" . addslashes($pos_found_s) . " {$num_last}%')</script>\r\n";
+							echo "<script type='text/javascript'>/* <![CDATA[ */rar_st('$jsoutid', '" . addslashes($pos_found_s) . " {$num_last}%')/* ]]> */</script>\r\n";
 							flush();
+							ob_flush();
 							if ($num_last == 100) $pos_found_s = '';
 						}
 					}
