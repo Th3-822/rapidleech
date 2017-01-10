@@ -5,10 +5,11 @@ if (!defined('RAPIDLEECH')) {
 }
 // Using functions from: http://julien-marchand.fr/blog/using-the-mega-api-with-php-examples/
 class mega_co_nz extends DownloadClass {
-	private $useOpenSSL, $seqno, $cookie;
+	private $useOpenSSL, $alwaysLogin, $seqno, $cookie;
 	public function Download($link) {
 		if (!extension_loaded('mcrypt') || !in_array('rijndael-128', mcrypt_list_algorithms(), true)) html_error("Mcrypt module isn't installed or it doesn't have support for the needed encryption.");
 		$this->useOpenSSL = (version_compare(PHP_VERSION, '5.4.0', '>=') && extension_loaded('openssl') && in_array('AES-128-CBC', openssl_get_cipher_methods(), true));
+		$this->alwaysLogin = false;
 
 		$this->seqno = mt_rand();
 		$this->changeMesg(lang(300).'<br />Mega.co.nz plugin by Th3-822'); // Please, do not remove or change this line contents. - Th3-822
@@ -26,7 +27,8 @@ class mega_co_nz extends DownloadClass {
 				$pass = decrypt(urldecode($pass));
 				unset($_POST['pA_encrypted']);
 			}
-		}
+			if ($this->alwaysLogin) $this->cJar_load($user, $pass);
+		} else if ($this->alwaysLogin) html_error('[alwaysLogin is Enabled] Add an Account to Download');
 
 		do {
 			$reply = $this->apiReq(array('a' => 'g', 'g' => 1, (empty($fid[1]) ? 'p' : 'n') => $fid[2], 'ssl' => 2), (!empty($fid[1]) && !empty($fid[4]) ? $fid[4] : ''));

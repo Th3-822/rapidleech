@@ -294,7 +294,6 @@ class rlRar {
 							}
 							echo "<script type='text/javascript'>/* <![CDATA[ */rar_st('$jsoutid', '" . addslashes($pos_found_s) . " {$num_last}%')/* ]]> */</script>\r\n";
 							flush();
-							ob_flush();
 							if ($num_last == 100) $pos_found_s = '';
 						}
 					}

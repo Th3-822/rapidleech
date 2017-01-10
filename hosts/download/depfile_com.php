@@ -161,7 +161,7 @@ class depfile_com extends DownloadClass {
 
 		if ($this->loginTOTP($page)) $this->SaveCookies($user, $pass);
 
-		if (stripos($page, "<img src='/images/i_premium.png'") === false) {
+		if (stripos($page, "<img src='/images/svg/i_premium.svg'") === false) {
 			$this->changeMesg('<br /><b>Account isn\'t premium?</b>', true);
 
 			$this->page = $this->GetPage($this->link, $this->cookie);
@@ -211,7 +211,7 @@ class depfile_com extends DownloadClass {
 			$this->cookie['sdlanguageid'] = '2';
 			$this->SaveCookies($user, $pass); // Update cookies file
 			if ($this->loginTOTP($page)) $this->SaveCookies($user, $pass);
-			if (stripos($page, "<img src='/images/i_premium.png'") === false) {
+			if (stripos($page, "<img src='/images/svg/i_premium.svg'") === false) {
 				$this->changeMesg('<br /><b>Account isn\'t premium?</b>', true);
 				$this->page = $this->GetPage($this->link, $this->cookie);
 				$this->cookie = GetCookiesArr($this->page, $this->cookie);
@@ -247,5 +247,6 @@ class depfile_com extends DownloadClass {
 }
 
 // [28-4-2016] Written by Th3-822.
+// [02-1-2017] Fixed premium check. - Th3-822
 
 ?>

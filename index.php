@@ -169,7 +169,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 
 	$redir = GetDefaultParams();
 	$redir['dis_plug'] = 'on';
-	$redir['filename'] = urlencode((isset($Url['path']) && basename($Url['path'])) ? basename($Url['path']) : 'index.html');
+	$redir['filename'] = urlencode((isset($Url['path']) && basename($Url['path'])) ? urldecode(basename($Url['path'])) : 'index.html');
 	$redir['host'] = urlencode($Url['host']);
 	if (!empty($Url['port'])) $redir['port'] = urlencode($Url['port']);
 	$redir['path'] = urlencode($Url['path'] . (!empty($Url['query']) ? '?' . $Url['query'] : ''));

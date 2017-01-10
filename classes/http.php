@@ -385,7 +385,6 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				$speed = @round((($bytesReceived - $last) / 1024) / $chunkTime, 2);
 				echo "<script type='text/javascript'>pr('$percent', '$received', '$speed');</script>";
 				flush();
-				ob_flush();
 				$last = $bytesReceived;
 			}
 			if (!empty($bytesTotal) && ($bytesReceived + $chunkSize) > $bytesTotal) $chunkSize = $bytesTotal - $bytesReceived;
@@ -785,7 +784,6 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		$percent = round($totalsend / $fileSize * 100, 2);
 		echo "<script type='text/javascript'>pr('$percent', '" . bytesToKbOrMbOrGb($totalsend) . "', '$speed');</script>\n";
 		flush();
-		ob_flush();
 	}
 
 	if ($errno || $errstr) {
@@ -994,7 +992,6 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 		$percent = round($totalsend / $fileSize * 100, 2);
 		echo "<script type='text/javascript'>pr('$percent', '" . bytesToKbOrMbOrGb($totalsend) . "', '$speed');</script>\n";
 		flush();
-		ob_flush();
 	}
 
 	if ($errno || $errstr) {

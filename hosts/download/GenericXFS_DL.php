@@ -11,8 +11,8 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class GenericXFS_DL extends DownloadClass {
-	protected $page, $cookie, $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname, $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/(?:[^\?\'\"\t<>\r\n\\\]{15,}|v(?:id(?:eo)?)?\.(?:flv|mp4))@i';
-	private $classVer = 16;
+	protected $page, $cookie, $baseCookie = array('lang' => 'english'), $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname = 'xfss', $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/(?:[^\?\'\"\t<>\r\n\\\]{15,}|v(?:id(?:eo)?)?\.(?:flv|mp4))@i';
+	private $classVer = 17;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -22,9 +22,9 @@ class GenericXFS_DL extends DownloadClass {
 	protected function onLoad() {} // Placeholder
 
 	protected function Start($link, $cErrs = array(), $cErrReplace = true) {
-		if ($this->pluginVer > $this->classVer) html_error('GenericXFS_DL class is outdated, please update it.');
+		if ($this->pluginVer > $this->classVer) html_error('GenericXFS_DL class is outdated, please install last version from: https://pastebin.com/e5TZcfQ2 ');
 
-		$this->cookie = empty($this->cookie) ? array('lang' => 'english') : array_merge($this->cookie, array('lang' => 'english'));
+		$this->cookie = $this->baseCookie = empty($this->cookie) ? $this->baseCookie : array_merge($this->cookie, $this->baseCookie);
 		$link = explode('|', str_ireplace('%7C', '|', $link), 2);
 		if (count($link) > 1) $this->lpass = rawurldecode($link[1]);
 		if (!preg_match('@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(\w{12})(?=(?:[/\.]|(?:\.html?))?)@i', str_ireplace('/embed-', '/', $link[0]), $url)) html_error('Invalid link?.');
@@ -185,7 +185,12 @@ class GenericXFS_DL extends DownloadClass {
 
 	protected function showCaptcha($step) {
 		if (!empty($this->captcha)) {
-			$data = $this->DefaultParamArr($this->link, (empty($this->cookie[$this->cname])) ? 0 : encrypt(CookiesToStr($this->cookie)));
+			if (!empty($this->cookie[$this->cname])) {
+				$data = $this->DefaultParamArr($this->link, $this->cookie, 1, 1);
+				$data['cookie_encrypted'] = 1;
+			} else {
+				$data = $this->DefaultParamArr($this->link);
+			}
 			if (!empty($this->post)) foreach ($this->post as $k => $v) $data["T8gXFS[$k]"] = $v;
 			$data['step'] = $step;
 			$data['captcha_type'] = $this->captcha['type'];
@@ -209,11 +214,6 @@ class GenericXFS_DL extends DownloadClass {
 
 	protected function postCaptcha(&$step) {
 		if (empty($_POST['step']) || empty($_POST['captcha_type'])) return false;
-		if (!empty($_POST['cookie'])) {
-			$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
-			$this->cookie['lang'] = 'english';
-			$_POST['cookie'] = false;
-		}
 		$post = (!empty($_POST['T8gXFS']) && is_array($_POST['T8gXFS']) ? array_map('urlencode', $_POST['T8gXFS']) : array());
 		switch ($_POST['captcha_type']) {
 			default: 
@@ -261,7 +261,7 @@ class GenericXFS_DL extends DownloadClass {
 	}
 
 	protected function FreeDL($step = 1) {
-		if (!$this->postCaptcha($step) && $step == 1 && !empty($this->cookie[(!empty($this->cname) ? $this->cname : 'xfss')])) {
+		if (!$this->postCaptcha($step) && $step == 1 && !empty($this->cookie[$this->cname])) {
 			// Member DL: We need to reload the page with the user's cookies.
 			$this->page = $this->GetPage($this->link, $this->cookie);
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
@@ -333,30 +333,44 @@ class GenericXFS_DL extends DownloadClass {
 	protected function Login() {
 		$this->pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
 		$pkey = str_ireplace(array('www.', '.'), array('', '_'), $this->domain);
-		if (($_REQUEST['premium_acc'] != 'on' || (!$this->pA && (empty($GLOBALS['premium_acc'][$pkey]['user']) || empty($GLOBALS['premium_acc'][$pkey]['pass']))))) return $this->FreeDL();
+		if (empty($_POST['cookie']) && ($_REQUEST['premium_acc'] != 'on' || (!$this->pA && (empty($GLOBALS['premium_acc'][$pkey]['user']) || empty($GLOBALS['premium_acc'][$pkey]['pass'])) && empty($GLOBALS['premium_acc'][$pkey]['cookie'])))) return $this->FreeDL();
 
-		$user = ($this->pA ? $_REQUEST['premium_user'] : $GLOBALS['premium_acc'][$pkey]['user']);
-		$pass = ($this->pA ? $_REQUEST['premium_pass'] : $GLOBALS['premium_acc'][$pkey]['pass']);
-		if ($this->pA && !empty($_POST['pA_encrypted'])) {
-			$user = decrypt(urldecode($user));
-			$pass = decrypt(urldecode($pass));
-			unset($_POST['pA_encrypted']);
+		if (!empty($_POST['cookie']) || !empty($GLOBALS['premium_acc'][$pkey]['cookie'])) {
+			if (!empty($_POST['cookie'])) {
+				if (!empty($_POST['cookie_encrypted'])) {
+					$_POST['cookie'] = decrypt(urldecode($_POST['cookie']));
+					unset($_POST['cookie_encrypted']);
+				}
+				$this->cookie = StrToCookies($_POST['cookie']);
+				$_POST['cookie'] = false;
+			} else {
+				$cookie = $GLOBALS['premium_acc'][$pkey]['cookie'];
+				$this->cookie = (is_array($cookie) ? $cookie : StrToCookies($cookie));
+			}
+		} else {
+			$user = ($this->pA ? $_REQUEST['premium_user'] : $GLOBALS['premium_acc'][$pkey]['user']);
+			$pass = ($this->pA ? $_REQUEST['premium_pass'] : $GLOBALS['premium_acc'][$pkey]['pass']);
+			if ($this->pA && !empty($_POST['pA_encrypted'])) {
+				$user = decrypt(urldecode($user));
+				$pass = decrypt(urldecode($pass));
+				unset($_POST['pA_encrypted']);
+			}
+
+			if (empty($user) || empty($pass)) html_error('Login Failed: User or Password is empty. Please check login data.');
+			$post = array();
+			$post['op'] = 'login';
+			$post['redirect'] = '';
+			$post['login'] = urlencode($user);
+			$post['password'] = urlencode($pass);
+
+			$page = $this->sendLogin($post);
+
+			if (!$this->checkLogin($page)) html_error('Login Error: checkLogin() returned false.');
+			$this->cookie = GetCookiesArr($page);
 		}
 
-		if (empty($user) || empty($pass)) html_error('Login Failed: User or Password is empty. Please check login data.');
-		$post = array();
-		$post['op'] = 'login';
-		$post['redirect'] = '';
-		$post['login'] = urlencode($user);
-		$post['password'] = urlencode($pass);
-
-		$page = $this->sendLogin($post);
-
-		if (!$this->checkLogin($page)) html_error('Login Error: checkLogin() returned false.');
-
-		$this->cookie = GetCookiesArr($page);
-		if (empty($this->cookie[(!empty($this->cname) ? $this->cname : 'xfss')])) html_error('Login Error: Cannot find session cookie.');
-		$this->cookie['lang'] = 'english';
+		if (empty($this->cookie[$this->cname])) html_error('Login Error: Cannot find session cookie.');
+		$this->cookie = array_merge($this->cookie, $this->baseCookie);
 
 		$page = $this->isLoggedIn();
 		if (!$page) html_error('Login Error: isLoggedIn() returned false.');
