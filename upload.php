@@ -66,7 +66,7 @@ if (!empty($download_link) || !empty($delete_link) || !empty($stat_link) || !emp
 	<title>' . lang(75) . '</title>
 	<style type="text/css">.bluefont,body{font-family:tahoma,arial,"times New Roman",georgia,verdana,sans-serif;font-size:11px}.linktitle,hr{border-style:solid}.bluefont,.host .links a,body{font-size:11px}body{color:#333;background-color:#EFF0F4;margin:0;padding:0}.linktitle{width:576px;background-color:#C291F9;text-align:center;padding:3px;margin:25px auto 0;border-width:1px 1px 0;border-color:#C7C4FB}.host .links,.host .title{text-align:left;padding:3px 0 3px 10px}.bluefont{color:#0E078F}hr{height:1px;background-color:#046FC6;color:#046FC6;width:90%;border-width:0}.host .links{width:95%;margin:0 auto;border:1px dashed #666;background-color:#F2F1FE}.host{width:600px;margin:10px auto}.host .links a{text-decoration:none;color:#666}.host .links a:hover{text-decoration:none;color:#E8740B}.host .title{width:95%;margin:0 auto;background-color:#C7C4FB;color:#000;font-size:12px;font-family:Georgia,"Times New Roman",Times,serif;border-width:1px 1px 0;border-style:dashed;border-color:#333}</style>
 </head>
-<body>' . sprintf(lang(76), htmlspecialchars($lname), bytesToKbOrMb($fsize));
+<body>' . sprintf(lang(76), htmlspecialchars($lname), bytesToKbOrMbOrGb($fsize));
 
 		$upload_html .= '<div class="host"><div class="title"><strong>' . htmlspecialchars($uphost) . '</strong> - <span class="bluefont">'.date("Y-m-d H:i:s").'</span></div>
 		<div class="links">'.
@@ -88,8 +88,9 @@ if (isset($_GET['auul'])) {
 	echo "<script type='text/javascript'>parent.nextlink{$_GET['auul']}();</script>";
 	// Write links to a file
 	if (!$options['myuploads_disable']) {
-		if (empty($_GET['save_style']) || $_GET['save_style'] == lang(51)) $save_style = "$lname\r\n" . str_repeat('=', 80) . "\r\n$download_link\r\n";
-		else $save_style = str_ireplace(array('{link}', '{name}'), array($download_link, $lname), base64_decode($_GET['save_style']));
+		if (empty($_GET['save_style']) || $_GET['save_style'] == lang(51)) $_GET['save_style'] = '{name}\n' . str_repeat('=', 80) . '\n{link}\n';
+
+		$save_style = str_ireplace(array('{link}', '{name}', '\n', '{size}', '{sizeb}'), array($download_link, $lname, "\r\n", bytesToKbOrMbOrGb($fsize), $fsize), base64_decode($_GET['save_style']));
 		write_file(DOWNLOAD_DIR . 'myuploads.txt', "$save_style\r\n", 0); // Obviously it was a mistake not making it a variable earlier
 	}
 }

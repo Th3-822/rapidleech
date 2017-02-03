@@ -287,7 +287,7 @@ class mega_co_nz extends DownloadClass {
 	}
 
 	private function FSort($a, $b) {
-		return strcmp($a, $b['n']);
+		return strcmp($a['n'], $b['n']);
 	}
 
 	private function Folder($fnid, $fnk, $sfolder, $recursive) {
@@ -469,5 +469,3 @@ class Th3822_MegaDlDecrypt extends php_user_filter {
 //[29-1-2015] Replaced 'T8' prefix at folder->file links for support on third-party downloaders using links with 'N' as prefix. - Th3-822
 //[04-2-2016] Added sub-folders support (fully) and added support for link suffix "!less" to disable recursive sub-folder download. - Th3-822
 //[27-12-2016] Added Login support for increase traffic limits & forced SSL on downloads to avoid corrupted downloads. - Th3-822
-
-?>

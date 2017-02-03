@@ -1,117 +1,76 @@
 <?php
+
 if (!defined('RAPIDLEECH')) {
-	require_once("index.html");
+	require_once('index.html');
 	exit;
 }
 
 class filesmonster_com extends DownloadClass {
-
+	private $link, $baseUrl, $fid, $page, $cookie = array('yab_ulanguage' => 'en'), $pA;
 	public function Download($link) {
-		global $premium_acc;
+		$link = parse_url($link);
+		$link['scheme'] = 'https';
+		$link['host'] = 'filesmonster.com';
+		$link = rebuild_url($link);
+		if (!preg_match('@(https?://filesmonster\.com)/download\.php\?id=([\w\-\.%]+)@i', $link, $fid)) html_error('Invalid link?.');
+		$this->link = $GLOBALS['Referer'] = str_ireplace('http://', 'https://', $fid[0]);
+		$this->baseUrl = $fid[1];
+		$this->fid = $fid[2];
 
-		if (!$_REQUEST['step']) {
-			$this->cookie = array('yab_mylang' => 'en');
-			$this->page = $this->GetPage($link, $this->cookie);
-			is_present($this->page, 'File not found');
-			$this->cookie = GetCookiesArr($this->page, $this->cookie);
-		}
-		$this->link = $link;
-		if ($_REQUEST['premium_acc'] == 'on' && (($_REQUEST['premium_user'] && $_REQUEST['premium_pass']) || ($premium_acc['filesmonster_com']['user'] && $premium_acc['filesmonster_com']['pass']))) {
-			return $this->Premium();
+		$this->page = $this->GetPage($this->link, $this->cookie);
+		if (substr($this->page, 9, 3) == '404') html_error('File Not Found.');
+		$this->cookie = GetCookiesArr($this->page, $this->cookie);
+
+		$this->pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
+		if (($_REQUEST['premium_acc'] == 'on' && ($this->pA || (!empty($GLOBALS['premium_acc']['filesmonster_com']['user']) && !empty($GLOBALS['premium_acc']['filesmonster_com']['pass']))))) {
+			$user = ($this->pA ? $_REQUEST['premium_user'] : $GLOBALS['premium_acc']['filesmonster_com']['user']);
+			$pass = ($this->pA ? $_REQUEST['premium_pass'] : $GLOBALS['premium_acc']['filesmonster_com']['pass']);
+			if ($this->pA && !empty($_POST['pA_encrypted'])) {
+				$user = decrypt(urldecode($user));
+				$pass = decrypt(urldecode($pass));
+				unset($_POST['pA_encrypted']);
+			}
+			return $this->Login($user, $pass);
 		} else {
-			return $this->Free();
+			// There is not FreeDL support yet, due to lack of "public" downloadable links
+			is_present($this->page, 'You need Premium membership to download', 'Only Premium users can download this file.');
+			html_error('FreeDL Support Not Added Yet, Please Report Any Link Which Supports It On The Forum.');
 		}
 	}
 
-	private function Free() {
-		if ($_REQUEST['step'] == '1') {
-			$this->link = urldecode($_POST['link']);
-			$this->cookie = urldecode($_POST['cookie']);
+	private function PremiumDL() {
+		$page = $this->GetPage($this->link, $this->cookie);
 
-			$post = array();
-			$post['recaptcha_challenge_field'] = $_POST['recaptcha_challenge_field'];
-			$post['recaptcha_response_field'] = $_POST['recaptcha_response_field'];
-			$page = $this->GetPage($this->link, $this->cookie, $post);
-		} else {
-			is_present($this->page, "You need Premium membership to download files larger than 1.0 GB.");
-			//check the file size
-			$flsize = cut_str($this->page, 'File size:</td>', '</tr>');
-			preg_match('/(\d+\.\d+) MB/', $flsize, $match);
-			if (round($match[0]) > 100) html_error("Error[You need to split the file first directly from filesmonster!]");
-			$freeform = cut_str($this->page, "<form id='slowdownload'", "</form>");
-			if (!preg_match('/action="([^\r\n\s\t"]+)"/', $freeform, $fl)) html_error('Error[Free link 1 not found!]');
-			$page = $this->GetPage('http://filesmonster.com' . $fl[1], $this->cookie, array(), $this->link);
-			$this->cookie = GetCookiesArr($page, $this->cookie);
-			$rfturl = cut_str($page, "rftUrl = '", "'");
-			$step2url = cut_str($page, "step2UrlTemplate = '", "'");
-			$page = $this->GetPage('http://filesmonster.com' . $rfturl, $this->cookie, 0, 'http://filesmonster.com' . $fl[1]);
-			$this->cookie = GetCookiesArr($page, $this->cookie);
-			$step2url = str_replace('!!!', cut_str($page, '"dlcode":"', '"'), $step2url);
-			$this->link = "http://filesmonster.com" . $step2url;
-			$page = $this->GetPage($this->link, $this->cookie, array(), 'http://filesmonster.com' . $rfturl);
-		}
-		if (preg_match('/Next free download will be available in (\d+) min/', $page, $msg)) html_error($msg[0]);
-		if (stripos($page, "Enter Captcha code below")) {
-			if (stripos($page, cut_str($page, '<p class="error">', '</p>'))) echo "<center><font color='red'><b>Wrong captcha text or captcha expired</b></font></center>";
-			if (!preg_match('/\/challenge\?k=([^"]+)"/', $page, $c)) html_error('Error[Captcha Data not found!]');
+		if (!preg_match('@/get/[\w\-\.%]+/@', $page, $redir)) html_error('PremiumDL Error: Redirect not Found.');
+		$page = $this->GetPage($this->baseUrl . $redir[0], $this->cookie);
 
-			$data = $this->DefaultParamArr($this->link, $this->cookie);
-			$data['step'] = "1";
-			$this->reCAPTCHA($c[1], $data);
-			exit();
-		}
-		if (!preg_match("/<span id='sec'>(\d+)<\/span>/", $page, $w)) html_error('Error[Timer not found!]');
-		$this->CountDown($w[1]);
-		if (!preg_match("/get_link\('([^\r\n\s\t']+)'\)/", $page, $get_link)) html_error('Error[Free Link 2 not found!]');
-		$page = $this->GetPage('http://filesmonster.com' . $get_link[1], $this->cookie, 0, $this->link);
-		$dlink = cut_str($page, '"url":"', '"');
-		if (!$dlink) html_error("Error, Free Download link not found");
-		$dlink = str_replace("\/", "/", $dlink);
-		$FileName = basename(parse_url($dlink, PHP_URL_PATH));
-		$this->RedirectDownload($dlink, $FileName, $this->cookie, 0, $this->link);
+		if (!preg_match('@/dl/gpl/[\w\-\.%]+/@', $page, $redir)) html_error('PremiumDL Error: Redirect 2 not Found.');
+		$page = $this->GetPage($this->baseUrl . $redir[0], $this->cookie);
+		$reply = $this->json2array($page, 'PremiumDL Error');
+
+		if (empty($reply['url']) || strpos($reply['url'], '://') === false) html_error('Download-Link Not Found.');
+		return $this->RedirectDownload($reply['url'], urldecode(parse_url($reply['url'], PHP_URL_PATH)));
 	}
 
-	private function Premium() {
+	private function Login($user, $pass) {
+		$lUrl = $this->baseUrl . '/login.php?return=%2F';
+		$hUrl = $this->baseUrl . '/';
 
-		$cookie = $this->login();
-		$page = $this->GetPage($this->link, $cookie);
-		is_notpresent($page, '<span class="em lightblack">Premium</span>', 'Error[Account isn\'t Premium!]');
-		is_present($page, cut_str($page, '<div id="error">', '<br>'));
-		if (!preg_match('%<a href="(https?:\/\/[^\r\n\s\t"]+)"><span class="huge_button_green_left">%', $page, $rd)) html_error('Error[Redirect link PREMIUM 1 not found!]');
-		$page = $this->GetPage($rd[1], $cookie, 0, $this->link);
-		if (!preg_match('/get_link\("([^\r\n\s\t"]+)"\)/', $page, $rdd)) html_error('Error[Redirect link PREMIUM 2 not found!]');
-		$page = $this->GetPage('http://filesmonster.com' . $rdd[1], $cookie, 0, $rd[1]);
-		$dlink = cut_str($page, 'url":"', '"');
-		if (!$dlink) html_error("Error, Premium Download link not found");
-		$dlink = str_replace('\/', '/', $dlink);
-		$FileName = basename(parse_url($dlink, PHP_URL_PATH));
-		$this->RedirectDownload($dlink, $FileName, $cookie);
+		$post = array('act' => 'login', 'captcha_shown' => 0);
+		$post['user'] = urlencode($user);
+		$post['pass'] = urlencode($pass);
+
+		$page = $this->GetPage($lUrl, $this->cookie, $post, $hUrl);
+		is_present($page, 'Username/Password can not be found', 'Login Error: Wrong Login/Password.');
+		$this->cookie = GetCookiesArr($page, $this->cookie);
+		if (empty($this->cookie['yab_logined'])) html_error('Login Error: Cookie "yab_logined" not Found.');
+		$this->cookie['yab_ulanguage'] = 'en';
+
+		$page = $this->GetPage($hUrl, $this->cookie, 0, $lUrl);
+		is_notpresent($page, '<span class="expire-date', 'Login Error: Account Isn\'t Premium?');
+
+		return $this->PremiumDL();
 	}
-
-	private function login() {
-		global $premium_acc;
-
-		$user = ($_REQUEST["premium_user"] ? trim($_REQUEST["premium_user"]) : $premium_acc ["filesmonster_com"] ["user"]);
-		$pass = ($_REQUEST["premium_pass"] ? trim($_REQUEST["premium_pass"]) : $premium_acc ["filesmonster_com"] ["pass"]);
-		if (empty($user) || empty($pass)) html_error("Login failed, username or password is empty!");
-
-		$posturl = 'http://filesmonster.com/';
-		$post = array();
-		$post['act'] = "login";
-		$post['user'] = $user;
-		$post['pass'] = $pass;
-		$post['login'] = "Login";
-		$page = $this->GetPage($posturl . 'login.php', $this->cookie, $post, $posturl);
-		is_present($page, 'Username/Password can not be found in our database!');
-		$cookie = GetCookiesArr($page, $this->cookie);
-
-		return $cookie;
-	}
-
 }
 
-//filesmonster free download plugin by Ruud v.Tony 23-06-2011
-//updated 11-07-2011 by Ruud v.Tony for checking link
-//updated 30-08-2011 by Ruud v.Tony to support premium
-//fixed 06-03-2013 by Tony Fauzi Wihana/Ruud v.Tony
-?>
+//[21-01-2017] Rewritten by Th3-822.

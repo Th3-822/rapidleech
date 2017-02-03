@@ -227,10 +227,10 @@ class youtube_com extends DownloadClass {
 			$this->encS = explode(' ', trim($saved['steps']));
 		} else {
 			$this->playerJs = $this->GetPage('https://s.ytimg.com/yts/jsbin'.$this->js[0], $this->cookie, 0, 'https://www.youtube.com/embed/'.$this->vid);
-			if (($spos = strpos($this->playerJs, '.sig||')) === false) $this->decError('Not found (".sig||")');
+			//if (($spos = strpos($this->playerJs, '.sig||')) === false) $this->decError('Not found (".sig||")');
 			//if (($cut1 = cut_str(substr($this->playerJs, $spos), '{', '}')) == false) $this->decError('Cannot get inner content of "if(X.sig||X.s)"');
 			$v = '[\$_A-Za-z][\$\w]*';
-			if (!preg_match("@(?<=\.sig\|\|)$v(?=\($v\.s\))@", $this->playerJs, $fn, 0, $spos)) $this->decError('Cannot get decoder function name');
+			if (!preg_match("@(?<=\.sig\|\||\.set\(\"signature\",)$v(?=\($v\.s\))@", $this->playerJs, $fn, 0, $spos)) $this->decError('Cannot get decoder function name');
 			$fn = preg_quote($fn[0], '@');
 			if (!preg_match("@(?:function\s+$fn\s*\(|var\s+$fn\s*=\s*function\s*\(|(?<=(?:{|,|;))\s*$fn\s*=\s*function\s*\()@", $this->playerJs, $fpos, PREG_OFFSET_CAPTURE)) $this->decError('Cannot find decoder function');
 			$fpos = $fpos[0][1];
@@ -345,6 +345,4 @@ class youtube_com extends DownloadClass {
 // [05-2-2016]  Fixed captcha (Now uses reCaptcha2) & Added cookie storage for it. - Th3-822
 // [08-6-2016]  Added support to download DASH formats & Revised video formats handling. - Th3-822
 // [30-8-2016]  Fixed slow speed while downloading DASH streams. - Th3-822
-// [17-11-2016]  Fixed signature decoding functions. - Th3-822
-
-?>
+// [31-1-2017]  Fixed signature decoding functions. - Th3-822

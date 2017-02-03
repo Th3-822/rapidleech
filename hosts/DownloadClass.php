@@ -72,7 +72,7 @@ class DownloadClass {
 		$url = parse_url($link);
 		$params = $this->DefaultParamArr($link, $cookie, $referer, true);
 		unset($params['premium_acc']);
-		$params['filename'] = urlencode(basename((!empty($FileName) ? $FileName : urldecode(parse_url($link, PHP_URL_PATH)))));
+		$params['filename'] = urlencode((!empty($FileName) ? basename($FileName) : urldecode(basename(parse_url($link, PHP_URL_PATH)))));
 		if (!empty($force_name)) $params['force_name'] = urlencode(basename($force_name));
 		$params['host'] = urlencode($url['host']);
 		if (!empty($url['port'])) $params['port'] = urlencode($url['port']);
@@ -148,7 +148,10 @@ class DownloadClass {
 
 		$DParam = GetDefaultParams();
 		if (!empty($link)) $DParam['link'] = $link;
-		if (!empty($cookie)) $DParam['cookie'] = urlencode($cookie);
+		if (!empty($cookie)) {
+			$DParam['cookie'] = urlencode($cookie);
+			if ($encrypt) $DParam['cookie_encrypted'] = 1;
+		}
 		if (!empty($referer)) $DParam['referer'] = $referer;
 		return $DParam;
 	}
