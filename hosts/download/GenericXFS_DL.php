@@ -11,8 +11,8 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class GenericXFS_DL extends DownloadClass {
-	protected $page, $cookie, $baseCookie = array('lang' => 'english'), $scheme, $wwwDomain, $domain, $port, $host, $purl, $sslLogin, $cname = 'xfss', $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/(?:[^\?\'\"\t<>\r\n\\\]{15,}|v(?:id(?:eo)?)?\.(?:flv|mp4))@i';
-	private $classVer = 17;
+	protected $page, $cookie, $baseCookie = array('lang' => 'english'), $scheme, $wwwDomain, $domain, $port, $host, $purl, $httpsOnly = false, $sslLogin = false, $cname = 'xfss', $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/(?:[^\?\'\"\t<>\r\n\\\]{15,}|v(?:id(?:eo)?)?\.(?:flv|mp4))@i';
+	private $classVer = 18;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -30,7 +30,7 @@ class GenericXFS_DL extends DownloadClass {
 		if (!preg_match('@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(\w{12})(?=(?:[/\.]|(?:\.html?))?)@i', str_ireplace('/embed-', '/', $link[0]), $url)) html_error('Invalid link?.');
 		$this->fid = $url[1];
 		$url = parse_url($url[0]);
-		$url['scheme'] = strtolower($url['scheme']);
+		$url['scheme'] =  ($this->httpsOnly ? 'https' : strtolower($url['scheme']));
 		$url['host'] = strtolower($url['host']);
 
 		if ($this->wwwDomain && strpos($url['host'], 'www.') !== 0) $url['host'] = 'www.' . $url['host'];
@@ -50,6 +50,7 @@ class GenericXFS_DL extends DownloadClass {
 
 		if (empty($_POST['step']) || empty($_POST['captcha_type'])) {
 			$this->page = $this->GetPage($this->link, $this->cookie);
+			if ($this->scheme != 'https') is_present($this->page, "\nLocation: https://", '[GenericXFS_DL] Please Set "$this->httpsOnly" to true or add https:// to your link.');
 			if (!empty($cErrs) && is_array($cErrs)) {
 				foreach ($cErrs as $cErr) {
 					if (is_array($cErr)) is_present($this->page, $cErr[0], $cErr[1]);
@@ -364,6 +365,7 @@ class GenericXFS_DL extends DownloadClass {
 			$post['password'] = urlencode($pass);
 
 			$page = $this->sendLogin($post);
+			if (empty($this->sslLogin) && $this->scheme != 'https') is_present($page, "\nLocation: https://", '[GenericXFS_DL] Please Set "$this->sslLogin" to true.');
 
 			if (!$this->checkLogin($page)) html_error('Login Error: checkLogin() returned false.');
 			$this->cookie = GetCookiesArr($page);
@@ -384,7 +386,7 @@ class GenericXFS_DL extends DownloadClass {
 	protected function checkLogin($page) {
 		is_present($page, 'op=resend_activation', 'Login failed: Your account isn\'t confirmed yet.');
 		is_present($page, 'Your account was banned by administrator.', 'Login failed: Account is Banned.');
-		is_present($page, 'Your IP is banned', 'Login Error: IP banned for too many wrong logins.');
+		is_present($page, 'Your IP is banned', 'Login Error: IP banned temporally for too many wrong logins.');
 		if (preg_match('@Incorrect (Username|Login) or Password@i', $page)) html_error('Login failed: User/Password incorrect.');
 		return true;
 	}
@@ -417,5 +419,3 @@ class GenericXFS_DL extends DownloadClass {
 
 // GenericXFS_DL (alpha)
 // Written by Th3-822.
-
-?>

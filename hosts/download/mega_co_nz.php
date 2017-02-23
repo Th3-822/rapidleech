@@ -66,7 +66,7 @@ class mega_co_nz extends DownloadClass {
 
 	private function CheckErr($code, $prefix = 'Error') {
 		$isLogin = (stripos($prefix, 'login') !== false);
-		switch ($err) {
+		switch ($code) {
 			default: $msg = '*No message for this error*';break;
 			case -1: $msg = 'An internal error has occurred';break;
 			case -2: $msg = 'You have passed invalid arguments to this command, your rapidleech is outdated?';break;
@@ -83,7 +83,7 @@ class mega_co_nz extends DownloadClass {
 			// Confirmed at page:
 			case -6: $msg = 'File not found, account was deleted';break;
 		}
-		html_error("$prefix: [$err] $msg.");
+		html_error("$prefix: [$code] $msg.");
 	}
 
 	private function apiReq($atrr, $node = '') {
