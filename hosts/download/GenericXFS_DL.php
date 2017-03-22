@@ -12,7 +12,7 @@ if (!defined('RAPIDLEECH')) {
 
 class GenericXFS_DL extends DownloadClass {
 	protected $page, $cookie, $baseCookie = array('lang' => 'english'), $scheme, $wwwDomain, $domain, $port, $host, $purl, $httpsOnly = false, $sslLogin = false, $cname = 'xfss', $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/(?:[^\?\'\"\t<>\r\n\\\]{15,}|v(?:id(?:eo)?)?\.(?:flv|mp4))@i';
-	private $classVer = 18;
+	private $classVer = 19;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -92,7 +92,7 @@ class GenericXFS_DL extends DownloadClass {
 
 		if (($pos = stripos($this->form, '<textarea')) !== false && preg_match_all('@<textarea\s+(?:[^>]*\s)?name="(\w+)"[^>]*>([^<]*)</textarea>@i', substr($this->form, $pos), $inputs)) $data = array_merge($data, array_map('html_entity_decode', array_combine($inputs[1], $inputs[2])));
 
-		if ((stripos($this->form, 'type="submit"') !== false || stripos($this->form, 'type="image"') !== false) && preg_match_all('@<input\s*[^>]*\stype="(?:submit|image)"[^>]*\sname="(\w+)"[^>]*\svalue="([^"]*)"@i', $this->form, $inputs)) {
+		if ((stripos($this->form, 'type="submit"') !== false || stripos($this->form, 'type="image"') !== false || stripos($this->form, 'type="button"') !== false || stripos($this->form, '</button>') !== false) && preg_match_all('@<(?:input\s*[^>]*\stype="(?:submit|image|button)"|button)[^>]*\sname="(\w+)"[^>]*\svalue="([^"]*)"@i', $this->form, $inputs)) {
 			$data = array_merge($data, array_map('html_entity_decode', array_combine($inputs[1], $inputs[2])));
 			if (!empty($data['method_free']) && !empty($data['method_premium'])) $data['method_premium'] = '';
 		}

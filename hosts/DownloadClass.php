@@ -196,13 +196,13 @@ class DownloadClass {
 	}
 
 	public function reCAPTCHA($publicKey, $inputs, $referer = 0, $sname = 'Download File') {
-		if (empty($publicKey) || preg_match('/[^\w\.\-]/', $publicKey)) html_error('Invalid reCAPTCHA public key.');
+		if (empty($publicKey) || preg_match('/[^\w\.\-]/', $publicKey)) html_error('Invalid reCAPTCHA PublicKey Format.');
 		if (!is_array($inputs)) html_error('Error parsing captcha post data.');
 
 		$cookie = array('PREF' => 'LD=en');
 		// Check for a global recaptcha key
 		$page = $this->GetPage('http://www.google.com/recaptcha/api/challenge?k=' . $publicKey, $cookie, 0, 'http://fakedomain.tld/fakepath');
-		if (substr($page, 9, 3) != '200') html_error('Invalid or deleted reCAPTCHA public key.');
+		if (substr($page, 9, 3) != '200') html_error('Invalid or Deleted reCAPTCHA PublicKey.');
 		$inputs['recaptcha_public_key'] = $publicKey; // This may be needed later.
 
 		if (strpos($page, 'Invalid referer') === false && strpos($page, 'An internal error occurred') === false) {

@@ -70,9 +70,6 @@ function rar() {
                 <span id="rar_opts_vols" style="display:none">
                   <br />Size: <input type="text" size="3" name="rar_opts[vols_s]" value="1" />&nbsp;
                   <select name="rar_opts[vols_sm]">
-                  	<option value="0">Byte</option>
-                  	<option value="1">KiB(*1024)</option>
-                  	<option value="2">kb(*1000)</option>
                   	<option value="3" selected="selected">MiB(*1048576)</option>
                   	<option value="4">Mb(*1000000)</option>
                   	<option value="5">GiB(*1073741824)</option>

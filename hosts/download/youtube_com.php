@@ -8,7 +8,7 @@ if (!defined('RAPIDLEECH')) {
 class youtube_com extends DownloadClass {
 	private $page, $cookie, $fmtmaps, $vid, $sts, $js, $playerJs, $sigJs, $jsVars, $cookieFile,
 		$fmts = array(22 => '0|720|0|192', 45 => '1|720|1|192', 44 => '1|480|1|192', 35 => '2|480|0|128', 43 => '1|360|1|128', 34 => '2|360|0|128', 18 => '0|360|0|96', 6 => '2|270|3|64', 5 => '2|240|3|64', 36 => '3|240|0|36', 17 => '3|144|0|24'),
-		$dashfmts = array(138 => 'V0', 272 => 'V1', 315 => 'V1', 266 => 'V0', 313 => 'V1', 308 => 'V1', 264 => 'V0', 271 => 'V1', 299 => 'V0', 303 => 'V1', 137 => 'V0', 248 => 'V1', 298 => 'V0', 302 => 'V1', 140 => 'A0', 171 => 'A1', 251 => 'A2', 250 => 'A2', 249 => 'A2');
+		$dashfmts = array(138 => 'V0', 272 => 'V1', 315 => 'V1', 266 => 'V0', 313 => 'V1', 308 => 'V1', 264 => 'V0', 271 => 'V1', 299 => 'V0', 303 => 'V1', 137 => 'V0', 248 => 'V1', 298 => 'V0', 302 => 'V1', 135 => 'V0', 244 => 'V1', 140 => 'A0', 171 => 'A1', 251 => 'A2', 250 => 'A2', 249 => 'A2');
 
 	public function Download($link) {
 		$this->cookieFile = DOWNLOAD_DIR.'YT_cookie.txt';
@@ -230,7 +230,7 @@ class youtube_com extends DownloadClass {
 			//if (($spos = strpos($this->playerJs, '.sig||')) === false) $this->decError('Not found (".sig||")');
 			//if (($cut1 = cut_str(substr($this->playerJs, $spos), '{', '}')) == false) $this->decError('Cannot get inner content of "if(X.sig||X.s)"');
 			$v = '[\$_A-Za-z][\$\w]*';
-			if (!preg_match("@(?<=\.sig\|\||\.set\(\"signature\",)$v(?=\($v\.s\))@", $this->playerJs, $fn, 0, $spos)) $this->decError('Cannot get decoder function name');
+			if (!preg_match("@(?<=\.sig\|\||\.set\(\"signature\",)$v(?=\($v\.s\))@", $this->playerJs, $fn)) $this->decError('Cannot get decoder function name');
 			$fn = preg_quote($fn[0], '@');
 			if (!preg_match("@(?:function\s+$fn\s*\(|var\s+$fn\s*=\s*function\s*\(|(?<=(?:{|,|;))\s*$fn\s*=\s*function\s*\()@", $this->playerJs, $fpos, PREG_OFFSET_CAPTURE)) $this->decError('Cannot find decoder function');
 			$fpos = $fpos[0][1];

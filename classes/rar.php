@@ -98,8 +98,8 @@ class rlRar {
 				if (!empty($this->rar_opts['rar5'])) $rar_cmd .= '-ma5 ';
 				$rar_cmd .= "-m{$this->rar_opts['comp_lvl']} ";
 				if ($this->rar_opts['vols']) {
-					$vols_sm = array(0 => 'b', 1 => 'k', 2 => 'K', 3 => 'm', 4 => 'M', 5 => 'g', 6 => 'G');
-					$rar_cmd .= "-v{$this->rar_opts['vols_s']}{$vols_sm[$this->rar_opts['vols_sm']]} ";
+					$vols_sm = array(3 => 'm', 4 => 'M', 5 => 'g', 6 => 'G');
+					$rar_cmd .= sprintf('-v%s%s ', max(1, $this->rar_opts['vols_s']), $vols_sm[max(3, min(6, $this->rar_opts['vols_sm']))]);
 				}
 				if ($this->rar_opts['delete']) $rar_cmd .= '-df ';
 				$rar_cmd .= $this->rar_opts['solid'] ? '-s -ds ' : '-s- ';

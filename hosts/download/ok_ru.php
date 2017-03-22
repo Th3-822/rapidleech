@@ -10,7 +10,7 @@ class ok_ru extends DownloadClass {
 	public function Download($link) {
 		if (!preg_match('@/video(?:embed)?/(\d+)@i', $link, $xid)) html_error('Video ID not found.');
 		$this->xid = $xid[1];
-		$this->link = 'http://ok.ru/video/' . $this->xid;
+		$this->link = 'https://ok.ru/video/' . $this->xid;
 
 		$page = $this->GetPage($this->link);
 		is_present($page, "Video has not been found", 'Video not found or it was deleted.');
@@ -69,6 +69,7 @@ class ok_ru extends DownloadClass {
 	}
 }
 
-//[18-11-2015]  Written by Th3-822.
+//[18-11-2015] Written by Th3-822.
+//[25-02-2017] Switched to HTTPS. - Th3-822
 
 ?>
