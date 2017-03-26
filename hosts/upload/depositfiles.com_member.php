@@ -32,7 +32,7 @@ if ($continue_up) {
 	$login = $not_done = false;
 	$cookie = array('lang_current' => 'en');
 	$domain = CheckDomain('depositfiles.com');
-	$referer = "http://$domain/";
+	$referer = "https://$domain/";
 
 	// Login
 	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='login' width='100%' align='center'>Login to $domain</div>\n";
@@ -43,108 +43,78 @@ if ($continue_up) {
 			$_REQUEST['up_pass'] = decrypt(urldecode($_REQUEST['up_pass']));
 		}
 		SkipLoginC(strtolower($_REQUEST['up_login']), $_REQUEST['up_pass']);
-		$page = geturl($domain, 80, '/', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 		$login = true;
 	} else echo "<b><center>Login not found or empty, using non member upload.</center></b>\n";
 
 	// Retrive upload ID
 	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrive upload ID</div>\n";
 
-	if (!$login) {
-		$page = geturl($domain, 80, '/', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
-		$cookie = GetCookiesArr($page, $cookie);
-	}
+	$page = cURL($referer, $cookie, 0, $referer);
 
-	if (!preg_match('@https?://fileshare\d+\.(?:depositfiles|dfiles)\.[^/:\r\n\t\"\'<>]+(?:\:\d+)?/[\w\-]+/[^\?\'"\r\n\<>;\s\t]*@i', $page, $up)) html_error('Error: Cannot find upload server.');
+	if (!preg_match('@https?://fileshare\d+\.(?:depositfiles|dfiles)\.[^/:\r\n\t\"\'<>]+(?:\:\d+)?/[\w\-]+/[^\'"\r\n\<>;\s\t]*@i', $page, $up)) html_error('Error: Cannot find upload server.');
 
 	$post = array();
-	$post['MAX_FILE_SIZE'] = cut_str($page, 'name="MAX_FILE_SIZE" value="', '"');
-	$post['UPLOAD_IDENTIFIER'] = generate_upload_id();
-	$post['go'] = cut_str($page, 'name="go" value="', '"');
-	$post['agree'] = '1';
+	$post['format'] = 'html5';
+	$post['member_passkey'] = cut_str($page, 'sharedkey="', '"');
+	$post['fm'] = '_root';
+	$post['fmh'] = '';
 
-	$up_url = $up[0].'?X-Progress-ID='.$post['UPLOAD_IDENTIFIER'];
+	if (empty($post['member_passkey'])) html_error('Upload sharedkey Not Found.');
+
+	$up_url = $up[0];
 
 	// Uploading
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
 
 	$url = parse_url($up_url);
-	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer, $cookie, $post, $lfile, $lname, 'files', '', $_GET['proxy'], $pauth);
+	$url['scheme'] = 'http'; // Force HTTP on upload.
+	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer, 0, $post, $lfile, $lname, 'files', '', $_GET['proxy'], $pauth, 0, $url['scheme']);
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";
 
 	is_page($upfiles);
 
-	if (preg_match('@https?://(?:[^/\'"\r\n\s\t<>;]\.)?(?:depositfiles|dfiles)\.[^/\r\n\t\"\'<>]+/files/[^\'"\r\n\s\t<>;]+@i', $upfiles, $dl)) {
-		$download_link = $dl[0];
-		if (preg_match('@https?://(?:[^/\'"\r\n\s\t<>;]\.)?(?:depositfiles|dfiles)\.[^/\r\n\t\"\'<>]+/rmv/[^\'"\r\n\s\t<>;]+@i', $upfiles, $del)) $delete_link = $del[0];
-	} else html_error('Download link not found.');
+	$json = json2array($upfiles, 'Upload Error');
+
+	if (!empty($json['download_url'])) {
+		$download_link = $json['download_url'];
+		if (!empty($json['delete_url'])) $delete_link = $json['delete_url'];
+
+		// Optional?
+		cURL($referer.'api/upload/add_info?url='.urlencode($json['download_url']).'&size='.$fsize, $cookie, 0, $referer);
+	} else {
+		if (!$default_acc) textarea($upfiles);
+		html_error('Download link not found.');
+	}
 }
 
 function CheckDomain($domain) {
 	global $cookie, $pauth;
 	$domain = strtolower($domain);
-	$page = geturl($domain, 80, '/', "http://$domain/", $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+	$url = "https://$domain/";
+	$page = cURL($url, $cookie, 0, $url);
 	if (($hpos = strpos($page, "\r\n\r\n")) > 0) $page = substr($page, 0, $hpos);
-	if (stripos($page, "\nLocation: ") !== false && preg_match('@\nLocation: https?://(?:[^/\r\n]+\.)?((?:depositfiles|dfiles)\.[^/:\r\n\t\"\'<>]+)(?:\:\d+)?/@i', $page, $redir_domain)) {
+	if (stripos($page, "\nLocation: ") !== false && preg_match('@\nLocation: (?:https?:)?//(?:[^/\r\n]+\.)?((?:depositfiles|dfiles)\.[^/:\r\n\t\"\'<>]+)(?:\:\d+)?/@i', $page, $redir_domain)) {
 		$redir_domain = strtolower($redir_domain[1]);
 		if ($domain != $redir_domain) $domain = $redir_domain;
 	}
 	return $domain;
 }
 
-function generate_upload_id() {
-	$chars = str_split('1234567890qwertyuiopasdfghjklzxcvbnm');
-	$uid = time();
-	for ($i=0;$i<32;$i++) $uid .= $chars[array_rand($chars)];
-	return $uid;
-}
-
-// Edited For upload.php usage.
-function EnterCaptcha($captchaImg, $inputs, $captchaSize = '5', $sname = 'Enter Captcha', $iname = 'captcha') {
-	echo "\n<form name='captcha' method='POST'>\n";
-	foreach ($inputs as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='$input' />\n";
-	echo "\t<h4>" . lang(301) . " <img alt='CAPTCHA Image' src='$captchaImg' /> " . lang(302) . ": <input type='text' id='captcha' name='$iname' size='$captchaSize' />&nbsp;&nbsp;\n\t\t<input type='submit' onclick='return check();' value='$sname' />\n\t</h4>\n\t<script type='text/javascript'>/* <![CDATA[ */\n\t\tfunction check() {\n\t\t\tvar captcha=document.getElementById('captcha').value;\n\t\t\tif (captcha == '') {\n\t\t\t\twindow.alert('You didn\'t enter the image verification code');\n\t\t\t\treturn false;\n\t\t\t} else return true;\n\t\t}\n\t/* ]]> */</script>\n</form>\n</body>\n</html>";
-}
-
-// Edited For upload.php usage.
-function reCAPTCHA($publicKey, $inputs, $sname = 'Upload File') {
-	global $cookie, $domain, $referer, $pauth;
-	if (empty($publicKey) || preg_match('/[^\w\.\-]/', $publicKey)) html_error('Invalid reCAPTCHA public key.');
-	if (!is_array($inputs)) html_error('Error parsing captcha post data.');
-	// Check for a global recaptcha key
-	$page = geturl('www.google.com', 0, '/recaptcha/api/challenge?k=' . $publicKey, 'http://fakedomain.tld/fakepath', 0, 0, 0, $_GET['proxy'], $pauth);is_page($page);
-	if (substr($page, 9, 3) != '200') html_error('Invalid or deleted reCAPTCHA public key.');
-
-	if (strpos($page, 'Invalid referer') === false) {
-		// Embed captcha
-		echo "<script language='JavaScript'>var RecaptchaOptions = {theme:'red', lang:'en'};</script>\n\n<center><form name='recaptcha' method='POST'><br />\n";
-		foreach ($inputs as $name => $input) echo "<input type='hidden' name='$name' id='C_$name' value='$input' />\n";
-		echo "<script type='text/javascript' src='//www.google.com/recaptcha/api/challenge?k=$publicKey'></script><noscript><iframe src='//www.google.com/recaptcha/api/noscript?k=$publicKey' height='300' width='500' frameborder='0'></iframe><br /><textarea name='recaptcha_challenge_field' rows='3' cols='40'></textarea><input type='hidden' name='recaptcha_response_field' value='manual_challenge' /></noscript><br /><input type='submit' name='submit' onclick='javascript:return checkc();' value='$sname' />\n<script type='text/javascript'>/*<![CDATA[*/\nfunction checkc(){\nvar capt=document.getElementById('recaptcha_response_field');\nif (capt.value == '') { window.alert('You didn\'t enter the image verification code.'); return false; }\nelse { return true; }\n}\n/*]]>*/</script>\n</form></center>\n</body>\n</html>";
-	} else {
-		// Download captcha
-		$page = geturl('www.google.com', 0, '/recaptcha/api/challenge?k=' . $publicKey, $referer, 0, 0, 0, $_GET['proxy'], $pauth);is_page($page);
-		if (!preg_match('@[\{,\s]challenge\s*:\s*[\'\"]([\w\-]+)[\'\"]@', $page, $challenge)) html_error('Error getting reCAPTCHA challenge.');
-		$inputs['recaptcha_challenge_field'] = $challenge = $challenge[1];
-
-		$imgReq = geturl('www.google.com', 0, '/recaptcha/api/image?c=' . $challenge, $referer, 0, 0, 0, $_GET['proxy'], $pauth);is_page($imgReq);
-		list($headers, $imgBody) = explode("\r\n\r\n", $imgReq, 2);
-		unset($imgReq);
-		if (substr($headers, 9, 3) != '200') html_error('Error downloading captcha img.');
-		$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/jpeg');
-
-		EnterCaptcha("data:$mimetype;base64,".base64_encode($imgBody), $inputs, 20, $sname, 'recaptcha_response_field');
-	}
-	exit;
-}
-
-function Get_Reply($page) {
+function json2array($content, $errorPrefix = 'Error') {
 	if (!function_exists('json_decode')) html_error('Error: Please enable JSON in php.');
-	$json = substr($page, strpos($page, "\r\n\r\n") + 4);
-	$json = substr($json, strpos($json, '{'));$json = substr($json, 0, strrpos($json, '}') + 1);
-	$rply = json_decode($json, true);
-	if (!$rply || count($rply) == 0) html_error('Error reading json.');
+	if (empty($content)) html_error("[$errorPrefix]: No content.");
+	$content = ltrim($content);
+	if (($pos = strpos($content, "\r\n\r\n")) > 0) $content = trim(substr($content, $pos + 4));
+	$cb_pos = strpos($content, '{');
+	$sb_pos = strpos($content, '[');
+	if ($cb_pos === false && $sb_pos === false) html_error("[$errorPrefix]: JSON start braces not found.");
+	$sb = ($cb_pos === false || $sb_pos < $cb_pos) ? true : false;
+	$content = substr($content, strpos($content, ($sb ? '[' : '{')));$content = substr($content, 0, strrpos($content, ($sb ? ']' : '}')) + 1);
+	if (empty($content)) html_error("[$errorPrefix]: No JSON content.");
+	$rply = json_decode($content, true);
+	if ($rply === NULL) html_error("[$errorPrefix]: Error reading JSON.");
 	return $rply;
 }
 
@@ -152,13 +122,15 @@ function Login($user, $pass) {
 	global $default_acc, $cookie, $domain, $referer, $pauth;
 	$errors = array('CaptchaInvalid' => 'Wrong CAPTCHA entered.', 'InvalidLogIn' => 'Invalid Login/Pass.', 'CaptchaRequired' => 'Captcha Required.');
 	if (!empty($_POST['step']) && $_POST['step'] == '1') {
+		html_error('reCAPTCHA2 Not Supported ATM.');
+		/*
 		if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
 		$post = array('recaptcha_challenge_field' => $_POST['recaptcha_challenge_field'], 'recaptcha_response_field' => $_POST['recaptcha_response_field']);
 		$post['login'] = urlencode($user);
 		$post['password'] = urlencode($pass);
 
-		$page = geturl($domain, 80, '/api/user/login', $referer.'login.php?return=%2F', $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);
-		$json = Get_Reply($page);
+		$page = cURL($referer . 'api/user/login', $cookie, $post, $referer.'login.php?return=%2F');
+		$json = json2array($page, 'Login Error P');
 		if (!empty($json['error'])) html_error('Login Error'. (!empty($errors[$json['error']]) ? ': ' . $errors[$json['error']] : '..'));
 		elseif ($json['status'] != 'OK') html_error('Login Failed');
 
@@ -167,13 +139,14 @@ function Login($user, $pass) {
 
 		SaveCookies($user, $pass); // Update cookies file
 		return true;
+		*/
 	} else {
 		$post = array();
 		$post['login'] = urlencode($user);
 		$post['password'] = urlencode($pass);
 
-		$page = geturl($domain, 80, '/api/user/login', $referer.'login.php?return=%2F', $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);
-		$json = Get_Reply($page);
+		$page = cURL($referer . 'api/user/login', $cookie, $post, $referer.'login.php?return=%2F');
+		$json = json2array($page, 'Login Error');
 		if (!empty($json['error']) && $json['error'] != 'CaptchaRequired') html_error('Login Error'. (!empty($errors[$json['error']]) ? ': ' . $errors[$json['error']] : '.'));
 		elseif ($json['status'] == 'OK') {
 			$cookie = GetCookiesArr($page, $cookie);
@@ -183,15 +156,14 @@ function Login($user, $pass) {
 		} elseif (empty($json['error']) || $json['error'] != 'CaptchaRequired') html_error('Login Failed.');
 
 		// Captcha Required
-		$page = geturl($domain, 80, '/login.php?return=%2F', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		$page = cURL($referer.'login.php?return=%2F', $cookie, 0, $referer);
 		$cookie = GetCookiesArr($page, $cookie);
 
 		if (!preg_match('@(https?://([^/\r\n\t\s\'\"<>]+\.)?(?:depositfiles|dfiles)\.[^/:\r\n\t\"\'<>]+(?:\:\d+)?)/js/base2\.js@i', $page, $jsurl)) html_error('Cannot find captcha.');
-		$jsurl = (empty($jsurl[1])) ? 'http://' . $domain . $jsurl[0] : $jsurl[0];
-		$jsurl = parse_url($jsurl);
-		$page = geturl($jsurl['host'], defport($jsurl), $jsurl['path'].(!empty($jsurl['query']) ? '?'.$jsurl['query'] : ''), $referer.'login.php?return=%2F', $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		$jsurl = (empty($jsurl[1])) ? 'https://' . $domain . $jsurl[0] : $jsurl[0];
+		$page = cURL($jsurl, $cookie, 0, $referer.'login.php?return=%2F');
 
-		if (!preg_match('@recaptcha_public_key\s*=\s*[\'\"]([\w\-]+)@i', $page, $cpid)) html_error('reCAPTCHA Not Found.');
+		if (!preg_match('@recaptcha2PublicKey\s*=\s*[\'\"]([\w\.\-]+)@i', $page, $cpid)) html_error('reCAPTCHA2 Not Found.');
 
 		$post = array('action' => 'FORM');
 		$post['step'] = '1';
@@ -200,7 +172,7 @@ function Login($user, $pass) {
 			$post['up_login'] = urlencode(encrypt($user));
 			$post['up_pass'] = urlencode(encrypt($pass));
 		}
-		reCAPTCHA($cpid[1], $post, 'Login');
+		html_error('reCAPTCHA2 Not Supported ATM.');
 	}
 }
 
@@ -240,7 +212,7 @@ function SkipLoginC($user, $pass) {
 		$secretkey = $_secretkey;
 		if ((is_array($testCookie) && count($testCookie) < 1) || empty($testCookie)) return Login($user, $pass);
 
-		$page = geturl($domain, 80, '/', $referer, $testCookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		$page = cURL($referer, $testCookie, 0, $referer);
 		if (stripos($page, 'style="display: none;" data-type="guest"') === false) return Login($user, $pass);
 		$cookie = $testCookie; // Update cookies
 		SaveCookies($user, $pass); // Update cookies file
@@ -251,7 +223,7 @@ function SkipLoginC($user, $pass) {
 
 function SaveCookies($user, $pass) {
 	global $cookie, $secretkey;
-	$maxdays = 7; // Max days to keep cookies saved
+	$maxdays = 31; // Max days to keep cookies saved
 	$filename = DOWNLOAD_DIR.basename('depositfiles_ul.php');
 	if (file_exists($filename)) {
 		$file = file($filename);
@@ -273,5 +245,4 @@ function SaveCookies($user, $pass) {
 //[06-9-2012] Written by Th3-822.
 //[01-1-2013] Fixed login. - Th3-822 (Happy New Year)
 //[20-1-2013] Updated for df's new domains. - Th3-822
-
-?>
+//[25-3-2017] Switched to cURL/https, fixed domain checker & fixed login & upload. - Th3-822

@@ -12,7 +12,7 @@ if (!defined('RAPIDLEECH')) {
 
 class GenericXFS_DL extends DownloadClass {
 	protected $page, $cookie, $baseCookie = array('lang' => 'english'), $scheme, $wwwDomain, $domain, $port, $host, $purl, $httpsOnly = false, $sslLogin = false, $cname = 'xfss', $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/(?:[^\?\'\"\t<>\r\n\\\]{15,}|v(?:id(?:eo)?)?\.(?:flv|mp4))@i';
-	private $classVer = 19;
+	private $classVer = 20;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -175,7 +175,7 @@ class GenericXFS_DL extends DownloadClass {
 		} elseif ((stripos($this->page, 'google.com/recaptcha/api/') !== false || stripos($this->page, 'recaptcha.net/') !== false) && preg_match('@(?:https?:)?//(?:[\w\-]+\.)?(?:google\.com/recaptcha/api|recaptcha\.net)/(?:challenge|noscript)\?k=([\w\.\-]+)@i', $this->page, $reCaptcha)) {
 			// Old reCAPTCHA
 			$this->captcha = array('type' => 3, 'key' => $reCaptcha[1]);
-		} elseif (($pos = stripos($this->page, '//api.solvemedia.com/')) !== false && preg_match('@(?:https?:)?//api\.solvemedia\.com/papi/challenge\.(?:no)?script\?k=([\w\.\-]+)@i', substr($this->page, $pos - 5), $smCaptcha)) {
+		} elseif (preg_match('@(?:https?:)?//api(?:-secure)?\.solvemedia\.com/papi/challenge\.(?:no)?script\?k=([\w\.\-]+)@i', $this->page, $smCaptcha)) {
 			// SolveMedia Captcha
 			$this->captcha = array('type' => 4, 'key' => $smCaptcha[1]);
 		} elseif (preg_match('@(?:class|id)=["\']g-recaptcha["\']\s+data-sitekey=["\']([\w\.\-]+)["\']@i', $this->page, $cpid)) {
@@ -402,7 +402,7 @@ class GenericXFS_DL extends DownloadClass {
 	// A simpler function for check if account is premium in $page contents, easier to override on plugins for specific hosts.
 	// return true if user is premium, false otherwise.
 	protected function isAccPremium($page) {
-		if (stripos($page, 'Premium account expire') !== false || stripos($page, 'Premium-account expire') !== false || stripos($page, 'Premium Expires') !== false) return true;
+		if (stripos($page, 'Premium account expire') !== false || stripos($page, 'Premium-account expire') !== false || stripos($page, 'Premium Expires') !== false || stripos($page, 'Expiration date') !== false) return true;
 		return false;
 	}
 

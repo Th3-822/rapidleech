@@ -106,19 +106,19 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 	if ($scheme == 'https://') {
 		if (!extension_loaded('openssl')) return html_error('You need to install/enable PHP\'s OpenSSL extension to support downloading via HTTPS.');
-		$scheme = 'tls://';
+		$scheme = 'ssl://';
 		if ($port == 0 || $port == 80) $port = 443;
 	} else if ($port == 0) $port = 80;
 
 	if ($proxy) {
 		list($proxyHost, $proxyPort) = explode(':', $proxy, 2);
-		if ($scheme != 'tls://') {
+		if ($scheme != 'ssl://') {
 			$host = $host . ($port != 80 && $port != 443 ? ":$port" : '');
 			$url = "$scheme$host$url";
 		}
 	}
 
-	if ($scheme != 'tls://') $scheme = '';
+	if ($scheme != 'ssl://') $scheme = '';
 
 	$cHeaders = readCustomHeaders($referer);
 	$request = array();
@@ -144,7 +144,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 	$errno = 0;
 	$errstr = '';
-	if ($scheme == 'tls://') {
+	if ($scheme == 'ssl://') {
 		$hosts = (!empty($proxyHost) ? $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
 		if ($proxy) $url = "https://$host$url"; // For the 'connected to' message
 	} else $hosts = (!empty($proxyHost) ? $scheme . $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
@@ -169,7 +169,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		else echo '<p>'.sprintf(lang(90), $host, $port).'</p>';
 	}
 
-	if ($scheme == 'tls://' && $proxy) {
+	if ($scheme == 'ssl://' && $proxy) {
 		$connRequest = array();
 		$connRequest[''] = "CONNECT $host:$port HTTP/1.1";
 		if (!empty($pauth)) $connRequest['proxy-authorization'] = "Basic $pauth";
@@ -651,24 +651,24 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
 	if ($scheme == 'https://') {
 		if (!extension_loaded('openssl')) return html_error('You need to install/enable PHP\'s OpenSSL extension to support uploading via HTTPS.');
-		$scheme = 'tls://';
+		$scheme = 'ssl://';
 		if ($port == 0 || $port == 80) $port = 443;
 	} else if ($port == 0) $port = 80;
 
 	if (!empty($referer) && ($pos = strpos("\r\n", $referer)) !== 0) {
 		$origin = parse_url($pos ? substr($referer, 0, $pos) : $referer);
 		$origin = strtolower($origin['scheme']) . '://' . strtolower($origin['host']) . (!empty($origin['port']) && $origin['port'] != defport(array('scheme' => $origin['scheme'])) ? ':' . $origin['port'] : '');
-	} else $origin = ($scheme == 'tls://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'tls://' || $port != 443) ? ':' . $port : '');
+	} else $origin = ($scheme == 'ssl://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
 
 	if ($proxy) {
 		list($proxyHost, $proxyPort) = explode(':', $proxy, 2);
-		if ($scheme != 'tls://') {
+		if ($scheme != 'ssl://') {
 			$host = $host . ($port != 80 && $port != 443 ? ":$port" : '');
 			$url = "$scheme$host$url";
 		}
 	}
 
-	if ($scheme != 'tls://') $scheme = '';
+	if ($scheme != 'ssl://') $scheme = '';
 
 	$cHeaders = readCustomHeaders($referer);
 	$request = array();
@@ -689,7 +689,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
 	$errno = 0;
 	$errstr = '';
-	if ($scheme == 'tls://') {
+	if ($scheme == 'ssl://') {
 		$hosts = (!empty($proxyHost) ? $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
 		if ($proxy) $url = "https://$host$url"; // For the 'connected to' message
 	} else $hosts = (!empty($proxyHost) ? $scheme . $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
@@ -710,7 +710,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 	if ($proxy) echo '<p>' . sprintf(lang(89), $proxyHost, $proxyPort) . '<br />UPLOAD: <b>' . htmlspecialchars($url) . "</b>...<br />\n";
 	else echo '<p>'.sprintf(lang(90), $host, $port).'</p>';
 
-	if ($scheme == 'tls://' && $proxy) {
+	if ($scheme == 'ssl://' && $proxy) {
 		$connRequest = array();
 		$connRequest[''] = "CONNECT $host:$port HTTP/1.1";
 		if (!empty($pauth)) $connRequest['proxy-authorization'] = "Basic $pauth";
@@ -858,24 +858,24 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 
 	if ($scheme == 'https://') {
 		if (!extension_loaded('openssl')) return html_error('You need to install/enable PHP\'s OpenSSL extension to support uploading via HTTPS.');
-		$scheme = 'tls://';
+		$scheme = 'ssl://';
 		if ($port == 0 || $port == 80) $port = 443;
 	} else if ($port == 0) $port = 80;
 
 	if (!empty($referer) && ($pos = strpos("\r\n", $referer)) !== 0) {
 		$origin = parse_url($pos ? substr($referer, 0, $pos) : $referer);
 		$origin = strtolower($origin['scheme']) . '://' . strtolower($origin['host']) . (!empty($origin['port']) && $origin['port'] != defport(array('scheme' => $origin['scheme'])) ? ':' . $origin['port'] : '');
-	} else $origin = ($scheme == 'tls://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'tls://' || $port != 443) ? ':' . $port : '');
+	} else $origin = ($scheme == 'ssl://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
 
 	if ($proxy) {
 		list($proxyHost, $proxyPort) = explode(':', $proxy, 2);
-		if ($scheme != 'tls://') {
+		if ($scheme != 'ssl://') {
 			$host = $host . ($port != 80 && $port != 443 ? ":$port" : '');
 			$url = "$scheme$host$url";
 		}
 	}
 
-	if ($scheme != 'tls://') $scheme = '';
+	if ($scheme != 'ssl://') $scheme = '';
 
 	$cHeaders = readCustomHeaders($referer);
 	$request = array();
@@ -898,7 +898,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 
 	$errno = 0;
 	$errstr = '';
-	if ($scheme == 'tls://') {
+	if ($scheme == 'ssl://') {
 		$hosts = (!empty($proxyHost) ? $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
 		if ($proxy) $url = "https://$host$url"; // For the 'connected to' message
 	} else $hosts = (!empty($proxyHost) ? $scheme . $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
@@ -919,7 +919,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 	if ($proxy) echo '<p>' . sprintf(lang(89), $proxyHost, $proxyPort) . '<br />PUT: <b>' . htmlspecialchars($url) . "</b>...<br />\n";
 	else echo '<p>'.sprintf(lang(90), $host, $port).'</p>';
 
-	if ($scheme == 'tls://' && $proxy) {
+	if ($scheme == 'ssl://' && $proxy) {
 		$connRequest = array();
 		$connRequest[''] = "CONNECT $host:$port HTTP/1.1";
 		if (!empty($pauth)) $connRequest['proxy-authorization'] = "Basic $pauth";
