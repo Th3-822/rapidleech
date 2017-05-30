@@ -222,7 +222,7 @@ class youtube_com extends DownloadClass {
 		$this->sts = $this->sts[1];
 
 		$savefile = DOWNLOAD_DIR.'YT_lastjs.txt';
-		if (!preg_match('@/(?:html5)?player-([\w\-\.]+(?:/[\w\-\.]+)?)\.js@i', str_replace('\\/', '/', $page), $this->js)) html_error('YT\'s player javascript not found.');
+		if (!preg_match('@/(?:html5)?player-([\w\-\.]+(?:(?:/\w+)?/[\w\-\.]+)?)\.js@i', str_replace('\\/', '/', $page), $this->js)) html_error('YT\'s player javascript not found.');
 		if (@file_exists($savefile) && ($file = file_get_contents($savefile, NULL, NULL, -1, 822)) && ($saved = @unserialize($file)) && is_array($saved) && !empty($saved['sts']) && $saved['sts'] == $this->sts && !empty($saved['steps']) && preg_match('@^\s*([ws]\d+|r)( ([ws]\d+|r))*\s*$@', $saved['steps'])) {
 			$this->encS = explode(' ', trim($saved['steps']));
 		} else {
@@ -345,4 +345,4 @@ class youtube_com extends DownloadClass {
 // [05-2-2016]  Fixed captcha (Now uses reCaptcha2) & Added cookie storage for it. - Th3-822
 // [08-6-2016]  Added support to download DASH formats & Revised video formats handling. - Th3-822
 // [30-8-2016]  Fixed slow speed while downloading DASH streams. - Th3-822
-// [31-1-2017]  Fixed signature decoding functions. - Th3-822
+// [30-4-2017]  Fixed signature decoding functions. - Th3-822

@@ -107,16 +107,16 @@ function updateFtpProgress($bytesReceived) {
 		$bytesReceived = $FtpUploadBytesSent;
 	}
 	$FtpBytesReceived = $bytesReceived;
-	if ($bytesReceived > $FtpLast + $FtpChunkSize) {
+	if ($bytesReceived > $FtpLast + $FtpChunkSize && (!$FtpLastChunkTime || !((microtime(true) - $FtpLastChunkTime) < 1))) {
 		$time = microtime(true) - $FtpTimeStart;
 		$chunkTime = $time - $FtpLastChunkTime;
 		$FtpLastChunkTime = $time;
-		$speed = round($FtpChunkSize / 1024 / $chunkTime, 2);
-		# $FtpBytesReceived = $bytesReceived;
-		if ($bytesReceived > $FtpBytesTotal) $percent = 100;
-		else $percent = round($bytesReceived / $FtpBytesTotal * 100, 2);
-		$FtpLast = $bytesReceived;
+		if ($bytesReceived >= $FtpBytesTotal) $percent = 100;
+		else $percent = @round($bytesReceived / $FtpBytesTotal * 100);
+		$speed = @round((($bytesReceived - $FtpLast) / 1024) / $chunkTime, 2);
 		echo "<script type='text/javascript'>pr($percent, '" . bytesToKbOrMbOrGb($bytesReceived) . "', $speed)</script>\r\n";
+		flush();
+		$FtpLast = $bytesReceived;
 	}
 }
 

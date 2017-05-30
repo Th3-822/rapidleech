@@ -38,12 +38,12 @@ class baidu_com extends DownloadClass {
 			$post['vcode_str'] = urlencode($_POST['vcode_str']);
 		}
 
-		$json = $this->GetPage("$host/api/sharedownload?app_id={$yunData['file_list']['list'][0]['app_id']}&bdstoken={$yunData['bdstoken']}&channel=chunlei&clienttype=0&sign={$yunData['sign']}&timestamp={$yunData['timestamp']}&web=1", $cookie, $post, "$link\r\nX-Requested-With: XMLHttpRequest");
+		$json = $this->GetPage("$host/api/sharedownload?app_id={$yunData['file_list']['list'][0]['app_id']}&bdstoken={$yunData['bdstoken']}&channel=chunlei&clienttype=0&sign={$yunData['sign']}&timestamp={$yunData['timestamp']}&web=1", $cookie, $post, $GLOBALS['Referer'] . "\r\nX-Requested-With: XMLHttpRequest");
 		$data = $this->json2array($json, 'Error getting download info');
 
 		if (!empty($data['errno'])) {
 			if ($data['errno'] == -20) {
-				$captcha = $this->json2array($this->GetPage("{$host}/api/getcaptcha?app_id={$yunData['file_list']['list'][0]['app_id']}&bdstoken={$yunData['bdstoken']}&channel=chunlei&clienttype=0&prod=share&web=1", $cookie, $post, "$link\r\nX-Requested-With: XMLHttpRequest"), 'Error getting captcha data');
+				$captcha = $this->json2array($this->GetPage("{$host}/api/getcaptcha?app_id={$yunData['file_list']['list'][0]['app_id']}&bdstoken={$yunData['bdstoken']}&channel=chunlei&clienttype=0&prod=share&web=1", $cookie, $post, $GLOBALS['Referer'] . "\r\nX-Requested-With: XMLHttpRequest"), 'Error getting captcha data');
 				if (!empty($captcha['errno'])) html_error("Unknown captcha error [{$captcha['errno']}]");
 
 				$data = $this->DefaultParamArr($link, $cookie, 1, 1);
@@ -77,6 +77,4 @@ class baidu_com extends DownloadClass {
 
 // [26-8-2016] Written by Th3-822.
 // [30-8-2016] Switched links to http to help decrease connection errors & Changed User-Agent for "better" download speed. - Th3-822
-// [03-1-2017] Fixed. - Th3-822
-
-?>
+// [18-4-2017] Fixed. - Th3-822

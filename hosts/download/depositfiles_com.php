@@ -308,12 +308,11 @@ class depositfiles_com extends DownloadClass {
 				$data['premium_user'] = urlencode(encrypt($user));
 				$data['premium_pass'] = urlencode(encrypt($pass));
 			}
-			html_error('reCAPTCHA2 Not Supported ATM.');
 			$this->reCAPTCHAv2($cpid[1], $data, 0, 'Login');
 		}
 	}
 
-	// Special Function Called by verifyReCaptchav2 When Captcha Is Incorrect, To Allow Retry. - Required
+	// Special Function Called by verifyReCaptchav2 When Captcha Is Incorrect, To Allow Retry. - Required for NoScript reCAPTCHA2
 	protected function retryReCaptchav2() {
 		$data = $this->DefaultParamArr($this->link);
 		$data['step'] = '1';

@@ -13,7 +13,8 @@ class subyshare_com extends GenericXFS_DL {
 	public function Download($link) {
 		$this->wwwDomain = false; // Switch to true if filehost forces it's domain with www.
 		$this->cname = 'xfss'; // Session cookie name
-		$this->sslLogin = false; // Force https on login.
+		$this->httpsOnly = false; // Force https on all the site, supersedes $this->sslLogin when true.
+		$this->sslLogin = false; // Force https on login post only.
 		$this->embedDL = false; // Try to unpack player's js for finding download link. (Only hosts with video player)
 		$this->unescaper = false; // Enable JS unescape decoder.
 

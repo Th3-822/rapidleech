@@ -6,7 +6,7 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class keep2share_cc extends DownloadClass {
-	private $page, $cookie = array(), $pA;
+	private $page, $cookie = array('use_new_design' => 0), $pA;
 	public function Download($link) {
 		$this->LnkRegexp = '@https?://(?:www\.)?(keep2share\.(?:cc|com)|k(?:eep)?2s\.cc)/file(?:/info)?/(\w+)@i';
 		$this->RDRegexp = '@/file/url.html\?file=\w+@i';
@@ -14,13 +14,13 @@ class keep2share_cc extends DownloadClass {
 
 		if (!preg_match($this->LnkRegexp, $link, $fid)) html_error('Invalid link?.');
 		$this->domain = $fid[1];
-		$this->link = $GLOBALS['Referer'] = 'http://'.$fid[1].'/file/'.$fid[2];
+		$this->link = $GLOBALS['Referer'] = 'https://'.$fid[1].'/file/'.$fid[2];
 
 		if (empty($_POST['step'])) {
 			$this->page = $this->GetPage($this->link, $this->cookie);
 			if (preg_match($this->LnkRegexp, $this->page, $fid)) {
 				$this->domain = $fid[1];
-				$this->link = $GLOBALS['Referer'] = 'http://'.$fid[1].'/file/'.$fid[2];
+				$this->link = $GLOBALS['Referer'] = 'https://'.$fid[1].'/file/'.$fid[2];
 				$this->cookie = GetCookiesArr($this->page, $this->cookie);
 				$this->page = $this->GetPage($this->link, $this->cookie);
 			}
@@ -60,7 +60,7 @@ class keep2share_cc extends DownloadClass {
 
 			// Check direct link
 			if (preg_match($this->RDRegexp, $page, $idDl)) {
-				$page = $this->GetPage('http://'.$this->domain.$idDl[0], $this->cookie);
+				$page = $this->GetPage('https://'.$this->domain.$idDl[0], $this->cookie);
 				if (!preg_match($this->DLRegexp, $page, $dl)) html_error('Download Link Not Found.');
 				return $this->RedirectDownload($dl[0], 'T8_k2s_fr2', $this->cookie);
 			}
@@ -74,7 +74,7 @@ class keep2share_cc extends DownloadClass {
 				$this->reCAPTCHA($pid[1], $data);
 			} elseif (preg_match('@\W(file/captcha\.html\?v=\w+)@i', $page, $cpid)) {
 				$data['step'] = '2';
-				list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage('http://'.$this->domain.'/'.$cpid[1], $this->cookie), 2);
+				list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage('https://'.$this->domain.'/'.$cpid[1], $this->cookie), 2);
 				if (substr($headers, 9, 3) != '200') html_error('Error downloading captcha img.');
 				$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/png');
 				$this->EnterCaptcha("data:$mimetype;base64,".base64_encode($imgBody), $data, 20);
@@ -110,7 +110,7 @@ class keep2share_cc extends DownloadClass {
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 
 		if (!preg_match($this->RDRegexp, $page, $idDl)) html_error('Redirect Link Not Found.');
-		$page = $this->GetPage('http://'.$this->domain.$idDl[0], $this->cookie);
+		$page = $this->GetPage('https://'.$this->domain.$idDl[0], $this->cookie);
 
 		if (!preg_match($this->DLRegexp, $page, $dl)) html_error('Download Link Not Found.');
 
@@ -131,7 +131,7 @@ class keep2share_cc extends DownloadClass {
 				$data['step'] = '3';
 				return $this->reCAPTCHA($pkey[1], $data);
 			} elseif (preg_match('@(https?://(?:www\.)?(?:keep2share\.(?:cc|com)|k(?:eep)?2s\.cc))?(?(1)/)(?:[^/\"\'<>\s]+/)*captcha\.html\?v=\w+@i', $page, $imgcap)) {
-				$imgcap = empty($imgcap[1]) ? 'http://'.$this->domain.'/'.$imgcap[0] : $imgcap[0];
+				$imgcap = empty($imgcap[1]) ? 'https://'.$this->domain.'/'.$imgcap[0] : $imgcap[0];
 				$data['step'] = '4';
 				list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage($purl . $cpid[1], $this->cookie), 2);
 				if (substr($headers, 9, 3) != '200') html_error('Error downloading captcha img.');
@@ -165,7 +165,7 @@ class keep2share_cc extends DownloadClass {
 		if (!($page = $this->postAntiBotCaptcha())) $page = $this->GetPage($this->link, $this->cookie);
 		if (preg_match($this->LnkRegexp, $page, $fid)) {
 			$this->domain = $fid[1];
-			$this->link = $GLOBALS['Referer'] = 'http://'.$fid[1].'/file/'.$fid[2];
+			$this->link = $GLOBALS['Referer'] = 'https://'.$fid[1].'/file/'.$fid[2];
 			$this->cookie = GetCookiesArr($page, $this->cookie);
 			$page = $this->GetPage($this->link, $this->cookie);
 		}
@@ -179,13 +179,13 @@ class keep2share_cc extends DownloadClass {
 		is_present($page, 'Traffic limit exceed!');
 
 		if (!preg_match($this->RDRegexp, $page, $idDl)) html_error('Redirect-Link Not Found.');
-		$page = $this->GetPage('http://'.$this->domain.$idDl[0], $this->cookie);
+		$page = $this->GetPage('https://'.$this->domain.$idDl[0], $this->cookie);
 		if (!preg_match($this->DLRegexp, $page, $dl)) html_error('Download-Link Not Found.');
 		return $this->RedirectDownload($dl[0], 'T8_k2s_pr', $this->cookie);
 	}
 
 	private function Login($user, $pass) {
-		$purl = 'http://'.$this->domain.'/';
+		$purl = 'https://'.$this->domain.'/';
 
 		$post = array();
 		$post['LoginForm%5Busername%5D'] = urlencode($user);
@@ -240,6 +240,7 @@ class keep2share_cc extends DownloadClass {
 		is_present($page, 'Incorrect username or password', 'Login Failed: Email/Password incorrect.');
 		is_present($page, 'You logged in from different country IP', 'Login Failed: Your account was locked for security reasons, to unlock your account check your email.');
 		if (empty($this->cookie['c903aeaf0da94d1b365099298d28f38f'])) html_error('Login Cookie Not Found.');
+		$this->cookie['use_new_design'] = 0;
 
 		$page = $this->GetPage($purl, $this->cookie, 0, $purl.'login.html');
 		is_notpresent($page, '/auth/logout.html">Logout', 'Login Error.');
@@ -282,7 +283,8 @@ class keep2share_cc extends DownloadClass {
 			$secretkey = $_secretkey;
 			if (empty($testCookie) || (is_array($testCookie) && count($testCookie) < 1)) return $this->Login($user, $pass);
 
-			$page = $this->GetPage('http://'.$this->domain.'/', $testCookie);
+			$testCookie['use_new_design'] = 0;
+			$page = $this->GetPage('https://'.$this->domain.'/', $testCookie);
 			if (stripos($page, '/auth/logout.html">Logout') === false) return $this->Login($user, $pass);
 			$this->cookie = GetCookiesArr($page, $testCookie); // Update cookies
 			$this->SaveCookies($user, $pass); // Update cookies file
@@ -320,5 +322,4 @@ class keep2share_cc extends DownloadClass {
 //[02-8-2014] Fixed FreeDL captcha. - Th3-822
 //[02-1-2016] Fixed FreeDL countdown. - Th3-822
 //[17-1-2016] Merged updates from fileboom plugin. - Th3-822
-
-?>
+//[01-4-2017] Switched to https and added cookie to avoid site's new design. - Th3-822

@@ -27,12 +27,12 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 } else {
 	$login = $not_done = false;
 	$domain = 'keep2share.cc';
-	$referer = "http://$domain/";
+	$referer = "https://$domain/";
 
 	// Login
 	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='login' width='100%' align='center'>Login to $domain</div>\n";
 
-	$cookie = array();
+	$cookie = array('use_new_design' => 0);
 	if (!empty($_REQUEST['up_login']) && !empty($_REQUEST['up_pass'])) {
 		if (!empty($_REQUEST['A_encrypted'])) {
 			$_REQUEST['up_login'] = decrypt(urldecode($_REQUEST['up_login']));
@@ -53,19 +53,19 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
 
 	$url = parse_url($uploadData['form_action']);
-	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer, 0, $uploadData['form_data'], $lfile, $lname, $uploadData['file_field'], '', 0, 0, 0, $url['scheme']);
+	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer, 0, $uploadData['form_data'], $lfile, $lname, $uploadData['file_field'], '', $_GET['proxy'], $pauth, 0, $url['scheme']);
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";
 
 	is_page($upfiles);
 
-	$status = (int)substr($upfiles, 9, 3);
+	$status = intval(substr($upfiles, 9, 3));
 	$ulResult = ($status >= 500) ? array('status' => 'fail', 'code' => $status, 'message' => "HTTP Error $status.") : Get_Reply($upfiles);
 	k2s_checkErrors($ulResult, $prefix = 'Upload error');
 
 	if (empty($ulResult['user_file_id'])) html_error('Download link not found.');
-	$download_link = 'http://k2s.cc/file/'.$ulResult['user_file_id'];
+	$download_link = 'https://k2s.cc/file/'.$ulResult['user_file_id'];
 }
 
 // Edited For upload.php usage.
@@ -114,7 +114,7 @@ function Login($user, $pass) {
 	$post['LoginForm%5Bpassword%5D'] = urlencode($pass);
 	$post['LoginForm%5BrememberMe%5D'] = 1;
 	if (empty($_POST['step']) || !in_array($_POST['step'], array('1', '2'))) {
-		$page = geturl($domain, 80, '/login.html', $referer, 0, $post, 0, $_GET['proxy'], $pauth);is_page($page);
+		$page = geturl($domain, 0, '/login.html', $referer, 0, $post, 0, $_GET['proxy'], $pauth, 0, 'https');is_page($page);
 		$cookie = GetCookiesArr($page);
 
 		if (stripos($page, 'The verification code is incorrect.') !== false) {
@@ -132,7 +132,7 @@ function Login($user, $pass) {
 			} elseif (preg_match('@\W(auth/captcha\.html\?v=\w+)@i', $page, $cpid)) {
 				$data['step'] = '2';
 
-				$imgReq = geturl($domain, 80, '/' . $cpid[1], $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($imgReq);
+				$imgReq = geturl($domain, 0, '/' . $cpid[1], $referer, $cookie, 0, 0, $_GET['proxy'], $pauth, 0, 'https');is_page($imgReq);
 				list($headers, $imgBody) = explode("\r\n\r\n", $imgReq, 2);
 				unset($imgReq);
 				if (substr($headers, 9, 3) != '200') html_error('Error downloading captcha img.');
@@ -151,7 +151,7 @@ function Login($user, $pass) {
 		$test = k2s_apireq('test');
 		if ($test['code'] != 403) k2s_checkErrors($test, 'Login error');
 		else {
-			$page = geturl($domain, 80, '/', $referer.'login.html', $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+			$page = geturl($domain, 0, '/', $referer.'login.html', $cookie, 0, 0, $_GET['proxy'], $pauth, 0, 'https');is_page($page);
 			is_notpresent($page, '/auth/logout.html">Logout', 'Login Error.');
 		}
 
@@ -172,7 +172,7 @@ function Login($user, $pass) {
 	$_POST['step'] = false;
 	$cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
 
-	$page = geturl($domain, 80, '/login.html', $referer, $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);
+	$page = geturl($domain, 0, '/login.html', $referer, $cookie, $post, 0, $_GET['proxy'], $pauth, 0, 'https');is_page($page);
 	$cookie = GetCookiesArr($page, $cookie);
 
 	is_present($page, 'The verification code is incorrect.');
@@ -180,11 +180,12 @@ function Login($user, $pass) {
 	is_present($page, 'You logged in from different country IP', 'Login Failed: Your account was locked for security reasons, to unlock your account check your email');
 	if (empty($cookie['c903aeaf0da94d1b365099298d28f38f'])) html_error('Login Cookie Not Found');
 	if (empty($cookie['sessid'])) html_error('Session Cookie Not Found');
+	$cookie['use_new_design'] = 0;
 
 	$test = k2s_apireq('test');
 	if ($test['code'] != 403) k2s_checkErrors($test, 'Login Error');
 	else {
-		$page = geturl($domain, 80, '/', $referer.'login.html', $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		$page = geturl($domain, 0, '/', $referer.'login.html', $cookie, 0, 0, $_GET['proxy'], $pauth, 0, 'https');is_page($page);
 		is_notpresent($page, '/auth/logout.html">Logout', 'Login Error');
 	}
 
@@ -230,11 +231,12 @@ function CookieLogin($user, $pass) {
 		$secretkey = $_secretkey;
 		if (empty($testCookie) || (is_array($testCookie) && count($testCookie) < 1)) return Login($user, $pass);
 
+		$testCookie['use_new_design'] = 0;
 		$test = k2s_apireq('test', array('auth_token' => urldecode($testCookie['sessid'])));
 		if ($test['code'] != 403) k2s_checkErrors($test, 'Login error');
 		else {
 			// If session is expired, try to get a updated one from the site with the cookies
-			$page = geturl($domain, 80, '/', $referer.'login.html', $testCookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+			$page = geturl($domain, 0, '/', $referer.'login.html', $testCookie, 0, 0, $_GET['proxy'], $pauth, 0, 'https');is_page($page);
 			$testCookie = GetCookiesArr($page, $testCookie);
 			if (stripos($page, '/auth/logout.html">Logout') === false || empty($testCookie['sessid'])) return Login($user, $pass);
 			// Test possibly updated session
@@ -303,15 +305,14 @@ function k2s_apireq($actionPath, $post = array()) {
 	if (!is_array($post)) html_error('k2s_apireq: Parameter 2 must be passed as an array.');
 	$post['auth_token'] = (!empty($post['auth_token']) ? $post['auth_token'] : (!empty($GLOBALS['cookie']['sessid']) ? urldecode($GLOBALS['cookie']['sessid']) : false));
 
-	$page = geturl($GLOBALS['domain'], 80, '/api/v1/'.$actionPath, $GLOBALS['referer'], 0, json_encode($post), 0, $_GET['proxy'], $GLOBALS['pauth']);
+	$page = geturl($GLOBALS['domain'], 0, '/api/v1/'.$actionPath, $GLOBALS['referer'], 0, json_encode($post), 0, $_GET['proxy'], $GLOBALS['pauth'], 0, 'https');
 	is_page($page);
 
-	$status = (int)substr($page, 9, 3);
+	$status = intval(substr($page, 9, 3));
 	if ($status >= 500) return array('status' => 'fail', 'code' => $status, 'message' => "k2s_apireq: HTTP Error $status.");
 
 	return Get_Reply($page);
 }
 
 //[31-7-2014]  Written by Th3-822.
-
-?>
+//[04-4-2017] Switched to https and added cookie to avoid site's new design. - Th3-822

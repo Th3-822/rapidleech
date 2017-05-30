@@ -11,8 +11,8 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class GenericXFS_DL extends DownloadClass {
-	protected $page, $cookie, $baseCookie = array('lang' => 'english'), $scheme, $wwwDomain, $domain, $port, $host, $purl, $httpsOnly = false, $sslLogin = false, $cname = 'xfss', $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi)/(?:[^\?\'\"\t<>\r\n\\\]{15,}|v(?:id(?:eo)?)?\.(?:flv|mp4))@i';
-	private $classVer = 20;
+	protected $page, $cookie, $baseCookie = array('lang' => 'english'), $scheme, $wwwDomain, $domain, $port, $host, $purl, $httpsOnly = false, $sslLogin = false, $cname = 'xfss', $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi|[\da-zA-Z]{30,})/(?:[^\?\'\"\t<>\r\n\\\]{15,}|v(?:id(?:eo)?)?\.(?:flv|mp4))@i';
+	private $classVer = 21;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -108,16 +108,16 @@ class GenericXFS_DL extends DownloadClass {
 
 	protected function runDecoders() {
 		// Packed embedded video decoder
-		if (!empty($this->embedDL) && preg_match_all('@eval\s*\(\s*function\s*\(p,a,c,k,e,d\)\s*\{.*\}\s*\(\s*\'([^\r|\n]*)\'\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*\'([^\']+)\'\.split\([\'|\"](.)[\'|\"]\)(?:,\d,\{\})?\)\)@', $this->page, $js)) {
+		if (!empty($this->embedDL) && preg_match_all('@eval\s*\(\s*function\s*\(p,a,c,k,e,d\)\s*\{.+\}\s*\(\s*\'([^\r|\n]*)\'\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*\'([^\']+)\'\.split\([\'|\"](.)[\'|\"]\)(?:\s*,\s*\d\s*,\s*\{\})?\)\)@', $this->page, $js)) {
 			$cnt = count($js[0]);
-			for ($i = 0; $i < count($js[0]); $i++) {
+			for ($i = 0; $i < $cnt; $i++) {
 				$this->page = str_replace($js[0][$i], $this->XFSUnpacker($js[1][$i], $js[2][$i], $js[3][$i], $js[4][$i], $js[5][$i]), $this->page);
 			}
 		}
 		// JS unescape decoder
 		if (!empty($this->unescaper) && preg_match_all('@eval\s*\(unescape\s*\(\s*(\"|\')([%\da-fA-F]+)\1\s*\)\s*\)\s*;?@', $this->page, $js)) {
 			$cnt = count($js[0]);
-			for ($i = 0; $i < count($js[0]); $i++) {
+			for ($i = 0; $i < $cnt; $i++) {
 				$this->page = str_replace($js[0][$i], urldecode($js[2][$i]), $this->page);
 			}
 		}

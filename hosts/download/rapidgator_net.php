@@ -260,5 +260,3 @@ class rapidgator_net extends DownloadClass {
 // [20-5-2014] Fixed Login, bw error msg. - Th3-822
 // [16-12-2015][WIP] Fixing Blocks, Redirect Handling & Forcing Plugin To Use cURL. - Th3-822
 // [01-8-2016] Fixed FreeDL Captchas. - Th3-822
-
-?>

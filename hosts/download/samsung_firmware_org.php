@@ -7,7 +7,7 @@ if (!defined('RAPIDLEECH')) {
 
 class samsung_firmware_org extends DownloadClass {
 	public function Download($link) {textarea($link);
-		if (!preg_match('@(https://samsung-firmware\.org/)(?:\w+/)(download/[\w\-\%() ]+/[\w\-\.]+/\w{3}/(?:\w+/){1,2})@i', $link, $_link)) html_error('Invalid Link?.');
+		if (!preg_match('@(https://samsung-firmware\.org/)(?:\w+/)?(download/[\w\-\%() ]+/[\w\-\.]+/\w{3}/(?:\w+/){1,2})@i', $link, $_link)) html_error('Invalid Link?.');
 		$link = $GLOBALS['Referer'] = $_link[1] . $_link[2];
 
 		$pA = (empty($_REQUEST['premium_user']) || empty($_REQUEST['premium_pass']) ? false : true);
@@ -42,4 +42,4 @@ class samsung_firmware_org extends DownloadClass {
 }
 
 //[30-12-2016] Written by Th3-822.
-//[21-02-2017] Updated Link Regexp. - Th3-822
+//[01-4-2017] Updated Link Regexp. - Th3-822
