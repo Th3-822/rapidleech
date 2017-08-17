@@ -117,7 +117,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		$rdc++;
 	}
 
-	if (!preg_match('@var\s+form_url\s*=\s*"(https?://[^/|\"]+/[^\"]+)"\s*;@i', $page, $form_url) || !preg_match('@var\s+progress_url_web\s*=\s*"(https?://[^/|\"]+/[^\"]+)"\s*;@i', $page, $prog_url)) {
+	if (!preg_match('@var\s+form_url\s*=\s*setProtocol\("(https?:\/\/[^/|\"]+\/[^\"]+)"\)\s*;@i', $page, $form_url) || !preg_match('@var\s+progress_url_web\s*=\s*setProtocol\("(https?:\/\/[^/|\"]+\/[^\"]+)"\)\s*;@i', $page, $prog_url)) {
 		is_present($page, 'Your storage space is full. Delete some files or upgrade to the new', 'Your storage space is full');
 		html_error('Error: Cannot find upload url.');
 	}
