@@ -88,7 +88,7 @@ if (isset($_GET['auul'])) {
 	echo "<script type='text/javascript'>parent.nextlink{$_GET['auul']}();</script>";
 	// Write links to a file
 	if (!$options['myuploads_disable']) {
-		if (empty($_GET['save_style']) || $_GET['save_style'] == lang(51)) $_GET['save_style'] = '{name}\n' . str_repeat('=', 80) . '\n{link}\n';
+		if (empty($_GET['save_style']) || $_GET['save_style'] == lang(51)) $_GET['save_style'] = base64_encode('{name}\n' . str_repeat('=', 80) . '\n{link}\n');
 
 		$save_style = str_ireplace(array('{link}', '{name}', '\n', '{size}', '{sizeb}'), array($download_link, $lname, "\r\n", bytesToKbOrMbOrGb($fsize), $fsize), base64_decode($_GET['save_style']));
 		write_file(DOWNLOAD_DIR . 'myuploads.txt', "$save_style\r\n", 0); // Obviously it was a mistake not making it a variable earlier
