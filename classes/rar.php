@@ -95,7 +95,7 @@ class rlRar {
 				$return = 'NO_FILES_TO_ADD';
 			} else {
 				$rar_cmd = 'a -ierr -ep -o- ';
-				if (!empty($this->rar_opts['rar5'])) $rar_cmd .= '-ma5 ';
+				$rar_cmd .= '-ma' . (empty($this->rar_opts['rar5']) ? '4' : '5') . ' ';
 				$rar_cmd .= "-m{$this->rar_opts['comp_lvl']} ";
 				if ($this->rar_opts['vols']) {
 					$vols_sm = array(3 => 'm', 4 => 'M', 5 => 'g', 6 => 'G');
@@ -114,12 +114,11 @@ class rlRar {
 				}
 				if ($this->rar_opts['path_i']) $rar_cmd .= '-ap' . escapeshellarg($this->rar_opts['path_i_path']) . ' ';
 				$this->runit($rar_cmd, $rar_file_list, $jsoutid, $debug_id);
-				if ($this->rar_return == 7 && !empty($this->rar_list) && strpos($this->rar_list[0], 'Unknown option: ma5') !== false) {
-					// Trying to create rar5 file with older rar.
-					$rar_cmd = str_replace(' -ma5 ', ' ', $rar_cmd);
+				if ($this->rar_return == 7 && !empty($this->rar_list) && strpos($this->rar_list[0], 'Unknown option: ma') !== false) {
+					// Using older rar, so it doesn't support the -ma switches
+					$rar_cmd = str_replace(array(' -ma5 ', ' -ma4 '), ' ', $rar_cmd);
 					$this->runit($rar_cmd, $rar_file_list, $jsoutid, $debug_id + 1);
 				}
-				$return = nl2br("UNKNOWN_ERROR\n{$this->rar_return}\n" . htmlspecialchars($this->rar_error));
 				switch ($this->rar_return) {
 					case 0:
 						if (strtolower(substr(trim($this->rar_error), -4)) == 'done') $return = 'Done';
@@ -132,6 +131,7 @@ class rlRar {
 					case 8: $return = 'MEMORY ERROR';break;
 					case 9: $return = 'CREATE ERROR';break;
 					case 255: $return = 'USER BREAK';break;
+					default: $return = nl2br("UNKNOWN_ERROR\n{$this->rar_return}\n" . htmlspecialchars($this->rar_error));break;
 				}
 			}
 		}
@@ -202,7 +202,6 @@ class rlRar {
 		else {
 			$password = $this->fix_pass($password);
 			$this->runit("e -ierr -o- -c- -ts- $password", "\"$file\" \"$dest\"", $jsoutid, $debug_id);
-			$return = nl2br("UNKNOWN_ERROR\n{$this->rar_return}\n" . htmlspecialchars($this->rar_error));
 			switch ($this->rar_return) {
 				case 0:
 					if (strtolower(substr(trim($this->rar_error), -6)) == 'all ok') $return = 'OK';
@@ -219,6 +218,7 @@ class rlRar {
 				case 9: $return = 'CREATE ERROR';break;
 				case 11: $return = 'INCORRECT PASSWORD';break;
 				case 255: $return = 'USER BREAK';break;
+				default: $return = nl2br("UNKNOWN_ERROR\n{$this->rar_return}\n" . htmlspecialchars($this->rar_error));break;
 			}
 		}
 		if ($jsoutid !== '') return "<script type='text/javascript'>/* <![CDATA[ */rar_st('$jsoutid', '" . preg_replace("/\r?\n/", "\\n", addslashes($return)) . "')/* ]]> */</script>\r\n";

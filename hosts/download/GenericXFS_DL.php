@@ -12,7 +12,7 @@ if (!defined('RAPIDLEECH')) {
 
 class GenericXFS_DL extends DownloadClass {
 	protected $page, $cookie, $baseCookie = array('lang' => 'english'), $scheme, $wwwDomain, $domain, $port, $host, $purl, $httpsOnly = false, $sslLogin = false, $cname = 'xfss', $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi|[\da-zA-Z]{30,})/(?:[^\?\'\"\t<>\r\n\\\]{15,}|v(?:id(?:eo)?)?\.(?:flv|mp4))@i';
-	private $classVer = 21;
+	private $classVer = 22;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -178,8 +178,9 @@ class GenericXFS_DL extends DownloadClass {
 		} elseif (preg_match('@(?:https?:)?//api(?:-secure)?\.solvemedia\.com/papi/challenge\.(?:no)?script\?k=([\w\.\-]+)@i', $this->page, $smCaptcha)) {
 			// SolveMedia Captcha
 			$this->captcha = array('type' => 4, 'key' => $smCaptcha[1]);
-		} elseif (preg_match('@(?:class|id)=["\']g-recaptcha["\']\s+data-sitekey=["\']([\w\.\-]+)["\']@i', $this->page, $cpid)) {
-			html_error('Unsupported CAPTCHA [reCAPTCHA2]');
+		} elseif (preg_match('@(?:class|id)=["\']g-recaptcha["\']\s+data-sitekey=["\']([\w\.\-]+)["\']@i', $this->page, $reCaptcha2)) {
+			// reCAPTCHA2
+			$this->captcha = array('type' => 5, 'key' => $reCaptcha2[1]);
 		}
 		return (!empty($this->captcha));
 	}
@@ -208,6 +209,7 @@ class GenericXFS_DL extends DownloadClass {
 					return true;
 				case 3: return $this->reCAPTCHA($this->captcha['key'], $data);
 				case 4: return $this->SolveMedia($this->captcha['key'], $data);
+				case 5: return $this->reCAPTCHAv2($this->captcha['key'], $data);
 			}
 		}
 		return false;
@@ -235,6 +237,10 @@ class GenericXFS_DL extends DownloadClass {
 				$this->captcha = array('type' => 4);
 				$post = array_merge($post, $this->verifySolveMedia());
 				break;
+			case '5': // reCAPTCHA2
+				$this->captcha = array('type' => 5);
+				$post = array_merge($post, $this->verifyReCaptchav2());
+				break;
 		}
 		$step = intval($_POST['step']);
 		$_POST['step'] = $_POST['captcha_type'] = false;
@@ -246,7 +252,7 @@ class GenericXFS_DL extends DownloadClass {
 	// Finds FreeDL countdown on $this->page and calls $this->CountDown(X) for it.
 	// return true if there is a countdown, false otherwise.
 	protected function findCountdown() {
-		if (preg_match('@<span[^>]*>(?>.*?<span\s+id=[\'"][\w\-]+[\'"][^>]*>)\s*(\d+)\s*</span>(?>.*?</span>)@sim', $this->page, $count) || preg_match('@<span[^>]*>(?>[\w ]*?<span\s+class=[\'\"](?:\w+\s+)*seconds(?:\s+\w+)*[\'\"][^>]*>)\s*(\d+)\s*</span>(?>[\w ]*?</span>)@sim', $this->form, $count)) {
+		if (preg_match('@<span[^>]*>(?>.*?<span\s+id=[\'"][\w\-]+[\'"][^>]*>)\s*(\d+)\s*</span>(?>.*?</span>)@sim', $this->page, $count) || preg_match('@<span[^>]*>(?>[\w\s]*?<span\s+class=[\'\"](?:[\w-]+\s+)*seconds(?:\s+\w+)*[\'\"][^>]*>)\s*(\d+)\s*</span>(?>[\w\s]*?</span>)@sim', $this->form, $count)) {
 			if ($count[1] > 0) $this->CountDown($count[1] + 2);
 			return true;
 		}
@@ -285,7 +291,7 @@ class GenericXFS_DL extends DownloadClass {
 			}
 			return html_error('Non aceptable form found.');
 		}
-		is_present($this->page, '>Skipped countdown', "Error: Skipped countdown? [$step].");
+		if (preg_match('@>\s*Skipped countdown@i', $this->page)) html_error("Error: Skipped countdown? [$step].");
 		$this->checkCaptcha($step);
 		switch ($this->post['op']) {
 			default: html_error('Unknown form op.');

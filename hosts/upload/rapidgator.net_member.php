@@ -62,7 +62,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		//Redirects
 		$rdc = 0;
 		$page = false; // False value for starting the loop.
-		$redir = "http://$domain/auth/login";
+		$redir = "https://$domain/auth/login";
 		if (!empty($_POST['referer'])) $referer = $_POST['referer'];
 		while (($redir = ChkRGRedirs($page, $redir, '(?:/auth/login|/site/ChangeLocation/key/)', $default_acc)) && $rdc < 15) {
 			$page = cURL($redir, $cookie, $post, $referer);
@@ -77,7 +77,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		if (stripos($page, 'The code from a picture does not coincide') !== false) {
 			if (!empty($post['LoginForm%5BverifyCode%5D'])) html_error('Login Failed: Incorrect CAPTCHA response.');
 			if (!preg_match('@(https?://(?:[^\./\r\n\'\"\t\:]+\.)?rapidgator\.net(?:\:\d+)?)?/auth/captcha/\w+/\w+@i', $page, $imgurl)) html_error('Error: CAPTCHA not found.');
-			$imgurl = (empty($imgurl[1])) ? 'http://rapidgator.net'.$imgurl[0] : $imgurl[0];
+			$imgurl = (empty($imgurl[1])) ? 'https://rapidgator.net'.$imgurl[0] : $imgurl[0];
 			//Download captcha img.
 			$captcha = explode("\r\n\r\n", cURL($imgurl, $this->cookie), 2);
 			if (substr($captcha[0], 9, 3) != '200') html_error('Error downloading captcha img.');
@@ -109,7 +109,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	//Redirects
 	$rdc = 0;
 	$page = false; // False value for starting the loop.
-	$redir = "http://$domain/";
+	$redir = "https://$domain/";
 	while (($redir = ChkRGRedirs($page, $redir)) && $rdc < 15) {
 		$page = cURL($redir, $cookie, 0, $referer);
 		$cookie = GetCookiesArr($page, $cookie);
@@ -259,5 +259,4 @@ function ChkRGRedirs($page, $lasturl, $rgpath = '/', $default_login = false) { /
 // [25-11-2013] Fixed redirects function (aagain :D ). - Th3-822
 // [16-12-2015][WIP] Fixing Blocks, Redirect Handling & Forcing Plugin To Use cURL. - Th3-822
 // [27-11-2016] Added wait and retries to get download_link. - Th3-822
-
-?>
+// [28-08-2017] Switched to HTTPS. - Th3-822

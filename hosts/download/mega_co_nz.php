@@ -5,11 +5,10 @@ if (!defined('RAPIDLEECH')) {
 }
 // Using functions from: http://julien-marchand.fr/blog/using-the-mega-api-with-php-examples/
 class mega_co_nz extends DownloadClass {
-	private $useOpenSSL, $alwaysLogin, $seqno, $cookie;
+	private $useOpenSSL, $seqno, $cookie;
 	public function Download($link) {
 		if (!extension_loaded('mcrypt') || !in_array('rijndael-128', mcrypt_list_algorithms(), true)) html_error("Mcrypt module isn't installed or it doesn't have support for the needed encryption.");
 		$this->useOpenSSL = (version_compare(PHP_VERSION, '5.4.0', '>=') && extension_loaded('openssl') && in_array('AES-128-CBC', openssl_get_cipher_methods(), true));
-		$this->alwaysLogin = false;
 
 		$this->seqno = mt_rand();
 		$this->changeMesg(lang(300).'<br />Mega.co.nz plugin by Th3-822'); // Please, do not remove or change this line contents. - Th3-822
@@ -27,33 +26,18 @@ class mega_co_nz extends DownloadClass {
 				$pass = decrypt(urldecode($pass));
 				unset($_POST['pA_encrypted']);
 			}
-			if ($this->alwaysLogin) $this->cJar_load($user, $pass);
-		} else if ($this->alwaysLogin) html_error('[alwaysLogin is Enabled] Add an Account to Download');
-
-		do {
-			$reply = $this->apiReq(array('a' => 'g', 'g' => 1, (empty($fid[1]) ? 'p' : 'n') => $fid[2], 'ssl' => 2), (!empty($fid[1]) && !empty($fid[4]) ? $fid[4] : ''));
-			if (is_numeric($reply[0])) $this->CheckErr($reply[0]);
-			if (!empty($reply[0]['e']) && is_numeric($reply[0]['e'])) $this->CheckErr($reply[0]['e']);
-			if (empty($reply[0]['efq'])) {
-				$tLimit = $this->apiReq(array('a' => 'qbq', 's' => $reply[0]['s']));
-				if (is_numeric($tLimit[0]) && $tLimit[0] < 0) $this->CheckErr($tLimit[0], 'Error querying bandwidth quota');
-			} else $tLimit = array(0);
-		} while (!empty($user) && !empty($pass) && empty($this->cookie['sid']) && (!empty($reply[0]['efq']) || !empty($tLimit[0])) && $this->cJar_load($user, $pass));
-
-		if (!empty($reply[0]['efq'])) {
-			// This shouldn't happen on accounts, but i will check it anyway
-			if (!empty($reply[0]['tl'])) {
-				if (empty($this->cookie['sid'])) html_error('Anonymous Quota Limit Reached, add an account or wait ' . sec2time($reply[0]['tl']) . ' then try again.');
-				else html_error('Free Quota Limit Reached, wait ' . sec2time($reply[0]['tl']) . ' then try again.');
-			} else {
-				if (empty($this->cookie['sid'])) html_error('Anonymous Quota Limit Reached, add an account then try again.');
-				else html_error('Free Quota Limit Reached.');
-			}
 		}
 
-		if (!empty($tLimit[0])) {
+		do {
+			$reply = $this->apiReq(array('a' => 'g', 'g' => 1, (empty($fid[1]) ? 'p' : 'n') => $fid[2], 'ssl' => 0), (!empty($fid[1]) && !empty($fid[4]) ? $fid[4] : ''));
+			if (is_numeric($reply[0])) $this->CheckErr($reply[0]);
+			if (!empty($reply[0]['e']) && is_numeric($reply[0]['e'])) $this->CheckErr($reply[0]['e']);
+			$tLimit = $this->checkTrafficLimit($reply[0]['g']);
+		} while (!empty($user) && !empty($pass) && empty($this->cookie['sid']) && $tLimit && $this->cJar_load($user, $pass));
+
+		if ($tLimit) {
 			if (empty($this->cookie['sid'])) html_error('Anonymous Traffic Limit Reached, add an account then try again.');
-			else html_error('Free Traffic Limit Reached.');
+			else html_error('Traffic Limit Reached.');
 		}
 
 		$key = $this->base64_to_a32($fid[3]);
@@ -62,6 +46,16 @@ class mega_co_nz extends DownloadClass {
 		if (empty($attr)) html_error((!empty($fid[1]) ? 'Folder Error: ' : '').'File\'s key isn\'t correct.');
 
 		$this->RedirectDownload($reply[0]['g'], $attr['n'], 0, 0, $link, 0, 0, array('T8[fkey]' => $fid[3]));
+	}
+
+	// It's seems to not work properly with a HEAD request neither with a GET with a small Range (TODO: Add here a small copy of geturl that stops after getting the headers or add a parameter to geturl that does that)
+	private function checkTrafficLimit($link) {
+		if (extension_loaded('curl') && function_exists('curl_init') && function_exists('curl_exec')) {
+			$page = cURL($link, 0, 0, 0, 0, array(CURLOPT_NOBODY => true));
+		} else if (function_exists('readCustomHeaders')) {
+			$page = $this->GetPage($link, 0, 0, "https://mega.nz/\r\n:HEAD " . parse_url($link, PHP_URL_PATH) . " HTTP/1.1");
+		} else html_error('Your rapidleech is outdated and doesn\'t support a required check.');
+		return (intval(substr($page, 9, 3)) == 509);
 	}
 
 	private function CheckErr($code, $prefix = 'Error') {
@@ -98,7 +92,7 @@ class mega_co_nz extends DownloadClass {
 
 	private function doApiReq($atrr, $node='') {
 		if (!function_exists('json_encode')) html_error('Error: Please enable JSON in php.');
-		$page = $this->GetPage('https://g.api.mega.co.nz/cs?id=' . ($this->seqno++) . (!empty($node) ? "&n=$node" : '') . (!empty($this->cookie['sid']) ? "&sid={$this->cookie['sid']}" : ''), 0, json_encode(array($atrr)), "https://mega.nz/\r\nContent-Type: application/json");
+		$page = $this->GetPage('https://g.api.mega.co.nz/cs?id=' . ($this->seqno++) . (!empty($node) ? "&n=$node" : '') . (!empty($this->cookie['sid']) ? "&sid={$this->cookie['sid']}" : ''), 0, json_encode((!empty($atrr[0]) && is_array($atrr[0])) ? $atrr : array($atrr)), "https://mega.nz/\r\nContent-Type: application/json");
 		if (in_array(intval(substr($page, 9, 3)), array(500, 503))) return array(-3); //  500 Server Too Busy
 		list ($header, $page) = array_map('trim', explode("\r\n\r\n", $page, 2));
 		if (is_numeric($page)) return array(intval($page));
@@ -434,11 +428,15 @@ class Th3822_MegaDlDecrypt extends php_user_filter {
 	public function onCreate() {
 		if (empty($this->params['iv']) || empty($this->params['key'])) return false;
 		$this->td = mcrypt_module_open('rijndael-128', '', 'ctr', '');
-		$init = mcrypt_generic_init($this->td, $this->params['key'], $this->params['iv']);
+		$iv = $this->params['iv'];
+		if (!empty($this->params['startFrom']) && is_numeric($this->params['startFrom']) && $this->params['startFrom'] > 0) {
+			$blocks = floor($this->params['startFrom'] / 16);
+			$waste = $this->params['startFrom'] - ($blocks * 16);
+			if ($blocks > 0) $this->increaseIV($iv, $blocks);
+		} else $waste = 0;
+		$init = mcrypt_generic_init($this->td, $this->params['key'], $iv);
 		if ($init === false || $init < 0) return false;
-		if (!empty($this->params['waste']) && is_int($this->params['waste']) && $this->params['waste'] > 0 && $this->params['waste'] < 16) {
-			mdecrypt_generic($this->td, str_repeat('*', $this->params['waste']));
-		}
+		if ($waste > 0) mdecrypt_generic($this->td, str_repeat('*', min($waste, 16)));
 		return true;
 	}
 
@@ -457,6 +455,15 @@ class Th3822_MegaDlDecrypt extends php_user_filter {
 		mcrypt_generic_deinit($this->td);
 		mcrypt_module_close($this->td);
 	}
+
+	private function increaseIV(&$iv, $inc = 1) {
+		$i = 16;
+		while ($inc > 0 && --$i >= 0) {
+			$sum = ord($iv{$i}) + $inc;
+			$iv{$i} = chr($sum & 0xFF);
+			$inc = $sum >> 8;
+		}
+	}
 }
 
 //[24-2-2013] Written by Th3-822. (Rapidleech r415 or newer required)
@@ -469,3 +476,4 @@ class Th3822_MegaDlDecrypt extends php_user_filter {
 //[29-1-2015] Replaced 'T8' prefix at folder->file links for support on third-party downloaders using links with 'N' as prefix. - Th3-822
 //[04-2-2016] Added sub-folders support (fully) and added support for link suffix "!less" to disable recursive sub-folder download. - Th3-822
 //[27-12-2016] Added Login support for increase traffic limits & forced SSL on downloads to avoid corrupted downloads. - Th3-822
+//[12-11-2017] Removed SSL from downloads to increase download speed & updated Th3822_MegaDlDecrypt class. - Th3-822

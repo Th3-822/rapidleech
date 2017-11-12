@@ -5,7 +5,7 @@ if (!defined('RAPIDLEECH')) {
 }
 
 // Allow user-agent to be changed easily
-if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:53.0) Gecko/20100101 Firefox/53.0');
+if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:52.0) Gecko/20100101 Firefox/52.0');
 
 /*
  * Pauses for countdown timer in file hosts
@@ -376,7 +376,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			}
 			if ($bytesReceived >= $bytesTotal) $percent = 100;
 			else $percent = @round(($bytesReceived + $Resume['from']) / ($bytesTotal + $Resume['from']) * 100, 2);
-			if ($bytesReceived > $last + $chunkSize && (!$lastChunkTime || !((microtime(true) - $lastChunkTime) < 1))) {
+			if ($bytesReceived > $last + $chunkSize && (!$lastChunkTime || !(((microtime(true) - $timeStart) - $lastChunkTime) < 1))) {
 				$received = bytesToKbOrMbOrGb($bytesReceived + $Resume['from']);
 				$time = microtime(true) - $timeStart;
 				$chunkTime = $time - $lastChunkTime;
@@ -429,8 +429,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 }
 
 function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0) {
-	global $pauth;
-	static $ch, $lastProxy;
+	static $NSS, $ch, $lastProxy;
 	if (empty($link) || !is_string($link)) return html_error(lang(24));
 	if (!extension_loaded('curl') || !function_exists('curl_init') || !function_exists('curl_exec')) return html_error('cURL isn\'t enabled or cURL\'s functions are disabled');
 	if (!empty($referer)) {
@@ -448,8 +447,12 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		CURLOPT_ENCODING => 'gzip, deflate', CURLOPT_USERAGENT => rl_UserAgent);
 
 	// Fixes "Unknown cipher in list: TLSv1" on cURL with NSS
-	$cV = curl_version();
-	if (!empty($cV['ssl_version']) && strtoupper(substr($cV['ssl_version'], 0, 4)) != 'NSS/') $opt[CURLOPT_SSL_CIPHER_LIST] = 'TLSv1';
+	if (!isset($NSS)) {
+		$cV = curl_version();
+		$NSS = (!empty($cV['ssl_version']) && strtoupper(substr($cV['ssl_version'], 0, 4)) == 'NSS/');
+	}
+	if (!$NSS) $opt[CURLOPT_SSL_CIPHER_LIST] = 'TLSv1';
+
 
 	// Uncomment next line if do you have IPv6 problems
 	// $opt[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
@@ -461,7 +464,7 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		$opt[CURLOPT_HTTPPROXYTUNNEL] = strtolower(parse_url($link, PHP_URL_SCHEME) == 'https') ? true : false; // cURL https proxy support... Experimental.
 		// $opt[CURLOPT_HTTPPROXYTUNNEL] = false; // Uncomment this line for disable https proxy over curl.
 		$opt[CURLOPT_PROXY] = $_GET['proxy'];
-		$opt[CURLOPT_PROXYUSERPWD] = (!empty($pauth) ? base64_decode($pauth) : false);
+		$opt[CURLOPT_PROXYUSERPWD] = (!empty($GLOBALS['pauth']) ? base64_decode($GLOBALS['pauth']) : false);
 	} else $opt[CURLOPT_PROXY] = false;
 
 	// Send more headers...

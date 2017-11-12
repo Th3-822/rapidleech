@@ -6,9 +6,14 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class rapidgator_net extends DownloadClass {
-	private $page, $link, $cookie;
+	private $baseUrl, $link, $page, $cookie, $referer, $DLregexp;
 	public function Download($link) {
-		$this->link = $GLOBALS['Referer'] = str_ireplace(array('://www.rg.to/', '://rg.to/'), '://rapidgator.net/', $link);
+		$this->baseUrl = 'https://rapidgator.net/';
+
+		$link = parse_url($link);
+		$link['scheme'] = 'https';
+		$link['host'] = 'rapidgator.net';
+		$this->link = $GLOBALS['Referer'] = $link = rebuild_url($link);
 		$this->cookie = array('lang' => 'en');
 		$this->DLregexp = '@https?://pr\d+\.rapidgator\.net/[^\s\"\'<>]+@i';
 		if ((empty($_POST['step']) || !in_array($_POST['step'], array('1', '2', 'L'))) && (empty($_GET['rgredir']) || (stripos($_GET['rgredir'], '/auth/login') === false && stripos($_GET['rgredir'], '/site/ChangeLocation/key/') === false))) {
@@ -39,7 +44,7 @@ class rapidgator_net extends DownloadClass {
 	}
 
 	private function FreeDL() {
-		$capt_url = 'http://rapidgator.net/download/captcha';
+		$capt_url = $this->baseUrl . 'download/captcha';
 		if (empty($_POST['step']) || !in_array($_POST['step'], array('1', '2'))) {
 			is_present($this->page, 'This file can be downloaded by premium only', 'Only Premium users can download this file.'); // F##### PPS
 			is_present($this->page, 'download not more than 1 file at a time in free mode.', 'You can\'t download not more than 1 file at a time. Wait 15 minutes and try again.');
@@ -47,12 +52,12 @@ class rapidgator_net extends DownloadClass {
 			if (!preg_match('@fid\s*=\s*(\d+)\s*;@i', $this->page, $fid)) html_error('File-id not found.');
 			if (!preg_match('@secs\s*=\s*(\d+)\s*;@i', $this->page, $cd)) html_error('Countdown not found.');
 
-			$page = cURL('http://rapidgator.net/download/AjaxStartTimer?fid='.$fid[1], $this->cookie, 0, $this->link."\r\nX-Requested-With: XMLHttpRequest");
+			$page = cURL($this->baseUrl . 'download/AjaxStartTimer?fid='.$fid[1], $this->cookie, 0, $this->link."\r\nX-Requested-With: XMLHttpRequest");
 			if (!preg_match('@"sid":"([^"\}]+)"@i', $page, $sid)) html_error('Session id not found.');
 
 			if ($cd[1] > 0) $this->CountDown($cd[1]);
 
-			$page = cURL('http://rapidgator.net/download/AjaxGetDownloadLink?sid='.urlencode($sid[1]), $this->cookie, 0, $this->link."\r\nX-Requested-With: XMLHttpRequest"); // ['download_link']
+			$page = cURL($this->baseUrl . 'download/AjaxGetDownloadLink?sid='.urlencode($sid[1]), $this->cookie, 0, $this->link."\r\nX-Requested-With: XMLHttpRequest"); // ['download_link']
 			$this->cookie = GetCookiesArr($page, $this->cookie);
 			is_notpresent($page, '"state":"done"', 'Error: Countdown bypassed?.');
 
@@ -60,7 +65,7 @@ class rapidgator_net extends DownloadClass {
 
 			if (preg_match($this->DLregexp, $page, $dlink)) return $this->RedirectDownload($dlink[0], 'rapidgatorfr2');
 
-			$data = $this->DefaultParamArr($this->link, $this->cookie);
+			$data = $this->DefaultParamArr($this->link, $this->cookie, 1, 1);
 			if (preg_match('@(?:https?:)?//api\.solvemedia\.com/papi/challenge\.(?:no)?script\?k=([\w\.\-]+)@i', $page, $captcha)) {
 				$data['step'] = 1;
 				return $this->SolveMedia($captcha[1], $data);
@@ -71,7 +76,7 @@ class rapidgator_net extends DownloadClass {
 
 			return html_error('CAPTCHA not found.');
 		} else {
-			$this->cookie = (!empty($_POST['cookie'])) ? urldecode($_POST['cookie']) : '';
+			$this->cookie = (!empty($_POST['cookie'])) ? decrypt(urldecode($_POST['cookie'])) : '';
 
 			$post = array('DownloadCaptchaForm%5Bcaptcha%5D' => '');
 			switch ($_POST['step']) {
@@ -98,7 +103,7 @@ class rapidgator_net extends DownloadClass {
 
 	// Special Function Called by verifySolveMedia When Captcha Is Incorrect, To Allow Retry.
 	protected function retrySolveMedia() {
-		$data = $this->DefaultParamArr($this->link, $this->cookie);
+		$data = $this->DefaultParamArr($this->link, $this->cookie, 1, 1);
 		$data['step'] = 1;
 		return $this->SolveMedia($_POST['sm_public_key'], $data, 0, 'Retry Download');
 	}
@@ -137,12 +142,11 @@ class rapidgator_net extends DownloadClass {
 			$post['LoginForm%5BverifyCode%5D'] = urlencode($_POST['captcha']);
 		}
 
-		$purl = 'http://rapidgator.net/';
 		// There are more of those redirects at login
 		$rdc = 0;
 		$page = false; // False value for starting the loop.
-		$redir = $purl.'auth/login';
-		$this->referer = !empty($GLOBALS['Referer']) && $GLOBALS['Referer'] != $this->link ? $GLOBALS['Referer'] : $purl;
+		$redir = $this->baseUrl . 'auth/login';
+		$this->referer = !empty($GLOBALS['Referer']) && $GLOBALS['Referer'] != $this->link ? $GLOBALS['Referer'] : $this->baseUrl;
 		while (($redir = $this->ChkRGRedirs($page, $redir, '(?:/auth/login|/site/ChangeLocation/key/)')) && $rdc < 15) {
 			$page = cURL($redir, $this->cookie, $post, $this->referer);
 			$this->cookie = GetCookiesArr($page, $this->cookie);
@@ -156,13 +160,13 @@ class rapidgator_net extends DownloadClass {
 		if (stripos($page, 'The code from a picture does not coincide') !== false) {
 			if (!empty($post['LoginForm%5BverifyCode%5D'])) html_error('Login Failed: Incorrect CAPTCHA response.');
 			if (!preg_match('@(https?://(?:[^\./\r\n\'\"\t\:]+\.)?rapidgator\.net(?:\:\d+)?)?/auth/captcha/\w+/\w+@i', $page, $imgurl)) html_error('Error: CAPTCHA not found.');
-			$imgurl = (empty($imgurl[1])) ? 'http://rapidgator.net'.$imgurl[0] : $imgurl[0];
+			$imgurl = (empty($imgurl[1])) ? $this->baseUrl . substr($imgurl[0], 1) : $imgurl[0];
 			//Download captcha img.
 			$captcha = explode("\r\n\r\n", cURL($imgurl, $this->cookie), 2);
 			if (substr($captcha[0], 9, 3) != '200') html_error('Error downloading captcha img.');
 			$mimetype = (preg_match('@image/[\w+]+@', $captcha[0], $mimetype) ? $mimetype[0] : 'image/png');
 
-			$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
+			$data = $this->DefaultParamArr($this->link, CookiesToStr($this->cookie), 1, 1);
 			$data['step'] = 'L';
 			$data['premium_acc'] = 'on'; // I should add 'premium_acc' to DefaultParamArr()
 			if ($pA) {
@@ -178,10 +182,13 @@ class rapidgator_net extends DownloadClass {
 		if (empty($this->cookie['user__'])) html_error("Login Error: Cannot find 'user__' cookie.");
 		$this->cookie['lang'] = 'en';
 
-		$page = cURL($purl, $this->cookie, 0, $purl.'auth/login');
-		is_present($page, '>Free</a>', 'Account isn\'t premium');
+		$page = cURL($this->baseUrl, $this->cookie, 0, $this->baseUrl . 'auth/login');
+		if (stripos($page, '>Free</a>') !== false) {
+			$this->changeMesg('<br /><b>Account isn\'t premium?</b>', true);
+			return $this->FreeDL();
+		}
 
-		$this->PremiumDL();
+		return $this->PremiumDL();
 	}
 
 	private function ChkRGRedirs($page, $lasturl, $rgpath = '/') {
@@ -238,10 +245,10 @@ class rapidgator_net extends DownloadClass {
 				$_GET['rgredir'] = rawurldecode($_GET['rgredir']);
 				if (strpos($_GET['rgredir'], '://')) $_GET['rgredir'] = parse_url($_GET['rgredir'], PHP_URL_PATH);
 				if (empty($_GET['rgredir']) || substr($_GET['rgredir'], 0, 1) != '/') html_error('Invalid redirect value.');
-				$redir = (!empty($lasturl['scheme']) && strtolower($lasturl['scheme']) == 'https' ? 'https' : 'http').'://rapidgator.net'.$_GET['rgredir'];
+				$redir = (!empty($lasturl['scheme']) && strtolower($lasturl['scheme']) == 'https' ? 'https' : 'http') . '://rapidgator.net' . $_GET['rgredir'];
 				unset($_GET['rgredir']);
 			}
-		} elseif (preg_match('@Location: ((https?://(?:[^/\r\n]+\.)?rapidgator\.net)?'.$rgpath.'[^\r\n]*)@i', $headers, $redir)) $redir = (empty($redir[2])) ? (!empty($lasturl['scheme']) && strtolower($lasturl['scheme']) == 'https' ? 'https' : 'http').'://rapidgator.net'.$redir[1] : $redir[1];
+		} elseif (preg_match('@Location: ((https?://(?:[^/\r\n]+\.)?rapidgator\.net)?'.$rgpath.'[^\r\n]*)@i', $headers, $redir)) $redir = (empty($redir[2])) ? (!empty($lasturl['scheme']) && strtolower($lasturl['scheme']) == 'https' ? 'https' : 'http') . '://rapidgator.net' . $redir[1] : $redir[1];
 
 		return (empty($redir) ? false : $redir);
 	}
@@ -260,3 +267,4 @@ class rapidgator_net extends DownloadClass {
 // [20-5-2014] Fixed Login, bw error msg. - Th3-822
 // [16-12-2015][WIP] Fixing Blocks, Redirect Handling & Forcing Plugin To Use cURL. - Th3-822
 // [01-8-2016] Fixed FreeDL Captchas. - Th3-822
+// [28-8-2017] Switched to HTTPs (Untested) - Th3-822
