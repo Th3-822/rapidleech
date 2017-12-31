@@ -635,7 +635,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		return FALSE;
 	}
 
-	$fileSize = getSize($file);
+	$fileSize = filesize($file);
 
 	if (!empty($field2name)) {
 		$postdata .= '--' . $bound . $nn;
@@ -852,7 +852,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 		return FALSE;
 	}
 
-	$fileSize = getSize($file);
+	$fileSize = filesize($file);
 
 	if (!empty($cookie)) {
 		if (is_array($cookie)) $cookies = (count($cookie) > 0) ? CookiesToStr($cookie) : 0;
@@ -1047,4 +1047,3 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 	$page = $header.$page;
 	return $page;
 }
-?>

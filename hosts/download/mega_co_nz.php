@@ -276,7 +276,7 @@ class mega_co_nz extends DownloadClass {
 		if (!stream_filter_register('MegaDlDecrypt', 'Th3822_MegaDlDecrypt') && !in_array('MegaDlDecrypt', stream_get_filters())) html_error('Error: Cannot register "MegaDlDecrypt" filter.');
 
 		if (!isset($sFilters) || !is_array($sFilters)) $sFilters = array();
-		if (empty($sFilters['MegaDlDecrypt'])) $sFilters['MegaDlDecrypt'] = stream_filter_prepend($fp, 'MegaDlDecrypt', STREAM_FILTER_READ, $opts);
+		if (empty($sFilters['MegaDlDecrypt'])) $sFilters['MegaDlDecrypt'] = stream_filter_append($fp, 'MegaDlDecrypt', STREAM_FILTER_READ, $opts);
 		if (!$sFilters['MegaDlDecrypt']) html_error('Error: Unknown error while initializing MegaDlDecrypt filter, cannot continue download.');
 	}
 

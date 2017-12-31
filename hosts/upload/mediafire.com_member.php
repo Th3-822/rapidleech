@@ -38,9 +38,9 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	echo "</table>\n</form>\n";
 } else {
 	$login = $not_done = false;
-	$domain = 'mediafire.com';
+	$domain = 'www.mediafire.com';
 	$referer = "https://$domain/";
-	$app = array('id' => '44595', 'api_version' => '1.4'); // Application ID for MediaFire's API @ https://www.mediafire.com/#settings/applications
+	$app = array('id' => '44595', 'api_version' => '1.5'); // Application ID for MediaFire's API @ https://www.mediafire.com/#settings/applications
 
 	// Login
 	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='info' width='100%' align='center'>Login to $domain</div>\n";
@@ -64,7 +64,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	// Preparing Upload
 	echo "<script type='text/javascript'>document.getElementById('info').innerHTML = 'Preparing Upload';</script>\n";
 
-	$uploadCheck = array_map('strtolower', mf_apireq('upload/check', array('size' => $fsize, 'hash' => $fileHash, 'filename' => $lname)));
+	$uploadCheck = array_map('strtolower_nr', mf_apireq('upload/check', array('size' => $fsize, 'hash' => $fileHash, 'filename' => $lname)));
 	mf_checkErrors($uploadCheck, 'Pre-Upload Check Error');
 
 	if ($uploadCheck['storage_limit_exceeded'] == 'yes') html_error('User storage limit exceeded.');
@@ -101,7 +101,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	$up_url = $referer . "api/{$app['api_version']}/upload/simple.php?response_format=json&session_token={$getAToken['action_token']}&action_on_duplicate=" . $uploadPrefs['action_on_duplicate'];
 
 	$url = parse_url($up_url);
-	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer.(!empty($fileHash) ? "\r\nX-Filehash: $fileHash" : ''), 0, 0, $lfile, $lname, 'Filedata', '', 0, 0, 0, $url['scheme']);
+	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer.(!empty($fileHash) ? "\r\nX-Filehash: $fileHash" : ''), 0, 0, $lfile, $lname, 'Filedata', '', $_GET['proxy'], $pauth, 0, $url['scheme']);
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";
@@ -157,7 +157,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	} while ($x++ < 20 && $poll_upload['doupload']['status'] != '99');
 
 	if (empty($poll_upload['doupload']['quickkey'])) html_error('Upload: quickkey not found.');
-	$download_link = "$referer?" . $poll_upload['doupload']['quickkey'];
+	$download_link = str_replace('www.', '', "$referer?") . $poll_upload['doupload']['quickkey'];
 
 	// I will try to kill the action_token... Why this request needs session_token?
 	mf_apireq('user/destroy_action_token', array('action_token' => $getAToken['action_token']));
@@ -238,7 +238,7 @@ function mf_apireq($action, $post = array()) {
 	$path = "api/{$GLOBALS['app']['api_version']}/$action.php";
 	if ($GLOBALS['cURL']) $page = cURL($GLOBALS['referer'] . $path, 0, $post, $GLOBALS['referer']);
 	else {
-		$page = geturl($GLOBALS['domain'], 443, "/$path", $GLOBALS['referer'], 0, $post, 0, 0, 0, 0, 'https'); // geturl doesn't support https proxy
+		$page = geturl($GLOBALS['domain'], 443, "/$path", $GLOBALS['referer'], 0, $post, 0, $_GET['proxy'], $GLOBALS['pauth'], 0, 'https');
 		is_page($page);
 	}
 
@@ -250,6 +250,9 @@ function mf_apireq($action, $post = array()) {
 	return $json;
 }
 
-//[18-2-2015]  Written by Th3-822.
+function strtolower_nr($str) {
+	return (is_string($str) ? strtolower($str) : $str);
+}
 
-?>
+//[18-2-2015]  Written by Th3-822.
+//[30-12-2017] Updated API to 1.5 & small fixes. - Th3-822
