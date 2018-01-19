@@ -230,15 +230,15 @@ class rlRar {
 		if (is_resource($rar_process)) {
 			fclose($rar_pipes[0]);
 			$this->rar_list = array();
-			if ($jsoutid == '') {//don't read this pipe if we getting js extract percentage
+			if ($jsoutid === '') {//don't read this pipe if we getting js extract percentage
 				while (!feof($rar_pipes[1])) {
 					$rar_tmp = rtrim(fgets($rar_pipes[1]));
 					if (trim($rar_tmp) !== '') $this->rar_list[] = $rar_tmp;
 				}
 			} else {
 				// Always get first line of output (helps for version check)
-				while (empty($this->rar_list) && !feof($rar_pipes[1])) {
-					if (($rar_tmp = trim(fgets($rar_pipes[1]))) !== '') $this->rar_list[0] = $rar_tmp;
+				while (empty($this->rar_list) && !feof($rar_pipes[2])) {
+					if (($rar_tmp = trim(fgets($rar_pipes[2]))) !== '') $this->rar_list[0] = $rar_tmp;
 				}
 			}
 			fclose($rar_pipes[1]);
@@ -248,7 +248,7 @@ class rlRar {
 			}
 
 			if ($jsoutid !== '') {
-				$this->rar_error = '';
+				$this->rar_error = $this->rar_list[0] . "\n";
 				$last = '';
 				$len = 0;
 				$pos_s = 0;
@@ -256,11 +256,11 @@ class rlRar {
 				$pos_last = 0;
 				$pos_found_s = '';
 				while (!feof($rar_pipes[2])) {
-					$read = fgets($rar_pipes[2], 8);
+					$read = fread($rar_pipes[2], 8);
 					$len += strlen($read);
 					$this->rar_error .= $read;
 					if ($len > ($pos_s + 1)) {
-						foreach (array('Adding', 'Testing', 'Calculating the control sum', 'Testing archive', 'Creating archive') as $find) {
+						foreach (array('Adding', 'Testing', 'Calculating', 'Creating') as $find) {
 							if (($pos_s_ = strpos($this->rar_error, $find, $pos_s+1)) !== false) break;
 						}
 					} else $pos_s_ = false;
@@ -279,17 +279,22 @@ class rlRar {
 								$pos_tmp[0] = strpos($pos_found_s, '...');
 								if ($pos_tmp[0] !== false) {
 									$pos_tmp[1] = strpos($pos_found_s, 'Creating archive');
+									if ($pos_tmp[1] === false) $pos_tmp[1] = strpos($pos_found_s, 'Creating solid archive');
 									if ($pos_tmp[1] === 0) {
-										$pos_found_s = 'Adding     '.trim(substr($pos_found_s, $pos_tmp[0] + 3));
+										$pos_found_s = '[Adding] ' . trim(substr($pos_found_s, $pos_tmp[0] + 3));
 									} else {
 										$pos_tmp[1] = strpos($pos_found_s, 'Testing archive');
-										if ($pos_tmp[1] === 0) $pos_found_s = 'Testing     ' . trim(substr($pos_found_s, $pos_tmp[0] + 3));
+										if ($pos_tmp[1] === 0) $pos_found_s = '[Testing] ' . trim(substr($pos_found_s, $pos_tmp[0] + 3));
+										$pos_tmp[0] = strpos($pos_found_s, 'Calculating');
+										if ($pos_tmp[0] === 0) $pos_found_s = '[Hashing File]';
 									}
 								}
 								$pos_tmp[0] = strpos($pos_found_s, 'Adding');
-								if ($pos_tmp[0] === 0) $pos_found_s = 'Adding     ' . basename(substr($pos_found_s, 11));
+								if ($pos_tmp[0] === 0) $pos_found_s = '[Adding] ' . basename(substr($pos_found_s, 11));
 								$pos_tmp[0] = strpos($pos_found_s, 'Testing');
-								if ($pos_tmp[0] === 0) $pos_found_s = 'Testing     ' . basename(substr($pos_found_s, 12));
+								if ($pos_tmp[0] === 0) $pos_found_s = '[Testing] ' . basename(substr($pos_found_s, 12));
+								$pos_tmp[0] = strpos($pos_found_s, 'Calculating');
+								if ($pos_tmp[0] === 0) $pos_found_s = '[Hashing File]';
 								$pos_found_s = str_replace(array("\r\n", "\n", "\r"), '' , $pos_found_s);
 							}
 							echo "<script type='text/javascript'>/* <![CDATA[ */rar_st('$jsoutid', '" . addslashes($pos_found_s) . " {$num_last}%')/* ]]> */</script>\r\n";

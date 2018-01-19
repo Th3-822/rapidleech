@@ -6,7 +6,7 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class youtube_com extends DownloadClass {
-	private $page, $cookie, $fmtmaps, $vid, $sts, $js, $playerJs, $sigJs, $jsVars, $cookieFile,
+	private $page, $cookie, $fmtmaps, $vid, $sts = -1, $js, $playerJs, $sigJs, $jsVars, $cookieFile,
 		$fmts = array(22 => '0|720|0|192', 45 => '1|720|1|192', 44 => '1|480|1|192', 35 => '2|480|0|128', 43 => '1|360|1|128', 34 => '2|360|0|128', 18 => '0|360|0|96', 6 => '2|270|3|64', 5 => '2|240|3|64', 36 => '3|240|0|36', 17 => '3|144|0|24'),
 		$dashfmts = array(138 => 'V0', 272 => 'V1', 315 => 'V1', 266 => 'V0', 313 => 'V1', 308 => 'V1', 264 => 'V0', 271 => 'V1', 299 => 'V0', 303 => 'V1', 137 => 'V0', 248 => 'V1', 298 => 'V0', 302 => 'V1', 135 => 'V0', 244 => 'V1', 140 => 'A0', 171 => 'A1', 251 => 'A2', 250 => 'A2', 249 => 'A2');
 
@@ -126,7 +126,7 @@ class youtube_com extends DownloadClass {
 	}
 
 	private function getFmtMaps() {
-		$this->page = $this->GetPage('https://www.youtube.com/get_video_info?video_id='.$this->vid.'&asv=3&el=ve'.'vo&hl=en_US&s'.'t'.'s'.'='.(!empty($this->sts) ? urlencode($this->sts) : 0), $this->cookie);
+		$this->page = $this->GetPage('https://www.youtube.com/get_video_info?hl=en_US&video_id='.$this->vid.'&eu'.'rl=https%3A%2F%2Fyoutube.com%2F&s'.'t'.'s'.'='.$this->sts, $this->cookie);
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		$this->response = array_map('urldecode', $this->FormToArr(substr($this->page, strpos($this->page, "\r\n\r\n") + 4)));
 		if (!empty($this->response['requires_purchase'])) html_error('[Unsupported Video] This Video or Channel Requires a Payment to Watch.');
@@ -134,7 +134,7 @@ class youtube_com extends DownloadClass {
 
 		if (in_array(substr($this->page, 9, 3), array('402', '429')) || preg_match('@Location: https?://(www\.)?youtube\.com/das_captcha@i', $this->page)) return $this->captcha();
 
-		if (empty($this->response['url_encoded_fmt_stream_map']) && empty($this->response['adaptive_fmts'])) html_error('['. (!empty($this->sts) ? htmlspecialchars($this->sts) : 0) . '] Video links not found.');
+		if (empty($this->response['url_encoded_fmt_stream_map']) && empty($this->response['adaptive_fmts'])) html_error('[' . $this->sts . '] Video links not found.');
 
 		if (!empty($this->cookie['goojf'])) $this->saveCookie();
 
@@ -145,13 +145,13 @@ class youtube_com extends DownloadClass {
 				$fmt = array_map('urldecode', $this->FormToArr($fmt));
 				if (empty($fmt['itag']) || empty($fmt['url'])) continue;
 				if (!empty($fmt['s']) && empty($this->encS)) {
-					if (empty($this->sts)) return $this->getCipher();
-					else $this->decError('No decoded steps');
+					if ($this->sts < 1) return $this->getCipher();
+					else html_error('[' . $this->sts . '] No decoded steps');
 				}
 				$fmt['url'] = parse_url($fmt['url']);
 				$fmt['url']['query'] = array_map('urldecode', $this->FormToArr($fmt['url']['query']));
 				if (empty($fmt['url']['query']['signature'])) $fmt['url']['query']['signature'] = (!empty($fmt['s']) ? $this->sigDecode($fmt['s']) : $fmt['sig']);
-				foreach (array_diff(array_keys($fmt), array('signature', 'sig', 's', 'url')) as $k) $fmt['url']['query'][$k] = $fmt[$k];
+				foreach (array_diff(array_keys($fmt), array('signature', 'sig', 's', 'url', 'xtags')) as $k) $fmt['url']['query'][$k] = $fmt[$k];
 				if (empty($fmt['url']['query']['ratebypass'])) $fmt['url']['query']['ratebypass'] = 'yes'; // Fix for Slow Downloads of DASH Formats
 				ksort($fmt['url']['query']);
 				$fmt['url']['query'] = http_build_query($fmt['url']['query']);
@@ -219,7 +219,7 @@ class youtube_com extends DownloadClass {
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 
 		if (!preg_match('@"sts"\s*:\s*(\d+)@i', $page, $this->sts)) html_error('Signature timestamp not found.');
-		$this->sts = $this->sts[1];
+		$this->sts = intval($this->sts[1]);
 
 		$savefile = DOWNLOAD_DIR.'YT_lastjs.txt';
 		if (!preg_match('@/(?:html5)?player-([\w\-\.]+(?:(?:/\w+)?/[\w\-\.]+)?)\.js@i', str_replace('\\/', '/', $page), $this->js)) html_error('YT\'s player javascript not found.');
@@ -346,3 +346,4 @@ class youtube_com extends DownloadClass {
 // [08-6-2016]  Added support to download DASH formats & Revised video formats handling. - Th3-822
 // [30-8-2016]  Fixed slow speed while downloading DASH streams. - Th3-822
 // [30-4-2017]  Fixed signature decoding functions. - Th3-822
+// [18-1-2018]  Fixed get_video_info. - Th3-822
