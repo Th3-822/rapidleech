@@ -38,7 +38,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	echo "</table>\n</form>\n";
 } else {
 	$login = $not_done = false;
-	$domain = 'www.mediafire.com';
+	$domain = 'mediafire.com';
 	$referer = "https://$domain/";
 	$app = array('id' => '44595', 'api_version' => '1.5'); // Application ID for MediaFire's API @ https://www.mediafire.com/#settings/applications
 
@@ -95,7 +95,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	echo "<script type='text/javascript'>document.getElementById('info').style.display = 'none';</script>\n";
 
 	// action_token
-	$getAToken = mf_apireq('user/get_action_token', array('type' => 'upload', 'lifespan' => 60)); // 1 Hour Lifespan
+	$getAToken = mf_apireq('user/get_action_token', array('type' => 'upload', 'lifespan' => 1440)); //24 Hours Lifespan
 	mf_checkErrors($getAToken, 'Error Getting Action Token');
 
 	$up_url = $referer . "api/{$app['api_version']}/upload/simple.php?response_format=json&session_token={$getAToken['action_token']}&action_on_duplicate=" . $uploadPrefs['action_on_duplicate'];
@@ -108,7 +108,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 
 	is_page($upfiles);
 
-	$status = (int)substr($upfiles, 9, 3);
+	$status = intval(substr($upfiles, 9, 3));
 	if ($status >= 500) $ulResult = array('result' => 'Error', 'error' => $status, 'message' => "Upload: HTTP Error $status.");
 	else {
 		$ulResult = Get_Reply($upfiles);
@@ -117,6 +117,14 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	mf_checkErrors($ulResult, $prefix = 'Upload error');
 
 	if (empty($ulResult['doupload']['key'])) html_error('Upload error: Key not found.');
+
+	// Kill Action Token and test the Session Token with it too
+	$test = mf_apireq('user/destroy_action_token', array('action_token' => $getAToken['action_token']));
+	if (strtolower($test['result']) == 'error' && $test['error'] == '105') {
+		// Re-Login
+		Login($_REQUEST['up_login'], $_REQUEST['up_pass']);
+		mf_apireq('user/destroy_action_token', array('action_token' => $getAToken['action_token']));
+	}
 
 	// Pool Upload
 	echo "<div id='T8_div' width='100%' align='center'>Checking Finished Upload : Try <span id='T8_try'>0</span><br /><span id='T8_status'></span></div>\n";
@@ -157,10 +165,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	} while ($x++ < 20 && $poll_upload['doupload']['status'] != '99');
 
 	if (empty($poll_upload['doupload']['quickkey'])) html_error('Upload: quickkey not found.');
-	$download_link = str_replace('www.', '', "$referer?") . $poll_upload['doupload']['quickkey'];
-
-	// I will try to kill the action_token... Why this request needs session_token?
-	mf_apireq('user/destroy_action_token', array('action_token' => $getAToken['action_token']));
+	$download_link = "$referer?" . $poll_upload['doupload']['quickkey'];
 }
 
 function Login($user, $pass) {
@@ -242,7 +247,7 @@ function mf_apireq($action, $post = array()) {
 		is_page($page);
 	}
 
-	$status = (int)substr($page, 9, 3);
+	$status = intval(substr($page, 9, 3));
 	if ($status >= 500) return array('result' => 'Error', 'error' => $status, 'message' => "mf_apireq: HTTP Error $status.");
 
 	$json = Get_Reply($page);
@@ -256,3 +261,4 @@ function strtolower_nr($str) {
 
 //[18-2-2015]  Written by Th3-822.
 //[30-12-2017] Updated API to 1.5 & small fixes. - Th3-822
+//[24-1-2018] Fixed upload token expiring issues & small fixes. - Th3-822
