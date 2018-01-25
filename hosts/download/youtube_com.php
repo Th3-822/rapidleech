@@ -125,11 +125,17 @@ class youtube_com extends DownloadClass {
 		return $this->reCAPTCHAv2($_POST['recaptcha2_public_key'], $data);
 	}
 
-	private function getFmtMaps() {
-		$this->page = $this->GetPage('https://www.youtube.com/get_video_info?hl=en_US&video_id='.$this->vid.'&eu'.'rl=https%3A%2F%2Fyoutube.com%2F&s'.'t'.'s'.'='.$this->sts, $this->cookie);
+	private function queryVideo($alt = 0) {
+		$this->page = $this->GetPage('https://www.youtube.com/get_video_info?hl=en_US&video_id=' . $this->vid . ($alt ? '&eurl=https%3A%2F%2Fgoogle.com%2F' : '&el=detailpage') .'&sts=' . $this->sts, $this->cookie);
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		$this->response = array_map('urldecode', $this->FormToArr(substr($this->page, strpos($this->page, "\r\n\r\n") + 4)));
 		if (!empty($this->response['requires_purchase'])) html_error('[Unsupported Video] This Video or Channel Requires a Payment to Watch.');
+	}
+
+	private function getFmtMaps() {
+		$this->queryVideo();
+		if (!empty($this->response['errorcode']) && $this->response['errorcode'] == 150 && $this->response['errordetail'] == 1) $this->queryVideo(1);
+
 		if (!empty($this->response['reason'])) html_error('['.htmlspecialchars($this->response['errorcode']).'] '.htmlspecialchars($this->response['reason']));
 
 		if (in_array(substr($this->page, 9, 3), array('402', '429')) || preg_match('@Location: https?://(www\.)?youtube\.com/das_captcha@i', $this->page)) return $this->captcha();
@@ -346,4 +352,4 @@ class youtube_com extends DownloadClass {
 // [08-6-2016]  Added support to download DASH formats & Revised video formats handling. - Th3-822
 // [30-8-2016]  Fixed slow speed while downloading DASH streams. - Th3-822
 // [30-4-2017]  Fixed signature decoding functions. - Th3-822
-// [18-1-2018]  Fixed get_video_info. - Th3-822
+// [25-1-2018]  Fixed get_video_info. - Th3-822
