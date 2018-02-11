@@ -191,7 +191,7 @@ class youtube_com extends DownloadClass {
 				$this->jsVars[$obj]['fn'][$fName] = array('src' => $src);
 
 				if (empty($src[1])) return $this->jsVars[$obj]['fn'][$fName]['step'] = 'r';
-				else if (preg_match("@var\s+($v)=($v)\[0\];\\2\[0\]=\\2\[{$src[1]}%\\2(?:\.length|\[$v\])\];\\2\[{$src[1]}\]=\\1@", $src[2])) {
+				else if (preg_match("@var\s+($v)=($v)\[0\];\\2\[0\]=\\2\[{$src[1]}%\\2(?:\.length|\[$v\])\];\\2\[{$src[1]}(?:%\\2(?:\.length|\[$v\]))?\]=\\1@", $src[2])) {
 					$this->jsVars[$obj]['fn'][$fName]['step'] = 'w%d';
 					return "w$num";
 				} else if (preg_match("@(?:$v=)?$v(?:\.s(p)?lice|\[$v\])\((?(1)0,){$src[1]}\)@", $src[2])) {
@@ -207,7 +207,7 @@ class youtube_com extends DownloadClass {
 			$v = '[\$_A-Za-z][\$\w]*';
 			if (!preg_match("@^function\s+$fName\($v(?:,($v))?\)\{(.*)$@", $this->jsVars[$fName]['src'], $pars)) $this->decError("Cannot parse function '$fName'");
 			if (empty($pars[1])) return $this->jsVars[$fName]['step'] = 'r';
-			else if (preg_match("@var\s+($v)=($v)\[0\];\\2\[0\]=\\2\[{$pars[1]}%\\2(?:\.length|\[$v\])\];\\2\[{$pars[1]}\]=\\1@", $src[2])) {
+			else if (preg_match("@var\s+($v)=($v)\[0\];\\2\[0\]=\\2\[{$pars[1]}%\\2(?:\.length|\[$v\])\];\\2\[{$pars[1]}(?:%\\2(?:\.length|\[$v\]))?\]=\\1@", $src[2])) {
 				$this->jsVars[$fName]['step'] = 'w%d';
 				return "w$num";
 			} else if (preg_match("@(?:$v=)?$v(?:\.s(p)?lice|\[$v\])\((?(1)0,){$src[1]}\)@", $src[2])) {
@@ -353,3 +353,4 @@ class youtube_com extends DownloadClass {
 // [30-8-2016]  Fixed slow speed while downloading DASH streams. - Th3-822
 // [30-4-2017]  Fixed signature decoding functions. - Th3-822
 // [25-1-2018]  Fixed get_video_info. - Th3-822
+// [11-2-2018]  Fixed signature decoding functions. - Th3-822
