@@ -56,7 +56,7 @@ class youtube_com extends DownloadClass {
 		else $filename .= " [YT-Audio]";
 		$filename .= "[{$this->vid}]$ext";
 
-		$this->RedirectDownload($fmt['url'], $filename, $this->cookie, 0, 0, $filename);
+		$this->RedirectDownload($fmt['url'], $filename, $this->cookie, 0, (is_dash ? $this->link . "\r\nRange: bytes=0-" : 0), $filename);
 	}
 
 	private function FormToArr($content, $v1 = '&', $v2 = '=') {

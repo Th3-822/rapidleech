@@ -11,8 +11,8 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class GenericXFS_DL extends DownloadClass {
-	protected $page, $cookie, $baseCookie = array('lang' => 'english'), $scheme, $wwwDomain, $domain, $port, $host, $purl, $httpsOnly = false, $sslLogin = false, $cname = 'xfss', $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi|[\da-zA-Z]{30,})/(?:[^\?\'\"\t<>\r\n\\\]{15,}|v(?:id(?:eo)?)?\.(?:flv|mp4))@i';
-	private $classVer = 22;
+	protected $page, $cookie, $baseCookie = array('lang' => 'english'), $scheme, $wwwDomain, $domain, $port, $host, $purl, $httpsOnly = false, $sslLogin = false, $cname = 'xfss', $cookieSave = false, $cJar = array(), $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi|[\da-zA-Z]{30,})/(?:[^\?\'\"\t<>\r\n\\\]{15,}|v(?:id(?:eo)?)?\.(?:flv|mp4))@i';
+	private $classVer = 23;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -364,17 +364,23 @@ class GenericXFS_DL extends DownloadClass {
 			}
 
 			if (empty($user) || empty($pass)) html_error('Login Failed: User or Password is empty. Please check login data.');
-			$post = array();
-			$post['op'] = 'login';
-			$post['redirect'] = '';
-			$post['login'] = urlencode($user);
-			$post['password'] = urlencode($pass);
+			
+			if ($this->cookieSave && ($page = $this->cJar_load($user, $pass))) {
+				if ($page === true) $page = $this->GetPage($this->purl.'?op=my_account', $this->cookie, 0, $this->purl);
+				return $this->checkAccount($page);
+			} else {
+				$post = array();
+				$post['op'] = 'login';
+				$post['redirect'] = '';
+				$post['login'] = urlencode($user);
+				$post['password'] = urlencode($pass);
 
-			$page = $this->sendLogin($post);
-			if (empty($this->sslLogin) && $this->scheme != 'https') is_present($page, "\nLocation: https://", '[GenericXFS_DL] Please Set "$this->sslLogin" to true.');
+				$page = $this->sendLogin($post);
+				if (empty($this->sslLogin) && $this->scheme != 'https') is_present($page, "\nLocation: https://", '[GenericXFS_DL] Please Set "$this->sslLogin" to true.');
 
-			if (!$this->checkLogin($page)) html_error('Login Error: checkLogin() returned false.');
-			$this->cookie = GetCookiesArr($page);
+				if (!$this->checkLogin($page)) html_error('Login Error: checkLogin() returned false.');
+				$this->cookie = GetCookiesArr($page);
+			}
 		}
 
 		if (empty($this->cookie[$this->cname])) html_error('Login Error: Cannot find session cookie.');
@@ -383,8 +389,68 @@ class GenericXFS_DL extends DownloadClass {
 		$page = $this->isLoggedIn();
 		if (!$page) html_error('Login Error: isLoggedIn() returned false.');
 
+		if ($this->cookieSave && !empty($this->cJar)) $this->cJar_save();
+
 		if ($page === true) $page = $this->GetPage($this->purl.'?op=my_account', $this->cookie, 0, $this->purl);
 		return $this->checkAccount($page);
+	}
+
+	private function cJar_encrypt($data, $key) {
+		if (empty($data)) return false;
+		global $secretkey;
+		$_secretkey = $secretkey;
+		$secretkey = $key;
+		$data = base64_encode(encrypt(json_encode($data)));
+		$secretkey = $_secretkey;
+		return $data;
+	}
+
+	private function cJar_decrypt($data, $key) {
+		if (empty($data)) return false;
+		global $secretkey;
+		$_secretkey = $secretkey;
+		$secretkey = $key;
+		$data = json_decode(decrypt(base64_decode($data)), true);
+		$secretkey = $_secretkey;
+		return (!empty($data) ? $data : false);
+	}
+
+	private function cJar_load($user, $pass) {
+		if (empty($user) || empty($pass)) return html_error('Login Failed: User or Password is empty.');
+
+		$user = strtolower($user);
+		$this->cJar['file'] = DOWNLOAD_DIR . get_class($this) . '_dl.php';
+		$this->cJar['hash'] = base64_encode(sha1("$user$pass", true));
+		$this->cJar['key'] = substr(base64_encode(hash('sha512', "$user$pass", true)), 0, 56);
+
+		if (file_exists($this->cJar['file']) && ($cFile = file($this->cJar['file'])) && is_array($cFile = unserialize($cFile[1])) && array_key_exists($this->cJar['hash'], $cFile) && ($testCookie = $this->cJar_decrypt($cFile[$this->cJar['hash']]['cookie'], $this->cJar['key']))) {
+			return $this->cJar_test($testCookie);
+		} else return false;
+	}
+
+	private function cJar_test($cookie) {
+		if (empty($this->cJar) || empty($cookie[$this->cname])) return false;
+		$oldCookie = $this->cookie;
+		$this->cookie = array_merge($cookie, $this->baseCookie);
+
+		if (!($page = $this->isLoggedIn())) {
+			$this->cookie = $oldCookie;
+			return false;
+		}
+		$this->cJar_save(); // Update last used time.
+		return $page;
+	}
+
+	private function cJar_save() {
+		if (empty($this->cJar)) return;
+		$maxTime = 31 * 86400; // Max time to keep unused cookies saved (31 days)
+		if (file_exists($this->cJar['file']) && ($savedcookies = file($this->cJar['file'])) && is_array($savedcookies = unserialize($savedcookies[1]))) {
+			// Remove old cookies
+			foreach ($savedcookies as $k => $v) if (time() - $v['time'] >= $maxTime) unset($savedcookies[$k]);
+		} else $savedcookies = array();
+		$savedcookies[$this->cJar['hash']] = array('time' => time(), 'cookie' => $this->cJar_encrypt($this->cookie, $this->cJar['key']));
+
+		file_put_contents($this->cJar['file'], "<?php exit(); ?>\r\n" . serialize($savedcookies), LOCK_EX);
 	}
 
 	// Checks For Login Errors on $page and Calls html_error() For Them.

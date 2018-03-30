@@ -9,11 +9,12 @@ if (!file_exists(HOST_DIR . 'download/GenericXFS_DL.php')) html_error('Cannot lo
 require_once(HOST_DIR . 'download/GenericXFS_DL.php');
 
 class uptobox_com extends GenericXFS_DL {
-	public $pluginVer = 15;
+	public $pluginVer = 23;
 	public function Download($link) {
 		$this->wwwDomain = false; // Switch to true if filehost forces it's domain with www.
 		$this->cname = 'xfss'; // Session cookie name
-		$this->sslLogin = false; // Force https on login.
+		$this->sslLogin = true; // Force https on login.
+		$this->cookieSave = true; // Save login cookies to file. (For hosts that limit/bans repeated logins)
 		$this->embedDL = false; // Try to unpack player's js for finding download link. (Only hosts with video player)
 		$this->unescaper = false; // Enable JS unescape decoder.
 
@@ -29,17 +30,38 @@ class uptobox_com extends GenericXFS_DL {
 	}
 
 	protected function findCountdown() {
-		if (parent::findCountdown()) return true;
-		if (stripos($this->page, 'Happy hour!!!')) {
-			$this->CountDown(3); // I still do get some Skipped CountDown even with longer countdowns it may be a bug at the site at "happy hour".
+		if (preg_match('@data-remaining-time=\'(\d+)\'@i', $this->page, $count)) {
+			if ($count[1] > 0) $this->CountDown($count[1] + 2);
 			return true;
 		}
 		return false;
 	}
 
-	// Patched function for UTB new ajax login.
+	// FreeDL is totally different now, so it needs it's own function
+	protected function FreeDL($step = 1) {
+		$this->page = $this->GetPage($this->link, $this->cookie);
+		$this->cookie = GetCookiesArr($this->page, $this->cookie);
+
+		if (!$this->testDL()) {
+			if (!preg_match('@name=\'waitingToken\'\s+value=\'([\w\-]+)\'@i', $this->page, $token)) {
+				if (preg_match('@wait\s+(?:\d+ \w+,?\s){0,2}\d+ \w+ to launch a new download@i', $this->page, $err)) html_error('Error: You need to ' . strip_tags($err[0]));
+				return html_error('FreeDL Token Not Found.');
+			}
+			if (!$this->findCountdown()) html_error('CountDown not Found.');
+
+			$this->page = $this->GetPage($this->link, $this->cookie, array('waitingToken' => $token[1]));
+			$this->cookie = GetCookiesArr($this->page, $this->cookie);
+
+			if (!$this->testDL()) {
+				return html_error('FreeDL Download Link not Found.');
+			}
+		}
+		return true;
+	}
+
+	// Full login url, just in case.
 	protected function sendLogin($post) {
-		return $this->GetPage('https://login.uptobox.com/logarithme', $this->cookie, $post, 'https://login.uptobox.com/');
+		return $this->GetPage('https://uptobox.com/?op=login&referer=homepage', $this->cookie, $post, 'https://uptobox.com/?op=login&referer=homepage');
 	}
 
 	protected function isAccPremium($page) {
@@ -54,5 +76,3 @@ class uptobox_com extends GenericXFS_DL {
 }
 
 // Written by Th3-822.
-
-?>

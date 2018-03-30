@@ -25,7 +25,7 @@ $upload_acc[$acc_key_name]['pass'] = ''; //Set your password
 
 function SendLogin($post) {
 	global $_T8, $cookie, $pauth;
-	$page = geturl('login.uptobox.com', 443, '/logarithme', 'https://login.uptobox.com/', $cookie, $post, 0, 0, 0, 0, 'https'); // geturl doesn't support https proxy
+	$page = geturl('uptobox.com', 443, '/?op=login&referer=homepage', 'https://uptobox.com/?op=login&referer=homepage', $cookie, $post, 0, 0, 0, 0, 'https'); // geturl doesn't support https proxy
 	is_page($page);
 	is_present($page, 'You are trying to log in from a different country', 'Login Failed: Login Blocked By IP, Check Account Email And Follow The Steps To Add IP to Whitelist.');
 	return $page;
