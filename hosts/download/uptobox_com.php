@@ -13,7 +13,7 @@ class uptobox_com extends GenericXFS_DL {
 	public function Download($link) {
 		$this->wwwDomain = false; // Switch to true if filehost forces it's domain with www.
 		$this->cname = 'xfss'; // Session cookie name
-		$this->httpsOnly = false; // Force https on all the site, supersedes $this->sslLogin when true
+		$this->httpsOnly = true; // Force https on all the site, supersedes $this->sslLogin when true
 		$this->sslLogin = true; // Force https on login post only.
 		$this->cookieSave = true; // Save login cookies to file. (For hosts that limit/bans repeated logins)
 		$this->embedDL = false; // Try to unpack player's js for finding download link. (Only hosts with video player)

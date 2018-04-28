@@ -9,7 +9,7 @@ $_T8['anonUploadDisable'] = false; // Disallow non-registered users upload. (XFS
 $_T8['anonUploadLimit'] = 1024; // File-size limit for non-registered users (MB) | 0 = Plugin's limit | (XFS Pro)
 
 // Advanced Settings (Don't edit it unless you know what are you doing)
-	$_T8['port'] = 80; // Server's port, default: 80 | 443 = https.
+	$_T8['port'] = 443; // Server's port, default: 80 | 443 = https.
 	$_T8['xfsFree'] = false; // Change to true if the host is using XFS free.
 	$_T8['path'] = '/'; // URL path to XFS script, default: '/'
 	$_T8['sslLogin'] = false; // Force https on login.
