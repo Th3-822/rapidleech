@@ -41,10 +41,8 @@ class mediafire_com extends DownloadClass {
 			echo "Enter your password here:<br />\n<input type='text' name='mfpassword' value='' placeholder='Enter file password here' autofocus='autofocus' required='required' />\n<input type='submit' />\n</form>";
 			return html_error('File requires password');
 		}
-		if (preg_match('@Location: (http:\/\/[^\r\n]+)@i', $this->page, $dl) || preg_match('@\w+\s*=\s*\"(https?://[^\"]+)\"\s*;@i', $this->page, $dl)) {
-			$dlink = trim($dl[1]);
-			$this->RedirectDownload($dlink, 'Mediafire.com');
-		} else html_error("Error: Download link [FREE] not found!");
+		if (!preg_match('@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/[\w\-\.]{5,}/' . preg_quote($this->fid[3]) . '/[^\?\'\"\t<>\r\n\\\]+@i', $this->page, $dl)) return html_error("Error: Download link [FREE] not found!");
+		$this->RedirectDownload($dl[0], 'Mediafire.com');
 	}
 
 	private function MF_Captcha() {
@@ -124,6 +122,5 @@ class mediafire_com extends DownloadClass {
  * added recaptcha v2 captcha support && fixed dead link msgs by Th3-822 07-04-2015
  * added checkbox "captcha" support (non tested) by Th3-822 18-06-2015
  * fixed link regexp, redirect by Th3-822 18-10-2016
+ * fixed download regexp by Th3-822 09-05-2018
  */
- 
-?>
