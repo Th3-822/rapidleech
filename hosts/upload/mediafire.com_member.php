@@ -19,6 +19,127 @@ if ($cURL) {
 if (!extension_loaded('openssl') && !$chttps) html_error('You need to install/enable PHP\'s OpenSSL extension to support HTTPS connections.');
 elseif (!$chttps) $cURL = false;
 
+/* Not Final */
+if (!function_exists('curl_upfile')) {
+	function curl_upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, $fieldname, $field2name = '', $proxy = 0, $pauth = 0, $upagent = 0, $scheme = 'http') {
+		static $ch;
+		if (empty($upagent)) $upagent = rl_UserAgent;
+		$scheme = strtolower("$scheme://");
+		$fileSize = filesize($file);
+
+		if (!is_readable($file)) return html_error(sprintf(lang(65), $file));
+		if ($scheme == 'https://' && ($port == 0 || $port == 80)) $port = 443;
+		elseif ($port == 0) $port = 80;
+
+		if (!extension_loaded('curl') || !function_exists('curl_init') || !function_exists('curl_exec')) return html_error('cURL isn\'t enabled or cURL\'s functions are disabled');
+		$arr = explode("\r\n", $referer);
+		$header = array();
+		if (count($arr) > 1) {
+			$referer = $arr[0];
+			unset($arr[0]);
+			$header = array_filter(array_map('trim', $arr));
+		}
+		$opt = array(CURLOPT_HEADER => 1, CURLOPT_SSL_VERIFYPEER => 0,
+			CURLOPT_SSL_VERIFYHOST => 0, CURLOPT_RETURNTRANSFER => 1,
+			CURLOPT_FOLLOWLOCATION => 0, CURLOPT_FAILONERROR => 1,
+			CURLOPT_FORBID_REUSE => 0, CURLOPT_FRESH_CONNECT => 0,
+			CURLINFO_HEADER_OUT => 1, CURLOPT_URL => $scheme . $host . ($port != 80 && $port != 443 ? ":" . $port : "") . str_replace(array(' ', "\r", "\n"), array('%20'), $url),
+			CURLOPT_USERAGENT => $upagent);
+
+		$opt[CURLOPT_REFERER] = !empty($referer) ? $referer : false;
+		$opt[CURLOPT_COOKIE] = !empty($cookie) ? (is_array($cookie) ? CookiesToStr($cookie) : trim($cookie)) : false;
+
+		if (!empty($_GET['useproxy']) && !empty($_GET['proxy'])) {
+			$opt[CURLOPT_HTTPPROXYTUNNEL] = ($scheme == 'https://') ? true : false;
+			// $opt[CURLOPT_HTTPPROXYTUNNEL] = false; // Uncomment this line for disable https proxy over curl.
+			$opt[CURLOPT_PROXY] = $_GET['proxy'];
+			$opt[CURLOPT_PROXYUSERPWD] = (!empty($pauth) ? base64_decode($pauth) : false);
+		} else $opt[CURLOPT_PROXY] = false;
+
+		// Send more headers...
+		$headers = array('Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language: en-US;q=0.7,en;q=0.3', 'Pragma: no-cache', 'Cache-Control: no-cache', 'Connection: Close');
+		if (empty($opt[CURLOPT_REFERER])) $headers[] = 'Referer:';
+		if (empty($opt[CURLOPT_COOKIE])) $headers[] = 'Cookie:';
+		if (!empty($opt[CURLOPT_PROXY]) && empty($opt[CURLOPT_PROXYUSERPWD])) $headers[] = 'Proxy-Authorization:';
+		if (count($header) > 0) $headers = array_merge($headers, $header);
+		$opt[CURLOPT_HTTPHEADER] = $headers;
+
+		if ($auth) {
+			$opt[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
+			$opt[CURLOPT_USERPWD] = base64_decode($auth);
+		} else $opt[CURLOPT_HTTPAUTH] = false;
+
+		if (empty($post)) $post = array();
+		$opt[CURLOPT_POST] = 1;
+		if (!is_array($post)) return html_error('Error: $post must be a array!');
+		if (function_exists('curl_file_create')) {
+			$post[$fieldname] = curl_file_create($file);
+		} else {
+			$post = array_map(function($val) {
+				return ltrim($val, '@');
+			}, $post);
+			$post[$fieldname] = "@".realpath($file);
+			if (defined('CURLOPT_SAFE_UPLOAD')) $opt['CURLOPT_SAFE_UPLOAD'] = false;
+		}
+		$opt[CURLOPT_POSTFIELDS] = $post;
+
+		// Progress bar
+		$opt[CURLOPT_NOPROGRESS] = false;
+		$opt[CURLOPT_BUFFERSIZE] = GetChunkSize($fileSize);
+		$opt[CURLOPT_PROGRESSFUNCTION] = function($ch, $download_size = 0, $downloaded = 0, $upload_size = 0, $uploaded = 0) {
+			if (version_compare(PHP_VERSION, '5.5.0') < 0) {
+				$uploaded = $upload_size;
+				$upload_size = $downloaded;
+				$downloaded = $download_size;
+				$download_size = $ch;
+			}
+			static $lastUploaded = 0;
+			static $time = 0;
+			static $lastChunkTime;
+			if (!isset($lastChunkTime)) $lastChunkTime = microtime(true);
+
+			if ($uploaded != $lastUploaded && (time() > $time || $uploaded == $upload_size)) {
+				$mtime = microtime(true);
+				$ctime = $mtime - $lastChunkTime;
+				$ctime = ($ctime > 0) ? $ctime : 1;
+				$lastChunkTime = $mtime;
+				$speed = round(($uploaded - $lastUploaded) / 1024 / $ctime, 2);
+				$progress = min(round(($uploaded / $upload_size) * 100, 2), 100);
+				echo "<script type='text/javascript'>pr('$progress', '" . bytesToKbOrMbOrGb($uploaded) . "', '$speed');</script>\n";
+				flush();
+				$lastUploaded = $uploaded;
+				$time = time();
+			}
+		};
+
+		$opt[CURLOPT_CONNECTTIMEOUT] = $opt[CURLOPT_TIMEOUT] = 120;
+
+		// Creating curl resource
+		if (!isset($ch)) $ch = curl_init();
+
+		foreach ($opt as $O => $V) curl_setopt($ch, $O, $V); // Using this instead of 'curl_setopt_array'
+
+		if ($proxy) echo '<p>' . sprintf(lang(89), $proxyHost, $proxyPort) . '<br />UPLOAD: <b>' . htmlspecialchars($url) . "</b>...<br />\n";
+		else echo '<p>'.sprintf(lang(90), $host, $port).'</p>';
+
+		echo(lang(104) . ' <b>' . htmlspecialchars($filename) . '</b>, ' . lang(56) . ' <b>' . bytesToKbOrMbOrGb($fileSize) . '</b>...<br />');
+		$GLOBALS['id'] = md5(time() * rand(0, 10));
+		require (TEMPLATE_DIR . '/uploadui.php');
+		flush();
+
+		$page = curl_exec($ch);
+		$info = curl_getinfo($ch);
+		$errz = curl_errno($ch);
+		$errz2 = curl_error($ch);
+		curl_close($ch);
+
+		if ($errz != 0) return html_error("[cURL-Upload:$errz] $errz2");
+
+		if (substr($page, 9, 3) == '100' || !empty($opt[CURLOPT_HTTPPROXYTUNNEL])) $page = preg_replace("@^HTTP/1\.[01] \d{3}(?:\s[^\r\n]+)?\r\n\r\n(HTTP/1\.[01] \d+ [^\r\n]+)@i", "$1", $page, 1); // The "100 Continue" or "200 Connection established" can break some functions in plugins, lets remove it...
+		return $page;
+	}
+}
+
 if ($upload_acc['mediafire_com']['user'] && $upload_acc['mediafire_com']['pass']) {
 	$default_acc = true;
 	$_REQUEST['up_login'] = $upload_acc['mediafire_com']['user'];
@@ -38,7 +159,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	echo "</table>\n</form>\n";
 } else {
 	$login = $not_done = false;
-	$domain = 'mediafire.com';
+	$domain = 'www.mediafire.com';
 	$referer = "https://$domain/";
 	$app = array('id' => '44595', 'api_version' => '1.5'); // Application ID for MediaFire's API @ https://www.mediafire.com/#settings/applications
 
@@ -101,7 +222,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	$up_url = $referer . "api/{$app['api_version']}/upload/simple.php?response_format=json&session_token={$getAToken['action_token']}&action_on_duplicate=" . $uploadPrefs['action_on_duplicate'];
 
 	$url = parse_url($up_url);
-	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer.(!empty($fileHash) ? "\r\nX-Filehash: $fileHash" : ''), 0, 0, $lfile, $lname, 'Filedata', '', $_GET['proxy'], $pauth, 0, $url['scheme']);
+	$upfiles = curl_upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer.(!empty($fileHash) ? "\r\nX-Filehash: $fileHash" : ''), 0, 0, $lfile, $lname, 'Filedata', '', $_GET['proxy'], $pauth, 0, $url['scheme']);
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";
@@ -262,3 +383,4 @@ function strtolower_nr($str) {
 //[18-2-2015]  Written by Th3-822.
 //[30-12-2017] Updated API to 1.5 & small fixes. - Th3-822
 //[24-1-2018] Fixed upload token expiring issues & small fixes. - Th3-822
+//[03-6-2018] Switched to www. domain & use cURL for upload (Requires PHP 5.4 for Progress Bar to Work, iirc) & spamming GH with issues won't make this fixed early. - Th3-822
