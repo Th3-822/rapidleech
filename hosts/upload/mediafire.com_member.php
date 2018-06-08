@@ -64,21 +64,18 @@ if (!function_exists('curl_upfile')) {
 		if (count($header) > 0) $headers = array_merge($headers, $header);
 		$opt[CURLOPT_HTTPHEADER] = $headers;
 
-		if ($auth) {
-			$opt[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
-			$opt[CURLOPT_USERPWD] = base64_decode($auth);
-		} else $opt[CURLOPT_HTTPAUTH] = false;
+		$opt[CURLOPT_HTTPAUTH] = false;
 
 		if (empty($post)) $post = array();
 		$opt[CURLOPT_POST] = 1;
 		if (!is_array($post)) return html_error('Error: $post must be a array!');
 		if (function_exists('curl_file_create')) {
-			$post[$fieldname] = curl_file_create($file);
+			$post[$fieldname] = curl_file_create($file, '', $filename);
 		} else {
 			$post = array_map(function($val) {
 				return ltrim($val, '@');
 			}, $post);
-			$post[$fieldname] = "@".realpath($file);
+			$post[$fieldname] = sprintf('@%s;filename=%s', realpath($file), $filename);
 			if (defined('CURLOPT_SAFE_UPLOAD')) $opt['CURLOPT_SAFE_UPLOAD'] = false;
 		}
 		$opt[CURLOPT_POSTFIELDS] = $post;
@@ -384,3 +381,4 @@ function strtolower_nr($str) {
 //[30-12-2017] Updated API to 1.5 & small fixes. - Th3-822
 //[24-1-2018] Fixed upload token expiring issues & small fixes. - Th3-822
 //[03-6-2018] Switched to www. domain & use cURL for upload (Requires PHP 5.4 for Progress Bar to Work, iirc) & spamming GH with issues won't make this fixed early. - Th3-822
+//[08-6-2018] Fixed filenames on upload. - Th3-822
