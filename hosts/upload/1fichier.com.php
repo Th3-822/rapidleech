@@ -97,11 +97,13 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 
 	$page = geturl($end_url['host'], defport($end_url), $end_url['path'].(!empty($end_url['query']) ? '?'.$end_url['query'] : ''), $up_url, $cookie, 0, 0, 0, 0, 0, $end_url['scheme']);is_page($page);
 
-	if (!preg_match('@https?://(?:\w+\.)*1fichier\.com/remove/([\w\-]+)/[^\s<>\"\']+@i', $page, $lnk)) html_error('Download link not found.');
-	$download_link = $referer . '?' . $lnk[1];
-	$delete_link = $lnk[0];
+	if (preg_match('@https?://(?:\w+\.)*1fichier\.com/remove/([\w\-]+)/[^\s<>\"\']+@i', $page, $lnk)) {
+		$download_link = $referer . '?' . $lnk[1];
+		$delete_link = $lnk[0];
+	} else if (preg_match('@https://(?:\w+\.)*1fichier\.com/\?\w+(?="|<)@i', $page, $lnk)) {
+		$download_link = $lnk[0];
+	} else html_error('Download link not found.');
 }
 
 //[18-3-2015]  Written by Th3-822.
-
-?>
+//[24-6-2018] Fixed download link regexp for Member uploads. - Th3-822
