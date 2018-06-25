@@ -70,7 +70,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		$cookie = GetCookiesArr($page, $cookie);
 	}
 
-	if (!preg_match('@action="((https?://(?:\w+\.)*1fichier\.com)?(/)?upload\.cgi\?id=(?:[^\"\'\s<>]+))"@i', $page, $up)) html_error('Error: Upload url not found.');
+	if (!preg_match('@action="((https?://(?:[\w-]+\.)*1fichier\.com)?(/)?upload\.cgi\?id=(?:[^\"\'\s<>]+))"@i', $page, $up)) html_error('Error: Upload url not found.');
 
 	$post = array();
 	$post['domain'] = '0';
@@ -91,7 +91,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 
 	is_page($upfiles);
 
-	if (!preg_match('@\nLocation: ((https?://(?:\w+\.)*1fichier\.com)?/end\.pl\?\w?id=(?:[^\"\'\s<>]+))@i', $upfiles, $end_url)) html_error('Error: Post Upload url not found.');
+	if (!preg_match('@\nLocation: ((https?://(?:[\w-]+\.)*1fichier\.com)?/end\.pl\?\w?id=(?:[^\"\'\s<>]+))@i', $upfiles, $end_url)) html_error('Error: Post Upload url not found.');
 
 	$end_url = parse_url(empty($end_url[2]) ? (empty($up[2]) ? "https://$domain" : $up[2]) . $end_url[1] : $end_url[1]);
 
@@ -106,4 +106,4 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 }
 
 //[18-3-2015]  Written by Th3-822.
-//[24-6-2018] Fixed download link regexp for Member uploads. - Th3-822
+//[25-6-2018] Fixed download link regexp for Member uploads & Fixed upload url regexp. - Th3-822
