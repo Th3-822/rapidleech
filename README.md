@@ -13,6 +13,10 @@
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
+## Digital Oceon $100 Credit
+
+![Digital Oceon](https://goo.gl/dwtvzE)
+
 ==> Script Information
 Rapid Leech is a free server transfer script for use on various popular upload/download sites such as uploaded.net, Rapidgator.net and more than 127 others. The famous Rapidleech script transfers files from Other Filehosting Servers To Your Server via your fast servers connection speed and dumps the file on your server. You may then download these files from your server anytime later.
 
