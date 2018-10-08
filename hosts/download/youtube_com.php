@@ -56,7 +56,7 @@ class youtube_com extends DownloadClass {
 		else $filename .= " [YT-Audio]";
 		$filename .= "[{$this->vid}]$ext";
 
-		$this->RedirectDownload($fmt['url'], $filename, $this->cookie, 0, (is_dash ? $this->link . "\r\nRange: bytes=0-" : 0), $filename);
+		$this->RedirectDownload($fmt['url'], $filename, $this->cookie, 0, ($is_dash ? $this->link . "\r\nRange: bytes=0-" : 0), $filename);
 	}
 
 	private function FormToArr($content, $v1 = '&', $v2 = '=') {
@@ -236,8 +236,8 @@ class youtube_com extends DownloadClass {
 			//if (($spos = strpos($this->playerJs, '.sig||')) === false) $this->decError('Not found (".sig||")');
 			//if (($cut1 = cut_str(substr($this->playerJs, $spos), '{', '}')) == false) $this->decError('Cannot get inner content of "if(X.sig||X.s)"');
 			$v = '[\$_A-Za-z][\$\w]*';
-			if (!preg_match("@(?<=\.sig\|\||\.set\(\"signature\",|\|\"signature\",)$v(?=\($v\.s\))@", $this->playerJs, $fn)) $this->decError('Cannot get decoder function name');
-			$fn = preg_quote($fn[0], '@');
+			if (!preg_match("@(?:\.sig\|\||\.set\(\"signature\",|\|\"signature\",|$v\.sp,)($v)(?=\($v\.s\))@", $this->playerJs, $fn)) $this->decError('Cannot get decoder function name');
+			$fn = preg_quote($fn[1], '@');
 			if (!preg_match("@(?:function\s+$fn\s*\(|var\s+$fn\s*=\s*function\s*\(|(?<=(?:{|,|;))\s*$fn\s*=\s*function\s*\()@", $this->playerJs, $fpos, PREG_OFFSET_CAPTURE)) $this->decError('Cannot find decoder function');
 			$fpos = $fpos[0][1];
 			if (($cut2 = cut_str(substr($this->playerJs, $fpos), '{', '}')) == false) $this->decError('Cannot get decoder function contents');
@@ -353,4 +353,4 @@ class youtube_com extends DownloadClass {
 // [30-8-2016]  Fixed slow speed while downloading DASH streams. - Th3-822
 // [30-4-2017]  Fixed signature decoding functions. - Th3-822
 // [25-1-2018]  Fixed get_video_info. - Th3-822
-// [14-2-2018]  Fixed signature decoding functions. - Th3-822
+// [25-9-2018]  Fixed signature decoding functions. - Th3-822
