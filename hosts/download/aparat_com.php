@@ -10,7 +10,7 @@ class aparat_com extends DownloadClass {
 		if (!preg_match('@aparat\.com/v/(\w+)@i', $link, $vid)) html_error('Video ID not found.');
 		$vid = $vid[1];
 
-		$page = $this->GetPage("http://www.aparat.com/v/$vid");
+		$page = $this->GetPage("https://www.aparat.com/v/$vid");
 		is_present($page, "ویدیو مشابهی یافت نشد.", 'Video not found or it was deleted.');
 		if (!preg_match('@<title>(?>(.*?)</title>)@is', $page, $title)) html_error('Error: Video title not found.');
 		if (!preg_match('@https?://(?:[\w-]+\.)*aparat\.com/aparat-video/\w+(?:-(\d+p))?__\w+\.mp4@i', $page, $DL)) html_error('Download link not found.');
@@ -25,5 +25,6 @@ class aparat_com extends DownloadClass {
 
 //[23-12-2015]  Written by Th3-822.
 //[27-12-2015]  Fixed Regexp. - Th3-822
+//[02-11-2018]  Fixed video URL pattern - Nabi K.A.Z. <www.nabi.ir>
 
 ?>
