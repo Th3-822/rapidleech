@@ -23,8 +23,8 @@ class aparat_com extends DownloadClass {
 	}
 }
 
-//[02-11-2018]  Fixed video URL - Nabi K.A.Z. <nabikaz@gmail.com>
 //[23-12-2015]  Written by Th3-822.
 //[27-12-2015]  Fixed Regexp. - Th3-822
+//[02-11-2018]  Fixed video URL pattern - Nabi K.A.Z. <www.nabi.ir>
 
 ?>
