@@ -87,5 +87,6 @@ class aparat_com extends DownloadClass {
 //[27-12-2015]  Fixed Regexp. - Th3-822
 //[02-11-2018]  Fixed video URL pattern - Nabi K.A.Z. <www.nabi.ir>
 //[02-11-2018]  Added aparat quality selector - Nabi K.A.Z. <www.nabi.ir>
+//[02-11-2018]  Fixed bug in multi downloader - Nabi K.A.Z. <www.nabi.ir>
 
 ?>
