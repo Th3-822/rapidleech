@@ -37,6 +37,10 @@ allow from all
 allow from all
 </files>
 
+<files video.php>
+allow from all
+</files>
+
 <files ~ "^\.">
 deny from all
 </files>

@@ -14,7 +14,7 @@ class dailymotion_com extends DownloadClass {
 		$this->cookie = !empty($_POST['step']) && !empty($_POST['cookie']) ? StrToCookies(decrypt(urldecode($_POST['cookie']))) : array('ff' => 'off');
 		if (!preg_match('@/video/(x[0-9a-zA-Z]+)@i', $link, $xid)) html_error('Video ID not found.');
 		$this->xid = $xid[1];
-		$this->link = 'https://www.dailymotion.com/video/'.$this->xid;
+		$this->link = 'http://www.dailymotion.com/video/'.$this->xid;
 
 		if (empty($_POST['step'])) {
 			$page = $this->GetPage($this->link, $this->cookie);
@@ -42,8 +42,6 @@ class dailymotion_com extends DownloadClass {
 		$filename = preg_replace('@(?:\.(?:mp4|flv|mkv|webm|wmv|(m2)?ts|rm(vb)?|mpe?g?|vob|avi|[23]gp))+$@i', '', $filename);
 		$filename .= " [DM-{$key}p][{$this->xid}].mp4";
 
-		$DL = str_replace( 'http://', 'https://', $DL);
-
 		$page = $this->GetPage($DL, $this->cookie);
 		if (!preg_match('@https?://[^/\s]+/video/[^\s<>\'\"]+@i', $page, $DL)) html_error('Download Link not Found.');
 
@@ -51,7 +49,7 @@ class dailymotion_com extends DownloadClass {
 	}
 
 	private function getVideoInfo() {
-		$page = $this->GetPage("https://www.dailymotion.com/json/video/{$this->xid}?fields=title%2C".implode('%2C', $this->formats), $this->cookie);
+		$page = $this->GetPage("http://www.dailymotion.com/json/video/{$this->xid}?fields=title%2C".implode('%2C', $this->formats), $this->cookie);
 		$json = $this->json2array($page);
 
 		if (empty($json['title'])) html_error('Video Title not Found.');
@@ -79,5 +77,5 @@ class dailymotion_com extends DownloadClass {
 }
 
 //[07-3-2014] Written by Th3-822.
-//[14-10-2018] Fixed download issues with http by swiching to https. - miyuru
+
 ?>

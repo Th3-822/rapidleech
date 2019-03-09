@@ -8,7 +8,7 @@ if (!defined('RAPIDLEECH')) {
 class youtube_com extends DownloadClass {
 	private $page, $cookie, $fmtmaps, $vid, $sts = -1, $js, $playerJs, $sigJs, $jsVars, $cookieFile,
 		$fmts = array(22 => '0|720|0|192', 45 => '1|720|1|192', 44 => '1|480|1|192', 35 => '2|480|0|128', 43 => '1|360|1|128', 34 => '2|360|0|128', 18 => '0|360|0|96', 6 => '2|270|3|64', 5 => '2|240|3|64', 36 => '3|240|0|36', 17 => '3|144|0|24'),
-		$dashfmts = array(138 => 'V0', 272 => 'V1', 315 => 'V1', 266 => 'V0', 313 => 'V1', 308 => 'V1', 264 => 'V0', 271 => 'V1', 299 => 'V0', 303 => 'V1', 137 => 'V0', 248 => 'V1', 136 => 'V0', 298 => 'V0', 247 => 'V1', 302 => 'V1', 135 => 'V0', 244 => 'V1', 140 => 'A0', 171 => 'A1', 251 => 'A2', 250 => 'A2', 249 => 'A2');
+		$dashfmts = array(138 => 'V0', 272 => 'V1', 315 => 'V1', 266 => 'V0', 313 => 'V1', 308 => 'V1', 264 => 'V0', 271 => 'V1', 299 => 'V0', 303 => 'V1', 137 => 'V0', 248 => 'V1', 298 => 'V0', 302 => 'V1', 135 => 'V0', 244 => 'V1', 140 => 'A0', 171 => 'A1', 251 => 'A2', 250 => 'A2', 249 => 'A2');
 
 	public function Download($link) {
 		$this->cookieFile = DOWNLOAD_DIR.'YT_cookie.txt';
@@ -56,7 +56,7 @@ class youtube_com extends DownloadClass {
 		else $filename .= " [YT-Audio]";
 		$filename .= "[{$this->vid}]$ext";
 
-		$this->RedirectDownload($fmt['url'], $filename, $this->cookie, 0, ($is_dash ? $this->link . "\r\nRange: bytes=0-" : 0), $filename);
+		$this->RedirectDownload($fmt['url'], $filename, $this->cookie, 0, (is_dash ? $this->link . "\r\nRange: bytes=0-" : 0), $filename);
 	}
 
 	private function FormToArr($content, $v1 = '&', $v2 = '=') {
@@ -236,9 +236,8 @@ class youtube_com extends DownloadClass {
 			//if (($spos = strpos($this->playerJs, '.sig||')) === false) $this->decError('Not found (".sig||")');
 			//if (($cut1 = cut_str(substr($this->playerJs, $spos), '{', '}')) == false) $this->decError('Cannot get inner content of "if(X.sig||X.s)"');
 			$v = '[\$_A-Za-z][\$\w]*';
-			$v3 = '[\$_A-Za-z][\$\w]{3,}';
-			if (!preg_match("@(?:\.sig\|\||\.set\(\"signature\",|\|\"signature\",|$v\.sp,)(?:\(0,$v(?:\.$v)*\)\(|$v3\()?($v)\((?:\(0,$v(?:\.$v)*\)\(|$v3\()?$v\.s\)@", $this->playerJs, $fn)) $this->decError('Cannot get decoder function name');
-			$fn = preg_quote($fn[1], '@');
+			if (!preg_match("@(?<=\.sig\|\||\.set\(\"signature\",|\|\"signature\",)$v(?=\($v\.s\))@", $this->playerJs, $fn)) $this->decError('Cannot get decoder function name');
+			$fn = preg_quote($fn[0], '@');
 			if (!preg_match("@(?:function\s+$fn\s*\(|var\s+$fn\s*=\s*function\s*\(|(?<=(?:{|,|;))\s*$fn\s*=\s*function\s*\()@", $this->playerJs, $fpos, PREG_OFFSET_CAPTURE)) $this->decError('Cannot find decoder function');
 			$fpos = $fpos[0][1];
 			if (($cut2 = cut_str(substr($this->playerJs, $fpos), '{', '}')) == false) $this->decError('Cannot get decoder function contents');
@@ -291,7 +290,7 @@ class youtube_com extends DownloadClass {
 			$sizes = array();
 			$opt = array(CURLOPT_FOLLOWLOCATION => true, CURLOPT_MAXREDIRS => 5, CURLOPT_NOBODY => true);
 			foreach ($this->fmtmaps as $itag => $fmt) {
-				if (empty($this->fmts[$itag])) continue;
+				if (empty($this->fmts[$itag]) && empty($this->dashfmts[$itag])) continue;
 				$headers = explode("\r\n\r\n", cURL($fmt['url'], $this->cookie, 0, 0, 0, $opt));
 				$headers = ((count($headers) > 2) ? $headers[count($headers) - 2] : $headers[0]) . "\r\n\r\n";
 				if (substr($headers, 9, 3) == '200' && ($CL = cut_str($headers, "\nContent-Length: ", "\n")) && $CL > 1024) $sizes[$itag] = bytesToKbOrMbOrGb(trim($CL));
@@ -305,12 +304,11 @@ class youtube_com extends DownloadClass {
 		echo '<label><input type="checkbox" name="cleanname" checked="checked" value="1" /><small>&nbsp;Remove non-supported characters from filename</small></label><br />';
 		echo "<select name='yt_fmt' id='QS_fmt'>\n";
 		foreach ($this->fmtmaps as $itag => $fmt) {
+			$size = (!empty($sizes[$itag]) ? ' ('.$sizes[$itag].')' : '');
 			if (!empty($this->fmts[$itag])) {
-				$size = (!empty($sizes[$itag]) ? ' ('.$sizes[$itag].')' : '');
 				if (($I = explode('|', $this->fmts[$itag]))) printf("<option value='%d'>[%1\$d] Video: %s %dp | Audio: %s ~%d Kbps%s</option>\n", $itag, $C['V'][$I[0]], $I[1], $C['A'][$I[2]], $I[3], $size);
 			} else if (!empty($this->dashfmts[$itag])) {
 				if (($I = str_split($this->dashfmts[$itag]))) {
-					$size = (!empty($fmt['clen']) ? ' ('.bytesToKbOrMbOrGb($fmt['clen']).')' : '');
 					if ($I[0] == 'V' || $I[0] == 'v') printf("<option value='%d'>[%1\$d] Video only: %s @ %s%s</option>\n", $itag, $C['V'][$I[1]], $fmt['quality_label'], $size);
 					else printf("<option value='%d'>[%1\$d] Audio only: %s @ ~%s%s</option>\n", $itag, $C['A'][$I[1]], $this->bitrate2KMG($fmt['bitrate']), $size);
 				}
@@ -355,4 +353,4 @@ class youtube_com extends DownloadClass {
 // [30-8-2016]  Fixed slow speed while downloading DASH streams. - Th3-822
 // [30-4-2017]  Fixed signature decoding functions. - Th3-822
 // [25-1-2018]  Fixed get_video_info. - Th3-822
-// [03-2-2019]  Fixed signature decoding functions. - Th3-822
+// [14-2-2018]  Fixed signature decoding functions. - Th3-822

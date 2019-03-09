@@ -52,17 +52,18 @@ class d1fichier_com extends DownloadClass {
 		is_present($page, 'you can only download one file at a time');
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 
-		is_present($page, 'The link your requested is expired','The download link is expired, please try again.');
-		
 		if (preg_match($this->DLRegexp, $page, $dl)) return $this->RedirectDownload($dl[0], (empty($dl[2]) ? 'T8_1f_f2' : urldecode(parse_url($dl[0], PHP_URL_PATH))));
 
-		if (preg_match('@\(\'.clock\'\), (\d+)\*60, { clockFace:@i', $page, $cD))	if ($cD[1] > 0) $this->CountDown(($cD[1]*60));
+		is_present($page, 'you must wait between downloads', 'You must wait 15 minutes between downloads');
+
+		if (!preg_match('@[\s,;]var\s+count\s*=\s*(\d+)\s*;@i', $page, $cD)) html_error('Countdown not found.');
+		if ($cD[1] > 0) $this->CountDown($cD[1]);
 
 		$post = array();
 		$post['submit'] = cut_str($this->page, 'name="submit" value="', '"');
-		$post['adzone'] = cut_str($this->page, 'name="adzone" value="', '"');
+		$post['t'] = cut_str($this->page, 'name="t" value="', '"');
 		if (empty($post['submit'])) $post['submit'] = 'Show the download link';
-		if (empty($post['adzone'])) html_error('Form data not found.');
+		if (empty($post['t'])) html_error('Form data not found.');
 
 		$page = $this->GetPage($this->link, $this->cookie, $post);
 		$this->cookie = GetCookiesArr($page, $this->cookie);
@@ -122,5 +123,5 @@ class d1fichier_com extends DownloadClass {
 //[08-4-2014] Written by Th3-822.
 //[18-4-2014] Fixed Link Regexp. - Th3-822
 //[17-12-2014] Un-tested fixes for changes at the site. - Th3-822
-//[14-10-2018] fixed countdown and form data. - miyuru
+
 ?>

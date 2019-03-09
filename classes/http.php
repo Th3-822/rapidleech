@@ -163,10 +163,19 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	}
 
 	stream_set_timeout($fp, 120);
-
+	
 	if ($saveToFile) {
+		/*
 		if ($proxy) echo '<p>' . sprintf(lang(89), $proxyHost, $proxyPort) . '<br />GET: <b>' . htmlspecialchars($url) . "</b>...<br />\n";
 		else echo '<p>'.sprintf(lang(90), $host, $port).'</p>';
+		*/
+		//sending the output to transloadui.php 
+		if($proxy)
+		{
+			$data = sprintf(lang(89),$proxyHost, $proxyPort);
+			$dataUrl = htmlspecialchars($url);
+		}
+		else $data = sprintf(lang(90),$host,$port);
 	}
 
 	if ($scheme == 'ssl://' && $proxy) {
@@ -349,10 +358,13 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			$fileSize = bytesToKbOrMbOrGb($fileSize);
 		} else $fileSize = bytesToKbOrMbOrGb($bytesTotal);
 		$chunkSize = GetChunkSize($bytesTotal);
-		echo(lang(104) . " <b>$FileName</b>, " . lang(56) . " <b>$fileSize</b>...<br />");
-
-		//$scriptStarted = false;
+		
+		//sending next line to template (transloadui.php)
+		//echo(lang(104) . " <b>$FileName</b>, " . lang(56) . " <b>$fileSize</b>...<br />");
+		
+		//include transloadui.php to output any data 
 		require_once(TEMPLATE_DIR . '/transloadui.php');
+		//$scriptStarted = false;
 		if ($Resume['use'] === TRUE) {
 			$received = bytesToKbOrMbOrGb(filesize($saveToFile));
 			$percent = round($Resume['from'] / ($bytesTotal + $Resume['from']) * 100, 2);
@@ -382,7 +394,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				$chunkTime = $time - $lastChunkTime;
 				$chunkTime = ($chunkTime > 0) ? $chunkTime : 1;
 				$lastChunkTime = $time;
-				$speed = @round((($bytesReceived - $last) / 1024) / $chunkTime, 2);
+				$speed = @round((($bytesReceived - $last) / 1024) / $chunkTime, 2); //in KB/s 
 				echo "<script type='text/javascript'>pr('$percent', '$received', '$speed');</script>";
 				flush();
 				$last = $bytesReceived;

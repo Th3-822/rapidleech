@@ -193,7 +193,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 	require_once(TEMPLATE_DIR . 'functions.php');
 	include(TEMPLATE_DIR . '/header.php');
 	if ($options['ref_check']) check_referer();
-	echo('<div align="center">');
+	//echo('<div align="center">');
 
 	$_GET['saveto'] = urldecode(trim($_GET['saveto']));
 	do {
@@ -277,7 +277,11 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 		if ($options['redir'] && $lastError && strpos($lastError, substr(lang(95), 0, strpos(lang(95), '%1$s'))) !== false) {
 			$redirectto = substr($lastError, strpos(lang(95), '%1$s'));
 			$redirectto = trim(substr($redirectto, 0, strrpos($redirectto, ']')));
+			/*
+				need to send this to template engine!				
+			*/
 			print lang(8) . ' <b>' . htmlspecialchars($redirectto) . "</b> ... <br />$nn";
+			
 			$_GET['referer'] = urlencode($_GET['link']);
 			if (!preg_match('@^(?:https?|ftp)\://@i', $redirectto)) { // If redirect doesn't have the host
 				$ref = parse_url($_GET['link']);
@@ -300,8 +304,13 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 
 	if ($lastError) html_error(htmlspecialchars($lastError));
 	elseif ($file['bytesReceived'] == $file['bytesTotal'] || $file['size'] == 'Unknown') {
-		echo '<script type="text/javascript">' . "pr(100, '" . $file['size'] . "', '" . $file['speed'] . "')</script>\r\n";
-		echo sprintf(lang(10), link_for_file($file['file']), $file['size'], $file['time'], $file['speed']);
+		echo '<script>' . "pr(100, '" . $file['size'] . "', '" . $file['speed'] . "')</script>\r\n";
+		//sending the variable to template (transloadui.php)
+		//$downlink = sprintf(lang(10), link_for_file($file['file']), $file['size'], $file['time'], $file['speed']);
+		$downlink['link'] = link_for_file($file['file']);
+		$downlink['size'] = $file['size'];
+		$downlink['elapsed_time'] = $file['time'];
+		$downlink['avg_speed'] = $file['speed'];
 		$file['date'] = time();
 
 		if (!write_file(CONFIG_DIR . 'files.lst', serialize(array('name' => $file['file'], 'size' => $file['size'], 'date' => $file['date'], 'link' => $_GET['link'], 'comment' => (!empty($_GET['comment']) ? str_replace(array("\r", "\n"), array('\r', '\n'), $_GET['comment']) : ''))) . "\r\n", 0)) echo lang(9) . '<br />';
@@ -313,14 +322,16 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 				printf(lang(11), $_GET['email'], $file['name']);
 			} else echo lang(12) . '<br />';
 		}
+		/*--- disable the action menu
 		echo "\n<form method='POST' name='flist' action='{$_SERVER['SCRIPT_NAME']}'>\n";
 		echo "\t<input type='hidden' name='files[]' value='{$file['date']}' /><br />\n";
 		echo "\t<div style='text-align:center;'>\n";
 		echo renderActions();
 		echo "\t</div>\n";
 		echo "</form>\n";
+		*/
 		if ($options['new_window']) echo '<br /><a href="javascript:window.close();">' . lang(378) . '</a>';
-		else echo "<br /><a href='{$_SERVER['SCRIPT_NAME']}'>" . lang(13) . "</a>";
+		else $home = "<a href='{$_SERVER['SCRIPT_NAME']}'>" . lang(13) . "</a>";
 
 		if (!empty($_GET['audl'])) echo $nn . '<script type="text/javascript">parent.nextlink();</script>';
 	} else {
@@ -331,5 +342,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 		}
 		//echo '<script type="text/javascript">location.reload();</script>';
 	}
-	echo "\n</div>\n</body>\n</html>";
+	//echo "\n</div>\n</body>\n</html>";
+	include(TEMPLATE_DIR . '/download.php');
+	include(TEMPLATE_DIR . '/footer.php');
 }

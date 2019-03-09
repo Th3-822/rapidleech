@@ -16,7 +16,3 @@ Rapidleech script has being used by more than 5 million users worldwide and has 
 For webmasters, if you have not tried the script before, download and install now and you will see how convenient the script can be. You may also generate income by offering your Rapidleech sites to end-users and earn income from advertising programs. Some webmasters are earning hundreds per day on the advertising program(Google and yahoo Ads) from their Rapidleech sites. Script installation is extremely easy and does not require any database.
 
 For end-users, you may search on our forum for readily available installed scripts on servers worldwide. You may use them but please support these sites by visiting their sponsors or donate in order to keep these sites available.
-
-## Deploy to Heroku
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
