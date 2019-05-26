@@ -228,7 +228,7 @@ class youtube_com extends DownloadClass {
 		$this->sts = intval($this->sts[1]);
 
 		$savefile = DOWNLOAD_DIR.'YT_lastjs.txt';
-		if (!preg_match('@/(?:html5)?player-([\w\-\.]+(?:(?:/\w+)?/[\w\-\.]+)?)\.js@i', str_replace('\\/', '/', $page), $this->js)) html_error('YT\'s player javascript not found.');
+		if (!preg_match('@/(?:html5)?player[-_]([\w\-\.]+(?:(?:/\w+)?/[\w\-\.]+)?)\.js@i', str_replace('\\/', '/', $page), $this->js)) html_error('YT\'s player javascript not found.');
 		if (@file_exists($savefile) && ($file = file_get_contents($savefile, NULL, NULL, -1, 822)) && ($saved = @unserialize($file)) && is_array($saved) && !empty($saved['sts']) && $saved['sts'] == $this->sts && !empty($saved['steps']) && preg_match('@^\s*([ws]\d+|r)( ([ws]\d+|r))*\s*$@', $saved['steps'])) {
 			$this->encS = explode(' ', trim($saved['steps']));
 		} else {
@@ -356,3 +356,4 @@ class youtube_com extends DownloadClass {
 // [30-4-2017]  Fixed signature decoding functions. - Th3-822
 // [25-1-2018]  Fixed get_video_info. - Th3-822
 // [03-2-2019]  Fixed signature decoding functions. - Th3-822
+// [25-5-2019]  Fixed embed JS regex. - Th3-822
