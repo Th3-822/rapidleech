@@ -156,7 +156,15 @@ class youtube_com extends DownloadClass {
 				}
 				$fmt['url'] = parse_url($fmt['url']);
 				$fmt['url']['query'] = array_map('urldecode', $this->FormToArr($fmt['url']['query']));
-				if (empty($fmt['url']['query']['signature'])) $fmt['url']['query']['signature'] = (!empty($fmt['s']) ? $this->sigDecode($fmt['s']) : $fmt['sig']);
+				if (!empty($fmt['s']) && !empty($fmt['sp']))
+				{
+					$fmt['url']['query']["{$fmt['sp']}"] = $this->sigDecode($fmt['s']);
+				}
+				else if (empty($fmt['s']) && !empty($fmt['sig']))
+				{
+					if (empty($fmt['url']['query']['signature'])) $fmt['url']['query']['signature'] = $fmt['sig'];
+				}
+				else html_error("Cannot get signature key name");
 				foreach (array_diff(array_keys($fmt), array('signature', 'sig', 's', 'url', 'xtags')) as $k) $fmt['url']['query'][$k] = $fmt[$k];
 				if (empty($fmt['url']['query']['ratebypass'])) $fmt['url']['query']['ratebypass'] = 'yes'; // Fix for Slow Downloads of DASH Formats
 				ksort($fmt['url']['query']);
@@ -357,3 +365,4 @@ class youtube_com extends DownloadClass {
 // [25-1-2018]  Fixed get_video_info. - Th3-822
 // [03-2-2019]  Fixed signature decoding functions. - Th3-822
 // [25-5-2019]  Fixed embed JS regex. - Th3-822
+// [19-6-2019]  Fixed signature key name. - Th3-822
