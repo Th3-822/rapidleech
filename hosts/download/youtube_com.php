@@ -164,7 +164,7 @@ class youtube_com extends DownloadClass {
 				{
 					if (empty($fmt['url']['query']['signature'])) $fmt['url']['query']['signature'] = $fmt['sig'];
 				}
-				else html_error("Cannot get signature key name");
+				else if (empty($fmt['url']['query']['signature']) && empty($fmt['url']['query']['sig'])) html_error("Cannot get signature key name");
 				foreach (array_diff(array_keys($fmt), array('signature', 'sig', 's', 'url', 'xtags')) as $k) $fmt['url']['query'][$k] = $fmt[$k];
 				if (empty($fmt['url']['query']['ratebypass'])) $fmt['url']['query']['ratebypass'] = 'yes'; // Fix for Slow Downloads of DASH Formats
 				ksort($fmt['url']['query']);
@@ -232,15 +232,22 @@ class youtube_com extends DownloadClass {
 		$page = $this->GetPage('https://www.youtube.com/embed/'.$this->vid, $this->cookie);
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 
-		if (!preg_match('@"sts"\s*:\s*(\d+)@i', $page, $this->sts)) html_error('Signature timestamp not found.');
-		$this->sts = intval($this->sts[1]);
+		if (preg_match('@"sts"\s*:\s*(\d+)@i', $page, $this->sts) && intval($this->sts[1])) {
+			$this->sts = intval($this->sts[1]);
+		}
 
 		$savefile = DOWNLOAD_DIR.'YT_lastjs.txt';
-		if (!preg_match('@/(?:html5)?player[-_]([\w\-\.]+(?:(?:/\w+)?/[\w\-\.]+)?)\.js@i', str_replace('\\/', '/', $page), $this->js)) html_error('YT\'s player javascript not found.');
-		if (@file_exists($savefile) && ($file = file_get_contents($savefile, NULL, NULL, -1, 822)) && ($saved = @unserialize($file)) && is_array($saved) && !empty($saved['sts']) && $saved['sts'] == $this->sts && !empty($saved['steps']) && preg_match('@^\s*([ws]\d+|r)( ([ws]\d+|r))*\s*$@', $saved['steps'])) {
+		if (!preg_match('@/((?:html5)?player[-_][\w\-\.]+(?:(?:/\w+)?/[\w\-\.]+)?)\.js@i', str_replace('\\/', '/', $page), $this->js)) html_error('YT\'s player javascript not found.');
+		if (@file_exists($savefile) && ($file = file_get_contents($savefile, NULL, NULL, -1, 822)) && ($saved = @unserialize($file)) && is_array($saved) && !empty($saved['js']) && !empty($saved['sts']) && !empty($saved['steps']) && ((!$this->sts && $saved['js'] == $this->js[1]) || $saved['sts'] == $this->sts) && preg_match('@^\s*([ws]\d+|r)( ([ws]\d+|r))*\s*$@', $saved['steps'])) {
+			$this->changeMesg('<br />Using cached decoding steps.', 1);
 			$this->encS = explode(' ', trim($saved['steps']));
+			if (empty($this->sts)) $this->sts = $saved['sts'];
 		} else {
+			$this->changeMesg('<br />Loading video player data.', 1);
 			$this->playerJs = $this->GetPage('https://s.ytimg.com/yts/jsbin'.$this->js[0], $this->cookie, 0, 'https://www.youtube.com/embed/'.$this->vid);
+			if (empty($this->sts) && (!preg_match('@\bsts\s*:\s*(\d+)@i', $this->playerJs, $this->sts) || !($this->sts = intval($this->sts[1])))) {
+				html_error('Signature TimeStamp not found.');
+			}
 			//if (($spos = strpos($this->playerJs, '.sig||')) === false) $this->decError('Not found (".sig||")');
 			//if (($cut1 = cut_str(substr($this->playerJs, $spos), '{', '}')) == false) $this->decError('Cannot get inner content of "if(X.sig||X.s)"');
 			$v = '[\$_A-Za-z][\$\w]*';
@@ -261,7 +268,7 @@ class youtube_com extends DownloadClass {
 			}
 
 			if (empty($this->encS)) $this->decError('Empty decoded result');
-			file_put_contents($savefile, serialize(array('sts' => $this->sts, 'js' => $this->js[1], 'steps' => implode(' ', $this->encS))));
+			file_put_contents($savefile, serialize(array('js' => $this->js[1], 'sts' => $this->sts, 'steps' => implode(' ', $this->encS))));
 		}
 
 		// Request video fmts with the current sts
@@ -366,3 +373,4 @@ class youtube_com extends DownloadClass {
 // [03-2-2019]  Fixed signature decoding functions. - Th3-822
 // [25-5-2019]  Fixed embed JS regex. - Th3-822
 // [19-6-2019]  Fixed signature key name. - Th3-822
+// [10-7-2019]  Fixed signature search and related functions. - Th3-822
