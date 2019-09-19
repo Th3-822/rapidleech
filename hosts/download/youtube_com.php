@@ -46,7 +46,10 @@ class youtube_com extends DownloadClass {
 		$v = ($is_dash ? str_split($is_dash) : array('V', substr($this->fmts[$itag], 0, 1)));
 		if ($v) $ext .= $fmtexts[$v[0]][$v[1]];
 
-		if (empty($this->response['title'])) html_error('No video title found! Download halted.');
+		if (empty($this->response['title'])) {
+			if (empty($this->response['player_response']['videoDetails']['title'])) html_error('No video title found! Download halted.');
+			else $this->response['title'] = $this->response['player_response']['videoDetails']['title'];
+		}
 		$filename = str_replace(str_split('\\\:*?"<>|=;'."\t\r\n\f"), '_', html_entity_decode(trim($this->response['title']), ENT_QUOTES));
 		if (!empty($_REQUEST['cleanname'])) $filename = preg_replace('@[^ A-Za-z_\-\d\.,\(\)\[\]\{\}&\!\'\@\%\#]@u', '_', $filename);
 		if (!$is_dash) {
@@ -130,6 +133,7 @@ class youtube_com extends DownloadClass {
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		$this->response = array_map('urldecode', $this->FormToArr(substr($this->page, strpos($this->page, "\r\n\r\n") + 4)));
 		if (!empty($this->response['requires_purchase'])) html_error('[Unsupported Video] This Video or Channel Requires a Payment to Watch.');
+		$this->response['player_response'] = json_decode($this->response['player_response'], true);
 	}
 
 	private function getFmtMaps() {
@@ -374,3 +378,4 @@ class youtube_com extends DownloadClass {
 // [25-5-2019]  Fixed embed JS regex. - Th3-822
 // [19-6-2019]  Fixed signature key name. - Th3-822
 // [10-7-2019]  Fixed signature search and related functions. - Th3-822
+// [27-8-2019]  Fixed video title code. - Th3-822
