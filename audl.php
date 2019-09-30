@@ -10,7 +10,6 @@ ignore_user_abort(true);
 
 login_check();
 
-header('X-Accel-Buffering: no');
 require(TEMPLATE_DIR . '/header.php');
 ?>
 <br />

@@ -187,6 +187,7 @@ function doApiReq($atrr) {
 	return Get_Reply($page);
 }
 function check_errors($err, $prefix = 'Error') {
+	$isLogin = (stripos($prefix, 'login') !== false);
 	switch ($err) {
 		default: $msg = '*No message for this error*';break;
 		case -1: $msg = 'An internal error has occurred';break;
@@ -197,9 +198,9 @@ function check_errors($err, $prefix = 'Error') {
 		case -6: $msg = 'Too many concurrent IP addresses are accessing this upload target URL';break;
 		case -7: $msg = 'The upload file packet is out of range or not starting and ending on a chunk boundary';break;
 		case -8: $msg = 'The upload target URL you are trying to access has expired. Please request a fresh one';break;
-		case -9: $msg = (stripos($prefix, 'login') !== false ? 'Email/Password incorrect' : 'Resource not found or deleted');break;
+		case -9: $msg = ($isLogin ? 'Email/Password incorrect' : 'Resource not found or deleted');break;
 		case -11: $msg = 'Access violation';break;
-		case -13: $msg = (stripos($prefix, 'login') !== false ? 'Account not Activated yet' : 'Trying to access an incomplete file');break;
+		case -13: $msg = ($isLogin ? 'Account not Activated yet' : 'Trying to access an incomplete file');break;
 		case -14: $msg = 'A decryption operation failed';break;
 		case -15: $msg = 'Invalid or expired user session, please relogin';break;
 		case -16: $msg = 'User blocked';break;

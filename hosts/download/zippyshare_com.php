@@ -9,7 +9,7 @@ class zippyshare_com extends DownloadClass {
 	public $link;
 	private $page, $cookie, $fid;
 	public function Download($link) {
-		$this->link = $link;
+		$this->link = str_ireplace('http://', 'https://', $link);
 		$this->cookie = array('ziplocale' => 'en');
 
 		if (!preg_match('@https?://(?:[\w\-]+\.)*zippyshare\.com/\w/(\w+)@i', $this->link, $this->fid)) html_error('File ID not found at link. Invalid link?');
@@ -43,10 +43,10 @@ class zippyshare_com extends DownloadClass {
 		if (!preg_match_all('@<script(?:\s[^>]*)?>([^<]+)</script>@i', $this->page, $scripts)) html_error('No inline JS found at page.');
 		foreach ($scripts[1] as $script) {
 			if (preg_match('@\.getElementById\(\s*(?:(\'|\")(?i)(?:dlbutton|fimage)(?-i)\1|([\$_A-Za-z][\$\w]*))\)\.href\s*=\s*[\'\"](?i)(?:https?://(?:[\w\-]+\.)*zippyshare\.com)?/d/(?-i)'.$this->fid.'@', $script, $match)) {
-			if (!empty($match[2])) $this->vname = $match[2];
-			$this->script = $script;
-			return true;
-		}
+				if (!empty($match[2])) $this->vname = $match[2];
+				$this->script = $script;
+				return true;
+			}
 			if (preg_match('@((?:[\$_A-Za-z][\$\w]*\.)*[\$_A-Za-z][\$\w]*)\s*\(\s*(?:(\'|\")(?:dlbutton|fimage)(?-i)\2|([\$_A-Za-z][\$\w]*))\s*,\s*[\'\"](?:https?://(?:[\w\-]+\.)*zippyshare\.com)?/d/(?-i)'.$this->fid.'@i', $script, $match)) {
 				$this->fname = $match[1];
 				if (!empty($match[3])) $this->vname = $match[3];
@@ -76,7 +76,7 @@ class zippyshare_com extends DownloadClass {
 		$data['dllink'] = '';
 		echo "\n<div style='display:none;'>$T8</div>\n<form name='zs_dcode' action='{$GLOBALS['PHP_SELF']}' method='POST'><br />\n";
 		foreach ($data as $name => $input) echo "<input type='hidden' name='$name' id='T8_$name' value='" . htmlspecialchars($input, ENT_QUOTES) . "' />\n";
-		echo("</form>\n<span id='T8_emsg' class='htmlerror' style='text-align:center;display:none;'></span>\n<noscript><span class='htmlerror'><b>Sorry, this code needs JavaScript enabled to work.</b></span></noscript>\n<script type='text/javascript'>/* <![CDATA[ */\n\tvar T8 = true;\n\tfunction zsWriteLink(a, b) {\n\t\tdocument.getElementById(a).value = b;\n\t}\n\ttry {{$this->script}\n\t} catch(e) {\n\t\t$('#T8_emsg').html('<b>Cannot decode link: ['+e.name+'] '+e.message+'</b>').show();\n\t\tT8 = false;\n\t}\n\tif (T8) window.setTimeout(\"$('form[name=zs_dcode]').submit();\", 300); // 300 µs to make sure that the value was decoded and added.\n/* ]]> */</script>\n\n</body>\n</html>");
+		echo("</form>\n<span id='T8_emsg' class='htmlerror' style='text-align:center;display:none;'></span>\n<noscript><span class='htmlerror'><b>Sorry, this code needs JavaScript enabled to work.</b></span></noscript>\n<script type='text/javascript'>/* <![CDATA[ Th3-822 */\n\tvar T8 = true;\n\tfunction zsWriteLink(a, b) {\n\t\tdocument.getElementById(a).value = b;\n\t}\n\ttry {{$this->script}\n\t} catch(e) {\n\t\t$('#T8_emsg').html('<b>Cannot decode link: ['+e.name+'] '+e.message+'</b>').show();\n\t\tT8 = false;\n\t}\n\tif (T8) window.setTimeout(\"$('form[name=zs_dcode]').submit();\", 300); // 300 µs to make sure that the value was decoded and added.\n/* ]]> */</script>\n\n</body>\n</html>");
 		exit;
 	}
 
@@ -104,7 +104,7 @@ class zippyshare_com extends DownloadClass {
 	}
 
 	private function CheckCaptcha() {
-		$host = 'http://' . parse_url($this->link, PHP_URL_HOST);
+		$host = 'https://' . parse_url($this->link, PHP_URL_HOST);
 		$this->cookie = urldecode($_POST['cookie']);
 
 		$post = array();
@@ -130,5 +130,4 @@ class zippyshare_com extends DownloadClass {
 // [11-1-2015] Fixed link regexp. (Happy new year) - Th3-822
 // [07-3-2015]  Added Support for v2 reCAPTCHAs. - Th3-822
 // [13-3-2015]  Quick fix to decoder function. - Th3-822
-
-?>
+// [24-6-2018] Switched to https & small changes. - Th3-822

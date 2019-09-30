@@ -8,17 +8,17 @@ if (!defined('RAPIDLEECH')) {
 class google_com extends DownloadClass {
 	public $fNames = array('odt' => 'OpenDocument Text', 'docx' => 'Microsoft Word', 'rtf' => 'Rich Text Format', 'txt' => 'Plain Text', 'pdf' => 'PDF Document', 'epub' => 'EPUB Publication', 'zip' => 'Zipped html Document', 'pptx' => 'Microsoft PowerPoint', 'ods' => 'OpenDocument Spreadsheet', 'xlsx' => 'Microsoft Excel'), $dFormats = array('odt', 'docx', 'rtf', 'txt', 'pdf', 'epub', 'zip'), $pFormats = array('pptx', 'pdf'), $ssFormats = array('ods', 'xlsx', 'pdf', 'zip'), $sFormats = array(13 => 'ods', 420 => 'xlsx', 12 => 'pdf');
 	public function Download($link) {
-		if (!preg_match('@https?://(?:[\w\-]+\.)*(?:drive|docs)\.google\.com/(?:(?:folderview|open|uc)\?(?:[\w\-\%]+=[\w\-\%]*&)*id=|(?:folder|file|document|presentation|spreadsheets)/d/|spreadsheet/ccc\?(?:[\w\-\%]+=[\w\-\%]*&)*key=|drive/folders/)([\w\-]{28,})@i', $link, $this->ID)) html_error('File/Folder ID not found at link.');
+		if (!preg_match('@https?://(?:[\w\-]+\.)*(?:drive|docs)\.google\.com/(?:(?:folderview|open|(?:a/[\w\-\.]+/)?uc)\?(?:[\w\-\%]+=[\w\-\%]*&)*id=|(?:folder|file|document|presentation|spreadsheets)/d/|spreadsheet/ccc\?(?:[\w\-\%]+=[\w\-\%]*&)*key=|drive/folders/)([\w\-]{28,})@i', $link, $this->ID)) html_error('File/Folder ID not found at link.');
 		$this->ID = $this->ID[1];
 
 		// Use /open link for check if ID exists and also get it's type.
 		$page = $this->GetPage('https://drive.google.com/open?id='.$this->ID);
 		if (substr($page, 9, 3) == '404') html_error('File/Folder doesn\'t exists.');
-		if (substr($page, 9, 1) != '3' || !preg_match('@\nLocation: https?://(?:[\w\-]+\.)*(?:drive|docs)\.google\.com/(\w+)[\?/]@i', $page, $type)) html_error('Cannot find /open redirect.');
+		if (substr($page, 9, 1) != '3' || !preg_match('@\nLocation: https?://(?:[\w\-]+\.)*(?:drive|docs)\.google\.com/(?:drive/)?(\w+)[\?/]@i', $page, $type)) html_error('Cannot find /open redirect.');
 
 		switch (strtolower($type[1])) {
 			case 'file': $this->File();break;
-			case 'folder': case 'folderview': $this->Folder();break;
+			case 'folder': case 'folders': case 'folderview': $this->Folder();break;
 			case 'document': $this->Document();break;
 			case 'presentation': $this->Presentation();break;
 			case 'spreadsheets': $this->Spreadsheets();break; // New spreadsheets
@@ -43,8 +43,8 @@ class google_com extends DownloadClass {
 		if (isset($_GET['audl'])) html_error('Cannot check folder in audl.');
 		$page = $this->GetPage('https://drive.google.com/drive/folders/'.$this->ID);
 		$this->isPrivate($page);
-		if (!preg_match_all('@\[(\\\x22)([\w\-]{28,})\1,\[\1[\w\-]{28,}\1\]\\\n,\1(?>.*?\1),\1(?!application\\\/vnd\.google-apps\.folder)@i', $page, $ids)) html_error('Empty folder?');
-		$ids = $ids[2];
+		if (!preg_match_all('@\\\x5b\\\x22([\w\-]{28,})\\\x22,@i', $page, $ids) && !preg_match_all('@\[(\\\x22)([\w\-]{28,})\1,\[\1[\w\-]{28,}\1\]\\\n,\1(?>.*?\1),\1(?!application\\\/vnd\.google-apps\.folder)@i', $page, $ids, PREG_SET_ORDER)) html_error('Empty folder?');
+		$ids = $ids[1];
 		$links = array();
 		foreach ($ids as $id) $links[] = "https://drive.google.com/uc?id=$id&export=download";
 		$this->moveToAutoDownloader($links);
@@ -143,6 +143,4 @@ class google_com extends DownloadClass {
 
 // [11-2-2014]  Written by Th3-822.
 // [23-12-2014]  Added support for new spreadsheets format/urls & Some workarounds to get filesize on chunked downloads... - Th3-822
-// [11-9-2016]  Fixed Folders. - Th3-822
-
-?>
+// [30-4-2018]  Fixed Folders. - Th3-822

@@ -72,7 +72,7 @@ class DownloadClass {
 		$url = parse_url($link);
 		$params = $this->DefaultParamArr($link, $cookie, $referer, true);
 		unset($params['premium_acc']);
-		$params['filename'] = urlencode(basename((!empty($FileName) ? $FileName : urldecode(parse_url($link, PHP_URL_PATH)))));
+		$params['filename'] = urlencode((!empty($FileName) ? basename($FileName) : urldecode(basename(parse_url($link, PHP_URL_PATH)))));
 		if (!empty($force_name)) $params['force_name'] = urlencode(basename($force_name));
 		$params['host'] = urlencode($url['host']);
 		if (!empty($url['port'])) $params['port'] = urlencode($url['port']);
@@ -148,7 +148,10 @@ class DownloadClass {
 
 		$DParam = GetDefaultParams();
 		if (!empty($link)) $DParam['link'] = $link;
-		if (!empty($cookie)) $DParam['cookie'] = urlencode($cookie);
+		if (!empty($cookie)) {
+			$DParam['cookie'] = urlencode($cookie);
+			if ($encrypt) $DParam['cookie_encrypted'] = 1;
+		}
 		if (!empty($referer)) $DParam['referer'] = $referer;
 		return $DParam;
 	}
@@ -193,13 +196,13 @@ class DownloadClass {
 	}
 
 	public function reCAPTCHA($publicKey, $inputs, $referer = 0, $sname = 'Download File') {
-		if (empty($publicKey) || preg_match('/[^\w\.\-]/', $publicKey)) html_error('Invalid reCAPTCHA public key.');
+		if (empty($publicKey) || preg_match('/[^\w\.\-]/', $publicKey)) html_error('Invalid reCAPTCHA PublicKey Format.');
 		if (!is_array($inputs)) html_error('Error parsing captcha post data.');
 
 		$cookie = array('PREF' => 'LD=en');
 		// Check for a global recaptcha key
 		$page = $this->GetPage('http://www.google.com/recaptcha/api/challenge?k=' . $publicKey, $cookie, 0, 'http://fakedomain.tld/fakepath');
-		if (substr($page, 9, 3) != '200') html_error('Invalid or deleted reCAPTCHA public key.');
+		if (substr($page, 9, 3) != '200') html_error('Invalid or Deleted reCAPTCHA PublicKey.');
 		$inputs['recaptcha_public_key'] = $publicKey; // This may be needed later.
 
 		if (strpos($page, 'Invalid referer') === false && strpos($page, 'An internal error occurred') === false) {
@@ -278,80 +281,14 @@ class DownloadClass {
 		else return array('adcopy_challenge' => urlencode($gibberish[1]), 'adcopy_response' => 'manual_challenge');
 	}
 
-	protected $rc2Page = array();
 	public function reCAPTCHAv2($publicKey, $inputs, $referer = 0, $sname = 'Download File') {
-		if (empty($publicKey) || preg_match('/[^\w\.\-]/', $publicKey)) html_error('Invalid reCAPTCHA2 public key.');
-		if (!is_array($inputs)) html_error('[RC2] Error parsing captcha post data.');
-
-		$blink = 'http://www.google.com/recaptcha';
-		$link = "$blink/api/fallback?k=" . urlencode($publicKey);
-		$cookie = array('PREF' => 'LD=en');
-		// Check key
-		if (empty($this->rc2Page[$publicKey])) {
-			$c = '[c] ';
-			$this->rc2Page[$publicKey] = $page = $this->GetPage($link, $cookie, 0, ($referer !== 0 ? $referer : $link));
-			if (substr($page, 9, 3) != '200') html_error('Invalid or deleted reCAPTCHA2 public key.');
-		} else {
-			$c = '';
-			$page = $this->rc2Page[$publicKey];
-			if (substr($page, 9, 3) != '200') html_error('[RC2] Invalid cached response.');
-		}
-
-		$inputs['recaptcha2_public_key'] = $publicKey; // Required for validateReCaptchav2()
-
-		// Download captcha
-		if (!preg_match('@name="c" value="([\w\.\-]+)"@', $page, $challenge)) html_error("{$c}Error getting reCAPTCHA2 challenge.");
-		$inputs['recaptcha2_challenge_field'] = $challenge = $challenge[1];
-
-		list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage("$blink/api2/payload?c=" . urlencode($challenge) . '&k=' . urlencode($publicKey), $cookie, 0, $link), 2);
-		if (substr($headers, 9, 3) != '200') html_error("[RC2] {$c}Error downloading captcha img.");
-		$imgBody = 'data:'.(preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/jpeg').';base64,' . base64_encode($imgBody);
-
-		// Get Challenge Text/Picture
-		if (!preg_match('@<div\s+class="fbc-imageselect-message(-without-candidate-image)?">\s*<(?:(div)|label for="response") class="fbc-imageselect-message-(?:text|error)">(?>(.*?)</(?(2)div|label)>)@i', $page, $cMsg)) html_error("[RC2] {$c}Error getting challenge message.");
-		if (empty($cMsg[1])) {
-			if (!preg_match('@<img\s+class="fbc-imageselect-candidates-image"\s+src="(data:image/jpeg;base64,[a-zA-Z\d+/=]+)"\s*/?>@i', $page, $addImage)) html_error("[RC2] {$c}Error getting challenge image.");
-			$addImage = $addImage[1];
-		} else {
-			$addImage = false;
-		}
-		$cMsg = $cMsg[3];
-
-		echo "\n<form name='captcha' action='{$_SERVER['SCRIPT_NAME']}' method='POST'>\n";
-		foreach ($inputs as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='" . htmlspecialchars($input, ENT_QUOTES) . "' />\n";
-		echo "<style>@import url(//fonts.googleapis.com/css?family=Roboto:400,500);.fbc{color:#000;text-align:left;background:#f9f9f9;border:1px solid #c1c1c1;border-radius:3px;height:421px;width:300px}.fbc-header{height:50px}.fbc-button-verify{float:right;margin:2px 11px 2px 24px}.fbc-button-verify input{background:#4a90e2;border:0;border-radius:2px;color:#fff;cursor:pointer;font-family:Roboto,helvetica,arial,san-serif;font-size:12px;font-weight:500;height:25px;margin-top:2px;min-width:74px;padding:0 10px;text-align:center;width:90px}.fbc-payload-imageselect{margin-top:10px;margin-left:10px;height:290px}.fbc-imageselect-message,.fbc-imageselect-message-without-candidate-image{font-family:Roboto,helvetica,arial,san-serif;font-size:14px;font-weight:400;height:20px}.fbc-imageselect-message{margin-top:-45px;margin-left:65px}.fbc-imageselect-message-without-candidate-image{margin-top:-40px;margin-left:20px}.fbc-imageselect-candidates{margin-top:10px;height:45px;margin-left:10px}.fbc-imageselect-candidates-image{height:45px}.fbc-imageselect-header{height:50px}.fbc-imageselect-challenge{position:relative}.fbc-imageselect-payload{height:280px}.fbc-payload-imageselect input{position:absolute;-webkit-transform:scale(1.5);-moz-transform:scale(1.5);-ms-transform:scale(1.5);-o-transform:scale(1.5);transform:scale(1.5)}.fbc-imageselect-checkbox-1{margin-top:78px;margin-left:78px}.fbc-imageselect-checkbox-2{margin-top:78px;margin-left:171px}.fbc-imageselect-checkbox-3{margin-top:78px;margin-left:265px}.fbc-imageselect-checkbox-4{margin-top:171px;margin-left:78px}.fbc-imageselect-checkbox-5{margin-top:171px;margin-left:171px}.fbc-imageselect-checkbox-6{margin-top:171px;margin-left:265px}.fbc-imageselect-checkbox-7{margin-top:265px;margin-left:78px}.fbc-imageselect-checkbox-8{margin-top:265px;margin-left:171px}.fbc-imageselect-checkbox-9{margin-top:265px;margin-left:265px}</style><div class='fbc'><div class='fbc-header'><div class='fbc-imageselect-candidates'>";
-		if (!empty($addImage)) echo "<img class='fbc-imageselect-candidates-image' src='$addImage' />";
-		echo "</div><div class='fbc-imageselect-message" . (empty($addImage) ? '-without-candidate-image' : '') . "'><label for='recaptcha2_response_field[]' class='fbc-imageselect-message-text'>$cMsg</label></div></div><div><div class='fbc-imageselect-challenge'><div class='fbc-payload-imageselect'>";
-		for ($x = 0; $x < 9; $x++) echo "\n<input class='fbc-imageselect-checkbox-".($x+1)."' type='checkbox' name='recaptcha2_response_field[]' value='$x'>";
-		echo "\n<img class='fbc-imageselect-payload' src='$imgBody' /></div><div class='fbc-button-verify'><input type='submit' value='$sname' /></div></div></div></div></form>\n";
-		include(TEMPLATE_DIR.'footer.php');
-		exit();
+		// RC2 no longer works due to security enhancements
+		html_error('reCAPTCHA2 is no longer supported');
 	}
 
 	public function verifyReCaptchav2($directOutput = false, $retryMethod = 'retryReCaptchav2') {
-		if (empty($_POST['recaptcha2_challenge_field']) || empty($_POST['recaptcha2_public_key']) || preg_match('/[^\w\.\-]/', $_POST['recaptcha2_public_key'])) html_error('[RC2] Invalid / Missing reCaptcha2 data.');
-		if (empty($_POST['recaptcha2_response_field']) || !is_array($_POST['recaptcha2_response_field'])) html_error('[RC2] You didn\'t enter the image verification code.');
-
-		$publicKey = $_POST['recaptcha2_public_key'];
-		$post = 'c=' . urlencode($_POST['recaptcha2_challenge_field']) . '&response=' . implode(array_map('urlencode', $_POST['recaptcha2_response_field']), '&response=');
-		$link = 'http://www.google.com/recaptcha/api/fallback?k=' . urlencode($publicKey);
-
-		$this->rc2Page[$publicKey] = $page = $this->GetPage($link, array('PREF' => 'LD=en'), $post, $link);
-
-		is_present($page, 'Sorry, an error has occurred', '[RC2] Corrupted o Invalid reCaptcha2 Data.');
-		if (stripos($page, 'payload?c=') !== false) {
-			$retryCallback = array($this, $retryMethod);
-			if (is_callable($retryCallback)) {
-				echo '<span class="htmlerror"><b>[RC2] Wrong CAPTCHA entered.</b></span><br /><br />';
-				return call_user_func($retryCallback);
-			} else html_error('[RC2] retryMethod not found/callable.');
-		}
-		if (stripos($page, 'Copy this code') === false) html_error('[RC2] Unknown error after sending captcha.');
-
-		if (!preg_match('@>\s*([^<>\s]+)\s*</textarea>@i', $page, $gibberish)) html_error('[RC2] Validated response not found.');
-
-		if ($directOutput) return urlencode($gibberish[1]);
-		else return array('g-recaptcha-response' => urlencode($gibberish[1]));
+		// RC2 no longer works due to security enhancements
+		html_error('reCAPTCHA2 is no longer supported');
 	}
 }
 
@@ -367,4 +304,3 @@ class DownloadClass {
   Remove declaration of checkback function, it automatically signed in the plugin itself
   Add new limitation options by Ruud v.Tony
  **********************************************************/
-?>

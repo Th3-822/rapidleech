@@ -114,11 +114,13 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 				require_once(HOST_DIR . 'DownloadClass.php');
 				$class = substr($file, 0, -4);
 				if (empty($auth) && !empty($_GET['premium_acc'])) {
-					if (!empty($premium_acc["$class"]['proxy']) && $premium_acc["$class"]['proxy'] != -1) {
-						// Load Server-Side Proxy for this host.
-						$_GET['useproxy'] = 'on';
-						$_GET['proxy'] = $premium_acc["$class"]['proxy'];
-						$pauth = (!empty($premium_acc["$class"]['pauth']) ? base64_encode($premium_acc["$class"]['pauth']) : false);
+					if (!empty($premium_acc["$class"]['proxy'])) {
+						if ($premium_acc["$class"]['proxy'] != -1) {
+							// Load Server-Side Proxy for this host.
+							$_GET['useproxy'] = 'on';
+							$_GET['proxy'] = $premium_acc["$class"]['proxy'];
+							$pauth = (!empty($premium_acc["$class"]['pauth']) ? base64_encode($premium_acc["$class"]['pauth']) : false);
+						}
 					} else if (!empty($premium_acc["$class"])) {
 						// Disable User-Proxy Support for Server-Side accounts.
 						$_GET['useproxy'] = $_GET['proxy'] = $pauth = false;
@@ -138,12 +140,14 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 
 	$mydomain = strtolower(($pos = strpos($_SERVER['HTTP_HOST'], ':')) !== false ? substr($_SERVER['HTTP_HOST'], 0, $pos) : $_SERVER['HTTP_HOST']);
 	if ($options['bw_save'] && ($Url['host'] == $_SERVER['SERVER_ADDR'] || host_matches($mydomain, $Url['host']))) html_error(sprintf(lang(7), $mydomain, $_SERVER['SERVER_ADDR']));
-	if (empty($auth) && $_GET['premium_acc'] == 'on') {
+	if (empty($auth) && !empty($_GET['premium_acc'])) {
 		if (!empty($premium_acc[$Url['host']]['proxy'])) {
 			$proxy = $premium_acc[$Url['host']]['proxy'];
-			$_GET['useproxy'] = ($proxy != -1 ? 'on' : false);
-			$_GET['proxy'] = ($proxy != -1 ? $proxy : false);
-			$pauth = (!empty($premium_acc[$Url['host']]['pauth']) ? base64_encode($premium_acc[$Url['host']]['pauth']) : false);
+			if ($proxy != -1) {
+				$_GET['useproxy'] = ($proxy != -1 ? 'on' : false);
+				$_GET['proxy'] = ($proxy != -1 ? $proxy : false);
+				$pauth = (!empty($premium_acc[$Url['host']]['pauth']) ? base64_encode($premium_acc[$Url['host']]['pauth']) : false);
+			}
 		} else $proxy = false;
 
 		if (!empty($premium_acc[$Url['host']]['user']) && !empty($premium_acc[$Url['host']]['pass'])) $auth = '2';
@@ -152,9 +156,15 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 			foreach (array_keys($premium_acc) as $site) if (host_matches($site, $Url['host'])) {
 				if (empty($proxy) && !empty($premium_acc["$site"]['proxy'])) {
 					$proxy = $premium_acc["$site"]['proxy'];
-					$_GET['useproxy'] = ($proxy != -1 ? 'on' : false);
-					$_GET['proxy'] = ($proxy != -1 ? $proxy : false);
-					$pauth = (!empty($premium_acc["$site"]['pauth']) ? base64_encode($premium_acc["$site"]['pauth']) : false);
+					if ($proxy != -1) {
+						// Load Server-Side Proxy for this host.
+						$_GET['useproxy'] = 'on';
+						$_GET['proxy'] = $proxy;
+						$pauth = (!empty($premium_acc["$site"]['pauth']) ? base64_encode($premium_acc["$site"]['pauth']) : false);
+					}
+				} else if (!empty($premium_acc["$site"])) {
+					// Disable User-Proxy Support for Server-Side accounts.
+					$_GET['useproxy'] = $_GET['proxy'] = $pauth = false;
 				}
 				if (!empty($premium_acc["$site"]['user']) && !empty($premium_acc["$site"]['pass'])) {
 					$auth = '2';
@@ -169,7 +179,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 
 	$redir = GetDefaultParams();
 	$redir['dis_plug'] = 'on';
-	$redir['filename'] = urlencode((isset($Url['path']) && basename($Url['path'])) ? basename($Url['path']) : 'index.html');
+	$redir['filename'] = urlencode((isset($Url['path']) && basename($Url['path'])) ? urldecode(basename($Url['path'])) : 'index.html');
 	$redir['host'] = urlencode($Url['host']);
 	if (!empty($Url['port'])) $redir['port'] = urlencode($Url['port']);
 	$redir['path'] = urlencode($Url['path'] . (!empty($Url['query']) ? '?' . $Url['query'] : ''));
@@ -180,7 +190,6 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 
 	insert_location($redir);
 } else {
-	header('X-Accel-Buffering: no');
 	require_once(TEMPLATE_DIR . 'functions.php');
 	include(TEMPLATE_DIR . '/header.php');
 	if ($options['ref_check']) check_referer();
@@ -324,5 +333,3 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 	}
 	echo "\n</div>\n</body>\n</html>";
 }
-
-?>

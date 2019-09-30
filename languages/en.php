@@ -400,4 +400,5 @@ $lang[390] = 'CRC32 Hash';
 $lang[391] = 'CRC32 found in file\'s name is valid';
 $lang[392] = 'CRC32 found in file\'s name (&quot;%1$s&quot;) doesn\'t match calculated CRC32';
 $lang[393] = 'SHA1 Hash';
+$lang[394] = 'Create RAR5 file';
 ?>

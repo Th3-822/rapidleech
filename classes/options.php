@@ -11,8 +11,10 @@ if (!empty($_GET['act']) && $_GET['act'] !== 'files') {
 	else {
 		$all_act_files_exist = true;
 		foreach($_GET['files'] as $v) {
-			$file = $list[$v]['name'];
-			if (!is_file($file)) {
+			if (empty($list[$v])) {
+				$file = '';
+				$size_time = false;
+			} else if (!is_file(($file = $list[$v]['name']))) {
 				if ($options['2gb_fix'] && in_array($_GET['act'], array('delete', 'delete_go')) && file_exists($file) && !is_dir($file) && !is_link($file)) $size_time = file_data_size_time($file);
 				else $size_time = false;
 			} else $size_time = true;

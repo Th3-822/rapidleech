@@ -5,7 +5,7 @@ if (!defined('RAPIDLEECH')) {
 }
 
 // Allow user-agent to be changed easily
-if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:50.0) Gecko/20100101 Firefox/50.0');
+if (!defined('rl_UserAgent')) define('rl_UserAgent', 'Mozilla/5.0 (Windows NT 6.1; rv:52.0) Gecko/20100101 Firefox/52.0');
 
 /*
  * Pauses for countdown timer in file hosts
@@ -106,19 +106,19 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 	if ($scheme == 'https://') {
 		if (!extension_loaded('openssl')) return html_error('You need to install/enable PHP\'s OpenSSL extension to support downloading via HTTPS.');
-		$scheme = 'tls://';
+		$scheme = 'ssl://';
 		if ($port == 0 || $port == 80) $port = 443;
 	} else if ($port == 0) $port = 80;
 
 	if ($proxy) {
 		list($proxyHost, $proxyPort) = explode(':', $proxy, 2);
-		if ($scheme != 'tls://') {
+		if ($scheme != 'ssl://') {
 			$host = $host . ($port != 80 && $port != 443 ? ":$port" : '');
 			$url = "$scheme$host$url";
 		}
 	}
 
-	if ($scheme != 'tls://') $scheme = '';
+	if ($scheme != 'ssl://') $scheme = '';
 
 	$cHeaders = readCustomHeaders($referer);
 	$request = array();
@@ -144,7 +144,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 	$errno = 0;
 	$errstr = '';
-	if ($scheme == 'tls://') {
+	if ($scheme == 'ssl://') {
 		$hosts = (!empty($proxyHost) ? $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
 		if ($proxy) $url = "https://$host$url"; // For the 'connected to' message
 	} else $hosts = (!empty($proxyHost) ? $scheme . $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
@@ -169,7 +169,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		else echo '<p>'.sprintf(lang(90), $host, $port).'</p>';
 	}
 
-	if ($scheme == 'tls://' && $proxy) {
+	if ($scheme == 'ssl://' && $proxy) {
 		$connRequest = array();
 		$connRequest[''] = "CONNECT $host:$port HTTP/1.1";
 		if (!empty($pauth)) $connRequest['proxy-authorization'] = "Basic $pauth";
@@ -199,7 +199,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 		}
 
 		// Start TLS.
-		if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) return html_error('TLS Startup Error.');
+		if (!stream_socket_enable_crypto($fp, true, (defined('STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT') ? STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT : STREAM_CRYPTO_METHOD_TLS_CLIENT))) return html_error('TLS Startup Error.');
 	}
 
 	#########################################################################
@@ -376,7 +376,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			}
 			if ($bytesReceived >= $bytesTotal) $percent = 100;
 			else $percent = @round(($bytesReceived + $Resume['from']) / ($bytesTotal + $Resume['from']) * 100, 2);
-			if ($bytesReceived > $last + $chunkSize && (!$lastChunkTime || !((microtime(true) - $lastChunkTime) < 1))) {
+			if ($bytesReceived > $last + $chunkSize && (!$lastChunkTime || !(((microtime(true) - $timeStart) - $lastChunkTime) < 1))) {
 				$received = bytesToKbOrMbOrGb($bytesReceived + $Resume['from']);
 				$time = microtime(true) - $timeStart;
 				$chunkTime = $time - $lastChunkTime;
@@ -384,6 +384,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				$lastChunkTime = $time;
 				$speed = @round((($bytesReceived - $last) / 1024) / $chunkTime, 2);
 				echo "<script type='text/javascript'>pr('$percent', '$received', '$speed');</script>";
+				flush();
 				$last = $bytesReceived;
 			}
 			if (!empty($bytesTotal) && ($bytesReceived + $chunkSize) > $bytesTotal) $chunkSize = $bytesTotal - $bytesReceived;
@@ -428,8 +429,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 }
 
 function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0) {
-	global $pauth;
-	static $ch, $lastProxy;
+	static $NSS, $ch, $lastProxy;
 	if (empty($link) || !is_string($link)) return html_error(lang(24));
 	if (!extension_loaded('curl') || !function_exists('curl_init') || !function_exists('curl_exec')) return html_error('cURL isn\'t enabled or cURL\'s functions are disabled');
 	if (!empty($referer)) {
@@ -447,8 +447,12 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		CURLOPT_ENCODING => 'gzip, deflate', CURLOPT_USERAGENT => rl_UserAgent);
 
 	// Fixes "Unknown cipher in list: TLSv1" on cURL with NSS
-	$cV = curl_version();
-	if (!empty($cV['ssl_version']) && strtoupper(substr($cV['ssl_version'], 0, 4)) != 'NSS/') $opt[CURLOPT_SSL_CIPHER_LIST] = 'TLSv1';
+	if (!isset($NSS)) {
+		$cV = curl_version();
+		$NSS = (!empty($cV['ssl_version']) && strtoupper(substr($cV['ssl_version'], 0, 4)) == 'NSS/');
+	}
+	if (!$NSS) $opt[CURLOPT_SSL_CIPHER_LIST] = 'TLSv1';
+
 
 	// Uncomment next line if do you have IPv6 problems
 	// $opt[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
@@ -460,7 +464,7 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		$opt[CURLOPT_HTTPPROXYTUNNEL] = strtolower(parse_url($link, PHP_URL_SCHEME) == 'https') ? true : false; // cURL https proxy support... Experimental.
 		// $opt[CURLOPT_HTTPPROXYTUNNEL] = false; // Uncomment this line for disable https proxy over curl.
 		$opt[CURLOPT_PROXY] = $_GET['proxy'];
-		$opt[CURLOPT_PROXYUSERPWD] = (!empty($pauth) ? base64_decode($pauth) : false);
+		$opt[CURLOPT_PROXYUSERPWD] = (!empty($GLOBALS['pauth']) ? base64_decode($GLOBALS['pauth']) : false);
 	} else $opt[CURLOPT_PROXY] = false;
 
 	// Send more headers...
@@ -631,7 +635,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		return FALSE;
 	}
 
-	$fileSize = getSize($file);
+	$fileSize = filesize($file);
 
 	if (!empty($field2name)) {
 		$postdata .= '--' . $bound . $nn;
@@ -650,24 +654,24 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
 	if ($scheme == 'https://') {
 		if (!extension_loaded('openssl')) return html_error('You need to install/enable PHP\'s OpenSSL extension to support uploading via HTTPS.');
-		$scheme = 'tls://';
+		$scheme = 'ssl://';
 		if ($port == 0 || $port == 80) $port = 443;
 	} else if ($port == 0) $port = 80;
 
 	if (!empty($referer) && ($pos = strpos("\r\n", $referer)) !== 0) {
 		$origin = parse_url($pos ? substr($referer, 0, $pos) : $referer);
 		$origin = strtolower($origin['scheme']) . '://' . strtolower($origin['host']) . (!empty($origin['port']) && $origin['port'] != defport(array('scheme' => $origin['scheme'])) ? ':' . $origin['port'] : '');
-	} else $origin = ($scheme == 'tls://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'tls://' || $port != 443) ? ':' . $port : '');
+	} else $origin = ($scheme == 'ssl://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
 
 	if ($proxy) {
 		list($proxyHost, $proxyPort) = explode(':', $proxy, 2);
-		if ($scheme != 'tls://') {
+		if ($scheme != 'ssl://') {
 			$host = $host . ($port != 80 && $port != 443 ? ":$port" : '');
 			$url = "$scheme$host$url";
 		}
 	}
 
-	if ($scheme != 'tls://') $scheme = '';
+	if ($scheme != 'ssl://') $scheme = '';
 
 	$cHeaders = readCustomHeaders($referer);
 	$request = array();
@@ -688,7 +692,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 
 	$errno = 0;
 	$errstr = '';
-	if ($scheme == 'tls://') {
+	if ($scheme == 'ssl://') {
 		$hosts = (!empty($proxyHost) ? $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
 		if ($proxy) $url = "https://$host$url"; // For the 'connected to' message
 	} else $hosts = (!empty($proxyHost) ? $scheme . $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
@@ -709,7 +713,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 	if ($proxy) echo '<p>' . sprintf(lang(89), $proxyHost, $proxyPort) . '<br />UPLOAD: <b>' . htmlspecialchars($url) . "</b>...<br />\n";
 	else echo '<p>'.sprintf(lang(90), $host, $port).'</p>';
 
-	if ($scheme == 'tls://' && $proxy) {
+	if ($scheme == 'ssl://' && $proxy) {
 		$connRequest = array();
 		$connRequest[''] = "CONNECT $host:$port HTTP/1.1";
 		if (!empty($pauth)) $connRequest['proxy-authorization'] = "Basic $pauth";
@@ -739,7 +743,7 @@ function upfile($host, $port, $url, $referer, $cookie, $post, $file, $filename, 
 		}
 
 		// Start TLS.
-		if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) return html_error('TLS Startup Error.');
+		if (!stream_socket_enable_crypto($fp, true, (defined('STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT') ? STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT : STREAM_CRYPTO_METHOD_TLS_CLIENT))) return html_error('TLS Startup Error.');
 	}
 
 	echo(lang(104) . ' <b>' . htmlspecialchars($filename) . '</b>, ' . lang(56) . ' <b>' . bytesToKbOrMbOrGb($fileSize) . '</b>...<br />');
@@ -848,7 +852,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 		return FALSE;
 	}
 
-	$fileSize = getSize($file);
+	$fileSize = filesize($file);
 
 	if (!empty($cookie)) {
 		if (is_array($cookie)) $cookies = (count($cookie) > 0) ? CookiesToStr($cookie) : 0;
@@ -857,24 +861,24 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 
 	if ($scheme == 'https://') {
 		if (!extension_loaded('openssl')) return html_error('You need to install/enable PHP\'s OpenSSL extension to support uploading via HTTPS.');
-		$scheme = 'tls://';
+		$scheme = 'ssl://';
 		if ($port == 0 || $port == 80) $port = 443;
 	} else if ($port == 0) $port = 80;
 
 	if (!empty($referer) && ($pos = strpos("\r\n", $referer)) !== 0) {
 		$origin = parse_url($pos ? substr($referer, 0, $pos) : $referer);
 		$origin = strtolower($origin['scheme']) . '://' . strtolower($origin['host']) . (!empty($origin['port']) && $origin['port'] != defport(array('scheme' => $origin['scheme'])) ? ':' . $origin['port'] : '');
-	} else $origin = ($scheme == 'tls://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'tls://' || $port != 443) ? ':' . $port : '');
+	} else $origin = ($scheme == 'ssl://' ? 'https://' : $scheme) . $host . ($port != 80 && ($scheme != 'ssl://' || $port != 443) ? ':' . $port : '');
 
 	if ($proxy) {
 		list($proxyHost, $proxyPort) = explode(':', $proxy, 2);
-		if ($scheme != 'tls://') {
+		if ($scheme != 'ssl://') {
 			$host = $host . ($port != 80 && $port != 443 ? ":$port" : '');
 			$url = "$scheme$host$url";
 		}
 	}
 
-	if ($scheme != 'tls://') $scheme = '';
+	if ($scheme != 'ssl://') $scheme = '';
 
 	$cHeaders = readCustomHeaders($referer);
 	$request = array();
@@ -897,7 +901,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 
 	$errno = 0;
 	$errstr = '';
-	if ($scheme == 'tls://') {
+	if ($scheme == 'ssl://') {
 		$hosts = (!empty($proxyHost) ? $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
 		if ($proxy) $url = "https://$host$url"; // For the 'connected to' message
 	} else $hosts = (!empty($proxyHost) ? $scheme . $proxyHost : $scheme . $host) . ':' . (!empty($proxyPort) ? $proxyPort : $port);
@@ -918,7 +922,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 	if ($proxy) echo '<p>' . sprintf(lang(89), $proxyHost, $proxyPort) . '<br />PUT: <b>' . htmlspecialchars($url) . "</b>...<br />\n";
 	else echo '<p>'.sprintf(lang(90), $host, $port).'</p>';
 
-	if ($scheme == 'tls://' && $proxy) {
+	if ($scheme == 'ssl://' && $proxy) {
 		$connRequest = array();
 		$connRequest[''] = "CONNECT $host:$port HTTP/1.1";
 		if (!empty($pauth)) $connRequest['proxy-authorization'] = "Basic $pauth";
@@ -948,7 +952,7 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 		}
 
 		// Start TLS.
-		if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) return html_error('TLS Startup Error.');
+		if (!stream_socket_enable_crypto($fp, true, (defined('STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT') ? STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT : STREAM_CRYPTO_METHOD_TLS_CLIENT))) return html_error('TLS Startup Error.');
 	}
 
 	echo(lang(104) . ' <b>' . htmlspecialchars($filename) . '</b>, ' . lang(56) . ' <b>' . bytesToKbOrMbOrGb($fileSize) . '</b>...<br />');
@@ -1043,4 +1047,3 @@ function putfile($host, $port, $url, $referer, $cookie, $file, $filename, $proxy
 	$page = $header.$page;
 	return $page;
 }
-?>

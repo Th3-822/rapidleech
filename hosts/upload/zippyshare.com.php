@@ -32,7 +32,7 @@ else {
 if ($continue_up) {
 	$not_done = false;
 	$domain = 'zippyshare.com';
-	$referer = "http://$domain/";
+	$referer = "https://$domain/";
 
 	// Login
 	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='login' width='100%' align='center'>Login to zippyshare.com</div>\n";
@@ -44,7 +44,7 @@ if ($continue_up) {
 		$post['pass'] = $_REQUEST['up_pass'];
 		$post['remember'] = 'on';
 
-		$page = geturl($domain, 80, '/services/login', $referer, $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);
+		$page = geturl($domain, 443, '/services/login', $referer, $cookie, $post, 0, $_GET['proxy'], $pauth, 0, 'https');is_page($page);
 		is_present($page, '?invalid=1', 'Login failed: User/Password incorrect.');
 		$cookie = GetCookiesArr($page, $cookie);
 		if (empty($cookie['zipname']) && empty($cookie['ziphash'])) html_error('Error: Login cookies not found.');
@@ -54,12 +54,12 @@ if ($continue_up) {
 		$login = false;
 	}
 
-	// Retrive upload ID
+	// Retrieve upload ID
 	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrive upload ID</div>\n";
 
-	$page = geturl($domain, 80, '/', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+	$page = geturl($domain, 443, '/', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth, 0, 'https');is_page($page);
 
-	if (!preg_match('@\s(?:url\s*:\s*|action=)[\'\"](https?://www\d+\.zippyshare\.com/[^\s\'\"<>]+)[\'\"]@i', $page, $up)) html_error('Error: Cannot find upload server.');
+	if (!preg_match('@(?<=//|\')www\d+(?=\.zippyshare\.com/upload|\';)@i', $page, $up)) html_error('Error: Cannot find upload server.');
 
 	$post = array();
 	$post['name'] = $lname;
@@ -68,17 +68,16 @@ if ($continue_up) {
 		$post['ziphash'] = $cookie['ziphash'];
 	}
 	$post['embPlayerValues'] = (!empty($cookie['embed-player-values']) ? $cookie['embed-player-values'] : 'false');
-	if (!empty($_REQUEST['up_private'])) $post['private'] = 'checked';
-	//else $post['notprivate'] = '';
-	$post['Upload'] = 'Submit Query';
+	if (!empty($_REQUEST['up_private'])) $post['private'] = 'true';
+	else $post['notprivate'] = 'true';
 
-	$up_url = $up[1];
+	$up_url = sprintf('https://%s.zippyshare.com/upload', $up[0]);
 
 	// Uploading
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
 
 	$url = parse_url($up_url);
-	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer, $cookie, $post, $lfile, $lname, 'Filedata', '', $_GET['proxy'], $pauth, 'Shockwave Flash');
+	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer, $cookie, $post, $lfile, $lname, 'Filedata', '', $_GET['proxy'], $pauth, 0, $url['scheme']);
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>\n";
@@ -93,5 +92,4 @@ if ($continue_up) {
 //[17-5-2013] Written by Th3-822.
 //[28-9-2014] Added private upload option. - Th3-822
 //[11-1-2015] Fixed upload & Link regexp. (Happy new year) - Th3-822
-
-?>
+//[24-6-2018] Switched to https & small changes. - Th3-822

@@ -14,13 +14,13 @@ class fileboom_me extends DownloadClass {
 
 		if (!preg_match($this->LnkRegexp, $link, $fid)) html_error('Invalid link?.');
 		$this->domain = $fid[1];
-		$this->link = $GLOBALS['Referer'] = 'http://'.$fid[1].'/file/'.$fid[2];
+		$this->link = $GLOBALS['Referer'] = 'https://'.$fid[1].'/file/'.$fid[2];
 
 		if (empty($_POST['step'])) {
 			$this->page = $this->GetPage($this->link, $this->cookie);
 			if (preg_match($this->LnkRegexp, $this->page, $fid)) {
 				$this->domain = $fid[1];
-				$this->link = $GLOBALS['Referer'] = 'http://'.$fid[1].'/file/'.$fid[2];
+				$this->link = $GLOBALS['Referer'] = 'https://'.$fid[1].'/file/'.$fid[2];
 				$this->cookie = GetCookiesArr($this->page, $this->cookie);
 				$this->page = $this->GetPage($this->link, $this->cookie);
 			}
@@ -59,7 +59,7 @@ class fileboom_me extends DownloadClass {
 
 			// Check direct link
 			if (preg_match($this->RDRegexp, $page, $idDl)) {
-				$page = $this->GetPage('http://'.$this->domain.$idDl[0], $this->cookie);
+				$page = $this->GetPage('https://'.$this->domain.$idDl[0], $this->cookie);
 				if (!preg_match($this->DLRegexp, $page, $dl)) html_error('Download Link Not Found.');
 				return $this->RedirectDownload($dl[0], 'T8_fb_fr2', $this->cookie);
 			}
@@ -73,7 +73,7 @@ class fileboom_me extends DownloadClass {
 				$this->reCAPTCHA($pid[1], $data);
 			} elseif (preg_match('@\W(file/captcha\.html\?v=\w+)@i', $page, $cpid)) {
 				$data['step'] = '2';
-				list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage('http://'.$this->domain.'/'.$cpid[1], $this->cookie), 2);
+				list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage('https://'.$this->domain.'/'.$cpid[1], $this->cookie), 2);
 				if (substr($headers, 9, 3) != '200') html_error('Error downloading captcha img.');
 				$mimetype = (preg_match('@image/[\w+]+@', $headers, $mimetype) ? $mimetype[0] : 'image/png');
 				$this->EnterCaptcha("data:$mimetype;base64,".base64_encode($imgBody), $data, 20);
@@ -109,7 +109,7 @@ class fileboom_me extends DownloadClass {
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 
 		if (!preg_match($this->RDRegexp, $page, $idDl)) html_error('Redirect Link Not Found.');
-		$page = $this->GetPage('http://'.$this->domain.$idDl[0], $this->cookie);
+		$page = $this->GetPage('https://'.$this->domain.$idDl[0], $this->cookie);
 
 		if (!preg_match($this->DLRegexp, $page, $dl)) html_error('Download Link Not Found.');
 
@@ -130,7 +130,7 @@ class fileboom_me extends DownloadClass {
 				$data['step'] = '3';
 				return $this->reCAPTCHA($pkey[1], $data);
 			} elseif (preg_match('@(https?://(?:www\.)?(?:f(?:ile)?boom\.me))?(?(1)/)(?:[^/\"\'<>\s]+/)*captcha\.html\?v=\w+@i', $page, $imgcap)) {
-				$imgcap = empty($imgcap[1]) ? 'http://'.$this->domain.'/'.$imgcap[0] : $imgcap[0];
+				$imgcap = empty($imgcap[1]) ? 'https://'.$this->domain.'/'.$imgcap[0] : $imgcap[0];
 				$data['step'] = '4';
 				list($headers, $imgBody) = explode("\r\n\r\n", $this->GetPage($purl . $cpid[1], $this->cookie), 2);
 				if (substr($headers, 9, 3) != '200') html_error('Error downloading captcha img.');
@@ -164,7 +164,7 @@ class fileboom_me extends DownloadClass {
 		if (!($page = $this->postAntiBotCaptcha())) $page = $this->GetPage($this->link, $this->cookie);
 		if (preg_match($this->LnkRegexp, $page, $fid)) {
 			$this->domain = $fid[1];
-			$this->link = $GLOBALS['Referer'] = 'http://'.$fid[1].'/file/'.$fid[2];
+			$this->link = $GLOBALS['Referer'] = 'https://'.$fid[1].'/file/'.$fid[2];
 			$this->cookie = GetCookiesArr($page, $this->cookie);
 			$page = $this->GetPage($this->link, $this->cookie);
 		}
@@ -178,13 +178,13 @@ class fileboom_me extends DownloadClass {
 		is_present($page, 'Traffic limit exceed!');
 
 		if (!preg_match($this->RDRegexp, $page, $idDl)) html_error('Redirect-Link Not Found.');
-		$page = $this->GetPage('http://'.$this->domain.$idDl[0], $this->cookie);
+		$page = $this->GetPage('https://'.$this->domain.$idDl[0], $this->cookie);
 		if (!preg_match($this->DLRegexp, $page, $dl)) html_error('Download-Link Not Found.');
 		return $this->RedirectDownload($dl[0], 'T8_fb_pr', $this->cookie);
 	}
 
 	private function Login($user, $pass) {
-		$purl = 'http://'.$this->domain.'/';
+		$purl = 'https://'.$this->domain.'/';
 
 		$post = array();
 		$post['LoginForm%5Busername%5D'] = urlencode($user);
@@ -280,7 +280,7 @@ class fileboom_me extends DownloadClass {
 			$secretkey = $_secretkey;
 			if (empty($testCookie) || (is_array($testCookie) && count($testCookie) < 1)) return $this->Login($user, $pass);
 
-			$page = $this->GetPage('http://'.$this->domain.'/site/profile.html', $testCookie);
+			$page = $this->GetPage('https://'.$this->domain.'/site/profile.html', $testCookie);
 			if (stripos($page, '/auth/logout.html">Logout') === false) return $this->Login($user, $pass);
 			$this->cookie = GetCookiesArr($page, $testCookie); // Update cookies
 			$this->SaveCookies($user, $pass); // Update cookies file
@@ -318,5 +318,4 @@ class fileboom_me extends DownloadClass {
 //[02-8-2014] Fixed FreeDL captcha. - Th3-822
 //[02-1-2016] Fixed FreeDL countdown. - Th3-822
 //[17-1-2016] Copied keep2share_cc to fileboom_me & fixed. - Th3-822
-
-?>
+//[02-4-2017] Switched to https. - Th3-822

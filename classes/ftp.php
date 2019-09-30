@@ -53,27 +53,27 @@ function getftpurl($host, $port, $url, $saveToFile = 0) {
 
 				$FileName = str_replace(array_merge(range(chr(0), chr(31)), str_split("<>:\"/|?*\x5C\x7F")), '', basename(trim($saveToFile)));
 
-				if (!empty($options['rename_prefix'])) $FileName = $options['rename_prefix'] . '_' . $FileName;
-				if (!empty($options['rename_suffix'])) {
-					$ext = strrchr($FileName, '.');
-					$before_ext = explode($ext, $FileName);
-					$FileName = $before_ext[0] . '_' . $options['rename_suffix'] . $ext;
+				$extPos = strrpos($FileName, '.');
+				$ext = ($extPos ? substr($FileName, $extPos) : '');
+				if (is_array($options['forbidden_filetypes']) && in_array(strtolower($ext), array_map('strtolower', $options['forbidden_filetypes']))) {
+					if ($options['forbidden_filetypes_block']) return html_error(sprintf(lang(82), $ext));
+					if (empty($options['rename_these_filetypes_to'])) $options['rename_these_filetypes_to'] = '.xxx';
+					else if (strpos($options['rename_these_filetypes_to'], '.') === false) $options['rename_these_filetypes_to'] = '.' . $options['rename_these_filetypes_to'];
+					$FileName = substr_replace($FileName, $options['rename_these_filetypes_to'], $extPos);
 				}
-				if ($options['rename_underscore']) $FileName = str_replace(array(' ', '%20'), '_', $FileName);
+
+				if (!empty($options['rename_prefix'])) $FileName = $options['rename_prefix'] . '_' . $FileName;
+				if (!empty($options['rename_suffix'])) $FileName = ($extPos > 0 ? substr($FileName, 0, $extPos) : $FileName) . '_' . $options['rename_suffix'] . $ext;
+				if (!empty($options['rename_underscore'])) $FileName = str_replace(array(' ', '%20'), '_', $FileName);
 
 				$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $FileName;
 
-				$filetype = strrchr($saveToFile, '.');
-				if (is_array($options['forbidden_filetypes']) && in_array(strtolower($filetype), $options['forbidden_filetypes'])) {
-					if ($options['forbidden_filetypes_block']) html_error(sprintf(lang(82), $filetype));
-					$saveToFile = str_replace($filetype, $options['rename_these_filetypes_to'], $saveToFile);
+				if (@file_exists($saveToFile) && $Resume['use'] !== TRUE) {
+					if ($options['bw_save']) return html_error(lang(99) . ': ' . link_for_file($saveToFile));
+					$FileName = time() . '_' . $FileName;
+					$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $FileName;
 				}
 
-				if (@file_exists($saveToFile) && $options['bw_save']) {
-					// Skip in audl.
-					if (isset($_GET['audl'])) echo '<script type="text/javascript">parent.nextlink();</script>';
-					html_error(lang(99) . ': ' . link_for_file($saveToFile));
-				} elseif (@file_exists($saveToFile)) $saveToFile = dirname($saveToFile) . PATH_SPLITTER . time() . '_' . $FileName;
 				printf(lang(83), $FileName, bytesToKbOrMbOrGb($fileSize));
 				echo "<br />";
 
@@ -107,16 +107,16 @@ function updateFtpProgress($bytesReceived) {
 		$bytesReceived = $FtpUploadBytesSent;
 	}
 	$FtpBytesReceived = $bytesReceived;
-	if ($bytesReceived > $FtpLast + $FtpChunkSize) {
+	if ($bytesReceived > $FtpLast + $FtpChunkSize && (!$FtpLastChunkTime || !((microtime(true) - $FtpLastChunkTime) < 1))) {
 		$time = microtime(true) - $FtpTimeStart;
 		$chunkTime = $time - $FtpLastChunkTime;
 		$FtpLastChunkTime = $time;
-		$speed = round($FtpChunkSize / 1024 / $chunkTime, 2);
-		# $FtpBytesReceived = $bytesReceived;
-		if ($bytesReceived > $FtpBytesTotal) $percent = 100;
-		else $percent = round($bytesReceived / $FtpBytesTotal * 100, 2);
-		$FtpLast = $bytesReceived;
+		if ($bytesReceived >= $FtpBytesTotal) $percent = 100;
+		else $percent = @round($bytesReceived / $FtpBytesTotal * 100);
+		$speed = @round((($bytesReceived - $FtpLast) / 1024) / $chunkTime, 2);
 		echo "<script type='text/javascript'>pr($percent, '" . bytesToKbOrMbOrGb($bytesReceived) . "', $speed)</script>\r\n";
+		flush();
+		$FtpLast = $bytesReceived;
 	}
 }
 

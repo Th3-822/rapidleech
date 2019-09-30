@@ -50,7 +50,7 @@
 
 			$tmp=cut_str($page,'adresse suivante',true);
 			
-			$download_link=cut_str($tmp,'<a href="','"');
+			$download_link=cut_str($tmp,'"underline" href="','"');
 			$tmpd=cut_str($tmp,'http://dl.free.fr/rm.pl?','"');
 			if ($tmpd){
 				$tmpd='http://dl.free.fr/rm.pl?'.$tmpd;
@@ -60,7 +60,6 @@
 ?>
 <script>document.getElementById('final').style.display='none';</script>
 <?php
-
-
 // sert 30.07.2008
+// andykimpe 23.08/2018 update get download link
 ?>

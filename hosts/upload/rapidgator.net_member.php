@@ -62,7 +62,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		//Redirects
 		$rdc = 0;
 		$page = false; // False value for starting the loop.
-		$redir = "http://$domain/auth/login";
+		$redir = "https://$domain/auth/login";
 		if (!empty($_POST['referer'])) $referer = $_POST['referer'];
 		while (($redir = ChkRGRedirs($page, $redir, '(?:/auth/login|/site/ChangeLocation/key/)', $default_acc)) && $rdc < 15) {
 			$page = cURL($redir, $cookie, $post, $referer);
@@ -77,7 +77,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		if (stripos($page, 'The code from a picture does not coincide') !== false) {
 			if (!empty($post['LoginForm%5BverifyCode%5D'])) html_error('Login Failed: Incorrect CAPTCHA response.');
 			if (!preg_match('@(https?://(?:[^\./\r\n\'\"\t\:]+\.)?rapidgator\.net(?:\:\d+)?)?/auth/captcha/\w+/\w+@i', $page, $imgurl)) html_error('Error: CAPTCHA not found.');
-			$imgurl = (empty($imgurl[1])) ? 'http://rapidgator.net'.$imgurl[0] : $imgurl[0];
+			$imgurl = (empty($imgurl[1])) ? 'https://rapidgator.net'.$imgurl[0] : $imgurl[0];
 			//Download captcha img.
 			$captcha = explode("\r\n\r\n", cURL($imgurl, $this->cookie), 2);
 			if (substr($captcha[0], 9, 3) != '200') html_error('Error downloading captcha img.');
@@ -109,7 +109,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	//Redirects
 	$rdc = 0;
 	$page = false; // False value for starting the loop.
-	$redir = "http://$domain/";
+	$redir = "https://$domain/";
 	while (($redir = ChkRGRedirs($page, $redir)) && $rdc < 15) {
 		$page = cURL($redir, $cookie, 0, $referer);
 		$cookie = GetCookiesArr($page, $cookie);
@@ -117,7 +117,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		$rdc++;
 	}
 
-	if (!preg_match('@var\s+form_url\s*=\s*"(https?://[^/|\"]+/[^\"]+)"\s*;@i', $page, $form_url) || !preg_match('@var\s+progress_url_web\s*=\s*"(https?://[^/|\"]+/[^\"]+)"\s*;@i', $page, $prog_url)) {
+	if (!preg_match('@var\s+form_url\s*=\s*setProtocol\("(https?:\/\/[^/|\"]+\/[^\"]+)"\)\s*;@i', $page, $form_url) || !preg_match('@var\s+progress_url_web\s*=\s*setProtocol\("(https?:\/\/[^/|\"]+\/[^\"]+)"\)\s*;@i', $page, $prog_url)) {
 		is_present($page, 'Your storage space is full. Delete some files or upgrade to the new', 'Your storage space is full');
 		html_error('Error: Cannot find upload url.');
 	}
@@ -133,32 +133,54 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
 
 	$url = parse_url($up_url);
-	$upfiles = upfile($url['host'], 80, $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer, $cookie, array(), $lfile, $lname, 'file', '', $_GET['proxy'], $pauth);
+	$upfiles = upfile($url['host'], defport($url), $url['path'].(!empty($url['query']) ? '?'.$url['query'] : ''), $referer, $cookie, array(), $lfile, $lname, 'file', '', $_GET['proxy'], $pauth, 0, $url['scheme']);
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>";
 
 	is_page($upfiles);
 
-	//Redirects
-	$rdc = 0;
-	$page = false; // False value for starting the loop.
-	$redir = $prog_url[1]."&data%5B0%5D%5Buuid%5D=$uuid&data%5B0%5D%5Bstart_time%5D=$starttime";
-	while (($redir = ChkRGRedirs($page, $redir)) && $rdc < 15) {
-		$page = cURL($redir, $cookie, 0, $referer);
-		$cookie = GetCookiesArr($page, $cookie);
-		$referer = $redir;
-		$rdc++;
-	}
+	// Pool Upload
+	echo "<div id='T8_div' width='100%' align='center'>Checking Finished Upload : Try <span id='T8_try'>0</span><br /><span id='T8_status'></span></div>\n";
+	$x = 1;
+	do {
+		echo "<script type='text/javascript'>document.getElementById('T8_try').innerHTML = '$x';</script>\n";
+		sleep($x + 5); // A little wait
 
-	$body = substr($page, strpos($page, "\r\n\r\n") + 4);
-	if (!preg_match_all('@"([^\"]*)":"([^\"]*)"@i', $body, $resp)) html_error("Unknown reply from server.");
-	$resp = array_combine($resp[1], array_map('stripcslashes', $resp[2]));
+		//Redirects
+		$rdc = 0;
+		$page = false; // False value for starting the loop.
+		$redir = $prog_url[1]."&data%5B0%5D%5Buuid%5D=$uuid&data%5B0%5D%5Bstart_time%5D=$starttime";
+		while (($redir = ChkRGRedirs($page, $redir)) && $rdc < 15) {
+			$page = cURL($redir, $cookie, 0, $referer);
+			$cookie = GetCookiesArr($page, $cookie);
+			$referer = $redir;
+			$rdc++;
+		}
 
-	if (!empty($resp['download_url'])) {
-		$download_link = $resp['download_url'];
-		if (!empty($resp['remove_url'])) $delete_link = $resp['remove_url'];
-	} else html_error("Download link not found ({$resp['state']}).");
+		$resp = json2array($page, "Cannot get upload status $x");
+	} while ($x++ < 5 && $resp[0]['state'] == 'processing');
+
+	if (!empty($resp[0]['download_url'])) {
+		$download_link = $resp[0]['download_url'];
+		if (!empty($resp[0]['remove_url'])) $delete_link = $resp[0]['remove_url'];
+	} else html_error("Download link not found ({$resp[0]['state']}).");
+}
+
+function json2array($content, $errorPrefix = 'Error') {
+	if (!function_exists('json_decode')) html_error('Error: Please enable JSON in php.');
+	if (empty($content)) return NULL;
+	$content = ltrim($content);
+	if (($pos = strpos($content, "\r\n\r\n")) > 0) $content = trim(substr($content, $pos + 4));
+	$cb_pos = strpos($content, '{');
+	$sb_pos = strpos($content, '[');
+	if ($cb_pos === false && $sb_pos === false) html_error("[$errorPrefix]: JSON start braces not found.");
+	$sb = ($cb_pos === false || $sb_pos < $cb_pos) ? true : false;
+	$content = substr($content, strpos($content, ($sb ? '[' : '{')));$content = substr($content, 0, strrpos($content, ($sb ? ']' : '}')) + 1);
+	if (empty($content)) html_error("[$errorPrefix]: No JSON content.");
+	$rply = json_decode($content, true);
+	if ($rply === NULL) html_error("[$errorPrefix]: Error reading JSON.");
+	return $rply;
 }
 
 // Edited For upload.php usage.
@@ -236,5 +258,5 @@ function ChkRGRedirs($page, $lasturl, $rgpath = '/', $default_login = false) { /
 // [05-10-2013] Removed anon user support. - Th3-822
 // [25-11-2013] Fixed redirects function (aagain :D ). - Th3-822
 // [16-12-2015][WIP] Fixing Blocks, Redirect Handling & Forcing Plugin To Use cURL. - Th3-822
-
-?>
+// [27-11-2016] Added wait and retries to get download_link. - Th3-822
+// [28-08-2017] Switched to HTTPS. - Th3-822

@@ -28,6 +28,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 	$login = $not_done = false;
 	$domain = 'ge.tt';
 	$referer = "http://$domain/";
+	$referer_json = "$referer\r\nContent-Type: application/json";
 
 	// Login
 	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='login' width='100%' align='center'>Login to $domain</div>\n";
@@ -43,18 +44,19 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		$post = array();
 		$post['email'] = $_REQUEST['up_login'];
 		$post['password'] = $_REQUEST['up_pass'];
-		$post['autologin'] = false;
 
 		if (!function_exists('json_encode')) html_error('Error: Please enable JSON in php.');
 
-		$page = geturl($domain, 80, '/u/login?t='.jstime(), $referer, $cookie, json_encode($post), 0, $_GET['proxy'], $pauth);is_page($page);
+		$page = geturl('api.gett.pro', 80, '/1/users/login', $referer_json, $cookie, json_encode($post), 0, $_GET['proxy'], $pauth);is_page($page);
 		//$cookie = GetCookiesArr($page, $cookie);
 
 		is_present($page, 'User not found', 'Invalid email address or user doesn\'t exists.');
 		is_present($page, 'Wrong email or password', 'Login Failed: Email/Password incorrect.');
 
 		$userInfo = json2array($page, 'Login Error');
-		if ($fsize > $userInfo['storage']['free']) html_error('You don\'t have the enough free space in your account for upload this file.');
+		if (!empty($userInfo['message'])) html_error('Login Error: ' . htmlspecialchars((!empty($userInfo['body']['err']) ? "[{$userInfo['message']}] {$userInfo['body']['err']}" : $userInfo['message'])));
+		if (empty($userInfo['login'])) html_error('Login Failed.');
+		if ($fsize > $userInfo['user']['storage']['free']) html_error('You don\'t have the enough free space in your account for upload this file.');
 
 		$login = true;
 	} else {
@@ -62,31 +64,30 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != 'FORM') {
 		$login = false;
 
 		// Anon Login
-		$page = geturl('ge.tt', 80, '/', $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
-		$anonCookie = GetCookiesArr($page, $cookie);
-		if (empty($anonCookie['session']) || !preg_match('@"accesstoken"\s*:\s*"([^\"]+)"@i', urldecode($anonCookie['session']), $anonToken)) html_error('Anonymous Session not Found.');
+		$page = geturl('api.ge.tt', 80, '/anon/signup', $referer_json, $cookie, '{}', 0, $_GET['proxy'], $pauth);is_page($page);
+		if (!preg_match('@"accesstoken"\s*:\s*"([^\"]+)"@i', $page, $anonToken)) html_error('Anonymous Session not Found.');
 		$anonToken = $anonToken[1];
 
 		// Get Anon User Info
-		$page = geturl('open.ge.tt', 80, '/1/users/me?accesstoken='.urlencode($anonToken).'&t='.jstime(), $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		$page = geturl('api.ge.tt', 80, '/1/users/me?accesstoken='.urlencode($anonToken), $referer, $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
 		$userInfo = json2array($page, 'Anon Login Error');
 		$userInfo['accesstoken'] = $anonToken;
-		if ($fsize > $userInfo['storage']['free']) html_error('You don\'t have the enough free space in your anon account for upload this file.');
+		if ($fsize > $userInfo['user']['storage']['free']) html_error('You don\'t have the enough free space in your anon account for upload this file.');
 	}
 
 	// Retrive upload ID
 	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrieving upload ID</div>\n";
 
 	// Create Share
-	$page = geturl('open.ge.tt', 80, '/1/shares/create?accesstoken='.urlencode($userInfo['accesstoken']).'&t='.jstime(), $referer, $cookie, '', 0, $_GET['proxy'], $pauth);is_page($page);
+	$page = geturl('api.ge.tt', 80, '/1/shares/create?accesstoken='.urlencode($userInfo['accesstoken']).'&t='.jstime(), $referer, $cookie, '', 0, $_GET['proxy'], $pauth);is_page($page);
 	$share = json2array($page, 'Create Share Error');
 	if (empty($share['sharename'])) html_error('Cannot get Share ID');
 
 	// Create File
 	$post = array('filename' => $lname);
-	$page = geturl('open.ge.tt', 80, '/1/files/'.urlencode($share['sharename']).'/create?accesstoken='.urlencode($userInfo['accesstoken']).'&t='.jstime(), $referer, $cookie, json_encode($post), 0, $_GET['proxy'], $pauth);is_page($page);
+	$page = geturl('api.ge.tt', 80, '/1/files/'.urlencode($share['sharename']).'/create?accesstoken='.urlencode($userInfo['accesstoken']).'&t='.jstime(), $referer_json, $cookie, json_encode($post), 0, $_GET['proxy'], $pauth);is_page($page);
 	$file = json2array($page, 'Create File Error');
-	if (empty($file['getturl'])) html_error('Download link not found.');
+	if (empty($file['getturl'])) $file['getturl'] = 'http://ge.tt/' . urlencode($share['sharename']);
 	if (empty($file['upload']['posturl'])) html_error('Upload URL not Found.'); // posturl		puturl
 
 	// Uploading
@@ -134,5 +135,4 @@ function exports_uuid() {
 }
 
 //[16-8-2015]  Written by Th3-822.
-
-?>
+//[18-4-2017]  Fixed. - Th3-822

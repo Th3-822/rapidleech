@@ -1,7 +1,7 @@
 <?php
 $host = array();
 $d = dir(HOST_DIR . 'download/');
-$HostnamesToFix = array('d.h.st' => 'd-h.st', 'ex.load.com' => 'ex-load.com', 'share.online.biz' => 'share-online.biz');
+$HostnamesToFix = array('d.h.st' => 'd-h.st', 'ex.load.com' => 'ex-load.com', 'samsung.firmware.org' => 'samsung-firmware.org', 'share.online.biz' => 'share-online.biz', 'up.4ever.com' => 'up-4ever.com');
 $HostnamesToIgnore = array('hosts', 'genericxfs.dl');
 while (false !== ($entry = $d->read())) {
 	if (strtolower(strrchr($entry, '.')) == '.php' && stripos($entry, '.JD') === false) {
