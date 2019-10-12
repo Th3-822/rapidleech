@@ -58,9 +58,6 @@ class GenericXFS_DL extends DownloadClass {
 				}
 				if ($cErrReplace) return $this->Login();
 			}
-			
-			if(preg_match('/Location: https?([^\s]+)/', $this->page, $output)) $this->page = $this->GetPage($this->scheme.$output[1], $this->cookie); //if a redirect is detected, get the new page.
-
 			is_present($this->page, 'The file you were looking for could not be found');
 			is_present($this->page, 'The file was removed by administrator');
 			is_present($this->page, 'The file was deleted by its owner');
