@@ -5,10 +5,9 @@ if (!defined('RAPIDLEECH')) {
 }
 // Using functions from: http://julien-marchand.fr/blog/using-the-mega-api-with-php-examples/
 class mega_co_nz extends DownloadClass {
-	private $useOpenSSL, $seqno, $cookie;
+	private $useOpenSSL, $useOldFilter, $seqno, $cookie;
 	public function Download($link) {
-		if (!extension_loaded('mcrypt') || !in_array('rijndael-128', mcrypt_list_algorithms(), true)) html_error("Mcrypt module isn't installed or it doesn't have support for the needed encryption.");
-		$this->useOpenSSL = (version_compare(PHP_VERSION, '5.4.0', '>=') && extension_loaded('openssl') && in_array('AES-128-CBC', openssl_get_cipher_methods(), true));
+		$this->checkCryptDependences();
 
 		$this->seqno = mt_rand();
 		$this->changeMesg(lang(300).'<br />Mega.co.nz plugin by Th3-822'); // Please, do not remove or change this line contents. - Th3-822
@@ -46,6 +45,16 @@ class mega_co_nz extends DownloadClass {
 		if (empty($attr)) html_error((!empty($fid[1]) ? 'Folder Error: ' : '').'File\'s key isn\'t correct.');
 
 		$this->RedirectDownload($reply[0]['g'], $attr['n'], 0, 0, $link, 0, 0, array('T8[fkey]' => $fid[3]));
+	}
+
+	private function checkCryptDependences() {
+		$this->useOpenSSL = (version_compare(PHP_VERSION, '5.4.0', '>=') && extension_loaded('openssl') && in_array('AES-128-CBC', ($ossl_ciphers = openssl_get_cipher_methods()), true));
+
+		if (!$this->useOpenSSL || !in_array('AES-128-CTR', $ossl_ciphers, true))
+		{
+			$this->useOldFilter = true;
+			if (!extension_loaded('mcrypt') || !in_array('rijndael-128', mcrypt_list_algorithms(), true)) html_error("OpenSSL / Mcrypt module isn't installed or it doesn't have support for the needed encryption.");
+		} else $this->useOldFilter = false;
 	}
 
 	// It's seems to not work properly with a HEAD request neither with a GET with a small Range (TODO: Add here a small copy of geturl that stops after getting the headers or add a parameter to geturl that does that)
@@ -266,6 +275,7 @@ class mega_co_nz extends DownloadClass {
 
 		global $fp, $sFilters;
 		if (empty($fp) || !is_resource($fp)) html_error("Error: Your rapidleech version is outdated and it doesn't support this plugin.");
+		$this->checkCryptDependences();
 		if (!empty($_GET['T8']['fkey'])) $key = $this->base64_to_a32(urldecode($_GET['T8']['fkey']));
 		elseif (preg_match('@^(T8|N)?!([^!]{8})!([\w\-\,]{43})@i', parse_url($_GET['referer'], PHP_URL_FRAGMENT), $dat)) $key = $this->base64_to_a32($dat[2]);
 		else html_error("[CB] File's key not found.");
@@ -273,7 +283,7 @@ class mega_co_nz extends DownloadClass {
 		$key = array($key[0] ^ $key[4], $key[1] ^ $key[5], $key[2] ^ $key[6], $key[3] ^ $key[7]);
 		$opts = array('iv' => $this->a32_to_str($iv), 'key' => $this->a32_to_str($key));
 
-		if (!stream_filter_register('MegaDlDecrypt', 'Th3822_MegaDlDecrypt') && !in_array('MegaDlDecrypt', stream_get_filters())) html_error('Error: Cannot register "MegaDlDecrypt" filter.');
+		if (!stream_filter_register('MegaDlDecrypt', ($this->useOldFilter ? 'Th3822_MegaDlDecrypt_Old' : 'Th3822_MegaDlDecrypt')) && !in_array('MegaDlDecrypt', stream_get_filters())) html_error('Error: Cannot register "MegaDlDecrypt" filter.');
 
 		if (!isset($sFilters) || !is_array($sFilters)) $sFilters = array();
 		if (empty($sFilters['MegaDlDecrypt'])) $sFilters['MegaDlDecrypt'] = stream_filter_append($fp, 'MegaDlDecrypt', STREAM_FILTER_READ, $opts);
@@ -424,6 +434,52 @@ class mega_co_nz extends DownloadClass {
 }
 
 class Th3822_MegaDlDecrypt extends php_user_filter {
+	private $key, $iv, $start, $lastBlock, $waste;
+	public function onCreate() {
+		if (empty($this->params['iv']) || empty($this->params['key'])) return false;
+		$this->key = $this->params['key'];
+		$this->iv = $this->params['iv'];
+		$this->waste = $this->lastBlock = $this->start = 0;
+		if (!empty($this->params['startFrom']) && is_numeric($this->params['startFrom']) && $this->params['startFrom'] > 0) {
+			$this->setNextStart($this->params['startFrom']);
+		}
+		return true;
+	}
+
+	public function filter($in, $out, &$consumed, $stop) {
+		while ($bucket = stream_bucket_make_writeable($in)) {
+			if ($bucket->datalen > 0) {
+				if ($this->waste > 0) $bucket->data = str_repeat('*', $this->waste) . $bucket->data;
+				$bucket->data = openssl_decrypt($bucket->data, 'AES-128-CTR', $this->key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $this->iv);
+				if ($this->waste > 0) $bucket->data = substr($bucket->data, $this->waste);
+				$consumed += $bucket->datalen;
+				$this->setNextStart($bucket->datalen);
+				stream_bucket_append($out, $bucket);
+			}
+		}
+		return PSFS_PASS_ON;
+	}
+
+	private function setNextStart($nextStart) {
+		$start = $this->start + $nextStart;
+		$block = floor($start / 16);
+		if (($incBlocks = $block - $this->lastBlock) > 0) $this->increaseIV($incBlocks);
+		$this->start = $start;
+		$this->lastBlock = $block;
+		$this->waste = $start % 16;
+	}
+
+	private function increaseIV($inc) {
+		$i = 16;
+		while ($inc > 0 && --$i >= 0) {
+			$sum = ord($this->iv{$i}) + $inc;
+			$this->iv{$i} = chr($sum & 0xFF);
+			$inc = $sum >> 8;
+		}
+	}
+}
+
+class Th3822_MegaDlDecrypt_Old extends php_user_filter {
 	private $td;
 	public function onCreate() {
 		if (empty($this->params['iv']) || empty($this->params['key'])) return false;
@@ -431,12 +487,12 @@ class Th3822_MegaDlDecrypt extends php_user_filter {
 		$iv = $this->params['iv'];
 		if (!empty($this->params['startFrom']) && is_numeric($this->params['startFrom']) && $this->params['startFrom'] > 0) {
 			$blocks = floor($this->params['startFrom'] / 16);
-			$waste = $this->params['startFrom'] - ($blocks * 16);
+			$waste = $this->params['startFrom'] % 16;
 			if ($blocks > 0) $this->increaseIV($iv, $blocks);
 		} else $waste = 0;
 		$init = mcrypt_generic_init($this->td, $this->params['key'], $iv);
 		if ($init === false || $init < 0) return false;
-		if ($waste > 0) mdecrypt_generic($this->td, str_repeat('*', min($waste, 16)));
+		if ($waste > 0) mdecrypt_generic($this->td, str_repeat('*', $waste));
 		return true;
 	}
 
@@ -477,3 +533,4 @@ class Th3822_MegaDlDecrypt extends php_user_filter {
 //[04-2-2016] Added sub-folders support (fully) and added support for link suffix "!less" to disable recursive sub-folder download. - Th3-822
 //[27-12-2016] Added Login support for increase traffic limits & forced SSL on downloads to avoid corrupted downloads. - Th3-822
 //[12-11-2017] Removed SSL from downloads to increase download speed & updated Th3822_MegaDlDecrypt class. - Th3-822
+//[18-10-2019] Added new Th3822_MegaDlDecrypt class using OpenSSL & Removed mcrypt dependence to run, now it can be used with only the OpenSSL module (Btw, it's Faster). - Th3-822

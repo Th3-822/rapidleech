@@ -6,7 +6,7 @@ if (!defined('RAPIDLEECH')) {
 }
 
 class rapidgator_net extends DownloadClass {
-	private $baseUrl, $link, $page, $cookie, $referer, $DLregexp;
+	private $baseUrl, $link, $cJar, $page, $cookie, $referer, $DLregexp;
 	public function Download($link) {
 		$this->baseUrl = 'https://rapidgator.net/';
 
@@ -40,72 +40,7 @@ class rapidgator_net extends DownloadClass {
 
 		if ($_REQUEST['premium_acc'] == 'on' && ((!empty($_REQUEST['premium_user']) && !empty($_REQUEST['premium_pass'])) || (!empty($GLOBALS['premium_acc']['rapidgator_net']['user']) && !empty($GLOBALS['premium_acc']['rapidgator_net']['pass'])))) {
 			$this->Login();
-		} else $this->FreeDL();
-	}
-
-	private function FreeDL() {
-		$capt_url = $this->baseUrl . 'download/captcha';
-		if (empty($_POST['step']) || !in_array($_POST['step'], array('1', '2'))) {
-			is_present($this->page, 'This file can be downloaded by premium only', 'Only Premium users can download this file.'); // F##### PPS
-			is_present($this->page, 'download not more than 1 file at a time in free mode.', 'You can\'t download not more than 1 file at a time. Wait 15 minutes and try again.');
-			if (preg_match('@You can download files up to \d+ MB in free mode@i', $this->page, $err)) html_error($err[0].'.');
-			if (!preg_match('@fid\s*=\s*(\d+)\s*;@i', $this->page, $fid)) html_error('File-id not found.');
-			if (!preg_match('@secs\s*=\s*(\d+)\s*;@i', $this->page, $cd)) html_error('Countdown not found.');
-
-			$page = cURL($this->baseUrl . 'download/AjaxStartTimer?fid='.$fid[1], $this->cookie, 0, $this->link."\r\nX-Requested-With: XMLHttpRequest");
-			if (!preg_match('@"sid":"([^"\}]+)"@i', $page, $sid)) html_error('Session id not found.');
-
-			if ($cd[1] > 0) $this->CountDown($cd[1]);
-
-			$page = cURL($this->baseUrl . 'download/AjaxGetDownloadLink?sid='.urlencode($sid[1]), $this->cookie, 0, $this->link."\r\nX-Requested-With: XMLHttpRequest"); // ['download_link']
-			$this->cookie = GetCookiesArr($page, $this->cookie);
-			is_notpresent($page, '"state":"done"', 'Error: Countdown bypassed?.');
-
-			$page = cURL($capt_url, $this->cookie);
-
-			if (preg_match($this->DLregexp, $page, $dlink)) return $this->RedirectDownload($dlink[0], 'rapidgatorfr2');
-
-			$data = $this->DefaultParamArr($this->link, $this->cookie, 1, 1);
-			if (preg_match('@(?:https?:)?//api\.solvemedia\.com/papi/challenge\.(?:no)?script\?k=([\w\.\-]+)@i', $page, $captcha)) {
-				$data['step'] = 1;
-				return $this->SolveMedia($captcha[1], $data);
-			} else if (preg_match('@(?:https?:)?//(?:[\w\-]+\.)?(?:google\.com/recaptcha/api|recaptcha\.net)/(?:challenge|noscript)\?k=([\w\.\-]+)@i', $page, $captcha)) {
-				$data['step'] = 2;
-				return $this->reCAPTCHA($captcha[1], $data);
-			}
-
-			return html_error('CAPTCHA not found.');
-		} else {
-			$this->cookie = (!empty($_POST['cookie'])) ? decrypt(urldecode($_POST['cookie'])) : '';
-
-			$post = array('DownloadCaptchaForm%5Bcaptcha%5D' => '');
-			switch ($_POST['step']) {
-				case '1':
-					$post = array_merge($post, $this->verifySolveMedia());
-					break;
-				case '2':
-					if (empty($_POST['recaptcha_response_field'])) html_error('You didn\'t enter the image verification code.');
-					if (empty($_POST['recaptcha_challenge_field'])) html_error('Empty reCAPTCHA challenge.');
-					$post['recaptcha_challenge_field'] = urlencode($_POST['recaptcha_challenge_field']);
-					$post['recaptcha_response_field'] = urlencode($_POST['recaptcha_response_field']);
-					break;
-			}
-			$_POST['step'] = false;
-			$page = cURL($capt_url, $this->cookie, $post);
-
-			is_present($page, 'The verification code is incorrect.');
-			is_present($page, "\nSet-Cookie: failed_on_captcha=1", 'Captcha expired. Try again in 15 minutes.');
-
-			if (!preg_match($this->DLregexp, $page, $dlink)) html_error('Error: Download link not found.');
-			$this->RedirectDownload($dlink[0], 'rapidgatorfr');
-		}
-	}
-
-	// Special Function Called by verifySolveMedia When Captcha Is Incorrect, To Allow Retry.
-	protected function retrySolveMedia() {
-		$data = $this->DefaultParamArr($this->link, $this->cookie, 1, 1);
-		$data['step'] = 1;
-		return $this->SolveMedia($_POST['sm_public_key'], $data, 0, 'Retry Download');
+		} else html_error('Login Failed: User or Password is empty.');
 	}
 
 	private function PremiumDL() {
@@ -130,6 +65,12 @@ class rapidgator_net extends DownloadClass {
 
 		if (empty($user) || empty($pass)) html_error('Login Failed: User or Password is empty. Please check login data.');
 		$this->cookie = array('lang' => 'en'); // Account is always showed as free if it comes from a file, as i don't send file's link as referer, lets reset the cookies.
+
+		if (($page = $this->cJar_load($user, $pass))) {
+			// Account loaded from Cookie Storage
+			is_present($page, '>Free</a>', 'Account isn\'t premium');
+			return $this->PremiumDL();
+		}
 
 		$post = array();
 		$post['LoginForm%5Bemail%5D'] = urlencode($user);
@@ -156,6 +97,7 @@ class rapidgator_net extends DownloadClass {
 
 		is_present($page, 'Wrong e-mail or password.', 'Login Failed: Email/Password incorrect.');
 		is_present($page, 'E-mail is not a valid email address.', 'Login Failed: Login isn\'t an email address.');
+		is_present($page, 'Frequent logins.', 'Too frequent logins, please wait and try again.');
 		is_present($page, 'We discovered that you try to access your account from unusual location.', 'Login Failed: Login Blocked By IP, Check Account Email And Follow The Steps To Add IP to Whitelist.');
 		if (stripos($page, 'The code from a picture does not coincide') !== false) {
 			if (!empty($post['LoginForm%5BverifyCode%5D'])) html_error('Login Failed: Incorrect CAPTCHA response.');
@@ -181,12 +123,10 @@ class rapidgator_net extends DownloadClass {
 
 		if (empty($this->cookie['user__'])) html_error("Login Error: Cannot find 'user__' cookie.");
 		$this->cookie['lang'] = 'en';
+		$this->cJar_save();
 
 		$page = cURL($this->baseUrl, $this->cookie, 0, $this->baseUrl . 'auth/login');
-		if (stripos($page, '>Free</a>') !== false) {
-			$this->changeMesg('<br /><b>Account isn\'t premium?</b>', true);
-			return $this->FreeDL();
-		}
+		is_present($page, '>Free</a>', 'Account isn\'t premium.');
 
 		return $this->PremiumDL();
 	}
@@ -252,6 +192,79 @@ class rapidgator_net extends DownloadClass {
 
 		return (empty($redir) ? false : $redir);
 	}
+
+	private function cJar_encrypt($data, $key) {
+		if (empty($data)) return false;
+		global $secretkey;
+		$_secretkey = $secretkey;
+		$secretkey = $key;
+		$data = base64_encode(encrypt(json_encode($data)));
+		$secretkey = $_secretkey;
+		return $data;
+	}
+
+	private function cJar_decrypt($data, $key) {
+		if (empty($data)) return false;
+		global $secretkey;
+		$_secretkey = $secretkey;
+		$secretkey = $key;
+		$data = json_decode(decrypt(base64_decode($data)), true);
+		$secretkey = $_secretkey;
+		return (!empty($data) ? $data : false);
+	}
+
+	private function cJar_load($user, $pass) {
+		if (empty($user) || empty($pass)) return html_error('Login Failed: User or Password is empty.');
+
+		$user = strtolower($user);
+		$this->cJar['file'] = DOWNLOAD_DIR . get_class($this) . '_dl.php';
+		$this->cJar['hash'] = base64_encode(sha1("$user$pass", true));
+		$this->cJar['key'] = substr(base64_encode(hash('sha512', "$user$pass", true)), 0, 56);
+
+		if (file_exists($this->cJar['file']) && ($cFile = file($this->cJar['file'])) && is_array($cFile = unserialize($cFile[1])) && array_key_exists($this->cJar['hash'], $cFile) && ($testCookie = $this->cJar_decrypt($cFile[$this->cJar['hash']]['cookie'], $this->cJar['key']))) {
+			return $this->cJar_test($testCookie);
+		} else return false;
+	}
+
+	private function cJar_test($cookie) {
+		if (empty($this->cJar) || empty($cookie['user__'])) return false;
+		$oldCookie = $this->cookie;
+		$this->cookie = array_merge($cookie, array('lang' => 'en'));
+
+		// Weird RG redirects.
+		$rdc = 0;
+		$page = false; // False value for starting the loop.
+		$redir = $this->baseUrl;
+		$referer = $this->baseUrl; // Account is always shown as free if referer is from a file. (I'm not sure if this still happens)
+		while (($redir = $this->ChkRGRedirs($page, $redir)) && $rdc < 15) {
+			$page = cURL($redir, $this->cookie, 0, $referer);
+			$this->cookie = GetCookiesArr($page, $this->cookie);
+			$referer = $redir;
+			$rdc++;
+		}
+
+		if (!empty($this->cookie['user__']) && stripos($page, '/auth/logout') !== false)
+		{
+			$this->cookie['lang'] = 'en';
+			$this->cJar_save(); // Update last used time.
+			return $page;
+		}
+
+		$this->cookie = $oldCookie;
+		return false;
+	}
+
+	private function cJar_save() {
+		if (empty($this->cJar)) return;
+		$maxTime = 31 * 86400; // Max time to keep unused cookies saved (31 days)
+		if (file_exists($this->cJar['file']) && ($savedcookies = file($this->cJar['file'])) && is_array($savedcookies = unserialize($savedcookies[1]))) {
+			// Remove old cookies
+			foreach ($savedcookies as $k => $v) if (time() - $v['time'] >= $maxTime) unset($savedcookies[$k]);
+		} else $savedcookies = array();
+		$savedcookies[$this->cJar['hash']] = array('time' => time(), 'cookie' => $this->cJar_encrypt($this->cookie, $this->cJar['key']));
+
+		file_put_contents($this->cJar['file'], "<?php exit(); ?>\r\n" . serialize($savedcookies), LOCK_EX);
+	}
 }
 
 // [14-8-2012]  Written by Th3-822.
@@ -268,3 +281,4 @@ class rapidgator_net extends DownloadClass {
 // [16-12-2015][WIP] Fixing Blocks, Redirect Handling & Forcing Plugin To Use cURL. - Th3-822
 // [01-8-2016] Fixed FreeDL Captchas. - Th3-822
 // [28-8-2017] Switched to HTTPs (Untested) - Th3-822
+// [13-10-2019] Added Login Cookie Storage (login is rate-limited) & Removed FreeDL (as it now uses reCAPTCHA 2) - Th3-822
