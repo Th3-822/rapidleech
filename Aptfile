@@ -1,1 +1,12 @@
-php-openssl
+php-common
+php-mbstring
+php-xml
+php-zip
+php-curl
+gcc
+make
+autoconf
+libc-dev
+pkg-config
+php7.2-dev
+libmcrypt-dev
