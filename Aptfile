@@ -1,3 +1,4 @@
+libssl-dev
 php-common
 php-mbstring
 php-xml
