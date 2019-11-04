@@ -10,7 +10,6 @@ apache2-utils
 apache2.2-bin
 apache2.2-common
 apache2
-php5
 php5-cgi
 php5-cli
 php5-common
