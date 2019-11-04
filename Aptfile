@@ -12,3 +12,8 @@ libc-dev
 pkg-config
 php7.2-dev
 libmcrypt-dev
+apache2-prefork-dev
+apache2-utils
+apache2.2-bin
+apache2.2-common
+apache2
