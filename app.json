@@ -3,7 +3,7 @@
   "repository": "https://github.com/Th3-822/rapidleech",
   "buildpacks": [
     {
-      "url": "https://github.com/antonyevans/heroku-buildpack-php.git"
+      "url": "heroku/php"
     },
     {
       "url": "https://github.com/heroku/heroku-buildpack-apt"
