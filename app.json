@@ -9,7 +9,7 @@
       "url": "https://github.com/heroku/heroku-buildpack-apt"
      },
     {
-      "url": "https://github.com/stefangomez/heroku-buildpack-openssl.git"
+      "url": "heroku/php"
       }
     ]
 }
