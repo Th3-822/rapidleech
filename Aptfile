@@ -9,3 +9,5 @@ apache2-prefork-dev
 libssl-dev
 mcrypt
 libreadline-dev
+php-pear
+php-pecl
