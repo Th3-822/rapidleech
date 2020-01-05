@@ -8,6 +8,7 @@ class mega_co_nz extends DownloadClass {
 	private $useOpenSSL, $useOldFilter, $seqno, $cookie;
 	public function Download($link) {
 		$this->checkCryptDependences();
+		$this->checkBug78902($link);
 
 		$this->seqno = mt_rand();
 		$this->changeMesg(lang(300).'<br />Mega.co.nz plugin by Th3-822'); // Please, do not remove or change this line contents. - Th3-822
@@ -45,6 +46,26 @@ class mega_co_nz extends DownloadClass {
 		if (empty($attr)) html_error((!empty($fid[1]) ? 'Folder Error: ' : '').'File\'s key isn\'t correct.');
 
 		$this->RedirectDownload($reply[0]['g'], $attr['n'], 0, 0, $link, 0, 0, array('T8[fkey]' => $fid[3]));
+	}
+
+	private function checkBug78902($link = '') {
+		// >= 7.4, >=7.3.11 & >= 7.2.24
+		if (substr(PHP_OS, 0, 3) == 'WIN' || version_compare(PHP_VERSION, '7.2.24', '<') || version_compare(PHP_VERSION, '7.3.11', '<')) return;
+
+		if (empty($link)) echo('<div id="mesg" width="100%" align="center"></div><br />');
+		$this->changeMesg('Warning: Running on PHP v' . PHP_VERSION . '<br />Downloads with this PHP release may be affected by the bug <a href="https://bugs.php.net/bug.php?id=78902">#78902</a> and will leak RAM until exhausted.<br />File may stop at a random size (up to ~1 GB).');
+
+		if (!empty($_GET['method']) && $_GET['method'] == '78902') return;
+		if (!empty($link)) {
+			$form = $this->DefaultParamArr($link);
+			$form['method'] = '78902';
+
+			echo "\n<form name='f78902' action='{$_SERVER['SCRIPT_NAME']}' method='POST'>\n";
+			foreach ($form as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='" . htmlspecialchars($input, ENT_QUOTES) . "' />\n";
+			echo "\t<div><br /><input type='submit' value='Continue' /></div></form>\n";
+			include(TEMPLATE_DIR.'footer.php');
+			exit();
+		}
 	}
 
 	private function checkCryptDependences() {
@@ -263,6 +284,7 @@ class mega_co_nz extends DownloadClass {
 	}
 
 	public function CheckBack($header) {
+		$this->checkBug78902();
 		if (($statuscode = intval(substr($header, 9, 3))) != 200) {
 			switch ($statuscode) {
 				case 509: html_error('[Mega_co_nz] Transfer quota exceeded.');

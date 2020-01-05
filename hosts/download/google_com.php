@@ -8,6 +8,7 @@ if (!defined('RAPIDLEECH')) {
 class google_com extends DownloadClass {
 	public $fNames = array('odt' => 'OpenDocument Text', 'docx' => 'Microsoft Word', 'rtf' => 'Rich Text Format', 'txt' => 'Plain Text', 'pdf' => 'PDF Document', 'epub' => 'EPUB Publication', 'zip' => 'Zipped html Document', 'pptx' => 'Microsoft PowerPoint', 'ods' => 'OpenDocument Spreadsheet', 'xlsx' => 'Microsoft Excel'), $dFormats = array('odt', 'docx', 'rtf', 'txt', 'pdf', 'epub', 'zip'), $pFormats = array('pptx', 'pdf'), $ssFormats = array('ods', 'xlsx', 'pdf', 'zip'), $sFormats = array(13 => 'ods', 420 => 'xlsx', 12 => 'pdf');
 	public function Download($link) {
+		$this->checkBug78902($link);
 		if (!preg_match('@https?://(?:[\w\-]+\.)*(?:drive|docs)\.google\.com/(?:(?:folderview|open|(?:a/[\w\-\.]+/)?uc)\?(?:[\w\-\%]+=[\w\-\%]*&)*id=|(?:folder|file|document|presentation|spreadsheets)/d/|spreadsheet/ccc\?(?:[\w\-\%]+=[\w\-\%]*&)*key=|drive/folders/)([\w\-]{28,})@i', $link, $this->ID)) html_error('File/Folder ID not found at link.');
 		$this->ID = $this->ID[1];
 
@@ -24,6 +25,26 @@ class google_com extends DownloadClass {
 			case 'spreadsheets': $this->Spreadsheets();break; // New spreadsheets
 			case 'spreadsheet': $this->Spreadsheet();break;
 			default: html_error('Unknown /open redirect.');break;
+		}
+	}
+
+	private function checkBug78902($link = '') {
+		// >= 7.4, >=7.3.11 & >= 7.2.24
+		if (substr(PHP_OS, 0, 3) == 'WIN' || version_compare(PHP_VERSION, '7.2.24', '<') || version_compare(PHP_VERSION, '7.3.11', '<')) return;
+
+		if (empty($link)) echo('<div id="mesg" width="100%" align="center"></div><br />');
+		$this->changeMesg('Warning: Running on PHP v' . PHP_VERSION . '<br />Downloads with this PHP release may be affected by the bug <a href="https://bugs.php.net/bug.php?id=78902">#78902</a> and will leak RAM until exhausted.<br />File may stop at a random size (up to ~1 GB).');
+
+		if (!empty($_GET['method']) && $_GET['method'] == '78902') return;
+		if (!empty($link)) {
+			$form = $this->DefaultParamArr($link);
+			$form['method'] = '78902';
+
+			echo "\n<form name='f78902' action='{$_SERVER['SCRIPT_NAME']}' method='POST'>\n";
+			foreach ($form as $name => $input) echo "\t<input type='hidden' name='$name' id='$name' value='" . htmlspecialchars($input, ENT_QUOTES) . "' />\n";
+			echo "\t<div><br /><input type='submit' value='Continue' /></div></form>\n";
+			include(TEMPLATE_DIR.'footer.php');
+			exit();
 		}
 	}
 
@@ -127,6 +148,7 @@ class google_com extends DownloadClass {
 	}
 
 	public function CheckBack(&$headers) {
+		$this->checkBug78902();
 		if (substr($headers, 9, 3) == '416') html_error('[google_com.php] Plugin needs a fix, \'Range\' method is not working.');
 		if (stripos($headers, "\nTransfer-Encoding: chunked") !== false) {
 			global $fp, $sFilters;
