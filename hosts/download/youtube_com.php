@@ -272,7 +272,7 @@ class youtube_com extends DownloadClass {
 			}
 			//if (($spos = strpos($this->playerJs, '.sig||')) === false) $this->decError('Not found (".sig||")');
 			//if (($cut1 = cut_str(substr($this->playerJs, $spos), '{', '}')) == false) $this->decError('Cannot get inner content of "if(X.sig||X.s)"');
-			if (!preg_match("@(?:\.sig\|\||\.set\(\"signature\",|\|\"signature\",|$v\.sp,)(?:\(0,$v(?:\.$v)*\)\(|$v3\()?($v)\((?:\(0,$v(?:\.$v)*\)\(|$v3\()?$v\.s\)@", $this->playerJs, $fn)) $this->decError('Cannot get decoder function name');
+			if (!preg_match("@(?:\.sig\|\||\.set\(\"signature\",|\|\"signature\",|$v\.sp,|$v=)(?:\(0,$v(?:\.$v)*\)\(|$v3\()?($v)\((?:\(0,$v(?:\.$v)*\)\(|$v3\()?$v\.s\)@", $this->playerJs, $fn)) $this->decError('Cannot get decoder function name');
 			$fn = preg_quote($fn[1], '@');
 			if (!preg_match("@(?:function\s+$fn\s*\(|var\s+$fn\s*=\s*function\s*\(|(?<=(?:{|,|;))\s*$fn\s*=\s*function\s*\()@", $this->playerJs, $fpos, PREG_OFFSET_CAPTURE)) $this->decError('Cannot find decoder function');
 			$fpos = $fpos[0][1];
@@ -396,3 +396,4 @@ class youtube_com extends DownloadClass {
 // [10-7-2019]  Fixed signature search and related functions. - Th3-822
 // [27-8-2019]  Fixed video title code. - Th3-822
 // [04-1-2020]  Fixed fmts handling & Fixed signature search. - Th3-822
+// [02-2-2020]  Fixed signature search. - Th3-822
