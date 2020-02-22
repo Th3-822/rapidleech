@@ -29,11 +29,11 @@ class google_com extends DownloadClass {
 	}
 
 	private function checkBug78902($link = '') {
-		// >= 7.4, >=7.3.11 & >= 7.2.24
-		if (substr(PHP_OS, 0, 3) == 'WIN' || version_compare(PHP_VERSION, '7.2.24', '<') || version_compare(PHP_VERSION, '7.3.11', '<')) return;
+		// 7.4 - 7.4.2, 7.3.11 - 7.3.14, 7.2.24 - 7.2.*
+		if (substr(PHP_OS, 0, 3) == 'WIN' || version_compare(PHP_VERSION, '7.2.24', '<') || version_compare(PHP_VERSION, '7.4.2', '>') || !version_compare(PHP_VERSION, '7.3.14', '<=')) return;
 
 		if (empty($link)) echo('<div id="mesg" width="100%" align="center"></div><br />');
-		$this->changeMesg('Warning: Running on PHP v' . PHP_VERSION . '<br />Downloads with this PHP release may be affected by the bug <a href="https://bugs.php.net/bug.php?id=78902">#78902</a> and will leak RAM until exhausted.<br />File may stop at a random size (up to ~1 GB).');
+		$this->changeMesg('Warning: Running on PHP v' . PHP_VERSION . ' (Please Upgrade)<br />Downloads with this PHP release will be affected by the bug <a href="https://bugs.php.net/bug.php?id=78902">#78902</a> and will leak RAM until exhausted.<br />File may stop at a random size (up to ~1 GB).');
 
 		if (!empty($_GET['method']) && $_GET['method'] == '78902') return;
 		if (!empty($link)) {
