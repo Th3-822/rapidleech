@@ -16,14 +16,14 @@ echo "<center>Mega.co.nz plugin by <b>Th3-822</b></center><br />\n"; // Please, 
 if (!extension_loaded('mcrypt') || !in_array('rijndael-128', mcrypt_list_algorithms(), true)) html_error("Mcrypt module isn't installed or it doesn't have support for the needed encryption.");
 
 // OpenSSL is Much Faster (Only Works Since 5.4)
-if (version_compare(PHP_VERSION, '5.4.0', '>=') && extension_loaded('openssl') && in_array('AES-128-CBC', openssl_get_cipher_methods(), true)) {
+if (version_compare(PHP_VERSION, '5.4.0', '>=') && extension_loaded('openssl') && in_array('aes-128-cbc', openssl_get_cipher_methods(), true)) {
 	function aes_cbc_encrypt($data, $key) {
 		$data = str_pad($data, 16 * ceil(strlen($data) / 16), "\0"); // OpenSSL needs this padded.
-		return openssl_encrypt($data, 'AES-128-CBC', $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
+		return openssl_encrypt($data, 'aes-128-cbc', $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
 	}
 	function aes_cbc_decrypt($data, $key) {
 		$data = str_pad($data, 16 * ceil(strlen($data) / 16), "\0"); // OpenSSL needs this padded.
-		return openssl_decrypt($data, 'AES-128-CBC', $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
+		return openssl_decrypt($data, 'aes-128-cbc', $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
 	}
 } else {
 	function aes_cbc_encrypt($data, $key) {

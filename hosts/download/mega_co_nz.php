@@ -69,9 +69,9 @@ class mega_co_nz extends DownloadClass {
 	}
 
 	private function checkCryptDependences() {
-		$this->useOpenSSL = (version_compare(PHP_VERSION, '5.4.0', '>=') && extension_loaded('openssl') && in_array('AES-128-CBC', ($ossl_ciphers = openssl_get_cipher_methods()), true));
+		$this->useOpenSSL = (version_compare(PHP_VERSION, '5.4.0', '>=') && extension_loaded('openssl') && in_array('aes-128-cbc', ($ossl_ciphers = openssl_get_cipher_methods()), true));
 
-		if (!$this->useOpenSSL || !in_array('AES-128-CTR', $ossl_ciphers, true))
+		if (!$this->useOpenSSL || !in_array('aes-128-ctr', $ossl_ciphers, true))
 		{
 			$this->useOldFilter = true;
 			if (!extension_loaded('mcrypt') || !in_array('rijndael-128', mcrypt_list_algorithms(), true)) html_error("OpenSSL / Mcrypt module isn't installed or it doesn't have support for the needed encryption.");
@@ -159,14 +159,14 @@ class mega_co_nz extends DownloadClass {
 	private function aes_cbc_encrypt($data, $key) {
 		if ($this->useOpenSSL) {
 			$data = str_pad($data, 16 * ceil(strlen($data) / 16), "\0"); // OpenSSL needs this padded.
-			return openssl_encrypt($data, 'AES-128-CBC', $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
+			return openssl_encrypt($data, 'aes-128-cbc', $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
 		} else return mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_CBC, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
 	}
 
 	private function aes_cbc_decrypt($data, $key) {
 		if ($this->useOpenSSL) {
 			$data = str_pad($data, 16 * ceil(strlen($data) / 16), "\0"); // OpenSSL needs this padded.
-			return openssl_decrypt($data, 'AES-128-CBC', $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
+			return openssl_decrypt($data, 'aes-128-cbc', $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
 		} else return mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_CBC, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
 	}
 
@@ -472,7 +472,7 @@ class Th3822_MegaDlDecrypt extends php_user_filter {
 		while ($bucket = stream_bucket_make_writeable($in)) {
 			if ($bucket->datalen > 0) {
 				if ($this->waste > 0) $bucket->data = str_repeat('*', $this->waste) . $bucket->data;
-				$bucket->data = openssl_decrypt($bucket->data, 'AES-128-CTR', $this->key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $this->iv);
+				$bucket->data = openssl_decrypt($bucket->data, 'aes-128-ctr', $this->key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $this->iv);
 				if ($this->waste > 0) $bucket->data = substr($bucket->data, $this->waste);
 				$consumed += $bucket->datalen;
 				$this->setNextStart($bucket->datalen);
