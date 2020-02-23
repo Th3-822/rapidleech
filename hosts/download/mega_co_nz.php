@@ -69,9 +69,9 @@ class mega_co_nz extends DownloadClass {
 	}
 
 	private function checkCryptDependences() {
-		$this->useOpenSSL = (version_compare(PHP_VERSION, '5.4.0', '>=') && extension_loaded('openssl') && in_array('AES-128-CBC', ($ossl_ciphers = openssl_get_cipher_methods()), true));
+		$this->useOpenSSL = (version_compare(PHP_VERSION, '5.4.0', '>=') && extension_loaded('openssl') && in_array('aes-128-cbc', ($ossl_ciphers = openssl_get_cipher_methods()), true));
 
-		if (!$this->useOpenSSL || !in_array('AES-128-CTR', $ossl_ciphers, true))
+		if (!$this->useOpenSSL || !in_array('aes-128-ctr', $ossl_ciphers, true))
 		{
 			$this->useOldFilter = true;
 			if (!extension_loaded('mcrypt') || !in_array('rijndael-128', mcrypt_list_algorithms(), true)) html_error("OpenSSL / Mcrypt module isn't installed or it doesn't have support for the needed encryption.");
