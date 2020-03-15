@@ -15,7 +15,7 @@ class rapidgator_net extends DownloadClass {
 		$link['host'] = 'rapidgator.net';
 		$this->link = $GLOBALS['Referer'] = $link = rebuild_url($link);
 		$this->cookie = array('lang' => 'en');
-		$this->DLregexp = '@https?://pr\d+\.rapidgator\.net/[^\s\"\'<>]+@i';
+		$this->DLregexp = '@https?://(?:pr|(s))\d+\.rapidgator\.net/(?(1)download/)[^\s\"\'<>]+@i';
 		if ((empty($_POST['step']) || !in_array($_POST['step'], array('1', '2', 'L'))) && (empty($_GET['rgredir']) || (stripos($_GET['rgredir'], '/auth/login') === false && stripos($_GET['rgredir'], '/site/ChangeLocation/key/') === false))) {
 			// Weird RG redirects.
 			$rdc = 0;
@@ -282,3 +282,4 @@ class rapidgator_net extends DownloadClass {
 // [01-8-2016] Fixed FreeDL Captchas. - Th3-822
 // [28-8-2017] Switched to HTTPs (Untested) - Th3-822
 // [13-10-2019] Added Login Cookie Storage (login is rate-limited) & Removed FreeDL (as it now uses reCAPTCHA 2) - Th3-822
+// [17-2-2020] Fixed download regexp. - Th3-822

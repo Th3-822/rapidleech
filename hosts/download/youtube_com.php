@@ -192,7 +192,7 @@ class youtube_com extends DownloadClass {
 	}
 
 	private function decError($msg) {
-		html_error("Error while decoding [{$this->sts}][{$this->js[1]}]: $msg");
+		html_error("Error while decoding [{$this->sts}][{$this->js[2]}]: $msg");
 	}
 
 	private function findFunction($fName, $num) {
@@ -252,14 +252,14 @@ class youtube_com extends DownloadClass {
 		}
 
 		$savefile = DOWNLOAD_DIR.'YT_lastjs.txt';
-		if (!preg_match('@/((?:html5)?player[-_][\w\-\.]+(?:(?:/\w+)?/[\w\-\.]+)?)\.js@i', str_replace('\\/', '/', $page), $this->js)) html_error('YT\'s player javascript not found.');
-		if (@file_exists($savefile) && ($file = file_get_contents($savefile, NULL, NULL, -1, 822)) && ($saved = @unserialize($file)) && is_array($saved) && !empty($saved['js']) && !empty($saved['sts']) && !empty($saved['steps']) && ((!$this->sts && $saved['js'] == $this->js[1]) || $saved['sts'] == $this->sts) && preg_match('@^\s*([ws]\d+|r)( ([ws]\d+|r))*\s*$@', $saved['steps'])) {
+		if (!preg_match('@(?<=[\"\'])(?:(?:https?:?)?//((?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?))?(/(?:[^\"\'/]+/)+?(?:html5)?player[-_][\w\-\.]+(?:(?:/\w+)?/[\w\-\.]+)?)\.js@i', str_replace('\\/', '/', $page), $this->js)) html_error('YT\'s player javascript not found.');
+		if (@file_exists($savefile) && ($file = file_get_contents($savefile, NULL, NULL, -1, 822)) && ($saved = @unserialize($file)) && is_array($saved) && !empty($saved['js']) && !empty($saved['sts']) && !empty($saved['steps']) && ((!$this->sts && $saved['js'] == $this->js[2]) || $saved['sts'] == $this->sts) && preg_match('@^\s*([ws]\d+|r)( ([ws]\d+|r))*\s*$@', $saved['steps'])) {
 			$this->changeMesg('<br />Using cached decoding steps.', 1);
 			$this->encS = explode(' ', trim($saved['steps']));
 			if (empty($this->sts)) $this->sts = $saved['sts'];
 		} else {
 			$this->changeMesg('<br />Loading video player data.', 1);
-			$this->playerJs = $this->GetPage('https://s.ytimg.com/yts/jsbin'.$this->js[0], $this->cookie, 0, 'https://www.youtube.com/embed/'.$this->vid);
+			$this->playerJs = $this->GetPage('https://' . (!empty($this->js[1]) ? $this->js[1] : 'www.youtube.com') . $this->js[2] . '.js', $this->cookie, 0, 'https://www.youtube.com/embed/'.$this->vid);
 			$v = '[\$_A-Za-z][\$\w]*';
 			$v3 = '[\$_A-Za-z][\$\w]{3,}';
 			if (empty($this->sts)) {
@@ -288,7 +288,7 @@ class youtube_com extends DownloadClass {
 			}
 
 			if (empty($this->encS)) $this->decError('Empty decoded result');
-			file_put_contents($savefile, serialize(array('js' => $this->js[1], 'sts' => $this->sts, 'steps' => implode(' ', $this->encS))));
+			file_put_contents($savefile, serialize(array('js' => $this->js[2], 'sts' => $this->sts, 'steps' => implode(' ', $this->encS))));
 		}
 
 		// Request video fmts with the current sts
@@ -397,3 +397,4 @@ class youtube_com extends DownloadClass {
 // [27-8-2019]  Fixed video title code. - Th3-822
 // [04-1-2020]  Fixed fmts handling & Fixed signature search. - Th3-822
 // [02-2-2020]  Fixed signature search. - Th3-822
+// [15-3-2020]  Fixed embed JS regex. - Th3-822
