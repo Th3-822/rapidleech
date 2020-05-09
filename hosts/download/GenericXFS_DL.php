@@ -12,7 +12,7 @@ if (!defined('RAPIDLEECH')) {
 
 class GenericXFS_DL extends DownloadClass {
 	protected $page, $cookie, $baseCookie = array('lang' => 'english'), $scheme, $wwwDomain, $domain, $port, $host, $purl, $httpsOnly = false, $sslLogin = false, $cname = 'xfss', $cookieSave = false, $cJar = array(), $form, $lpass, $fid, $enableDecoders = false, $embedDL = false, $unescaper = false, $customDecoder = false, $reverseForms = true, $cErrsFDL = array(), $DLregexp = '@https?://(?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?/(?:files|dl?|cgi-bin/dl\.cgi|[\da-zA-Z]{30,})/(?:[^\?\'\"\t<>\r\n\\\]{15,}|v(?:id(?:eo)?)?\.(?:flv|mp4))@i';
-	private $classVer = 23;
+	private $classVer = 24;
 	public $pluginVer, $pA;
 
 	public function Download($link) {
@@ -20,6 +20,8 @@ class GenericXFS_DL extends DownloadClass {
 	}
 
 	protected function onLoad() {} // Placeholder
+
+	protected function onLoad_Post() {} // Placeholder
 
 	protected function Start($link, $cErrs = array(), $cErrReplace = true) {
 		if ($this->pluginVer > $this->classVer) html_error('GenericXFS_DL class is outdated, please install last version from: https://pastebin.com/e5TZcfQ2 ');
@@ -56,7 +58,10 @@ class GenericXFS_DL extends DownloadClass {
 					if (is_array($cErr)) is_present($this->page, $cErr[0], $cErr[1]);
 					else is_present($this->page, $cErr);
 				}
-				if ($cErrReplace) return $this->Login();
+				if ($cErrReplace) {
+					$this->onLoad_Post();
+					return $this->Login();
+				}
 			}
 			is_present($this->page, 'The file you were looking for could not be found');
 			is_present($this->page, 'The file was removed by administrator');
@@ -65,6 +70,7 @@ class GenericXFS_DL extends DownloadClass {
 			is_present($this->page, 'No such file with this filename', 'Error: Invalid filename, check your link and try again.'); // With the regexp i removed the filename part of the link, this error shouldn't be showed
 		}
 
+		$this->onLoad_Post();
 		return $this->Login();
 	}
 
