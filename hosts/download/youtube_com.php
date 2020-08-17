@@ -281,9 +281,11 @@ class youtube_com extends DownloadClass {
 			$v = '[\$_A-Za-z][\$\w]*';
 			$v3 = '[\$_A-Za-z][\$\w]{3,}';
 			if (empty($this->sts)) {
-				if (preg_match('@\bsts\s*:\s*(\d+)@i', $this->playerJs, $sts)) {
+				if (preg_match('@\b(?:sts|signatureTimestamp)\s*[:=]\s*(\d+)@i', $this->playerJs, $sts)) {
 					$this->sts = intval($sts[1]);
-				} else if (preg_match("@\bsts\s*:\s*($v)@", $this->playerJs, $sts, PREG_OFFSET_CAPTURE) && preg_match("@(?:var\s+|[,{};])\s*{$sts[1][0]}\s*[=:]\s*(\d\d+)@", $this->playerJs, $sts2, 0, strrpos($this->playerJs, "\n", $sts[0][1] - strlen($this->playerJs)))) {
+				} else if (preg_match("@[:=]($v+(?:\.$v+)?\(\s*\"STS\"[^()?:]+?\))\s*\?\s*\1\s*:\s*(\d\d+)\b@i", $this->playerJs, $sts)) {
+					$this->sts = intval($sts[2]);
+				} else if (preg_match("@\b(?:sts|signatureTimestamp)\s*[:=]\s*($v)@", $this->playerJs, $sts, PREG_OFFSET_CAPTURE) && preg_match("@(?:var\s+|[,{};])\s*{$sts[1][0]}\s*[=:]\s*(\d\d+)@", $this->playerJs, $sts2, 0, strrpos($this->playerJs, "\n", $sts[0][1] - strlen($this->playerJs)))) {
 					$this->sts = intval($sts2[1]);
 				}
 				if (empty($this->sts)) html_error('Signature TimeStamp not found.');
@@ -428,3 +430,4 @@ class youtube_com extends DownloadClass {
 // [02-2-2020]  Fixed signature search. - Th3-822
 // [15-3-2020]  Fixed embed JS regex. - Th3-822
 // [31-5-2020]  Fixed signature search & Rewrote quality selector to parse and show all available formats. - Th3-822
+// [17-8-2020]  Fixed signature timestamp search. - Th3-822
