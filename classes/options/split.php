@@ -18,7 +18,7 @@ function rl_split() {
 						</td>
 					</tr>
 					<tr>
-						<td><?php echo lang(143); ?>:&nbsp;<input type="number" step="any" min="1" name="partSize[]" size="6" value="<?php echo ((!empty($_COOKIE['partSize']) && is_numeric($_COOKIE['partSize'])) ? max(1, $_COOKIE['partSize']) : 10); ?>" />&nbsp;MB
+						<td><?php echo lang(143); ?>:&nbsp;<input type="number" step="any" min="1" name="partSize[]" size="6" value="<?php echo ((!empty($_COOKIE['partSize']) && is_numeric($_COOKIE['partSize'])) ? max(1, $_COOKIE['partSize']) : 5); ?>" />&nbsp;MB
 						</td>
 					</tr>
 <?php
@@ -91,6 +91,7 @@ function split_go() {
 			while (isset($list[$time])) $time++;
 			$list[$time] = array('name' => realpath("$saveTo$dest_name.crc"), 'size' => bytesToKbOrMbOrGb(filesize("$saveTo$dest_name.crc")), 'date' => $time);
 			$split_buffer_size = 2097152;
+			$invento = 0;
 			$split_source = @fopen($file['name'], 'rb');
 			if (!$split_source) {
 				echo "It is not possible to open source file <b>{$file['name']}</b> !<br /><br />";
@@ -115,6 +116,10 @@ function split_go() {
 						$split_ok = false;
 						break;
 					}
+					unset($split_buffer);
+					gc_collect_cycles();
+					$invento = $invento + $split_buffer_size;
+					fseek($split_source, $invento);
 				}
 				$split_rest = $partSize - ($split_write_times * $split_buffer_size);
 				if ($split_ok && $split_rest > 0) {
@@ -124,6 +129,10 @@ function split_go() {
 						echo "Error writing the file <b>$part_name</b> !<br /><br />";
 						$split_ok = false;
 					}
+					unset($split_buffer);
+					gc_collect_cycles();
+					$invento = $invento + $split_rest;
+					fseek($split_source, $invento);
 				}
 				fclose($split_dest);
 				if ($split_ok) {
