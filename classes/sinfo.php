@@ -99,7 +99,7 @@ $prozent_belegt = 100 * $belegt / $insgesamt;
 			$cpu_load += $cpu->loadpercentage;
 			$cpu_string .= "" . $cpu->loadpercentage;
 		}
-		$cpu_load /= count($cpus);
+		$cpu_load /= (is_array($cpus) ? count($cpus) : 1);
 		$cpu_string .= '%<br /><img src="' . CLASS_DIR . 'bar.php?rating=' . round ( $cpu_load, "2" ) . '" border="0" /><br />';
 	} elseif ($os == "linux") {
 		function getStat($_statPath) {
