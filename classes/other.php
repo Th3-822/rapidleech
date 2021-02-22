@@ -166,9 +166,9 @@ function sec2time($time) {
 		$time -= $min * 60;
 	}
 	$sec = $time;
-	$hour = ($hour > 1) ? $hour . ' ' . lang(129) . ' ' : ($hour == 1) ? $hour . ' ' . lang(130).' ' : '';
-	$min = ($min > 1) ? $min . ' ' . lang(131) . ' ' : ($min == 1) ? $min . ' ' . lang(132).' ' : '';
-	$sec = ($sec > 1) ? $sec . ' ' . lang(133) : ($sec == 1 || $sec == 0) ? $sec . ' ' . lang(134) : '';
+	$hour = ($hour > 1) ? $hour . ' ' . lang(129) . ' ' : (($hour == 1) ? $hour . ' ' . lang(130) . ' ' : '');
+	$min = ($min > 1) ? $min . ' ' . lang(131) . ' ' : (($min == 1) ? $min . ' ' . lang(132) . ' ' : '');
+	$sec = ($sec > 1) ? $sec . ' ' . lang(133) : (($sec == 1 || $sec == 0) ? $sec . ' ' . lang(134) : '');
 	return $hour . $min . $sec;
 }
 
