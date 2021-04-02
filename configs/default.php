@@ -6,7 +6,7 @@
 $default_options = array(
 //General
 'secretkey' => '', #Secret key for cookie encryption
-'download_dir' => 'files/', # This is where your downloaded files are saved
+'download_dir' => 'files/', # This is where your downloaded files are saved. On Windows, if you want to include the full path, use: 'C:\folder name/files/'
 'download_dir_is_changeable' => false, # true - Allow users to change the download dir
 'delete_delay' => 0, # 0 - Disabled, time in SECONDS before downloaded files are deleted
 'rename_prefix' => '', # i.e : prefix_filename.ext
