@@ -1,4 +1,4 @@
-#Rapidleech
+# Rapidleech
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/Th3-822/rapidleech?label=last%20update)](https://github.com/Th3-822/rapidleech/commits/master)
 [![Support Forum](https://img.shields.io/badge/Support%20Forum-Click%20Here-blue)](https://rapidleech.com/forum/)
