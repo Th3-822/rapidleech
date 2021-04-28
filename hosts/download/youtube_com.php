@@ -271,7 +271,8 @@ class youtube_com extends DownloadClass {
 
 		$savefile = DOWNLOAD_DIR.'YT_lastjs.txt';
 		if (!preg_match('@(?<=[\"\'])(?:(?:https?:?)?//((?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?))?(/(?:[^\"\'/]+/)+?(?:html5)?player[-_][\w\-\.]+(?:(?:/\w+)?/[\w\-\.]+)?)\.js@i', str_replace('\\/', '/', $page), $this->js)) html_error('YT\'s player javascript not found.');
-		if (@file_exists($savefile) && ($file = file_get_contents($savefile, NULL, NULL, -1, 822)) && ($saved = @unserialize($file)) && is_array($saved) && !empty($saved['js']) && !empty($saved['sts']) && !empty($saved['steps']) && ((!$this->sts && $saved['js'] == $this->js[2]) || $saved['sts'] == $this->sts) && preg_match('@^\s*([ws]\d+|r)( ([ws]\d+|r))*\s*$@', $saved['steps'])) {
+
+		if (@file_exists($savefile) && ($file = file_get_contents($savefile, false, NULL, 0, 822)) && ($saved = @unserialize($file)) && is_array($saved) && !empty($saved['js']) && !empty($saved['sts']) && !empty($saved['steps']) && ((!$this->sts && $saved['js'] == $this->js[2]) || $saved['sts'] == $this->sts) && preg_match('@^\s*([ws]\d+|r)( ([ws]\d+|r))*\s*$@', $saved['steps'])) {
 			$this->changeMesg(sprintf('<br />Using cached decoder: [%d] %s.', $saved['sts'], $saved['steps']), 1);
 			$this->encS = explode(' ', trim($saved['steps']));
 			if (empty($this->sts)) $this->sts = $saved['sts'];
@@ -300,7 +301,7 @@ class youtube_com extends DownloadClass {
 			$this->sigJs = preg_replace("@var $v=$v\[0\];$v\[0\]=($v)\[(\d+)%$v(?:\.length|\[$v\])\];$v\[\d+\]=$v;@", '$1=T8($1,$2);', trim($cut2));
 			$this->encS = array();
 			foreach (array_map('trim', explode(';', '{'.$this->sigJs.'}')) as $step) {
-				if (($step{0} == '{' || substr($step, strlen($step) - 1, 1) == '}') && (preg_match("@^\{(?:var\s+)?$v=$v(?:\.split|\[$v\])\(\"\"\)$@", $step) || preg_match("@^return\s+$v(?:\.join|\[$v\])\(\"\"\);?\}$@", $step))) continue;
+				if (($step[0] == '{' || substr($step, strlen($step) - 1, 1) == '}') && (preg_match("@^\{(?:var\s+)?$v=$v(?:\.split|\[$v\])\(\"\"\)$@", $step) || preg_match("@^return\s+$v(?:\.join|\[$v\])\(\"\"\);?\}$@", $step))) continue;
 				else if (preg_match("@^(?:$v=)?((?:$v.)*$v)\($v\,(\d+)\)$@", $step, $s)) $this->encS[] = $this->findFunction($s[1], $s[2]);
 				else if (preg_match("@^(?:$v=)?$v(?:\.s(p)?lice|\[$v\])\((?(1)0,)(\d+)\)$@", $step, $s)) $this->encS[] = 's'.$s[2];
 				else if (preg_match("@^(?:$v=)?$v(?:\.reverse|\[$v\])\(\)$@", $step)) $this->encS[] = 'r';

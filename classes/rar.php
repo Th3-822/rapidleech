@@ -139,7 +139,7 @@ class rlRar {
 		return $return;
 	}
 
-	function listthem($password = '', $dest_dir, $debug_id) {
+	function listthem($password, $dest_dir, $debug_id) {
 		$dest_dir = realpath($dest_dir).'/';
 		$this->filename = $dest_dir.basename($this->filename);
 		$password = $this->fix_pass($password);
@@ -192,7 +192,7 @@ class rlRar {
 		return array( 0 => 'LIST', 'NEEDP' => $rar_needs_pass, 2 => $rar_files);
 	}
 
-	function extract($file=false, $dest, $password='', $jsoutid='', $debug_id=0) {
+	function extract($file, $dest, $password='', $jsoutid='', $debug_id=0) {
 		$dest = realpath($dest) . '/';
 		if ($file === false) $return = 'BAD_FILENAME';
 		elseif (dirname(realpath($this->filename)) !== dirname($dest.'safe')) $return = 'RAR_INCORRECT_LOCATION';

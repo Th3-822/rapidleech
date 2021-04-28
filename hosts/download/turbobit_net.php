@@ -33,66 +33,8 @@ class turbobit_net extends DownloadClass {
 				unset($_POST['pA_encrypted']);
 			}
 			return $this->CookieLogin($user, $pass);
-		} else {
-			$this->link = 'https://turbobit.net/download/free/' . $id[1];
-			return $this->FreeDL();
 		}
-	}
-
-	private function FreeDL() {
-		$_POST['step'] = empty($_POST['step']) ? '' : $_POST['step'];
-		switch ($_POST['step']) {
-			case '1': { // Send Captcha && Get Countdown
-				if (empty($_POST['captcha'])) html_error('You didn\'t enter the image-verification code.');
-				$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
-
-				$post = array();
-				$post['captcha_response'] = urlencode($_POST['captcha']);
-				$post['captcha_type'] = urlencode($_POST['c_type']);
-				$post['captcha_subtype'] = (!empty($_POST['c_subtype']) ? urlencode($_POST['c_subtype']) : '');
-				$page = $this->GetPage($this->link, $this->cookie, $post);
-
-				is_present($page, 'Incorrect, try again!', 'Error: Wrong CAPTCHA entered.');
-				is_present($page, 'Looks like your browser has disabled cookies.', 'Error: Invalid cookies.');
-
-				if (!preg_match('@\W(?:min)?Limit[\s\t]*:[\s\t]*([\d\s\t\r\n\+\-\*/\(\)]+)[\s\t]*[\,\;]@i', $page, $count)) html_error('Countdown not found.');
-				$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
-				$data['step'] = '2';
-				return $this->JSCountdown($count[1], $data);
-				break;
-			}
-			case '2': { // Download
-				$this->cookie = StrToCookies(decrypt(urldecode($_POST['cookie'])));
-				$page = $this->GetPage(str_replace('/download/free/', '/download/getLinkTimeout/', $this->link), $this->cookie, 0, $this->link . "\r\nX-Requested-With: XMLHttpRequest");
-
-				if (preg_match($this->RDregexp, $page, $redir)) {
-					$redir = (empty($redir[1])) ? 'https://turbobit.net'.$redir[0] : $redir[0];
-					$page = $this->GetPage($redir, $this->cookie, 0, $this->link);
-					if (!preg_match($this->DLregexp, $page, $dllink)) html_error('Download-Link not Found.');
-				} elseif (!preg_match($this->DLregexp, $page, $dllink)) html_error('Redirect-Link not Found.');
-				return $this->RedirectDownload(html_entity_decode($dllink[0]), 'turbobit_fr', $this->cookie);
-				break;
-			}
-			default : { // Get Captcha
-				$page = $this->GetPage($this->link, $this->cookie);
-
-				if (preg_match('@\W(?:min)?Limit[\s\t]*:[\s\t]*([\d\s\t\r\n\+\-\*/\(\)]+)[\s\t]*[\,\;]@i', $page, $count)) {
-					$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
-					$this->JSCountdown($count[1], $data, 'FreeDL limit reached');
-				}
-
-				if (!preg_match('@(?:id|class)="g-recaptcha"\s+data-sitekey="([\w\.\-]+)"@i', $page, $pid)) html_error('Error: reCAPTCHA2 not found.');
-
-				if (!preg_match('@\Wvalue\s*=\s*[\'\"]([^\'\"\r\n<>]+)[\'\"]\s+name\s*=\s*[\'\"]captcha_type[\'\"]@i', $page, $c_type) || !preg_match('@\Wvalue\s*=\s*[\'\"]([^\'\"\r\n<>]*)[\'\"]\s+name\s*=\s*[\'\"]captcha_subtype[\'\"]@i', $page, $c_subtype)) html_error('CAPTCHA data not found');
-
-				$data = $this->DefaultParamArr($this->link, encrypt(CookiesToStr($this->cookie)));
-				$data['step'] = '1';
-				$data['c_type'] = urlencode($c_type[1]);
-				$data['c_subtype'] = urlencode($c_subtype[1]);
-
-				return $this->reCAPTCHAv2($pid[1], $data);
-			}
-		}
+		html_error('Login Failed: User or Password is empty.');
 	}
 
 	private function PremiumDL() {

@@ -128,7 +128,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 				}
 				require_once(HOST_DIR . "download/$file");
 				$firstchar = substr($file, 0, 1);
-				if ($firstchar > 0) $class = "d$class";
+				if (ctype_digit($firstchar)) $class = "d$class";
 				if (class_exists($class)) {
 					$hostClass = new $class();
 					$hostClass->Download($LINK);
@@ -139,7 +139,7 @@ if (empty($_GET['filename']) || empty($_GET['host']) || empty($_GET['path'])) {
 	}
 
 	$mydomain = strtolower(($pos = strpos($_SERVER['HTTP_HOST'], ':')) !== false ? substr($_SERVER['HTTP_HOST'], 0, $pos) : $_SERVER['HTTP_HOST']);
-	if ($options['bw_save'] && ($Url['host'] == $_SERVER['SERVER_ADDR'] || host_matches($mydomain, $Url['host']))) html_error(sprintf(lang(7), $mydomain, $_SERVER['SERVER_ADDR']));
+	if ($options['bw_save'] && !empty($_SERVER['SERVER_ADDR']) && ($Url['host'] == $_SERVER['SERVER_ADDR'] || host_matches($mydomain, $Url['host']))) html_error(sprintf(lang(7), $mydomain, $_SERVER['SERVER_ADDR']));
 	if (empty($auth) && !empty($_GET['premium_acc'])) {
 		if (!empty($premium_acc[$Url['host']]['proxy'])) {
 			$proxy = $premium_acc[$Url['host']]['proxy'];
