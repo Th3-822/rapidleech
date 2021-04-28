@@ -494,8 +494,8 @@ class Th3822_MegaDlDecrypt extends php_user_filter {
 	private function increaseIV($inc) {
 		$i = 16;
 		while ($inc > 0 && --$i >= 0) {
-			$sum = ord($this->iv{$i}) + $inc;
-			$this->iv{$i} = chr($sum & 0xFF);
+			$sum = ord($this->iv[$i]) + $inc;
+			$this->iv[$i] = chr($sum & 0xFF);
 			$inc = $sum >> 8;
 		}
 	}
@@ -537,8 +537,8 @@ class Th3822_MegaDlDecrypt_Old extends php_user_filter {
 	private function increaseIV(&$iv, $inc = 1) {
 		$i = 16;
 		while ($inc > 0 && --$i >= 0) {
-			$sum = ord($iv{$i}) + $inc;
-			$iv{$i} = chr($sum & 0xFF);
+			$sum = ord($iv[$i]) + $inc;
+			$iv[$i] = chr($sum & 0xFF);
 			$inc = $sum >> 8;
 		}
 	}

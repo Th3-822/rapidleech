@@ -465,7 +465,7 @@ function jstime() {
 
 function check_referer() {
 	$refhost = !empty($_SERVER['HTTP_REFERER']) ? cut_str($_SERVER['HTTP_REFERER'], '://', '/') : false;
-	if (empty($refhost)) return;
+	if (empty($refhost) || empty($_SERVER['SERVER_ADDR'])) return;
 
 	//Remove the port.
 	$httphost = ($pos = strpos($_SERVER['HTTP_HOST'], ':')) !== false ? substr($_SERVER['HTTP_HOST'], 0, $pos) : $_SERVER['HTTP_HOST'];

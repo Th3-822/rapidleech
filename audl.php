@@ -133,7 +133,7 @@ function resetProgress() {
 				}
 				echo "<script type='text/javascript'>updateStatus($i, '".lang(25)."');</script>$nn";
 
-				$_GET['saveto'] = ($options['download_dir_is_changeable'] ? urldecode(trim($_GET['saveto'])) : (substr($options['download_dir'], 0, 6) != 'ftp://') ? realpath(DOWNLOAD_DIR) : $options['download_dir']);
+				$_GET['saveto'] = ($options['download_dir_is_changeable'] ? urldecode(trim($_GET['saveto'])) : ((substr($options['download_dir'], 0, 6) != 'ftp://') ? realpath(DOWNLOAD_DIR) : $options['download_dir']));
 				$_GET['proxy'] = !empty($_GET['proxy']) ? trim(urldecode($_GET['proxy'])) : '';
 				$pauth = (empty($_GET['proxy']) || empty($_GET['pauth'])) ? '' : urldecode(trim($_GET['pauth']));
 				do {

@@ -5,7 +5,7 @@
 // | Brazilian Organization                                               |
 // +----------------------------------------------------------------------+
 // | Viva ao Linux!                                                       |
-// | Porque nós amamos a liberdade!                                       |
+// | Porque nÃ³s amamos a liberdade!                                       |
 // +----------------------------------------------------------------------+
 // | Class Perfect Crypt                                                  |
 // | Created By Igor Ribeiro de Assis                                     |
@@ -90,7 +90,7 @@ class pcrypt
       * @return void
       */
     
-    function pcrypt($blockmode = MODE_ECB, $cipher = 'BLOWFISH', $key = null)
+    function __construct($blockmode = MODE_ECB, $cipher = 'BLOWFISH', $key = null)
     {
         // Include cipher_class file
         $cipher = strtolower($cipher);

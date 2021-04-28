@@ -387,7 +387,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 				flush();
 				$last = $bytesReceived;
 			}
-			if (!empty($bytesTotal) && ($bytesReceived + $chunkSize) > $bytesTotal) $chunkSize = $bytesTotal - $bytesReceived;
+			if (!empty($bytesTotal) && ($bytesReceived + $chunkSize) > $bytesTotal) $chunkSize = max($bytesTotal - $bytesReceived, 4096);
 		} while (!feof($fp));
 
 		flock($fs, LOCK_UN);
@@ -596,7 +596,7 @@ function StrToCookies($cookies, $cookie=array(), $del=true, $dval=array('','dele
 
 function GetChunkSize($fsize) {
 	if ($fsize <= 0) return 4096;
-	if ($fsize < 4096) return (int)$fsize;
+	if ($fsize < 4096) return intval($fsize);
 	if ($fsize <= 1024 * 1024) return 4096;
 	if ($fsize <= 1024 * 1024 * 10) return 4096 * 10;
 	if ($fsize <= 1024 * 1024 * 40) return 4096 * 30;

@@ -223,18 +223,18 @@ class ftp_base {
 				'date' => $ret[7] . ' ' . $ret[8] . ' ' . $ret[9],
 				'name' => $ret[10]
 			);
-			$v['perms'] += 00400 * (int) ($ret[2]{0} == 'rb');
-			$v['perms'] += 00200 * (int) ($ret[2]{1} == 'wb');
-			$v['perms'] += 00100 * (int) in_array($ret[2]{2}, array('x', 's'));
-			$v['perms'] += 00040 * (int) ($ret[2]{3} == 'rb');
-			$v['perms'] += 00020 * (int) ($ret[2]{4} == 'wb');
-			$v['perms'] += 00010 * (int) in_array($ret[2]{5}, array('x', 's'));
-			$v['perms'] += 00004 * (int) ($ret[2]{6} == 'rb');
-			$v['perms'] += 00002 * (int) ($ret[2]{7} == 'wb');
-			$v['perms'] += 00001 * (int) in_array($ret[2]{8}, array('x', 't'));
-			$v['perms'] += 04000 * (int) in_array($ret[2]{2}, array('S', 's'));
-			$v['perms'] += 02000 * (int) in_array($ret[2]{5}, array('S', 's'));
-			$v['perms'] += 01000 * (int) in_array($ret[2]{8}, array('T', 't'));
+			if ($ret[2][0] == 'r') $v['perms'] |= 00400;
+			if ($ret[2][1] == 'w') $v['perms'] |= 00200;
+			if (in_array($ret[2][2], array('x', 's'))) $v['perms'] |= 00100;
+			if ($ret[2][3] == 'r') $v['perms'] |= 00040;
+			if ($ret[2][4] == 'w') $v['perms'] |= 00020;
+			if (in_array($ret[2][5], array('x', 's'))) $v['perms'] |= 00010;
+			if ($ret[2][6] == 'r') $v['perms'] |= 00004;
+			if ($ret[2][7] == 'w') $v['perms'] |= 00002;
+			if (in_array($ret[2][8], array('x', 's'))) $v['perms'] |= 00001;
+			if (strtolower($ret[2][2]) == 's') $v['perms'] |= 04000;
+			if (strtolower($ret[2][5]) == 's') $v['perms'] |= 02000;
+			if (strtolower($ret[2][8]) == 't') $v['perms'] |= 01000;
 		}
 		return $v;
 	}

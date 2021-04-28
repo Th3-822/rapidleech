@@ -40,24 +40,25 @@ function checkos() {
 	return $osType;
 }
 function winosname() {
-	$wUnameB = php_uname ( "v" );
-	$wUnameBM = trim( php_uname ( "r" ) );
-	if (preg_match ("@build (\d+)@i", $wUnameB, $build)) $wUnameB = $build[1];
+	$wUnameB = php_uname('v');
+	if (preg_match ('@build (\d+)(?: \(([\w ]+)\))?@i', $wUnameB, $build)) $wUnameB = $build[1];
+	if (!empty($build[2])) return $build[2];
 
-	if ($wUnameBM == "5.0" && ($wUnameB == "2195")) {
-		$wVer = "Windows 2000";
+	$wUnameBM = trim(php_uname('r'));
+	if ($wUnameBM == '5.0' && ($wUnameB == '2195')) {
+		$wVer = 'Windows 2000';
 	}
-	if ($wUnameBM == "5.1" && ($wUnameB == "2600")) {
-		$wVer = "Windows XP";
+	if ($wUnameBM == '5.1' && ($wUnameB == '2600')) {
+		$wVer = 'Windows XP';
 	}
-	if ($wUnameBM == "5.2" && ($wUnameB == "3790")) {
-		$wVer = "Windows Server 2003";
+	if ($wUnameBM == '5.2' && ($wUnameB == '3790')) {
+		$wVer = 'Windows Server 2003';
 	}
-	if ($wUnameBM == "6.0" && ($wUnameB == "6000")) {
-		$wVer = "Windows Vista";
+	if ($wUnameBM == '6.0' && ($wUnameB == '6000')) {
+		$wVer = 'Windows Vista';
 	}
-	if ($wUnameBM == "6.0" && ($wUnameB == "6001")) {
-		$wVer = "Windows Vista SP1";
+	if ($wUnameBM == '6.0' && ($wUnameB == '6001')) {
+		$wVer = 'Windows Vista SP1';
 	}
 	return $wVer;
 }
