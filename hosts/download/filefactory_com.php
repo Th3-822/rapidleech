@@ -1,6 +1,6 @@
 <?php
 if (!defined('RAPIDLEECH')) {
-	require_once ("index.html");
+	require_once('index.html');
 	exit();
 }
 
@@ -16,7 +16,7 @@ class filefactory_com extends DownloadClass {
 		}
 		unset($arr);
 
-		$this->link = $GLOBALS['Referer'] = str_ireplace('://filefactory.com/', '://www.filefactory.com/', $link);
+		$this->link = $GLOBALS['Referer'] = str_ireplace(array('http://', '://filefactory.com/'), array('https://', '://www.filefactory.com/'), $link);
 
 		$post = empty($this->lpass) ? 0 : array('password' => urlencode($this->lpass), 'Submit' => 'Continue');
 		$this->page = $this->GetPage($this->link, $this->cookie, $post);
@@ -26,7 +26,7 @@ class filefactory_com extends DownloadClass {
 
 		$X = 0;
 		while ($X < 3 && preg_match('@\nLocation: .*(/(?:file|preview)/[^\r\n]+)@i', $this->page, $RD)) {
-			$this->link = 'http://www.filefactory.com' . $RD[1];
+			$this->link = 'https://www.filefactory.com' . $RD[1];
 			$this->page = $this->GetPage($this->link, $this->cookie);
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
 			$X++;
@@ -34,7 +34,7 @@ class filefactory_com extends DownloadClass {
 
 		if (preg_match('@/error\.php\?code=(\d+)@i', $this->page, $this->redir) && !in_array($this->redir[1], array('257', '258')) /*Forcing PPS is not fair...*/) {
 			if ($this->redir[1] == '160') html_error('IP banned by FF.');
-			$page = $this->GetPage('http://www.filefactory.com'.$this->redir[0], $this->cookie);
+			$page = $this->GetPage('https://www.filefactory.com'.$this->redir[0], $this->cookie);
 			if (preg_match('@class="alert alert-error">\s*<h2>\s*([\w\-\s]+)\s*</h2>@i', $page, $err)) html_error("[FF:{$this->redir[1]}] ".htmlspecialchars($err[1]));
 			html_error("Link is not available [{$this->redir[1]}]");
 		}
@@ -57,13 +57,13 @@ class filefactory_com extends DownloadClass {
 	private function CheckPass() {
 		if (stripos($this->page, 'This File has been password protected by the uploader.') !== false || stripos($this->page, '>Please enter the password</') !== false) {
 			if (empty($this->lpass)) html_error('File is password protected, please send the password in this format: link|pass');
-			else html_error('The link\'s password you have sended is not valid.');
+			else html_error('The link\'s password you have sent is not valid.');
 		}
 	}
 
 	private function FreeDL() {
 		if (!empty($this->redir)) {
-			$page = $this->GetPage('http://www.filefactory.com'.$this->redir[0], $this->cookie);
+			$page = $this->GetPage('https://www.filefactory.com'.$this->redir[0], $this->cookie);
 			if (preg_match('@class="alert alert-error">\s*<h2>\s*([\w\-\s]+)\s*</h2>@i', $page, $err)) html_error("[FF:{$this->redir[1]}] ".htmlspecialchars($err[1]));
 			html_error("Link is not available [{$this->redir[1]}]");
 		}
@@ -85,14 +85,14 @@ class filefactory_com extends DownloadClass {
 
 		$X = 0;
 		while ($X < 3 && preg_match('@\nLocation: .*(/(?:file|preview)/[^\r\n]+)@i', $this->page, $RD)) {
-			$this->link = 'http://www.filefactory.com' . $RD[1];
+			$this->link = 'https://www.filefactory.com' . $RD[1];
 			$this->page = $this->GetPage($this->link, $this->cookie);
 			$this->cookie = GetCookiesArr($this->page, $this->cookie);
 			$X++;
 		}
 
 		if (preg_match('@/error\.php\?code=(\d+)@i', $this->page, $this->redir)) {
-			$this->page = $this->GetPage('http://www.filefactory.com'.$this->redir[0], $this->cookie);
+			$this->page = $this->GetPage('https://www.filefactory.com'.$this->redir[0], $this->cookie);
 			if (preg_match('@class="alert alert-error">\s*<h2>\s*([\w\-\s]+)\s*</h2>@i', $this->page, $err)) html_error("[FF:{$this->redir[1]}]-".htmlspecialchars($err[1]));
 			html_error("Link is not available. [{$this->redir[1]}]");
 		}
@@ -112,7 +112,7 @@ class filefactory_com extends DownloadClass {
 
 		if (empty($email) || empty($password)) html_error('Login Failed: Email or Password is empty. Please check login data.');
 
-		$postURL = 'http://www.filefactory.com/member/signin.php';
+		$postURL = 'https://www.filefactory.com/member/signin.php';
 		$post = array();
 		$post['loginEmail'] = urlencode($email);
 		$post['loginPassword'] = urlencode($password);
@@ -124,7 +124,7 @@ class filefactory_com extends DownloadClass {
 		$this->cookie = GetCookiesArr($page, $this->cookie);
 		if (empty($this->cookie['auth'])) html_error('Login Failed, auth cookie not found.');
 
-		$page = $this->GetPage('http://www.filefactory.com/account/', $this->cookie, 0, $postURL);
+		$page = $this->GetPage('https://www.filefactory.com/account/', $this->cookie, 0, $postURL);
 		is_present($page, "\nLocation: /member/settos.php", 'TOS have changed and need to be approved at the site.');
 		is_present($page, "\nLocation: /member/setpwd.php", 'Your password has expired, please change it.');
 		if (stripos($page, '>Free Member<') !== false) {
@@ -151,5 +151,4 @@ class filefactory_com extends DownloadClass {
 //[24-Oct-2013] Added a error at login & fixed redirect on premium download. - Th3-822
 //[18-Nov-2013] Fixed premium-dl error msgs. - Th3-822
 //[02-Dec-2016] Fixed login error msgs. - Th3-822
-
-?>
+//[14-May-2021] Switched links to https. - Th3-822

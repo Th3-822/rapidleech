@@ -131,7 +131,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 	if (!empty($referer)) $request['referer'] = $referer;
 	if (!empty($cookies)) $request['cookie'] = $cookies;
 	$request['cache-control'] = $request['pragma'] = 'no-cache';
-//	if ($Resume['use'] === TRUE) $request['range'] = 'bytes=' . $Resume['from'] . '-';
+//	if (!empty($Resume['use']) && $Resume['use'] === TRUE) $request['range'] = 'bytes=' . $Resume['from'] . '-';
 	if (!empty($auth)) $request['authorization'] = "Basic $auth";
 	if (!empty($pauth) && !$scheme) $request['proxy-authorization'] = "Basic $pauth";
 	if ($method == 'POST') {
@@ -297,7 +297,7 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 			return FALSE;
 		}
 		//$ContentType = trim (cut_str($header, "\nContent-Type:", "\n")); // Unused
-		if ($Resume['use'] === TRUE && stripos($header, "\nContent-Range: ") === false) {
+		if (!empty($Resume['use']) && $Resume['use'] === TRUE && stripos($header, "\nContent-Range: ") === false) {
 			$lastError = (stripos($header, '503 Limit Exceeded') !== false) ? lang(97) : lang(98);
 			return FALSE;
 		}
@@ -331,19 +331,19 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 		$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $FileName;
 
-		if (@file_exists($saveToFile) && $Resume['use'] !== TRUE) {
+		if (!empty($Resume['use']) && $Resume['use'] !== TRUE && @file_exists($saveToFile)) {
 			if ($options['bw_save']) return html_error(lang(99) . ': ' . link_for_file($saveToFile));
 			$FileName = time() . '_' . $FileName;
 			$saveToFile = dirname($saveToFile) . PATH_SPLITTER . $FileName;
 		}
-		$fs = @fopen($saveToFile, ($Resume['use'] === TRUE ? 'ab' : 'wb'));
+		$fs = @fopen($saveToFile, ((!empty($Resume['use']) && $Resume['use'] === TRUE) ? 'ab' : 'wb'));
 		if (!$fs) {
 			$lastError = sprintf(lang(101), $FileName, dirname($saveToFile)) . '<br />' . lang(102) . '<br /><a href="javascript:location.reload();">' . lang(103) . '</a>';
 			return FALSE;
 		}
 
 		flock($fs, LOCK_EX);
-		if ($Resume['use'] === TRUE && stripos($header, "\nContent-Range: ") !== false) {
+		if (!empty($Resume['use']) && $Resume['use'] === TRUE && stripos($header, "\nContent-Range: ") !== false) {
 			list($temp, $Resume['range']) = explode(' ', trim(cut_str($header, "\nContent-Range: ", "\n")));
 			list($Resume['range'], $fileSize) = explode('/', $Resume['range']);
 			$fileSize = bytesToKbOrMbOrGb($fileSize);
@@ -353,13 +353,13 @@ function geturl($host, $port, $url, $referer = 0, $cookie = 0, $post = 0, $saveT
 
 		//$scriptStarted = false;
 		require_once(TEMPLATE_DIR . '/transloadui.php');
-		if ($Resume['use'] === TRUE) {
+		if (!empty($Resume['use']) && $Resume['use'] === TRUE) {
 			$received = bytesToKbOrMbOrGb(filesize($saveToFile));
 			$percent = round($Resume['from'] / ($bytesTotal + $Resume['from']) * 100, 2);
 			echo "<script type='text/javascript'>pr('$percent', '$received', '0');</script>";
 			//$scriptStarted = true;
 			flush();
-		}
+		} else $Resume = array('use' => false, 'from' => 0, 'range' => 0);
 
 		$time = $last = $lastChunkTime = 0;
 		do {
@@ -444,6 +444,7 @@ function cURL($link, $cookie = 0, $post = 0, $referer = 0, $auth = 0, $opts = 0)
 		CURLOPT_FORBID_REUSE => 0, CURLOPT_FRESH_CONNECT => 0,
 		CURLINFO_HEADER_OUT => 1, CURLOPT_URL => $link,
 		CURLOPT_SSLVERSION => (defined('CURL_SSLVERSION_TLSv1') ? CURL_SSLVERSION_TLSv1 : 1),
+		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 		CURLOPT_ENCODING => 'gzip, deflate', CURLOPT_USERAGENT => rl_UserAgent);
 
 	// Fixes "Unknown cipher in list: TLSv1" on cURL with NSS
