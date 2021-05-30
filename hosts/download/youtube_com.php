@@ -123,8 +123,8 @@ class youtube_com extends DownloadClass {
 		return $this->reCAPTCHAv2($_POST['recaptcha2_public_key'], $data);
 	}
 
-	private function queryVideo($alt = 0) {
-		$this->page = $this->GetPage('https://www.youtube.com/get_video_info?hl=en_US&video_id=' . $this->vid . ($alt ? '&eurl=https%3A%2F%2Fgoogle.com%2F' : '&el=detailpage') . ($this->sts > 0 ? '&sts=' . $this->sts : ''), $this->cookie);
+	private function queryVideo() {
+		$this->page = $this->GetPage('https://www.youtube.com/get_video_info?hl=en_US&video_id=' . $this->vid . '&eurl=https%3A%2F%2Fgoogle.com%2F&html5=1' . ($this->sts > 0 ? '&sts=' . $this->sts : ''), $this->cookie);
 		$this->cookie = GetCookiesArr($this->page, $this->cookie);
 		$this->response = array_map('urldecode', $this->FormToArr(substr($this->page, strpos($this->page, "\r\n\r\n") + 4)));
 		if (!empty($this->response['requires_purchase'])) html_error('[Unsupported Video] This Video or Channel Requires a Payment to Watch.');
@@ -133,11 +133,10 @@ class youtube_com extends DownloadClass {
 
 	private function getFmtMaps() {
 		$this->queryVideo();
-		if (!empty($this->response['errorcode']) && $this->response['errorcode'] == 150 && $this->response['errordetail'] == 1) $this->queryVideo(1);
 
 		if (!empty($this->response['reason'])) html_error('['.htmlspecialchars($this->response['errorcode']).'] '.htmlspecialchars($this->response['reason']));
 
-		if (!empty($this->response['player_response']['playabilityStatus']['reason'])) html_error('['.htmlspecialchars($this->response['player_response']['playabilityStatus']['reason']).'] '.htmlspecialchars($this->response['player_response']['playabilityStatus']['errorScreen']['playerErrorMessageRenderer']['subreason']['simpleText']));
+		if (!empty($this->response['player_response']['playabilityStatus']['reason'])) html_error('['.htmlspecialchars($this->response['player_response']['playabilityStatus']['reason']).'] '.htmlspecialchars($this->response['player_response']['playabilityStatus']['errorScreen']['playerErrorMessageRenderer']['subreason']['runs'][0]['text']));
 
 		if (!empty($this->response['player_response']['streamingData']['formats'])) {
 			$this->response['_formats'] = $this->response['player_response']['streamingData']['formats'];
@@ -272,6 +271,8 @@ class youtube_com extends DownloadClass {
 		$savefile = DOWNLOAD_DIR.'YT_lastjs.txt';
 		if (!preg_match('@(?<=[\"\'])(?:(?:https?:?)?//((?:[\w\-]+\.)+[\w\-]+(?:\:\d+)?))?(/(?:[^\"\'/]+/)+?(?:html5)?player[-_][\w\-\.]+(?:(?:/\w+)?/[\w\-\.]+)?)\.js@i', str_replace('\\/', '/', $page), $this->js)) html_error('YT\'s player javascript not found.');
 
+		$this->changeMesg(sprintf('<br />Found player: %s.js', $this->js[2]), 1);
+
 		if (@file_exists($savefile) && ($file = file_get_contents($savefile, false, NULL, 0, 822)) && ($saved = @unserialize($file)) && is_array($saved) && !empty($saved['js']) && !empty($saved['sts']) && !empty($saved['steps']) && ((!$this->sts && $saved['js'] == $this->js[2]) || $saved['sts'] == $this->sts) && preg_match('@^\s*([ws]\d+|r)( ([ws]\d+|r))*\s*$@', $saved['steps'])) {
 			$this->changeMesg(sprintf('<br />Using cached decoder: [%d] %s.', $saved['sts'], $saved['steps']), 1);
 			$this->encS = explode(' ', trim($saved['steps']));
@@ -348,12 +349,12 @@ class youtube_com extends DownloadClass {
 			$sizes = array();
 			$opt = array(CURLOPT_FOLLOWLOCATION => true, CURLOPT_MAXREDIRS => 5, CURLOPT_NOBODY => true);
 			foreach ($this->fmtmaps as $itag => $fmt) {
-				if (empty($this->fmts[$itag])) continue;
+				if (empty($this->fmts[$itag]) || !empty($fmt['contentLength']) || !empty($fmt['clen'])) continue;
 				$headers = explode("\r\n\r\n", cURL($fmt['url'], $this->cookie, 0, 0, 0, $opt));
 				$headers = ((count($headers) > 2) ? $headers[count($headers) - 2] : $headers[0]) . "\r\n\r\n";
 				if (substr($headers, 9, 3) == '200' && ($CL = cut_str($headers, "\nContent-Length: ", "\n")) && $CL > 1024) $sizes[$itag] = bytesToKbOrMbOrGb(trim($CL));
 				if (substr($headers, 9, 3) == '403') {
-					$this->changeMesg('<br />Cannot Ask Video Filesize (Signature Error?)');
+					$this->changeMesg('<br />Cannot Ask Video Filesize of (' . $itag . ') (Signature Error?)');
 					break;
 				}
 			}
@@ -369,7 +370,7 @@ class youtube_com extends DownloadClass {
 			if (!empty($this->fmts[$itag])) {
 				// Classic Formats
 				$size = (!empty($fmt['contentLength']) ? ' ('.bytesToKbOrMbOrGb($fmt['contentLength']).')' : (!empty($fmt['clen']) ? ' ('.bytesToKbOrMbOrGb($fmt['clen']).')' : (!empty($sizes[$itag]) ? ' ('.$sizes[$itag].')' : '')));
-				if (($I = explode('|', $this->fmts[$itag]))) printf("<option value='%d'>[%1\$d] Video: %s %dp | Audio: %s ~%d Kbps%s</option>\n", $itag, $C['V'][$I[0]], $I[1], $C['A'][$I[2]], $I[3], $size);
+				if (($I = explode('|', $this->fmts[$itag]))) printf('<option value="%d"' . ($itag == '22' ? ' selected="selected"' : '') . ">[%1\$d] Video: %s %dp | Audio: %s ~%d Kbps%s</option>\n", $itag, $C['V'][$I[0]], $I[1], $C['A'][$I[2]], $I[3], $size);
 			} else if (!empty($fmt['_codecs'])) {
 				// DASH Streams
 				$size = (!empty($fmt['contentLength']) ? ' ('.bytesToKbOrMbOrGb($fmt['contentLength']).')' : (!empty($fmt['clen']) ? ' ('.bytesToKbOrMbOrGb($fmt['clen']).')' : ''));
@@ -432,3 +433,4 @@ class youtube_com extends DownloadClass {
 // [15-3-2020]  Fixed embed JS regex. - Th3-822
 // [31-5-2020]  Fixed signature search & Rewrote quality selector to parse and show all available formats. - Th3-822
 // [17-8-2020]  Fixed signature timestamp search. - Th3-822
+// [30-5-2021]  Fixed get_video_info & Now MP4 @ 720p is default (if available) on the selector. - Th3-822
