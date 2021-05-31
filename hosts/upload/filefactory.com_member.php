@@ -27,7 +27,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != '_T8_') {
 } else {
 	$login = $not_done = false;
 	$domain = 'www.filefactory.com';
-	$referer = "http://$domain/";
+	$referer = "https://$domain/";
 
 	// Login
 	echo "<table style='width:600px;margin:auto;'>\n<tr><td align='center'>\n<div id='login' width='100%' align='center'>Login to $domain</div>\n";
@@ -44,7 +44,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != '_T8_') {
 		$post['loginEmail'] = urlencode($_REQUEST['up_login']);
 		$post['loginPassword'] = urlencode($_REQUEST['up_pass']);
 		$post['Submit'] = 'Sign+In';
-		$page = geturl($domain, 80, '/member/signin.php', "$referer/member/signin.php", $cookie, $post, 0, $_GET['proxy'], $pauth);is_page($page);
+		$page = geturl($domain, 443, '/member/signin.php', $referer.'member/signin.php', $cookie, $post, 0, $_GET['proxy'], $pauth, 0, 'https');is_page($page);
 
 		is_present($page, 'The Email Address submitted was invalid', 'Login Failed: Invalid email address.');
 		is_present($page, 'The email address or password you have entered is incorrect.', 'Login Failed: The Email/Password you have entered is incorrect.');
@@ -53,7 +53,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != '_T8_') {
 		if (empty($cookie['auth'])) html_error('Login Failed, auth cookie not found.');
 
 		// Check account messages
-		$page = geturl($domain, 80, '/account/', "$referer/member/signin.php", $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+		$page = geturl($domain, 443, '/account/', $referer.'member/signin.php', $cookie, 0, 0, $_GET['proxy'], $pauth, 0, 'https');is_page($page);
 		is_present($page, "\nLocation: /member/settos.php", 'TOS have changed and need to be approved at the site.');
 		is_present($page, "\nLocation: /member/setpwd.php", 'Your password has expired, please change it.');
 
@@ -66,14 +66,14 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != '_T8_') {
 	$post = array();
 	$post['cookie'] = rawurldecode($cookie['auth']);
 
-	$up_loc = 'http://upload.filefactory.com/upload';
+	$up_loc = 'https://upload.filefactory.com/upload';
 	$up_loc .= '-beta.php'; // Old Url
 
 	// Uploading
 	echo "<script type='text/javascript'>document.getElementById('info').style.display='none';</script>\n";
 
 	$url = parse_url($up_loc);
-	$upfiles = upfile($url['host'], defport($url), $url['path'] . (!empty($url['query']) ? '?' . $url['query'] : ''), "$referer/upload/", 0, $post, $lfile, $lname, 'Filedata', '', $_GET['proxy'], $pauth, 0, $url['scheme']);
+	$upfiles = upfile($url['host'], defport($url), $url['path'] . (!empty($url['query']) ? '?' . $url['query'] : ''), $referer.'upload/', 0, $post, $lfile, $lname, 'Filedata', '', $_GET['proxy'], $pauth, 0, $url['scheme']);
 
 	// Upload Finished
 	echo "<script type='text/javascript'>document.getElementById('progressblock').style.display='none';</script>";
@@ -81,7 +81,7 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != '_T8_') {
 	is_page($upfiles);
 
 	if (!preg_match('@\s(\w+)\s*$@i', $upfiles, $uid)) html_error('Upload ID not found.');
-	$page = geturl($domain, 80, '/upload/results.php?files='.$uid[1], "$referer/upload/", $cookie, 0, 0, $_GET['proxy'], $pauth);is_page($page);
+	$page = geturl($domain, 443, '/upload/results.php?files='.$uid[1], $referer.'upload/', $cookie, 0, 0, $_GET['proxy'], $pauth, 0, 'https');is_page($page);
 
 	if (preg_match('@(?<=/)file/\w+(/[^\r\n\"\'<>\s\t]+)?@i', $page, $dl)) {
 		$download_link = $referer.$dl[0];
@@ -92,5 +92,4 @@ if (empty($_REQUEST['action']) || $_REQUEST['action'] != '_T8_') {
 //[15-9-2013]  Rewritten and fixed for new FF site & Removed anon user support. - Th3-822
 //[24-10-2013] Added a error at login. - Th3-822
 //[02-12-2016] Fixed login error msgs & revised plugin. - Th3-822
-
-?>
+//[30-5-2021] Switched to HTTPS. - Th3-822
