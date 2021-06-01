@@ -107,14 +107,18 @@ if (!$_T8['xfsFree'] && (empty($_REQUEST['action']) || $_REQUEST['action'] != 'F
 	// Retrive upload ID
 	echo "<script type='text/javascript'>document.getElementById('login').style.display='none';</script>\n<div id='info' width='100%' align='center'>Retrive upload ID</div>\n";
 
-	$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'].'?op='.(empty($_T8['opUploadName']) ? 'upload' : $_T8['opUploadName']), $referer, $cookie, 0, 0, $_GET['proxy'], $pauth, 0, $scheme);is_page($page);
+	$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'].'?op='.(empty($_T8['opUploadName']) ? 'upload' : $_T8['opUploadName']), $referer, $cookie, 0, 0, $_GET['proxy'], $pauth, 0, $scheme);
+	is_page($page);
 	if (substr($page, 9, 3) != '200') {
 		$page = geturl($_T8['domain'], $_T8['port'], $_T8['path'], $referer, $cookie, 0, 0, $_GET['proxy'], $pauth, 0, $scheme);is_page($page);
 	}
 	$header = substr($page, 0, strpos($page, "\r\n\r\n"));
 	if (!$login && stripos($header, "\nLocation: ") !== false && preg_match('@\nLocation: (https?://[^\r\n]+)@i', $header, $redir) && 'www.' . strtolower($_T8['domain']) == strtolower(parse_url($redir[1], PHP_URL_HOST))) html_error("Please set \$_T8['domain'] to 'www.{$_T8['domain']}'.");
 
-	if (!preg_match('@action=["\'](https?://www\d+\.uptobox\.com/upload\?(?:\w+=\w+&)*sess_id=)@i', $page, $up_url)) html_error('Upload Server Not Found.');
+	// echo $page;
+	// exit;
+	
+	if (!preg_match('@action=["\'](//www\d+\.uptobox\.com/upload\?(?:\w+=\w+&)*sess_id=)@i', $page, $up_url)) html_error('Upload Server Not Found.');
 	$up_url = $up_url[1];
 	if ($login) $up_url .= $cookie['xfss'];
 
