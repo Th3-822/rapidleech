@@ -52,7 +52,7 @@ function unrar_setCheckboxes(act, filestounrar) {
       elseif ($rar_list[0] == 'ERROR') { printf(lang(370),$rar_list[1].' '.$rar_list[2]); }
     }
 ?>
-                <input type="<?php echo ($rar_list['NEEDP'] == true) ? 'password' : 'hidden'; ?>" name="passwords[]" value="<?php echo $_GET['passwords'][$i]; ?>" />
+                <input type="<?php echo ($rar_list['NEEDP'] == true) ? 'password' : 'hidden'; ?>" name="passwords[]" value="<?php echo htmlspecialchars($_GET['passwords'][$i], ENT_QUOTES); ?>" />
                 &nbsp;
               </td>
             </tr>
