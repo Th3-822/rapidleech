@@ -1,8 +1,8 @@
 <?php
 function zip() {
-	global $list, $options, $PHP_SELF;
+	global $list, $options;
 ?>
-<form name="ziplist" method="post" action="<?php echo $PHP_SELF; ?>"><input type="hidden" name="act" value="zip_go" />
+<form name="ziplist" method="post" action="<?php echo $_SERVER['SCRIPT_NAME']; ?>"><input type="hidden" name="act" value="zip_go" />
 	<table cellspacing="5">
 		<tr>
 			<td align="center"><strong>Adding files to a ZIP archive</strong></td>
@@ -42,7 +42,7 @@ function zip() {
 function zip_go() {
 	global $list, $options;
 	$saveTo = realpath ( $options['download_dir'] ) . '/';
-	$_POST ["archive"] = (strlen ( trim ( urldecode ( $_POST ["archive"] ) ) ) > 4 && substr ( trim ( urldecode ( $_POST ["archive"] ) ), - 4 ) == ".zip") ? trim ( urldecode ( $_POST ["archive"] ) ) : "archive.zip";
+	$_POST ["archive"] = (strlen ( trim ( urldecode ($_POST['archive']) ) ) > 4 && substr ( trim ( urldecode ($_POST['archive']) ), - 4 ) == ".zip") ? trim ( urldecode ($_POST['archive']) ) : "archive.zip";
 	$_POST ["archive"] = $saveTo.basename($_POST ["archive"]);
 	for($i = 0; $i < count ( $_POST ["files"] ); $i ++) {
 		$files [] = $list [($_POST ["files"] [$i])];
@@ -55,25 +55,24 @@ function zip_go() {
 		}
 	}
 	require_once (CLASS_DIR . "pclzip.php");
-	$archive = new PclZip ( $_POST ["archive"] );
+	$archive = new PclZip ($_POST['archive']);
 	$no_compression = ($options['disable_archive_compression'] || isset($_POST["no_compression"]));
-	if (file_exists ( $_POST ["archive"] )) {
+	if (file_exists ($_POST['archive'])) {
 		if ($no_compression) { $v_list = $archive->add ( $add_files, PCLZIP_OPT_REMOVE_ALL_PATH, PCLZIP_OPT_NO_COMPRESSION); }
 		else { $v_list = $archive->add ( $add_files, PCLZIP_OPT_REMOVE_ALL_PATH); }
 	} else {
 		if ($no_compression) { $v_list = $archive->create ( $add_files, PCLZIP_OPT_REMOVE_ALL_PATH, PCLZIP_OPT_NO_COMPRESSION); }
 		else { $v_list = $archive->create ( $add_files, PCLZIP_OPT_REMOVE_ALL_PATH); }
 	}
-	if ($v_list == 0) {
-		echo "Error: " . $archive->errorInfo ( true ) . "<br /><br />";
-		return;
-	} else {
-		echo "Archive <b>" . $_POST ["archive"] . "</b> successfully created!<br /><br />";
-	}
-	if (is_file($_POST['archive'])) {
+
+	if ($v_list != 0 && is_file($_POST['archive'])) {
+		echo "Archive <b>" . htmlspecialchars($_POST['archive']) . "</b> successfully created!<br /><br />";
+
 		$time = filemtime($_POST['archive']); while (isset($list[$time])) { $time++; }
 		$list[$time] = array("name" => $_POST['archive'], "size" => bytesToKbOrMbOrGb(filesize($_POST['archive'])), "date" => $time);
 		if (!updateListInFile($list)) { echo lang(146)."<br /><br />"; }
+	} else {
+		echo "Error: " . htmlspecialchars($archive->errorInfo(true)) . "<br /><br />";
+		return;
 	}
 }
-?>
