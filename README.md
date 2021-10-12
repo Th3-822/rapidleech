@@ -1,3 +1,12 @@
+## Disclaimer
+
+### This is non longer mantained and _may contain insecure code/validations_ 
+
+Switched to Read-only thanks to *user(s)* from  _external sites_ that can't see the [**Issues**] and [**Pull requests**] tabs
+And mainly, the lack of time/motivation to continue on it ~~(and stress from even thinking of it)~~
+
+Please abstain from contacting me for RL related stuff, thanks.
+
 # Rapidleech
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/Th3-822/rapidleech?label=last%20update)](https://github.com/Th3-822/rapidleech/commits/master)
