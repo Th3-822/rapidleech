@@ -43,7 +43,7 @@ class aparat_com extends DownloadClass {
 	}
 	
 	public function Qualities($page) {
-		if (!preg_match_all('@<a.*?href="(https?://(?:[\w-]+\.)*aparat\.com/aparat-video/\w+(?:-(\d+p))?__\w+\.mp4)".*?><span.*?>(.*?)<@im', $page, $matches, PREG_SET_ORDER, 0)) {
+		if (!preg_match_all('@href="(https?://(?:[\w-]+\.)*aparat\.com/aparat-video/\w+(?:-(\d+p))?__\w+\.mp4)"[\s\S]*?><span[\s\S]*?>([\s\S]*?)<@i', $page, $matches, PREG_SET_ORDER, 0)) {
 			html_error('Download link not found.');
 		}
 		$return = array();
@@ -88,5 +88,6 @@ class aparat_com extends DownloadClass {
 //[02-11-2018]  Fixed video URL pattern - Nabi K.A.Z. <www.nabi.ir>
 //[02-11-2018]  Added aparat quality selector - Nabi K.A.Z. <www.nabi.ir>
 //[02-11-2018]  Fixed bug in multi downloader - Nabi K.A.Z. <www.nabi.ir>
+//[05-25-2019]  Fixed Error from Getting download LINKS
 
 ?>
